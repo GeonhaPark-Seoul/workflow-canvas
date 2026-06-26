@@ -15,7 +15,12 @@ import '@xyflow/react/dist/style.css'
 import StageNode from './nodes/StageNode'
 import MemoNode from './nodes/MemoNode'
 import Toolbar from './components/Toolbar'
-import Legend from './components/Legend'
+import HelpPanel from './components/HelpPanel'
+import CanvasTabs from './components/CanvasTabs'
+import {
+  initCanvases, loadCanvasData, saveCanvasData, deleteCanvasData,
+  saveCanvasList, saveActiveId, loadStageTypes, saveStageTypes, uid,
+} from './storage'
 
 const nodeTypes = { stage: StageNode, memo: MemoNode }
 
@@ -46,15 +51,15 @@ const TYPE_PALETTE = [
   { bg: '#2a2a1a', border: '#84cc16' },
 ]
 
-// ── Initial canvas data ─────────────────────────────────────────────────────
+// ── Initial canvas data (seed for the very first canvas) ─────────────────────
 const initialNodes = [
   { id: '1', type: 'stage', position: { x: 80,   y: 200 }, data: { label: '요구사항 분석', description: '사용자 인터뷰, 기능 정의',   colorIdx: 0 } },
   { id: '2', type: 'stage', position: { x: 380,  y: 200 }, data: { label: 'UI/UX 설계',   description: '와이어프레임, 프로토타입',  colorIdx: 0 } },
   { id: '3', type: 'stage', position: { x: 680,  y: 200 }, data: { label: '개발',          description: '프론트엔드 / 백엔드 구현', colorIdx: 1 } },
   { id: '4', type: 'stage', position: { x: 980,  y: 200 }, data: { label: 'QA 테스트',     description: '버그 수정, 성능 검증',     colorIdx: 2 } },
   { id: '5', type: 'stage', position: { x: 1280, y: 200 }, data: { label: '배포',          description: '프로덕션 릴리즈',          colorIdx: 3 } },
-  { id: 'm1', type: 'memo', position: { x: 380, y: 380 }, data: { text: '디자인 시스템은 Figma에서 관리\n컴포넌트 라이브러리 재사용 필수' } },
-  { id: 'm2', type: 'memo', position: { x: 980, y: 60  }, data: { text: '테스트 커버리지 80% 이상 목표' } },
+  { id: 'm1', type: 'memo', position: { x: 380, y: 380 }, data: { header: '디자인', text: '디자인 시스템은 Figma에서 관리\n컴포넌트 라이브러리 재사용 필수' } },
+  { id: 'm2', type: 'memo', position: { x: 980, y: 60  }, data: { header: 'QA', text: '테스트 커버리지 80% 이상 목표' } },
 ]
 
 const initialEdges = [
@@ -66,12 +71,15 @@ const initialEdges = [
   { id: 'em2-4', source: 'm2', target: '4', type: 'smoothstep', style: { stroke: '#f59e0b88', strokeWidth: 1.5, strokeDasharray: '5,4' }, markerEnd: { type: MarkerType.ArrowClosed, color: '#f59e0b88' } },
 ]
 
-// ── localStorage helpers ────────────────────────────────────────────────────
-function loadSavedState() {
-  try { const r = localStorage.getItem('workflow-canvas');   return r ? JSON.parse(r)   : null } catch { return null }
+// ── Helpers ──────────────────────────────────────────────────────────────────
+// Normalize every edge to the smoothstep type, keeping its style/marker.
+// Older saved edges may carry the now-removed 'editable' type.
+function normalizeEdges(edges) {
+  return (edges ?? []).map(({ data, ...e }) => ({ ...e, type: 'smoothstep' }))
 }
-function loadStageTypes() {
-  try { const r = localStorage.getItem('workflow-canvas-types'); return r ? JSON.parse(r) : null } catch { return null }
+
+function maxNodeId(nodes) {
+  return Math.max(10, ...(nodes ?? []).map((n) => parseInt(n.id) || 0))
 }
 
 // Strip runtime callbacks (and stageTypes) before snapshot / localStorage save
@@ -80,16 +88,19 @@ function stripNode(n) {
   const { selected, ...rest } = n
   return { ...rest, data }
 }
+const stripEdge = ({ selected, ...e }) => e
 
-const savedState = loadSavedState()
-let nodeCounter = savedState?.nodes?.length
-  ? Math.max(10, ...savedState.nodes.map((n) => parseInt(n.id) || 0))
-  : 10
+// ── Bootstrap canvases (runs once at module load) ────────────────────────────
+const { list: initCanvasList, activeId: initActiveId } = initCanvases({ nodes: initialNodes, edges: initialEdges })
+const initData = loadCanvasData(initActiveId) ?? { nodes: initialNodes, edges: initialEdges }
 
 // ── App ─────────────────────────────────────────────────────────────────────
 export default function App() {
-  const [nodes, setNodes, onNodesChange] = useNodesState(savedState?.nodes ?? initialNodes)
-  const [edges, setEdges, onEdgesChange] = useEdgesState(savedState?.edges ?? initialEdges)
+  const [canvases, setCanvases] = useState(initCanvasList)
+  const [activeCanvasId, setActiveCanvasId] = useState(initActiveId)
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(initData.nodes ?? [])
+  const [edges, setEdges, onEdgesChange] = useEdgesState(normalizeEdges(initData.edges))
   const [stageTypes, setStageTypes] = useState(() => loadStageTypes() ?? DEFAULT_STAGE_TYPES)
   const [contextMenu, setContextMenu] = useState(null)
   const [renamingTypeIdx, setRenamingTypeIdx] = useState(null)
@@ -98,25 +109,22 @@ export default function App() {
   const [rfInstance, setRfInstance] = useState(null)
   const [isAnyEditing, setIsAnyEditing] = useState(false)
 
+  const counterRef = useRef(maxNodeId(initData.nodes))
   const historyStack = useRef([])
   const historyPointer = useRef(-1)
   const isRestoring = useRef(false)
 
-  // ── Save stageTypes ──────────────────────────────────────────────────────
-  useEffect(() => {
-    try { localStorage.setItem('workflow-canvas-types', JSON.stringify(stageTypes)) } catch {}
-  }, [stageTypes])
+  const nextId = () => String(++counterRef.current)
 
-  // ── Auto-save canvas + history snapshot (debounced) ──────────────────────
+  // ── Save stageTypes ──────────────────────────────────────────────────────
+  useEffect(() => { saveStageTypes(stageTypes) }, [stageTypes])
+
+  // ── Auto-save active canvas + history snapshot (debounced) ───────────────
   useEffect(() => {
     if (isRestoring.current) return
-    const cleanNodes = nodes.map(stripNode)
-    const cleanEdges = edges.map(({ selected, ...e }) => e)
-    const snapshot = { nodes: cleanNodes, edges: cleanEdges }
+    const snapshot = { nodes: nodes.map(stripNode), edges: edges.map(stripEdge) }
 
-    const lsTimer = setTimeout(() => {
-      try { localStorage.setItem('workflow-canvas', JSON.stringify(snapshot)) } catch {}
-    }, 500)
+    const lsTimer = setTimeout(() => { saveCanvasData(activeCanvasId, snapshot) }, 500)
 
     const histTimer = setTimeout(() => {
       if (isRestoring.current) return
@@ -128,7 +136,7 @@ export default function App() {
     }, 300)
 
     return () => { clearTimeout(lsTimer); clearTimeout(histTimer) }
-  }, [nodes, edges])
+  }, [nodes, edges, activeCanvasId])
 
   // ── Undo / Redo ──────────────────────────────────────────────────────────
   const undo = useCallback(() => {
@@ -162,6 +170,105 @@ export default function App() {
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [undo, redo])
+
+  // ── Trackpad: simultaneous pan + pinch ───────────────────────────────────
+  const handleWheel = useCallback(
+    (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      if (!rfInstance || !reactFlowRef.current) return
+
+      const { x, y, zoom } = rfInstance.getViewport()
+      const rect = reactFlowRef.current.getBoundingClientRect()
+      const cx = e.clientX - rect.left
+      const cy = e.clientY - rect.top
+
+      if (e.ctrlKey) {
+        const newZoom = Math.min(Math.max(zoom * Math.exp(-e.deltaY * 0.01), 0.1), 2)
+        rfInstance.setViewport({
+          x: cx - (cx - x) * (newZoom / zoom),
+          y: cy - (cy - y) * (newZoom / zoom),
+          zoom: newZoom,
+        })
+      } else if (e.deltaMode === 0) {
+        rfInstance.setViewport({ x: x - e.deltaX * 1.5, y: y - e.deltaY * 1.5, zoom })
+      } else {
+        const newZoom = Math.min(Math.max(zoom * (e.deltaY > 0 ? 1 / 1.2 : 1.2), 0.1), 2)
+        rfInstance.setViewport({
+          x: cx - (cx - x) * (newZoom / zoom),
+          y: cy - (cy - y) * (newZoom / zoom),
+          zoom: newZoom,
+        })
+      }
+    },
+    [rfInstance],
+  )
+
+  useEffect(() => {
+    const el = reactFlowRef.current
+    if (!el || !rfInstance) return
+    el.addEventListener('wheel', handleWheel, { passive: false, capture: true })
+    return () => el.removeEventListener('wheel', handleWheel, { capture: true })
+  }, [handleWheel, rfInstance])
+
+  // ── Multi-canvas ───────────────────────────────────────────────────────────
+  const loadCanvas = useCallback((id) => {
+    const data = loadCanvasData(id) ?? { nodes: [], edges: [] }
+    const nNodes = data.nodes ?? []
+    const nEdges = normalizeEdges(data.edges)
+    isRestoring.current = true
+    setActiveCanvasId(id)
+    saveActiveId(id)
+    setNodes(nNodes)
+    setEdges(nEdges)
+    counterRef.current = maxNodeId(nNodes)
+    const snap = { nodes: nNodes.map(stripNode), edges: nEdges.map(stripEdge) }
+    historyStack.current = [snap]
+    historyPointer.current = 0
+    setTimeout(() => { isRestoring.current = false }, 400)
+  }, [setNodes, setEdges])
+
+  const persistCurrent = useCallback(() => {
+    saveCanvasData(activeCanvasId, { nodes: nodes.map(stripNode), edges: edges.map(stripEdge) })
+  }, [activeCanvasId, nodes, edges])
+
+  const switchCanvas = useCallback((id) => {
+    if (id === activeCanvasId) return
+    persistCurrent()
+    loadCanvas(id)
+  }, [activeCanvasId, persistCurrent, loadCanvas])
+
+  const addCanvas = useCallback(() => {
+    persistCurrent()
+    const id = uid()
+    setCanvases((prev) => {
+      const name = `캔버스 ${prev.length + 1}`
+      const next = [...prev, { id, name }]
+      saveCanvasList(next)
+      return next
+    })
+    saveCanvasData(id, { nodes: [], edges: [] })
+    loadCanvas(id)
+  }, [persistCurrent, loadCanvas])
+
+  const renameCanvas = useCallback((id, name) => {
+    setCanvases((prev) => {
+      const next = prev.map((c) => (c.id === id ? { ...c, name } : c))
+      saveCanvasList(next)
+      return next
+    })
+  }, [])
+
+  const deleteCanvas = useCallback((id) => {
+    setCanvases((prev) => {
+      if (prev.length <= 1) return prev
+      const next = prev.filter((c) => c.id !== id)
+      saveCanvasList(next)
+      deleteCanvasData(id)
+      if (id === activeCanvasId) loadCanvas(next[0].id)
+      return next
+    })
+  }, [activeCanvasId, loadCanvas])
 
   // ── Node data ────────────────────────────────────────────────────────────
   const updateNodeData = useCallback((id, patch) => {
@@ -203,27 +310,23 @@ export default function App() {
 
   // ── Add nodes ─────────────────────────────────────────────────────────────
   const addStage = useCallback(() => {
-    nodeCounter++
-    const id = String(nodeCounter)
+    const id = nextId()
     setNodes((nds) => [...nds, { id, type: 'stage', position: { x: 200 + Math.random() * 400, y: 150 + Math.random() * 300 }, data: { label: '새 단계', description: '', colorIdx: 0 } }])
   }, [setNodes])
 
   const addMemo = useCallback(() => {
-    nodeCounter++
-    const id = String(nodeCounter)
-    setNodes((nds) => [...nds, { id, type: 'memo', position: { x: 300 + Math.random() * 400, y: 200 + Math.random() * 200 }, data: { text: '' } }])
+    const id = nextId()
+    setNodes((nds) => [...nds, { id, type: 'memo', position: { x: 300 + Math.random() * 400, y: 200 + Math.random() * 200 }, data: { header: '', text: '' } }])
   }, [setNodes])
 
   const addStageAt = useCallback((pos) => {
-    nodeCounter++
-    const id = String(nodeCounter)
+    const id = nextId()
     setNodes((nds) => [...nds, { id, type: 'stage', position: pos, data: { label: '새 단계', description: '', colorIdx: 0 } }])
   }, [setNodes])
 
   const addMemoAt = useCallback((pos) => {
-    nodeCounter++
-    const id = String(nodeCounter)
-    setNodes((nds) => [...nds, { id, type: 'memo', position: pos, data: { text: '' } }])
+    const id = nextId()
+    setNodes((nds) => [...nds, { id, type: 'memo', position: pos, data: { header: '', text: '' } }])
   }, [setNodes])
 
   // ── Connect ───────────────────────────────────────────────────────────────
@@ -290,20 +393,21 @@ export default function App() {
   }
 
   const clearAll = useCallback(() => {
-    if (window.confirm('모든 노드와 연결을 삭제할까요?')) { setNodes([]); setEdges([]) }
+    if (window.confirm('현재 캔버스의 모든 노드와 연결을 삭제할까요?')) { setNodes([]); setEdges([]) }
   }, [setNodes, setEdges])
 
   const fitView = useCallback(() => {
     rfInstance?.fitView({ padding: 0.1, duration: 500 })
   }, [rfInstance])
 
-  // ── Selected edge highlight ───────────────────────────────────────────────
+  // ── Selected edge highlight + elevate above nodes ─────────────────────────
   const styledEdges = edges.map((e) => {
     if (!e.selected) return e
     const isMemo = !!e.style?.strokeDasharray
     const color = isMemo ? '#f59e0b' : '#60a5fa'
     return {
       ...e,
+      zIndex: 1001,
       style: { ...e.style, stroke: color, strokeWidth: isMemo ? 2.5 : 3.5, filter: `drop-shadow(0 0 6px ${color}88)` },
       markerEnd: { type: MarkerType.ArrowClosed, color },
     }
@@ -317,6 +421,15 @@ export default function App() {
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }} onClick={() => { commitRename(); closeContext() }}>
+      <CanvasTabs
+        canvases={canvases}
+        activeId={activeCanvasId}
+        onSwitch={switchCanvas}
+        onAdd={addCanvas}
+        onRename={renameCanvas}
+        onDelete={deleteCanvas}
+      />
+
       <Toolbar onAddStage={addStage} onAddMemo={addMemo} onFitView={fitView} onClearAll={clearAll} />
 
       <ReactFlow
@@ -343,10 +456,11 @@ export default function App() {
         onEdgeContextMenu={onEdgeContextMenu}
         nodesDraggable={!isAnyEditing}
         connectionMode="loose"
-        panOnScroll
-        panOnScrollMode="free"
-        panOnScrollSpeed={1.5}
-        zoomOnPinch
+        panOnScroll={false}
+        zoomOnPinch={false}
+        zoomOnScroll={false}
+        zoomOnDoubleClick={false}
+        elevateEdgesOnSelect
         fitView
         fitViewOptions={{ padding: 0.15 }}
         minZoom={0.1}
@@ -363,7 +477,7 @@ export default function App() {
         />
       </ReactFlow>
 
-      <Legend />
+      <HelpPanel />
 
       {/* ── Context Menu ─────────────────────────────────────────────────── */}
       {contextMenu && (

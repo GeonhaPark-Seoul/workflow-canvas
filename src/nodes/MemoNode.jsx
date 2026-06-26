@@ -1,12 +1,38 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Handle, Position, NodeResizer } from '@xyflow/react'
 
-export default function MemoNode({ data, selected }) {
-  const [text, setText] = useState(data.text || '')
+// Bidirectional connection ports: every handle is type="source"; with the
+// canvas in connectionMode="loose", a source handle can also receive a
+// connection, so any port can be both an input and an output.
+const HANDLE = { background: '#f59e0b', width: 10, height: 10, border: '2px solid #0f0f13' }
+const PORTS = [
+  { id: 'left', position: Position.Left },
+  { id: 'right', position: Position.Right },
+  { id: 'top', position: Position.Top },
+  { id: 'bottom', position: Position.Bottom },
+]
 
-  const handleChange = (e) => {
-    setText(e.target.value)
-    data.onUpdate?.({ text: e.target.value })
+export default function MemoNode({ data, selected }) {
+  const [header, setHeader] = useState(data.header ?? '')
+  const [text, setText] = useState(data.text || '')
+  const [editing, setEditing] = useState(null) // 'header' | 'text' | null
+  const headerRef = useRef(null)
+  const textRef = useRef(null)
+
+  // Sync external changes (e.g. undo/redo, canvas switch)
+  useEffect(() => { setHeader(data.header ?? '') }, [data.header])
+  useEffect(() => { setText(data.text || '') }, [data.text])
+
+  useEffect(() => {
+    if (editing === 'header' && headerRef.current) { headerRef.current.focus(); headerRef.current.select() }
+    if (editing === 'text' && textRef.current) { textRef.current.focus() }
+  }, [editing])
+
+  const startEdit = (field) => { setEditing(field); data.onEditStart?.() }
+  const stopEdit = () => {
+    setEditing(null)
+    data.onEditEnd?.()
+    data.onUpdate?.({ header, text })
   }
 
   return (
@@ -37,12 +63,11 @@ export default function MemoNode({ data, selected }) {
         lineStyle={{ borderColor: '#f59e0b44' }}
       />
 
-      <Handle type="source" position={Position.Right} style={{ background: '#f59e0b', width: 9, height: 9, border: '2px solid #0f0f13' }} />
-      <Handle type="target" position={Position.Left}  style={{ background: '#f59e0b', width: 9, height: 9, border: '2px solid #0f0f13' }} />
-      <Handle type="source" id="bottom" position={Position.Bottom} style={{ background: '#f59e0b', width: 9, height: 9, border: '2px solid #0f0f13' }} />
-      <Handle type="target" id="top"    position={Position.Top}    style={{ background: '#f59e0b', width: 9, height: 9, border: '2px solid #0f0f13' }} />
+      {PORTS.map((p) => (
+        <Handle key={p.id} type="source" id={p.id} position={p.position} style={HANDLE} />
+      ))}
 
-      {/* Header strip */}
+      {/* Header strip — editable, blank by default */}
       <div
         style={{
           background: '#f59e0b22',
@@ -53,28 +78,66 @@ export default function MemoNode({ data, selected }) {
           alignItems: 'center',
           gap: 6,
           flexShrink: 0,
+          minHeight: 26,
         }}
       >
-        <span style={{ fontSize: 12 }}>📝</span>
-        <span style={{ color: '#f59e0b', fontSize: 10, fontWeight: 700, letterSpacing: 1 }}>MEMO</span>
+        {editing === 'header' ? (
+          <input
+            ref={headerRef}
+            value={header}
+            onChange={(e) => setHeader(e.target.value)}
+            onBlur={stopEdit}
+            onKeyDown={(e) => { if (e.key === 'Enter') stopEdit(); if (e.key === 'Escape') stopEdit() }}
+            placeholder="제목 입력..."
+            style={{
+              flex: 1, background: 'transparent', border: 'none',
+              borderBottom: '1px solid #f59e0b88',
+              color: '#f59e0b', fontSize: 10, fontWeight: 700, letterSpacing: 1,
+              outline: 'none', fontFamily: 'inherit', padding: 0,
+            }}
+          />
+        ) : (
+          <span
+            onDoubleClick={() => startEdit('header')}
+            style={{
+              flex: 1, color: header ? '#f59e0b' : '#f59e0b66',
+              fontSize: 10, fontWeight: 700, letterSpacing: 1, cursor: 'text',
+              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+            }}
+          >
+            {header || '제목 (더블클릭)'}
+          </span>
+        )}
       </div>
 
       {/* Content — fills remaining height */}
       <div style={{ flex: 1, padding: '8px 10px', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-        <textarea
-          value={text}
-          onChange={handleChange}
-          onFocus={() => data.onEditStart?.()}
-          onBlur={() => data.onEditEnd?.()}
-          placeholder="메모 내용..."
-          style={{
-            flex: 1,
-            background: 'transparent', border: 'none',
-            color: '#e8d88a', fontSize: 12, width: '100%',
-            resize: 'none', outline: 'none',
-            fontFamily: 'inherit', lineHeight: 1.6, minHeight: 0,
-          }}
-        />
+        {editing === 'text' ? (
+          <textarea
+            ref={textRef}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onBlur={stopEdit}
+            placeholder="메모 내용..."
+            style={{
+              flex: 1, background: 'transparent', border: 'none',
+              color: '#e8d88a', fontSize: 12, width: '100%',
+              resize: 'none', outline: 'none',
+              fontFamily: 'inherit', lineHeight: 1.6, minHeight: 0,
+            }}
+          />
+        ) : (
+          <div
+            onDoubleClick={() => startEdit('text')}
+            style={{
+              flex: 1, color: text ? '#e8d88a' : '#e8d88a55', fontSize: 12,
+              whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text',
+              overflow: 'auto', lineHeight: 1.6, minHeight: 0,
+            }}
+          >
+            {text || '메모 내용 (더블클릭하여 편집)'}
+          </div>
+        )}
       </div>
     </div>
   )

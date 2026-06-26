@@ -9,28 +9,35 @@ const DEFAULT_TYPES = [
   { bg: '#2a1a3a', border: '#a855f7', label: '완료' },
 ]
 
+// Bidirectional ports: type="source" + canvas connectionMode="loose" lets every
+// handle act as both input and output.
 const HANDLE_STYLE = (borderColor) => ({
   width: 10, height: 10, border: `2px solid #0f0f13`, background: borderColor,
 })
+const PORTS = [
+  { id: 'left', position: Position.Left },
+  { id: 'right', position: Position.Right },
+  { id: 'top', position: Position.Top },
+  { id: 'bottom', position: Position.Bottom },
+]
 
 export default function StageNode({ data, selected }) {
   const stageTypes = data.stageTypes ?? DEFAULT_TYPES
   const colorIdx = Math.min(Math.max(data.colorIdx ?? 0, 0), stageTypes.length - 1)
   const color = stageTypes[colorIdx]
 
-  const [isEditing, setIsEditing] = useState(false)
+  const [editing, setEditing] = useState(null) // 'title' | 'desc' | null
   const [title, setTitle] = useState(data.label || '새 단계')
   const [description, setDescription] = useState(data.description || '')
-  const inputRef = useRef(null)
+  const titleRef = useRef(null)
+  const descRef = useRef(null)
 
   useEffect(() => {
-    if (isEditing && inputRef.current) {
-      inputRef.current.focus()
-      inputRef.current.select()
-    }
-  }, [isEditing])
+    if (editing === 'title' && titleRef.current) { titleRef.current.focus(); titleRef.current.select() }
+    if (editing === 'desc' && descRef.current) { descRef.current.focus() }
+  }, [editing])
 
-  // Sync external label changes (e.g. from undo/redo)
+  // Sync external label/description changes (e.g. from undo/redo, canvas switch)
   useEffect(() => { setTitle(data.label || '새 단계') }, [data.label])
   useEffect(() => { setDescription(data.description || '') }, [data.description])
 
@@ -40,20 +47,11 @@ export default function StageNode({ data, selected }) {
     data.onUpdate?.({ colorIdx: next })
   }
 
-  const handleTitleDoubleClick = () => {
-    setIsEditing(true)
-    data.onEditStart?.()
-  }
-
-  const handleTitleBlur = () => {
-    setIsEditing(false)
+  const startEdit = (field) => { setEditing(field); data.onEditStart?.() }
+  const stopEdit = () => {
+    setEditing(null)
     data.onEditEnd?.()
     data.onUpdate?.({ label: title, description })
-  }
-
-  const handleDescChange = (e) => {
-    setDescription(e.target.value)
-    data.onUpdate?.({ label: title, description: e.target.value })
   }
 
   return (
@@ -85,10 +83,9 @@ export default function StageNode({ data, selected }) {
         lineStyle={{ borderColor: `${color.border}66` }}
       />
 
-      <Handle type="target" position={Position.Left} style={HANDLE_STYLE(color.border)} />
-      <Handle type="source" position={Position.Right} style={HANDLE_STYLE(color.border)} />
-      <Handle type="target" id="top" position={Position.Top} style={HANDLE_STYLE(color.border)} />
-      <Handle type="source" id="bottom" position={Position.Bottom} style={HANDLE_STYLE(color.border)} />
+      {PORTS.map((p) => (
+        <Handle key={p.id} type="source" id={p.id} position={p.position} style={HANDLE_STYLE(color.border)} />
+      ))}
 
       {/* Header */}
       <div style={{ padding: '10px 12px 4px', flexShrink: 0 }}>
@@ -106,23 +103,23 @@ export default function StageNode({ data, selected }) {
           </span>
         </div>
 
-        {isEditing ? (
+        {editing === 'title' ? (
           <input
-            ref={inputRef}
+            ref={titleRef}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            onBlur={handleTitleBlur}
-            onKeyDown={(e) => e.key === 'Enter' && handleTitleBlur()}
+            onBlur={stopEdit}
+            onKeyDown={(e) => { if (e.key === 'Enter') stopEdit(); if (e.key === 'Escape') stopEdit() }}
             style={{
               background: 'transparent', border: 'none',
               borderBottom: `1px solid ${color.border}`,
               color: '#f0f0f0', fontSize: 15, fontWeight: 700,
-              width: '100%', outline: 'none', marginBottom: 4,
+              width: '100%', outline: 'none', marginBottom: 4, fontFamily: 'inherit',
             }}
           />
         ) : (
           <div
-            onDoubleClick={handleTitleDoubleClick}
+            onDoubleClick={() => startEdit('title')}
             style={{
               color: '#f0f0f0', fontSize: 15, fontWeight: 700,
               marginBottom: 4, cursor: 'text', minHeight: 22, lineHeight: '22px',
@@ -133,22 +130,34 @@ export default function StageNode({ data, selected }) {
         )}
       </div>
 
-      {/* Description — fills remaining height */}
+      {/* Description — fills remaining height; double-click to edit */}
       <div style={{ flex: 1, padding: '0 12px 10px', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-        <textarea
-          value={description}
-          onChange={handleDescChange}
-          onFocus={() => data.onEditStart?.()}
-          onBlur={() => data.onEditEnd?.()}
-          placeholder="설명을 입력하세요..."
-          style={{
-            flex: 1,
-            background: 'transparent', border: 'none',
-            color: '#aaa', fontSize: 12, width: '100%',
-            resize: 'none', outline: 'none',
-            fontFamily: 'inherit', lineHeight: 1.5, minHeight: 0,
-          }}
-        />
+        {editing === 'desc' ? (
+          <textarea
+            ref={descRef}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            onBlur={stopEdit}
+            placeholder="설명을 입력하세요..."
+            style={{
+              flex: 1, background: 'transparent', border: 'none',
+              color: '#aaa', fontSize: 12, width: '100%',
+              resize: 'none', outline: 'none',
+              fontFamily: 'inherit', lineHeight: 1.5, minHeight: 0,
+            }}
+          />
+        ) : (
+          <div
+            onDoubleClick={() => startEdit('desc')}
+            style={{
+              flex: 1, color: description ? '#aaa' : '#888', fontSize: 12,
+              whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text',
+              overflow: 'auto', lineHeight: 1.5, minHeight: 0,
+            }}
+          >
+            {description || '설명 (더블클릭하여 편집)'}
+          </div>
+        )}
       </div>
     </div>
   )
