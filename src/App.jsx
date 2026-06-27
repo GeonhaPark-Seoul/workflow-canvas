@@ -122,9 +122,7 @@ export default function App() {
 
   // Saved views (per canvas): [{ id, name, bounds: {x,y,width,height} }]
   const [views, setViews] = useState(initData.views ?? [])
-  const [expandViews, setExpandViews] = useState(false) // views submenu open in pane context menu
-  const [viewRenameId, setViewRenameId] = useState(null)
-  const [viewRenameValue, setViewRenameValue] = useState('')
+  const [currentViewId, setCurrentViewId] = useState(null) // view shown in the toolbar selector
 
   // Touch / responsive detection
   const [touchDevice] = useState(() => 'ontouchstart' in window || navigator.maxTouchPoints > 0)
@@ -342,6 +340,7 @@ export default function App() {
     setNodes(nNodes)
     setEdges(nEdges)
     setViews(data.views ?? [])
+    setCurrentViewId(null)
     counterRef.current = maxNodeId(nNodes)
     const snap = { nodes: nNodes.map(stripNode), edges: nEdges.map(stripEdge) }
     historyStack.current = [snap]
@@ -618,7 +617,7 @@ export default function App() {
     setRenamingTypeIdx(null)
   }, [])
 
-  const closeContext = () => { setContextMenu(null); setRenamingTypeIdx(null); setExpandViews(false); setViewRenameId(null) }
+  const closeContext = () => { setContextMenu(null); setRenamingTypeIdx(null) }
 
   const handleContextAddStage = () => {
     if (!rfInstance || !contextMenu) return
@@ -682,6 +681,15 @@ export default function App() {
     rfInstance?.fitBounds(view.bounds, { padding: 0.15, duration: 500 })
   }, [rfInstance])
 
+  // Toolbar selector: null = fit all, otherwise recall the chosen view.
+  const selectView = useCallback((id) => {
+    if (id == null) { setCurrentViewId(null); fitView(); return }
+    const v = views.find((x) => x.id === id)
+    if (!v) return
+    setCurrentViewId(id)
+    recallView(v)
+  }, [views, fitView, recallView])
+
   const renameView = useCallback((id, name) => {
     if (!name.trim()) return
     setViews((prev) => prev.map((v) => (v.id === id ? { ...v, name: name.trim() } : v)))
@@ -689,6 +697,7 @@ export default function App() {
 
   const deleteView = useCallback((id) => {
     setViews((prev) => prev.filter((v) => v.id !== id))
+    setCurrentViewId((cur) => (cur === id ? null : cur))
   }, [])
 
   // ── Selected edge highlight + elevate above nodes ─────────────────────────
@@ -735,7 +744,17 @@ export default function App() {
         mobile={mobile}
       />
 
-      <Toolbar onAddStage={addStage} onAddMemo={addMemo} onFitView={fitView} onClearAll={clearAll} mobile={mobile} />
+      <Toolbar
+        onAddStage={addStage}
+        onAddMemo={addMemo}
+        onClearAll={clearAll}
+        mobile={mobile}
+        views={views}
+        currentViewId={currentViewId}
+        onSelectView={selectView}
+        onRenameView={renameView}
+        onDeleteView={deleteView}
+      />
 
       <AuthPanel user={user} syncing={cloudSyncing} mobile={mobile} />
 
@@ -831,84 +850,11 @@ export default function App() {
             minWidth: 200,
           }}
         >
-          {/* Pane: add nodes + saved views */}
+          {/* Pane: add nodes */}
           {!contextMenu.nodeId && !contextMenu.edgeId && (
             <>
               <ContextItem icon="＋" label="단계 노드 추가" color="#3b82f6" onClick={handleContextAddStage} />
               <ContextItem icon="📝" label="메모 노드 추가" color="#f59e0b" onClick={handleContextAddMemo} />
-              <div style={{ height: 1, background: '#ffffff18', margin: '4px 2px' }} />
-
-              <ContextItem
-                icon="⊡"
-                label={`전체 보기 ${expandViews ? '▾' : '▸'}`}
-                color="#06b6d4"
-                onClick={() => setExpandViews((v) => !v)}
-              />
-
-              {expandViews && (
-                <div style={{ paddingLeft: 6, borderLeft: '1px solid #ffffff14', marginLeft: 8 }}>
-                  <ContextItem
-                    icon="▦"
-                    label="전체 보기 (모든 노드)"
-                    color="#06b6d4"
-                    onClick={() => { fitView(); closeContext() }}
-                  />
-                  {views.length === 0 && (
-                    <div style={{ padding: '6px 12px', color: '#555', fontSize: 11 }}>저장된 뷰 없음</div>
-                  )}
-                  {views.map((v) => (
-                    <div key={v.id} style={{ display: 'flex', alignItems: 'center', gap: 2, padding: '1px 4px' }}>
-                      {viewRenameId === v.id ? (
-                        <input
-                          autoFocus
-                          value={viewRenameValue}
-                          placeholder="뷰 이름"
-                          onFocus={(e) => e.target.select()}
-                          onChange={(e) => setViewRenameValue(e.target.value)}
-                          onBlur={() => { renameView(v.id, viewRenameValue); setViewRenameId(null) }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') { renameView(v.id, viewRenameValue); setViewRenameId(null) }
-                            if (e.key === 'Escape') setViewRenameId(null)
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                          style={{
-                            flex: 1, background: '#2a2a36', border: '1px solid #06b6d4',
-                            borderRadius: 4, color: '#f0f0f0', fontSize: 12,
-                            padding: '3px 8px', outline: 'none', fontFamily: 'inherit',
-                          }}
-                        />
-                      ) : (
-                        <>
-                          <button
-                            onClick={() => { recallView(v); closeContext() }}
-                            style={{
-                              flex: 1, display: 'flex', alignItems: 'center', gap: 8,
-                              background: 'transparent', border: 'none', borderRadius: 6,
-                              padding: '6px 8px', color: '#ccc', fontSize: 12, cursor: 'pointer',
-                              textAlign: 'left', fontFamily: 'inherit',
-                            }}
-                            onMouseEnter={(e) => (e.currentTarget.style.background = '#06b6d422')}
-                            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                          >
-                            <span style={{ fontSize: 11 }}>⊡</span>
-                            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.name}</span>
-                          </button>
-                          <IconBtn
-                            title="이름 변경"
-                            onClick={(e) => { e.stopPropagation(); setViewRenameId(v.id); setViewRenameValue(v.name) }}
-                            hoverColor="#aaa"
-                          >✎</IconBtn>
-                          <IconBtn
-                            title="삭제"
-                            onClick={(e) => { e.stopPropagation(); deleteView(v.id) }}
-                            hoverColor="#ef4444"
-                          >✕</IconBtn>
-                        </>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
             </>
           )}
 
@@ -917,18 +863,21 @@ export default function App() {
             <ContextItem icon="🗑" label="연결선 삭제" color="#ef4444" onClick={handleContextDeleteEdge} />
           )}
 
-          {/* Multi-selection: pin a saved view */}
-          {contextMenu.nodeId && contextMenu.selectedIds?.length >= 2 && (
-            <>
-              <ContextItem
-                icon="📌"
-                label={`뷰 고정 (${contextMenu.selectedIds.length}개 노드)`}
-                color="#06b6d4"
-                onClick={() => { saveViewFromSelection(contextMenu.selectedIds); closeContext() }}
-              />
-              <div style={{ height: 1, background: '#ffffff18', margin: '4px 2px' }} />
-            </>
-          )}
+          {/* Pin a saved view from the current selection (or just this node) */}
+          {contextMenu.nodeId && (() => {
+            const ids = contextMenu.selectedIds?.length ? contextMenu.selectedIds : [contextMenu.nodeId]
+            return (
+              <>
+                <ContextItem
+                  icon="📌"
+                  label={`뷰 고정 (${ids.length}개 노드)`}
+                  color="#06b6d4"
+                  onClick={() => { saveViewFromSelection(ids); closeContext() }}
+                />
+                <div style={{ height: 1, background: '#ffffff18', margin: '4px 2px' }} />
+              </>
+            )
+          })()}
 
           {/* Stage node: type selector + delete */}
           {contextMenu.nodeId && contextMenu.nodeType === 'stage' && (
