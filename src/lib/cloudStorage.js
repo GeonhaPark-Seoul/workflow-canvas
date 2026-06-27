@@ -1,8 +1,8 @@
 import { supabase } from './supabase'
 
-export async function saveCanvas(userId, canvasId, name, nodes, edges) {
+export async function saveCanvas(userId, canvasId, name, nodes, edges, views = []) {
   const { error } = await supabase.from('canvases').upsert(
-    { user_id: userId, canvas_id: canvasId, name, nodes, edges, updated_at: new Date().toISOString() },
+    { user_id: userId, canvas_id: canvasId, name, nodes, edges, views, updated_at: new Date().toISOString() },
     { onConflict: 'user_id,canvas_id' }
   )
   if (error) { console.error('[cloud] saveCanvas:', error.message); throw new Error('saveCanvas: ' + error.message) }

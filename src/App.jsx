@@ -120,6 +120,12 @@ export default function App() {
   const [isAnyEditing, setIsAnyEditing] = useState(false)
   const [lassoRect, setLassoRect] = useState(null) // screen-space rubber-band box
 
+  // Saved views (per canvas): [{ id, name, bounds: {x,y,width,height} }]
+  const [views, setViews] = useState(initData.views ?? [])
+  const [expandViews, setExpandViews] = useState(false) // views submenu open in pane context menu
+  const [viewRenameId, setViewRenameId] = useState(null)
+  const [viewRenameValue, setViewRenameValue] = useState('')
+
   // Touch / responsive detection
   const [touchDevice] = useState(() => 'ontouchstart' in window || navigator.maxTouchPoints > 0)
   const [mobile, setMobile] = useState(() => window.innerWidth < 768)
@@ -138,12 +144,12 @@ export default function App() {
   const [user, setUser] = useState(null)
   const [cloudSyncing, setCloudSyncing] = useState(false)
   // Stable ref to always-current state for use inside async callbacks
-  const latestRef = useRef({ canvases: initCanvasList, activeCanvasId: initActiveId, stageTypes: [] })
+  const latestRef = useRef({ canvases: initCanvasList, activeCanvasId: initActiveId, stageTypes: [], views: [] })
 
   const nextId = () => String(++counterRef.current)
 
   // Keep latestRef in sync so async callbacks always see fresh state
-  useEffect(() => { latestRef.current = { canvases, activeCanvasId, stageTypes } }, [canvases, activeCanvasId, stageTypes])
+  useEffect(() => { latestRef.current = { canvases, activeCanvasId, stageTypes, views } }, [canvases, activeCanvasId, stageTypes, views])
 
   // ── Save stageTypes ──────────────────────────────────────────────────────
   useEffect(() => { saveStageTypes(stageTypes) }, [stageTypes])
@@ -151,21 +157,22 @@ export default function App() {
   // ── Auto-save active canvas + history snapshot (debounced) ───────────────
   useEffect(() => {
     if (isRestoring.current) return
-    const snapshot = { nodes: nodes.map(stripNode), edges: edges.map(stripEdge) }
+    const histSnapshot = { nodes: nodes.map(stripNode), edges: edges.map(stripEdge) }
 
-    const lsTimer = setTimeout(() => { saveCanvasData(activeCanvasId, snapshot) }, 500)
+    // localStorage snapshot also carries saved views (undo/redo does not).
+    const lsTimer = setTimeout(() => { saveCanvasData(activeCanvasId, { ...histSnapshot, views }) }, 500)
 
     const histTimer = setTimeout(() => {
       if (isRestoring.current) return
       const last = historyStack.current[historyPointer.current]
-      if (last && JSON.stringify(last) === JSON.stringify(snapshot)) return
+      if (last && JSON.stringify(last) === JSON.stringify(histSnapshot)) return
       historyStack.current = historyStack.current.slice(0, historyPointer.current + 1)
-      historyStack.current.push(snapshot)
+      historyStack.current.push(histSnapshot)
       historyPointer.current++
     }, 300)
 
     return () => { clearTimeout(lsTimer); clearTimeout(histTimer) }
-  }, [nodes, edges, activeCanvasId])
+  }, [nodes, edges, activeCanvasId, views])
 
   // ── Undo / Redo ──────────────────────────────────────────────────────────
   const undo = useCallback(() => {
@@ -306,6 +313,15 @@ export default function App() {
           const swallow = (ev) => { ev.stopPropagation(); window.removeEventListener('click', swallow, true) }
           window.addEventListener('click', swallow, true)
           setTimeout(() => window.removeEventListener('click', swallow, true), 50)
+        } else if (touchDevice) {
+          // Stationary long-press on empty space (touch) → pane context menu,
+          // the mobile equivalent of a right-click.
+          const r = reactFlowRef.current?.getBoundingClientRect()
+          setContextMenu({ x: sx, y: sy, flowX: sx - (r?.left ?? 0), flowY: sy - (r?.top ?? 0) })
+          setRenamingTypeIdx(null)
+          const swallow = (ev) => { ev.stopPropagation(); window.removeEventListener('click', swallow, true) }
+          window.addEventListener('click', swallow, true)
+          setTimeout(() => window.removeEventListener('click', swallow, true), 50)
         }
       }
       active = false; mode = null; setLassoRect(null)
@@ -325,6 +341,7 @@ export default function App() {
     saveActiveId(id)
     setNodes(nNodes)
     setEdges(nEdges)
+    setViews(data.views ?? [])
     counterRef.current = maxNodeId(nNodes)
     const snap = { nodes: nNodes.map(stripNode), edges: nEdges.map(stripEdge) }
     historyStack.current = [snap]
@@ -333,8 +350,8 @@ export default function App() {
   }, [setNodes, setEdges])
 
   const persistCurrent = useCallback(() => {
-    saveCanvasData(activeCanvasId, { nodes: nodes.map(stripNode), edges: edges.map(stripEdge) })
-  }, [activeCanvasId, nodes, edges])
+    saveCanvasData(activeCanvasId, { nodes: nodes.map(stripNode), edges: edges.map(stripEdge), views })
+  }, [activeCanvasId, nodes, edges, views])
 
   const switchCanvas = useCallback((id) => {
     if (id === activeCanvasId) return
@@ -394,7 +411,7 @@ export default function App() {
       const list = loadCanvasList() ?? []
       for (const c of list) {
         const d = loadCanvasData(c.id) ?? { nodes: [], edges: [] }
-        await cloudSaveCanvas(userId, c.id, c.name, d.nodes ?? [], d.edges ?? [])
+        await cloudSaveCanvas(userId, c.id, c.name, d.nodes ?? [], d.edges ?? [], d.views ?? [])
       }
       await cloudSaveUserPrefs(userId, {
         active_canvas_id: loadActiveId(),
@@ -406,7 +423,7 @@ export default function App() {
 
     // Populate localStorage from cloud (so existing loadCanvas() works unchanged)
     const canvasList = prefs?.canvas_order ?? rows.map((r) => ({ id: r.canvas_id, name: r.name }))
-    rows.forEach((r) => saveCanvasData(r.canvas_id, { nodes: r.nodes ?? [], edges: r.edges ?? [] }))
+    rows.forEach((r) => saveCanvasData(r.canvas_id, { nodes: r.nodes ?? [], edges: r.edges ?? [], views: r.views ?? [] }))
     saveCanvasList(canvasList)
     const activeId = prefs?.active_canvas_id ?? canvasList[0]?.id
 
@@ -440,12 +457,12 @@ export default function App() {
     clearTimeout(cloudSaveTimer.current)
     setCloudSyncing(true)
     cloudSaveTimer.current = setTimeout(async () => {
-      const { canvases: cvs, activeCanvasId: aid, stageTypes: types } = latestRef.current
+      const { canvases: cvs, activeCanvasId: aid, stageTypes: types, views: vws } = latestRef.current
       const snapshot = { nodes: nodes.map(stripNode), edges: edges.map(stripEdge) }
       const name = cvs.find((c) => c.id === aid)?.name ?? '캔버스'
       try {
         await Promise.all([
-          cloudSaveCanvas(user.id, aid, name, snapshot.nodes, snapshot.edges),
+          cloudSaveCanvas(user.id, aid, name, snapshot.nodes, snapshot.edges, vws),
           cloudSaveUserPrefs(user.id, { active_canvas_id: aid, stage_types: types, canvas_order: cvs }),
         ])
       } catch (err) {
@@ -454,7 +471,7 @@ export default function App() {
       setCloudSyncing(false)
     }, 1500)
     return () => clearTimeout(cloudSaveTimer.current)
-  }, [user, nodes, edges, stageTypes, canvases, activeCanvasId])
+  }, [user, nodes, edges, stageTypes, canvases, activeCanvasId, views])
 
   // ── Node data ────────────────────────────────────────────────────────────
   const updateNodeData = useCallback((id, patch) => {
@@ -589,9 +606,10 @@ export default function App() {
   const onNodeContextMenu = useCallback((e, node) => {
     e.preventDefault()
     e.stopPropagation()
-    setContextMenu({ x: e.clientX, y: e.clientY, nodeId: node.id, nodeType: node.type })
+    const selectedIds = nodes.filter((n) => n.selected).map((n) => n.id)
+    setContextMenu({ x: e.clientX, y: e.clientY, nodeId: node.id, nodeType: node.type, selectedIds })
     setRenamingTypeIdx(null)
-  }, [])
+  }, [nodes])
 
   const onEdgeContextMenu = useCallback((e, edge) => {
     e.preventDefault()
@@ -600,7 +618,7 @@ export default function App() {
     setRenamingTypeIdx(null)
   }, [])
 
-  const closeContext = () => { setContextMenu(null); setRenamingTypeIdx(null) }
+  const closeContext = () => { setContextMenu(null); setRenamingTypeIdx(null); setExpandViews(false); setViewRenameId(null) }
 
   const handleContextAddStage = () => {
     if (!rfInstance || !contextMenu) return
@@ -635,6 +653,43 @@ export default function App() {
   const fitView = useCallback(() => {
     rfInstance?.fitView({ padding: 0.1, duration: 500 })
   }, [rfInstance])
+
+  // ── Saved views ───────────────────────────────────────────────────────────
+  // Compute the bounding box (in flow coords) of the given node ids.
+  const boundsOf = useCallback((ids) => {
+    const sel = nodes.filter((n) => ids.includes(n.id))
+    if (!sel.length) return null
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
+    sel.forEach((n) => {
+      const w = n.measured?.width ?? n.width ?? 0
+      const h = n.measured?.height ?? n.height ?? 0
+      minX = Math.min(minX, n.position.x)
+      minY = Math.min(minY, n.position.y)
+      maxX = Math.max(maxX, n.position.x + w)
+      maxY = Math.max(maxY, n.position.y + h)
+    })
+    return { x: minX, y: minY, width: maxX - minX, height: maxY - minY }
+  }, [nodes])
+
+  const saveViewFromSelection = useCallback((ids) => {
+    const bounds = boundsOf(ids)
+    if (!bounds || !rfInstance) return
+    rfInstance.fitBounds(bounds, { padding: 0.15, duration: 500 })
+    setViews((prev) => [...prev, { id: uid(), name: `뷰 ${prev.length + 1}`, bounds }])
+  }, [boundsOf, rfInstance])
+
+  const recallView = useCallback((view) => {
+    rfInstance?.fitBounds(view.bounds, { padding: 0.15, duration: 500 })
+  }, [rfInstance])
+
+  const renameView = useCallback((id, name) => {
+    if (!name.trim()) return
+    setViews((prev) => prev.map((v) => (v.id === id ? { ...v, name: name.trim() } : v)))
+  }, [])
+
+  const deleteView = useCallback((id) => {
+    setViews((prev) => prev.filter((v) => v.id !== id))
+  }, [])
 
   // ── Selected edge highlight + elevate above nodes ─────────────────────────
   const styledEdges = edges.map((e) => {
@@ -695,7 +750,8 @@ export default function App() {
             onEditStart: () => setIsAnyEditing(true),
             onEditEnd: () => setIsAnyEditing(false),
             onLongPress: (clientX, clientY) => {
-              setContextMenu({ x: clientX, y: clientY, nodeId: n.id, nodeType: n.type })
+              const selectedIds = nodes.filter((x) => x.selected).map((x) => x.id)
+              setContextMenu({ x: clientX, y: clientY, nodeId: n.id, nodeType: n.type, selectedIds })
               setRenamingTypeIdx(null)
             },
           },
@@ -775,17 +831,103 @@ export default function App() {
             minWidth: 200,
           }}
         >
-          {/* Pane: add nodes */}
+          {/* Pane: add nodes + saved views */}
           {!contextMenu.nodeId && !contextMenu.edgeId && (
             <>
               <ContextItem icon="＋" label="단계 노드 추가" color="#3b82f6" onClick={handleContextAddStage} />
               <ContextItem icon="📝" label="메모 노드 추가" color="#f59e0b" onClick={handleContextAddMemo} />
+              <div style={{ height: 1, background: '#ffffff18', margin: '4px 2px' }} />
+
+              <ContextItem
+                icon="⊡"
+                label={`전체 보기 ${expandViews ? '▾' : '▸'}`}
+                color="#06b6d4"
+                onClick={() => setExpandViews((v) => !v)}
+              />
+
+              {expandViews && (
+                <div style={{ paddingLeft: 6, borderLeft: '1px solid #ffffff14', marginLeft: 8 }}>
+                  <ContextItem
+                    icon="▦"
+                    label="전체 보기 (모든 노드)"
+                    color="#06b6d4"
+                    onClick={() => { fitView(); closeContext() }}
+                  />
+                  {views.length === 0 && (
+                    <div style={{ padding: '6px 12px', color: '#555', fontSize: 11 }}>저장된 뷰 없음</div>
+                  )}
+                  {views.map((v) => (
+                    <div key={v.id} style={{ display: 'flex', alignItems: 'center', gap: 2, padding: '1px 4px' }}>
+                      {viewRenameId === v.id ? (
+                        <input
+                          autoFocus
+                          value={viewRenameValue}
+                          placeholder="뷰 이름"
+                          onFocus={(e) => e.target.select()}
+                          onChange={(e) => setViewRenameValue(e.target.value)}
+                          onBlur={() => { renameView(v.id, viewRenameValue); setViewRenameId(null) }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') { renameView(v.id, viewRenameValue); setViewRenameId(null) }
+                            if (e.key === 'Escape') setViewRenameId(null)
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          style={{
+                            flex: 1, background: '#2a2a36', border: '1px solid #06b6d4',
+                            borderRadius: 4, color: '#f0f0f0', fontSize: 12,
+                            padding: '3px 8px', outline: 'none', fontFamily: 'inherit',
+                          }}
+                        />
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => { recallView(v); closeContext() }}
+                            style={{
+                              flex: 1, display: 'flex', alignItems: 'center', gap: 8,
+                              background: 'transparent', border: 'none', borderRadius: 6,
+                              padding: '6px 8px', color: '#ccc', fontSize: 12, cursor: 'pointer',
+                              textAlign: 'left', fontFamily: 'inherit',
+                            }}
+                            onMouseEnter={(e) => (e.currentTarget.style.background = '#06b6d422')}
+                            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                          >
+                            <span style={{ fontSize: 11 }}>⊡</span>
+                            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.name}</span>
+                          </button>
+                          <IconBtn
+                            title="이름 변경"
+                            onClick={(e) => { e.stopPropagation(); setViewRenameId(v.id); setViewRenameValue(v.name) }}
+                            hoverColor="#aaa"
+                          >✎</IconBtn>
+                          <IconBtn
+                            title="삭제"
+                            onClick={(e) => { e.stopPropagation(); deleteView(v.id) }}
+                            hoverColor="#ef4444"
+                          >✕</IconBtn>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </>
           )}
 
           {/* Edge: delete */}
           {contextMenu.edgeId && (
             <ContextItem icon="🗑" label="연결선 삭제" color="#ef4444" onClick={handleContextDeleteEdge} />
+          )}
+
+          {/* Multi-selection: pin a saved view */}
+          {contextMenu.nodeId && contextMenu.selectedIds?.length >= 2 && (
+            <>
+              <ContextItem
+                icon="📌"
+                label={`뷰 고정 (${contextMenu.selectedIds.length}개 노드)`}
+                color="#06b6d4"
+                onClick={() => { saveViewFromSelection(contextMenu.selectedIds); closeContext() }}
+              />
+              <div style={{ height: 1, background: '#ffffff18', margin: '4px 2px' }} />
+            </>
           )}
 
           {/* Stage node: type selector + delete */}
