@@ -121,6 +121,15 @@ export default function App() {
   const [isAnyEditing, setIsAnyEditing] = useState(false)
   const [lassoRect, setLassoRect] = useState(null) // screen-space rubber-band box
 
+  // Touch / responsive detection
+  const [touchDevice] = useState(() => 'ontouchstart' in window || navigator.maxTouchPoints > 0)
+  const [mobile, setMobile] = useState(() => window.innerWidth < 768)
+  useEffect(() => {
+    const fn = () => setMobile(window.innerWidth < 768)
+    window.addEventListener('resize', fn)
+    return () => window.removeEventListener('resize', fn)
+  }, [])
+
   const counterRef = useRef(maxNodeId(initData.nodes))
   const historyStack = useRef([])
   const historyPointer = useRef(-1)
@@ -226,16 +235,17 @@ export default function App() {
   )
 
   useEffect(() => {
+    if (touchDevice) return // native pinch handles zoom on touch devices
     const el = reactFlowRef.current
     if (!el || !rfInstance) return
     el.addEventListener('wheel', handleWheel, { passive: false, capture: true })
     return () => el.removeEventListener('wheel', handleWheel, { capture: true })
-  }, [handleWheel, rfInstance])
+  }, [handleWheel, rfInstance, touchDevice])
 
   // ── Empty-space gesture: quick drag = pan, long-press then drag = box select ─
-  // React Flow can't switch pan↔select mid-gesture, so we drive both ourselves
-  // (panOnDrag is disabled on the canvas).
+  // Desktop only — on touch devices React Flow's native pan/pinch is used instead.
   useEffect(() => {
+    if (touchDevice) return
     const el = reactFlowRef.current
     if (!el || !rfInstance) return
     const LONG_PRESS = 250 // ms held before a drag becomes a selection box
@@ -295,7 +305,7 @@ export default function App() {
 
     el.addEventListener('pointerdown', onDown)
     return () => { el.removeEventListener('pointerdown', onDown); cleanup() }
-  }, [rfInstance, setNodes])
+  }, [rfInstance, setNodes, touchDevice])
 
   // ── Multi-canvas ───────────────────────────────────────────────────────────
   const loadCanvas = useCallback((id) => {
@@ -636,9 +646,10 @@ export default function App() {
         onAdd={addCanvas}
         onRename={renameCanvas}
         onDelete={deleteCanvas}
+        mobile={mobile}
       />
 
-      <Toolbar onAddStage={addStage} onAddMemo={addMemo} onFitView={fitView} onClearAll={clearAll} />
+      <Toolbar onAddStage={addStage} onAddMemo={addMemo} onFitView={fitView} onClearAll={clearAll} mobile={mobile} />
 
       <AuthPanel user={user} syncing={cloudSyncing} />
 
@@ -669,10 +680,10 @@ export default function App() {
         onEdgeContextMenu={onEdgeContextMenu}
         nodesDraggable={!isAnyEditing}
         connectionMode="loose"
-        panOnDrag={false}
+        panOnDrag={touchDevice ? true : false}
         multiSelectionKeyCode={['Shift', 'Meta']}
         panOnScroll={false}
-        zoomOnPinch={false}
+        zoomOnPinch={touchDevice ? true : false}
         zoomOnScroll={false}
         zoomOnDoubleClick={false}
         elevateEdgesOnSelect
@@ -684,15 +695,17 @@ export default function App() {
         style={{ background: '#0f0f13' }}
       >
         <Background variant={BackgroundVariant.Dots} gap={28} size={1} color="#ffffff12" />
-        <Controls style={{ background: '#1a1a22', border: '1px solid #ffffff18', borderRadius: 8 }} />
-        <MiniMap
-          nodeColor={(n) => (n.type === 'memo' ? '#f59e0b88' : '#3b82f688')}
-          maskColor="#0f0f1388"
-          style={{ background: '#1a1a22', border: '1px solid #ffffff18', borderRadius: 8 }}
-        />
+        {!mobile && <Controls style={{ background: '#1a1a22', border: '1px solid #ffffff18', borderRadius: 8 }} />}
+        {!mobile && (
+          <MiniMap
+            nodeColor={(n) => (n.type === 'memo' ? '#f59e0b88' : '#3b82f688')}
+            maskColor="#0f0f1388"
+            style={{ background: '#1a1a22', border: '1px solid #ffffff18', borderRadius: 8 }}
+          />
+        )}
       </ReactFlow>
 
-      <HelpPanel />
+      <HelpPanel mobile={mobile} />
 
       {/* ── Selection rubber-band (long-press drag) ──────────────────────── */}
       {lassoRect && (

@@ -23,3 +23,14 @@ html, body, #root {
 .react-flow__node:hover .react-flow__handle {
   opacity: 1;
 }
+
+/* Touch devices: prevent browser pull-to-refresh / scroll interference */
+.react-flow__renderer {
+  touch-action: none;
+}
+
+/* Safe-area padding for notch / home-bar devices */
+:root {
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+}

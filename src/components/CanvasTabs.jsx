@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 
-export default function CanvasTabs({ canvases, activeId, onSwitch, onAdd, onRename, onDelete }) {
+export default function CanvasTabs({ canvases, activeId, onSwitch, onAdd, onRename, onDelete, mobile }) {
   const [editingId, setEditingId] = useState(null)
   const [value, setValue] = useState('')
   const inputRef = useRef(null)
@@ -19,19 +19,20 @@ export default function CanvasTabs({ canvases, activeId, onSwitch, onAdd, onRena
     <div
       onClick={(e) => e.stopPropagation()}
       style={{
-        position: 'absolute',
-        top: 20,
-        left: 20,
+        position: 'fixed',
+        top: mobile ? 0 : 20,
+        left: mobile ? 0 : 20,
+        right: mobile ? 0 : 'auto',
         zIndex: 10,
         display: 'flex',
         alignItems: 'center',
         gap: 4,
-        maxWidth: '38vw',
+        maxWidth: mobile ? '100%' : '38vw',
         overflowX: 'auto',
         background: '#1a1a22',
         border: '1px solid #ffffff18',
-        borderRadius: 12,
-        padding: '6px 8px',
+        borderRadius: mobile ? '0 0 12px 12px' : 12,
+        padding: mobile ? 'calc(env(safe-area-inset-top, 0px) + 6px) 8px 6px' : '6px 8px',
         boxShadow: '0 4px 24px #000a',
         backdropFilter: 'blur(8px)',
       }}

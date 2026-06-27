@@ -58,11 +58,12 @@ const SECTIONS = [
   },
 ]
 
-export default function HelpPanel() {
+export default function HelpPanel({ mobile }) {
   const [open, setOpen] = useState(false)
+  const bottomOffset = mobile ? 'calc(72px + env(safe-area-inset-bottom, 0px))' : 20
 
   return (
-    <div style={{ position: 'absolute', bottom: 20, left: 64, zIndex: 10 }}>
+    <div style={{ position: 'fixed', bottom: bottomOffset, left: mobile ? 12 : 64, zIndex: 10 }}>
       {open && (
         <div
           onClick={(e) => e.stopPropagation()}
