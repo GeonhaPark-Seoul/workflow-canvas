@@ -674,7 +674,7 @@ export default function App() {
 
       <Toolbar onAddStage={addStage} onAddMemo={addMemo} onFitView={fitView} onClearAll={clearAll} mobile={mobile} />
 
-      <AuthPanel user={user} syncing={cloudSyncing} />
+      <AuthPanel user={user} syncing={cloudSyncing} mobile={mobile} />
 
       <ReactFlow
         ref={reactFlowRef}
