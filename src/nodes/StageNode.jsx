@@ -21,7 +21,7 @@ const PORTS = [
   { id: 'bottom', position: Position.Bottom },
 ]
 
-export default function StageNode({ data, selected }) {
+export default function StageNode({ data, selected, id }) {
   const stageTypes = data.stageTypes ?? DEFAULT_TYPES
   const colorIdx = Math.min(Math.max(data.colorIdx ?? 0, 0), stageTypes.length - 1)
   const color = stageTypes[colorIdx]
@@ -31,6 +31,24 @@ export default function StageNode({ data, selected }) {
   const [description, setDescription] = useState(data.description || '')
   const titleRef = useRef(null)
   const descRef = useRef(null)
+  const longPressTimer = useRef(null)
+  const longPressStart = useRef(null)
+
+  const handlePointerDown = (e) => {
+    if (e.pointerType !== 'touch') return
+    longPressStart.current = { x: e.clientX, y: e.clientY }
+    const cx = e.clientX, cy = e.clientY
+    longPressTimer.current = setTimeout(() => {
+      data.onLongPress?.(cx, cy)
+      longPressTimer.current = null
+    }, 500)
+  }
+  const handlePointerMove = (e) => {
+    if (!longPressStart.current || !longPressTimer.current) return
+    if (Math.hypot(e.clientX - longPressStart.current.x, e.clientY - longPressStart.current.y) > 10)
+      clearTimeout(longPressTimer.current)
+  }
+  const handlePointerUp = () => { clearTimeout(longPressTimer.current); longPressStart.current = null }
 
   useEffect(() => {
     if (editing === 'title' && titleRef.current) { titleRef.current.focus(); titleRef.current.select() }
@@ -90,6 +108,10 @@ export default function StageNode({ data, selected }) {
         transition: 'border-color 0.15s, box-shadow 0.15s',
         cursor: 'default',
       }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
     >
       <NodeResizer
         isVisible={selected}
@@ -141,6 +163,7 @@ export default function StageNode({ data, selected }) {
             style={{
               color: title ? '#f0f0f0' : '#ffffff66', fontSize: 15, fontWeight: 700,
               marginBottom: 4, cursor: 'text', minHeight: 22, lineHeight: '22px',
+              touchAction: 'manipulation',
             }}
           >
             {title || (data.titleTouched ? '' : '단계 이름 (더블클릭하여 편집)')}
@@ -171,6 +194,7 @@ export default function StageNode({ data, selected }) {
               flex: 1, color: description ? '#aaa' : '#888', fontSize: 12,
               whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text',
               overflow: 'auto', lineHeight: 1.5, minHeight: 0,
+              touchAction: 'manipulation',
             }}
           >
             {description || (data.descTouched ? '' : '설명 (더블클릭하여 편집)')}

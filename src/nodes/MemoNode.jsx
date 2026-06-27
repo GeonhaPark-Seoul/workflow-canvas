@@ -12,12 +12,30 @@ const PORTS = [
   { id: 'bottom', position: Position.Bottom },
 ]
 
-export default function MemoNode({ data, selected }) {
+export default function MemoNode({ data, selected, id }) {
   const [header, setHeader] = useState(data.header ?? '')
   const [text, setText] = useState(data.text || '')
   const [editing, setEditing] = useState(null) // 'header' | 'text' | null
   const headerRef = useRef(null)
   const textRef = useRef(null)
+  const longPressTimer = useRef(null)
+  const longPressStart = useRef(null)
+
+  const handlePointerDown = (e) => {
+    if (e.pointerType !== 'touch') return
+    longPressStart.current = { x: e.clientX, y: e.clientY }
+    const cx = e.clientX, cy = e.clientY
+    longPressTimer.current = setTimeout(() => {
+      data.onLongPress?.(cx, cy)
+      longPressTimer.current = null
+    }, 500)
+  }
+  const handlePointerMove = (e) => {
+    if (!longPressStart.current || !longPressTimer.current) return
+    if (Math.hypot(e.clientX - longPressStart.current.x, e.clientY - longPressStart.current.y) > 10)
+      clearTimeout(longPressTimer.current)
+  }
+  const handlePointerUp = () => { clearTimeout(longPressTimer.current); longPressStart.current = null }
 
   // Sync external changes (e.g. undo/redo, canvas switch)
   useEffect(() => { setHeader(data.header ?? '') }, [data.header])
@@ -56,6 +74,10 @@ export default function MemoNode({ data, selected }) {
           : '0 4px 16px #0005',
         transition: 'border-color 0.15s, box-shadow 0.15s',
       }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
     >
       <NodeResizer
         isVisible={selected}
@@ -106,6 +128,7 @@ export default function MemoNode({ data, selected }) {
               flex: 1, color: header ? '#f59e0b' : '#f59e0b66',
               fontSize: 13, fontWeight: 800, letterSpacing: 0.3, cursor: 'text',
               whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+              touchAction: 'manipulation',
             }}
           >
             {header || (data.headerTouched ? '' : '제목 (더블클릭)')}
@@ -136,6 +159,7 @@ export default function MemoNode({ data, selected }) {
               flex: 1, color: text ? '#e8d88a' : '#e8d88a55', fontSize: 12,
               whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text',
               overflow: 'auto', lineHeight: 1.6, minHeight: 0,
+              touchAction: 'manipulation',
             }}
           >
             {text || (data.textTouched ? '' : '메모 내용 (더블클릭하여 편집)')}

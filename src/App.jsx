@@ -16,7 +16,6 @@ import '@xyflow/react/dist/style.css'
 import StageNode from './nodes/StageNode'
 import MemoNode from './nodes/MemoNode'
 import Toolbar from './components/Toolbar'
-import HelpPanel from './components/HelpPanel'
 import CanvasTabs from './components/CanvasTabs'
 import AuthPanel from './components/AuthPanel'
 import {
@@ -243,31 +242,42 @@ export default function App() {
   }, [handleWheel, rfInstance, touchDevice])
 
   // ── Empty-space gesture: quick drag = pan, long-press then drag = box select ─
-  // Desktop only — on touch devices React Flow's native pan/pinch is used instead.
+  // Works on both desktop (mouse) and mobile (touch). On touch, if a second
+  // finger appears we cancel so React Flow can handle the pinch-to-zoom.
   useEffect(() => {
-    if (touchDevice) return
     const el = reactFlowRef.current
     if (!el || !rfInstance) return
-    const LONG_PRESS = 250 // ms held before a drag becomes a selection box
-    const MOVE_THRESH = 8   // jitter tolerance while waiting for the long-press
+    const LONG_PRESS = touchDevice ? 400 : 250
+    const MOVE_THRESH = touchDevice ? 12 : 8
     let active = false, mode = null, sx = 0, sy = 0, vp = null, timer = null
+    let activePointerId = null
 
     const cleanup = () => {
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerup', onUp)
+      window.removeEventListener('pointerdown', onSecondPointer)
       clearTimeout(timer)
+    }
+    // Cancel our single-finger handler when a second finger appears (pinch)
+    const onSecondPointer = (e) => {
+      if (e.pointerId !== activePointerId) {
+        cleanup(); active = false; mode = null; setLassoRect(null)
+      }
     }
     const onDown = (e) => {
       if (e.button !== 0 || !e.target.classList?.contains('react-flow__pane')) return
-      active = true; mode = null; sx = e.clientX; sy = e.clientY; vp = rfInstance.getViewport()
+      if (e.pointerType === 'touch' && !e.isPrimary) return
+      active = true; mode = null; sx = e.clientX; sy = e.clientY
+      vp = rfInstance.getViewport(); activePointerId = e.pointerId
       timer = setTimeout(() => {
         if (active && mode === null) { mode = 'lasso'; setLassoRect({ x: sx, y: sy, w: 0, h: 0 }) }
       }, LONG_PRESS)
       window.addEventListener('pointermove', onMove)
       window.addEventListener('pointerup', onUp)
+      if (e.pointerType === 'touch') window.addEventListener('pointerdown', onSecondPointer)
     }
     const onMove = (e) => {
-      if (!active) return
+      if (!active || e.pointerId !== activePointerId) return
       const dx = e.clientX - sx, dy = e.clientY - sy
       if (mode === null) {
         if (Math.hypot(dx, dy) > MOVE_THRESH) { mode = 'pan'; clearTimeout(timer) }
@@ -280,21 +290,19 @@ export default function App() {
       }
     }
     const onUp = (e) => {
+      if (e.pointerId !== activePointerId) return
       cleanup()
       if (mode === 'lasso') {
         const a = rfInstance.screenToFlowPosition({ x: sx, y: sy })
         const b = rfInstance.screenToFlowPosition({ x: e.clientX, y: e.clientY })
         const x1 = Math.min(a.x, b.x), y1 = Math.min(a.y, b.y), x2 = Math.max(a.x, b.x), y2 = Math.max(a.y, b.y)
         if (x2 - x1 > 2 || y2 - y1 > 2) {
-          // Select every node whose box overlaps the lasso region
           setNodes((nds) => nds.map((n) => {
             const w = n.measured?.width ?? n.width ?? 0
             const h = n.measured?.height ?? n.height ?? 0
             const sel = n.position.x < x2 && n.position.x + w > x1 && n.position.y < y2 && n.position.y + h > y1
             return { ...n, selected: sel }
           }))
-          // Swallow the click that fires right after, so React Flow's
-          // pane-click handler doesn't immediately clear the new selection.
           const swallow = (ev) => { ev.stopPropagation(); window.removeEventListener('click', swallow, true) }
           window.addEventListener('click', swallow, true)
           setTimeout(() => window.removeEventListener('click', swallow, true), 50)
@@ -686,6 +694,10 @@ export default function App() {
             onUpdate: (patch) => updateNodeData(n.id, patch),
             onEditStart: () => setIsAnyEditing(true),
             onEditEnd: () => setIsAnyEditing(false),
+            onLongPress: (clientX, clientY) => {
+              setContextMenu({ x: clientX, y: clientY, nodeId: n.id, nodeType: n.type })
+              setRenamingTypeIdx(null)
+            },
           },
         }))}
         edges={styledEdges}
@@ -703,7 +715,7 @@ export default function App() {
         onEdgeContextMenu={onEdgeContextMenu}
         nodesDraggable={!isAnyEditing}
         connectionMode="loose"
-        panOnDrag={touchDevice ? true : false}
+        panOnDrag={false}
         multiSelectionKeyCode={['Shift', 'Meta']}
         panOnScroll={false}
         zoomOnPinch={touchDevice ? true : false}
@@ -727,8 +739,6 @@ export default function App() {
           />
         )}
       </ReactFlow>
-
-      <HelpPanel mobile={mobile} />
 
       {/* ── Selection rubber-band (long-press drag) ──────────────────────── */}
       {lassoRect && (
