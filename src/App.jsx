@@ -138,7 +138,6 @@ export default function App() {
   // ── Auth + cloud sync ─────────────────────────────────────────────────────
   const [user, setUser] = useState(null)
   const [cloudSyncing, setCloudSyncing] = useState(false)
-  const [debugMsg, setDebugMsg] = useState('대기 중 (로그인 후 변경하면 표시)')
   // Stable ref to always-current state for use inside async callbacks
   const latestRef = useRef({ canvases: initCanvasList, activeCanvasId: initActiveId, stageTypes: [] })
 
@@ -371,7 +370,6 @@ export default function App() {
   // ── Cloud: load all canvases from Supabase into memory + localStorage ────
   // Placed after loadCanvas so it can be a stable dep reference (no TDZ).
   const loadFromCloud = useCallback(async (userId) => {
-    setDebugMsg('클라우드 불러오는 중... uid=' + userId.slice(0, 8))
     let rows, prefs
     try {
       ;[rows, prefs] = await Promise.all([
@@ -379,10 +377,9 @@ export default function App() {
         cloudLoadUserPrefs(userId),
       ])
     } catch (err) {
-      setDebugMsg('❌ 불러오기 실패: ' + err.message)
+      console.error('[cloud] loadFromCloud:', err.message)
       return
     }
-    setDebugMsg('불러옴: 캔버스 ' + (rows?.length ?? 0) + '개')
 
     if (!rows.length) {
       // First login: push existing localStorage data up to the cloud
@@ -443,9 +440,8 @@ export default function App() {
           cloudSaveCanvas(user.id, aid, name, snapshot.nodes, snapshot.edges),
           cloudSaveUserPrefs(user.id, { active_canvas_id: aid, stage_types: types, canvas_order: cvs }),
         ])
-        setDebugMsg('✅ 저장됨 ' + new Date().toLocaleTimeString() + ' (노드 ' + snapshot.nodes.length + ')')
       } catch (err) {
-        setDebugMsg('❌ 저장 실패: ' + err.message)
+        console.error('[cloud] autosave:', err.message)
       }
       setCloudSyncing(false)
     }, 1500)
@@ -720,33 +716,6 @@ export default function App() {
       </ReactFlow>
 
       <HelpPanel mobile={mobile} />
-
-      {/* ── 임시 디버그 오버레이 (동기화 진단용) ──────────────────────────── */}
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          position: 'fixed',
-          top: 'calc(env(safe-area-inset-top, 0px) + 60px)',
-          right: 8,
-          zIndex: 9999,
-          maxWidth: 280,
-          background: debugMsg.startsWith('❌') ? '#3a0a0a' : '#0a1a0a',
-          border: '1px solid ' + (debugMsg.startsWith('❌') ? '#ef4444' : '#22c55e'),
-          borderRadius: 8,
-          padding: '8px 10px',
-          color: debugMsg.startsWith('❌') ? '#ff8a8a' : '#9af0a0',
-          fontSize: 11,
-          fontFamily: 'monospace',
-          lineHeight: 1.4,
-          wordBreak: 'break-word',
-          boxShadow: '0 4px 16px #0008',
-        }}
-      >
-        <div style={{ color: '#888', marginBottom: 3 }}>
-          SYNC {user ? '· ' + (user.email ?? 'logged-in') : '· (비로그인)'}
-        </div>
-        {debugMsg}
-      </div>
 
       {/* ── Selection rubber-band (long-press drag) ──────────────────────── */}
       {lassoRect && (
