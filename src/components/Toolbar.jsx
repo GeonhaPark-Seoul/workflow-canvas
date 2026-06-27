@@ -32,7 +32,7 @@ export default function Toolbar({ onAddStage, onAddMemo, onFitView, onClearAll }
       <div style={{ width: 1, background: '#ffffff18', margin: '0 4px' }} />
       <ToolBtn
         onClick={onFitView}
-        color="#888"
+        color="#06b6d4"
         icon="⊡"
         label="전체 보기"
       />

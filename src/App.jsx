@@ -5,6 +5,7 @@ import {
   Controls,
   MiniMap,
   addEdge,
+  reconnectEdge,
   useNodesState,
   useEdgesState,
   BackgroundVariant,
@@ -17,10 +18,20 @@ import MemoNode from './nodes/MemoNode'
 import Toolbar from './components/Toolbar'
 import HelpPanel from './components/HelpPanel'
 import CanvasTabs from './components/CanvasTabs'
+import AuthPanel from './components/AuthPanel'
 import {
   initCanvases, loadCanvasData, saveCanvasData, deleteCanvasData,
   saveCanvasList, saveActiveId, loadStageTypes, saveStageTypes, uid,
+  loadCanvasList, loadActiveId,
 } from './storage'
+import { supabase } from './lib/supabase'
+import {
+  saveCanvas as cloudSaveCanvas,
+  loadAllCanvases as cloudLoadAllCanvases,
+  deleteCanvas as cloudDeleteCanvas,
+  saveUserPrefs as cloudSaveUserPrefs,
+  loadUserPrefs as cloudLoadUserPrefs,
+} from './lib/cloudStorage'
 
 const nodeTypes = { stage: StageNode, memo: MemoNode }
 
@@ -108,13 +119,23 @@ export default function App() {
   const reactFlowRef = useRef(null)
   const [rfInstance, setRfInstance] = useState(null)
   const [isAnyEditing, setIsAnyEditing] = useState(false)
+  const [lassoRect, setLassoRect] = useState(null) // screen-space rubber-band box
 
   const counterRef = useRef(maxNodeId(initData.nodes))
   const historyStack = useRef([])
   const historyPointer = useRef(-1)
   const isRestoring = useRef(false)
 
+  // ── Auth + cloud sync ─────────────────────────────────────────────────────
+  const [user, setUser] = useState(null)
+  const [cloudSyncing, setCloudSyncing] = useState(false)
+  // Stable ref to always-current state for use inside async callbacks
+  const latestRef = useRef({ canvases: initCanvasList, activeCanvasId: initActiveId, stageTypes: [] })
+
   const nextId = () => String(++counterRef.current)
+
+  // Keep latestRef in sync so async callbacks always see fresh state
+  useEffect(() => { latestRef.current = { canvases, activeCanvasId, stageTypes } }, [canvases, activeCanvasId, stageTypes])
 
   // ── Save stageTypes ──────────────────────────────────────────────────────
   useEffect(() => { saveStageTypes(stageTypes) }, [stageTypes])
@@ -211,6 +232,71 @@ export default function App() {
     return () => el.removeEventListener('wheel', handleWheel, { capture: true })
   }, [handleWheel, rfInstance])
 
+  // ── Empty-space gesture: quick drag = pan, long-press then drag = box select ─
+  // React Flow can't switch pan↔select mid-gesture, so we drive both ourselves
+  // (panOnDrag is disabled on the canvas).
+  useEffect(() => {
+    const el = reactFlowRef.current
+    if (!el || !rfInstance) return
+    const LONG_PRESS = 250 // ms held before a drag becomes a selection box
+    const MOVE_THRESH = 8   // jitter tolerance while waiting for the long-press
+    let active = false, mode = null, sx = 0, sy = 0, vp = null, timer = null
+
+    const cleanup = () => {
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+      clearTimeout(timer)
+    }
+    const onDown = (e) => {
+      if (e.button !== 0 || !e.target.classList?.contains('react-flow__pane')) return
+      active = true; mode = null; sx = e.clientX; sy = e.clientY; vp = rfInstance.getViewport()
+      timer = setTimeout(() => {
+        if (active && mode === null) { mode = 'lasso'; setLassoRect({ x: sx, y: sy, w: 0, h: 0 }) }
+      }, LONG_PRESS)
+      window.addEventListener('pointermove', onMove)
+      window.addEventListener('pointerup', onUp)
+    }
+    const onMove = (e) => {
+      if (!active) return
+      const dx = e.clientX - sx, dy = e.clientY - sy
+      if (mode === null) {
+        if (Math.hypot(dx, dy) > MOVE_THRESH) { mode = 'pan'; clearTimeout(timer) }
+        else return
+      }
+      if (mode === 'pan') {
+        rfInstance.setViewport({ x: vp.x + dx, y: vp.y + dy, zoom: vp.zoom })
+      } else if (mode === 'lasso') {
+        setLassoRect({ x: Math.min(sx, e.clientX), y: Math.min(sy, e.clientY), w: Math.abs(dx), h: Math.abs(dy) })
+      }
+    }
+    const onUp = (e) => {
+      cleanup()
+      if (mode === 'lasso') {
+        const a = rfInstance.screenToFlowPosition({ x: sx, y: sy })
+        const b = rfInstance.screenToFlowPosition({ x: e.clientX, y: e.clientY })
+        const x1 = Math.min(a.x, b.x), y1 = Math.min(a.y, b.y), x2 = Math.max(a.x, b.x), y2 = Math.max(a.y, b.y)
+        if (x2 - x1 > 2 || y2 - y1 > 2) {
+          // Select every node whose box overlaps the lasso region
+          setNodes((nds) => nds.map((n) => {
+            const w = n.measured?.width ?? n.width ?? 0
+            const h = n.measured?.height ?? n.height ?? 0
+            const sel = n.position.x < x2 && n.position.x + w > x1 && n.position.y < y2 && n.position.y + h > y1
+            return { ...n, selected: sel }
+          }))
+          // Swallow the click that fires right after, so React Flow's
+          // pane-click handler doesn't immediately clear the new selection.
+          const swallow = (ev) => { ev.stopPropagation(); window.removeEventListener('click', swallow, true) }
+          window.addEventListener('click', swallow, true)
+          setTimeout(() => window.removeEventListener('click', swallow, true), 50)
+        }
+      }
+      active = false; mode = null; setLassoRect(null)
+    }
+
+    el.addEventListener('pointerdown', onDown)
+    return () => { el.removeEventListener('pointerdown', onDown); cleanup() }
+  }, [rfInstance, setNodes])
+
   // ── Multi-canvas ───────────────────────────────────────────────────────────
   const loadCanvas = useCallback((id) => {
     const data = loadCanvasData(id) ?? { nodes: [], edges: [] }
@@ -265,10 +351,82 @@ export default function App() {
       const next = prev.filter((c) => c.id !== id)
       saveCanvasList(next)
       deleteCanvasData(id)
+      if (user) cloudDeleteCanvas(user.id, id)
       if (id === activeCanvasId) loadCanvas(next[0].id)
       return next
     })
-  }, [activeCanvasId, loadCanvas])
+  }, [activeCanvasId, loadCanvas, user])
+
+  // ── Cloud: load all canvases from Supabase into memory + localStorage ────
+  // Placed after loadCanvas so it can be a stable dep reference (no TDZ).
+  const loadFromCloud = useCallback(async (userId) => {
+    const [rows, prefs] = await Promise.all([
+      cloudLoadAllCanvases(userId),
+      cloudLoadUserPrefs(userId),
+    ])
+
+    if (!rows.length) {
+      // First login: push existing localStorage data up to the cloud
+      const list = loadCanvasList() ?? []
+      for (const c of list) {
+        const d = loadCanvasData(c.id) ?? { nodes: [], edges: [] }
+        await cloudSaveCanvas(userId, c.id, c.name, d.nodes ?? [], d.edges ?? [])
+      }
+      await cloudSaveUserPrefs(userId, {
+        active_canvas_id: loadActiveId(),
+        stage_types: loadStageTypes(),
+        canvas_order: list,
+      })
+      return
+    }
+
+    // Populate localStorage from cloud (so existing loadCanvas() works unchanged)
+    const canvasList = prefs?.canvas_order ?? rows.map((r) => ({ id: r.canvas_id, name: r.name }))
+    rows.forEach((r) => saveCanvasData(r.canvas_id, { nodes: r.nodes ?? [], edges: r.edges ?? [] }))
+    saveCanvasList(canvasList)
+    const activeId = prefs?.active_canvas_id ?? canvasList[0]?.id
+
+    setCanvases(canvasList)
+    if (prefs?.stage_types?.length) {
+      setStageTypes(prefs.stage_types)
+      saveStageTypes(prefs.stage_types)
+    }
+    if (activeId) loadCanvas(activeId)
+  }, [loadCanvas, setCanvases, setStageTypes])
+
+  // ── Auth listener ─────────────────────────────────────────────────────────
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const u = session?.user ?? null
+      setUser(u)
+      if (u) loadFromCloud(u.id)
+    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      const u = session?.user ?? null
+      setUser(u)
+      if (event === 'SIGNED_IN' && u) loadFromCloud(u.id)
+    })
+    return () => subscription.unsubscribe()
+  }, [loadFromCloud])
+
+  // ── Cloud auto-save (debounced 1.5 s, only when logged in) ───────────────
+  const cloudSaveTimer = useRef(null)
+  useEffect(() => {
+    if (!user) return
+    clearTimeout(cloudSaveTimer.current)
+    setCloudSyncing(true)
+    cloudSaveTimer.current = setTimeout(async () => {
+      const { canvases: cvs, activeCanvasId: aid, stageTypes: types } = latestRef.current
+      const snapshot = { nodes: nodes.map(stripNode), edges: edges.map(stripEdge) }
+      const name = cvs.find((c) => c.id === aid)?.name ?? '캔버스'
+      await Promise.all([
+        cloudSaveCanvas(user.id, aid, name, snapshot.nodes, snapshot.edges),
+        cloudSaveUserPrefs(user.id, { active_canvas_id: aid, stage_types: types, canvas_order: cvs }),
+      ])
+      setCloudSyncing(false)
+    }, 1500)
+    return () => clearTimeout(cloudSaveTimer.current)
+  }, [user, nodes, edges, stageTypes, canvases, activeCanvasId])
 
   // ── Node data ────────────────────────────────────────────────────────────
   const updateNodeData = useCallback((id, patch) => {
@@ -305,7 +463,7 @@ export default function App() {
     const palette = TYPE_PALETTE[newIdx % TYPE_PALETTE.length]
     setStageTypes((prev) => [...prev, { id: `type-${Date.now()}`, ...palette, label: '새 종류' }])
     setRenamingTypeIdx(newIdx)
-    setRenameValue('새 종류')
+    setRenameValue('') // start blank so there's no default text to delete
   }, [stageTypes.length])
 
   // ── Add nodes ─────────────────────────────────────────────────────────────
@@ -341,6 +499,56 @@ export default function App() {
       markerEnd: { type: MarkerType.ArrowClosed, color: isMemo ? '#f59e0b88' : '#4a4a5a' },
     }, eds))
   }, [nodes, setEdges])
+
+  // ── Reconnect: drag an edge endpoint onto another node/handle ──────────────
+  const onReconnect = useCallback((oldEdge, newConnection) => {
+    setEdges((eds) => reconnectEdge(oldEdge, newConnection, eds))
+  }, [setEdges])
+
+  // ── Snap-to-straight: when a dragged node's center nearly aligns with a
+  // directly-connected neighbor, snap it so the shared edge becomes straight.
+  // Runs live during drag (magnetic feel) and again on drop (guarantees it sticks).
+  const SNAP = 9
+  const snapNodeToNeighbors = useCallback((dragged) => {
+    const dim = (n) => ({ w: n.measured?.width ?? n.width ?? 0, h: n.measured?.height ?? n.height ?? 0 })
+    const d = dim(dragged)
+    const cx = dragged.position.x + d.w / 2
+    const cy = dragged.position.y + d.h / 2
+
+    const neighborIds = new Set()
+    edges.forEach((e) => {
+      if (e.source === dragged.id) neighborIds.add(e.target)
+      if (e.target === dragged.id) neighborIds.add(e.source)
+    })
+    if (!neighborIds.size) return
+
+    let snapX = null
+    let snapY = null
+    nodes.forEach((n) => {
+      if (!neighborIds.has(n.id)) return
+      const nd = dim(n)
+      const ncx = n.position.x + nd.w / 2
+      const ncy = n.position.y + nd.h / 2
+      if (snapX === null && Math.abs(cx - ncx) <= SNAP) snapX = ncx
+      if (snapY === null && Math.abs(cy - ncy) <= SNAP) snapY = ncy
+    })
+    if (snapX === null && snapY === null) return
+
+    setNodes((nds) => nds.map((n) => {
+      if (n.id !== dragged.id) return n
+      const nd = dim(n)
+      return {
+        ...n,
+        position: {
+          x: snapX !== null ? snapX - nd.w / 2 : n.position.x,
+          y: snapY !== null ? snapY - nd.h / 2 : n.position.y,
+        },
+      }
+    }))
+  }, [nodes, edges, setNodes])
+
+  const onNodeDrag = useCallback((_e, n) => snapNodeToNeighbors(n), [snapNodeToNeighbors])
+  const onNodeDragStop = useCallback((_e, n) => snapNodeToNeighbors(n), [snapNodeToNeighbors])
 
   // ── Context menus ─────────────────────────────────────────────────────────
   const onPaneContextMenu = useCallback((e) => {
@@ -432,6 +640,8 @@ export default function App() {
 
       <Toolbar onAddStage={addStage} onAddMemo={addMemo} onFitView={fitView} onClearAll={clearAll} />
 
+      <AuthPanel user={user} syncing={cloudSyncing} />
+
       <ReactFlow
         ref={reactFlowRef}
         nodes={nodes.map((n) => ({
@@ -448,6 +658,9 @@ export default function App() {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onReconnect={onReconnect}
+        onNodeDrag={onNodeDrag}
+        onNodeDragStop={onNodeDragStop}
         onInit={setRfInstance}
         nodeTypes={nodeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
@@ -456,6 +669,8 @@ export default function App() {
         onEdgeContextMenu={onEdgeContextMenu}
         nodesDraggable={!isAnyEditing}
         connectionMode="loose"
+        panOnDrag={false}
+        multiSelectionKeyCode={['Shift', 'Meta']}
         panOnScroll={false}
         zoomOnPinch={false}
         zoomOnScroll={false}
@@ -478,6 +693,24 @@ export default function App() {
       </ReactFlow>
 
       <HelpPanel />
+
+      {/* ── Selection rubber-band (long-press drag) ──────────────────────── */}
+      {lassoRect && (
+        <div
+          style={{
+            position: 'fixed',
+            left: lassoRect.x,
+            top: lassoRect.y,
+            width: lassoRect.w,
+            height: lassoRect.h,
+            border: '1.5px solid #3b82f6',
+            background: '#3b82f622',
+            borderRadius: 2,
+            zIndex: 6,
+            pointerEvents: 'none',
+          }}
+        />
+      )}
 
       {/* ── Context Menu ─────────────────────────────────────────────────── */}
       {contextMenu && (
@@ -521,6 +754,8 @@ export default function App() {
                     <input
                       autoFocus
                       value={renameValue}
+                      placeholder="종류 이름"
+                      onFocus={(e) => e.target.select()}
                       onChange={(e) => setRenameValue(e.target.value)}
                       onBlur={() => { renameStageType(idx, renameValue); setRenamingTypeIdx(null) }}
                       onKeyDown={(e) => {
@@ -550,7 +785,7 @@ export default function App() {
                     <>
                       <IconBtn
                         title="이름 변경"
-                        onClick={(e) => { e.stopPropagation(); setRenamingTypeIdx(idx); setRenameValue(type.label) }}
+                        onClick={(e) => { e.stopPropagation(); setRenamingTypeIdx(idx); setRenameValue(type.label === '새 종류' ? '' : type.label) }}
                         hoverColor="#aaa"
                       >✎</IconBtn>
                       {stageTypes.length > 1 && (

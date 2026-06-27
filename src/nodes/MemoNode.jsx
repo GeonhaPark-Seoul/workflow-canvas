@@ -30,9 +30,12 @@ export default function MemoNode({ data, selected }) {
 
   const startEdit = (field) => { setEditing(field); data.onEditStart?.() }
   const stopEdit = () => {
+    const patch = { header, text }
+    if (editing === 'header') patch.headerTouched = true
+    if (editing === 'text') patch.textTouched = true
     setEditing(null)
     data.onEditEnd?.()
-    data.onUpdate?.({ header, text })
+    data.onUpdate?.(patch)
   }
 
   return (
@@ -56,7 +59,7 @@ export default function MemoNode({ data, selected }) {
     >
       <NodeResizer
         isVisible={selected}
-        minWidth={140}
+        minWidth={160}
         minHeight={80}
         color="#f59e0b"
         handleStyle={{ width: 10, height: 10, borderRadius: 5, border: '2px solid #f59e0b' }}
@@ -92,7 +95,7 @@ export default function MemoNode({ data, selected }) {
             style={{
               flex: 1, background: 'transparent', border: 'none',
               borderBottom: '1px solid #f59e0b88',
-              color: '#f59e0b', fontSize: 10, fontWeight: 700, letterSpacing: 1,
+              color: '#f59e0b', fontSize: 13, fontWeight: 800, letterSpacing: 0.3,
               outline: 'none', fontFamily: 'inherit', padding: 0,
             }}
           />
@@ -101,11 +104,11 @@ export default function MemoNode({ data, selected }) {
             onDoubleClick={() => startEdit('header')}
             style={{
               flex: 1, color: header ? '#f59e0b' : '#f59e0b66',
-              fontSize: 10, fontWeight: 700, letterSpacing: 1, cursor: 'text',
+              fontSize: 13, fontWeight: 800, letterSpacing: 0.3, cursor: 'text',
               whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
             }}
           >
-            {header || '제목 (더블클릭)'}
+            {header || (data.headerTouched ? '' : '제목 (더블클릭)')}
           </span>
         )}
       </div>
@@ -118,7 +121,7 @@ export default function MemoNode({ data, selected }) {
             value={text}
             onChange={(e) => setText(e.target.value)}
             onBlur={stopEdit}
-            placeholder="메모 내용..."
+            placeholder={data.textTouched ? '' : '메모 내용...'}
             style={{
               flex: 1, background: 'transparent', border: 'none',
               color: '#e8d88a', fontSize: 12, width: '100%',
@@ -135,7 +138,7 @@ export default function MemoNode({ data, selected }) {
               overflow: 'auto', lineHeight: 1.6, minHeight: 0,
             }}
           >
-            {text || '메모 내용 (더블클릭하여 편집)'}
+            {text || (data.textTouched ? '' : '메모 내용 (더블클릭하여 편집)')}
           </div>
         )}
       </div>

@@ -27,7 +27,7 @@ export default function StageNode({ data, selected }) {
   const color = stageTypes[colorIdx]
 
   const [editing, setEditing] = useState(null) // 'title' | 'desc' | null
-  const [title, setTitle] = useState(data.label || '새 단계')
+  const [title, setTitle] = useState(data.label ?? '')
   const [description, setDescription] = useState(data.description || '')
   const titleRef = useRef(null)
   const descRef = useRef(null)
@@ -38,7 +38,7 @@ export default function StageNode({ data, selected }) {
   }, [editing])
 
   // Sync external label/description changes (e.g. from undo/redo, canvas switch)
-  useEffect(() => { setTitle(data.label || '새 단계') }, [data.label])
+  useEffect(() => { setTitle(data.label ?? '') }, [data.label])
   useEffect(() => { setDescription(data.description || '') }, [data.description])
 
   const cycleColor = (e) => {
@@ -47,11 +47,28 @@ export default function StageNode({ data, selected }) {
     data.onUpdate?.({ colorIdx: next })
   }
 
-  const startEdit = (field) => { setEditing(field); data.onEditStart?.() }
+  const startEdit = (field) => {
+    // Clear the auto-generated default so the first edit starts blank
+    if (field === 'title' && title === '새 단계') setTitle('')
+    setEditing(field)
+    data.onEditStart?.()
+  }
   const stopEdit = () => {
+    const patch = { label: title, description }
+    if (editing === 'title') patch.titleTouched = true
+    if (editing === 'desc') patch.descTouched = true
     setEditing(null)
     data.onEditEnd?.()
-    data.onUpdate?.({ label: title, description })
+    data.onUpdate?.(patch)
+  }
+  const cancelEdit = () => {
+    setTitle(data.label ?? '')
+    setDescription(data.description || '')
+    const patch = {}
+    if (editing === 'title') patch.titleTouched = true
+    setEditing(null)
+    data.onEditEnd?.()
+    if (Object.keys(patch).length > 0) data.onUpdate?.(patch)
   }
 
   return (
@@ -76,7 +93,7 @@ export default function StageNode({ data, selected }) {
     >
       <NodeResizer
         isVisible={selected}
-        minWidth={160}
+        minWidth={200}
         minHeight={80}
         color={color.border}
         handleStyle={{ width: 10, height: 10, borderRadius: 2, border: `2px solid ${color.border}` }}
@@ -109,7 +126,8 @@ export default function StageNode({ data, selected }) {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             onBlur={stopEdit}
-            onKeyDown={(e) => { if (e.key === 'Enter') stopEdit(); if (e.key === 'Escape') stopEdit() }}
+            onKeyDown={(e) => { if (e.key === 'Enter') stopEdit(); if (e.key === 'Escape') cancelEdit() }}
+            placeholder="단계 이름 입력..."
             style={{
               background: 'transparent', border: 'none',
               borderBottom: `1px solid ${color.border}`,
@@ -121,11 +139,11 @@ export default function StageNode({ data, selected }) {
           <div
             onDoubleClick={() => startEdit('title')}
             style={{
-              color: '#f0f0f0', fontSize: 15, fontWeight: 700,
+              color: title ? '#f0f0f0' : '#ffffff66', fontSize: 15, fontWeight: 700,
               marginBottom: 4, cursor: 'text', minHeight: 22, lineHeight: '22px',
             }}
           >
-            {title}
+            {title || (data.titleTouched ? '' : '단계 이름 (더블클릭하여 편집)')}
           </div>
         )}
       </div>
@@ -138,7 +156,7 @@ export default function StageNode({ data, selected }) {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             onBlur={stopEdit}
-            placeholder="설명을 입력하세요..."
+            placeholder={data.descTouched ? '' : '설명을 입력하세요...'}
             style={{
               flex: 1, background: 'transparent', border: 'none',
               color: '#aaa', fontSize: 12, width: '100%',
@@ -155,7 +173,7 @@ export default function StageNode({ data, selected }) {
               overflow: 'auto', lineHeight: 1.5, minHeight: 0,
             }}
           >
-            {description || '설명 (더블클릭하여 편집)'}
+            {description || (data.descTouched ? '' : '설명 (더블클릭하여 편집)')}
           </div>
         )}
       </div>
