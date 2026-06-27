@@ -648,7 +648,20 @@ export default function App() {
   }
 
   return (
-    <div style={{ width: '100vw', height: '100vh', position: 'relative' }} onClick={() => { commitRename(); closeContext() }}>
+    <div
+      style={{ width: '100vw', height: '100vh', position: 'relative' }}
+      onClick={(e) => {
+        commitRename()
+        closeContext()
+        // React Flow only deselects edges when clicking inside its own pane.
+        // Clicks on toolbar / tabs / panels don't reach React Flow, so we
+        // explicitly clear edge selection whenever the click lands outside a
+        // node or edge element.
+        if (!e.target.closest('.react-flow__edge') && !e.target.closest('.react-flow__node')) {
+          setEdges((eds) => eds.some((ed) => ed.selected) ? eds.map((ed) => ({ ...ed, selected: false })) : eds)
+        }
+      }}
+    >
       <CanvasTabs
         canvases={canvases}
         activeId={activeCanvasId}
