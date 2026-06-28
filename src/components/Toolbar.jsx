@@ -30,7 +30,7 @@ export default function Toolbar({
         <MobileBtn onClick={onAddStage} color="#3b82f6" icon="＋" label="단계" />
         <MobileBtn onClick={onAddMemo} color="#f59e0b" icon="✎" label="메모" />
         <ViewSelector {...viewProps} />
-        <MobileBtn onClick={onUndo} color="#06b6d4" icon="↩" label="되돌리기" />
+        <MobileBtn onClick={onUndo} color="#06b6d4" icon="↩︎" label="되돌리기" />
       </div>
     )
   }
