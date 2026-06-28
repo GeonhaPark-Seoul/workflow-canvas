@@ -123,6 +123,7 @@ export default function App() {
 
   // Touch / responsive detection
   const [touchDevice] = useState(() => 'ontouchstart' in window || navigator.maxTouchPoints > 0)
+  const [reconnecting, setReconnecting] = useState(false)
   const [mobile, setMobile] = useState(() => window.innerWidth < 768)
   useEffect(() => {
     const fn = () => setMobile(window.innerWidth < 768)
@@ -357,6 +358,57 @@ export default function App() {
     el.addEventListener('pointerdown', onDown)
     return () => { el.removeEventListener('pointerdown', onDown); cleanup() }
   }, [rfInstance, setNodes, setEdges, touchDevice])
+
+  // ── Mobile: bridge touch → mousedown for React Flow edge reconnect ──────────
+  // React Flow's EdgeAnchor (the edge-endpoint grab handle) only registers
+  // onMouseDown — no touch handler — so reconnect never starts on touch devices.
+  //
+  // We can't rely on the touch's e.target: an endpoint sits on a node's boundary,
+  // so the touch usually lands on the node DIV, not the (transparent) anchor
+  // circle. Instead we geometrically match the touch against the screen positions
+  // of the rendered .react-flow__edgeupdater circles (which only exist while an
+  // edge is selected). If the touch is within grab range of one, we hijack the
+  // gesture: stop it reaching the node (preventDefault + stopPropagation, which
+  // blocks the node-drag) and dispatch a synthetic mousedown on that circle.
+  // React Flow then takes over via its own touchmove/touchend document listeners.
+  useEffect(() => {
+    if (!touchDevice || !rfInstance) return
+    const el = reactFlowRef.current
+    if (!el) return
+
+    const GRAB = 28 // px slack around the anchor center
+
+    const onTouchStart = (e) => {
+      if (e.touches.length !== 1) return
+      const t = e.touches[0]
+      const anchors = el.querySelectorAll('.react-flow__edgeupdater')
+      if (!anchors.length) return
+
+      let best = null, bestDist = Infinity, bestCx = 0, bestCy = 0
+      anchors.forEach((a) => {
+        const r = a.getBoundingClientRect()
+        const cx = r.left + r.width / 2
+        const cy = r.top + r.height / 2
+        const dist = Math.hypot(t.clientX - cx, t.clientY - cy)
+        const reach = Math.max(r.width, r.height) / 2 + GRAB
+        if (dist < reach && dist < bestDist) { best = a; bestDist = dist; bestCx = cx; bestCy = cy }
+      })
+      if (!best) return
+
+      // Hijack: keep the node under the finger from starting a drag.
+      e.preventDefault()
+      e.stopPropagation()
+      best.dispatchEvent(new MouseEvent('mousedown', {
+        bubbles: true, cancelable: true,
+        clientX: bestCx, clientY: bestCy,
+        button: 0, buttons: 1, view: window,
+      }))
+    }
+
+    // Capture phase so we run before React Flow's node drag and our pinch handler.
+    el.addEventListener('touchstart', onTouchStart, { passive: false, capture: true })
+    return () => el.removeEventListener('touchstart', onTouchStart, { capture: true })
+  }, [touchDevice, rfInstance])
 
   // ── Touch: two-finger pinch zoom (custom) ────────────────────────────────────
   // React Flow's own pinch is disabled here because panOnDrag=false makes its
@@ -889,6 +941,7 @@ export default function App() {
 
       <ReactFlow
         ref={reactFlowRef}
+        className={reconnecting ? 'rf-reconnecting' : undefined}
         nodes={nodes.map((n) => ({
           ...n,
           data: {
@@ -909,6 +962,8 @@ export default function App() {
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onReconnect={onReconnect}
+        onReconnectStart={() => setReconnecting(true)}
+        onReconnectEnd={() => setReconnecting(false)}
         onNodeDrag={onNodeDrag}
         onNodeDragStop={onNodeDragStop}
         onInit={setRfInstance}

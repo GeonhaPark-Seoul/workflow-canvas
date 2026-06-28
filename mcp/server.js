@@ -45,7 +45,17 @@ export function buildServer(getUserId) {
       type: z.enum(['stage', 'memo']),
       label: z.string().optional().describe('단계 노드 제목'),
       description: z.string().optional().describe('단계 노드 설명'),
-      colorIdx: z.number().int().min(0).max(4).optional().describe('단계 색상: 0 기획·1 개발·2 검토·3 배포·4 완료'),
+      colorIdx: z.number().int().min(0).max(4).optional().describe(
+        '단계 노드의 색상은 노드의 단계 또는 분류를 나타낸다.\n' +
+        'colorIdx는 두 가지 방식으로 사용할 수 있다.\n\n' +
+        '① 흐름/순서가 있을 때: 작업이나 프로세스의 진행 단계를 표현\n' +
+        '   0=기획(아이디어·계획), 1=제작(작업 진행 중),\n' +
+        '   2=검토(피드백·수정), 3=실행/배포(외부 공개), 4=완료(종료)\n\n' +
+        '② 분류/카테고리로 쓸 때: 흐름 없이 노드의 성격이나 종류를 구분\n' +
+        '   예) 주제별 색 구분, 중요도 구분, 팀/역할 구분 등\n\n' +
+        '→ 노드의 내용과 캔버스 전체 맥락을 보고 적합한 방식으로 선택할 것.\n' +
+        '   무조건 0부터 순서대로 쓸 필요 없음.'
+      ),
       header: z.string().optional().describe('메모 제목'),
       text: z.string().optional().describe('메모 내용'),
       x: z.number().optional().describe('x 좌표 (생략 시 자동 배치)'),
@@ -74,7 +84,19 @@ export function buildServer(getUserId) {
   }, g(async (userId, a) => ok(await store.deleteNode(userId, a.canvas_id, a.node_id))))
 
   server.registerTool('create_edge', {
-    description: '두 노드를 연결하는 연결선을 추가합니다. 메모 노드가 포함되면 점선으로 표시됩니다.',
+    description:
+      '두 노드를 연결하는 연결선을 추가한다. 메모 노드가 포함되면 점선으로 표시된다.\n\n' +
+      '연결선은 반드시 추가해야 하는 것이 아니다.\n' +
+      '아래 경우에만 연결선을 추가할 것:\n' +
+      '- 흐름: A 작업 이후 B 작업이 진행되는 순서 관계\n' +
+      '- 인과/영향: A가 B의 원인이거나 B에 영향을 줄 때\n' +
+      '- 계층: A가 B의 상위/하위 개념일 때\n' +
+      '- 관계: A와 B가 서로 연관되어 있음을 명시적으로 표현할 때\n\n' +
+      '연결 방향은 노드의 배치 좌표를 보고 결정할 것:\n' +
+      '- 좌→우 흐름: sourceHandle=right, targetHandle=left\n' +
+      '- 위→아래 흐름: sourceHandle=bottom, targetHandle=top\n' +
+      '- 우→좌 흐름: sourceHandle=left, targetHandle=right\n' +
+      '- 아래→위 흐름: sourceHandle=top, targetHandle=bottom',
     inputSchema: {
       canvas_id: z.string(),
       source: z.string().describe('출발 노드 id'),
@@ -103,6 +125,11 @@ export function buildServer(getUserId) {
 }
 
 function bearer(req) {
+  try {
+    const url = new URL(req.url, 'http://localhost')
+    const q = url.searchParams.get('token')
+    if (q) return q.trim()
+  } catch {}
   const h = req.headers['authorization'] || req.headers['Authorization'] || ''
   const raw = Array.isArray(h) ? h[0] : h
   const m = /^Bearer\s+(.+)$/i.exec(raw || '')

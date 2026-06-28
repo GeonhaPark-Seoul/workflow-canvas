@@ -57,7 +57,7 @@ export default function Toolbar({
       <ToolBtn onClick={onAddMemo} color="#f59e0b" icon="📝" label="메모 추가" />
       <div style={{ width: 1, background: '#ffffff18', margin: '0 4px' }} />
       <ViewSelector {...viewProps} />
-      <ToolBtn onClick={onClearAll} color="#ef4444" icon="✕" label="전체 삭제" />
+      <ToolBtn onClick={onUndo} color="#06b6d4" icon="↩︎" label="되돌리기" />
     </div>
   )
 }

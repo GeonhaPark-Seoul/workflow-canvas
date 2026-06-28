@@ -34,6 +34,20 @@ html, body, #root {
   touch-action: none;
 }
 
+/* Edge reconnect grab handles: larger on touch, and show target handles while dragging */
+.react-flow__edgeupdater {
+  r: 8;
+  cursor: crosshair;
+}
+@media (pointer: coarse) {
+  .react-flow__edgeupdater {
+    r: 18;
+  }
+}
+.rf-reconnecting .react-flow__node .react-flow__handle {
+  opacity: 1 !important;
+}
+
 /* Safe-area padding for notch / home-bar devices */
 :root {
   --safe-bottom: env(safe-area-inset-bottom, 0px);

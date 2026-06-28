@@ -4,7 +4,10 @@ import { Handle, Position, NodeResizer } from '@xyflow/react'
 // Bidirectional connection ports: every handle is type="source"; with the
 // canvas in connectionMode="loose", a source handle can also receive a
 // connection, so any port can be both an input and an output.
-const HANDLE = { background: '#f59e0b', width: 10, height: 10, border: '2px solid #0f0f13' }
+const HANDLE = {
+  width: 24, height: 24, border: 'none',
+  background: 'radial-gradient(circle, #f59e0b 3px, #0f0f13 3px 5px, transparent 5px)',
+}
 const PORTS = [
   { id: 'left', position: Position.Left },
   { id: 'right', position: Position.Right },

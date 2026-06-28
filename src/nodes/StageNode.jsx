@@ -3,16 +3,17 @@ import { Handle, Position, NodeResizer } from '@xyflow/react'
 
 const DEFAULT_TYPES = [
   { bg: '#1e3a5f', border: '#3b82f6', label: '기획' },
-  { bg: '#1a3a2a', border: '#22c55e', label: '개발' },
+  { bg: '#1a3a2a', border: '#22c55e', label: '제작' },
   { bg: '#3a1a1a', border: '#ef4444', label: '검토' },
-  { bg: '#2d2a1a', border: '#f59e0b', label: '배포' },
+  { bg: '#2d2a1a', border: '#f59e0b', label: '실행' },
   { bg: '#2a1a3a', border: '#a855f7', label: '완료' },
 ]
 
 // Bidirectional ports: type="source" + canvas connectionMode="loose" lets every
 // handle act as both input and output.
 const HANDLE_STYLE = (borderColor) => ({
-  width: 10, height: 10, border: `2px solid #0f0f13`, background: borderColor,
+  width: 24, height: 24, border: 'none',
+  background: `radial-gradient(circle, ${borderColor} 3px, #0f0f13 3px 5px, transparent 5px)`,
 })
 const PORTS = [
   { id: 'left', position: Position.Left },
