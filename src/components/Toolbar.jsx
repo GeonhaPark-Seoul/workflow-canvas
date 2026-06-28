@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 
 export default function Toolbar({
-  onAddStage, onAddMemo, onClearAll, mobile,
+  onAddStage, onAddMemo, onClearAll, onUndo, mobile,
   views = [], currentViewId, onSelectView, onRenameView, onDeleteView,
 }) {
   const viewProps = { views, currentViewId, onSelectView, onRenameView, onDeleteView, mobile }
@@ -30,7 +30,7 @@ export default function Toolbar({
         <MobileBtn onClick={onAddStage} color="#3b82f6" icon="＋" label="단계" />
         <MobileBtn onClick={onAddMemo} color="#f59e0b" icon="✎" label="메모" />
         <ViewSelector {...viewProps} />
-        <MobileBtn onClick={onClearAll} color="#ef4444" icon="✕" label="전체삭제" />
+        <MobileBtn onClick={onUndo} color="#06b6d4" icon="↩" label="되돌리기" />
       </div>
     )
   }
@@ -153,22 +153,39 @@ function ViewSelector({ views, currentViewId, onSelectView, onRenameView, onDele
     </div>
   )
 
-  // Mobile: column button matching the other bottom-bar items
+  // Mobile: tapping the ⊡ icon opens the saved-view list; tapping the label
+  // jumps to the current view. Laid out to match the neighbouring MobileBtn
+  // items exactly (same padding, icon size, label size, alignment).
   if (mobile) {
     return (
-      <div ref={ref} style={{ position: 'relative' }}>
+      <div
+        ref={ref}
+        style={{
+          position: 'relative', display: 'flex', flexDirection: 'column',
+          alignItems: 'center', minWidth: 56, padding: '0 6px',
+        }}
+      >
         <button
-          onClick={() => setOpen((o) => !o)}
+          onClick={(e) => { e.stopPropagation(); setOpen((o) => !o) }}
+          title="저장된 뷰"
           style={{
             background: 'transparent', border: 'none', color: COLOR,
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
-            padding: '4px 16px', cursor: 'pointer', fontFamily: 'inherit', minWidth: 56,
+            fontSize: 26, lineHeight: 1, padding: 0, marginTop: -4, cursor: 'pointer', fontFamily: 'inherit',
           }}
         >
-          <span style={{ fontSize: 22 }}>⊡</span>
+          ⊡
+        </button>
+        <button
+          onClick={() => onSelectView(currentViewId ?? null)}
+          title="현재 뷰로 이동"
+          style={{
+            background: 'transparent', border: 'none', cursor: 'pointer',
+            fontFamily: 'inherit', width: '100%', padding: '7px 14px 2px',
+          }}
+        >
           <span style={{
-            fontSize: 10, fontWeight: 600, color: '#aaa',
-            maxWidth: 60, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+            fontSize: 10, fontWeight: 600, color: '#aaa', display: 'block', textAlign: 'center',
+            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
           }}>{label}</span>
         </button>
         {open && dropdown}

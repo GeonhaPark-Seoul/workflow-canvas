@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import {
   ReactFlow,
   Background,
@@ -524,8 +524,10 @@ export default function App() {
   }, [setNodes])
 
   // ── Stage type management ─────────────────────────────────────────────────
-  const changeNodeStageType = useCallback((nodeId, typeIdx) => {
-    setNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, colorIdx: typeIdx } } : n))
+  // Apply a stage type to one or many nodes (memo nodes are left untouched).
+  const changeNodeStageType = useCallback((ids, typeIdx) => {
+    const set = new Set(ids)
+    setNodes((nds) => nds.map((n) => (set.has(n.id) && n.type === 'stage') ? { ...n, data: { ...n.data, colorIdx: typeIdx } } : n))
   }, [setNodes])
 
   const renameStageType = useCallback((idx, label) => {
@@ -679,9 +681,10 @@ export default function App() {
 
   const handleContextDeleteNode = () => {
     if (!contextMenu?.nodeId) return
-    const id = contextMenu.nodeId
-    setNodes((nds) => nds.filter((n) => n.id !== id))
-    setEdges((eds) => eds.filter((e) => e.source !== id && e.target !== id))
+    const ids = contextMenu.selectedIds?.length ? contextMenu.selectedIds : [contextMenu.nodeId]
+    const set = new Set(ids)
+    setNodes((nds) => nds.filter((n) => !set.has(n.id)))
+    setEdges((eds) => eds.filter((e) => !set.has(e.source) && !set.has(e.target)))
     closeContext()
   }
 
@@ -765,6 +768,27 @@ export default function App() {
     setRenamingTypeIdx(null)
   }
 
+  // ── Keep the context menu on screen ───────────────────────────────────────
+  // Default: opens down-right of the tap. If it would be clipped, flip so it
+  // opens up / left instead.
+  const menuRef = useRef(null)
+  const [menuPos, setMenuPos] = useState({ left: 0, top: 0 })
+  useLayoutEffect(() => {
+    if (!contextMenu || !menuRef.current) return
+    const { width, height } = menuRef.current.getBoundingClientRect()
+    const pad = 8
+    let left = contextMenu.x
+    let top = contextMenu.y
+    if (left + width > window.innerWidth - pad) left = Math.max(pad, contextMenu.x - width)
+    if (top + height > window.innerHeight - pad) top = Math.max(pad, contextMenu.y - height)
+    setMenuPos({ left, top })
+  }, [contextMenu])
+
+  // Resolve which nodes the node-context-menu acts on, and whether it's a
+  // multi-selection (so labels can say "전체 …").
+  const ctxIds = contextMenu?.selectedIds?.length ? contextMenu.selectedIds : (contextMenu?.nodeId ? [contextMenu.nodeId] : [])
+  const ctxMulti = (contextMenu?.selectedIds?.length ?? 0) >= 2
+
   return (
     <div
       style={{ width: '100vw', height: '100vh', position: 'relative' }}
@@ -794,6 +818,7 @@ export default function App() {
         onAddStage={addStage}
         onAddMemo={addMemo}
         onClearAll={clearAll}
+        onUndo={undo}
         mobile={mobile}
         views={views}
         currentViewId={currentViewId}
@@ -882,11 +907,12 @@ export default function App() {
       {/* ── Context Menu ─────────────────────────────────────────────────── */}
       {contextMenu && (
         <div
+          ref={menuRef}
           onClick={(e) => e.stopPropagation()}
           style={{
             position: 'fixed',
-            top: contextMenu.y,
-            left: contextMenu.x,
+            top: menuPos.top,
+            left: menuPos.left,
             zIndex: 1000,
             background: '#1e1e2a',
             border: '1px solid #ffffff22',
@@ -910,26 +936,23 @@ export default function App() {
           )}
 
           {/* Pin a saved view from the current selection (or just this node) */}
-          {contextMenu.nodeId && (() => {
-            const ids = contextMenu.selectedIds?.length ? contextMenu.selectedIds : [contextMenu.nodeId]
-            return (
-              <>
-                <ContextItem
-                  icon="📌"
-                  label={`뷰 고정 (${ids.length}개 노드)`}
-                  color="#06b6d4"
-                  onClick={() => { saveViewFromSelection(ids); closeContext() }}
-                />
-                <div style={{ height: 1, background: '#ffffff18', margin: '4px 2px' }} />
-              </>
-            )
-          })()}
+          {contextMenu.nodeId && (
+            <>
+              <ContextItem
+                icon="📌"
+                label={`뷰 고정 (${ctxIds.length}개 노드)`}
+                color="#06b6d4"
+                onClick={() => { saveViewFromSelection(ctxIds); closeContext() }}
+              />
+              <div style={{ height: 1, background: '#ffffff18', margin: '4px 2px' }} />
+            </>
+          )}
 
           {/* Stage node: type selector + delete */}
           {contextMenu.nodeId && contextMenu.nodeType === 'stage' && (
             <>
               <div style={{ padding: '4px 8px 4px', color: '#555', fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
-                종류 선택
+                {ctxMulti ? '종류 일괄 변경' : '종류 선택'}
               </div>
               {stageTypes.map((type, idx) => (
                 <div key={type.id} style={{ display: 'flex', alignItems: 'center', gap: 2, padding: '1px 4px' }}>
@@ -961,7 +984,7 @@ export default function App() {
                   ) : (
                     <TypeItem
                       type={type}
-                      onClick={() => { changeNodeStageType(contextMenu.nodeId, idx); closeContext() }}
+                      onClick={() => { changeNodeStageType(ctxIds, idx); closeContext() }}
                     />
                   )}
                   {renamingTypeIdx !== idx && (
@@ -995,13 +1018,13 @@ export default function App() {
                 + 새 종류 추가
               </button>
               <div style={{ height: 1, background: '#ffffff18', margin: '4px 2px' }} />
-              <ContextItem icon="🗑" label="노드 삭제" color="#ef4444" onClick={handleContextDeleteNode} />
+              <ContextItem icon="🗑" label={ctxMulti ? '전체 삭제' : '노드 삭제'} color="#ef4444" onClick={handleContextDeleteNode} />
             </>
           )}
 
           {/* Memo node: just delete */}
           {contextMenu.nodeId && contextMenu.nodeType === 'memo' && (
-            <ContextItem icon="🗑" label="노드 삭제" color="#ef4444" onClick={handleContextDeleteNode} />
+            <ContextItem icon="🗑" label={ctxMulti ? '전체 삭제' : '노드 삭제'} color="#ef4444" onClick={handleContextDeleteNode} />
           )}
         </div>
       )}

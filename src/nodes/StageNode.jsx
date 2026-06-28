@@ -33,6 +33,19 @@ export default function StageNode({ data, selected, id }) {
   const descRef = useRef(null)
   const longPressTimer = useRef(null)
   const longPressStart = useRef(null)
+  const lastTapRef = useRef(0)
+
+  // Touch double-tap → edit, while preventing the browser's double-tap zoom.
+  const touchEdit = (field) => (e) => {
+    const now = Date.now()
+    if (now - lastTapRef.current < 300) {
+      e.preventDefault()
+      lastTapRef.current = 0
+      startEdit(field)
+    } else {
+      lastTapRef.current = now
+    }
+  }
 
   const handlePointerDown = (e) => {
     if (e.pointerType !== 'touch') return
@@ -161,6 +174,7 @@ export default function StageNode({ data, selected, id }) {
         ) : (
           <div
             onDoubleClick={() => startEdit('title')}
+            onTouchStart={touchEdit('title')}
             style={{
               color: title ? '#f0f0f0' : '#ffffff66', fontSize: 15, fontWeight: 700,
               marginBottom: 4, cursor: 'text', minHeight: 22, lineHeight: '22px',
@@ -191,6 +205,7 @@ export default function StageNode({ data, selected, id }) {
         ) : (
           <div
             onDoubleClick={() => startEdit('desc')}
+            onTouchStart={touchEdit('desc')}
             style={{
               flex: 1, color: description ? '#aaa' : '#888', fontSize: 12,
               whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text',

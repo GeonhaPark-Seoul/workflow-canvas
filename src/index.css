@@ -12,6 +12,11 @@ html, body, #root {
   background: #0f0f13;
 }
 
+/* Disable the browser's double-tap-to-zoom on nodes (keeps pinch + dbl-tap edit) */
+.react-flow__node {
+  touch-action: manipulation;
+}
+
 /* Connection ports: hidden by default, shown only when the node is selected
    (also revealed on hover so they're discoverable). They stay interactive
    either way so connecting/reconnecting still works. */

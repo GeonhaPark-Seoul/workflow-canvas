@@ -20,6 +20,19 @@ export default function MemoNode({ data, selected, id }) {
   const textRef = useRef(null)
   const longPressTimer = useRef(null)
   const longPressStart = useRef(null)
+  const lastTapRef = useRef(0)
+
+  // Touch double-tap → edit, while preventing the browser's double-tap zoom.
+  const touchEdit = (field) => (e) => {
+    const now = Date.now()
+    if (now - lastTapRef.current < 300) {
+      e.preventDefault()
+      lastTapRef.current = 0
+      startEdit(field)
+    } else {
+      lastTapRef.current = now
+    }
+  }
 
   const handlePointerDown = (e) => {
     if (e.pointerType !== 'touch') return
@@ -125,6 +138,7 @@ export default function MemoNode({ data, selected, id }) {
         ) : (
           <span
             onDoubleClick={() => startEdit('header')}
+            onTouchStart={touchEdit('header')}
             style={{
               flex: 1, color: header ? '#f59e0b' : '#f59e0b66',
               fontSize: 13, fontWeight: 800, letterSpacing: 0.3, cursor: 'text',
@@ -156,6 +170,7 @@ export default function MemoNode({ data, selected, id }) {
         ) : (
           <div
             onDoubleClick={() => startEdit('text')}
+            onTouchStart={touchEdit('text')}
             style={{
               flex: 1, color: text ? '#e8d88a' : '#e8d88a55', fontSize: 12,
               whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text',
