@@ -15,6 +15,7 @@ import '@xyflow/react/dist/style.css'
 
 import StageNode from './nodes/StageNode'
 import MemoNode from './nodes/MemoNode'
+import SeparableEdge from './edges/SeparableEdge'
 import Toolbar from './components/Toolbar'
 import CanvasTabs from './components/CanvasTabs'
 import AuthPanel from './components/AuthPanel'
@@ -33,9 +34,10 @@ import {
 } from './lib/cloudStorage'
 
 const nodeTypes = { stage: StageNode, memo: MemoNode }
+const edgeTypes = { separable: SeparableEdge }
 
 const defaultEdgeOptions = {
-  type: 'smoothstep',
+  type: 'separable',
   animated: false,
   style: { stroke: '#4a4a5a', strokeWidth: 2 },
   markerEnd: { type: MarkerType.ArrowClosed, color: '#4a4a5a' },
@@ -77,15 +79,15 @@ const initialEdges = [
   { id: 'e2-3', source: '2', target: '3', ...defaultEdgeOptions },
   { id: 'e3-4', source: '3', target: '4', ...defaultEdgeOptions },
   { id: 'e4-5', source: '4', target: '5', ...defaultEdgeOptions },
-  { id: 'em1-2', source: 'm1', target: '2', type: 'smoothstep', style: { stroke: '#f59e0b88', strokeWidth: 1.5, strokeDasharray: '5,4' }, markerEnd: { type: MarkerType.ArrowClosed, color: '#f59e0b88' } },
-  { id: 'em2-4', source: 'm2', target: '4', type: 'smoothstep', style: { stroke: '#f59e0b88', strokeWidth: 1.5, strokeDasharray: '5,4' }, markerEnd: { type: MarkerType.ArrowClosed, color: '#f59e0b88' } },
+  { id: 'em1-2', source: 'm1', target: '2', type: 'separable', style: { stroke: '#f59e0b88', strokeWidth: 1.5, strokeDasharray: '5,4' }, markerEnd: { type: MarkerType.ArrowClosed, color: '#f59e0b88' } },
+  { id: 'em2-4', source: 'm2', target: '4', type: 'separable', style: { stroke: '#f59e0b88', strokeWidth: 1.5, strokeDasharray: '5,4' }, markerEnd: { type: MarkerType.ArrowClosed, color: '#f59e0b88' } },
 ]
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-// Normalize every edge to the smoothstep type, keeping its style/marker.
-// Older saved edges may carry the now-removed 'editable' type.
+// Normalize every edge to the separable type, keeping its style/marker.
+// Strips transient data (e.g. _sep) and any older/removed edge type.
 function normalizeEdges(edges) {
-  return (edges ?? []).map(({ data, ...e }) => ({ ...e, type: 'smoothstep' }))
+  return (edges ?? []).map(({ data, ...e }) => ({ ...e, type: 'separable' }))
 }
 
 function maxNodeId(nodes) {
@@ -618,7 +620,7 @@ export default function App() {
     const isMemo = isMemoSource || isMemoTarget
     setEdges((eds) => addEdge({
       ...params,
-      type: 'smoothstep',
+      type: 'separable',
       style: isMemo ? { stroke: '#f59e0b88', strokeWidth: 1.5, strokeDasharray: '5,4' } : { stroke: '#4a4a5a', strokeWidth: 2 },
       markerEnd: { type: MarkerType.ArrowClosed, color: isMemo ? '#f59e0b88' : '#4a4a5a' },
     }, eds))
@@ -781,13 +783,26 @@ export default function App() {
     setCurrentViewId((cur) => (cur === id ? null : cur))
   }, [])
 
-  // ── Selected edge highlight + elevate above nodes ─────────────────────────
+  // ── Parallel-edge separation + selected highlight ─────────────────────────
+  // Group edges by their unordered node pair so siblings between the same two
+  // nodes fan out (handled by SeparableEdge via the injected _sep field).
+  const edgeGroups = {}
+  edges.forEach((e) => {
+    const key = e.source < e.target ? `${e.source}~${e.target}` : `${e.target}~${e.source}`
+    ;(edgeGroups[key] ??= []).push(e.id)
+  })
   const styledEdges = edges.map((e) => {
-    if (!e.selected) return e
+    const key = e.source < e.target ? `${e.source}~${e.target}` : `${e.target}~${e.source}`
+    const group = edgeGroups[key]
+    const sep = { index: group.indexOf(e.id), size: group.length }
+    const withSep = { ...e, data: { ...e.data, _sep: sep } }
+    if (!e.selected) return withSep
     const isMemo = !!e.style?.strokeDasharray
     const color = isMemo ? '#f59e0b' : '#60a5fa'
     return {
-      ...e,
+      ...withSep,
+      // Only a selected (bold) edge can be snatched/reconnected.
+      reconnectable: true,
       zIndex: 1001,
       style: { ...e.style, stroke: color, strokeWidth: isMemo ? 2.5 : 3.5, filter: `drop-shadow(0 0 6px ${color}88)` },
       markerEnd: { type: MarkerType.ArrowClosed, color },
@@ -887,11 +902,16 @@ export default function App() {
         onNodeDragStop={onNodeDragStop}
         onInit={setRfInstance}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
         onPaneContextMenu={onPaneContextMenu}
         onNodeContextMenu={onNodeContextMenu}
         onEdgeContextMenu={onEdgeContextMenu}
+        onPaneClick={() => {
+          setEdges((eds) => eds.some((e) => e.selected) ? eds.map((e) => ({ ...e, selected: false })) : eds)
+        }}
         nodesDraggable={!isAnyEditing && !isPinching}
+        edgesReconnectable={false}
         reconnectRadius={mobile ? 40 : 10}
         connectionMode="loose"
         panOnDrag={false}
