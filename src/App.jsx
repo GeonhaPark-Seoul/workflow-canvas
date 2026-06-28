@@ -118,6 +118,7 @@ export default function App() {
   const reactFlowRef = useRef(null)
   const [rfInstance, setRfInstance] = useState(null)
   const [isAnyEditing, setIsAnyEditing] = useState(false)
+  const [isPinching, setIsPinching] = useState(false)
   const [lassoRect, setLassoRect] = useState(null) // screen-space rubber-band box
 
   // Saved views (per canvas): [{ id, name, bounds: {x,y,width,height} }]
@@ -270,8 +271,35 @@ export default function App() {
       }
     }
     const onDown = (e) => {
-      if (e.button !== 0 || !e.target.classList?.contains('react-flow__pane')) return
+      if (e.button !== 0) return
       if (e.pointerType === 'touch' && !e.isPrimary) return
+      // Mobile: long-press on edge → edge context menu (same as desktop right-click)
+      if (touchDevice && e.pointerType === 'touch') {
+        const edgeEl = e.target.closest?.('.react-flow__edge')
+        if (edgeEl) {
+          const edgeId = edgeEl.getAttribute('data-id')
+          if (edgeId) {
+            const ex = e.clientX, ey = e.clientY
+            const edgeLpTimer = setTimeout(() => {
+              setContextMenu({ x: ex, y: ey, edgeId })
+            }, 500)
+            const cancelEdgeLp = () => {
+              clearTimeout(edgeLpTimer)
+              window.removeEventListener('pointermove', onEdgeLpMove)
+              window.removeEventListener('pointerup', cancelEdgeLp)
+              window.removeEventListener('pointercancel', cancelEdgeLp)
+            }
+            const onEdgeLpMove = (ev) => {
+              if (Math.hypot(ev.clientX - ex, ev.clientY - ey) > 10) cancelEdgeLp()
+            }
+            window.addEventListener('pointermove', onEdgeLpMove)
+            window.addEventListener('pointerup', cancelEdgeLp)
+            window.addEventListener('pointercancel', cancelEdgeLp)
+          }
+          return
+        }
+      }
+      if (!e.target.classList?.contains('react-flow__pane')) return
       active = true; mode = null; sx = e.clientX; sy = e.clientY
       vp = rfInstance.getViewport(); activePointerId = e.pointerId
       timer = setTimeout(() => {
@@ -343,6 +371,7 @@ export default function App() {
 
     const onStart = (e) => {
       if (e.touches.length !== 2) return
+      setIsPinching(true)
       const vp = rfInstance.getViewport()
       const rect = el.getBoundingClientRect()
       const m = midOf(e.touches)
@@ -361,15 +390,18 @@ export default function App() {
       const z = Math.min(Math.max(pinch.z0 * (d / pinch.startDist), 0.1), 2)
       rfInstance.setViewport({ x: cx - pinch.Px * z, y: cy - pinch.Py * z, zoom: z })
     }
-    const onEnd = (e) => { if (e.touches.length < 2) pinch = null }
+    const onEnd = (e) => { if (e.touches.length < 2) { pinch = null; setIsPinching(false) } }
 
-    el.addEventListener('touchstart', onStart, { passive: false })
-    el.addEventListener('touchmove', onMove, { passive: false })
+    // capture:true ensures our handler fires before any child element (e.g. a node)
+    // and calling preventDefault in onStart prevents pointer-event synthesis for both
+    // touch points, so React Flow won't start a node-drag while we're pinching.
+    el.addEventListener('touchstart', onStart, { passive: false, capture: true })
+    el.addEventListener('touchmove', onMove, { passive: false, capture: true })
     el.addEventListener('touchend', onEnd)
     el.addEventListener('touchcancel', onEnd)
     return () => {
-      el.removeEventListener('touchstart', onStart)
-      el.removeEventListener('touchmove', onMove)
+      el.removeEventListener('touchstart', onStart, { capture: true })
+      el.removeEventListener('touchmove', onMove, { capture: true })
       el.removeEventListener('touchend', onEnd)
       el.removeEventListener('touchcancel', onEnd)
     }
@@ -859,7 +891,8 @@ export default function App() {
         onPaneContextMenu={onPaneContextMenu}
         onNodeContextMenu={onNodeContextMenu}
         onEdgeContextMenu={onEdgeContextMenu}
-        nodesDraggable={!isAnyEditing}
+        nodesDraggable={!isAnyEditing && !isPinching}
+        reconnectRadius={mobile ? 40 : 10}
         connectionMode="loose"
         panOnDrag={false}
         multiSelectionKeyCode={['Shift', 'Meta']}
