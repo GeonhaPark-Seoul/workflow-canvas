@@ -351,13 +351,18 @@ export default function App() {
           window.addEventListener('click', swallow, true)
           setTimeout(() => window.removeEventListener('click', swallow, true), 50)
         }
+      } else if (mode === null) {
+        // Quick tap on empty pane (onDown only proceeds for .react-flow__pane,
+        // so this is definitively empty space) → clear any selected-edge bold.
+        // Done here because onPaneClick / root onClick aren't reliable on touch.
+        setEdges((eds) => eds.some((ed) => ed.selected) ? eds.map((ed) => ({ ...ed, selected: false })) : eds)
       }
       active = false; mode = null; setLassoRect(null)
     }
 
     el.addEventListener('pointerdown', onDown)
     return () => { el.removeEventListener('pointerdown', onDown); cleanup() }
-  }, [rfInstance, setNodes, touchDevice])
+  }, [rfInstance, setNodes, setEdges, touchDevice])
 
   // ── Touch: two-finger pinch zoom (custom) ────────────────────────────────────
   // React Flow's own pinch is disabled here because panOnDrag=false makes its
