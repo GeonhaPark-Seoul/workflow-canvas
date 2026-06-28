@@ -138,14 +138,16 @@ export default function App() {
 
   // ── Auth + cloud sync ─────────────────────────────────────────────────────
   const [user, setUser] = useState(null)
+  const userRef = useRef(null)
   const [cloudSyncing, setCloudSyncing] = useState(false)
   // Stable ref to always-current state for use inside async callbacks
   const latestRef = useRef({ canvases: initCanvasList, activeCanvasId: initActiveId, stageTypes: [], views: [] })
 
   const nextId = () => String(++counterRef.current)
 
-  // Keep latestRef in sync so async callbacks always see fresh state
+  // Keep latestRef and userRef in sync so async callbacks always see fresh state
   useEffect(() => { latestRef.current = { canvases, activeCanvasId, stageTypes, views } }, [canvases, activeCanvasId, stageTypes, views])
+  useEffect(() => { userRef.current = user }, [user])
 
   // ── Save stageTypes ──────────────────────────────────────────────────────
   useEffect(() => { saveStageTypes(stageTypes) }, [stageTypes])
@@ -461,8 +463,29 @@ export default function App() {
   }, [rfInstance, touchDevice])
 
   // ── Multi-canvas ───────────────────────────────────────────────────────────
-  const loadCanvas = useCallback((id) => {
-    const data = loadCanvasData(id) ?? { nodes: [], edges: [] }
+  const loadCanvas = useCallback(async (id, prefetchedData) => {
+    let data
+    if (prefetchedData) {
+      data = prefetchedData
+    } else {
+      data = loadCanvasData(id) ?? { nodes: [], edges: [] }
+      if (userRef.current) {
+        try {
+          const { data: row } = await supabase
+            .from('canvases')
+            .select('nodes, edges, views')
+            .eq('user_id', userRef.current.id)
+            .eq('canvas_id', id)
+            .maybeSingle()
+          if (row) {
+            data = { nodes: row.nodes ?? [], edges: row.edges ?? [], views: row.views ?? [] }
+            saveCanvasData(id, data)
+          }
+        } catch (e) {
+          console.warn('[cloud] loadCanvas fetch:', e.message)
+        }
+      }
+    }
     const nNodes = data.nodes ?? []
     const nEdges = normalizeEdges(data.edges)
     isRestoring.current = true
@@ -552,7 +575,11 @@ export default function App() {
     }
 
     // Populate localStorage from cloud (so existing loadCanvas() works unchanged)
-    const canvasList = prefs?.canvas_order ?? rows.map((r) => ({ id: r.canvas_id, name: r.name }))
+    // Merge prefs.canvas_order with rows so MCP-created canvases (not in canvas_order) appear in tabs
+    const prefOrder = prefs?.canvas_order ?? []
+    const prefIds = new Set(prefOrder.map((c) => c.id))
+    const missing = rows.filter((r) => !prefIds.has(r.canvas_id)).map((r) => ({ id: r.canvas_id, name: r.name }))
+    const canvasList = prefOrder.length ? [...prefOrder, ...missing] : rows.map((r) => ({ id: r.canvas_id, name: r.name }))
     rows.forEach((r) => saveCanvasData(r.canvas_id, { nodes: r.nodes ?? [], edges: r.edges ?? [], views: r.views ?? [] }))
     saveCanvasList(canvasList)
     const activeId = prefs?.active_canvas_id ?? canvasList[0]?.id
@@ -562,7 +589,11 @@ export default function App() {
       setStageTypes(prefs.stage_types)
       saveStageTypes(prefs.stage_types)
     }
-    if (activeId) loadCanvas(activeId)
+    if (activeId) {
+      const activeRow = rows.find((r) => r.canvas_id === activeId)
+      const prefetched = activeRow ? { nodes: activeRow.nodes ?? [], edges: activeRow.edges ?? [], views: activeRow.views ?? [] } : null
+      loadCanvas(activeId, prefetched)
+    }
   }, [loadCanvas, setCanvases, setStageTypes])
 
   // ── Auth listener ─────────────────────────────────────────────────────────
