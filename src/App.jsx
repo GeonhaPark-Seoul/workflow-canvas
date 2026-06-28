@@ -94,6 +94,19 @@ function maxNodeId(nodes) {
   return Math.max(10, ...(nodes ?? []).map((n) => parseInt(n.id) || 0))
 }
 
+// Base (unselected) appearance for an edge, derived purely from whether it's a
+// dashed memo link. Used to force a clean look on deselect so selection-bold can
+// never linger — even if a stale bold style got baked into the edge by reconnect.
+function baseEdgeStyle(e) {
+  const isMemo = !!e.style?.strokeDasharray
+  return {
+    style: isMemo
+      ? { stroke: '#f59e0b88', strokeWidth: 1.5, strokeDasharray: '5,4' }
+      : { stroke: '#4a4a5a', strokeWidth: 2 },
+    markerEnd: { type: MarkerType.ArrowClosed, color: isMemo ? '#f59e0b88' : '#4a4a5a' },
+  }
+}
+
 // Strip runtime callbacks (and stageTypes) before snapshot / localStorage save
 function stripNode(n) {
   const { onUpdate, onEditStart, onEditEnd, stageTypes, ...data } = n.data ?? {}
@@ -633,7 +646,12 @@ export default function App() {
 
   // ── Reconnect: drag an edge endpoint onto another node/handle ──────────────
   const onReconnect = useCallback((oldEdge, newConnection) => {
-    setEdges((eds) => reconnectEdge(oldEdge, newConnection, eds))
+    // Reconnect the clean edge from state, not the styled (bold) object React
+    // Flow hands back — otherwise the selection styling gets baked in permanently.
+    setEdges((eds) => {
+      const clean = eds.find((e) => e.id === oldEdge.id) ?? oldEdge
+      return reconnectEdge(clean, newConnection, eds)
+    })
   }, [setEdges])
 
   // ── Snap-to-straight: when a dragged node's center nearly aligns with a
@@ -801,15 +819,16 @@ export default function App() {
     const group = edgeGroups[key]
     const sep = { index: group.indexOf(e.id), size: group.length }
     const withSep = { ...e, data: { ...e.data, _sep: sep } }
-    if (!e.selected) return withSep
     const isMemo = !!e.style?.strokeDasharray
+    // Non-selected: force base style so any baked-in bold can't persist on screen.
+    if (!e.selected) return { ...withSep, ...baseEdgeStyle(e) }
     const color = isMemo ? '#f59e0b' : '#60a5fa'
     return {
       ...withSep,
       // Only a selected (bold) edge can be snatched/reconnected.
       reconnectable: true,
       zIndex: 1001,
-      style: { ...e.style, stroke: color, strokeWidth: isMemo ? 2.5 : 3.5, filter: `drop-shadow(0 0 6px ${color}88)` },
+      style: { ...baseEdgeStyle(e).style, stroke: color, strokeWidth: isMemo ? 2.5 : 3.5, filter: `drop-shadow(0 0 6px ${color}88)` },
       markerEnd: { type: MarkerType.ArrowClosed, color },
     }
   })
