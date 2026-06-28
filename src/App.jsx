@@ -4,7 +4,6 @@ import {
   Background,
   Controls,
   MiniMap,
-  addEdge,
   reconnectEdge,
   useNodesState,
   useEdgesState,
@@ -632,16 +631,22 @@ export default function App() {
   }, [setNodes])
 
   // ── Connect ───────────────────────────────────────────────────────────────
+  // Each connection gets a unique id and is appended directly (instead of via
+  // addEdge, which dedupes by source/target handle) so a single connection
+  // point can spawn multiple edges — including several to the same node, which
+  // the parallel-separation routing then fans out.
   const onConnect = useCallback((params) => {
     const isMemoSource = nodes.find((n) => n.id === params.source)?.type === 'memo'
     const isMemoTarget = nodes.find((n) => n.id === params.target)?.type === 'memo'
     const isMemo = isMemoSource || isMemoTarget
-    setEdges((eds) => addEdge({
+    const newEdge = {
       ...params,
+      id: `e-${uid()}`,
       type: 'separable',
       style: isMemo ? { stroke: '#f59e0b88', strokeWidth: 1.5, strokeDasharray: '5,4' } : { stroke: '#4a4a5a', strokeWidth: 2 },
       markerEnd: { type: MarkerType.ArrowClosed, color: isMemo ? '#f59e0b88' : '#4a4a5a' },
-    }, eds))
+    }
+    setEdges((eds) => eds.concat(newEdge))
   }, [nodes, setEdges])
 
   // ── Reconnect: drag an edge endpoint onto another node/handle ──────────────
