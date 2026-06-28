@@ -46,7 +46,7 @@ export default function AuthPanel({ user, syncing, mobile }) {
   return (
     <div
       onClick={(e) => e.stopPropagation()}
-      style={{ position: 'absolute', top: mobile ? 72 : 20, right: 20, zIndex: 10 }}
+      style={{ position: 'absolute', top: mobile ? 56 : 20, right: 20, zIndex: 10 }}
     >
       {open && (
         <div style={{

@@ -107,6 +107,7 @@ export default function StageNode({ data, selected, id }) {
           : '0 4px 20px #0005',
         transition: 'border-color 0.15s, box-shadow 0.15s',
         cursor: 'default',
+        touchAction: 'manipulation',
       }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}

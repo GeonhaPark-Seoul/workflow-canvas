@@ -329,6 +329,52 @@ export default function App() {
     return () => { el.removeEventListener('pointerdown', onDown); cleanup() }
   }, [rfInstance, setNodes, touchDevice])
 
+  // ── Touch: two-finger pinch zoom (custom) ────────────────────────────────────
+  // React Flow's own pinch is disabled here because panOnDrag=false makes its
+  // event filter reject every touchstart (so one-finger lasso can work). We
+  // implement pinch ourselves so two-finger zoom and one-finger select coexist.
+  useEffect(() => {
+    if (!touchDevice) return
+    const el = reactFlowRef.current
+    if (!el || !rfInstance) return
+    let pinch = null
+    const distOf = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY)
+    const midOf = (t) => ({ x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 })
+
+    const onStart = (e) => {
+      if (e.touches.length !== 2) return
+      const vp = rfInstance.getViewport()
+      const rect = el.getBoundingClientRect()
+      const m = midOf(e.touches)
+      const cx0 = m.x - rect.left, cy0 = m.y - rect.top
+      // P = the flow-space point currently under the pinch midpoint; we keep it
+      // pinned under the (moving) midpoint while scaling.
+      pinch = { startDist: distOf(e.touches), Px: (cx0 - vp.x) / vp.zoom, Py: (cy0 - vp.y) / vp.zoom, z0: vp.zoom, rect }
+      e.preventDefault()
+    }
+    const onMove = (e) => {
+      if (!pinch || e.touches.length !== 2) return
+      e.preventDefault()
+      const d = distOf(e.touches)
+      const m = midOf(e.touches)
+      const cx = m.x - pinch.rect.left, cy = m.y - pinch.rect.top
+      const z = Math.min(Math.max(pinch.z0 * (d / pinch.startDist), 0.1), 2)
+      rfInstance.setViewport({ x: cx - pinch.Px * z, y: cy - pinch.Py * z, zoom: z })
+    }
+    const onEnd = (e) => { if (e.touches.length < 2) pinch = null }
+
+    el.addEventListener('touchstart', onStart, { passive: false })
+    el.addEventListener('touchmove', onMove, { passive: false })
+    el.addEventListener('touchend', onEnd)
+    el.addEventListener('touchcancel', onEnd)
+    return () => {
+      el.removeEventListener('touchstart', onStart)
+      el.removeEventListener('touchmove', onMove)
+      el.removeEventListener('touchend', onEnd)
+      el.removeEventListener('touchcancel', onEnd)
+    }
+  }, [rfInstance, touchDevice])
+
   // ── Multi-canvas ───────────────────────────────────────────────────────────
   const loadCanvas = useCallback((id) => {
     const data = loadCanvasData(id) ?? { nodes: [], edges: [] }
@@ -793,7 +839,7 @@ export default function App() {
         panOnDrag={false}
         multiSelectionKeyCode={['Shift', 'Meta']}
         panOnScroll={false}
-        zoomOnPinch={touchDevice ? true : false}
+        zoomOnPinch={false}
         zoomOnScroll={false}
         zoomOnDoubleClick={false}
         elevateEdgesOnSelect

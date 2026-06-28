@@ -73,6 +73,7 @@ export default function MemoNode({ data, selected, id }) {
           ? '0 0 0 2px #f59e0b44, 0 8px 32px #0008'
           : '0 4px 16px #0005',
         transition: 'border-color 0.15s, box-shadow 0.15s',
+        touchAction: 'manipulation',
       }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
