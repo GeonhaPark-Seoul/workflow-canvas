@@ -33,21 +33,34 @@ export function saveCanvasList(list) { write(LIST_KEY, list) }
 export function loadActiveId() { return read(ACTIVE_KEY) }
 export function saveActiveId(id) { write(ACTIVE_KEY, id) }
 
-// Returns { list, activeId }. On first run, seeds one canvas from legacy
-// single-canvas data (if any) or the provided seed.
-export function initCanvases(seed) {
+// Returns { list, activeId }. On first run, seeds canvases from legacy
+// single-canvas data (if any) or the provided demo seeds. `seeds` is an array
+// of { name, nodes, edges }; the first becomes the active canvas.
+export function initCanvases(seeds) {
   const list = loadCanvasList()
   if (list && list.length) {
     let activeId = loadActiveId()
     if (!list.find((c) => c.id === activeId)) activeId = list[0].id
     return { list, activeId }
   }
+
+  // Migrate a pre-multi-canvas single store into one canvas.
   const legacy = read(LEGACY_KEY)
-  const id = uid()
-  const newList = [{ id, name: '캔버스 1' }]
+  if (legacy) {
+    const id = uid()
+    const newList = [{ id, name: '캔버스 1' }]
+    saveCanvasList(newList)
+    saveActiveId(id)
+    saveCanvasData(id, legacy)
+    remove(LEGACY_KEY)
+    return { list: newList, activeId: id }
+  }
+
+  // Fresh install: seed all demo canvases.
+  const seedArr = Array.isArray(seeds) ? seeds : [seeds]
+  const newList = seedArr.map((s, i) => ({ id: `${uid()}-${i}`, name: s.name }))
+  newList.forEach((c, i) => saveCanvasData(c.id, { nodes: seedArr[i].nodes, edges: seedArr[i].edges }))
   saveCanvasList(newList)
-  saveActiveId(id)
-  saveCanvasData(id, legacy ?? seed)
-  if (legacy) remove(LEGACY_KEY)
-  return { list: newList, activeId: id }
+  saveActiveId(newList[0].id)
+  return { list: newList, activeId: newList[0].id }
 }

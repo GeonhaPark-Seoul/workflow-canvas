@@ -15,6 +15,7 @@ import '@xyflow/react/dist/style.css'
 import StageNode from './nodes/StageNode'
 import MemoNode from './nodes/MemoNode'
 import SeparableEdge from './edges/SeparableEdge'
+import { DEMO_CANVASES } from './demoCanvases'
 import Toolbar from './components/Toolbar'
 import CanvasTabs from './components/CanvasTabs'
 import AuthPanel from './components/AuthPanel'
@@ -63,25 +64,6 @@ const TYPE_PALETTE = [
 ]
 
 // ── Initial canvas data (seed for the very first canvas) ─────────────────────
-const initialNodes = [
-  { id: '1', type: 'stage', position: { x: 80,   y: 200 }, data: { label: '요구사항 분석', description: '사용자 인터뷰, 기능 정의',   colorIdx: 0 } },
-  { id: '2', type: 'stage', position: { x: 380,  y: 200 }, data: { label: 'UI/UX 설계',   description: '와이어프레임, 프로토타입',  colorIdx: 0 } },
-  { id: '3', type: 'stage', position: { x: 680,  y: 200 }, data: { label: '개발',          description: '프론트엔드 / 백엔드 구현', colorIdx: 1 } },
-  { id: '4', type: 'stage', position: { x: 980,  y: 200 }, data: { label: 'QA 테스트',     description: '버그 수정, 성능 검증',     colorIdx: 2 } },
-  { id: '5', type: 'stage', position: { x: 1280, y: 200 }, data: { label: '배포',          description: '프로덕션 릴리즈',          colorIdx: 3 } },
-  { id: 'm1', type: 'memo', position: { x: 380, y: 380 }, data: { header: '디자인', text: '디자인 시스템은 Figma에서 관리\n컴포넌트 라이브러리 재사용 필수' } },
-  { id: 'm2', type: 'memo', position: { x: 980, y: 60  }, data: { header: 'QA', text: '테스트 커버리지 80% 이상 목표' } },
-]
-
-const initialEdges = [
-  { id: 'e1-2', source: '1', target: '2', ...defaultEdgeOptions },
-  { id: 'e2-3', source: '2', target: '3', ...defaultEdgeOptions },
-  { id: 'e3-4', source: '3', target: '4', ...defaultEdgeOptions },
-  { id: 'e4-5', source: '4', target: '5', ...defaultEdgeOptions },
-  { id: 'em1-2', source: 'm1', target: '2', type: 'separable', style: { stroke: '#f59e0b88', strokeWidth: 1.5, strokeDasharray: '5,4' }, markerEnd: { type: MarkerType.ArrowClosed, color: '#f59e0b88' } },
-  { id: 'em2-4', source: 'm2', target: '4', type: 'separable', style: { stroke: '#f59e0b88', strokeWidth: 1.5, strokeDasharray: '5,4' }, markerEnd: { type: MarkerType.ArrowClosed, color: '#f59e0b88' } },
-]
-
 // ── Helpers ──────────────────────────────────────────────────────────────────
 // Normalize every edge to the separable type, keeping its style/marker.
 // Strips transient data (e.g. _sep) and any older/removed edge type.
@@ -115,8 +97,8 @@ function stripNode(n) {
 const stripEdge = ({ selected, ...e }) => e
 
 // ── Bootstrap canvases (runs once at module load) ────────────────────────────
-const { list: initCanvasList, activeId: initActiveId } = initCanvases({ nodes: initialNodes, edges: initialEdges })
-const initData = loadCanvasData(initActiveId) ?? { nodes: initialNodes, edges: initialEdges }
+const { list: initCanvasList, activeId: initActiveId } = initCanvases(DEMO_CANVASES)
+const initData = loadCanvasData(initActiveId) ?? { nodes: DEMO_CANVASES[0].nodes, edges: DEMO_CANVASES[0].edges }
 
 // ── App ─────────────────────────────────────────────────────────────────────
 export default function App() {
