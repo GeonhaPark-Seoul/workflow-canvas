@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Handle, Position, NodeResizer } from '@xyflow/react'
+import EditToolbar from '../components/EditToolbar'
 
 const DEFAULT_TYPES = [
   { bg: '#1e3a5f', border: '#3b82f6', label: '기획' },
@@ -22,14 +23,31 @@ const PORTS = [
   { id: 'bottom', position: Position.Bottom },
 ]
 
+// Place caret at end of contentEditable element
+function caretAtEnd(el) {
+  const range = document.createRange()
+  range.selectNodeContents(el)
+  range.collapse(false)
+  const sel = window.getSelection()
+  sel.removeAllRanges()
+  sel.addRange(range)
+}
+
+// Select all content of contentEditable element
+function selectAll(el) {
+  const range = document.createRange()
+  range.selectNodeContents(el)
+  const sel = window.getSelection()
+  sel.removeAllRanges()
+  sel.addRange(range)
+}
+
 export default function StageNode({ data, selected, id }) {
   const stageTypes = data.stageTypes ?? DEFAULT_TYPES
   const colorIdx = Math.min(Math.max(data.colorIdx ?? 0, 0), stageTypes.length - 1)
   const color = stageTypes[colorIdx]
 
   const [editing, setEditing] = useState(null) // 'title' | 'desc' | null
-  const [title, setTitle] = useState(data.label ?? '')
-  const [description, setDescription] = useState(data.description || '')
   const titleRef = useRef(null)
   const descRef = useRef(null)
   const longPressTimer = useRef(null)
@@ -37,6 +55,8 @@ export default function StageNode({ data, selected, id }) {
   const lastTapRef = useRef(0)
   const dimPressTimer = useRef(null)
   const suppressClick = useRef(false)
+  const titleContainerRef = useRef(null)
+  const descContainerRef = useRef(null)
 
   // Touch double-tap → edit, while preventing the browser's double-tap zoom.
   const touchEdit = (field) => (e) => {
@@ -66,14 +86,19 @@ export default function StageNode({ data, selected, id }) {
   }
   const handlePointerUp = () => { clearTimeout(longPressTimer.current); longPressStart.current = null }
 
+  // Set innerHTML once when entering edit mode, then focus
   useEffect(() => {
-    if (editing === 'title' && titleRef.current) { titleRef.current.focus(); titleRef.current.select() }
-    if (editing === 'desc' && descRef.current) { descRef.current.focus() }
-  }, [editing])
-
-  // Sync external label/description changes (e.g. from undo/redo, canvas switch)
-  useEffect(() => { setTitle(data.label ?? '') }, [data.label])
-  useEffect(() => { setDescription(data.description || '') }, [data.description])
+    if (editing === 'title' && titleRef.current) {
+      titleRef.current.innerHTML = data.label ?? ''
+      titleRef.current.focus()
+      selectAll(titleRef.current)
+    }
+    if (editing === 'desc' && descRef.current) {
+      descRef.current.innerHTML = data.description || ''
+      descRef.current.focus()
+      caretAtEnd(descRef.current)
+    }
+  }, [editing]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const cycleColor = (e) => {
     e.stopPropagation()
@@ -95,28 +120,34 @@ export default function StageNode({ data, selected, id }) {
   const onDimPointerCancel = () => { clearTimeout(dimPressTimer.current); dimPressTimer.current = null }
 
   const startEdit = (field) => {
-    // Clear the auto-generated default so the first edit starts blank
-    if (field === 'title' && title === '새 단계') setTitle('')
     setEditing(field)
     data.onEditStart?.()
   }
-  const stopEdit = () => {
-    const patch = { label: title, description }
-    if (editing === 'title') patch.titleTouched = true
-    if (editing === 'desc') patch.descTouched = true
+
+  const stopEdit = (field, ref) => {
+    if (editing !== field) return
+    const html = ref.current?.innerHTML ?? ''
+    const patch = { label: data.label, description: data.description }
+    if (field === 'title') { patch.label = html; patch.titleTouched = true }
+    if (field === 'desc') { patch.description = html; patch.descTouched = true }
     setEditing(null)
     data.onEditEnd?.()
     data.onUpdate?.(patch)
   }
-  const cancelEdit = () => {
-    setTitle(data.label ?? '')
-    setDescription(data.description || '')
-    const patch = {}
-    if (editing === 'title') patch.titleTouched = true
-    setEditing(null)
-    data.onEditEnd?.()
-    if (Object.keys(patch).length > 0) data.onUpdate?.(patch)
+
+  // Display-mode checkbox toggle: persist innerHTML after flipping
+  const handleDisplayClick = (field) => (e) => {
+    if (e.target.tagName === 'INPUT' && e.target.type === 'checkbox') {
+      e.stopPropagation()
+      e.target.toggleAttribute('checked')
+      const html = e.currentTarget.innerHTML
+      if (field === 'title') data.onUpdate?.({ label: html })
+      if (field === 'desc') data.onUpdate?.({ description: html })
+    }
   }
+
+  const titleValue = data.label ?? ''
+  const descValue = data.description || ''
 
   return (
     <div
@@ -177,67 +208,83 @@ export default function StageNode({ data, selected, id }) {
           </span>
         </div>
 
-        {editing === 'title' ? (
-          <input
-            ref={titleRef}
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            onBlur={stopEdit}
-            onKeyDown={(e) => { if (e.key === 'Enter') stopEdit(); if (e.key === 'Escape') cancelEdit() }}
-            placeholder="단계 이름 입력..."
-            style={{
-              background: 'transparent', border: 'none',
-              borderBottom: `1px solid ${color.border}`,
-              color: '#f0f0f0', fontSize: 15, fontWeight: 700,
-              width: '100%', outline: 'none', marginBottom: 4, fontFamily: 'inherit',
-            }}
-          />
-        ) : (
-          <div
-            onDoubleClick={() => startEdit('title')}
-            onTouchStart={touchEdit('title')}
-            style={{
-              color: title ? '#f0f0f0' : '#ffffff66', fontSize: 15, fontWeight: 700,
-              marginBottom: 4, cursor: 'text', minHeight: 22, lineHeight: '22px',
-              touchAction: 'manipulation',
-            }}
-          >
-            {title || (data.titleTouched ? '' : '단계 이름 (더블클릭하여 편집)')}
-          </div>
-        )}
+        {/* Title field */}
+        <div ref={titleContainerRef}>
+          {editing === 'title' ? (
+            <div
+              ref={titleRef}
+              contentEditable
+              suppressContentEditableWarning
+              className="nodrag nowheel rich-content"
+              onBlur={() => stopEdit('title', titleRef)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); stopEdit('title', titleRef) } if (e.key === 'Escape') { e.preventDefault(); stopEdit('title', titleRef) } }}
+              style={{
+                background: 'transparent',
+                borderBottom: `1px solid ${color.border}`,
+                color: '#f0f0f0', fontSize: 15, fontWeight: 700,
+                width: '100%', outline: 'none', marginBottom: 4,
+                minHeight: 22, lineHeight: '22px', whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+              }}
+            />
+          ) : (
+            <div
+              className="rich-content"
+              onDoubleClick={() => startEdit('title')}
+              onTouchStart={touchEdit('title')}
+              onClick={handleDisplayClick('title')}
+              dangerouslySetInnerHTML={{ __html: titleValue || (data.titleTouched ? '' : '단계 이름 (더블클릭하여 편집)') }}
+              style={{
+                color: titleValue ? '#f0f0f0' : '#ffffff66', fontSize: 15, fontWeight: 700,
+                marginBottom: 4, cursor: 'text', minHeight: 22, lineHeight: '22px',
+                whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                touchAction: 'manipulation',
+              }}
+            />
+          )}
+        </div>
       </div>
 
       {/* Description — fills remaining height; double-click to edit */}
       <div style={{ flex: 1, padding: '0 12px 10px', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-        {editing === 'desc' ? (
-          <textarea
-            ref={descRef}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            onBlur={stopEdit}
-            placeholder={data.descTouched ? '' : '설명을 입력하세요...'}
-            style={{
-              flex: 1, background: 'transparent', border: 'none',
-              color: '#aaa', fontSize: 12, width: '100%',
-              resize: 'none', outline: 'none',
-              fontFamily: 'inherit', lineHeight: 1.5, minHeight: 0,
-            }}
-          />
-        ) : (
-          <div
-            onDoubleClick={() => startEdit('desc')}
-            onTouchStart={touchEdit('desc')}
-            style={{
-              flex: 1, color: description ? '#aaa' : '#888', fontSize: 12,
-              whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text',
-              overflow: 'auto', lineHeight: 1.5, minHeight: 0,
-              touchAction: 'manipulation',
-            }}
-          >
-            {description || (data.descTouched ? '' : '설명 (더블클릭하여 편집)')}
-          </div>
-        )}
+        <div ref={descContainerRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+          {editing === 'desc' ? (
+            <div
+              ref={descRef}
+              contentEditable
+              suppressContentEditableWarning
+              className="nodrag nowheel rich-content"
+              onBlur={() => stopEdit('desc', descRef)}
+              style={{
+                flex: 1, background: 'transparent',
+                color: '#aaa', fontSize: 12, width: '100%',
+                outline: 'none', lineHeight: 1.5, minHeight: 0,
+                whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowY: 'auto',
+              }}
+            />
+          ) : (
+            <div
+              className="rich-content"
+              onDoubleClick={() => startEdit('desc')}
+              onTouchStart={touchEdit('desc')}
+              onClick={handleDisplayClick('desc')}
+              dangerouslySetInnerHTML={{ __html: descValue || (data.descTouched ? '' : '설명 (더블클릭하여 편집)') }}
+              style={{
+                flex: 1, color: descValue ? '#aaa' : '#888', fontSize: 12,
+                whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text',
+                overflow: 'auto', lineHeight: 1.5, minHeight: 0,
+                touchAction: 'manipulation',
+              }}
+            />
+          )}
+        </div>
       </div>
+
+      {/* Rich-text toolbar — portalled to body */}
+      <EditToolbar
+        editRef={editing === 'title' ? titleRef : editing === 'desc' ? descRef : null}
+        anchorRef={editing === 'title' ? titleContainerRef : editing === 'desc' ? descContainerRef : null}
+      />
     </div>
   )
 }

@@ -64,7 +64,7 @@ colorIdx는 stage 노드의 종류를 나타내는 index입니다 (get_stage_typ
 
 ## 연결선 생성 기준
 연결선은 반드시 추가해야 하는 것이 아닙니다. 흐름·인과·계층·관계가 명확할 때만 추가하세요.
-방향: 좌→우 흐름이면 sourceHandle=right/targetHandle=left, 위→아래면 bottom/top.
+연결 면은 노드 위치에 따라 자동으로 결정됩니다.
 `.trim()
 
 export function buildServer(getUserId) {
@@ -123,15 +123,11 @@ export function buildServer(getUserId) {
 
   server.registerTool('create_edge', {
     description:
-      '두 노드를 연결하는 연결선을 추가합니다. 메모 노드가 포함되면 점선으로 표시됩니다.\n\n' +
-      '연결선은 흐름·인과·계층·관계가 명확할 때만 추가할 것.\n' +
-      '방향: 좌→우 흐름이면 sourceHandle=right/targetHandle=left, 위→아래면 bottom/top.',
+      '두 노드를 연결하는 연결선을 추가합니다. 메모 노드가 포함되면 점선으로 표시됩니다. 연결 방향(어느 면에서 나가는지)은 노드 위치에 따라 자동 결정되므로 신경 쓰지 않아도 됩니다.\n\n연결선은 흐름·인과·계층·관계가 명확할 때만 추가할 것.',
     inputSchema: {
       canvas_id: z.string(),
       source: z.string().describe('출발 노드 id'),
       target: z.string().describe('도착 노드 id'),
-      sourceHandle: z.enum(['left', 'right', 'top', 'bottom']).optional(),
-      targetHandle: z.enum(['left', 'right', 'top', 'bottom']).optional(),
     },
   }, g(async (userId, a) => ok(await store.createEdge(userId, a.canvas_id, a))))
 

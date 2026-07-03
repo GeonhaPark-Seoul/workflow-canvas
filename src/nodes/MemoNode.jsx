@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Handle, Position, NodeResizer } from '@xyflow/react'
+import EditToolbar from '../components/EditToolbar'
 
 // Bidirectional connection ports: every handle is type="source"; with the
 // canvas in connectionMode="loose", a source handle can also receive a
@@ -15,9 +16,26 @@ const PORTS = [
   { id: 'bottom', position: Position.Bottom },
 ]
 
+// Place caret at end of contentEditable element
+function caretAtEnd(el) {
+  const range = document.createRange()
+  range.selectNodeContents(el)
+  range.collapse(false)
+  const sel = window.getSelection()
+  sel.removeAllRanges()
+  sel.addRange(range)
+}
+
+// Select all content of contentEditable element
+function selectAll(el) {
+  const range = document.createRange()
+  range.selectNodeContents(el)
+  const sel = window.getSelection()
+  sel.removeAllRanges()
+  sel.addRange(range)
+}
+
 export default function MemoNode({ data, selected, id }) {
-  const [header, setHeader] = useState(data.header ?? '')
-  const [text, setText] = useState(data.text || '')
   const [editing, setEditing] = useState(null) // 'header' | 'text' | null
   const headerRef = useRef(null)
   const textRef = useRef(null)
@@ -25,6 +43,8 @@ export default function MemoNode({ data, selected, id }) {
   const longPressStart = useRef(null)
   const lastTapRef = useRef(0)
   const dimPressTimer = useRef(null)
+  const headerContainerRef = useRef(null)
+  const textContainerRef = useRef(null)
 
   // Touch double-tap → edit, while preventing the browser's double-tap zoom.
   const touchEdit = (field) => (e) => {
@@ -54,14 +74,19 @@ export default function MemoNode({ data, selected, id }) {
   }
   const handlePointerUp = () => { clearTimeout(longPressTimer.current); longPressStart.current = null }
 
-  // Sync external changes (e.g. undo/redo, canvas switch)
-  useEffect(() => { setHeader(data.header ?? '') }, [data.header])
-  useEffect(() => { setText(data.text || '') }, [data.text])
-
+  // Set innerHTML once when entering edit mode, then focus
   useEffect(() => {
-    if (editing === 'header' && headerRef.current) { headerRef.current.focus(); headerRef.current.select() }
-    if (editing === 'text' && textRef.current) { textRef.current.focus() }
-  }, [editing])
+    if (editing === 'header' && headerRef.current) {
+      headerRef.current.innerHTML = data.header ?? ''
+      headerRef.current.focus()
+      selectAll(headerRef.current)
+    }
+    if (editing === 'text' && textRef.current) {
+      textRef.current.innerHTML = data.text || ''
+      textRef.current.focus()
+      caretAtEnd(textRef.current)
+    }
+  }, [editing]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const onDimPointerDown = (e) => {
     e.stopPropagation()
@@ -75,14 +100,31 @@ export default function MemoNode({ data, selected, id }) {
   const onDimPointerCancel = () => { clearTimeout(dimPressTimer.current); dimPressTimer.current = null }
 
   const startEdit = (field) => { setEditing(field); data.onEditStart?.() }
-  const stopEdit = () => {
-    const patch = { header, text }
-    if (editing === 'header') patch.headerTouched = true
-    if (editing === 'text') patch.textTouched = true
+
+  const stopEdit = (field, ref) => {
+    if (editing !== field) return
+    const html = ref.current?.innerHTML ?? ''
+    const patch = { header: data.header, text: data.text }
+    if (field === 'header') { patch.header = html; patch.headerTouched = true }
+    if (field === 'text') { patch.text = html; patch.textTouched = true }
     setEditing(null)
     data.onEditEnd?.()
     data.onUpdate?.(patch)
   }
+
+  // Display-mode checkbox toggle: persist innerHTML after flipping
+  const handleDisplayClick = (field) => (e) => {
+    if (e.target.tagName === 'INPUT' && e.target.type === 'checkbox') {
+      e.stopPropagation()
+      e.target.toggleAttribute('checked')
+      const html = e.currentTarget.innerHTML
+      if (field === 'header') data.onUpdate?.({ header: html })
+      if (field === 'text') data.onUpdate?.({ text: html })
+    }
+  }
+
+  const headerValue = data.header ?? ''
+  const textValue = data.text || ''
 
   return (
     <div
@@ -147,68 +189,80 @@ export default function MemoNode({ data, selected, id }) {
             background: '#f59e0b', border: 'none', cursor: 'pointer', flexShrink: 0,
           }}
         />
-        {editing === 'header' ? (
-          <input
-            ref={headerRef}
-            value={header}
-            onChange={(e) => setHeader(e.target.value)}
-            onBlur={stopEdit}
-            onKeyDown={(e) => { if (e.key === 'Enter') stopEdit(); if (e.key === 'Escape') stopEdit() }}
-            placeholder="제목 입력..."
-            style={{
-              flex: 1, background: 'transparent', border: 'none',
-              borderBottom: '1px solid #f59e0b88',
-              color: '#f59e0b', fontSize: 13, fontWeight: 800, letterSpacing: 0.3,
-              outline: 'none', fontFamily: 'inherit', padding: 0,
-            }}
-          />
-        ) : (
-          <span
-            onDoubleClick={() => startEdit('header')}
-            onTouchStart={touchEdit('header')}
-            style={{
-              flex: 1, color: header ? '#f59e0b' : '#f59e0b66',
-              fontSize: 13, fontWeight: 800, letterSpacing: 0.3, cursor: 'text',
-              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-              touchAction: 'manipulation',
-            }}
-          >
-            {header || (data.headerTouched ? '' : '제목 (더블클릭)')}
-          </span>
-        )}
+        <div ref={headerContainerRef} style={{ flex: 1, minWidth: 0 }}>
+          {editing === 'header' ? (
+            <div
+              ref={headerRef}
+              contentEditable
+              suppressContentEditableWarning
+              className="nodrag nowheel rich-content"
+              onBlur={() => stopEdit('header', headerRef)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); stopEdit('header', headerRef) } if (e.key === 'Escape') { e.preventDefault(); stopEdit('header', headerRef) } }}
+              style={{
+                flex: 1, background: 'transparent',
+                borderBottom: '1px solid #f59e0b88',
+                color: '#f59e0b', fontSize: 13, fontWeight: 800, letterSpacing: 0.3,
+                outline: 'none', minHeight: 18, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+              }}
+            />
+          ) : (
+            <div
+              className="rich-content"
+              onDoubleClick={() => startEdit('header')}
+              onTouchStart={touchEdit('header')}
+              onClick={handleDisplayClick('header')}
+              dangerouslySetInnerHTML={{ __html: headerValue || (data.headerTouched ? '' : '제목 (더블클릭)') }}
+              style={{
+                flex: 1, color: headerValue ? '#f59e0b' : '#f59e0b66',
+                fontSize: 13, fontWeight: 800, letterSpacing: 0.3, cursor: 'text',
+                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                touchAction: 'manipulation',
+              }}
+            />
+          )}
+        </div>
       </div>
 
       {/* Content — fills remaining height */}
       <div style={{ flex: 1, padding: '8px 10px', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-        {editing === 'text' ? (
-          <textarea
-            ref={textRef}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            onBlur={stopEdit}
-            placeholder={data.textTouched ? '' : '메모 내용...'}
-            style={{
-              flex: 1, background: 'transparent', border: 'none',
-              color: '#e8d88a', fontSize: 12, width: '100%',
-              resize: 'none', outline: 'none',
-              fontFamily: 'inherit', lineHeight: 1.6, minHeight: 0,
-            }}
-          />
-        ) : (
-          <div
-            onDoubleClick={() => startEdit('text')}
-            onTouchStart={touchEdit('text')}
-            style={{
-              flex: 1, color: text ? '#e8d88a' : '#e8d88a55', fontSize: 12,
-              whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text',
-              overflow: 'auto', lineHeight: 1.6, minHeight: 0,
-              touchAction: 'manipulation',
-            }}
-          >
-            {text || (data.textTouched ? '' : '메모 내용 (더블클릭하여 편집)')}
-          </div>
-        )}
+        <div ref={textContainerRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+          {editing === 'text' ? (
+            <div
+              ref={textRef}
+              contentEditable
+              suppressContentEditableWarning
+              className="nodrag nowheel rich-content"
+              onBlur={() => stopEdit('text', textRef)}
+              style={{
+                flex: 1, background: 'transparent',
+                color: '#e8d88a', fontSize: 12, width: '100%',
+                outline: 'none', lineHeight: 1.6, minHeight: 0,
+                whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowY: 'auto',
+              }}
+            />
+          ) : (
+            <div
+              className="rich-content"
+              onDoubleClick={() => startEdit('text')}
+              onTouchStart={touchEdit('text')}
+              onClick={handleDisplayClick('text')}
+              dangerouslySetInnerHTML={{ __html: textValue || (data.textTouched ? '' : '메모 내용 (더블클릭하여 편집)') }}
+              style={{
+                flex: 1, color: textValue ? '#e8d88a' : '#e8d88a55', fontSize: 12,
+                whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text',
+                overflow: 'auto', lineHeight: 1.6, minHeight: 0,
+                touchAction: 'manipulation',
+              }}
+            />
+          )}
+        </div>
       </div>
+
+      {/* Rich-text toolbar — portalled to body */}
+      <EditToolbar
+        editRef={editing === 'header' ? headerRef : editing === 'text' ? textRef : null}
+        anchorRef={editing === 'header' ? headerContainerRef : editing === 'text' ? textContainerRef : null}
+      />
     </div>
   )
 }
