@@ -260,7 +260,7 @@ export async function createNode(userId, canvasId, opts) {
   if (size.height != null) base.height = size.height
   const node = opts.type === 'memo'
     ? { ...base, data: { header: opts.header ?? '', text: opts.text ?? '' } }
-    : { ...base, data: { label: opts.label ?? '새 단계', description: opts.description ?? '', colorIdx: clampStageTypeIdx(opts.stageTypeIdx) } }
+    : { ...base, data: { label: opts.label ?? '새 단계', description: opts.description ?? '', colorIdx: clampStageTypeIdx(opts.stageTypeIdx ?? opts.colorIdx) } }
   await saveArrays(userId, canvasId, [...nodes, node], row.edges ?? [])
   return node
 }
@@ -274,7 +274,7 @@ export async function updateNode(userId, canvasId, nodeId, patch) {
   const data = { ...n.data }
   if (patch.label != null) data.label = patch.label
   if (patch.description != null) data.description = patch.description
-  if (patch.stageTypeIdx != null) data.colorIdx = clampStageTypeIdx(patch.stageTypeIdx)
+  if (patch.stageTypeIdx != null || patch.colorIdx != null) data.colorIdx = clampStageTypeIdx(patch.stageTypeIdx ?? patch.colorIdx)
   if (patch.header != null) data.header = patch.header
   if (patch.text != null) data.text = patch.text
   const position = { ...n.position }

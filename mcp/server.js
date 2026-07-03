@@ -135,6 +135,7 @@ export function buildServer(getUserId) {
         '노드의 내용과 캔버스 전체 맥락을 보고 흐름/순서(예: 기획→개발→검토) 또는 분류/카테고리 ' +
         '(예: 주제별, 역할별) 중 적합한 방식으로 선택할 것. 무조건 0부터 순서대로 쓸 필요 없음.'
       ),
+      colorIdx: z.number().int().min(0).optional().describe('deprecated: stageTypeIdx를 사용할 것 (하위 호환용 별칭).'),
       header: z.string().optional().describe('메모 제목'),
       text: z.string().optional().describe('메모 내용'),
       x: z.number().optional().describe('x 좌표 (좌상단 기준). 겹침 방지를 위해 명시 권장, 생략 시 빈 공간에 자동 배치.'),
@@ -152,6 +153,7 @@ export function buildServer(getUserId) {
       label: z.string().optional(),
       description: z.string().optional(),
       stageTypeIdx: z.number().int().min(0).optional().describe('단계 종류 인덱스. 유효 인덱스는 get_stage_types로 확인할 것.'),
+      colorIdx: z.number().int().min(0).optional().describe('deprecated: stageTypeIdx를 사용할 것 (하위 호환용 별칭).'),
       header: z.string().optional(),
       text: z.string().optional(),
       x: z.number().optional(),
