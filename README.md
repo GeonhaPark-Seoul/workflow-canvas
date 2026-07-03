@@ -23,8 +23,8 @@ Supabase 데이터베이스를 기반으로 동작합니다.
 |---|---|
 | `get_canvases` | 캔버스 목록 (id, 이름, 노드/연결선 개수) |
 | `get_canvas` | 특정 캔버스의 노드/연결선 데이터 |
-| `create_node` | 노드 추가 (`type`: `stage` 또는 `memo`) |
-| `update_node` | 노드 내용/위치 수정 (제공한 필드만) |
+| `create_node` | 노드 추가 (`type`: `stage` 또는 `memo`, 위치·크기 `width`/`height` 지정 가능) |
+| `update_node` | 노드 내용/위치/크기 수정 (제공한 필드만) |
 | `delete_node` | 노드 삭제 (연결된 연결선도 함께) |
 | `create_edge` | 두 노드 간 연결선 추가 |
 | `delete_edge` | 연결선 삭제 |

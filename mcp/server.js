@@ -39,7 +39,14 @@ export function buildServer(getUserId) {
   }, g(async (userId, a) => ok(await store.getCanvas(userId, a.canvas_id))))
 
   server.registerTool('create_node', {
-    description: '캔버스에 새 노드를 추가합니다. type=stage → 단계 노드(label/description/colorIdx), type=memo → 메모 노드(header/text).',
+    description:
+      '캔버스에 새 노드를 추가합니다. type=stage → 단계 노드(label/description/colorIdx), type=memo → 메모 노드(header/text).\n\n' +
+      '【캔버스 좌표/크기 모델】\n' +
+      '- 좌표계: x는 오른쪽(+), y는 아래(+), 단위 px. 작업 흐름은 보통 좌→우로 배치.\n' +
+      '- 기본 노드 크기: stage ≈ 220×90, memo ≈ 180×90 (width/height로 조절 가능).\n' +
+      '- 권장 간격: 컬럼(가로) ~300px, 행(세로) ~200px. 메모 노드는 관련 단계 노드의 위/아래에 둘 것.\n' +
+      '- x/y를 생략하면 기존 노드 오른쪽에 자동 배치된다. 여러 노드를 정렬하려면 x/y를 직접 지정할 것.\n' +
+      '  (현재 배치·크기는 get_canvas로 조회해 간격을 계산할 수 있다.)',
     inputSchema: {
       canvas_id: z.string(),
       type: z.enum(['stage', 'memo']),
@@ -60,6 +67,8 @@ export function buildServer(getUserId) {
       text: z.string().optional().describe('메모 내용'),
       x: z.number().optional().describe('x 좌표 (생략 시 자동 배치)'),
       y: z.number().optional().describe('y 좌표 (생략 시 자동 배치)'),
+      width: z.number().optional().describe('노드 너비(px). stage 최소 200, memo 최소 160. 생략 시 기본값.'),
+      height: z.number().optional().describe('노드 높이(px). 최소 80. 생략 시 기본값.'),
     },
   }, g(async (userId, a) => ok(await store.createNode(userId, a.canvas_id, a))))
 
@@ -75,6 +84,8 @@ export function buildServer(getUserId) {
       text: z.string().optional(),
       x: z.number().optional(),
       y: z.number().optional(),
+      width: z.number().optional().describe('노드 너비(px). stage 최소 200, memo 최소 160.'),
+      height: z.number().optional().describe('노드 높이(px). 최소 80.'),
     },
   }, g(async (userId, a) => ok(await store.updateNode(userId, a.canvas_id, a.node_id, a))))
 

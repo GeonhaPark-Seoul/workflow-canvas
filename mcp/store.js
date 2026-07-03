@@ -25,6 +25,21 @@ const clampColor = (c) => Math.min(Math.max(Number.isInteger(c) ? c : 0, 0), 4)
 const FLOW_STYLE = { stroke: '#4a4a5a', strokeWidth: 2 }
 const NOTE_STYLE = { stroke: '#f59e0b88', strokeWidth: 1.5, strokeDasharray: '5,4' }
 
+// 명시적 크기가 없을 때의 기본/최소 렌더 크기 (StageNode/MemoNode의 minWidth/minHeight와 정합)
+const SIZE = {
+  stage: { w: 220, h: 90, minW: 200, minH: 80 },
+  memo:  { w: 180, h: 90, minW: 160, minH: 80 },
+}
+const clampSize = (type, w, h) => {
+  const s = SIZE[type] ?? SIZE.stage
+  return {
+    width:  Number.isFinite(w) ? Math.max(w, s.minW) : undefined,
+    height: Number.isFinite(h) ? Math.max(h, s.minH) : undefined,
+  }
+}
+const nodeW = (n) => n.width  ?? SIZE[n.type]?.w ?? SIZE.stage.w
+const nodeH = (n) => n.height ?? SIZE[n.type]?.h ?? SIZE.stage.h
+
 // Map a Bearer token to a user id. Returns null when unauthenticated.
 export async function resolveUser(token) {
   if (!token) return null
@@ -73,6 +88,8 @@ export async function getCanvas(userId, canvasId) {
       id: n.id,
       type: n.type,
       position: n.position,
+      width: nodeW(n),
+      height: nodeH(n),
       ...(n.type === 'memo'
         ? { header: n.data?.header ?? '', text: n.data?.text ?? '' }
         : { label: n.data?.label ?? '', description: n.data?.description ?? '', colorIdx: n.data?.colorIdx ?? 0 }),
@@ -109,13 +126,26 @@ export async function createNode(userId, canvasId, opts) {
   const row = await getRow(userId, canvasId)
   const nodes = row.nodes ?? []
   const id = newNodeId()
-  const position = {
-    x: Number.isFinite(opts.x) ? opts.x : Math.round(200 + Math.random() * 400),
-    y: Number.isFinite(opts.y) ? opts.y : Math.round(150 + Math.random() * 300),
+  // 좌표 생략 시 겹치지 않게 배치: 빈 캔버스는 (80, 320), 아니면 기존 노드들
+  // 오른쪽 끝에서 한 칸 띄운 위치에 대표 y(첫 stage, 없으면 320)로 정렬.
+  const autoPos = () => {
+    if (!nodes.length) return { x: 80, y: 320 }
+    const rightEdge = Math.max(...nodes.map((n) => (n.position?.x ?? 0) + nodeW(n)))
+    const baseY = (nodes.find((n) => n.type === 'stage') ?? nodes[0]).position?.y ?? 320
+    return { x: rightEdge + 80, y: baseY }
   }
+  const auto = (Number.isFinite(opts.x) && Number.isFinite(opts.y)) ? null : autoPos()
+  const position = {
+    x: Number.isFinite(opts.x) ? opts.x : auto.x,
+    y: Number.isFinite(opts.y) ? opts.y : auto.y,
+  }
+  const size = clampSize(opts.type, opts.width, opts.height)
+  const base = { id, type: opts.type, position }
+  if (size.width != null) base.width = size.width
+  if (size.height != null) base.height = size.height
   const node = opts.type === 'memo'
-    ? { id, type: 'memo', position, data: { header: opts.header ?? '', text: opts.text ?? '' } }
-    : { id, type: 'stage', position, data: { label: opts.label ?? '새 단계', description: opts.description ?? '', colorIdx: clampColor(opts.colorIdx) } }
+    ? { ...base, data: { header: opts.header ?? '', text: opts.text ?? '' } }
+    : { ...base, data: { label: opts.label ?? '새 단계', description: opts.description ?? '', colorIdx: clampColor(opts.colorIdx) } }
   await saveArrays(userId, canvasId, [...nodes, node], row.edges ?? [])
   return node
 }
@@ -135,7 +165,11 @@ export async function updateNode(userId, canvasId, nodeId, patch) {
   const position = { ...n.position }
   if (Number.isFinite(patch.x)) position.x = patch.x
   if (Number.isFinite(patch.y)) position.y = patch.y
-  nodes[idx] = { ...n, position, data }
+  const next = { ...n, position, data }
+  const size = clampSize(n.type, patch.width, patch.height)
+  if (size.width != null) next.width = size.width
+  if (size.height != null) next.height = size.height
+  nodes[idx] = next
   await saveArrays(userId, canvasId, nodes, row.edges ?? [])
   return nodes[idx]
 }
