@@ -64,7 +64,7 @@ stageTypeIdx는 stage 노드의 종류를 나타내는 index입니다 (get_stage
 
 ## 연결선 생성 기준
 연결선은 반드시 추가해야 하는 것이 아닙니다. 흐름·인과·계층·관계가 명확할 때만 추가하세요.
-연결 면은 노드 위치에 따라 자동으로 결정됩니다.
+방향: 좌→우 흐름이면 sourceHandle=right/targetHandle=left, 위→아래면 bottom/top.
 `.trim()
 
 export function buildServer(getUserId) {
@@ -184,14 +184,17 @@ export function buildServer(getUserId) {
 
   server.registerTool('create_edge', {
     description:
-      '두 노드를 연결하는 연결선을 추가합니다. 메모 노드가 포함되면 점선으로 표시됩니다. 연결 방향(어느 면에서 나가는지)은 노드 위치에 따라 자동 결정되므로 신경 쓰지 않아도 됩니다.\n\n' +
+      '두 노드를 연결하는 연결선을 추가합니다. 메모 노드가 포함되면 점선으로 표시됩니다.\n\n' +
       '흐름·인과·계층·관계가 있는 노드들은 사용자가 따로 요청하지 않아도 능동적으로 연결할 것 ' +
       '(예: 프로세스를 그렸으면 단계 순서대로, 메모를 만들었으면 대상 노드에). ' +
-      '단, 관계가 불명확한 노드까지 전부 잇지는 말 것.',
+      '단, 관계가 불명확한 노드까지 전부 잇지는 말 것.\n\n' +
+      '방향: 좌→우 흐름이면 sourceHandle=right/targetHandle=left, 위→아래 흐름이면 bottom/top.',
     inputSchema: {
       canvas_id: z.string(),
       source: z.string().describe('출발 노드 id'),
       target: z.string().describe('도착 노드 id'),
+      sourceHandle: z.enum(['left', 'right', 'top', 'bottom']).optional(),
+      targetHandle: z.enum(['left', 'right', 'top', 'bottom']).optional(),
     },
   }, g(async (userId, a) => ok(await store.createEdge(userId, a.canvas_id, a))))
 

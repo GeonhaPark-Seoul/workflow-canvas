@@ -299,7 +299,7 @@ export async function deleteNode(userId, canvasId, nodeId) {
 }
 
 // ── Edge-level ───────────────────────────────────────────────────────────────
-export async function createEdge(userId, canvasId, { source, target }) {
+export async function createEdge(userId, canvasId, { source, target, sourceHandle, targetHandle }) {
   const row = await getRow(userId, canvasId)
   const nodes = row.nodes ?? []
   const sNode = nodes.find((n) => n.id === source)
@@ -311,6 +311,8 @@ export async function createEdge(userId, canvasId, { source, target }) {
     id: newEdgeId(),
     source,
     target,
+    ...(sourceHandle ? { sourceHandle } : {}),
+    ...(targetHandle ? { targetHandle } : {}),
     style: isMemo ? NOTE_STYLE : FLOW_STYLE,
     markerEnd: { type: 'arrowclosed', color: isMemo ? '#f59e0b88' : '#4a4a5a' },
   }

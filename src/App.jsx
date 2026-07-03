@@ -74,18 +74,6 @@ function maxNodeId(nodes) {
   return Math.max(10, ...(nodes ?? []).map((n) => parseInt(n.id) || 0))
 }
 
-// Pick the handle pair (side of each node) that best matches the direction
-// between the two node centers, so edges always leave from the nearest sides.
-function closestHandles(source, target) {
-  const dim = (n) => ({ w: n.measured?.width ?? n.width ?? 200, h: n.measured?.height ?? n.height ?? 80 })
-  const s = dim(source), t = dim(target)
-  const dx = (target.position.x + t.w / 2) - (source.position.x + s.w / 2)
-  const dy = (target.position.y + t.h / 2) - (source.position.y + s.h / 2)
-  return Math.abs(dx) >= Math.abs(dy)
-    ? { sourceHandle: dx > 0 ? 'right' : 'left', targetHandle: dx > 0 ? 'left' : 'right' }
-    : { sourceHandle: dy > 0 ? 'bottom' : 'top', targetHandle: dy > 0 ? 'top' : 'bottom' }
-}
-
 // Base (unselected) appearance for an edge, derived purely from whether it's a
 // dashed memo link. Used to force a clean look on deselect so selection-bold can
 // never linger — even if a stale bold style got baked into the edge by reconnect.
@@ -909,18 +897,12 @@ export default function App() {
   // ── Selected-edge highlight ───────────────────────────────────────────────
   // Non-selected edges get a forced base style so baked-in bold can never linger.
   // Selected edges get reconnectable + bold stroke + drop-shadow + colored marker.
-  // All edges get dynamic handle assignment so they always connect nearest sides.
-  const nodeById = new Map(nodes.map((n) => [n.id, n]))
   const styledEdges = edges.map((e) => {
-    const sNode = nodeById.get(e.source)
-    const tNode = nodeById.get(e.target)
-    const handles = (sNode && tNode) ? closestHandles(sNode, tNode) : {}
-    if (!e.selected) return { ...e, ...baseEdgeStyle(e), ...handles }
+    if (!e.selected) return { ...e, ...baseEdgeStyle(e) }
     const isMemo = !!e.style?.strokeDasharray
     const color = isMemo ? '#f59e0b' : '#60a5fa'
     return {
       ...e,
-      ...handles,
       // Only a selected (bold) edge can be snatched/reconnected.
       reconnectable: true,
       zIndex: 1001,
