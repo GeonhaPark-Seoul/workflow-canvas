@@ -24,8 +24,54 @@ const guard = (getUserId, fn) => async (args) => {
   }
 }
 
+// Server-level instructions, sent once at session init. Shared concepts
+// (concept, coordinate system, node sizes, layout rules) live here so
+// per-tool descriptions can stay short.
+const SERVER_INSTRUCTIONS = `
+Workflow Canvas는 사람과 AI가 함께 쓰는 시각적 워크플로우 캔버스입니다.
+계획·조사·프로세스를 노드와 연결선으로 표현하며, 사용자는 브라우저에서 같은 캔버스를 직접 편집할 수 있습니다.
+
+## 노드 종류
+- stage (단계 노드): 작업·항목·개념의 기본 블록. stageTypeIdx로 종류·단계를 분류합니다. 사용자가 직접 정의할 수 있으며 get_stage_types로 현재 목록을 확인하세요.
+- memo (메모 노드): 보조 정보·팁·주의사항을 담는 노드. 연결선이 점선으로 표시됩니다.
+
+## 좌표계와 노드 크기
+- position은 노드의 좌상단 기준. x → 오른쪽, y → 아래.
+- 노드 크기는 자동 조절되지 않습니다.
+  - stage: 기본 약 200×80px, 설명이 길면 높이 100–150px
+  - memo: 기본 약 160×80px
+- 배치 시 이 크기를 반드시 고려해 겹침이 생기지 않도록 하세요.
+
+## 배치 규칙
+- 노드 중심 간 권장 간격: 가로 ≥ 320px, 세로 ≥ 200px.
+- 흐름은 좌→우 또는 위→아래로 일관되게 배치하세요.
+- 관련 메모는 대상 stage 노드 근처(아래 또는 옆 ~250px 오프셋)에 배치하세요.
+- 겹침 금지: 기존 노드 좌표를 get_canvas로 확인한 뒤 배치하세요.
+- x, y를 항상 명시적으로 지정하는 것을 권장합니다 (생략 시 자동 배치되지만 검토 후 조정이 필요할 수 있습니다).
+
+## 권장 작업 순서
+1. get_canvases → 캔버스 목록 확인
+2. get_canvas → 기존 노드 구조·좌표 파악
+3. get_stage_types → 현재 종류 확인, 필요시 rename_stage_type / create_stage_type / delete_stage_type으로 편집
+4. create_node → x, y를 명시해 노드 추가
+5. create_edge → 필요한 관계만 연결 (모든 노드를 연결할 필요 없음)
+
+## stageTypeIdx 사용 지침
+stageTypeIdx는 stage 노드의 종류를 나타내는 index입니다 (get_stage_types 결과 배열의 순서).
+- 흐름/순서가 있는 경우: 프로세스의 진행 단계를 표현 (예: 기획→개발→검토→배포→완료)
+- 분류/카테고리로 쓰는 경우: 주제, 중요도, 팀/역할 등 구분
+캔버스 주제에 맞게 get_stage_types로 현재 종류를 확인하고, 필요하면 이름을 적극 변경하세요.
+
+## 연결선 생성 기준
+연결선은 반드시 추가해야 하는 것이 아닙니다. 흐름·인과·계층·관계가 명확할 때만 추가하세요.
+연결 면은 노드 위치에 따라 자동으로 결정됩니다.
+`.trim()
+
 export function buildServer(getUserId) {
-  const server = new McpServer({ name: 'workflow-canvas', version: '1.0.0' })
+  const server = new McpServer(
+    { name: 'workflow-canvas', version: '1.0.0' },
+    { instructions: SERVER_INSTRUCTIONS }
+  )
   const g = (fn) => guard(getUserId, fn)
 
   server.registerTool('get_canvases', {
@@ -75,13 +121,7 @@ export function buildServer(getUserId) {
       '전체 진행 순서를 단계별로 나누기 위한 노드다. "종류"는 흐름상의 단계 구분(기획→개발→검토→…) ' +
       '또는 주제/역할별 카테고리 구분으로 자유롭게 쓸 수 있다. (파라미터 이름이 colorIdx가 아니라 ' +
       'stageTypeIdx인 이유: 이 값은 "색상 선택"이 아니라 "어느 종류/그룹에 속하는가"를 나타내며, ' +
-      '색은 종류에 따라오는 부수 효과일 뿐이다.)\n\n' +
-      '【캔버스 좌표/크기 모델】\n' +
-      '- 좌표계: x는 오른쪽(+), y는 아래(+), 단위 px. 작업 흐름은 보통 좌→우로 배치.\n' +
-      '- 기본 노드 크기: stage ≈ 220×90, memo ≈ 180×90 (width/height로 조절 가능).\n' +
-      '- 권장 간격: 컬럼(가로) ~300px, 행(세로) ~200px. 메모 노드는 관련 단계 노드의 위/아래에 둘 것.\n' +
-      '- x/y를 생략하면 기존 노드 오른쪽에 자동 배치된다. 여러 노드를 정렬하려면 x/y를 직접 지정할 것.\n' +
-      '  (현재 배치·크기는 get_canvas로 조회해 간격을 계산할 수 있다.)',
+      '색은 종류에 따라오는 부수 효과일 뿐이다.)',
     inputSchema: {
       canvas_id: z.string(),
       type: z.enum(['stage', 'memo']),
@@ -97,8 +137,8 @@ export function buildServer(getUserId) {
       ),
       header: z.string().optional().describe('메모 제목'),
       text: z.string().optional().describe('메모 내용'),
-      x: z.number().optional().describe('x 좌표 (생략 시 자동 배치)'),
-      y: z.number().optional().describe('y 좌표 (생략 시 자동 배치)'),
+      x: z.number().optional().describe('x 좌표 (좌상단 기준). 겹침 방지를 위해 명시 권장, 생략 시 빈 공간에 자동 배치.'),
+      y: z.number().optional().describe('y 좌표 (좌상단 기준). 겹침 방지를 위해 명시 권장, 생략 시 빈 공간에 자동 배치.'),
       width: z.number().optional().describe('노드 너비(px). stage 최소 200, memo 최소 160. 생략 시 기본값.'),
       height: z.number().optional().describe('노드 높이(px). 최소 80. 생략 시 기본값.'),
     },
@@ -128,24 +168,11 @@ export function buildServer(getUserId) {
 
   server.registerTool('create_edge', {
     description:
-      '두 노드를 연결하는 연결선을 추가한다. 메모 노드가 포함되면 점선으로 표시된다.\n\n' +
-      '연결선은 반드시 추가해야 하는 것이 아니다.\n' +
-      '아래 경우에만 연결선을 추가할 것:\n' +
-      '- 흐름: A 작업 이후 B 작업이 진행되는 순서 관계\n' +
-      '- 인과/영향: A가 B의 원인이거나 B에 영향을 줄 때\n' +
-      '- 계층: A가 B의 상위/하위 개념일 때\n' +
-      '- 관계: A와 B가 서로 연관되어 있음을 명시적으로 표현할 때\n\n' +
-      '연결 방향은 노드의 배치 좌표를 보고 결정할 것:\n' +
-      '- 좌→우 흐름: sourceHandle=right, targetHandle=left\n' +
-      '- 위→아래 흐름: sourceHandle=bottom, targetHandle=top\n' +
-      '- 우→좌 흐름: sourceHandle=left, targetHandle=right\n' +
-      '- 아래→위 흐름: sourceHandle=top, targetHandle=bottom',
+      '두 노드를 연결하는 연결선을 추가합니다. 메모 노드가 포함되면 점선으로 표시됩니다. 연결 방향(어느 면에서 나가는지)은 노드 위치에 따라 자동 결정되므로 신경 쓰지 않아도 됩니다.\n\n연결선은 흐름·인과·계층·관계가 명확할 때만 추가할 것.',
     inputSchema: {
       canvas_id: z.string(),
       source: z.string().describe('출발 노드 id'),
       target: z.string().describe('도착 노드 id'),
-      sourceHandle: z.enum(['left', 'right', 'top', 'bottom']).optional(),
-      targetHandle: z.enum(['left', 'right', 'top', 'bottom']).optional(),
     },
   }, g(async (userId, a) => ok(await store.createEdge(userId, a.canvas_id, a))))
 

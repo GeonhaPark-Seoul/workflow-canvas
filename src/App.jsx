@@ -14,7 +14,6 @@ import '@xyflow/react/dist/style.css'
 
 import StageNode from './nodes/StageNode'
 import MemoNode from './nodes/MemoNode'
-import SeparableEdge from './edges/SeparableEdge'
 import { DEMO_CANVASES } from './demoCanvases'
 import Toolbar from './components/Toolbar'
 import HelpPanel from './components/HelpPanel'
@@ -35,10 +34,8 @@ import {
 } from './lib/cloudStorage'
 
 const nodeTypes = { stage: StageNode, memo: MemoNode }
-const edgeTypes = { separable: SeparableEdge }
 
 const defaultEdgeOptions = {
-  type: 'separable',
   animated: false,
   style: { stroke: '#4a4a5a', strokeWidth: 2 },
   markerEnd: { type: MarkerType.ArrowClosed, color: '#4a4a5a' },
@@ -66,14 +63,27 @@ const TYPE_PALETTE = [
 
 // ── Initial canvas data (seed for the very first canvas) ─────────────────────
 // ── Helpers ──────────────────────────────────────────────────────────────────
-// Normalize every edge to the separable type, keeping its style/marker.
-// Strips transient data (e.g. _sep) and any older/removed edge type.
+// Strip type and data from saved edges so old 'separable' type (and any other
+// removed custom type) doesn't cause React Flow to emit unknown-type warnings.
+// Keeps style/markerEnd so visual appearance is preserved.
 function normalizeEdges(edges) {
-  return (edges ?? []).map(({ data, ...e }) => ({ ...e, type: 'separable' }))
+  return (edges ?? []).map(({ data, type, ...e }) => ({ ...e }))
 }
 
 function maxNodeId(nodes) {
   return Math.max(10, ...(nodes ?? []).map((n) => parseInt(n.id) || 0))
+}
+
+// Pick the handle pair (side of each node) that best matches the direction
+// between the two node centers, so edges always leave from the nearest sides.
+function closestHandles(source, target) {
+  const dim = (n) => ({ w: n.measured?.width ?? n.width ?? 200, h: n.measured?.height ?? n.height ?? 80 })
+  const s = dim(source), t = dim(target)
+  const dx = (target.position.x + t.w / 2) - (source.position.x + s.w / 2)
+  const dy = (target.position.y + t.h / 2) - (source.position.y + s.h / 2)
+  return Math.abs(dx) >= Math.abs(dy)
+    ? { sourceHandle: dx > 0 ? 'right' : 'left', targetHandle: dx > 0 ? 'left' : 'right' }
+    : { sourceHandle: dy > 0 ? 'bottom' : 'top', targetHandle: dy > 0 ? 'top' : 'bottom' }
 }
 
 // Base (unselected) appearance for an edge, derived purely from whether it's a
@@ -139,14 +149,16 @@ export default function App() {
 
   // ── Auth + cloud sync ─────────────────────────────────────────────────────
   const [user, setUser] = useState(null)
+  const userRef = useRef(null)
   const [cloudSyncing, setCloudSyncing] = useState(false)
   // Stable ref to always-current state for use inside async callbacks
   const latestRef = useRef({ canvases: initCanvasList, activeCanvasId: initActiveId, stageTypes: [], views: [] })
 
   const nextId = () => String(++counterRef.current)
 
-  // Keep latestRef in sync so async callbacks always see fresh state
+  // Keep latestRef and userRef in sync so async callbacks always see fresh state
   useEffect(() => { latestRef.current = { canvases, activeCanvasId, stageTypes, views } }, [canvases, activeCanvasId, stageTypes, views])
+  useEffect(() => { userRef.current = user }, [user])
 
   // ── Save stageTypes ──────────────────────────────────────────────────────
   useEffect(() => { saveStageTypes(stageTypes) }, [stageTypes])
@@ -462,8 +474,40 @@ export default function App() {
   }, [rfInstance, touchDevice])
 
   // ── Multi-canvas ───────────────────────────────────────────────────────────
-  const loadCanvas = useCallback((id) => {
-    const data = loadCanvasData(id) ?? { nodes: [], edges: [] }
+  const loadCanvas = useCallback(async (id, prefetchedData) => {
+    let data
+    if (prefetchedData) {
+      data = prefetchedData
+    } else {
+      data = loadCanvasData(id) ?? { nodes: [], edges: [] }
+      if (userRef.current) {
+        try {
+          const [{ data: row }, { data: prefs }] = await Promise.all([
+            supabase
+              .from('canvases')
+              .select('nodes, edges, views')
+              .eq('user_id', userRef.current.id)
+              .eq('canvas_id', id)
+              .maybeSingle(),
+            supabase
+              .from('user_prefs')
+              .select('stage_types')
+              .eq('user_id', userRef.current.id)
+              .maybeSingle(),
+          ])
+          if (row) {
+            data = { nodes: row.nodes ?? [], edges: row.edges ?? [], views: row.views ?? [] }
+            saveCanvasData(id, data)
+          }
+          if (prefs?.stage_types?.length) {
+            setStageTypes(prefs.stage_types)
+            saveStageTypes(prefs.stage_types)
+          }
+        } catch (e) {
+          console.warn('[cloud] loadCanvas fetch:', e.message)
+        }
+      }
+    }
     const nNodes = data.nodes ?? []
     const nEdges = normalizeEdges(data.edges)
     isRestoring.current = true
@@ -553,7 +597,11 @@ export default function App() {
     }
 
     // Populate localStorage from cloud (so existing loadCanvas() works unchanged)
-    const canvasList = prefs?.canvas_order ?? rows.map((r) => ({ id: r.canvas_id, name: r.name }))
+    // Merge prefs.canvas_order with rows so MCP-created canvases (not in canvas_order) appear in tabs
+    const prefOrder = prefs?.canvas_order ?? []
+    const prefIds = new Set(prefOrder.map((c) => c.id))
+    const missing = rows.filter((r) => !prefIds.has(r.canvas_id)).map((r) => ({ id: r.canvas_id, name: r.name }))
+    const canvasList = prefOrder.length ? [...prefOrder, ...missing] : rows.map((r) => ({ id: r.canvas_id, name: r.name }))
     rows.forEach((r) => saveCanvasData(r.canvas_id, { nodes: r.nodes ?? [], edges: r.edges ?? [], views: r.views ?? [] }))
     saveCanvasList(canvasList)
     const activeId = prefs?.active_canvas_id ?? canvasList[0]?.id
@@ -563,7 +611,11 @@ export default function App() {
       setStageTypes(prefs.stage_types)
       saveStageTypes(prefs.stage_types)
     }
-    if (activeId) loadCanvas(activeId)
+    if (activeId) {
+      const activeRow = rows.find((r) => r.canvas_id === activeId)
+      const prefetched = activeRow ? { nodes: activeRow.nodes ?? [], edges: activeRow.edges ?? [], views: activeRow.views ?? [] } : null
+      loadCanvas(activeId, prefetched)
+    }
   }, [loadCanvas, setCanvases, setStageTypes])
 
   // ── Auth listener ─────────────────────────────────────────────────────────
@@ -677,7 +729,6 @@ export default function App() {
     const newEdge = {
       ...params,
       id: `e-${uid()}`,
-      type: 'separable',
       style: isMemo ? { stroke: '#f59e0b88', strokeWidth: 1.5, strokeDasharray: '5,4' } : { stroke: '#4a4a5a', strokeWidth: 2 },
       markerEnd: { type: MarkerType.ArrowClosed, color: isMemo ? '#f59e0b88' : '#4a4a5a' },
     }
@@ -855,25 +906,21 @@ export default function App() {
     setCurrentViewId((cur) => (cur === id ? null : cur))
   }, [])
 
-  // ── Parallel-edge separation + selected highlight ─────────────────────────
-  // Group edges by their unordered node pair so siblings between the same two
-  // nodes fan out (handled by SeparableEdge via the injected _sep field).
-  const edgeGroups = {}
-  edges.forEach((e) => {
-    const key = e.source < e.target ? `${e.source}~${e.target}` : `${e.target}~${e.source}`
-    ;(edgeGroups[key] ??= []).push(e.id)
-  })
+  // ── Selected-edge highlight ───────────────────────────────────────────────
+  // Non-selected edges get a forced base style so baked-in bold can never linger.
+  // Selected edges get reconnectable + bold stroke + drop-shadow + colored marker.
+  // All edges get dynamic handle assignment so they always connect nearest sides.
+  const nodeById = new Map(nodes.map((n) => [n.id, n]))
   const styledEdges = edges.map((e) => {
-    const key = e.source < e.target ? `${e.source}~${e.target}` : `${e.target}~${e.source}`
-    const group = edgeGroups[key]
-    const sep = { index: group.indexOf(e.id), size: group.length }
-    const withSep = { ...e, data: { ...e.data, _sep: sep } }
+    const sNode = nodeById.get(e.source)
+    const tNode = nodeById.get(e.target)
+    const handles = (sNode && tNode) ? closestHandles(sNode, tNode) : {}
+    if (!e.selected) return { ...e, ...baseEdgeStyle(e), ...handles }
     const isMemo = !!e.style?.strokeDasharray
-    // Non-selected: force base style so any baked-in bold can't persist on screen.
-    if (!e.selected) return { ...withSep, ...baseEdgeStyle(e) }
     const color = isMemo ? '#f59e0b' : '#60a5fa'
     return {
-      ...withSep,
+      ...e,
+      ...handles,
       // Only a selected (bold) edge can be snatched/reconnected.
       reconnectable: true,
       zIndex: 1001,
@@ -979,7 +1026,6 @@ export default function App() {
         onNodeClick={onNodeClick}
         onInit={setRfInstance}
         nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
         onPaneContextMenu={onPaneContextMenu}
         onNodeContextMenu={onNodeContextMenu}

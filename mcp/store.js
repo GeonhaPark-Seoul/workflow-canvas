@@ -75,7 +75,9 @@ async function loadPrefsRow(userId) {
     .eq('user_id', userId)
     .maybeSingle()
   if (error) throw new Error(error.message)
-  return data?.stage_types ?? DEFAULT_STAGE_TYPES
+  const list = data?.stage_types
+  if (!list || !Array.isArray(list) || list.length === 0) return DEFAULT_STAGE_TYPES
+  return list
 }
 
 async function saveStageTypesRow(userId, types) {
@@ -215,24 +217,43 @@ export async function clearCanvas(userId, canvasId) {
   await saveArrays(userId, canvasId, [], [])
 }
 
+// Free-spot placement: scan grid candidates so auto-placed nodes never overlap
+function findFreePosition(existingNodes) {
+  const COL_STEP = 320
+  const ROW_STEP = 200
+  const COLS = 8
+  const ROWS = 30
+  const X_MARGIN = 300
+  const Y_MARGIN = 180
+
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const cx = 100 + col * COL_STEP
+      const cy = 100 + row * ROW_STEP
+      const taken = existingNodes.some((n) => {
+        const nx = n.position?.x ?? 0
+        const ny = n.position?.y ?? 0
+        return Math.abs(nx - cx) < X_MARGIN && Math.abs(ny - cy) < Y_MARGIN
+      })
+      if (!taken) return { x: cx, y: cy }
+    }
+  }
+  // All grid spots taken — place below the lowest node
+  const maxY = existingNodes.reduce((m, n) => Math.max(m, n.position?.y ?? 0), 0)
+  return { x: 100, y: maxY + 220 }
+}
+
 // ── Node-level ───────────────────────────────────────────────────────────────
 export async function createNode(userId, canvasId, opts) {
   const row = await getRow(userId, canvasId)
   const nodes = row.nodes ?? []
   const id = newNodeId()
-  // 좌표 생략 시 겹치지 않게 배치: 빈 캔버스는 (80, 320), 아니면 기존 노드들
-  // 오른쪽 끝에서 한 칸 띄운 위치에 대표 y(첫 stage, 없으면 320)로 정렬.
-  const autoPos = () => {
-    if (!nodes.length) return { x: 80, y: 320 }
-    const rightEdge = Math.max(...nodes.map((n) => (n.position?.x ?? 0) + nodeW(n)))
-    const baseY = (nodes.find((n) => n.type === 'stage') ?? nodes[0]).position?.y ?? 320
-    return { x: rightEdge + 80, y: baseY }
-  }
-  const auto = (Number.isFinite(opts.x) && Number.isFinite(opts.y)) ? null : autoPos()
-  const position = {
-    x: Number.isFinite(opts.x) ? opts.x : auto.x,
-    y: Number.isFinite(opts.y) ? opts.y : auto.y,
-  }
+  const position = (Number.isFinite(opts.x) && Number.isFinite(opts.y))
+    ? { x: opts.x, y: opts.y }
+    : (Number.isFinite(opts.x) || Number.isFinite(opts.y))
+      ? { x: Number.isFinite(opts.x) ? opts.x : findFreePosition(nodes).x, y: Number.isFinite(opts.y) ? opts.y : findFreePosition(nodes).y }
+      : findFreePosition(nodes)
+
   const size = clampSize(opts.type, opts.width, opts.height)
   const base = { id, type: opts.type, position }
   if (size.width != null) base.width = size.width
@@ -278,7 +299,7 @@ export async function deleteNode(userId, canvasId, nodeId) {
 }
 
 // ── Edge-level ───────────────────────────────────────────────────────────────
-export async function createEdge(userId, canvasId, { source, target, sourceHandle, targetHandle }) {
+export async function createEdge(userId, canvasId, { source, target }) {
   const row = await getRow(userId, canvasId)
   const nodes = row.nodes ?? []
   const sNode = nodes.find((n) => n.id === source)
@@ -290,9 +311,6 @@ export async function createEdge(userId, canvasId, { source, target, sourceHandl
     id: newEdgeId(),
     source,
     target,
-    ...(sourceHandle ? { sourceHandle } : {}),
-    ...(targetHandle ? { targetHandle } : {}),
-    type: 'separable',
     style: isMemo ? NOTE_STYLE : FLOW_STYLE,
     markerEnd: { type: 'arrowclosed', color: isMemo ? '#f59e0b88' : '#4a4a5a' },
   }
