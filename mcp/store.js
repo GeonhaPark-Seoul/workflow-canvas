@@ -57,6 +57,20 @@ const clampSize = (type, w, h) => {
 const nodeW = (n) => n.width  ?? SIZE[n.type]?.w ?? SIZE.stage.w
 const nodeH = (n) => n.height ?? SIZE[n.type]?.h ?? SIZE.stage.h
 
+// Pick the handle pair (side of each node) that best matches the direction
+// between the two node centers — used as the default when the caller doesn't
+// pin an explicit sourceHandle/targetHandle, so the AI doesn't have to guess.
+function closestHandles(source, target) {
+  const sx = source.position.x + nodeW(source) / 2
+  const sy = source.position.y + nodeH(source) / 2
+  const tx = target.position.x + nodeW(target) / 2
+  const ty = target.position.y + nodeH(target) / 2
+  const dx = tx - sx, dy = ty - sy
+  return Math.abs(dx) >= Math.abs(dy)
+    ? { sourceHandle: dx > 0 ? 'right' : 'left', targetHandle: dx > 0 ? 'left' : 'right' }
+    : { sourceHandle: dy > 0 ? 'bottom' : 'top', targetHandle: dy > 0 ? 'top' : 'bottom' }
+}
+
 // Map a Bearer token to a user id. Returns null when unauthenticated.
 export async function resolveUser(token) {
   if (!token) return null
@@ -67,83 +81,7 @@ export async function resolveUser(token) {
   return u?.user?.id ?? null
 }
 
-// ── Stage types (user_prefs.stage_types) ────────────────────────────────────
-async function loadPrefsRow(userId) {
-  const { data, error } = await admin()
-    .from('user_prefs')
-    .select('stage_types')
-    .eq('user_id', userId)
-    .maybeSingle()
-  if (error) throw new Error(error.message)
-  const list = data?.stage_types
-  if (!list || !Array.isArray(list) || list.length === 0) return DEFAULT_STAGE_TYPES
-  return list
-}
-
-async function saveStageTypesRow(userId, types) {
-  const { error } = await admin()
-    .from('user_prefs')
-    .upsert({ user_id: userId, stage_types: types }, { onConflict: 'user_id' })
-  if (error) throw new Error(error.message)
-}
-
 const toExternal = (types) => types.map((t, i) => ({ stageTypeIdx: i, label: t.label, color: t.border }))
-
-export async function getStageTypes(userId) {
-  return toExternal(await loadPrefsRow(userId))
-}
-
-export async function createStageType(userId, label) {
-  const types = await loadPrefsRow(userId)
-  const palette = TYPE_PALETTE[types.length % TYPE_PALETTE.length]
-  const next = [...types, { id: `type-${uid()}`, ...palette, label: label?.trim() || '새 종류' }]
-  await saveStageTypesRow(userId, next)
-  return toExternal(next)[next.length - 1]
-}
-
-export async function renameStageType(userId, stageTypeIdx, label) {
-  const types = await loadPrefsRow(userId)
-  if (stageTypeIdx < 0 || stageTypeIdx >= types.length) throw new Error(`단계 종류를 찾을 수 없습니다: ${stageTypeIdx}`)
-  if (!label?.trim()) throw new Error('이름은 비어있을 수 없습니다.')
-  const next = types.map((t, i) => (i === stageTypeIdx ? { ...t, label: label.trim() } : t))
-  await saveStageTypesRow(userId, next)
-  return toExternal(next)[stageTypeIdx]
-}
-
-export async function deleteStageType(userId, stageTypeIdx) {
-  const types = await loadPrefsRow(userId)
-  if (stageTypeIdx < 0 || stageTypeIdx >= types.length) throw new Error(`단계 종류를 찾을 수 없습니다: ${stageTypeIdx}`)
-  if (types.length <= 1) throw new Error('최소 1개의 단계 종류는 남아있어야 합니다.')
-  const next = types.filter((_, i) => i !== stageTypeIdx)
-  await saveStageTypesRow(userId, next)
-
-  // 이 종류를 쓰던 모든 캔버스의 노드를 재색인 (삭제된 인덱스→0, 그보다 큰 인덱스→-1)
-  const { data: rows, error } = await admin()
-    .from('canvases')
-    .select('canvas_id, nodes')
-    .eq('user_id', userId)
-  if (error) throw new Error(error.message)
-  for (const row of rows ?? []) {
-    const nodes = row.nodes ?? []
-    let touched = false
-    const reindexed = nodes.map((n) => {
-      if (n.type !== 'stage') return n
-      const ci = n.data?.colorIdx ?? 0
-      if (ci === stageTypeIdx) { touched = true; return { ...n, data: { ...n.data, colorIdx: 0 } } }
-      if (ci > stageTypeIdx) { touched = true; return { ...n, data: { ...n.data, colorIdx: ci - 1 } } }
-      return n
-    })
-    if (touched) {
-      const { error: uErr } = await admin()
-        .from('canvases')
-        .update({ nodes: reindexed })
-        .eq('user_id', userId)
-        .eq('canvas_id', row.canvas_id)
-      if (uErr) throw new Error(uErr.message)
-    }
-  }
-  return toExternal(next)
-}
 
 // ── Canvas-level ─────────────────────────────────────────────────────────────
 export async function listCanvases(userId) {
@@ -174,12 +112,66 @@ async function getRow(userId, canvasId) {
   return data
 }
 
+// ── Stage types (per-canvas: canvases.stage_types) ──────────────────────────
+// Each canvas owns its own list, independent of every other canvas. A new
+// canvas (or one that never customized types) has stage_types = null and
+// falls back to DEFAULT_STAGE_TYPES.
+function rowStageTypes(row) {
+  return (row.stage_types?.length) ? row.stage_types : DEFAULT_STAGE_TYPES
+}
+
+export async function getStageTypes(userId, canvasId) {
+  const row = await getRow(userId, canvasId)
+  return toExternal(rowStageTypes(row))
+}
+
+export async function createStageType(userId, canvasId, label) {
+  const row = await getRow(userId, canvasId)
+  const types = rowStageTypes(row)
+  const palette = TYPE_PALETTE[types.length % TYPE_PALETTE.length]
+  const next = [...types, { id: `type-${uid()}`, ...palette, label: label?.trim() || '새 종류' }]
+  const { error } = await admin().from('canvases').update({ stage_types: next }).eq('user_id', userId).eq('canvas_id', canvasId)
+  if (error) throw new Error(error.message)
+  return toExternal(next)[next.length - 1]
+}
+
+export async function renameStageType(userId, canvasId, stageTypeIdx, label) {
+  const row = await getRow(userId, canvasId)
+  const types = rowStageTypes(row)
+  if (stageTypeIdx < 0 || stageTypeIdx >= types.length) throw new Error(`단계 종류를 찾을 수 없습니다: ${stageTypeIdx}`)
+  if (!label?.trim()) throw new Error('이름은 비어있을 수 없습니다.')
+  const next = types.map((t, i) => (i === stageTypeIdx ? { ...t, label: label.trim() } : t))
+  const { error } = await admin().from('canvases').update({ stage_types: next }).eq('user_id', userId).eq('canvas_id', canvasId)
+  if (error) throw new Error(error.message)
+  return toExternal(next)[stageTypeIdx]
+}
+
+export async function deleteStageType(userId, canvasId, stageTypeIdx) {
+  const row = await getRow(userId, canvasId)
+  const types = rowStageTypes(row)
+  if (stageTypeIdx < 0 || stageTypeIdx >= types.length) throw new Error(`단계 종류를 찾을 수 없습니다: ${stageTypeIdx}`)
+  if (types.length <= 1) throw new Error('최소 1개의 단계 종류는 남아있어야 합니다.')
+  const next = types.filter((_, i) => i !== stageTypeIdx)
+
+  // 이 캔버스의 노드만 재색인 (단계 종류는 캔버스별로 독립적이라 다른 캔버스는 영향받지 않음)
+  const reindexed = (row.nodes ?? []).map((n) => {
+    if (n.type !== 'stage') return n
+    const ci = n.data?.colorIdx ?? 0
+    if (ci === stageTypeIdx) return { ...n, data: { ...n.data, colorIdx: 0 } }
+    if (ci > stageTypeIdx) return { ...n, data: { ...n.data, colorIdx: ci - 1 } }
+    return n
+  })
+  const { error } = await admin().from('canvases').update({ stage_types: next, nodes: reindexed }).eq('user_id', userId).eq('canvas_id', canvasId)
+  if (error) throw new Error(error.message)
+  return toExternal(next)
+}
+
 export async function getCanvas(userId, canvasId) {
   const row = await getRow(userId, canvasId)
   return {
     canvas_id: row.canvas_id,
     name: row.name,
-    stage_types: await getStageTypes(userId),
+    stage_types: toExternal(rowStageTypes(row)),
     nodes: (row.nodes ?? []).map((n) => ({
       id: n.id,
       type: n.type,
@@ -307,12 +299,15 @@ export async function createEdge(userId, canvasId, { source, target, sourceHandl
   if (!sNode) throw new Error(`출발 노드를 찾을 수 없습니다: ${source}`)
   if (!tNode) throw new Error(`도착 노드를 찾을 수 없습니다: ${target}`)
   const isMemo = sNode.type === 'memo' || tNode.type === 'memo'
+  // Fill in whichever handle the caller didn't pin, from actual node positions —
+  // avoids the AI mechanically repeating the same side regardless of real layout.
+  const auto = (!sourceHandle || !targetHandle) ? closestHandles(sNode, tNode) : {}
   const edge = {
     id: newEdgeId(),
     source,
     target,
-    ...(sourceHandle ? { sourceHandle } : {}),
-    ...(targetHandle ? { targetHandle } : {}),
+    sourceHandle: sourceHandle || auto.sourceHandle,
+    targetHandle: targetHandle || auto.targetHandle,
     style: isMemo ? NOTE_STYLE : FLOW_STYLE,
     markerEnd: { type: 'arrowclosed', color: isMemo ? '#f59e0b88' : '#4a4a5a' },
   }

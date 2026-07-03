@@ -1,12 +1,12 @@
 // ── Multi-canvas localStorage layer ─────────────────────────────────────────
-// Each canvas stores its nodes/edges under its own key, so canvases are fully
-// independent. A list key tracks canvas ids + names; an active key remembers
-// the last-opened canvas. Stage types stay global (shared across canvases).
+// Each canvas stores its nodes/edges/stageTypes under its own key, so canvases
+// are fully independent (including their own set of stage-node types). A list
+// key tracks canvas ids + names; an active key remembers the last-opened canvas.
 
 const LIST_KEY = 'workflow-canvas-list'
 const ACTIVE_KEY = 'workflow-canvas-active'
-const TYPES_KEY = 'workflow-canvas-types'
 const LEGACY_KEY = 'workflow-canvas' // pre-multi-canvas single store
+const LEGACY_TYPES_KEY = 'workflow-canvas-types' // pre-per-canvas global stage types
 const dataKey = (id) => `workflow-canvas-data-${id}`
 
 export const uid = () => `c-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
@@ -20,9 +20,6 @@ function write(key, val) {
 function remove(key) {
   try { localStorage.removeItem(key) } catch {}
 }
-
-export function loadStageTypes() { return read(TYPES_KEY) }
-export function saveStageTypes(types) { write(TYPES_KEY, types) }
 
 export function loadCanvasData(id) { return read(dataKey(id)) }
 export function saveCanvasData(id, data) { write(dataKey(id), data) }
@@ -41,6 +38,7 @@ export function initCanvases(seeds) {
   if (list && list.length) {
     let activeId = loadActiveId()
     if (!list.find((c) => c.id === activeId)) activeId = list[0].id
+    migrateLegacyStageTypes(activeId)
     return { list, activeId }
   }
 
@@ -63,4 +61,16 @@ export function initCanvases(seeds) {
   saveCanvasList(newList)
   saveActiveId(newList[0].id)
   return { list: newList, activeId: newList[0].id }
+}
+
+// One-time migration: stage types used to be a single list shared by every
+// canvas. Fold that legacy value into the active canvas so a prior
+// customization isn't silently lost, then drop the legacy key so every other
+// (and future) canvas starts from the built-in defaults, as intended.
+function migrateLegacyStageTypes(activeId) {
+  const legacyTypes = read(LEGACY_TYPES_KEY)
+  if (!legacyTypes) return
+  const data = read(dataKey(activeId))
+  if (data && !data.stageTypes) write(dataKey(activeId), { ...data, stageTypes: legacyTypes })
+  remove(LEGACY_TYPES_KEY)
 }

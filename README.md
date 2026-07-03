@@ -30,13 +30,15 @@ Supabase 데이터베이스를 기반으로 동작합니다.
 | `delete_edge` | 연결선 삭제 |
 | `create_canvas` | 새 캔버스 생성 |
 | `clear_canvas` | 캔버스 전체 초기화 |
-| `get_stage_types` | 단계 노드 종류(라벨) 목록 조회 |
-| `create_stage_type` | 새 단계 종류 추가 |
-| `rename_stage_type` | 단계 종류 이름 변경 |
-| `delete_stage_type` | 단계 종류 삭제 (해당 종류를 쓰던 노드는 자동 재분류) |
+| `get_stage_types` | 단계 노드 종류(라벨) 목록 조회 (캔버스별) |
+| `create_stage_type` | 새 단계 종류 추가 (캔버스별) |
+| `rename_stage_type` | 단계 종류 이름 변경 (캔버스별) |
+| `delete_stage_type` | 단계 종류 삭제 (캔버스별, 해당 종류를 쓰던 노드는 자동 재분류) |
 
 > 단계 노드의 종류(`stageTypeIdx`가 가리키는 라벨)는 고정 값이 아니라 사용자가
-> 자유롭게 이름을 바꾸거나 추가/삭제할 수 있는 목록입니다. `get_stage_types`로 조회하세요.
+> 자유롭게 이름을 바꾸거나 추가/삭제할 수 있는 목록입니다. **캔버스마다 독립적으로
+> 관리**되며, 새 캔버스는 항상 기본값(기획·개발·검토·배포·완료)에서 시작합니다.
+> `get_stage_types`(canvas_id 필요)로 조회하세요.
 
 ---
 
@@ -56,6 +58,9 @@ create table if not exists mcp_tokens (
 );
 alter table mcp_tokens enable row level security; -- 정책 없음: service role만 접근
 ```
+
+기존 DB에 `canvases.stage_types` 컬럼이 없다면 [`supabase-canvas-stage-types.sql`](supabase-canvas-stage-types.sql)도
+실행하세요 (단계 종류를 캔버스별로 분리하는 마이그레이션).
 
 ### 2) 토큰 발급
 

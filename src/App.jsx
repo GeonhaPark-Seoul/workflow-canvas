@@ -21,7 +21,7 @@ import CanvasTabs from './components/CanvasTabs'
 import AuthPanel from './components/AuthPanel'
 import {
   initCanvases, loadCanvasData, saveCanvasData, deleteCanvasData,
-  saveCanvasList, saveActiveId, loadStageTypes, saveStageTypes, uid,
+  saveCanvasList, saveActiveId, uid,
   loadCanvasList, loadActiveId,
 } from './storage'
 import { supabase } from './lib/supabase'
@@ -106,7 +106,7 @@ export default function App() {
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initData.nodes ?? [])
   const [edges, setEdges, onEdgesChange] = useEdgesState(normalizeEdges(initData.edges))
-  const [stageTypes, setStageTypes] = useState(() => loadStageTypes() ?? DEFAULT_STAGE_TYPES)
+  const [stageTypes, setStageTypes] = useState(() => initData.stageTypes ?? DEFAULT_STAGE_TYPES)
   const [contextMenu, setContextMenu] = useState(null)
   const [renamingTypeIdx, setRenamingTypeIdx] = useState(null)
   const [renameValue, setRenameValue] = useState('')
@@ -148,16 +148,13 @@ export default function App() {
   useEffect(() => { latestRef.current = { canvases, activeCanvasId, stageTypes, views } }, [canvases, activeCanvasId, stageTypes, views])
   useEffect(() => { userRef.current = user }, [user])
 
-  // ── Save stageTypes ──────────────────────────────────────────────────────
-  useEffect(() => { saveStageTypes(stageTypes) }, [stageTypes])
-
   // ── Auto-save active canvas + history snapshot (debounced) ───────────────
   useEffect(() => {
     if (isRestoring.current) return
     const histSnapshot = { nodes: nodes.map(stripNode), edges: edges.map(stripEdge) }
 
-    // localStorage snapshot also carries saved views (undo/redo does not).
-    const lsTimer = setTimeout(() => { saveCanvasData(activeCanvasId, { ...histSnapshot, views }) }, 500)
+    // localStorage snapshot also carries saved views + stage types (undo/redo does not).
+    const lsTimer = setTimeout(() => { saveCanvasData(activeCanvasId, { ...histSnapshot, views, stageTypes }) }, 500)
 
     const histTimer = setTimeout(() => {
       if (isRestoring.current) return
@@ -169,7 +166,7 @@ export default function App() {
     }, 300)
 
     return () => { clearTimeout(lsTimer); clearTimeout(histTimer) }
-  }, [nodes, edges, activeCanvasId, views])
+  }, [nodes, edges, activeCanvasId, views, stageTypes])
 
   // ── Undo / Redo ──────────────────────────────────────────────────────────
   const undo = useCallback(() => {
@@ -470,26 +467,15 @@ export default function App() {
       data = loadCanvasData(id) ?? { nodes: [], edges: [] }
       if (userRef.current) {
         try {
-          const [{ data: row }, { data: prefs }] = await Promise.all([
-            supabase
-              .from('canvases')
-              .select('nodes, edges, views')
-              .eq('user_id', userRef.current.id)
-              .eq('canvas_id', id)
-              .maybeSingle(),
-            supabase
-              .from('user_prefs')
-              .select('stage_types')
-              .eq('user_id', userRef.current.id)
-              .maybeSingle(),
-          ])
+          const { data: row } = await supabase
+            .from('canvases')
+            .select('nodes, edges, views, stage_types')
+            .eq('user_id', userRef.current.id)
+            .eq('canvas_id', id)
+            .maybeSingle()
           if (row) {
-            data = { nodes: row.nodes ?? [], edges: row.edges ?? [], views: row.views ?? [] }
+            data = { nodes: row.nodes ?? [], edges: row.edges ?? [], views: row.views ?? [], stageTypes: row.stage_types?.length ? row.stage_types : undefined }
             saveCanvasData(id, data)
-          }
-          if (prefs?.stage_types?.length) {
-            setStageTypes(prefs.stage_types)
-            saveStageTypes(prefs.stage_types)
           }
         } catch (e) {
           console.warn('[cloud] loadCanvas fetch:', e.message)
@@ -504,6 +490,7 @@ export default function App() {
     setNodes(nNodes)
     setEdges(nEdges)
     setViews(data.views ?? [])
+    setStageTypes(data.stageTypes ?? DEFAULT_STAGE_TYPES)
     setCurrentViewId(null)
     counterRef.current = maxNodeId(nNodes)
     const snap = { nodes: nNodes.map(stripNode), edges: nEdges.map(stripEdge) }
@@ -513,8 +500,8 @@ export default function App() {
   }, [setNodes, setEdges])
 
   const persistCurrent = useCallback(() => {
-    saveCanvasData(activeCanvasId, { nodes: nodes.map(stripNode), edges: edges.map(stripEdge), views })
-  }, [activeCanvasId, nodes, edges, views])
+    saveCanvasData(activeCanvasId, { nodes: nodes.map(stripNode), edges: edges.map(stripEdge), views, stageTypes })
+  }, [activeCanvasId, nodes, edges, views, stageTypes])
 
   const switchCanvas = useCallback((id) => {
     if (id === activeCanvasId) return
@@ -574,11 +561,10 @@ export default function App() {
       const list = loadCanvasList() ?? []
       for (const c of list) {
         const d = loadCanvasData(c.id) ?? { nodes: [], edges: [] }
-        await cloudSaveCanvas(userId, c.id, c.name, d.nodes ?? [], d.edges ?? [], d.views ?? [])
+        await cloudSaveCanvas(userId, c.id, c.name, d.nodes ?? [], d.edges ?? [], d.views ?? [], d.stageTypes)
       }
       await cloudSaveUserPrefs(userId, {
         active_canvas_id: loadActiveId(),
-        stage_types: loadStageTypes(),
         canvas_order: list,
       })
       return
@@ -590,21 +576,19 @@ export default function App() {
     const prefIds = new Set(prefOrder.map((c) => c.id))
     const missing = rows.filter((r) => !prefIds.has(r.canvas_id)).map((r) => ({ id: r.canvas_id, name: r.name }))
     const canvasList = prefOrder.length ? [...prefOrder, ...missing] : rows.map((r) => ({ id: r.canvas_id, name: r.name }))
-    rows.forEach((r) => saveCanvasData(r.canvas_id, { nodes: r.nodes ?? [], edges: r.edges ?? [], views: r.views ?? [] }))
+    rows.forEach((r) => saveCanvasData(r.canvas_id, { nodes: r.nodes ?? [], edges: r.edges ?? [], views: r.views ?? [], stageTypes: r.stage_types?.length ? r.stage_types : undefined }))
     saveCanvasList(canvasList)
     const activeId = prefs?.active_canvas_id ?? canvasList[0]?.id
 
     setCanvases(canvasList)
-    if (prefs?.stage_types?.length) {
-      setStageTypes(prefs.stage_types)
-      saveStageTypes(prefs.stage_types)
-    }
     if (activeId) {
       const activeRow = rows.find((r) => r.canvas_id === activeId)
-      const prefetched = activeRow ? { nodes: activeRow.nodes ?? [], edges: activeRow.edges ?? [], views: activeRow.views ?? [] } : null
+      const prefetched = activeRow
+        ? { nodes: activeRow.nodes ?? [], edges: activeRow.edges ?? [], views: activeRow.views ?? [], stageTypes: activeRow.stage_types?.length ? activeRow.stage_types : undefined }
+        : null
       loadCanvas(activeId, prefetched)
     }
-  }, [loadCanvas, setCanvases, setStageTypes])
+  }, [loadCanvas, setCanvases])
 
   // ── Auth listener ─────────────────────────────────────────────────────────
   useEffect(() => {
@@ -633,8 +617,8 @@ export default function App() {
       const name = cvs.find((c) => c.id === aid)?.name ?? '캔버스'
       try {
         await Promise.all([
-          cloudSaveCanvas(user.id, aid, name, snapshot.nodes, snapshot.edges, vws),
-          cloudSaveUserPrefs(user.id, { active_canvas_id: aid, stage_types: types, canvas_order: cvs }),
+          cloudSaveCanvas(user.id, aid, name, snapshot.nodes, snapshot.edges, vws, types),
+          cloudSaveUserPrefs(user.id, { active_canvas_id: aid, canvas_order: cvs }),
         ])
       } catch (err) {
         console.error('[cloud] autosave:', err.message)
