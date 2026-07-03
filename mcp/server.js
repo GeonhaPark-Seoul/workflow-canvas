@@ -80,7 +80,10 @@ export function buildServer(getUserId) {
   }, g(async (userId) => ok(await store.listCanvases(userId))))
 
   server.registerTool('get_canvas', {
-    description: '특정 캔버스의 노드/연결선 데이터를 가져옵니다.',
+    description:
+      '특정 캔버스의 노드/연결선 데이터를 가져옵니다. 각 노드의 position(x,y)과 width/height, ' +
+      '단계 종류 목록(stage_types)이 포함되므로, 노드를 추가/이동/크기조절하기 전에 항상 먼저 호출해 ' +
+      '기존 배치와 간격을 파악할 것.',
     inputSchema: { canvas_id: z.string().describe('캔버스 ID (get_canvases로 조회)') },
   }, g(async (userId, a) => ok(await store.getCanvas(userId, a.canvas_id))))
 
@@ -121,7 +124,14 @@ export function buildServer(getUserId) {
       '전체 진행 순서를 단계별로 나누기 위한 노드다. "종류"는 흐름상의 단계 구분(기획→개발→검토→…) ' +
       '또는 주제/역할별 카테고리 구분으로 자유롭게 쓸 수 있다. (파라미터 이름이 colorIdx가 아니라 ' +
       'stageTypeIdx인 이유: 이 값은 "색상 선택"이 아니라 "어느 종류/그룹에 속하는가"를 나타내며, ' +
-      '색은 종류에 따라오는 부수 효과일 뿐이다.)',
+      '색은 종류에 따라오는 부수 효과일 뿐이다.)\n\n' +
+      '【좌표/크기/배치 — 지시 없어도 지킬 것】\n' +
+      '- 좌표계: x는 오른쪽(+), y는 아래(+), 단위 px. position은 노드 좌상단 기준. 흐름은 좌→우 또는 위→아래로 일관되게.\n' +
+      '- 기본 크기: stage ≈ 220×90, memo ≈ 180×90. 노드 크기는 자동으로 늘어나지 않으므로, ' +
+      'description/text가 두 줄을 넘으면 width/height를 직접 키워서(예: 260×140) 내용이 잘리지 않게 할 것.\n' +
+      '- 간격: 노드 중심 간 가로 ≥ 320px, 세로 ≥ 200px. 메모는 관련 stage 노드 위/아래 ~250px에 배치.\n' +
+      '- 겹침 금지: get_canvas로 기존 노드의 position과 width/height를 확인한 뒤 x/y를 명시해 배치할 것.\n' +
+      '- 흐름·인과·순서가 있는 노드들을 만들었으면, 사용자가 시키지 않아도 create_edge로 바로 연결까지 마칠 것.',
     inputSchema: {
       canvas_id: z.string(),
       type: z.enum(['stage', 'memo']),
@@ -146,7 +156,11 @@ export function buildServer(getUserId) {
   }, g(async (userId, a) => ok(await store.createNode(userId, a.canvas_id, a))))
 
   server.registerTool('update_node', {
-    description: '기존 노드의 내용/위치/크기를 수정합니다. 제공한 필드만 변경됩니다.',
+    description:
+      '기존 노드의 내용/위치/크기를 수정합니다. 제공한 필드만 변경됩니다.\n\n' +
+      '노드 크기 조절은 이 도구의 width/height로 한다 (px 단위, 별도 resize 도구 없음). ' +
+      '내용을 길게 수정했으면 잘리지 않도록 같은 호출에서 height도 함께 키울 것. ' +
+      '현재 크기는 get_canvas 응답의 width/height로 확인.',
     inputSchema: {
       canvas_id: z.string(),
       node_id: z.string(),
@@ -170,7 +184,10 @@ export function buildServer(getUserId) {
 
   server.registerTool('create_edge', {
     description:
-      '두 노드를 연결하는 연결선을 추가합니다. 메모 노드가 포함되면 점선으로 표시됩니다. 연결 방향(어느 면에서 나가는지)은 노드 위치에 따라 자동 결정되므로 신경 쓰지 않아도 됩니다.\n\n연결선은 흐름·인과·계층·관계가 명확할 때만 추가할 것.',
+      '두 노드를 연결하는 연결선을 추가합니다. 메모 노드가 포함되면 점선으로 표시됩니다. 연결 방향(어느 면에서 나가는지)은 노드 위치에 따라 자동 결정되므로 신경 쓰지 않아도 됩니다.\n\n' +
+      '흐름·인과·계층·관계가 있는 노드들은 사용자가 따로 요청하지 않아도 능동적으로 연결할 것 ' +
+      '(예: 프로세스를 그렸으면 단계 순서대로, 메모를 만들었으면 대상 노드에). ' +
+      '단, 관계가 불명확한 노드까지 전부 잇지는 말 것.',
     inputSchema: {
       canvas_id: z.string(),
       source: z.string().describe('출발 노드 id'),
