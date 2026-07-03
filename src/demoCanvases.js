@@ -4,12 +4,10 @@ import { MarkerType } from '@xyflow/react'
 
 // colorIdx → DEFAULT_STAGE_TYPES: 0 기획 · 1 개발 · 2 검토 · 3 배포 · 4 완료
 const FLOW = {
-  type: 'separable',
   style: { stroke: '#4a4a5a', strokeWidth: 2 },
   markerEnd: { type: MarkerType.ArrowClosed, color: '#4a4a5a' },
 }
 const NOTE = {
-  type: 'separable',
   style: { stroke: '#f59e0b88', strokeWidth: 1.5, strokeDasharray: '5,4' },
   markerEnd: { type: MarkerType.ArrowClosed, color: '#f59e0b88' },
 }

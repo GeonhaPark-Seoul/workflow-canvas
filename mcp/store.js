@@ -20,10 +20,26 @@ function admin() {
 const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 const newNodeId = () => `n-${uid()}`
 const newEdgeId = () => `e-${uid()}`
-const clampColor = (c) => Math.min(Math.max(Number.isInteger(c) ? c : 0, 0), 4)
+const clampColor = (c, max) => Math.min(Math.max(Number.isInteger(c) ? c : 0, 0), max)
 
 const FLOW_STYLE = { stroke: '#4a4a5a', strokeWidth: 2 }
 const NOTE_STYLE = { stroke: '#f59e0b88', strokeWidth: 1.5, strokeDasharray: '5,4' }
+
+// Default stage types and palette (mirrors frontend defaults in src/App.jsx)
+export const DEFAULT_STAGE_TYPES = [
+  { id: 'plan',   bg: '#1e3a5f', border: '#3b82f6', label: '기획' },
+  { id: 'dev',    bg: '#1a3a2a', border: '#22c55e', label: '개발' },
+  { id: 'review', bg: '#3a1a1a', border: '#ef4444', label: '검토' },
+  { id: 'deploy', bg: '#2d2a1a', border: '#f59e0b', label: '배포' },
+  { id: 'done',   bg: '#2a1a3a', border: '#a855f7', label: '완료' },
+]
+
+const TYPE_PALETTE = [
+  { bg: '#1e3a5f', border: '#3b82f6' }, { bg: '#1a3a2a', border: '#22c55e' },
+  { bg: '#3a1a1a', border: '#ef4444' }, { bg: '#2d2a1a', border: '#f59e0b' },
+  { bg: '#2a1a3a', border: '#a855f7' }, { bg: '#1a2a3a', border: '#06b6d4' },
+  { bg: '#2a1a2a', border: '#ec4899' }, { bg: '#2a2a1a', border: '#84cc16' },
+]
 
 // Map a Bearer token to a user id. Returns null when unauthenticated.
 export async function resolveUser(token) {
@@ -33,6 +49,39 @@ export async function resolveUser(token) {
   if (data?.user_id) return data.user_id
   const { data: u } = await db.auth.getUser(token)
   return u?.user?.id ?? null
+}
+
+// ── Stage-type tools ──────────────────────────────────────────────────────────
+
+export async function getStageTypes(userId) {
+  const { data } = await admin()
+    .from('user_prefs')
+    .select('stage_types')
+    .eq('user_id', userId)
+    .maybeSingle()
+  const list = data?.stage_types
+  if (!list || !Array.isArray(list) || list.length === 0) return DEFAULT_STAGE_TYPES
+  return list
+}
+
+export async function renameStageType(userId, index, label) {
+  const list = [...(await getStageTypes(userId))]
+  if (index < 0 || index >= list.length) throw new Error(`유효하지 않은 index입니다. 0–${list.length - 1} 범위여야 합니다.`)
+  const trimmed = label?.trim()
+  if (!trimmed) throw new Error('label이 비어 있습니다.')
+  list[index] = { ...list[index], label: trimmed }
+  await admin().from('user_prefs').upsert({ user_id: userId, stage_types: list }, { onConflict: 'user_id' })
+  return list
+}
+
+export async function addStageType(userId, label) {
+  const list = [...(await getStageTypes(userId))]
+  const trimmed = label?.trim()
+  if (!trimmed) throw new Error('label이 비어 있습니다.')
+  const palette = TYPE_PALETTE[list.length % TYPE_PALETTE.length]
+  list.push({ id: `type-${Date.now()}`, ...palette, label: trimmed })
+  await admin().from('user_prefs').upsert({ user_id: userId, stage_types: list }, { onConflict: 'user_id' })
+  return list
 }
 
 // ── Canvas-level ─────────────────────────────────────────────────────────────
@@ -104,18 +153,53 @@ export async function clearCanvas(userId, canvasId) {
   await saveArrays(userId, canvasId, [], [])
 }
 
+// Free-spot placement: scan grid candidates so auto-placed nodes never overlap
+function findFreePosition(existingNodes) {
+  const COL_STEP = 320
+  const ROW_STEP = 200
+  const COLS = 8
+  const ROWS = 30
+  const X_MARGIN = 300
+  const Y_MARGIN = 180
+
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const cx = 100 + col * COL_STEP
+      const cy = 100 + row * ROW_STEP
+      const taken = existingNodes.some((n) => {
+        const nx = n.position?.x ?? 0
+        const ny = n.position?.y ?? 0
+        return Math.abs(nx - cx) < X_MARGIN && Math.abs(ny - cy) < Y_MARGIN
+      })
+      if (!taken) return { x: cx, y: cy }
+    }
+  }
+  // All grid spots taken — place below the lowest node
+  const maxY = existingNodes.reduce((m, n) => Math.max(m, n.position?.y ?? 0), 0)
+  return { x: 100, y: maxY + 220 }
+}
+
 // ── Node-level ───────────────────────────────────────────────────────────────
 export async function createNode(userId, canvasId, opts) {
   const row = await getRow(userId, canvasId)
   const nodes = row.nodes ?? []
   const id = newNodeId()
-  const position = {
-    x: Number.isFinite(opts.x) ? opts.x : Math.round(200 + Math.random() * 400),
-    y: Number.isFinite(opts.y) ? opts.y : Math.round(150 + Math.random() * 300),
+
+  const position = (Number.isFinite(opts.x) && Number.isFinite(opts.y))
+    ? { x: opts.x, y: opts.y }
+    : (Number.isFinite(opts.x) || Number.isFinite(opts.y))
+      ? { x: Number.isFinite(opts.x) ? opts.x : findFreePosition(nodes).x, y: Number.isFinite(opts.y) ? opts.y : findFreePosition(nodes).y }
+      : findFreePosition(nodes)
+
+  let colorIdx = 0
+  if (opts.type !== 'memo' && opts.colorIdx != null) {
+    const stageTypes = await getStageTypes(userId)
+    colorIdx = clampColor(opts.colorIdx, stageTypes.length - 1)
   }
+
   const node = opts.type === 'memo'
     ? { id, type: 'memo', position, data: { header: opts.header ?? '', text: opts.text ?? '' } }
-    : { id, type: 'stage', position, data: { label: opts.label ?? '새 단계', description: opts.description ?? '', colorIdx: clampColor(opts.colorIdx) } }
+    : { id, type: 'stage', position, data: { label: opts.label ?? '새 단계', description: opts.description ?? '', colorIdx } }
   await saveArrays(userId, canvasId, [...nodes, node], row.edges ?? [])
   return node
 }
@@ -129,7 +213,10 @@ export async function updateNode(userId, canvasId, nodeId, patch) {
   const data = { ...n.data }
   if (patch.label != null) data.label = patch.label
   if (patch.description != null) data.description = patch.description
-  if (patch.colorIdx != null) data.colorIdx = clampColor(patch.colorIdx)
+  if (patch.colorIdx != null) {
+    const stageTypes = await getStageTypes(userId)
+    data.colorIdx = clampColor(patch.colorIdx, stageTypes.length - 1)
+  }
   if (patch.header != null) data.header = patch.header
   if (patch.text != null) data.text = patch.text
   const position = { ...n.position }
@@ -164,7 +251,6 @@ export async function createEdge(userId, canvasId, { source, target, sourceHandl
     target,
     ...(sourceHandle ? { sourceHandle } : {}),
     ...(targetHandle ? { targetHandle } : {}),
-    type: 'separable',
     style: isMemo ? NOTE_STYLE : FLOW_STYLE,
     markerEnd: { type: 'arrowclosed', color: isMemo ? '#f59e0b88' : '#4a4a5a' },
   }

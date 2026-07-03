@@ -14,7 +14,6 @@ import '@xyflow/react/dist/style.css'
 
 import StageNode from './nodes/StageNode'
 import MemoNode from './nodes/MemoNode'
-import SeparableEdge from './edges/SeparableEdge'
 import { DEMO_CANVASES } from './demoCanvases'
 import Toolbar from './components/Toolbar'
 import CanvasTabs from './components/CanvasTabs'
@@ -34,10 +33,8 @@ import {
 } from './lib/cloudStorage'
 
 const nodeTypes = { stage: StageNode, memo: MemoNode }
-const edgeTypes = { separable: SeparableEdge }
 
 const defaultEdgeOptions = {
-  type: 'separable',
   animated: false,
   style: { stroke: '#4a4a5a', strokeWidth: 2 },
   markerEnd: { type: MarkerType.ArrowClosed, color: '#4a4a5a' },
@@ -65,10 +62,11 @@ const TYPE_PALETTE = [
 
 // ── Initial canvas data (seed for the very first canvas) ─────────────────────
 // ── Helpers ──────────────────────────────────────────────────────────────────
-// Normalize every edge to the separable type, keeping its style/marker.
-// Strips transient data (e.g. _sep) and any older/removed edge type.
+// Strip type and data from saved edges so old 'separable' type (and any other
+// removed custom type) doesn't cause React Flow to emit unknown-type warnings.
+// Keeps style/markerEnd so visual appearance is preserved.
 function normalizeEdges(edges) {
-  return (edges ?? []).map(({ data, ...e }) => ({ ...e, type: 'separable' }))
+  return (edges ?? []).map(({ data, type, ...e }) => ({ ...e }))
 }
 
 function maxNodeId(nodes) {
@@ -471,15 +469,26 @@ export default function App() {
       data = loadCanvasData(id) ?? { nodes: [], edges: [] }
       if (userRef.current) {
         try {
-          const { data: row } = await supabase
-            .from('canvases')
-            .select('nodes, edges, views')
-            .eq('user_id', userRef.current.id)
-            .eq('canvas_id', id)
-            .maybeSingle()
+          const [{ data: row }, { data: prefs }] = await Promise.all([
+            supabase
+              .from('canvases')
+              .select('nodes, edges, views')
+              .eq('user_id', userRef.current.id)
+              .eq('canvas_id', id)
+              .maybeSingle(),
+            supabase
+              .from('user_prefs')
+              .select('stage_types')
+              .eq('user_id', userRef.current.id)
+              .maybeSingle(),
+          ])
           if (row) {
             data = { nodes: row.nodes ?? [], edges: row.edges ?? [], views: row.views ?? [] }
             saveCanvasData(id, data)
+          }
+          if (prefs?.stage_types?.length) {
+            setStageTypes(prefs.stage_types)
+            saveStageTypes(prefs.stage_types)
           }
         } catch (e) {
           console.warn('[cloud] loadCanvas fetch:', e.message)
@@ -707,7 +716,6 @@ export default function App() {
     const newEdge = {
       ...params,
       id: `e-${uid()}`,
-      type: 'separable',
       style: isMemo ? { stroke: '#f59e0b88', strokeWidth: 1.5, strokeDasharray: '5,4' } : { stroke: '#4a4a5a', strokeWidth: 2 },
       markerEnd: { type: MarkerType.ArrowClosed, color: isMemo ? '#f59e0b88' : '#4a4a5a' },
     }
@@ -876,25 +884,15 @@ export default function App() {
     setCurrentViewId((cur) => (cur === id ? null : cur))
   }, [])
 
-  // ── Parallel-edge separation + selected highlight ─────────────────────────
-  // Group edges by their unordered node pair so siblings between the same two
-  // nodes fan out (handled by SeparableEdge via the injected _sep field).
-  const edgeGroups = {}
-  edges.forEach((e) => {
-    const key = e.source < e.target ? `${e.source}~${e.target}` : `${e.target}~${e.source}`
-    ;(edgeGroups[key] ??= []).push(e.id)
-  })
+  // ── Selected-edge highlight ───────────────────────────────────────────────
+  // Non-selected edges get a forced base style so baked-in bold can never linger.
+  // Selected edges get reconnectable + bold stroke + drop-shadow + colored marker.
   const styledEdges = edges.map((e) => {
-    const key = e.source < e.target ? `${e.source}~${e.target}` : `${e.target}~${e.source}`
-    const group = edgeGroups[key]
-    const sep = { index: group.indexOf(e.id), size: group.length }
-    const withSep = { ...e, data: { ...e.data, _sep: sep } }
+    if (!e.selected) return { ...e, ...baseEdgeStyle(e) }
     const isMemo = !!e.style?.strokeDasharray
-    // Non-selected: force base style so any baked-in bold can't persist on screen.
-    if (!e.selected) return { ...withSep, ...baseEdgeStyle(e) }
     const color = isMemo ? '#f59e0b' : '#60a5fa'
     return {
-      ...withSep,
+      ...e,
       // Only a selected (bold) edge can be snatched/reconnected.
       reconnectable: true,
       zIndex: 1001,
@@ -999,7 +997,6 @@ export default function App() {
         onNodeDragStop={onNodeDragStop}
         onInit={setRfInstance}
         nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
         onPaneContextMenu={onPaneContextMenu}
         onNodeContextMenu={onNodeContextMenu}

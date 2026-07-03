@@ -35,6 +35,8 @@ export default function StageNode({ data, selected, id }) {
   const longPressTimer = useRef(null)
   const longPressStart = useRef(null)
   const lastTapRef = useRef(0)
+  const dimPressTimer = useRef(null)
+  const suppressClick = useRef(false)
 
   // Touch double-tap → edit, while preventing the browser's double-tap zoom.
   const touchEdit = (field) => (e) => {
@@ -75,9 +77,22 @@ export default function StageNode({ data, selected, id }) {
 
   const cycleColor = (e) => {
     e.stopPropagation()
+    if (suppressClick.current) { suppressClick.current = false; return }
     const next = (colorIdx + 1) % stageTypes.length
     data.onUpdate?.({ colorIdx: next })
   }
+
+  const onDimPointerDown = (e) => {
+    e.stopPropagation()
+    dimPressTimer.current = setTimeout(() => {
+      data.onUpdate?.({ dimmed: !data.dimmed })
+      suppressClick.current = true
+      dimPressTimer.current = null
+    }, 500)
+  }
+  const onDimPointerUp = () => { clearTimeout(dimPressTimer.current); dimPressTimer.current = null }
+  const onDimPointerLeave = () => { clearTimeout(dimPressTimer.current); dimPressTimer.current = null }
+  const onDimPointerCancel = () => { clearTimeout(dimPressTimer.current); dimPressTimer.current = null }
 
   const startEdit = (field) => {
     // Clear the auto-generated default so the first edit starts blank
@@ -122,6 +137,7 @@ export default function StageNode({ data, selected, id }) {
         transition: 'border-color 0.15s, box-shadow 0.15s',
         cursor: 'default',
         touchAction: 'manipulation',
+        filter: data.dimmed ? 'grayscale(0.85) brightness(0.55)' : undefined,
       }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
@@ -146,7 +162,11 @@ export default function StageNode({ data, selected, id }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
           <button
             onClick={cycleColor}
-            title="색상 변경"
+            onPointerDown={onDimPointerDown}
+            onPointerUp={onDimPointerUp}
+            onPointerLeave={onDimPointerLeave}
+            onPointerCancel={onDimPointerCancel}
+            title="클릭: 색상 변경 · 길게 누르기: 끄기/켜기"
             style={{
               width: 14, height: 14, borderRadius: '50%',
               background: color.border, border: 'none', cursor: 'pointer', flexShrink: 0,

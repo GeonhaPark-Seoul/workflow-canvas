@@ -24,6 +24,7 @@ export default function MemoNode({ data, selected, id }) {
   const longPressTimer = useRef(null)
   const longPressStart = useRef(null)
   const lastTapRef = useRef(0)
+  const dimPressTimer = useRef(null)
 
   // Touch double-tap → edit, while preventing the browser's double-tap zoom.
   const touchEdit = (field) => (e) => {
@@ -62,6 +63,17 @@ export default function MemoNode({ data, selected, id }) {
     if (editing === 'text' && textRef.current) { textRef.current.focus() }
   }, [editing])
 
+  const onDimPointerDown = (e) => {
+    e.stopPropagation()
+    dimPressTimer.current = setTimeout(() => {
+      data.onUpdate?.({ dimmed: !data.dimmed })
+      dimPressTimer.current = null
+    }, 500)
+  }
+  const onDimPointerUp = () => { clearTimeout(dimPressTimer.current); dimPressTimer.current = null }
+  const onDimPointerLeave = () => { clearTimeout(dimPressTimer.current); dimPressTimer.current = null }
+  const onDimPointerCancel = () => { clearTimeout(dimPressTimer.current); dimPressTimer.current = null }
+
   const startEdit = (field) => { setEditing(field); data.onEditStart?.() }
   const stopEdit = () => {
     const patch = { header, text }
@@ -90,6 +102,7 @@ export default function MemoNode({ data, selected, id }) {
           : '0 4px 16px #0005',
         transition: 'border-color 0.15s, box-shadow 0.15s',
         touchAction: 'manipulation',
+        filter: data.dimmed ? 'grayscale(0.85) brightness(0.55)' : undefined,
       }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
@@ -123,6 +136,17 @@ export default function MemoNode({ data, selected, id }) {
           minHeight: 26,
         }}
       >
+        <button
+          onPointerDown={onDimPointerDown}
+          onPointerUp={onDimPointerUp}
+          onPointerLeave={onDimPointerLeave}
+          onPointerCancel={onDimPointerCancel}
+          title="길게 누르기: 끄기/켜기"
+          style={{
+            width: 14, height: 14, borderRadius: '50%',
+            background: '#f59e0b', border: 'none', cursor: 'pointer', flexShrink: 0,
+          }}
+        />
         {editing === 'header' ? (
           <input
             ref={headerRef}
