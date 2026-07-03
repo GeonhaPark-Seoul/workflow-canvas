@@ -333,7 +333,9 @@ export default function EditToolbar({ editRef, anchorRef }) {
     if (top < 8) top = r.bottom + GAP
     if (left + barW > window.innerWidth - 8) left = window.innerWidth - 8 - barW
     if (left < 8) left = 8
-    setPos({ top, left, width: barW })
+    // Bail out when unchanged — this runs from a deps-less layout effect, so a
+    // fresh object every render would loop setPos → render → setPos forever.
+    setPos((p) => (p && p.top === top && p.left === left && p.width === barW) ? p : { top, left, width: barW })
   }, [anchorRef, layout])
 
   // Show / hide based on whether editRef is provided and populated

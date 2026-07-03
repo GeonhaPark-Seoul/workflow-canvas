@@ -20,26 +20,42 @@ function admin() {
 const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 const newNodeId = () => `n-${uid()}`
 const newEdgeId = () => `e-${uid()}`
-const clampColor = (c, max) => Math.min(Math.max(Number.isInteger(c) ? c : 0, 0), max)
+// 상한 없음: 종류 목록 길이는 사용자마다 다른 동적 값이라 서버에서 강제하지 않는다
+// (프런트엔드가 렌더 시 stageTypes.length-1로 안전하게 클램프함).
+const clampStageTypeIdx = (c) => Math.max(Number.isInteger(c) ? c : 0, 0)
 
-const FLOW_STYLE = { stroke: '#4a4a5a', strokeWidth: 2 }
-const NOTE_STYLE = { stroke: '#f59e0b88', strokeWidth: 1.5, strokeDasharray: '5,4' }
-
-// Default stage types and palette (mirrors frontend defaults in src/App.jsx)
-export const DEFAULT_STAGE_TYPES = [
+// 단계 종류(stage type) 기본값/팔레트 — src/App.jsx의 DEFAULT_STAGE_TYPES/TYPE_PALETTE와 동일
+const DEFAULT_STAGE_TYPES = [
   { id: 'plan',   bg: '#1e3a5f', border: '#3b82f6', label: '기획' },
   { id: 'dev',    bg: '#1a3a2a', border: '#22c55e', label: '개발' },
   { id: 'review', bg: '#3a1a1a', border: '#ef4444', label: '검토' },
   { id: 'deploy', bg: '#2d2a1a', border: '#f59e0b', label: '배포' },
   { id: 'done',   bg: '#2a1a3a', border: '#a855f7', label: '완료' },
 ]
-
 const TYPE_PALETTE = [
   { bg: '#1e3a5f', border: '#3b82f6' }, { bg: '#1a3a2a', border: '#22c55e' },
   { bg: '#3a1a1a', border: '#ef4444' }, { bg: '#2d2a1a', border: '#f59e0b' },
   { bg: '#2a1a3a', border: '#a855f7' }, { bg: '#1a2a3a', border: '#06b6d4' },
   { bg: '#2a1a2a', border: '#ec4899' }, { bg: '#2a2a1a', border: '#84cc16' },
 ]
+
+const FLOW_STYLE = { stroke: '#4a4a5a', strokeWidth: 2 }
+const NOTE_STYLE = { stroke: '#f59e0b88', strokeWidth: 1.5, strokeDasharray: '5,4' }
+
+// 명시적 크기가 없을 때의 기본/최소 렌더 크기 (StageNode/MemoNode의 minWidth/minHeight와 정합)
+const SIZE = {
+  stage: { w: 220, h: 90, minW: 200, minH: 80 },
+  memo:  { w: 180, h: 90, minW: 160, minH: 80 },
+}
+const clampSize = (type, w, h) => {
+  const s = SIZE[type] ?? SIZE.stage
+  return {
+    width:  Number.isFinite(w) ? Math.max(w, s.minW) : undefined,
+    height: Number.isFinite(h) ? Math.max(h, s.minH) : undefined,
+  }
+}
+const nodeW = (n) => n.width  ?? SIZE[n.type]?.w ?? SIZE.stage.w
+const nodeH = (n) => n.height ?? SIZE[n.type]?.h ?? SIZE.stage.h
 
 // Map a Bearer token to a user id. Returns null when unauthenticated.
 export async function resolveUser(token) {
@@ -51,37 +67,82 @@ export async function resolveUser(token) {
   return u?.user?.id ?? null
 }
 
-// ── Stage-type tools ──────────────────────────────────────────────────────────
-
-export async function getStageTypes(userId) {
-  const { data } = await admin()
+// ── Stage types (user_prefs.stage_types) ────────────────────────────────────
+async function loadPrefsRow(userId) {
+  const { data, error } = await admin()
     .from('user_prefs')
     .select('stage_types')
     .eq('user_id', userId)
     .maybeSingle()
+  if (error) throw new Error(error.message)
   const list = data?.stage_types
   if (!list || !Array.isArray(list) || list.length === 0) return DEFAULT_STAGE_TYPES
   return list
 }
 
-export async function renameStageType(userId, index, label) {
-  const list = [...(await getStageTypes(userId))]
-  if (index < 0 || index >= list.length) throw new Error(`유효하지 않은 index입니다. 0–${list.length - 1} 범위여야 합니다.`)
-  const trimmed = label?.trim()
-  if (!trimmed) throw new Error('label이 비어 있습니다.')
-  list[index] = { ...list[index], label: trimmed }
-  await admin().from('user_prefs').upsert({ user_id: userId, stage_types: list }, { onConflict: 'user_id' })
-  return list
+async function saveStageTypesRow(userId, types) {
+  const { error } = await admin()
+    .from('user_prefs')
+    .upsert({ user_id: userId, stage_types: types }, { onConflict: 'user_id' })
+  if (error) throw new Error(error.message)
 }
 
-export async function addStageType(userId, label) {
-  const list = [...(await getStageTypes(userId))]
-  const trimmed = label?.trim()
-  if (!trimmed) throw new Error('label이 비어 있습니다.')
-  const palette = TYPE_PALETTE[list.length % TYPE_PALETTE.length]
-  list.push({ id: `type-${Date.now()}`, ...palette, label: trimmed })
-  await admin().from('user_prefs').upsert({ user_id: userId, stage_types: list }, { onConflict: 'user_id' })
-  return list
+const toExternal = (types) => types.map((t, i) => ({ stageTypeIdx: i, label: t.label, color: t.border }))
+
+export async function getStageTypes(userId) {
+  return toExternal(await loadPrefsRow(userId))
+}
+
+export async function createStageType(userId, label) {
+  const types = await loadPrefsRow(userId)
+  const palette = TYPE_PALETTE[types.length % TYPE_PALETTE.length]
+  const next = [...types, { id: `type-${uid()}`, ...palette, label: label?.trim() || '새 종류' }]
+  await saveStageTypesRow(userId, next)
+  return toExternal(next)[next.length - 1]
+}
+
+export async function renameStageType(userId, stageTypeIdx, label) {
+  const types = await loadPrefsRow(userId)
+  if (stageTypeIdx < 0 || stageTypeIdx >= types.length) throw new Error(`단계 종류를 찾을 수 없습니다: ${stageTypeIdx}`)
+  if (!label?.trim()) throw new Error('이름은 비어있을 수 없습니다.')
+  const next = types.map((t, i) => (i === stageTypeIdx ? { ...t, label: label.trim() } : t))
+  await saveStageTypesRow(userId, next)
+  return toExternal(next)[stageTypeIdx]
+}
+
+export async function deleteStageType(userId, stageTypeIdx) {
+  const types = await loadPrefsRow(userId)
+  if (stageTypeIdx < 0 || stageTypeIdx >= types.length) throw new Error(`단계 종류를 찾을 수 없습니다: ${stageTypeIdx}`)
+  if (types.length <= 1) throw new Error('최소 1개의 단계 종류는 남아있어야 합니다.')
+  const next = types.filter((_, i) => i !== stageTypeIdx)
+  await saveStageTypesRow(userId, next)
+
+  // 이 종류를 쓰던 모든 캔버스의 노드를 재색인 (삭제된 인덱스→0, 그보다 큰 인덱스→-1)
+  const { data: rows, error } = await admin()
+    .from('canvases')
+    .select('canvas_id, nodes')
+    .eq('user_id', userId)
+  if (error) throw new Error(error.message)
+  for (const row of rows ?? []) {
+    const nodes = row.nodes ?? []
+    let touched = false
+    const reindexed = nodes.map((n) => {
+      if (n.type !== 'stage') return n
+      const ci = n.data?.colorIdx ?? 0
+      if (ci === stageTypeIdx) { touched = true; return { ...n, data: { ...n.data, colorIdx: 0 } } }
+      if (ci > stageTypeIdx) { touched = true; return { ...n, data: { ...n.data, colorIdx: ci - 1 } } }
+      return n
+    })
+    if (touched) {
+      const { error: uErr } = await admin()
+        .from('canvases')
+        .update({ nodes: reindexed })
+        .eq('user_id', userId)
+        .eq('canvas_id', row.canvas_id)
+      if (uErr) throw new Error(uErr.message)
+    }
+  }
+  return toExternal(next)
 }
 
 // ── Canvas-level ─────────────────────────────────────────────────────────────
@@ -118,13 +179,16 @@ export async function getCanvas(userId, canvasId) {
   return {
     canvas_id: row.canvas_id,
     name: row.name,
+    stage_types: await getStageTypes(userId),
     nodes: (row.nodes ?? []).map((n) => ({
       id: n.id,
       type: n.type,
       position: n.position,
+      width: nodeW(n),
+      height: nodeH(n),
       ...(n.type === 'memo'
         ? { header: n.data?.header ?? '', text: n.data?.text ?? '' }
-        : { label: n.data?.label ?? '', description: n.data?.description ?? '', colorIdx: n.data?.colorIdx ?? 0 }),
+        : { label: n.data?.label ?? '', description: n.data?.description ?? '', stageTypeIdx: n.data?.colorIdx ?? 0 }),
     })),
     edges: (row.edges ?? []).map((e) => ({ id: e.id, source: e.source, target: e.target })),
   }
@@ -184,22 +248,19 @@ export async function createNode(userId, canvasId, opts) {
   const row = await getRow(userId, canvasId)
   const nodes = row.nodes ?? []
   const id = newNodeId()
-
   const position = (Number.isFinite(opts.x) && Number.isFinite(opts.y))
     ? { x: opts.x, y: opts.y }
     : (Number.isFinite(opts.x) || Number.isFinite(opts.y))
       ? { x: Number.isFinite(opts.x) ? opts.x : findFreePosition(nodes).x, y: Number.isFinite(opts.y) ? opts.y : findFreePosition(nodes).y }
       : findFreePosition(nodes)
 
-  let colorIdx = 0
-  if (opts.type !== 'memo' && opts.colorIdx != null) {
-    const stageTypes = await getStageTypes(userId)
-    colorIdx = clampColor(opts.colorIdx, stageTypes.length - 1)
-  }
-
+  const size = clampSize(opts.type, opts.width, opts.height)
+  const base = { id, type: opts.type, position }
+  if (size.width != null) base.width = size.width
+  if (size.height != null) base.height = size.height
   const node = opts.type === 'memo'
-    ? { id, type: 'memo', position, data: { header: opts.header ?? '', text: opts.text ?? '' } }
-    : { id, type: 'stage', position, data: { label: opts.label ?? '새 단계', description: opts.description ?? '', colorIdx } }
+    ? { ...base, data: { header: opts.header ?? '', text: opts.text ?? '' } }
+    : { ...base, data: { label: opts.label ?? '새 단계', description: opts.description ?? '', colorIdx: clampStageTypeIdx(opts.stageTypeIdx) } }
   await saveArrays(userId, canvasId, [...nodes, node], row.edges ?? [])
   return node
 }
@@ -213,16 +274,17 @@ export async function updateNode(userId, canvasId, nodeId, patch) {
   const data = { ...n.data }
   if (patch.label != null) data.label = patch.label
   if (patch.description != null) data.description = patch.description
-  if (patch.colorIdx != null) {
-    const stageTypes = await getStageTypes(userId)
-    data.colorIdx = clampColor(patch.colorIdx, stageTypes.length - 1)
-  }
+  if (patch.stageTypeIdx != null) data.colorIdx = clampStageTypeIdx(patch.stageTypeIdx)
   if (patch.header != null) data.header = patch.header
   if (patch.text != null) data.text = patch.text
   const position = { ...n.position }
   if (Number.isFinite(patch.x)) position.x = patch.x
   if (Number.isFinite(patch.y)) position.y = patch.y
-  nodes[idx] = { ...n, position, data }
+  const next = { ...n, position, data }
+  const size = clampSize(n.type, patch.width, patch.height)
+  if (size.width != null) next.width = size.width
+  if (size.height != null) next.height = size.height
+  nodes[idx] = next
   await saveArrays(userId, canvasId, nodes, row.edges ?? [])
   return nodes[idx]
 }

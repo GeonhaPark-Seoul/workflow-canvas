@@ -22,16 +22,21 @@ Supabase 데이터베이스를 기반으로 동작합니다.
 | 도구 | 설명 |
 |---|---|
 | `get_canvases` | 캔버스 목록 (id, 이름, 노드/연결선 개수) |
-| `get_canvas` | 특정 캔버스의 노드/연결선 데이터 |
-| `create_node` | 노드 추가 (`type`: `stage` 또는 `memo`) |
-| `update_node` | 노드 내용/위치 수정 (제공한 필드만) |
+| `get_canvas` | 특정 캔버스의 노드/연결선 데이터 (단계 종류 목록 포함) |
+| `create_node` | 노드 추가 (`type`: `stage` 또는 `memo`, 위치·크기 `width`/`height` 지정 가능) |
+| `update_node` | 노드 내용/위치/크기 수정 (제공한 필드만) |
 | `delete_node` | 노드 삭제 (연결된 연결선도 함께) |
 | `create_edge` | 두 노드 간 연결선 추가 |
 | `delete_edge` | 연결선 삭제 |
 | `create_canvas` | 새 캔버스 생성 |
 | `clear_canvas` | 캔버스 전체 초기화 |
+| `get_stage_types` | 단계 노드 종류(라벨) 목록 조회 |
+| `create_stage_type` | 새 단계 종류 추가 |
+| `rename_stage_type` | 단계 종류 이름 변경 |
+| `delete_stage_type` | 단계 종류 삭제 (해당 종류를 쓰던 노드는 자동 재분류) |
 
-> 단계 색상 `colorIdx`: `0` 기획 · `1` 개발 · `2` 검토 · `3` 배포 · `4` 완료
+> 단계 노드의 종류(`stageTypeIdx`가 가리키는 라벨)는 고정 값이 아니라 사용자가
+> 자유롭게 이름을 바꾸거나 추가/삭제할 수 있는 목록입니다. `get_stage_types`로 조회하세요.
 
 ---
 

@@ -16,6 +16,7 @@ import StageNode from './nodes/StageNode'
 import MemoNode from './nodes/MemoNode'
 import { DEMO_CANVASES } from './demoCanvases'
 import Toolbar from './components/Toolbar'
+import HelpPanel from './components/HelpPanel'
 import CanvasTabs from './components/CanvasTabs'
 import AuthPanel from './components/AuthPanel'
 import {
@@ -789,6 +790,15 @@ export default function App() {
   const onNodeDrag = useCallback((_e, n) => snapNodeToNeighbors(n), [snapNodeToNeighbors])
   const onNodeDragStop = useCallback((_e, n) => snapNodeToNeighbors(n), [snapNodeToNeighbors])
 
+  // Clicking a node bolds every edge connected to it (reuses the same
+  // selected-edge bold styling as clicking an edge directly — see styledEdges).
+  const onNodeClick = useCallback((_e, node) => {
+    setEdges((eds) => eds.map((e) => ({
+      ...e,
+      selected: e.source === node.id || e.target === node.id,
+    })))
+  }, [setEdges])
+
   // ── Context menus ─────────────────────────────────────────────────────────
   const onPaneContextMenu = useCallback((e) => {
     e.preventDefault()
@@ -1013,6 +1023,7 @@ export default function App() {
         onReconnectEnd={() => setReconnecting(false)}
         onNodeDrag={onNodeDrag}
         onNodeDragStop={onNodeDragStop}
+        onNodeClick={onNodeClick}
         onInit={setRfInstance}
         nodeTypes={nodeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
@@ -1026,6 +1037,7 @@ export default function App() {
         edgesReconnectable={false}
         reconnectRadius={mobile ? 40 : 10}
         connectionMode="loose"
+        connectionRadius={0}
         panOnDrag={false}
         multiSelectionKeyCode={['Shift', 'Meta']}
         panOnScroll={false}
@@ -1050,6 +1062,8 @@ export default function App() {
           />
         )}
       </ReactFlow>
+
+      <HelpPanel mobile={mobile} />
 
       {/* ── Selection rubber-band (long-press drag) ──────────────────────── */}
       {lassoRect && (
