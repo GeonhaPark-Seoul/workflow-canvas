@@ -141,12 +141,16 @@ export default function App() {
   const [cloudSyncing, setCloudSyncing] = useState(false)
   // Stable ref to always-current state for use inside async callbacks
   const latestRef = useRef({ canvases: initCanvasList, activeCanvasId: initActiveId, stageTypes: [], views: [] })
+  const isAnyEditingRef = useRef(false) // mirror for the realtime channel callback
+  const lastPushedCanvasRef = useRef('') // JSON of the last canvas payload saved to cloud
+  const lastPushedPrefsRef = useRef('') // JSON of the last prefs payload saved to cloud
 
   const nextId = () => String(++counterRef.current)
 
   // Keep latestRef and userRef in sync so async callbacks always see fresh state
   useEffect(() => { latestRef.current = { canvases, activeCanvasId, stageTypes, views } }, [canvases, activeCanvasId, stageTypes, views])
   useEffect(() => { userRef.current = user }, [user])
+  useEffect(() => { isAnyEditingRef.current = isAnyEditing }, [isAnyEditing])
 
   // ── Auto-save active canvas + history snapshot (debounced) ───────────────
   useEffect(() => {
@@ -605,21 +609,114 @@ export default function App() {
     return () => subscription.unsubscribe()
   }, [loadFromCloud])
 
+  // ── Realtime: reflect MCP(AI)/other-device writes live ───────────────────
+  // Events are treated as signals only — large jsonb payloads can be truncated,
+  // so the handler always refetches the row instead of applying payload.new.
+  // Requires supabase-realtime.sql (publication + replica identity full).
+  useEffect(() => {
+    if (!user) return
+    const handler = async (payload) => {
+      const id = payload.new?.canvas_id ?? payload.old?.canvas_id
+      if (!id) return
+
+      if (payload.eventType === 'DELETE') {
+        setCanvases((prev) => {
+          const next = prev.filter((c) => c.id !== id)
+          if (!next.length || next.length === prev.length) return prev
+          saveCanvasList(next)
+          deleteCanvasData(id)
+          if (latestRef.current.activeCanvasId === id) loadCanvas(next[0].id)
+          return next
+        })
+        return
+      }
+
+      const { data: row } = await supabase
+        .from('canvases')
+        .select('name, nodes, edges, views, stage_types')
+        .eq('user_id', user.id)
+        .eq('canvas_id', id)
+        .maybeSingle()
+      if (!row) return
+
+      // Keep the tab list in sync (MCP-created canvas / renamed canvas)
+      setCanvases((prev) => {
+        const cur = prev.find((c) => c.id === id)
+        if (cur && cur.name === row.name) return prev
+        const next = cur
+          ? prev.map((c) => (c.id === id ? { ...c, name: row.name } : c))
+          : [...prev, { id, name: row.name }]
+        saveCanvasList(next)
+        return next
+      })
+
+      const mirror = {
+        nodes: row.nodes ?? [],
+        edges: row.edges ?? [],
+        views: row.views ?? [],
+        stageTypes: row.stage_types?.length ? row.stage_types : undefined,
+      }
+      if (latestRef.current.activeCanvasId !== id) {
+        saveCanvasData(id, mirror)
+        return
+      }
+      // Active canvas: never clobber an open editor; skip when content is
+      // unchanged (this also swallows the echo of our own autosave, since the
+      // localStorage mirror is written faster than the echo arrives).
+      if (isAnyEditingRef.current) return
+      const local = loadCanvasData(id) ?? {}
+      if (JSON.stringify({ n: local.nodes ?? [], e: local.edges ?? [] }) ===
+          JSON.stringify({ n: mirror.nodes, e: mirror.edges })) return
+
+      isRestoring.current = true
+      const nEdges = normalizeEdges(mirror.edges)
+      setNodes(mirror.nodes)
+      setEdges(nEdges)
+      setViews(mirror.views)
+      setStageTypes(mirror.stageTypes ?? DEFAULT_STAGE_TYPES)
+      counterRef.current = maxNodeId(mirror.nodes)
+      // Push (not reset) history so Ctrl+Z can undo a remote change
+      const snap = { nodes: mirror.nodes.map(stripNode), edges: nEdges.map(stripEdge) }
+      historyStack.current = [...historyStack.current.slice(0, historyPointer.current + 1), snap]
+      historyPointer.current = historyStack.current.length - 1
+      saveCanvasData(id, mirror)
+      setTimeout(() => { isRestoring.current = false }, 400)
+    }
+
+    const channel = supabase
+      .channel(`canvases-live-${user.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'canvases', filter: `user_id=eq.${user.id}` }, handler)
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [user, loadCanvas, setNodes, setEdges])
+
   // ── Cloud auto-save (debounced 1.5 s, only when logged in) ───────────────
   const cloudSaveTimer = useRef(null)
   useEffect(() => {
     if (!user) return
     clearTimeout(cloudSaveTimer.current)
-    setCloudSyncing(true)
     cloudSaveTimer.current = setTimeout(async () => {
       const { canvases: cvs, activeCanvasId: aid, stageTypes: types, views: vws } = latestRef.current
       const snapshot = { nodes: nodes.map(stripNode), edges: edges.map(stripEdge) }
       const name = cvs.find((c) => c.id === aid)?.name ?? '캔버스'
+      // Dirty-check: skip writes whose payload didn't change since the last
+      // push. An idle browser must not keep rewriting the row — that would
+      // clobber concurrent MCP(AI) writes with stale local state.
+      const canvasPayload = JSON.stringify({ aid, name, nodes: snapshot.nodes, edges: snapshot.edges, vws, types })
+      const prefsPayload = JSON.stringify({ aid, cvs })
+      const jobs = []
+      if (canvasPayload !== lastPushedCanvasRef.current) {
+        jobs.push(cloudSaveCanvas(user.id, aid, name, snapshot.nodes, snapshot.edges, vws, types)
+          .then(() => { lastPushedCanvasRef.current = canvasPayload }))
+      }
+      if (prefsPayload !== lastPushedPrefsRef.current) {
+        jobs.push(cloudSaveUserPrefs(user.id, { active_canvas_id: aid, canvas_order: cvs })
+          .then(() => { lastPushedPrefsRef.current = prefsPayload }))
+      }
+      if (!jobs.length) return
+      setCloudSyncing(true)
       try {
-        await Promise.all([
-          cloudSaveCanvas(user.id, aid, name, snapshot.nodes, snapshot.edges, vws, types),
-          cloudSaveUserPrefs(user.id, { active_canvas_id: aid, canvas_order: cvs }),
-        ])
+        await Promise.all(jobs)
       } catch (err) {
         console.error('[cloud] autosave:', err.message)
       }

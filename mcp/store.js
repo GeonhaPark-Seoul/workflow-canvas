@@ -6,6 +6,11 @@
 // maps to a user id via the `mcp_tokens` table; a raw Supabase access token
 // (JWT) is also accepted as a fallback.
 import { createClient } from '@supabase/supabase-js'
+import { sanitizeTextFields } from './sanitize.js'
+import {
+  SIZE, nodeW, nodeH, nodeRect, overlaps, findNonOverlapping,
+  layoutGraph, validateGraphInput,
+} from './layout.js'
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://tuaifwiigkacrflbhjmu.supabase.co'
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -20,9 +25,21 @@ function admin() {
 const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 const newNodeId = () => `n-${uid()}`
 const newEdgeId = () => `e-${uid()}`
-// 상한 없음: 종류 목록 길이는 사용자마다 다른 동적 값이라 서버에서 강제하지 않는다
-// (프런트엔드가 렌더 시 stageTypes.length-1로 안전하게 클램프함).
-const clampStageTypeIdx = (c) => Math.max(Number.isInteger(c) ? c : 0, 0)
+
+// Teaching validation: reject out-of-range indexes with the fix spelled out,
+// instead of silently clamping (a silent clamp hides the AI's mistake).
+function assertStageTypeIdx(types, idx) {
+  if (idx == null) return 0
+  if (!Number.isInteger(idx) || idx < 0 || idx >= types.length) {
+    throw new Error(
+      `stageTypeIdx ${idx}는 유효 범위를 벗어났습니다. 이 캔버스의 유효 범위: 0..${types.length - 1}. ` +
+      'get_stage_types로 현재 종류 목록을 확인한 뒤 다시 시도하세요.')
+  }
+  return idx
+}
+
+const findDuplicateEdge = (edges, source, target) =>
+  (edges ?? []).find((e) => e.source === source && e.target === target)
 
 // 단계 종류(stage type) 기본값/팔레트 — src/App.jsx의 DEFAULT_STAGE_TYPES/TYPE_PALETTE와 동일
 const DEFAULT_STAGE_TYPES = [
@@ -42,11 +59,8 @@ const TYPE_PALETTE = [
 const FLOW_STYLE = { stroke: '#4a4a5a', strokeWidth: 2 }
 const NOTE_STYLE = { stroke: '#f59e0b88', strokeWidth: 1.5, strokeDasharray: '5,4' }
 
-// 명시적 크기가 없을 때의 기본/최소 렌더 크기 (StageNode/MemoNode의 minWidth/minHeight와 정합)
-const SIZE = {
-  stage: { w: 220, h: 90, minW: 200, minH: 80 },
-  memo:  { w: 180, h: 90, minW: 160, minH: 80 },
-}
+// SIZE/nodeW/nodeH live in layout.js (shared with auto-layout); clampSize
+// enforces the frontend NodeResizer minimums on MCP-supplied dimensions.
 const clampSize = (type, w, h) => {
   const s = SIZE[type] ?? SIZE.stage
   return {
@@ -54,8 +68,6 @@ const clampSize = (type, w, h) => {
     height: Number.isFinite(h) ? Math.max(h, s.minH) : undefined,
   }
 }
-const nodeW = (n) => n.width  ?? SIZE[n.type]?.w ?? SIZE.stage.w
-const nodeH = (n) => n.height ?? SIZE[n.type]?.h ?? SIZE.stage.h
 
 // Pick the handle pair (side of each node) that best matches the direction
 // between the two node centers — used as the default when the caller doesn't
@@ -178,11 +190,16 @@ export async function getCanvas(userId, canvasId) {
       position: n.position,
       width: nodeW(n),
       height: nodeH(n),
+      dimmed: n.data?.dimmed ?? false,
       ...(n.type === 'memo'
         ? { header: n.data?.header ?? '', text: n.data?.text ?? '' }
         : { label: n.data?.label ?? '', description: n.data?.description ?? '', stageTypeIdx: n.data?.colorIdx ?? 0 }),
     })),
-    edges: (row.edges ?? []).map((e) => ({ id: e.id, source: e.source, target: e.target })),
+    edges: (row.edges ?? []).map((e) => ({
+      id: e.id, source: e.source, target: e.target,
+      ...(e.sourceHandle ? { sourceHandle: e.sourceHandle } : {}),
+      ...(e.targetHandle ? { targetHandle: e.targetHandle } : {}),
+    })),
   }
 }
 
@@ -207,6 +224,60 @@ export async function createCanvas(userId, name) {
 export async function clearCanvas(userId, canvasId) {
   await getRow(userId, canvasId) // ownership / existence check
   await saveArrays(userId, canvasId, [], [])
+}
+
+async function loadPrefs(userId) {
+  const { data, error } = await admin()
+    .from('user_prefs')
+    .select('active_canvas_id, canvas_order')
+    .eq('user_id', userId)
+    .maybeSingle()
+  if (error) throw new Error(error.message)
+  return data
+}
+
+async function savePrefs(userId, patch) {
+  const { error } = await admin()
+    .from('user_prefs')
+    .upsert({ user_id: userId, ...patch }, { onConflict: 'user_id' })
+  if (error) throw new Error(error.message)
+}
+
+// The browser builds its tab list from user_prefs.canvas_order (not from
+// canvases.name), so a rename must update both places to show up in tabs.
+export async function renameCanvas(userId, canvasId, name) {
+  const trimmed = name?.trim()
+  if (!trimmed) throw new Error('캔버스 이름은 비어있을 수 없습니다.')
+  await getRow(userId, canvasId) // ownership / existence check
+  const { error } = await admin().from('canvases').update({ name: trimmed }).eq('user_id', userId).eq('canvas_id', canvasId)
+  if (error) throw new Error(error.message)
+  const prefs = await loadPrefs(userId)
+  if (prefs?.canvas_order?.some((c) => c.id === canvasId)) {
+    await savePrefs(userId, {
+      canvas_order: prefs.canvas_order.map((c) => (c.id === canvasId ? { ...c, name: trimmed } : c)),
+    })
+  }
+  return { canvas_id: canvasId, name: trimmed }
+}
+
+export async function deleteCanvasRow(userId, canvasId) {
+  await getRow(userId, canvasId) // ownership / existence check
+  const { count, error: cntErr } = await admin()
+    .from('canvases')
+    .select('canvas_id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+  if (cntErr) throw new Error(cntErr.message)
+  if ((count ?? 0) <= 1) throw new Error('마지막 캔버스는 삭제할 수 없습니다 (최소 1개 유지).')
+  const { error } = await admin().from('canvases').delete().eq('user_id', userId).eq('canvas_id', canvasId)
+  if (error) throw new Error(error.message)
+  const prefs = await loadPrefs(userId)
+  if (prefs) {
+    const order = (prefs.canvas_order ?? []).filter((c) => c.id !== canvasId)
+    const patch = { canvas_order: order }
+    if (prefs.active_canvas_id === canvasId) patch.active_canvas_id = order[0]?.id ?? null
+    await savePrefs(userId, patch)
+  }
+  return { deleted: canvasId }
 }
 
 // Free-spot placement: scan grid candidates so auto-placed nodes never overlap
@@ -236,39 +307,66 @@ function findFreePosition(existingNodes) {
 }
 
 // ── Node-level ───────────────────────────────────────────────────────────────
+// Build the stored node object shared by createNode and createGraph.
+function materializeNode(opts, position, types) {
+  const size = clampSize(opts.type, opts.width, opts.height)
+  const base = { id: newNodeId(), type: opts.type, position }
+  if (size.width != null) base.width = size.width
+  if (size.height != null) base.height = size.height
+  const dimmed = opts.dimmed === true ? { dimmed: true } : {}
+  return opts.type === 'memo'
+    ? { ...base, data: { header: opts.header ?? '', text: opts.text ?? '', ...dimmed } }
+    : {
+        ...base,
+        data: {
+          label: opts.label ?? '새 단계',
+          description: opts.description ?? '',
+          colorIdx: assertStageTypeIdx(types, opts.stageTypeIdx ?? opts.colorIdx),
+          ...dimmed,
+        },
+      }
+}
+
 export async function createNode(userId, canvasId, opts) {
   const row = await getRow(userId, canvasId)
   const nodes = row.nodes ?? []
-  const id = newNodeId()
-  const position = (Number.isFinite(opts.x) && Number.isFinite(opts.y))
+  sanitizeTextFields(opts)
+  const explicit = Number.isFinite(opts.x) && Number.isFinite(opts.y)
+  let position = explicit
     ? { x: opts.x, y: opts.y }
     : (Number.isFinite(opts.x) || Number.isFinite(opts.y))
       ? { x: Number.isFinite(opts.x) ? opts.x : findFreePosition(nodes).x, y: Number.isFinite(opts.y) ? opts.y : findFreePosition(nodes).y }
       : findFreePosition(nodes)
 
-  const size = clampSize(opts.type, opts.width, opts.height)
-  const base = { id, type: opts.type, position }
-  if (size.width != null) base.width = size.width
-  if (size.height != null) base.height = size.height
-  const node = opts.type === 'memo'
-    ? { ...base, data: { header: opts.header ?? '', text: opts.text ?? '' } }
-    : { ...base, data: { label: opts.label ?? '새 단계', description: opts.description ?? '', colorIdx: clampStageTypeIdx(opts.stageTypeIdx ?? opts.colorIdx) } }
+  // Overlap enforcement: an explicitly-placed node that collides with an
+  // existing one gets shifted to the nearest free spot (reported, not fatal).
+  let shifted = null
+  if (explicit) {
+    const size = clampSize(opts.type, opts.width, opts.height)
+    const w = size.width ?? SIZE[opts.type]?.w ?? SIZE.stage.w
+    const h = size.height ?? SIZE[opts.type]?.h ?? SIZE.stage.h
+    const spot = findNonOverlapping(nodes.map(nodeRect), position, w, h)
+    if (spot.shifted) {
+      shifted = { from: position, to: { x: spot.x, y: spot.y } }
+      position = { x: spot.x, y: spot.y }
+    }
+  }
+
+  const node = materializeNode(opts, position, rowStageTypes(row))
   await saveArrays(userId, canvasId, [...nodes, node], row.edges ?? [])
-  return node
+  return shifted ? { ...node, shifted } : node
 }
 
-export async function updateNode(userId, canvasId, nodeId, patch) {
-  const row = await getRow(userId, canvasId)
-  const nodes = [...(row.nodes ?? [])]
-  const idx = nodes.findIndex((n) => n.id === nodeId)
-  if (idx < 0) throw new Error(`노드를 찾을 수 없습니다: ${nodeId}`)
-  const n = nodes[idx]
+// Per-node patch application, shared by updateNode and updateNodes.
+function applyPatch(n, patch, types) {
+  sanitizeTextFields(patch)
   const data = { ...n.data }
   if (patch.label != null) data.label = patch.label
   if (patch.description != null) data.description = patch.description
-  if (patch.stageTypeIdx != null || patch.colorIdx != null) data.colorIdx = clampStageTypeIdx(patch.stageTypeIdx ?? patch.colorIdx)
+  if (patch.stageTypeIdx != null || patch.colorIdx != null) data.colorIdx = assertStageTypeIdx(types, patch.stageTypeIdx ?? patch.colorIdx)
   if (patch.header != null) data.header = patch.header
   if (patch.text != null) data.text = patch.text
+  if (patch.dimmed != null) data.dimmed = patch.dimmed === true
   const position = { ...n.position }
   if (Number.isFinite(patch.x)) position.x = patch.x
   if (Number.isFinite(patch.y)) position.y = patch.y
@@ -276,9 +374,35 @@ export async function updateNode(userId, canvasId, nodeId, patch) {
   const size = clampSize(n.type, patch.width, patch.height)
   if (size.width != null) next.width = size.width
   if (size.height != null) next.height = size.height
-  nodes[idx] = next
+  return next
+}
+
+export async function updateNode(userId, canvasId, nodeId, patch) {
+  const row = await getRow(userId, canvasId)
+  const nodes = [...(row.nodes ?? [])]
+  const idx = nodes.findIndex((n) => n.id === nodeId)
+  if (idx < 0) throw new Error(`노드를 찾을 수 없습니다: ${nodeId}`)
+  nodes[idx] = applyPatch(nodes[idx], patch, rowStageTypes(row))
   await saveArrays(userId, canvasId, nodes, row.edges ?? [])
   return nodes[idx]
+}
+
+// Bulk update: all node_ids must exist (fail-all before any write), one save.
+export async function updateNodes(userId, canvasId, patches) {
+  const row = await getRow(userId, canvasId)
+  const nodes = [...(row.nodes ?? [])]
+  const byId = new Map(nodes.map((n, i) => [n.id, i]))
+  const missing = patches.filter((p) => !byId.has(p.node_id)).map((p) => p.node_id)
+  if (missing.length) {
+    throw new Error(`노드를 찾을 수 없습니다: ${missing.join(', ')}. get_canvas로 현재 노드 id를 확인하세요.`)
+  }
+  const types = rowStageTypes(row)
+  for (const p of patches) {
+    const i = byId.get(p.node_id)
+    nodes[i] = applyPatch(nodes[i], p, types)
+  }
+  await saveArrays(userId, canvasId, nodes, row.edges ?? [])
+  return { updated: patches.map((p) => p.node_id), count: patches.length }
 }
 
 export async function deleteNode(userId, canvasId, nodeId) {
@@ -290,6 +414,23 @@ export async function deleteNode(userId, canvasId, nodeId) {
   return { deleted: nodeId, remaining_nodes: nodes.length }
 }
 
+// Bulk delete: idempotent-friendly — deletes what it finds, reports the rest.
+export async function deleteNodes(userId, canvasId, nodeIds) {
+  const row = await getRow(userId, canvasId)
+  const ids = new Set(nodeIds)
+  const found = (row.nodes ?? []).filter((n) => ids.has(n.id)).map((n) => n.id)
+  if (!found.length) throw new Error(`노드를 찾을 수 없습니다: ${nodeIds.join(', ')}. get_canvas로 현재 노드 id를 확인하세요.`)
+  const foundSet = new Set(found)
+  const nodes = (row.nodes ?? []).filter((n) => !foundSet.has(n.id))
+  const edges = (row.edges ?? []).filter((e) => !foundSet.has(e.source) && !foundSet.has(e.target))
+  await saveArrays(userId, canvasId, nodes, edges)
+  return {
+    deleted: found,
+    not_found: nodeIds.filter((id) => !foundSet.has(id)),
+    remaining_nodes: nodes.length,
+  }
+}
+
 // ── Edge-level ───────────────────────────────────────────────────────────────
 export async function createEdge(userId, canvasId, { source, target, sourceHandle, targetHandle }) {
   const row = await getRow(userId, canvasId)
@@ -298,11 +439,23 @@ export async function createEdge(userId, canvasId, { source, target, sourceHandl
   const tNode = nodes.find((n) => n.id === target)
   if (!sNode) throw new Error(`출발 노드를 찾을 수 없습니다: ${source}`)
   if (!tNode) throw new Error(`도착 노드를 찾을 수 없습니다: ${target}`)
+  const dup = findDuplicateEdge(row.edges, source, target)
+  if (dup) {
+    throw new Error(
+      `이미 같은 방향의 연결이 있습니다 (edge_id: ${dup.id}). 중복 연결은 대부분 실수입니다 — ` +
+      '정말 평행선이 필요하면 먼저 delete_edge로 기존 것을 지우세요.')
+  }
+  const edge = buildEdge({ source, target, sourceHandle, targetHandle }, sNode, tNode)
+  await saveArrays(userId, canvasId, nodes, [...(row.edges ?? []), edge])
+  return edge
+}
+
+// Shared edge construction (createEdge + createGraph): memo links are dashed,
+// missing handles are auto-computed from the two nodes' final positions.
+function buildEdge({ source, target, sourceHandle, targetHandle }, sNode, tNode) {
   const isMemo = sNode.type === 'memo' || tNode.type === 'memo'
-  // Fill in whichever handle the caller didn't pin, from actual node positions —
-  // avoids the AI mechanically repeating the same side regardless of real layout.
   const auto = (!sourceHandle || !targetHandle) ? closestHandles(sNode, tNode) : {}
-  const edge = {
+  return {
     id: newEdgeId(),
     source,
     target,
@@ -311,8 +464,69 @@ export async function createEdge(userId, canvasId, { source, target, sourceHandl
     style: isMemo ? NOTE_STYLE : FLOW_STYLE,
     markerEnd: { type: 'arrowclosed', color: isMemo ? '#f59e0b88' : '#4a4a5a' },
   }
-  await saveArrays(userId, canvasId, nodes, [...(row.edges ?? []), edge])
-  return edge
+}
+
+// ── create_graph: whole graph in one call (1 read + 1 write) ─────────────────
+export async function createGraph(userId, canvasId, { nodes: nodeInputs, edges: edgeInputs = [], layout }) {
+  const row = await getRow(userId, canvasId)
+  const existing = row.nodes ?? []
+  const types = rowStageTypes(row)
+
+  // Layout mode: explicit param wins; default auto when any position missing.
+  const mode = layout ?? (nodeInputs.some((n) => !Number.isFinite(n.x) || !Number.isFinite(n.y)) ? 'auto' : 'manual')
+  validateGraphInput({ nodes: nodeInputs, edges: edgeInputs }, existing, types, mode)
+  nodeInputs.forEach(sanitizeTextFields)
+
+  // Positions
+  const shifted = []
+  const positions = new Map() // tmp_id -> {x,y}
+  if (mode === 'auto') {
+    const auto = layoutGraph({ newNodes: nodeInputs, newEdges: edgeInputs, existingNodes: existing })
+    for (const n of nodeInputs) positions.set(n.tmp_id, auto.get(n.tmp_id))
+  } else {
+    const placedRects = existing.map(nodeRect)
+    for (const n of nodeInputs) {
+      const size = clampSize(n.type, n.width, n.height)
+      const w = size.width ?? SIZE[n.type]?.w ?? SIZE.stage.w
+      const h = size.height ?? SIZE[n.type]?.h ?? SIZE.stage.h
+      const spot = findNonOverlapping(placedRects, { x: n.x, y: n.y }, w, h)
+      if (spot.shifted) shifted.push({ tmp_id: n.tmp_id, from: { x: n.x, y: n.y }, to: { x: spot.x, y: spot.y } })
+      positions.set(n.tmp_id, { x: spot.x, y: spot.y })
+      placedRects.push({ x: spot.x, y: spot.y, w, h })
+    }
+  }
+
+  // Materialize nodes; map tmp ids -> real ids
+  const idMap = new Map()
+  const newNodes = nodeInputs.map((n) => {
+    const node = materializeNode(n, positions.get(n.tmp_id), types)
+    idMap.set(n.tmp_id, node.id)
+    return node
+  })
+
+  // Materialize edges: resolve refs, silently dedupe (within call + vs existing)
+  const allNodes = [...existing, ...newNodes]
+  const byId = new Map(allNodes.map((n) => [n.id, n]))
+  const newEdges = []
+  const skippedDuplicates = []
+  const seenPairs = new Set((row.edges ?? []).map((e) => `${e.source}→${e.target}`))
+  for (const e of edgeInputs) {
+    const source = idMap.get(e.source) ?? e.source
+    const target = idMap.get(e.target) ?? e.target
+    const key = `${source}→${target}`
+    if (seenPairs.has(key)) { skippedDuplicates.push({ source: e.source, target: e.target }); continue }
+    seenPairs.add(key)
+    newEdges.push(buildEdge({ source, target, sourceHandle: e.sourceHandle, targetHandle: e.targetHandle }, byId.get(source), byId.get(target)))
+  }
+
+  await saveArrays(userId, canvasId, allNodes, [...(row.edges ?? []), ...newEdges])
+  return {
+    created_nodes: nodeInputs.map((n) => ({ tmp_id: n.tmp_id, id: idMap.get(n.tmp_id), ...positions.get(n.tmp_id) })),
+    created_edges: newEdges.map((e) => ({ id: e.id, source: e.source, target: e.target })),
+    ...(skippedDuplicates.length ? { skipped_duplicate_edges: skippedDuplicates } : {}),
+    ...(shifted.length ? { shifted } : {}),
+    layout: mode,
+  }
 }
 
 export async function deleteEdge(userId, canvasId, edgeId) {
