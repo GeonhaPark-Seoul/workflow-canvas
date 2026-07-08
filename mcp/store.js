@@ -46,13 +46,13 @@ const DEFAULT_STAGE_TYPES = [
   { id: 'plan',   bg: '#1e3a5f', border: '#3b82f6', label: '기획' },
   { id: 'dev',    bg: '#1a3a2a', border: '#22c55e', label: '개발' },
   { id: 'review', bg: '#3a1a1a', border: '#ef4444', label: '검토' },
-  { id: 'deploy', bg: '#2d2a1a', border: '#f59e0b', label: '배포' },
+  { id: 'deploy', bg: '#1a2a3a', border: '#06b6d4', label: '배포' },
   { id: 'done',   bg: '#2a1a3a', border: '#a855f7', label: '완료' },
 ]
 const TYPE_PALETTE = [
   { bg: '#1e3a5f', border: '#3b82f6' }, { bg: '#1a3a2a', border: '#22c55e' },
-  { bg: '#3a1a1a', border: '#ef4444' }, { bg: '#2d2a1a', border: '#f59e0b' },
-  { bg: '#2a1a3a', border: '#a855f7' }, { bg: '#1a2a3a', border: '#06b6d4' },
+  { bg: '#3a1a1a', border: '#ef4444' }, { bg: '#1a2a3a', border: '#06b6d4' },
+  { bg: '#2a1a3a', border: '#a855f7' }, { bg: '#20204a', border: '#6366f1' },
   { bg: '#2a1a2a', border: '#ec4899' }, { bg: '#2a2a1a', border: '#84cc16' },
 ]
 
@@ -466,6 +466,22 @@ function buildEdge({ source, target, sourceHandle, targetHandle }, sNode, tNode)
   }
 }
 
+// Auto heuristic: pick 'radial' when there is exactly one in-degree-0 stage,
+// that stage has out-degree ≥ 3, and the total stage count ≥ 5.
+function autoPreset(nodeInputs, edgeInputs) {
+  const stageIds = new Set(nodeInputs.filter((n) => n.type === 'stage').map((n) => n.tmp_id))
+  const stageEdges = (edgeInputs ?? []).filter((e) => stageIds.has(e.source) && stageIds.has(e.target))
+  const inDeg = new Map([...stageIds].map((id) => [id, 0]))
+  const outDeg = new Map([...stageIds].map((id) => [id, 0]))
+  for (const e of stageEdges) {
+    inDeg.set(e.target, inDeg.get(e.target) + 1)
+    outDeg.set(e.source, outDeg.get(e.source) + 1)
+  }
+  const zeroDegIds = [...stageIds].filter((id) => inDeg.get(id) === 0)
+  if (stageIds.size >= 5 && zeroDegIds.length === 1 && outDeg.get(zeroDegIds[0]) >= 3) return 'radial'
+  return 'right'
+}
+
 // ── create_graph: whole graph in one call (1 read + 1 write) ─────────────────
 export async function createGraph(userId, canvasId, { nodes: nodeInputs, edges: edgeInputs = [], layout }) {
   const row = await getRow(userId, canvasId)
@@ -477,12 +493,25 @@ export async function createGraph(userId, canvasId, { nodes: nodeInputs, edges: 
   validateGraphInput({ nodes: nodeInputs, edges: edgeInputs }, existing, types, mode)
   nodeInputs.forEach(sanitizeTextFields)
 
+  // Resolve the actual layout preset (for non-manual modes)
+  const preset = mode === 'manual' ? null
+    : mode === 'auto' ? autoPreset(nodeInputs, edgeInputs)
+    : mode // 'radial', 'right', 'down', 'left', 'up'
+
   // Positions
   const shifted = []
-  const positions = new Map() // tmp_id -> {x,y}
-  if (mode === 'auto') {
-    const auto = layoutGraph({ newNodes: nodeInputs, newEdges: edgeInputs, existingNodes: existing })
-    for (const n of nodeInputs) positions.set(n.tmp_id, auto.get(n.tmp_id))
+  const positions = new Map() // tmp_id -> {x, y}
+  // layoutSizes carries width/height assigned by the layout algorithm (radial only)
+  const layoutSizes = new Map() // tmp_id -> {width?, height?}
+  if (mode !== 'manual') {
+    const auto = layoutGraph({ newNodes: nodeInputs, newEdges: edgeInputs, existingNodes: existing, preset })
+    for (const n of nodeInputs) {
+      const entry = auto.get(n.tmp_id)
+      positions.set(n.tmp_id, { x: entry.x, y: entry.y })
+      if (entry.width != null || entry.height != null) {
+        layoutSizes.set(n.tmp_id, { width: entry.width, height: entry.height })
+      }
+    }
   } else {
     const placedRects = existing.map(nodeRect)
     for (const n of nodeInputs) {
@@ -496,10 +525,15 @@ export async function createGraph(userId, canvasId, { nodes: nodeInputs, edges: 
     }
   }
 
-  // Materialize nodes; map tmp ids -> real ids
+  // Materialize nodes; map tmp ids -> real ids.
+  // When the layout assigned a size (radial) and the input node had none, persist it.
   const idMap = new Map()
   const newNodes = nodeInputs.map((n) => {
-    const node = materializeNode(n, positions.get(n.tmp_id), types)
+    const lsz = layoutSizes.get(n.tmp_id)
+    const merged = lsz
+      ? { ...n, width: n.width ?? lsz.width, height: n.height ?? lsz.height }
+      : n
+    const node = materializeNode(merged, positions.get(n.tmp_id), types)
     idMap.set(n.tmp_id, node.id)
     return node
   })
@@ -525,7 +559,7 @@ export async function createGraph(userId, canvasId, { nodes: nodeInputs, edges: 
     created_edges: newEdges.map((e) => ({ id: e.id, source: e.source, target: e.target })),
     ...(skippedDuplicates.length ? { skipped_duplicate_edges: skippedDuplicates } : {}),
     ...(shifted.length ? { shifted } : {}),
-    layout: mode,
+    layout: preset ?? mode,
   }
 }
 

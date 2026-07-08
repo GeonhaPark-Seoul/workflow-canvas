@@ -1,7 +1,7 @@
 // Unit tests for mcp/layout.js and mcp/sanitize.js — plain node, no deps, no DB.
 // Run: node scripts/test-mcp-logic.mjs
 import assert from 'node:assert/strict'
-import { layoutGraph, findNonOverlapping, validateGraphInput, overlaps, nodeRect } from '../mcp/layout.js'
+import { layoutGraph, findNonOverlapping, validateGraphInput, overlaps, nodeRect, RADIAL_SIZE } from '../mcp/layout.js'
 import { sanitizeHtml } from '../mcp/sanitize.js'
 
 let passed = 0
@@ -78,6 +78,68 @@ t('non-empty canvas: layout translated below existing content', () => {
   const existing = [{ id: 'e1', type: 'stage', position: { x: 0, y: 300 }, height: 90 }]
   const pos = layoutGraph({ newNodes: [stage('A')], newEdges: [], existingNodes: existing })
   assert.ok(pos.get('A').y >= 300 + 90 + 160)
+})
+
+console.log('layoutGraph — presets')
+
+t('preset:left mirrors right horizontally', () => {
+  const posR = layoutGraph({ newNodes: [stage('A'), stage('B'), stage('C')], newEdges: [edge('A', 'B'), edge('B', 'C')], existingNodes: [], preset: 'right' })
+  const posL = layoutGraph({ newNodes: [stage('A'), stage('B'), stage('C')], newEdges: [edge('A', 'B'), edge('B', 'C')], existingNodes: [], preset: 'left' })
+  // In left preset A should have larger x than C (reversed)
+  assert.ok(posL.get('A').x > posL.get('C').x, 'A is rightmost in left-preset')
+  assert.equal(posR.get('A').y, posL.get('A').y, 'y unchanged by mirror')
+})
+
+t('preset:down swaps axes (layers become rows top→bottom)', () => {
+  const pos = layoutGraph({ newNodes: [stage('A'), stage('B'), stage('C')], newEdges: [edge('A', 'B'), edge('B', 'C')], existingNodes: [], preset: 'down' })
+  // With down preset, layer increment maps to y increment
+  assert.ok(pos.get('B').y > pos.get('A').y, 'B below A')
+  assert.ok(pos.get('C').y > pos.get('B').y, 'C below B')
+  assert.equal(pos.get('A').x, pos.get('B').x, 'same column (no siblings)')
+})
+
+console.log('layoutGraph — radial')
+
+t('radial: root is placed at canvas origin (100,100)', () => {
+  // Star: R -> A, B, C (R is the hub)
+  const nodes = [stage('R'), stage('A'), stage('B'), stage('C')]
+  const edges = [edge('R', 'A'), edge('R', 'B'), edge('R', 'C')]
+  const pos = layoutGraph({ newNodes: nodes, newEdges: edges, existingNodes: [], preset: 'radial' })
+  // Root should be at origin (100,100) after translation
+  // The root center is 0,0 before translation; top-left = (-w/2, -h/2) before translation
+  // After translation minX/minY -> 100: root top-left should be at 100,100
+  const rootEntry = pos.get('R')
+  assert.ok(rootEntry.x >= 100, 'root x >= 100')
+  assert.ok(rootEntry.y >= 100, 'root y >= 100')
+})
+
+t('radial: level-0 gets L0 size, level-1 gets L1 size (when no explicit width)', () => {
+  const nodes = [stage('R'), stage('A'), stage('B'), stage('C')]
+  const edges = [edge('R', 'A'), edge('R', 'B'), edge('R', 'C')]
+  const pos = layoutGraph({ newNodes: nodes, newEdges: edges, existingNodes: [], preset: 'radial' })
+  // Root carries width/height = RADIAL_SIZE[0]
+  assert.equal(pos.get('R').width, RADIAL_SIZE[0].w, 'root width = L0 width')
+  assert.equal(pos.get('R').height, RADIAL_SIZE[0].h, 'root height = L0 height')
+  // Level-1 children carry RADIAL_SIZE[1]
+  assert.equal(pos.get('A').width, RADIAL_SIZE[1].w, 'L1 child width')
+})
+
+t('radial: no two nodes overlap (simple star with 4 children)', () => {
+  const children = ['A', 'B', 'C', 'D']
+  const nodes = [stage('R'), ...children.map(stage)]
+  const edges = children.map((c) => edge('R', c))
+  const pos = layoutGraph({ newNodes: nodes, newEdges: edges, existingNodes: [], preset: 'radial' })
+  const rects = [...pos.entries()].map(([id, p]) => {
+    const n = nodes.find((x) => x.tmp_id === id)
+    const w = p.width ?? (n?.type === 'memo' ? 180 : 220)
+    const h = p.height ?? 90
+    return { x: p.x, y: p.y, w, h }
+  })
+  for (let i = 0; i < rects.length; i++) {
+    for (let j = i + 1; j < rects.length; j++) {
+      assert.ok(!overlaps(rects[i], rects[j], 0, 0), `nodes ${i} and ${j} overlap`)
+    }
+  }
 })
 
 console.log('findNonOverlapping / overlaps')

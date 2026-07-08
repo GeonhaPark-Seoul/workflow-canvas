@@ -46,7 +46,7 @@ const DEFAULT_STAGE_TYPES = [
   { id: 'plan',   bg: '#1e3a5f', border: '#3b82f6', label: '기획' },
   { id: 'dev',    bg: '#1a3a2a', border: '#22c55e', label: '개발' },
   { id: 'review', bg: '#3a1a1a', border: '#ef4444', label: '검토' },
-  { id: 'deploy', bg: '#2d2a1a', border: '#f59e0b', label: '배포' },
+  { id: 'deploy', bg: '#1a2a3a', border: '#06b6d4', label: '배포' },
   { id: 'done',   bg: '#2a1a3a', border: '#a855f7', label: '완료' },
 ]
 
@@ -54,9 +54,9 @@ const TYPE_PALETTE = [
   { bg: '#1e3a5f', border: '#3b82f6' },
   { bg: '#1a3a2a', border: '#22c55e' },
   { bg: '#3a1a1a', border: '#ef4444' },
-  { bg: '#2d2a1a', border: '#f59e0b' },
-  { bg: '#2a1a3a', border: '#a855f7' },
   { bg: '#1a2a3a', border: '#06b6d4' },
+  { bg: '#2a1a3a', border: '#a855f7' },
+  { bg: '#20204a', border: '#6366f1' },
   { bg: '#2a1a2a', border: '#ec4899' },
   { bg: '#2a2a1a', border: '#84cc16' },
 ]

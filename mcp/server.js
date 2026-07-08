@@ -91,6 +91,13 @@ stageTypeIdx는 stage 노드의 종류를 나타내는 index입니다 (get_stage
 sourceHandle/targetHandle은 생략 가능합니다 — 생략하면 두 노드의 실제 좌표를 기준으로 가장 자연스러운 면이 자동으로 선택됩니다. 특정 면을 강제하고 싶을 때만 지정하세요.
 같은 방향의 중복 연결(같은 source→target)은 거부됩니다.
 
+## 계층 구조 표현
+중심 주제에서 뻗어나가는 계층 구조라면:
+- 같은 계층의 노드는 같은 stage 종류를 공유할 것 (stage type = 계층 레벨). 노드마다 다른 종류를 주지 말 것.
+- 종류 이름은 내용에 맞게 rename_stage_type으로 바꿀 것. 마땅한 이름이 없으면 '핵심 주제', '1단계', '2단계'… 또는 '최상위/상위/하위'.
+- 계층이 높을수록 노드를 크게: 최상위 340×150, 중간 270×115, 기본 220×90 (layout:'radial'이 자동 적용; 글씨 크기는 노드 크기에 비례해 자동으로 커짐).
+- layout:'radial'을 쓰면 4방향 배치·크기·메모 꼬리표가 자동 처리됨.
+
 ## 반영
 로그인된 브라우저는 MCP 변경을 몇 초 내 자동으로 반영합니다 (새로고침 불필요).
 `.trim()
@@ -206,9 +213,14 @@ export function buildServer(getUserId) {
       '<div class="cl-item"><input type="checkbox">&nbsp;항목</div> 반복\n' +
       '- 접을 내용은 <details><summary>제목</summary><div>내용</div></details>, 강조는 <b>, <font color>\n\n' +
       '【배치】\n' +
-      'layout 생략(권장) 시 자동 배치: 좌→우 위상 정렬(열 320px/행 200px 간격), memo는 연결된 stage의 ' +
-      '위·아래, 전체가 기존 노드 아래 빈 영역에 놓임. 이때 노드의 x/y 입력은 무시됨. ' +
-      "위치를 전부 직접 지정하려면 layout:'manual' + 모든 노드에 x/y 필수 (겹치면 자동 이동 후 shifted로 보고).\n\n" +
+      'layout 프리셋: radial=4방향 확장형(중심 주제·계층 구조에 권장: 중심에서 1계층이 4방향으로, ' +
+      '하위 계층이 바깥으로 뻗음, 메모는 꼬리표처럼 수직으로), ' +
+      'right/down/left/up=방향 확장형(순서·흐름), manual=직접 좌표(모든 노드에 x/y 필수). ' +
+      "auto(기본): in-degree-0 stage가 정확히 1개이고 out-degree≥3이고 stage 수≥5이면 radial, 아니면 right.\n\n" +
+      '【계층 구조 표현 — 계층적 주제에 create_graph를 쓸 때 반드시 적용】\n' +
+      '- 같은 계층 = 같은 stageTypeIdx (종류는 계층 레벨을 나타냄). 노드마다 다른 종류를 주지 말 것.\n' +
+      '- rename_stage_type으로 종류 이름을 의미 있게 변경할 것 (예: "핵심 주제", "1단계", "2단계", "최상위/상위/하위").\n' +
+      '- layout:\'radial\'이면 계층별 크기(최상위 340×150, 중간 270×115, 기본 220×90)가 자동 적용됨.\n\n' +
       '노드 참조: 각 노드에 고유한 tmp_id를 부여하고 edges에서 그 tmp_id로 참조. ' +
       '기존 노드 id(get_canvas로 확인)도 edge의 source/target으로 쓸 수 있음. ' +
       '응답의 created_nodes에 tmp_id → 실제 id 매핑이 담김.',
@@ -234,7 +246,7 @@ export function buildServer(getUserId) {
         sourceHandle: z.enum(['left', 'right', 'top', 'bottom']).optional().describe('생략 시 자동 계산'),
         targetHandle: z.enum(['left', 'right', 'top', 'bottom']).optional().describe('생략 시 자동 계산'),
       })).max(300).optional(),
-      layout: z.enum(['auto', 'manual']).optional().describe("생략 시: 좌표 없는 노드가 있으면 auto. auto=자동 배치(x/y 무시), manual=모든 x/y 필수"),
+      layout: z.enum(['auto', 'radial', 'right', 'down', 'left', 'up', 'manual']).optional().describe("생략/'auto': 휴리스틱으로 radial 또는 right 자동 선택. radial=4방향 확장형, right/down/left/up=방향 확장형, manual=모든 노드에 x/y 필수"),
     },
   }, g(async (userId, a) => {
     const r = await store.createGraph(userId, a.canvas_id, a)

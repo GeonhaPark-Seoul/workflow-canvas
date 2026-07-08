@@ -6,7 +6,7 @@ const DEFAULT_TYPES = [
   { bg: '#1e3a5f', border: '#3b82f6', label: '기획' },
   { bg: '#1a3a2a', border: '#22c55e', label: '제작' },
   { bg: '#3a1a1a', border: '#ef4444', label: '검토' },
-  { bg: '#2d2a1a', border: '#f59e0b', label: '실행' },
+  { bg: '#1a2a3a', border: '#06b6d4', label: '실행' },
   { bg: '#2a1a3a', border: '#a855f7', label: '완료' },
 ]
 
@@ -42,7 +42,8 @@ function selectAll(el) {
   sel.addRange(range)
 }
 
-export default function StageNode({ data, selected, id }) {
+export default function StageNode({ data, selected, id, width }) {
+  const scale = Math.min(Math.max((width ?? 220) / 220, 1), 2)
   const stageTypes = data.stageTypes ?? DEFAULT_TYPES
   const colorIdx = Math.min(Math.max(data.colorIdx ?? 0, 0), stageTypes.length - 1)
   const color = stageTypes[colorIdx]
@@ -199,11 +200,11 @@ export default function StageNode({ data, selected, id }) {
             onPointerCancel={onDimPointerCancel}
             title="클릭: 색상 변경 · 길게 누르기: 끄기/켜기"
             style={{
-              width: 14, height: 14, borderRadius: '50%',
+              width: Math.round(14 * scale), height: Math.round(14 * scale), borderRadius: '50%',
               background: color.border, border: 'none', cursor: 'pointer', flexShrink: 0,
             }}
           />
-          <span style={{ color: color.border, fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
+          <span style={{ color: color.border, fontSize: Math.round(10 * scale), fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
             {color.label}
           </span>
         </div>
@@ -221,9 +222,9 @@ export default function StageNode({ data, selected, id }) {
               style={{
                 background: 'transparent',
                 borderBottom: `1px solid ${color.border}`,
-                color: '#f0f0f0', fontSize: 15, fontWeight: 700,
+                color: '#f0f0f0', fontSize: Math.round(15 * scale), fontWeight: 700,
                 width: '100%', outline: 'none', marginBottom: 4,
-                minHeight: 22, lineHeight: '22px', whiteSpace: 'pre-wrap',
+                minHeight: Math.round(22 * scale), lineHeight: `${Math.round(22 * scale)}px`, whiteSpace: 'pre-wrap',
                 wordBreak: 'break-word',
               }}
             />
@@ -235,8 +236,8 @@ export default function StageNode({ data, selected, id }) {
               onClick={handleDisplayClick('title')}
               dangerouslySetInnerHTML={{ __html: titleValue || (data.titleTouched ? '' : '단계 이름 (더블클릭하여 편집)') }}
               style={{
-                color: titleValue ? '#f0f0f0' : '#ffffff66', fontSize: 15, fontWeight: 700,
-                marginBottom: 4, cursor: 'text', minHeight: 22, lineHeight: '22px',
+                color: titleValue ? '#f0f0f0' : '#ffffff66', fontSize: Math.round(15 * scale), fontWeight: 700,
+                marginBottom: 4, cursor: 'text', minHeight: Math.round(22 * scale), lineHeight: `${Math.round(22 * scale)}px`,
                 whiteSpace: 'pre-wrap', wordBreak: 'break-word',
                 touchAction: 'manipulation',
               }}
@@ -257,7 +258,7 @@ export default function StageNode({ data, selected, id }) {
               onBlur={() => stopEdit('desc', descRef)}
               style={{
                 flex: 1, background: 'transparent',
-                color: '#aaa', fontSize: 12, width: '100%',
+                color: '#aaa', fontSize: Math.round(12 * scale), width: '100%',
                 outline: 'none', lineHeight: 1.5, minHeight: 0,
                 whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowY: 'auto',
               }}
@@ -270,7 +271,7 @@ export default function StageNode({ data, selected, id }) {
               onClick={handleDisplayClick('desc')}
               dangerouslySetInnerHTML={{ __html: descValue || (data.descTouched ? '' : '설명 (더블클릭하여 편집)') }}
               style={{
-                flex: 1, color: descValue ? '#aaa' : '#888', fontSize: 12,
+                flex: 1, color: descValue ? '#aaa' : '#888', fontSize: Math.round(12 * scale),
                 whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text',
                 overflow: 'auto', lineHeight: 1.5, minHeight: 0,
                 touchAction: 'manipulation',

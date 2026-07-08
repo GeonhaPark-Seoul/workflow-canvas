@@ -35,7 +35,8 @@ function selectAll(el) {
   sel.addRange(range)
 }
 
-export default function MemoNode({ data, selected, id }) {
+export default function MemoNode({ data, selected, id, width }) {
+  const scale = Math.min(Math.max((width ?? 180) / 180, 1), 2)
   const [editing, setEditing] = useState(null) // 'header' | 'text' | null
   const headerRef = useRef(null)
   const textRef = useRef(null)
@@ -185,7 +186,7 @@ export default function MemoNode({ data, selected, id }) {
           onPointerCancel={onDimPointerCancel}
           title="길게 누르기: 끄기/켜기"
           style={{
-            width: 14, height: 14, borderRadius: '50%',
+            width: Math.round(14 * scale), height: Math.round(14 * scale), borderRadius: '50%',
             background: '#f59e0b', border: 'none', cursor: 'pointer', flexShrink: 0,
           }}
         />
@@ -201,7 +202,7 @@ export default function MemoNode({ data, selected, id }) {
               style={{
                 flex: 1, background: 'transparent',
                 borderBottom: '1px solid #f59e0b88',
-                color: '#f59e0b', fontSize: 13, fontWeight: 800, letterSpacing: 0.3,
+                color: '#f59e0b', fontSize: Math.round(13 * scale), fontWeight: 800, letterSpacing: 0.3,
                 outline: 'none', minHeight: 18, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
               }}
             />
@@ -214,7 +215,7 @@ export default function MemoNode({ data, selected, id }) {
               dangerouslySetInnerHTML={{ __html: headerValue || (data.headerTouched ? '' : '제목 (더블클릭)') }}
               style={{
                 flex: 1, color: headerValue ? '#f59e0b' : '#f59e0b66',
-                fontSize: 13, fontWeight: 800, letterSpacing: 0.3, cursor: 'text',
+                fontSize: Math.round(13 * scale), fontWeight: 800, letterSpacing: 0.3, cursor: 'text',
                 whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                 touchAction: 'manipulation',
               }}
@@ -235,7 +236,7 @@ export default function MemoNode({ data, selected, id }) {
               onBlur={() => stopEdit('text', textRef)}
               style={{
                 flex: 1, background: 'transparent',
-                color: '#e8d88a', fontSize: 12, width: '100%',
+                color: '#e8d88a', fontSize: Math.round(12 * scale), width: '100%',
                 outline: 'none', lineHeight: 1.6, minHeight: 0,
                 whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowY: 'auto',
               }}
@@ -248,7 +249,7 @@ export default function MemoNode({ data, selected, id }) {
               onClick={handleDisplayClick('text')}
               dangerouslySetInnerHTML={{ __html: textValue || (data.textTouched ? '' : '메모 내용 (더블클릭하여 편집)') }}
               style={{
-                flex: 1, color: textValue ? '#e8d88a' : '#e8d88a55', fontSize: 12,
+                flex: 1, color: textValue ? '#e8d88a' : '#e8d88a55', fontSize: Math.round(12 * scale),
                 whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text',
                 overflow: 'auto', lineHeight: 1.6, minHeight: 0,
                 touchAction: 'manipulation',
