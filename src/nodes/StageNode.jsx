@@ -201,59 +201,114 @@ export default function StageNode({ data, selected, id, width }) {
 
       {/* Header */}
       <div style={{ padding: '10px 12px 4px', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-          <button
-            onClick={cycleColor}
-            onPointerDown={onDimPointerDown}
-            onPointerUp={onDimPointerUp}
-            onPointerLeave={onDimPointerLeave}
-            onPointerCancel={onDimPointerCancel}
-            title="클릭: 색상 변경 · 길게 누르기: 끄기/켜기"
-            style={{
-              width: circleSize, height: circleSize, borderRadius: '50%',
-              background: color.border, border: 'none', cursor: 'pointer', flexShrink: 0,
-            }}
-          />
-          <span style={{ color: color.border, fontSize: typeFontSize, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
-            {color.label}
-          </span>
-        </div>
+        {abstract ? (
+          /* Abstract mode: circle + title on one horizontal row, label hidden */
+          <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+            <button
+              onClick={cycleColor}
+              onPointerDown={onDimPointerDown}
+              onPointerUp={onDimPointerUp}
+              onPointerLeave={onDimPointerLeave}
+              onPointerCancel={onDimPointerCancel}
+              title="클릭: 색상 변경 · 길게 누르기: 끄기/켜기"
+              style={{
+                width: circleSize, height: circleSize, borderRadius: '50%',
+                background: color.border, border: 'none', cursor: 'pointer', flexShrink: 0,
+              }}
+            />
+            <div ref={titleContainerRef} style={{ flex: 1, minWidth: 0 }}>
+              {editing === 'title' ? (
+                <div
+                  ref={titleRef}
+                  contentEditable
+                  suppressContentEditableWarning
+                  className="nodrag nowheel rich-content"
+                  onBlur={() => stopEdit('title', titleRef)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); stopEdit('title', titleRef) } if (e.key === 'Escape') { e.preventDefault(); stopEdit('title', titleRef) } }}
+                  style={{
+                    background: 'transparent',
+                    borderBottom: `1px solid ${color.border}`,
+                    color: '#f0f0f0', fontSize: titleFontSize, fontWeight: 700,
+                    width: '100%', outline: 'none',
+                    minHeight: titleLineH, lineHeight: `${titleLineH}px`, whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                  }}
+                />
+              ) : (
+                <div
+                  className="rich-content"
+                  onDoubleClick={() => startEdit('title')}
+                  onTouchStart={touchEdit('title')}
+                  onClick={handleDisplayClick('title')}
+                  dangerouslySetInnerHTML={{ __html: titleValue || (data.titleTouched ? '' : '단계 이름 (더블클릭하여 편집)') }}
+                  style={{
+                    color: titleValue ? '#f0f0f0' : '#ffffff66', fontSize: titleFontSize, fontWeight: 700,
+                    cursor: 'text', minHeight: titleLineH, lineHeight: `${titleLineH}px`,
+                    whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                    touchAction: 'manipulation',
+                  }}
+                />
+              )}
+            </div>
+          </div>
+        ) : (
+          /* Normal mode: unchanged — circle + label row, then title below */
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <button
+                onClick={cycleColor}
+                onPointerDown={onDimPointerDown}
+                onPointerUp={onDimPointerUp}
+                onPointerLeave={onDimPointerLeave}
+                onPointerCancel={onDimPointerCancel}
+                title="클릭: 색상 변경 · 길게 누르기: 끄기/켜기"
+                style={{
+                  width: circleSize, height: circleSize, borderRadius: '50%',
+                  background: color.border, border: 'none', cursor: 'pointer', flexShrink: 0,
+                }}
+              />
+              <span style={{ color: color.border, fontSize: typeFontSize, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
+                {color.label}
+              </span>
+            </div>
 
-        {/* Title field */}
-        <div ref={titleContainerRef}>
-          {editing === 'title' ? (
-            <div
-              ref={titleRef}
-              contentEditable
-              suppressContentEditableWarning
-              className="nodrag nowheel rich-content"
-              onBlur={() => stopEdit('title', titleRef)}
-              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); stopEdit('title', titleRef) } if (e.key === 'Escape') { e.preventDefault(); stopEdit('title', titleRef) } }}
-              style={{
-                background: 'transparent',
-                borderBottom: `1px solid ${color.border}`,
-                color: '#f0f0f0', fontSize: titleFontSize, fontWeight: 700,
-                width: '100%', outline: 'none', marginBottom: 4,
-                minHeight: titleLineH, lineHeight: `${titleLineH}px`, whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-              }}
-            />
-          ) : (
-            <div
-              className="rich-content"
-              onDoubleClick={() => startEdit('title')}
-              onTouchStart={touchEdit('title')}
-              onClick={handleDisplayClick('title')}
-              dangerouslySetInnerHTML={{ __html: titleValue || (data.titleTouched ? '' : '단계 이름 (더블클릭하여 편집)') }}
-              style={{
-                color: titleValue ? '#f0f0f0' : '#ffffff66', fontSize: titleFontSize, fontWeight: 700,
-                marginBottom: 4, cursor: 'text', minHeight: titleLineH, lineHeight: `${titleLineH}px`,
-                whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-                touchAction: 'manipulation',
-              }}
-            />
-          )}
-        </div>
+            {/* Title field */}
+            <div ref={titleContainerRef}>
+              {editing === 'title' ? (
+                <div
+                  ref={titleRef}
+                  contentEditable
+                  suppressContentEditableWarning
+                  className="nodrag nowheel rich-content"
+                  onBlur={() => stopEdit('title', titleRef)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); stopEdit('title', titleRef) } if (e.key === 'Escape') { e.preventDefault(); stopEdit('title', titleRef) } }}
+                  style={{
+                    background: 'transparent',
+                    borderBottom: `1px solid ${color.border}`,
+                    color: '#f0f0f0', fontSize: titleFontSize, fontWeight: 700,
+                    width: '100%', outline: 'none', marginBottom: 4,
+                    minHeight: titleLineH, lineHeight: `${titleLineH}px`, whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                  }}
+                />
+              ) : (
+                <div
+                  className="rich-content"
+                  onDoubleClick={() => startEdit('title')}
+                  onTouchStart={touchEdit('title')}
+                  onClick={handleDisplayClick('title')}
+                  dangerouslySetInnerHTML={{ __html: titleValue || (data.titleTouched ? '' : '단계 이름 (더블클릭하여 편집)') }}
+                  style={{
+                    color: titleValue ? '#f0f0f0' : '#ffffff66', fontSize: titleFontSize, fontWeight: 700,
+                    marginBottom: 4, cursor: 'text', minHeight: titleLineH, lineHeight: `${titleLineH}px`,
+                    whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                    touchAction: 'manipulation',
+                  }}
+                />
+              )}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Description — only rendered in normal (non-abstract) mode, or when being edited */}

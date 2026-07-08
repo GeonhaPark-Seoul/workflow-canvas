@@ -1,7 +1,8 @@
 // Unit tests for mcp/layout.js and mcp/sanitize.js — plain node, no deps, no DB.
 // Run: node scripts/test-mcp-logic.mjs
 import assert from 'node:assert/strict'
-import { layoutGraph, findNonOverlapping, validateGraphInput, overlaps, nodeRect, RADIAL_SIZE } from '../mcp/layout.js'
+import { layoutGraph, findNonOverlapping, validateGraphInput, overlaps, nodeRect, RADIAL_SIZE, radialLevels } from '../mcp/layout.js'
+import { checkRadialLevelMixing } from '../mcp/store.js'
 import { sanitizeHtml } from '../mcp/sanitize.js'
 
 let passed = 0
@@ -197,6 +198,48 @@ t('manual layout requires x/y on every node', () => {
   assert.throws(
     () => validateGraphInput({ nodes: [{ ...stage('A'), x: 1 }], edges: [] }, [], types5, 'manual'),
     /manual.*누락: A/s)
+})
+
+console.log('radialLevels / checkRadialLevelMixing')
+
+t('radialLevels: root=level 0, direct children=level 1, grandchildren=level 2', () => {
+  // R -> A, B; A -> X
+  const nodes = [stage('R'), stage('A'), stage('B'), stage('X')]
+  const edges = [edge('R', 'A'), edge('R', 'B'), edge('A', 'X')]
+  const lv = radialLevels(nodes, edges)
+  assert.equal(lv.get('R'), 0)
+  assert.equal(lv.get('A'), 1)
+  assert.equal(lv.get('B'), 1)
+  assert.equal(lv.get('X'), 2)
+})
+
+t('checkRadialLevelMixing: warns when same-level nodes have different stageTypeIdx', () => {
+  // R(idx=0) -> A(idx=1) -> X(idx=3)
+  //           -> B(idx=2)   <- B uses idx 2 instead of 1: level-1 mix
+  const nodes = [
+    { tmp_id: 'R', type: 'stage', stageTypeIdx: 0 },
+    { tmp_id: 'A', type: 'stage', stageTypeIdx: 1 },
+    { tmp_id: 'B', type: 'stage', stageTypeIdx: 2 },
+    { tmp_id: 'X', type: 'stage', stageTypeIdx: 3 },
+  ]
+  const edges = [edge('R', 'A'), edge('R', 'B'), edge('A', 'X')]
+  const warn = checkRadialLevelMixing(nodes, edges)
+  assert.ok(warn !== null, 'expected a warning')
+  assert.ok(warn.includes('레벨 1'), warn)
+  assert.ok(warn.includes('update_nodes'), warn)
+})
+
+t('checkRadialLevelMixing: no warning when all levels are uniform', () => {
+  // R(idx=0) -> A(idx=1), B(idx=1); A -> X(idx=2)
+  const nodes = [
+    { tmp_id: 'R', type: 'stage', stageTypeIdx: 0 },
+    { tmp_id: 'A', type: 'stage', stageTypeIdx: 1 },
+    { tmp_id: 'B', type: 'stage', stageTypeIdx: 1 },
+    { tmp_id: 'X', type: 'stage', stageTypeIdx: 2 },
+  ]
+  const edges = [edge('R', 'A'), edge('R', 'B'), edge('A', 'X')]
+  const warn = checkRadialLevelMixing(nodes, edges)
+  assert.equal(warn, null, 'expected no warning for uniform levels')
 })
 
 console.log('sanitizeHtml')

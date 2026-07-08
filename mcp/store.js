@@ -9,7 +9,7 @@ import { createClient } from '@supabase/supabase-js'
 import { sanitizeTextFields } from './sanitize.js'
 import {
   SIZE, nodeW, nodeH, nodeRect, overlaps, findNonOverlapping,
-  layoutGraph, validateGraphInput,
+  layoutGraph, validateGraphInput, radialLevels,
 } from './layout.js'
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://tuaifwiigkacrflbhjmu.supabase.co'
@@ -40,6 +40,35 @@ function assertStageTypeIdx(types, idx) {
 
 const findDuplicateEdge = (edges, source, target) =>
   (edges ?? []).find((e) => e.source === source && e.target === target)
+
+// Teaching warning: for a radial graph, check whether same-depth stage nodes
+// share a single stageTypeIdx. Returns a warning string if mixing is detected,
+// or null when all levels are uniform. Pure function — no side effects.
+export function checkRadialLevelMixing(nodeInputs, edgeInputs) {
+  const level = radialLevels(nodeInputs, edgeInputs)
+  // Map level -> Set of stageTypeIdx values used at that level
+  const levelTypes = new Map()
+  for (const n of nodeInputs) {
+    if (n.type !== 'stage') continue
+    const lv = level.get(n.tmp_id)
+    if (lv == null || lv < 0) continue
+    if (!levelTypes.has(lv)) levelTypes.set(lv, new Set())
+    const idx = n.stageTypeIdx ?? n.colorIdx ?? 0
+    levelTypes.get(lv).add(idx)
+  }
+  const mixed = []
+  for (const [lv, types] of levelTypes) {
+    if (types.size >= 2) mixed.push({ lv, types: [...types].sort((a, b) => a - b) })
+  }
+  if (!mixed.length) return null
+  const detail = mixed.map(({ lv, types }) => `레벨 ${lv}: 종류 ${types.join(',')}`).join('; ')
+  return (
+    `⚠️ 같은 계층에 서로 다른 단계 종류가 섞여 있습니다 (${detail}). ` +
+    '계층 구조에서는 깊이별로 같은 종류를 공유해야 합니다 — ' +
+    'update_nodes로 stageTypeIdx를 레벨별로 통일하고, ' +
+    "rename_stage_type으로 이름을 '핵심 주제/추진 방안/세부 과제'처럼 바꾸는 것을 권장합니다."
+  )
+}
 
 // 단계 종류(stage type) 기본값/팔레트 — src/App.jsx의 DEFAULT_STAGE_TYPES/TYPE_PALETTE와 동일
 const DEFAULT_STAGE_TYPES = [
@@ -554,12 +583,17 @@ export async function createGraph(userId, canvasId, { nodes: nodeInputs, edges: 
   }
 
   await saveArrays(userId, canvasId, allNodes, [...(row.edges ?? []), ...newEdges])
+
+  // Radial-only teaching warning: check for per-branch (instead of per-depth) stageTypeIdx usage.
+  const warning = preset === 'radial' ? checkRadialLevelMixing(nodeInputs, edgeInputs) : null
+
   return {
     created_nodes: nodeInputs.map((n) => ({ tmp_id: n.tmp_id, id: idMap.get(n.tmp_id), ...positions.get(n.tmp_id) })),
     created_edges: newEdges.map((e) => ({ id: e.id, source: e.source, target: e.target })),
     ...(skippedDuplicates.length ? { skipped_duplicate_edges: skippedDuplicates } : {}),
     ...(shifted.length ? { shifted } : {}),
     layout: preset ?? mode,
+    ...(warning ? { warning } : {}),
   }
 }
 

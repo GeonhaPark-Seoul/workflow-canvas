@@ -400,6 +400,50 @@ function radialLayout({ newNodes, newEdges }) {
   return pos
 }
 
+// ── radialLevels: BFS depth per stage node (exported for warning checks) ─────
+// Returns Map<tmp_id, level> for stage nodes only, using the same root-selection
+// and BFS logic as radialLayout. Non-stage nodes are excluded.
+// Used by store.js to check whether same-depth nodes share stageTypeIdx.
+export function radialLevels(nodeInputs, edgeInputs) {
+  const stages = nodeInputs.filter((n) => n.type === 'stage')
+  const stageIds = new Set(stages.map((n) => n.tmp_id))
+  if (!stages.length) return new Map()
+
+  const stageEdges = (edgeInputs ?? []).filter((e) => stageIds.has(e.source) && stageIds.has(e.target))
+  const adj = new Map(stages.map((n) => [n.tmp_id, new Set()]))
+  const inDeg = new Map(stages.map((n) => [n.tmp_id, 0]))
+  for (const e of stageEdges) {
+    adj.get(e.source).add(e.target)
+    adj.get(e.target).add(e.source)
+    inDeg.set(e.target, inDeg.get(e.target) + 1)
+  }
+
+  const totalDeg = (id) => adj.get(id).size
+  const zeroDeg = stages.filter((n) => inDeg.get(n.tmp_id) === 0)
+  const pool = zeroDeg.length ? zeroDeg : [...stages]
+  const root = pool.reduce((best, n) => totalDeg(n.tmp_id) >= totalDeg(best.tmp_id) ? n : best, pool[0])
+  const rootId = root.tmp_id
+
+  const level = new Map([[rootId, 0]])
+  const queue = [rootId]
+  while (queue.length) {
+    const cur = queue.shift()
+    for (const nb of adj.get(cur)) {
+      if (!level.has(nb)) {
+        level.set(nb, level.get(cur) + 1)
+        queue.push(nb)
+      }
+    }
+  }
+
+  // Unreachable stages (disconnected components) get level = -1
+  for (const n of stages) {
+    if (!level.has(n.tmp_id)) level.set(n.tmp_id, -1)
+  }
+
+  return level
+}
+
 // ── Main layoutGraph export ───────────────────────────────────────────────────
 // preset: 'right' (default), 'left', 'down', 'up', 'radial'
 // Returns Map<tmp_id, {x, y, width?, height?}>
