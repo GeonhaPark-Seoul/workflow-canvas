@@ -10,13 +10,6 @@ export const SIZE = {
   memo:  { w: 180, h: 90, minW: 160, minH: 80 },
 }
 
-// Radial level-based default sizes (applied when node has no explicit width/height)
-export const RADIAL_SIZE = {
-  0: { w: 340, h: 150 },  // root
-  1: { w: 270, h: 115 },  // level-1
-  2: { w: 220, h: 90  },  // level-2+
-}
-
 export const nodeW = (n) => n.width  ?? SIZE[n.type]?.w ?? SIZE.stage.w
 export const nodeH = (n) => n.height ?? SIZE[n.type]?.h ?? SIZE.stage.h
 
@@ -157,9 +150,12 @@ function layeredLayout({ newNodes, newEdges, colGap = 320, rowGap = 200 }) {
 }
 
 // ── Radial layout ─────────────────────────────────────────────────────────────
-// Hub-and-spoke for hierarchical content. Returns Map<tmp_id, {x,y,width?,height?}>.
+// Hub-and-spoke for hierarchical content.
+// Returns Map<tmp_id, {x, y, dir?}> where dir = 'right'|'left'|'bottom'|'top'
+// is the outward branch direction for that node (used by createGraph to pin handles).
+// Root has dir=null (it legitimately connects on up to 4 sides).
 function radialLayout({ newNodes, newEdges }) {
-  const pos = new Map() // tmp_id -> {x, y, width?, height?}
+  const pos = new Map() // tmp_id -> {x, y, dir?}
   const stages = newNodes.filter((n) => n.type === 'stage')
   const memos = newNodes.filter((n) => n.type === 'memo')
   const stageIds = new Set(stages.map((n) => n.tmp_id))
@@ -244,20 +240,12 @@ function radialLayout({ newNodes, newEdges }) {
   // Level ≥2 distance
   const DIST2 = { right: 460, left: 460, bottom: 300, top: 300 }
 
-  // Compute radial default size for a stage node
-  function stageSize(id) {
-    const lv = level.get(id) ?? 2
-    const sz = RADIAL_SIZE[Math.min(lv, 2)]
-    return sz
-  }
-
   // Center position (will convert to top-left after placing)
   const center = new Map() // tmp_id -> {cx, cy, w, h}
 
-  // Place root at origin center
-  const rootSz = stageSize(rootId)
-  const rootW = root.width ?? rootSz.w
-  const rootH = root.height ?? rootSz.h
+  // Place root at origin center using normal stage default size
+  const rootW = root.width ?? SIZE.stage.w
+  const rootH = root.height ?? SIZE.stage.h
   center.set(rootId, { cx: 0, cy: 0, w: rootW, h: rootH })
   const sizeOut = new Map([[rootId, { w: rootW, h: rootH }]])
 
@@ -297,9 +285,8 @@ function radialLayout({ newNodes, newEdges }) {
         const cx = pcx + dir.dx * dist + dir.dy * fanOffset  // dir.dy is perp for horiz dirs: 0 for right/left
         const cy = pcy + dir.dy * dist + dir.dx * fanOffset   // dir.dx is perp for vert dirs: 0 for bottom/top
 
-        const sz = stageSize(n.tmp_id)
-        const w = n.width ?? sz.w
-        const h = n.height ?? sz.h
+        const w = n.width ?? SIZE.stage.w
+        const h = n.height ?? SIZE.stage.h
         sizeOut.set(n.tmp_id, { w, h })
 
         const desired = rectOf(cx, cy, w, h)
@@ -312,13 +299,13 @@ function radialLayout({ newNodes, newEdges }) {
     }
   }
 
-  // Convert centers to top-left positions and record in pos
+  // Convert centers to top-left positions and record in pos.
+  // Emit dir = branch direction for non-root nodes (null for root).
+  // dir is used by createGraph to pin radial edge handles.
   for (const [id, { cx, cy, w, h }] of center) {
-    const n = stages.find((s) => s.tmp_id === id)
     const entry = { x: cx - w / 2, y: cy - h / 2 }
-    // Carry width/height only if layout assigned them (node had no explicit size)
-    if (!n.width) entry.width = w
-    if (!n.height) entry.height = h
+    const dir = sideOf.get(id) ?? null  // null for root
+    if (dir != null) entry.dir = dir
     pos.set(id, entry)
   }
 
@@ -371,7 +358,24 @@ function radialLayout({ newNodes, newEdges }) {
     const desired = { x: mcx - memoW / 2, y: mcy - memoH / 2 }
     const spot = findNonOverlapping(placedRects, desired, memoW, memoH)
     placedRects.push({ x: spot.x, y: spot.y, w: memoW, h: memoH })
-    pos.set(m.tmp_id, { x: spot.x, y: spot.y })
+    // memoStageSide: the side of the stage that faces the memo (perpendicular to branch)
+    // memoOwnSide: the side of the memo that faces the stage
+    // For right/left stages, memos hang above/below → stage-facing side is top or bottom,
+    // memo-facing side is bottom or top.
+    // For top/bottom stages, memos hang left/right → stage-facing side is left or right,
+    // memo-facing side is right or left.
+    const memoSide = count % 2 === 0 ? -1 : 1
+    let stageFacing, memoFacing
+    if (isHoriz) {
+      // memo is to left or right of the stage (perpendicular = horizontal)
+      stageFacing = memoSide < 0 ? 'left' : 'right'
+      memoFacing  = memoSide < 0 ? 'right' : 'left'
+    } else {
+      // memo is above or below the stage (perpendicular = vertical)
+      stageFacing = memoSide < 0 ? 'top' : 'bottom'
+      memoFacing  = memoSide < 0 ? 'bottom' : 'top'
+    }
+    pos.set(m.tmp_id, { x: spot.x, y: spot.y, memoStageFacing: stageFacing, memoOwnFacing: memoFacing })
   }
 
   // Unlinked memos

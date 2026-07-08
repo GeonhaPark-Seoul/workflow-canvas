@@ -1,7 +1,7 @@
 // Unit tests for mcp/layout.js and mcp/sanitize.js — plain node, no deps, no DB.
 // Run: node scripts/test-mcp-logic.mjs
 import assert from 'node:assert/strict'
-import { layoutGraph, findNonOverlapping, validateGraphInput, overlaps, nodeRect, RADIAL_SIZE, radialLevels } from '../mcp/layout.js'
+import { layoutGraph, findNonOverlapping, validateGraphInput, overlaps, nodeRect, radialLevels } from '../mcp/layout.js'
 import { checkRadialLevelMixing } from '../mcp/store.js'
 import { sanitizeHtml } from '../mcp/sanitize.js'
 
@@ -114,15 +114,14 @@ t('radial: root is placed at canvas origin (100,100)', () => {
   assert.ok(rootEntry.y >= 100, 'root y >= 100')
 })
 
-t('radial: level-0 gets L0 size, level-1 gets L1 size (when no explicit width)', () => {
+t('radial: nodes use normal stage default size (no level-based sizing)', () => {
   const nodes = [stage('R'), stage('A'), stage('B'), stage('C')]
   const edges = [edge('R', 'A'), edge('R', 'B'), edge('R', 'C')]
   const pos = layoutGraph({ newNodes: nodes, newEdges: edges, existingNodes: [], preset: 'radial' })
-  // Root carries width/height = RADIAL_SIZE[0]
-  assert.equal(pos.get('R').width, RADIAL_SIZE[0].w, 'root width = L0 width')
-  assert.equal(pos.get('R').height, RADIAL_SIZE[0].h, 'root height = L0 height')
-  // Level-1 children carry RADIAL_SIZE[1]
-  assert.equal(pos.get('A').width, RADIAL_SIZE[1].w, 'L1 child width')
+  // No width/height emitted by layout (no level-based sizing)
+  assert.equal(pos.get('R').width, undefined, 'root: no layout-assigned width')
+  assert.equal(pos.get('R').height, undefined, 'root: no layout-assigned height')
+  assert.equal(pos.get('A').width, undefined, 'L1 child: no layout-assigned width')
 })
 
 t('radial: no two nodes overlap (simple star with 4 children)', () => {
@@ -132,8 +131,8 @@ t('radial: no two nodes overlap (simple star with 4 children)', () => {
   const pos = layoutGraph({ newNodes: nodes, newEdges: edges, existingNodes: [], preset: 'radial' })
   const rects = [...pos.entries()].map(([id, p]) => {
     const n = nodes.find((x) => x.tmp_id === id)
-    const w = p.width ?? (n?.type === 'memo' ? 180 : 220)
-    const h = p.height ?? 90
+    const w = n?.type === 'memo' ? 180 : 220
+    const h = 90
     return { x: p.x, y: p.y, w, h }
   })
   for (let i = 0; i < rects.length; i++) {
@@ -141,6 +140,30 @@ t('radial: no two nodes overlap (simple star with 4 children)', () => {
       assert.ok(!overlaps(rects[i], rects[j], 0, 0), `nodes ${i} and ${j} overlap`)
     }
   }
+})
+
+t('radial: non-root parent pins both children to the same sourceHandle (parent branch dir)', () => {
+  // R -> A -> X, Y  (A is a non-root parent; X and Y are its two children)
+  // R -> B (another branch, different direction)
+  const nodes = [stage('R'), stage('A'), stage('B'), stage('X'), stage('Y')]
+  const edges = [edge('R', 'A'), edge('R', 'B'), edge('A', 'X'), edge('A', 'Y')]
+  const pos = layoutGraph({ newNodes: nodes, newEdges: edges, existingNodes: [], preset: 'radial' })
+
+  // All nodes must get a position
+  for (const id of ['R', 'A', 'B', 'X', 'Y']) {
+    assert.ok(pos.has(id), `${id} should have a position`)
+  }
+
+  // A is a level-1 node so it gets a dir
+  const aDir = pos.get('A').dir
+  assert.ok(['right', 'left', 'bottom', 'top'].includes(aDir), `A should have a branch dir, got: ${aDir}`)
+
+  // X and Y (children of A) inherit A's dir
+  assert.equal(pos.get('X').dir, aDir, 'X inherits A branch direction')
+  assert.equal(pos.get('Y').dir, aDir, 'Y inherits A branch direction')
+
+  // Verify that both X and Y share the same dir (A's dir), confirming single connection point
+  assert.equal(pos.get('X').dir, pos.get('Y').dir, 'both children of A have same branch direction')
 })
 
 console.log('findNonOverlapping / overlaps')

@@ -527,18 +527,21 @@ export async function createGraph(userId, canvasId, { nodes: nodeInputs, edges: 
     : mode === 'auto' ? autoPreset(nodeInputs, edgeInputs)
     : mode // 'radial', 'right', 'down', 'left', 'up'
 
-  // Positions
+  // Positions + layout direction info (radial only)
   const shifted = []
-  const positions = new Map() // tmp_id -> {x, y}
-  // layoutSizes carries width/height assigned by the layout algorithm (radial only)
-  const layoutSizes = new Map() // tmp_id -> {width?, height?}
+  const positions = new Map()  // tmp_id -> {x, y}
+  const layoutDirs = new Map() // tmp_id -> 'right'|'left'|'bottom'|'top'|null (radial only)
+  const layoutMemoFacing = new Map() // memo tmp_id -> {stageFacing, ownFacing} (radial only)
   if (mode !== 'manual') {
     const auto = layoutGraph({ newNodes: nodeInputs, newEdges: edgeInputs, existingNodes: existing, preset })
     for (const n of nodeInputs) {
       const entry = auto.get(n.tmp_id)
       positions.set(n.tmp_id, { x: entry.x, y: entry.y })
-      if (entry.width != null || entry.height != null) {
-        layoutSizes.set(n.tmp_id, { width: entry.width, height: entry.height })
+      if (preset === 'radial') {
+        layoutDirs.set(n.tmp_id, entry.dir ?? null)
+        if (entry.memoStageFacing != null) {
+          layoutMemoFacing.set(n.tmp_id, { stageFacing: entry.memoStageFacing, ownFacing: entry.memoOwnFacing })
+        }
       }
     }
   } else {
@@ -555,17 +558,19 @@ export async function createGraph(userId, canvasId, { nodes: nodeInputs, edges: 
   }
 
   // Materialize nodes; map tmp ids -> real ids.
-  // When the layout assigned a size (radial) and the input node had none, persist it.
   const idMap = new Map()
   const newNodes = nodeInputs.map((n) => {
-    const lsz = layoutSizes.get(n.tmp_id)
-    const merged = lsz
-      ? { ...n, width: n.width ?? lsz.width, height: n.height ?? lsz.height }
-      : n
-    const node = materializeNode(merged, positions.get(n.tmp_id), types)
+    const node = materializeNode(n, positions.get(n.tmp_id), types)
     idMap.set(n.tmp_id, node.id)
     return node
   })
+
+  // BFS level map (radial): used to determine parent vs child in edge pinning.
+  // Built from input edges using the same logic as radialLevels.
+  const bfsLevel = preset === 'radial' ? radialLevels(nodeInputs, edgeInputs) : null
+
+  // Opposite handle for a given direction
+  const OPPOSITE = { right: 'left', left: 'right', top: 'bottom', bottom: 'top' }
 
   // Materialize edges: resolve refs, silently dedupe (within call + vs existing)
   const allNodes = [...existing, ...newNodes]
@@ -579,7 +584,69 @@ export async function createGraph(userId, canvasId, { nodes: nodeInputs, edges: 
     const key = `${source}→${target}`
     if (seenPairs.has(key)) { skippedDuplicates.push({ source: e.source, target: e.target }); continue }
     seenPairs.add(key)
-    newEdges.push(buildEdge({ source, target, sourceHandle: e.sourceHandle, targetHandle: e.targetHandle }, byId.get(source), byId.get(target)))
+
+    // Radial handle pinning (Task 1): when preset is radial and handles are not
+    // explicitly provided, pin them so all children of the same non-root parent
+    // leave from the parent's single outward connection point.
+    let { sourceHandle, targetHandle } = e
+    if (preset === 'radial' && (!sourceHandle || !targetHandle)) {
+      const srcTmp = e.source   // original tmp_id (before idMap resolution)
+      const tgtTmp = e.target
+      const srcInNew = idMap.has(srcTmp)
+      const tgtInNew = idMap.has(tgtTmp)
+
+      if (srcInNew && tgtInNew) {
+        // Both nodes are from this call — check if this is a stage-stage edge
+        const srcNode = nodeInputs.find((n) => n.tmp_id === srcTmp)
+        const tgtNode = nodeInputs.find((n) => n.tmp_id === tgtTmp)
+        const bothStages = srcNode?.type === 'stage' && tgtNode?.type === 'stage'
+
+        if (bothStages) {
+          const srcLevel = bfsLevel?.get(srcTmp) ?? -1
+          const tgtLevel = bfsLevel?.get(tgtTmp) ?? -1
+          // Determine which is parent (lower level) and which is child
+          if (srcLevel < tgtLevel) {
+            // source = parent, target = child
+            const childDir = layoutDirs.get(tgtTmp)
+            if (childDir) {
+              const parentIsRoot = srcLevel === 0
+              const parentDir = parentIsRoot ? childDir : layoutDirs.get(srcTmp)
+              if (parentDir) {
+                if (!sourceHandle) sourceHandle = parentDir
+                if (!targetHandle) targetHandle = OPPOSITE[childDir]
+              }
+            }
+          } else if (tgtLevel < srcLevel) {
+            // target = parent, source = child
+            const childDir = layoutDirs.get(srcTmp)
+            if (childDir) {
+              const parentIsRoot = tgtLevel === 0
+              const parentDir = parentIsRoot ? childDir : layoutDirs.get(tgtTmp)
+              if (parentDir) {
+                if (!targetHandle) targetHandle = parentDir
+                if (!sourceHandle) sourceHandle = OPPOSITE[childDir]
+              }
+            }
+          }
+        } else if (srcNode?.type === 'memo' || tgtNode?.type === 'memo') {
+          // Memo edge pinning: use the facing directions computed by the layout
+          const memoTmp = srcNode?.type === 'memo' ? srcTmp : tgtTmp
+          const stageTmp = srcNode?.type === 'memo' ? tgtTmp : srcTmp
+          const facing = layoutMemoFacing.get(memoTmp)
+          if (facing) {
+            if (srcNode?.type === 'memo') {
+              if (!sourceHandle) sourceHandle = facing.memoOwnFacing
+              if (!targetHandle) targetHandle = facing.stageFacing
+            } else {
+              if (!sourceHandle) sourceHandle = facing.stageFacing
+              if (!targetHandle) targetHandle = facing.memoOwnFacing
+            }
+          }
+        }
+      }
+    }
+
+    newEdges.push(buildEdge({ source, target, sourceHandle, targetHandle }, byId.get(source), byId.get(target)))
   }
 
   await saveArrays(userId, canvasId, allNodes, [...(row.edges ?? []), ...newEdges])

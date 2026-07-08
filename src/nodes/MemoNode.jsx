@@ -35,9 +35,7 @@ function selectAll(el) {
   sel.addRange(range)
 }
 
-export default function MemoNode({ data, selected, id, width }) {
-  const scale = Math.min(Math.max((width ?? 180) / 180, 1), 2)
-
+export default function MemoNode({ data, selected, id }) {
   // Abstract (LOD) mode: re-renders only when crossing the threshold, not every zoom tick.
   const abstract = useStore((s) => s.transform[2] < (data.lodThreshold ?? 0.55))
 
@@ -131,8 +129,8 @@ export default function MemoNode({ data, selected, id, width }) {
   const headerValue = data.header ?? ''
   const textValue = data.text || ''
 
-  const headerFontSize = abstract ? Math.round(13 * scale * 1.9) : Math.round(13 * scale)
-  const circleSize = abstract ? Math.round(14 * scale * 1.9) : Math.round(14 * scale)
+  const headerFontSize = abstract ? Math.round(13 * 1.9) : 13
+  const circleSize = abstract ? Math.round(14 * 1.9) : 14
 
   return (
     <div
@@ -247,7 +245,7 @@ export default function MemoNode({ data, selected, id, width }) {
                 onBlur={() => stopEdit('text', textRef)}
                 style={{
                   flex: 1, background: 'transparent',
-                  color: '#e8d88a', fontSize: Math.round(12 * scale), width: '100%',
+                  color: '#e8d88a', fontSize: 12, width: '100%',
                   outline: 'none', lineHeight: 1.6, minHeight: 0,
                   whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowY: 'auto',
                 }}
@@ -260,7 +258,7 @@ export default function MemoNode({ data, selected, id, width }) {
                 onClick={handleDisplayClick('text')}
                 dangerouslySetInnerHTML={{ __html: textValue || (data.textTouched ? '' : '메모 내용 (더블클릭하여 편집)') }}
                 style={{
-                  flex: 1, color: textValue ? '#e8d88a' : '#e8d88a55', fontSize: Math.round(12 * scale),
+                  flex: 1, color: textValue ? '#e8d88a' : '#e8d88a55', fontSize: 12,
                   whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text',
                   overflow: 'auto', lineHeight: 1.6, minHeight: 0,
                   touchAction: 'manipulation',

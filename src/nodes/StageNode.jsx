@@ -42,8 +42,7 @@ function selectAll(el) {
   sel.addRange(range)
 }
 
-export default function StageNode({ data, selected, id, width }) {
-  const scale = Math.min(Math.max((width ?? 220) / 220, 1), 2)
+export default function StageNode({ data, selected, id }) {
   const stageTypes = data.stageTypes ?? DEFAULT_TYPES
   const colorIdx = Math.min(Math.max(data.colorIdx ?? 0, 0), stageTypes.length - 1)
   const color = stageTypes[colorIdx]
@@ -153,11 +152,11 @@ export default function StageNode({ data, selected, id, width }) {
   const titleValue = data.label ?? ''
   const descValue = data.description || ''
 
-  // In abstract mode, font sizes get a ×1.9 multiplier on top of the width-based scale.
-  const titleFontSize = abstract ? Math.round(15 * scale * 1.9) : Math.round(15 * scale)
-  const titleLineH = abstract ? Math.round(22 * scale * 1.9) : Math.round(22 * scale)
-  const typeFontSize = abstract ? Math.round(10 * scale * 1.9) : Math.round(10 * scale)
-  const circleSize = abstract ? Math.round(14 * scale * 1.9) : Math.round(14 * scale)
+  // In abstract mode, font sizes get a ×1.9 multiplier.
+  const titleFontSize = abstract ? Math.round(15 * 1.9) : 15
+  const titleLineH = abstract ? Math.round(22 * 1.9) : 22
+  const typeFontSize = abstract ? Math.round(10 * 1.9) : 10
+  const circleSize = abstract ? Math.round(14 * 1.9) : 14
 
   return (
     <div
@@ -324,7 +323,7 @@ export default function StageNode({ data, selected, id, width }) {
                 onBlur={() => stopEdit('desc', descRef)}
                 style={{
                   flex: 1, background: 'transparent',
-                  color: '#aaa', fontSize: Math.round(12 * scale), width: '100%',
+                  color: '#aaa', fontSize: 12, width: '100%',
                   outline: 'none', lineHeight: 1.5, minHeight: 0,
                   whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowY: 'auto',
                 }}
@@ -337,7 +336,7 @@ export default function StageNode({ data, selected, id, width }) {
                 onClick={handleDisplayClick('desc')}
                 dangerouslySetInnerHTML={{ __html: descValue || (data.descTouched ? '' : '설명 (더블클릭하여 편집)') }}
                 style={{
-                  flex: 1, color: descValue ? '#aaa' : '#888', fontSize: Math.round(12 * scale),
+                  flex: 1, color: descValue ? '#aaa' : '#888', fontSize: 12,
                   whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text',
                   overflow: 'auto', lineHeight: 1.5, minHeight: 0,
                   touchAction: 'manipulation',
