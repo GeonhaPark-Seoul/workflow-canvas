@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Handle, Position, NodeResizer } from '@xyflow/react'
+import { Handle, Position, NodeResizer, useStore } from '@xyflow/react'
 import EditToolbar from '../components/EditToolbar'
 
 // Bidirectional connection ports: every handle is type="source"; with the
@@ -37,6 +37,10 @@ function selectAll(el) {
 
 export default function MemoNode({ data, selected, id, width }) {
   const scale = Math.min(Math.max((width ?? 180) / 180, 1), 2)
+
+  // Abstract (LOD) mode: re-renders only when crossing the threshold, not every zoom tick.
+  const abstract = useStore((s) => s.transform[2] < (data.lodThreshold ?? 0.55))
+
   const [editing, setEditing] = useState(null) // 'header' | 'text' | null
   const headerRef = useRef(null)
   const textRef = useRef(null)
@@ -127,6 +131,9 @@ export default function MemoNode({ data, selected, id, width }) {
   const headerValue = data.header ?? ''
   const textValue = data.text || ''
 
+  const headerFontSize = abstract ? Math.round(13 * scale * 1.9) : Math.round(13 * scale)
+  const circleSize = abstract ? Math.round(14 * scale * 1.9) : Math.round(14 * scale)
+
   return (
     <div
       style={{
@@ -137,6 +144,7 @@ export default function MemoNode({ data, selected, id, width }) {
         boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column',
+        justifyContent: abstract ? 'center' : undefined,
         background: '#2a2510',
         border: `2px solid ${selected ? '#ffffff' : '#f59e0b88'}`,
         borderRadius: 12,
@@ -169,9 +177,9 @@ export default function MemoNode({ data, selected, id, width }) {
       <div
         style={{
           background: '#f59e0b22',
-          borderBottom: '1px solid #f59e0b44',
+          borderBottom: abstract ? 'none' : '1px solid #f59e0b44',
           padding: '5px 10px',
-          borderRadius: '10px 10px 0 0',
+          borderRadius: abstract ? 10 : '10px 10px 0 0',
           display: 'flex',
           alignItems: 'center',
           gap: 6,
@@ -186,7 +194,7 @@ export default function MemoNode({ data, selected, id, width }) {
           onPointerCancel={onDimPointerCancel}
           title="길게 누르기: 끄기/켜기"
           style={{
-            width: Math.round(14 * scale), height: Math.round(14 * scale), borderRadius: '50%',
+            width: circleSize, height: circleSize, borderRadius: '50%',
             background: '#f59e0b', border: 'none', cursor: 'pointer', flexShrink: 0,
           }}
         />
@@ -202,7 +210,7 @@ export default function MemoNode({ data, selected, id, width }) {
               style={{
                 flex: 1, background: 'transparent',
                 borderBottom: '1px solid #f59e0b88',
-                color: '#f59e0b', fontSize: Math.round(13 * scale), fontWeight: 800, letterSpacing: 0.3,
+                color: '#f59e0b', fontSize: headerFontSize, fontWeight: 800, letterSpacing: 0.3,
                 outline: 'none', minHeight: 18, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
               }}
             />
@@ -215,8 +223,10 @@ export default function MemoNode({ data, selected, id, width }) {
               dangerouslySetInnerHTML={{ __html: headerValue || (data.headerTouched ? '' : '제목 (더블클릭)') }}
               style={{
                 flex: 1, color: headerValue ? '#f59e0b' : '#f59e0b66',
-                fontSize: Math.round(13 * scale), fontWeight: 800, letterSpacing: 0.3, cursor: 'text',
-                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                fontSize: headerFontSize, fontWeight: 800, letterSpacing: 0.3, cursor: 'text',
+                whiteSpace: abstract ? 'pre-wrap' : 'nowrap',
+                overflow: abstract ? 'visible' : 'hidden',
+                textOverflow: abstract ? 'unset' : 'ellipsis',
                 touchAction: 'manipulation',
               }}
             />
@@ -224,40 +234,42 @@ export default function MemoNode({ data, selected, id, width }) {
         </div>
       </div>
 
-      {/* Content — fills remaining height */}
-      <div style={{ flex: 1, padding: '8px 10px', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-        <div ref={textContainerRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-          {editing === 'text' ? (
-            <div
-              ref={textRef}
-              contentEditable
-              suppressContentEditableWarning
-              className="nodrag nowheel rich-content"
-              onBlur={() => stopEdit('text', textRef)}
-              style={{
-                flex: 1, background: 'transparent',
-                color: '#e8d88a', fontSize: Math.round(12 * scale), width: '100%',
-                outline: 'none', lineHeight: 1.6, minHeight: 0,
-                whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowY: 'auto',
-              }}
-            />
-          ) : (
-            <div
-              className="rich-content"
-              onDoubleClick={() => startEdit('text')}
-              onTouchStart={touchEdit('text')}
-              onClick={handleDisplayClick('text')}
-              dangerouslySetInnerHTML={{ __html: textValue || (data.textTouched ? '' : '메모 내용 (더블클릭하여 편집)') }}
-              style={{
-                flex: 1, color: textValue ? '#e8d88a' : '#e8d88a55', fontSize: Math.round(12 * scale),
-                whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text',
-                overflow: 'auto', lineHeight: 1.6, minHeight: 0,
-                touchAction: 'manipulation',
-              }}
-            />
-          )}
+      {/* Content — only rendered in normal (non-abstract) mode, or when being edited */}
+      {(!abstract || editing === 'text') && (
+        <div style={{ flex: 1, padding: '8px 10px', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+          <div ref={textContainerRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+            {editing === 'text' ? (
+              <div
+                ref={textRef}
+                contentEditable
+                suppressContentEditableWarning
+                className="nodrag nowheel rich-content"
+                onBlur={() => stopEdit('text', textRef)}
+                style={{
+                  flex: 1, background: 'transparent',
+                  color: '#e8d88a', fontSize: Math.round(12 * scale), width: '100%',
+                  outline: 'none', lineHeight: 1.6, minHeight: 0,
+                  whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowY: 'auto',
+                }}
+              />
+            ) : (
+              <div
+                className="rich-content"
+                onDoubleClick={() => startEdit('text')}
+                onTouchStart={touchEdit('text')}
+                onClick={handleDisplayClick('text')}
+                dangerouslySetInnerHTML={{ __html: textValue || (data.textTouched ? '' : '메모 내용 (더블클릭하여 편집)') }}
+                style={{
+                  flex: 1, color: textValue ? '#e8d88a' : '#e8d88a55', fontSize: Math.round(12 * scale),
+                  whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text',
+                  overflow: 'auto', lineHeight: 1.6, minHeight: 0,
+                  touchAction: 'manipulation',
+                }}
+              />
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Rich-text toolbar — portalled to body */}
       <EditToolbar

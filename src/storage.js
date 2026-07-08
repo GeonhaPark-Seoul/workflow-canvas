@@ -30,6 +30,14 @@ export function saveCanvasList(list) { write(LIST_KEY, list) }
 export function loadActiveId() { return read(ACTIVE_KEY) }
 export function saveActiveId(id) { write(ACTIVE_KEY, id) }
 
+const LOD_KEY = 'wfc:lodThreshold'
+export function loadLodThreshold() {
+  const v = read(LOD_KEY)
+  if (v == null) return 0.55
+  return Math.min(Math.max(Number(v), 0), 0.9)
+}
+export function saveLodThreshold(v) { write(LOD_KEY, Math.min(Math.max(Number(v), 0), 0.9)) }
+
 // Returns { list, activeId }. On first run, seeds canvases from legacy
 // single-canvas data (if any) or the provided demo seeds. `seeds` is an array
 // of { name, nodes, edges }; the first becomes the active canvas.

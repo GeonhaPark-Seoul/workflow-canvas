@@ -23,6 +23,7 @@ import {
   initCanvases, loadCanvasData, saveCanvasData, deleteCanvasData,
   saveCanvasList, saveActiveId, uid,
   loadCanvasList, loadActiveId,
+  loadLodThreshold, saveLodThreshold,
 } from './storage'
 import { supabase } from './lib/supabase'
 import {
@@ -115,6 +116,7 @@ export default function App() {
   const [isAnyEditing, setIsAnyEditing] = useState(false)
   const [isPinching, setIsPinching] = useState(false)
   const [lassoRect, setLassoRect] = useState(null) // screen-space rubber-band box
+  const [lodThreshold, setLodThreshold] = useState(() => loadLodThreshold())
 
   // Saved views (per canvas): [{ id, name, bounds: {x,y,width,height} }]
   const [views, setViews] = useState(initData.views ?? [])
@@ -1055,6 +1057,8 @@ export default function App() {
         onSelectView={selectView}
         onRenameView={renameView}
         onDeleteView={deleteView}
+        lodThreshold={lodThreshold}
+        onChangeLodThreshold={(v) => { setLodThreshold(v); saveLodThreshold(v) }}
       />
 
       <AuthPanel user={user} syncing={cloudSyncing} mobile={mobile} />
@@ -1067,6 +1071,7 @@ export default function App() {
           data: {
             ...n.data,
             stageTypes,
+            lodThreshold,
             onUpdate: (patch) => updateNodeData(n.id, patch),
             onEditStart: () => setIsAnyEditing(true),
             onEditEnd: () => setIsAnyEditing(false),
