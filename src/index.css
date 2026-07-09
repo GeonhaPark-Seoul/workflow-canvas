@@ -61,3 +61,26 @@ html, body, #root {
 .rich-content details summary { cursor: pointer; user-select: none; }
 .rich-content ul, .rich-content ol { padding-left: 18px; margin: 2px 0; }
 .rich-content li { margin: 1px 0; }
+.rich-content b, .rich-content strong { font-weight: 800; }
+
+/* Stage node parts list: add-row button and per-row remove button */
+.stage-part-add {
+  margin-top: 4px;
+  font-size: 10px;
+  color: #666;
+  cursor: pointer;
+  user-select: none;
+}
+.stage-part-add:hover { color: #aaa; }
+
+.stage-part-remove {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 0 2px;
+  font-size: 11px;
+  line-height: 1;
+  color: #555;
+  cursor: pointer;
+}
+.stage-part-remove:hover { color: #ef4444; }

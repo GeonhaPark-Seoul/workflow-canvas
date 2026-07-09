@@ -23,6 +23,12 @@ const PORTS = [
   { id: 'bottom', position: Position.Bottom },
 ]
 
+// Per-part handles: smaller port dots, colored per-part.
+const PART_HANDLE_STYLE = (partColor) => ({
+  width: 16, height: 16, border: 'none',
+  background: `radial-gradient(circle, ${partColor} 2px, #0f0f13 2px 4px, transparent 4px)`,
+})
+
 // Place caret at end of contentEditable element
 function caretAtEnd(el) {
   const range = document.createRange()
@@ -60,6 +66,11 @@ export default function StageNode({ data, selected, id }) {
   const suppressClick = useRef(false)
   const titleContainerRef = useRef(null)
   const descContainerRef = useRef(null)
+
+  // Parts list: inline text editing per-row (id of the part currently being edited)
+  const [editingPartId, setEditingPartId] = useState(null)
+  const [partDraft, setPartDraft] = useState('')
+  const partLastTapRef = useRef({})
 
   // Touch double-tap → edit, while preventing the browser's double-tap zoom.
   const touchEdit = (field) => (e) => {
@@ -147,6 +158,41 @@ export default function StageNode({ data, selected, id }) {
       if (field === 'title') data.onUpdate?.({ label: html })
       if (field === 'desc') data.onUpdate?.({ description: html })
     }
+  }
+
+  // Parts list handlers
+  const startPartEdit = (part) => {
+    if (editingPartId === part.id) return
+    setEditingPartId(part.id)
+    setPartDraft(part.text ?? '')
+  }
+  const commitPartEdit = () => {
+    if (editingPartId == null) return
+    const parts = (data.parts ?? []).map((p) => (p.id === editingPartId ? { ...p, text: partDraft } : p))
+    setEditingPartId(null)
+    data.onUpdate?.({ parts })
+  }
+  const cancelPartEdit = () => setEditingPartId(null)
+
+  // Touch double-tap → edit a part row, mirroring touchEdit() but keyed per-part id.
+  const touchEditPart = (part) => (e) => {
+    if (editingPartId === part.id) return
+    const now = Date.now()
+    if (now - (partLastTapRef.current[part.id] || 0) < 300) {
+      e.preventDefault()
+      partLastTapRef.current[part.id] = 0
+      startPartEdit(part)
+    } else {
+      partLastTapRef.current[part.id] = now
+    }
+  }
+
+  const addPart = () => {
+    const newPart = { id: 'pt-' + Date.now().toString(36), text: '새 파츠' }
+    data.onUpdate?.({ parts: [...(data.parts ?? []), newPart] })
+  }
+  const removePart = (partId) => {
+    data.onUpdate?.({ parts: (data.parts ?? []).filter((p) => p.id !== partId) })
   }
 
   const titleValue = data.label ?? ''
@@ -344,6 +390,88 @@ export default function StageNode({ data, selected, id }) {
               />
             )}
           </div>
+        </div>
+      )}
+
+      {/* Parts list — only rendered in normal (non-abstract) mode, same as description */}
+      {!abstract && (
+        <div style={{ padding: '0 12px 10px', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
+          {(data.parts ?? []).map((part) => {
+            const partColor = part.color || '#8b94a7'
+            return (
+              <div
+                key={part.id}
+                style={{
+                  position: 'relative',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  marginTop: 3,
+                  padding: '3px 8px',
+                  borderLeft: `3px solid ${partColor}`,
+                  background: '#ffffff0a',
+                  borderRadius: 4,
+                }}
+                onDoubleClick={() => startPartEdit(part)}
+                onTouchStart={touchEditPart(part)}
+              >
+                <Handle
+                  type="source"
+                  position={Position.Left}
+                  id={`p-${part.id}-l`}
+                  style={{ ...PART_HANDLE_STYLE(partColor), left: -13, top: '50%', transform: 'translateY(-50%)' }}
+                />
+
+                {editingPartId === part.id ? (
+                  <input
+                    className="nodrag"
+                    autoFocus
+                    value={partDraft}
+                    onChange={(e) => setPartDraft(e.target.value)}
+                    onFocus={(e) => e.target.select()}
+                    onBlur={commitPartEdit}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') { e.preventDefault(); commitPartEdit() }
+                      if (e.key === 'Escape') { e.preventDefault(); cancelPartEdit() }
+                    }}
+                    style={{
+                      flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none',
+                      borderBottom: `1px solid ${partColor}`,
+                      color: '#ccc', fontSize: 11, fontFamily: 'inherit', padding: 0,
+                    }}
+                  />
+                ) : (
+                  <span style={{ flex: 1, minWidth: 0, color: '#ccc', fontSize: 11, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                    {part.text}
+                  </span>
+                )}
+
+                {selected && editingPartId !== part.id && (
+                  <button
+                    type="button"
+                    className="nodrag stage-part-remove"
+                    onClick={(e) => { e.stopPropagation(); removePart(part.id) }}
+                    title="파츠 삭제"
+                  >
+                    ✕
+                  </button>
+                )}
+
+                <Handle
+                  type="source"
+                  position={Position.Right}
+                  id={`p-${part.id}-r`}
+                  style={{ ...PART_HANDLE_STYLE(partColor), right: -13, top: '50%', transform: 'translateY(-50%)' }}
+                />
+              </div>
+            )
+          })}
+
+          {selected && (
+            <div className="stage-part-add" onClick={addPart}>
+              ＋ 파츠
+            </div>
+          )}
         </div>
       )}
 

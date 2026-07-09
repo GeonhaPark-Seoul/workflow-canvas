@@ -14,6 +14,7 @@ import '@xyflow/react/dist/style.css'
 
 import StageNode from './nodes/StageNode'
 import MemoNode from './nodes/MemoNode'
+import GroupNode from './nodes/GroupNode'
 import { DEMO_CANVASES } from './demoCanvases'
 import Toolbar from './components/Toolbar'
 import HelpPanel from './components/HelpPanel'
@@ -34,7 +35,7 @@ import {
   loadUserPrefs as cloudLoadUserPrefs,
 } from './lib/cloudStorage'
 
-const nodeTypes = { stage: StageNode, memo: MemoNode }
+const nodeTypes = { stage: StageNode, memo: MemoNode, group: GroupNode }
 
 const defaultEdgeOptions = {
   animated: false,
@@ -75,6 +76,23 @@ function maxNodeId(nodes) {
   return Math.max(10, ...(nodes ?? []).map((n) => parseInt(n.id) || 0))
 }
 
+// React Flow requires a parent node to appear before its children in the
+// nodes array. Loaded data (localStorage / cloud) doesn't guarantee this, so
+// re-sort on load: parents first, otherwise stable relative to input order.
+function sortParentsFirst(nodes) {
+  const byId = new Map((nodes ?? []).map((n) => [n.id, n]))
+  const result = []
+  const visited = new Set()
+  const visit = (n) => {
+    if (visited.has(n.id)) return
+    if (n.parentId && byId.has(n.parentId)) visit(byId.get(n.parentId))
+    visited.add(n.id)
+    result.push(n)
+  }
+  ;(nodes ?? []).forEach(visit)
+  return result
+}
+
 // Base (unselected) appearance for an edge, derived purely from whether it's a
 // dashed memo link. Used to force a clean look on deselect so selection-bold can
 // never linger — even if a stale bold style got baked into the edge by reconnect.
@@ -105,7 +123,7 @@ export default function App() {
   const [canvases, setCanvases] = useState(initCanvasList)
   const [activeCanvasId, setActiveCanvasId] = useState(initActiveId)
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initData.nodes ?? [])
+  const [nodes, setNodes, onNodesChange] = useNodesState(sortParentsFirst(initData.nodes ?? []))
   const [edges, setEdges, onEdgesChange] = useEdgesState(normalizeEdges(initData.edges))
   const [stageTypes, setStageTypes] = useState(() => initData.stageTypes ?? DEFAULT_STAGE_TYPES)
   const [contextMenu, setContextMenu] = useState(null)
@@ -331,12 +349,28 @@ export default function App() {
         const b = rfInstance.screenToFlowPosition({ x: e.clientX, y: e.clientY })
         const x1 = Math.min(a.x, b.x), y1 = Math.min(a.y, b.y), x2 = Math.max(a.x, b.x), y2 = Math.max(a.y, b.y)
         if (x2 - x1 > 2 || y2 - y1 > 2) {
-          setNodes((nds) => nds.map((n) => {
-            const w = n.measured?.width ?? n.width ?? 0
-            const h = n.measured?.height ?? n.height ?? 0
-            const sel = n.position.x < x2 && n.position.x + w > x1 && n.position.y < y2 && n.position.y + h > y1
-            return { ...n, selected: sel }
-          }))
+          setNodes((nds) => {
+            const byId = new Map(nds.map((n) => [n.id, n]))
+            // Child nodes carry RELATIVE positions (parentId semantics) — walk
+            // up the parent chain to get absolute flow-space coordinates.
+            const absPos = (n) => {
+              let x = n.position.x, y = n.position.y, cur = n, guard = 0
+              while (cur.parentId && guard++ < 20) {
+                const p = byId.get(cur.parentId)
+                if (!p) break
+                x += p.position.x; y += p.position.y; cur = p
+              }
+              return { x, y }
+            }
+            return nds.map((n) => {
+              if (n.type === 'group') return { ...n, selected: false } // frames aren't lasso-selectable
+              const { x, y } = absPos(n)
+              const w = n.measured?.width ?? n.width ?? 0
+              const h = n.measured?.height ?? n.height ?? 0
+              const sel = x < x2 && x + w > x1 && y < y2 && y + h > y1
+              return { ...n, selected: sel }
+            })
+          })
           const swallow = (ev) => { ev.stopPropagation(); window.removeEventListener('click', swallow, true) }
           window.addEventListener('click', swallow, true)
           setTimeout(() => window.removeEventListener('click', swallow, true), 50)
@@ -414,6 +448,56 @@ export default function App() {
     return () => el.removeEventListener('touchstart', onTouchStart, { capture: true })
   }, [touchDevice, rfInstance])
 
+  // ── Desktop: forgiving grab radius for edge reconnect endpoints ─────────────
+  // index.css renders `.react-flow__edgeupdater` at a small, fixed CSS `r`
+  // (it overrides the reconnectRadius prop's SVG attribute entirely — CSS
+  // wins over presentation attributes), and that already-small circle shrinks
+  // further on screen as the canvas zooms out. The result: a real mouse click
+  // on a selected edge's endpoint routinely misses the tiny hit circle and
+  // lands on the node/edge underneath instead, so the drag never starts.
+  // Mirror the mobile touch bridge above: on mousedown, if the click is within
+  // grab range of a rendered anchor circle but didn't land exactly on it,
+  // hijack the gesture (block the node drag it would otherwise start) and
+  // dispatch a synthetic mousedown centered on the anchor so React Flow's own
+  // reconnect drag takes over from there.
+  useEffect(() => {
+    if (touchDevice || !rfInstance) return
+    const el = reactFlowRef.current
+    if (!el) return
+
+    const GRAB = 20 // px slack around the anchor center
+
+    const onMouseDown = (e) => {
+      if (e.button !== 0) return
+      if (e.target.closest?.('.react-flow__edgeupdater')) return // already a precise hit
+      const anchors = el.querySelectorAll('.react-flow__edgeupdater')
+      if (!anchors.length) return
+
+      let best = null, bestDist = Infinity, bestCx = 0, bestCy = 0
+      anchors.forEach((a) => {
+        const r = a.getBoundingClientRect()
+        const cx = r.left + r.width / 2
+        const cy = r.top + r.height / 2
+        const dist = Math.hypot(e.clientX - cx, e.clientY - cy)
+        const reach = Math.max(r.width, r.height) / 2 + GRAB
+        if (dist < reach && dist < bestDist) { best = a; bestDist = dist; bestCx = cx; bestCy = cy }
+      })
+      if (!best) return
+
+      e.preventDefault()
+      e.stopPropagation()
+      best.dispatchEvent(new MouseEvent('mousedown', {
+        bubbles: true, cancelable: true,
+        clientX: bestCx, clientY: bestCy,
+        button: 0, buttons: 1, view: window,
+      }))
+    }
+
+    // Capture phase so we run before React Flow's own node-drag mousedown handling.
+    el.addEventListener('mousedown', onMouseDown, { capture: true })
+    return () => el.removeEventListener('mousedown', onMouseDown, { capture: true })
+  }, [touchDevice, rfInstance])
+
   // ── Touch: two-finger pinch zoom (custom) ────────────────────────────────────
   // React Flow's own pinch is disabled here because panOnDrag=false makes its
   // event filter reject every touchstart (so one-finger lasso can work). We
@@ -488,7 +572,7 @@ export default function App() {
         }
       }
     }
-    const nNodes = data.nodes ?? []
+    const nNodes = sortParentsFirst(data.nodes ?? [])
     const nEdges = normalizeEdges(data.edges)
     isRestoring.current = true
     setActiveCanvasId(id)
@@ -653,7 +737,7 @@ export default function App() {
       })
 
       const mirror = {
-        nodes: row.nodes ?? [],
+        nodes: sortParentsFirst(row.nodes ?? []),
         edges: row.edges ?? [],
         views: row.views ?? [],
         stageTypes: row.stage_types?.length ? row.stage_types : undefined,
@@ -922,6 +1006,19 @@ export default function App() {
     closeContext()
   }
 
+  const handleContextGroupSelection = () => {
+    const ids = contextMenu?.selectedIds ?? []
+    if (ids.length < 2) return
+    groupSelection(ids)
+    closeContext()
+  }
+
+  const handleContextUngroup = () => {
+    if (!contextMenu?.nodeId) return
+    ungroup(contextMenu.nodeId)
+    closeContext()
+  }
+
   const clearAll = useCallback(() => {
     if (window.confirm('현재 캔버스의 모든 노드와 연결을 삭제할까요?')) { setNodes([]); setEdges([]) }
   }, [setNodes, setEdges])
@@ -946,6 +1043,53 @@ export default function App() {
     })
     return { x: minX, y: minY, width: maxX - minX, height: maxY - minY }
   }, [nodes])
+
+  // ── Groups (Obsidian-style frames) ────────────────────────────────────────
+  // Wrap the given node ids in a new group frame sized to their bounding box
+  // (+ padding), reparenting them with positions converted to relative coords.
+  const groupSelection = useCallback((ids) => {
+    const bounds = boundsOf(ids)
+    if (!bounds) return
+    const PAD = 40
+    const TOP_PAD = 36
+    const gx = bounds.x - PAD
+    const gy = bounds.y - PAD - TOP_PAD
+    const gw = bounds.width + PAD * 2
+    const gh = bounds.height + PAD * 2 + TOP_PAD
+    const groupId = nextId()
+    const groupNode = {
+      id: groupId, type: 'group', position: { x: gx, y: gy },
+      width: gw, height: gh, zIndex: -1, data: { label: '새 그룹' },
+    }
+    const idSet = new Set(ids)
+    setNodes((nds) => {
+      // Parent nodes must precede their children in the array (React Flow requirement).
+      const others = nds.filter((n) => !idSet.has(n.id))
+      const children = nds.filter((n) => idSet.has(n.id)).map((n) => ({
+        ...n,
+        parentId: groupId,
+        position: { x: n.position.x - gx, y: n.position.y - gy },
+      }))
+      return [...others, groupNode, ...children]
+    })
+  }, [boundsOf, setNodes])
+
+  // Remove a group frame, converting its children back to absolute positions
+  // and dropping their parentId. Used by both "그룹 해제" and "그룹 삭제".
+  const ungroup = useCallback((groupId) => {
+    setNodes((nds) => {
+      const group = nds.find((n) => n.id === groupId)
+      if (!group) return nds
+      const { x: gx, y: gy } = group.position
+      return nds
+        .filter((n) => n.id !== groupId)
+        .map((n) => {
+          if (n.parentId !== groupId) return n
+          const { parentId, ...rest } = n
+          return { ...rest, position: { x: n.position.x + gx, y: n.position.y + gy } }
+        })
+    })
+  }, [setNodes])
 
   const saveViewFromSelection = useCallback((ids) => {
     const bounds = boundsOf(ids)
@@ -1103,7 +1247,7 @@ export default function App() {
         }}
         nodesDraggable={!isAnyEditing && !isPinching}
         edgesReconnectable={false}
-        reconnectRadius={mobile ? 40 : 10}
+        reconnectRadius={mobile ? 40 : 20}
         connectionMode="loose"
         connectionRadius={0}
         panOnDrag={false}
@@ -1124,7 +1268,7 @@ export default function App() {
         {!mobile && <Controls style={{ background: '#1a1a22', border: '1px solid #ffffff18', borderRadius: 8 }} />}
         {!mobile && (
           <MiniMap
-            nodeColor={(n) => (n.type === 'memo' ? '#f59e0b88' : '#3b82f688')}
+            nodeColor={(n) => (n.type === 'memo' ? '#f59e0b88' : n.type === 'group' ? '#8b94a733' : '#3b82f688')}
             maskColor="#0f0f1388"
             style={{ background: '#1a1a22', border: '1px solid #ffffff18', borderRadius: 8 }}
           />
@@ -1191,7 +1335,18 @@ export default function App() {
                 color="#06b6d4"
                 onClick={() => { saveViewFromSelection(ctxIds); closeContext() }}
               />
+              {ctxMulti && (
+                <ContextItem icon="⬚" label="그룹으로 묶기" color="#8b94a7" onClick={handleContextGroupSelection} />
+              )}
               <div style={{ height: 1, background: '#ffffff18', margin: '4px 2px' }} />
+            </>
+          )}
+
+          {/* Group node: ungroup (frame removed, children kept) */}
+          {contextMenu.nodeId && contextMenu.nodeType === 'group' && (
+            <>
+              <ContextItem icon="⬚" label="그룹 해제" color="#8b94a7" onClick={handleContextUngroup} />
+              <ContextItem icon="🗑" label="그룹 삭제 (노드 유지)" color="#8b94a7" onClick={handleContextUngroup} />
             </>
           )}
 

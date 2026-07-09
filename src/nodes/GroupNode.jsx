@@ -1,0 +1,106 @@
+import { useState, useRef, useEffect } from 'react'
+import { NodeResizer, useStore } from '@xyflow/react'
+
+export default function GroupNode({ data, selected }) {
+  // Abstract (LOD) mode: re-renders only when crossing the threshold, not every zoom tick.
+  const abstract = useStore((s) => s.transform[2] < (data.lodThreshold ?? 0.55))
+
+  const [editing, setEditing] = useState(false)
+  const [value, setValue] = useState(data.label ?? '')
+  const inputRef = useRef(null)
+  const longPressTimer = useRef(null)
+  const longPressStart = useRef(null)
+
+  useEffect(() => {
+    if (editing) {
+      setValue(data.label ?? '')
+      inputRef.current?.focus()
+      inputRef.current?.select()
+    }
+  }, [editing]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handlePointerDown = (e) => {
+    if (e.pointerType !== 'touch') return
+    longPressStart.current = { x: e.clientX, y: e.clientY }
+    const cx = e.clientX, cy = e.clientY
+    longPressTimer.current = setTimeout(() => {
+      data.onLongPress?.(cx, cy)
+      longPressTimer.current = null
+    }, 500)
+  }
+  const handlePointerMove = (e) => {
+    if (!longPressStart.current || !longPressTimer.current) return
+    if (Math.hypot(e.clientX - longPressStart.current.x, e.clientY - longPressStart.current.y) > 10)
+      clearTimeout(longPressTimer.current)
+  }
+  const handlePointerUp = () => { clearTimeout(longPressTimer.current); longPressStart.current = null }
+
+  const commit = () => {
+    setEditing(false)
+    if (value.trim()) data.onUpdate?.({ label: value.trim() })
+  }
+
+  const labelFontSize = abstract ? Math.round(13 * 1.9) : 13
+
+  return (
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        minWidth: 240,
+        minHeight: 160,
+        boxSizing: 'border-box',
+        background: '#ffffff06',
+        border: '1.5px dashed #8b94a766',
+        borderRadius: 14,
+      }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+    >
+      <NodeResizer
+        isVisible={selected}
+        minWidth={240}
+        minHeight={160}
+        color="#8b94a7"
+        handleStyle={{ width: 10, height: 10, borderRadius: 2, border: '2px solid #8b94a7' }}
+        lineStyle={{ borderColor: '#8b94a766' }}
+      />
+
+      <div style={{ position: 'absolute', top: 0, left: 0, padding: '8px 12px' }}>
+        {editing ? (
+          <input
+            ref={inputRef}
+            className="nodrag nowheel"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onBlur={commit}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') { e.preventDefault(); commit() }
+              if (e.key === 'Escape') { e.preventDefault(); setEditing(false) }
+            }}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              borderBottom: '1px solid #8b94a7',
+              color: '#aab',
+              fontSize: labelFontSize,
+              fontWeight: 700,
+              outline: 'none',
+              fontFamily: 'inherit',
+              minWidth: 80,
+            }}
+          />
+        ) : (
+          <div
+            onDoubleClick={() => setEditing(true)}
+            style={{ color: '#aab', fontSize: labelFontSize, fontWeight: 700, cursor: 'text' }}
+          >
+            {data.label || '새 그룹'}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
