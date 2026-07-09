@@ -103,6 +103,30 @@ function absolutePosition(node, byId) {
   return { x, y }
 }
 
+// "연결선 정리": pick the nearest-side handle pair between two nodes, based on
+// their absolute centers (accounts for parentId children — see absolutePosition).
+function closestHandles(sourceNode, targetNode, byId) {
+  const dim = (n) => ({ w: n.measured?.width ?? n.width ?? 200, h: n.measured?.height ?? n.height ?? 80 })
+  const sPos = absolutePosition(sourceNode, byId)
+  const tPos = absolutePosition(targetNode, byId)
+  const sd = dim(sourceNode), td = dim(targetNode)
+  const dx = (tPos.x + td.w / 2) - (sPos.x + sd.w / 2)
+  const dy = (tPos.y + td.h / 2) - (sPos.y + sd.h / 2)
+  if (Math.abs(dx) >= Math.abs(dy)) {
+    return dx >= 0 ? { sourceHandle: 'right', targetHandle: 'left' } : { sourceHandle: 'left', targetHandle: 'right' }
+  }
+  return dy >= 0 ? { sourceHandle: 'bottom', targetHandle: 'top' } : { sourceHandle: 'top', targetHandle: 'bottom' }
+}
+
+// Copy/paste and undo/redo keydown guards must not fire while the user is
+// typing into a rich-text field, input, or textarea.
+function isTypingTarget() {
+  const el = document.activeElement
+  if (!el) return false
+  if (el.isContentEditable) return true
+  return el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT'
+}
+
 // Group-scope invitees can only add nodes inside their invited frame — place
 // new nodes near the frame center (relative coords) with a little jitter so
 // repeated adds don't stack exactly on top of each other.
@@ -1154,6 +1178,115 @@ export default function App() {
     setNodes((nds) => [...nds, { id, type: 'memo', position: pos, data: { header: '', text: '' } }])
   }, [setNodes])
 
+  // ── Copy / Paste (in-app clipboard, not the OS clipboard) ─────────────────
+  const clipboardRef = useRef(null) // { nodes, edges } — stripped copies, original ids
+  const pasteCountRef = useRef(0) // repeated pastes offset further each time
+
+  const copySelection = useCallback(() => {
+    const selected = nodes.filter((n) => n.selected)
+    if (!selected.length) return
+    const byId = new Map(nodes.map((n) => [n.id, n]))
+    // A selected group frame brings its children along even if they weren't
+    // individually selected — copying a group should copy its contents.
+    const groupIds = new Set(selected.filter((n) => n.type === 'group').map((n) => n.id))
+    const toCopy = new Map(selected.map((n) => [n.id, n]))
+    nodes.forEach((n) => { if (n.parentId && groupIds.has(n.parentId)) toCopy.set(n.id, n) })
+
+    const copiedNodes = Array.from(toCopy.values()).map((n) => {
+      const stripped = stripNode(n)
+      if (stripped.parentId && !toCopy.has(stripped.parentId)) {
+        // Parent frame isn't part of the copy — fall back to absolute position.
+        const { parentId, ...rest } = stripped
+        return { ...rest, position: absolutePosition(n, byId) }
+      }
+      return stripped
+    })
+    const copiedIds = new Set(copiedNodes.map((n) => n.id))
+    const copiedEdges = edges.filter((e) => copiedIds.has(e.source) && copiedIds.has(e.target)).map(stripEdge)
+
+    clipboardRef.current = { nodes: copiedNodes, edges: copiedEdges }
+    pasteCountRef.current = 0
+  }, [nodes, edges])
+
+  // Remap a part handle id ('p-<partId>-l'/'-r') through partIdMap; plain port
+  // ids (left/right/top/bottom) are shared across nodes and stay untouched.
+  const remapPartHandle = (handle, partIdMap) => {
+    if (!handle || !handle.startsWith('p-')) return handle
+    const m = handle.match(/^p-(.+)-(l|r)$/)
+    if (!m) return handle
+    const newPartId = partIdMap.get(m[1])
+    return newPartId ? `p-${newPartId}-${m[2]}` : handle
+  }
+
+  const pasteClipboard = useCallback(() => {
+    const clip = clipboardRef.current
+    if (!clip || !clip.nodes.length) return
+    if (perm.role === 'invitee' && perm.scope === 'node') return // nowhere to paste
+    const forceFrame = perm.role === 'invitee' && perm.scope === 'group'
+    const frame = forceFrame ? nodes.find((n) => n.id === perm.targetId) : null
+    if (forceFrame && !frame) return
+
+    pasteCountRef.current += 1
+    const offset = 40 * pasteCountRef.current
+
+    const idMap = new Map()
+    clip.nodes.forEach((n) => idMap.set(n.id, nextId()))
+    const partIdMap = new Map()
+    clip.nodes.forEach((n) => (n.data?.parts ?? []).forEach((p) => partIdMap.set(p.id, `pt-${uid()}`)))
+
+    const newNodes = clip.nodes.map((n) => {
+      const hasCopiedParent = !!(n.parentId && idMap.has(n.parentId))
+      let parentId = hasCopiedParent ? idMap.get(n.parentId) : undefined
+      let position = hasCopiedParent ? { ...n.position } : { x: n.position.x + offset, y: n.position.y + offset }
+
+      if (forceFrame && !hasCopiedParent) {
+        parentId = perm.targetId
+        position = centerInFrame(frame, n.measured?.width ?? n.width ?? 200, n.measured?.height ?? n.height ?? 80)
+      }
+
+      const parts = n.data?.parts ? n.data.parts.map((p) => ({ ...p, id: partIdMap.get(p.id) ?? p.id })) : undefined
+      const { parentId: _drop, ...rest } = n
+
+      return {
+        ...rest,
+        id: idMap.get(n.id),
+        position,
+        ...(parentId ? { parentId } : {}),
+        selected: true,
+        data: parts ? { ...n.data, parts } : n.data,
+      }
+    })
+
+    const newEdges = clip.edges.map((e) => ({
+      ...e,
+      id: `e-${uid()}`,
+      source: idMap.get(e.source),
+      target: idMap.get(e.target),
+      sourceHandle: remapPartHandle(e.sourceHandle, partIdMap),
+      targetHandle: remapPartHandle(e.targetHandle, partIdMap),
+      selected: false,
+    }))
+
+    setNodes((nds) => sortParentsFirst([...nds.map((n) => (n.selected ? { ...n, selected: false } : n)), ...newNodes]))
+    setEdges((eds) => eds.concat(newEdges))
+  }, [nodes, setNodes, setEdges, perm])
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (!(e.metaKey || e.ctrlKey)) return
+      if (isAnyEditingRef.current || isTypingTarget()) return
+      if (e.key === 'c' || e.key === 'C') {
+        e.preventDefault()
+        copySelection()
+      } else if (e.key === 'v' || e.key === 'V') {
+        e.preventDefault()
+        pasteClipboard()
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [copySelection, pasteClipboard])
+
   // ── Connect ───────────────────────────────────────────────────────────────
   // Each connection gets a unique id and is appended directly (instead of via
   // addEdge, which dedupes by source/target handle) so a single connection
@@ -1174,7 +1307,62 @@ export default function App() {
   }, [nodes, setEdges, perm, isNodeEditable])
 
   // ── Reconnect: drag an edge endpoint onto another node/handle ──────────────
+  // Bundle-snatch: when several selected nodes' edges all converge on ONE
+  // shared (node, handle) point, dragging any one of them at that shared
+  // point moves all of them together. See onReconnectStart below.
+  const reconnectBundleRef = useRef(null) // { point: {nodeId, handleId}, edgeIds: [...] } | null
+
+  const onReconnectStart = useCallback((_event, edge, handleType) => {
+    setReconnecting(true)
+    reconnectBundleRef.current = null
+
+    // xyflow passes the handleType of the FIXED (non-dragged) end; the
+    // dragged end is the opposite side of the edge.
+    const fixedIsTarget = handleType === 'target'
+    const draggedNodeId = fixedIsTarget ? edge.source : edge.target
+    const draggedHandleId = (fixedIsTarget ? edge.sourceHandle : edge.targetHandle) ?? null
+    const fixedNodeId = fixedIsTarget ? edge.target : edge.source
+
+    const selectedIds = new Set(nodes.filter((n) => n.selected).map((n) => n.id))
+    if (selectedIds.size < 2 || !selectedIds.has(fixedNodeId)) return
+
+    // Every edge with exactly one endpoint among the selected nodes — the
+    // "outward" edges connecting the selection to the rest of the canvas.
+    const pointKey = (nodeId, handleId) => `${nodeId}::${handleId ?? ''}`
+    const outward = edges.filter((e) => selectedIds.has(e.source) !== selectedIds.has(e.target))
+    const points = new Set(outward.map((e) =>
+      selectedIds.has(e.source) ? pointKey(e.target, e.targetHandle) : pointKey(e.source, e.sourceHandle)
+    ))
+    // Only bundle when ALL outward edges converge on this exact single point
+    // and there are at least two of them (otherwise: normal single-edge reconnect).
+    if (points.size !== 1 || !points.has(pointKey(draggedNodeId, draggedHandleId)) || outward.length < 2) return
+
+    reconnectBundleRef.current = {
+      point: { nodeId: draggedNodeId, handleId: draggedHandleId },
+      edgeIds: outward.map((e) => e.id),
+    }
+  }, [nodes, edges])
+
   const onReconnect = useCallback((oldEdge, newConnection) => {
+    const bundle = reconnectBundleRef.current
+    if (bundle && bundle.edgeIds.length >= 2 && bundle.edgeIds.includes(oldEdge.id)) {
+      const movedIsSource = oldEdge.source === bundle.point.nodeId && (oldEdge.sourceHandle ?? null) === bundle.point.handleId
+      const newPoint = movedIsSource
+        ? { nodeId: newConnection.source, handleId: newConnection.sourceHandle ?? null }
+        : { nodeId: newConnection.target, handleId: newConnection.targetHandle ?? null }
+
+      setEdges((eds) => eds.map((e) => {
+        if (!bundle.edgeIds.includes(e.id)) return e
+        const eMovedIsSource = e.source === bundle.point.nodeId && (e.sourceHandle ?? null) === bundle.point.handleId
+        const otherNodeId = eMovedIsSource ? e.target : e.source
+        if (perm.role === 'invitee' && (!isNodeEditable(newPoint.nodeId) || !isNodeEditable(otherNodeId))) return e
+        return eMovedIsSource
+          ? { ...e, source: newPoint.nodeId, sourceHandle: newPoint.handleId }
+          : { ...e, target: newPoint.nodeId, targetHandle: newPoint.handleId }
+      }))
+      return
+    }
+
     if (perm.role === 'invitee' && (!isNodeEditable(newConnection.source) || !isNodeEditable(newConnection.target))) return
     // Reconnect the clean edge from state, not the styled (bold) object React
     // Flow hands back — otherwise the selection styling gets baked in permanently.
@@ -1301,6 +1489,27 @@ export default function App() {
     const ids = contextMenu?.selectedIds ?? []
     if (ids.length < 2) return
     groupSelection(ids)
+    closeContext()
+  }
+
+  // "⇢ 연결선 정리": recompute both handles (nearest-side) for every edge
+  // touching any selected node. Skips part-anchored edges (fixed rows) and,
+  // for invitees, edges whose endpoints aren't both in their editable set.
+  const handleContextCleanupEdges = () => {
+    const ids = contextMenu?.selectedIds?.length ? contextMenu.selectedIds : (contextMenu?.nodeId ? [contextMenu.nodeId] : [])
+    if (!ids.length) { closeContext(); return }
+    const idSet = new Set(ids)
+    const byId = new Map(nodes.map((n) => [n.id, n]))
+    setEdges((eds) => eds.map((e) => {
+      if (!idSet.has(e.source) && !idSet.has(e.target)) return e
+      if (e.sourceHandle?.startsWith('p-') || e.targetHandle?.startsWith('p-')) return e
+      if (perm.role === 'invitee' && (!isNodeEditable(e.source) || !isNodeEditable(e.target))) return e
+      const sourceNode = byId.get(e.source)
+      const targetNode = byId.get(e.target)
+      if (!sourceNode || !targetNode) return e
+      const { sourceHandle, targetHandle } = closestHandles(sourceNode, targetNode, byId)
+      return { ...e, sourceHandle, targetHandle }
+    }))
     closeContext()
   }
 
@@ -1568,8 +1777,8 @@ export default function App() {
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onReconnect={onReconnect}
-        onReconnectStart={() => setReconnecting(true)}
-        onReconnectEnd={() => setReconnecting(false)}
+        onReconnectStart={onReconnectStart}
+        onReconnectEnd={() => { setReconnecting(false); reconnectBundleRef.current = null }}
         onNodeDrag={onNodeDrag}
         onNodeDragStop={onNodeDragStop}
         onNodeClick={onNodeClick}
@@ -1676,6 +1885,7 @@ export default function App() {
               {ctxMulti && ctxFullEdit && (
                 <ContextItem icon="⬚" label="그룹으로 묶기" color="#8b94a7" onClick={handleContextGroupSelection} />
               )}
+              <ContextItem icon="⇢" label="연결선 정리" color="#8b94a7" onClick={handleContextCleanupEdges} />
               <div style={{ height: 1, background: '#ffffff18', margin: '4px 2px' }} />
             </>
           )}
