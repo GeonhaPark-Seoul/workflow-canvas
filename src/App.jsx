@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import {
   ReactFlow,
   Background,
@@ -20,6 +20,7 @@ import Toolbar from './components/Toolbar'
 import HelpPanel from './components/HelpPanel'
 import CanvasTabs from './components/CanvasTabs'
 import AuthPanel from './components/AuthPanel'
+import InvitePopover from './components/InvitePopover'
 import {
   initCanvases, loadCanvasData, saveCanvasData, deleteCanvasData,
   saveCanvasList, saveActiveId, uid,
@@ -33,7 +34,10 @@ import {
   deleteCanvas as cloudDeleteCanvas,
   saveUserPrefs as cloudSaveUserPrefs,
   loadUserPrefs as cloudLoadUserPrefs,
+  updateSharedCanvas as cloudUpdateSharedCanvas,
 } from './lib/cloudStorage'
+import { joinCanvasPresence } from './lib/presence'
+import { claimEmailInvites, claimShareToken, listSharedWithMe } from './lib/shares'
 
 const nodeTypes = { stage: StageNode, memo: MemoNode, group: GroupNode }
 
@@ -74,6 +78,43 @@ function normalizeEdges(edges) {
 
 function maxNodeId(nodes) {
   return Math.max(10, ...(nodes ?? []).map((n) => parseInt(n.id) || 0))
+}
+
+// ── Phase 2 sharing: shared canvases live under a composite localStorage/
+// activeCanvasId key so they never collide with the owner's own canvas ids.
+const SHARED_PREFIX = 'shared:'
+function sharedCanvasId(ownerId, canvasId) { return `${SHARED_PREFIX}${ownerId}:${canvasId}` }
+function parseSharedId(id) {
+  if (typeof id !== 'string' || !id.startsWith(SHARED_PREFIX)) return null
+  const rest = id.slice(SHARED_PREFIX.length)
+  const sep = rest.indexOf(':')
+  if (sep === -1) return null
+  return { ownerId: rest.slice(0, sep), canvasId: rest.slice(sep + 1) }
+}
+
+// Walk a node's parentId chain to get its absolute flow-space position
+// (child nodes carry positions relative to their parent frame).
+function absolutePosition(node, byId) {
+  let x = node.position.x, y = node.position.y, cur = node, guard = 0
+  while (cur.parentId && byId.has(cur.parentId) && guard++ < 20) {
+    const p = byId.get(cur.parentId)
+    x += p.position.x; y += p.position.y; cur = p
+  }
+  return { x, y }
+}
+
+// Group-scope invitees can only add nodes inside their invited frame — place
+// new nodes near the frame center (relative coords) with a little jitter so
+// repeated adds don't stack exactly on top of each other.
+function centerInFrame(frame, nodeW, nodeH) {
+  const fw = frame.measured?.width ?? frame.width ?? 240
+  const fh = frame.measured?.height ?? frame.height ?? 160
+  const jx = (Math.random() - 0.5) * 60
+  const jy = (Math.random() - 0.5) * 60
+  return {
+    x: Math.max(10, Math.min(fw - nodeW - 10, fw / 2 - nodeW / 2 + jx)),
+    y: Math.max(46, Math.min(fh - nodeH - 10, fh / 2 - nodeH / 2 + jy)),
+  }
 }
 
 // React Flow requires a parent node to appear before its children in the
@@ -164,6 +205,12 @@ export default function App() {
   const isAnyEditingRef = useRef(false) // mirror for the realtime channel callback
   const lastPushedCanvasRef = useRef('') // JSON of the last canvas payload saved to cloud
   const lastPushedPrefsRef = useRef('') // JSON of the last prefs payload saved to cloud
+
+  // ── Sharing / invite (phase 2) ────────────────────────────────────────────
+  const [invite, setInvite] = useState(null) // { scope, targetId, x, y } | null
+  const [onlineUsers, setOnlineUsers] = useState([]) // [{ user_id, email }] in the active canvas
+  const [sharedCanvases, setSharedCanvases] = useState([]) // canvases shared WITH me (listSharedWithMe())
+  const pendingShareTokenRef = useRef(null) // #share=<token> claimed right after SIGNED_IN
 
   const nextId = () => String(++counterRef.current)
 
@@ -374,7 +421,7 @@ export default function App() {
           const swallow = (ev) => { ev.stopPropagation(); window.removeEventListener('click', swallow, true) }
           window.addEventListener('click', swallow, true)
           setTimeout(() => window.removeEventListener('click', swallow, true), 50)
-        } else if (touchDevice) {
+        } else if (touchDevice && !(permRef.current.role === 'invitee' && permRef.current.scope !== 'canvas')) {
           // Stationary long-press on empty space (touch) → pane context menu,
           // the mobile equivalent of a right-click.
           const r = reactFlowRef.current?.getBoundingClientRect()
@@ -593,11 +640,31 @@ export default function App() {
     saveCanvasData(activeCanvasId, { nodes: nodes.map(stripNode), edges: edges.map(stripEdge), views, stageTypes })
   }, [activeCanvasId, nodes, edges, views, stageTypes])
 
+  // Load a canvas I was invited to: fetched directly off the OWNER's row
+  // (RLS grants invitees select access), then fed through loadCanvas's
+  // existing prefetched-data path under a composite localStorage id.
+  const loadSharedCanvas = useCallback(async (ownerId, canvasId) => {
+    const { data: row, error } = await supabase
+      .from('canvases')
+      .select('name, nodes, edges, views, stage_types')
+      .eq('user_id', ownerId)
+      .eq('canvas_id', canvasId)
+      .maybeSingle()
+    if (error) { console.error('[shares] loadSharedCanvas:', error.message); return }
+    if (!row) return
+    const compositeId = sharedCanvasId(ownerId, canvasId)
+    const data = { nodes: row.nodes ?? [], edges: row.edges ?? [], views: row.views ?? [], stageTypes: row.stage_types?.length ? row.stage_types : undefined }
+    saveCanvasData(compositeId, data)
+    loadCanvas(compositeId, data)
+  }, [loadCanvas])
+
   const switchCanvas = useCallback((id) => {
     if (id === activeCanvasId) return
     persistCurrent()
+    const shared = parseSharedId(id)
+    if (shared) { loadSharedCanvas(shared.ownerId, shared.canvasId); return }
     loadCanvas(id)
-  }, [activeCanvasId, persistCurrent, loadCanvas])
+  }, [activeCanvasId, persistCurrent, loadCanvas, loadSharedCanvas])
 
   const addCanvas = useCallback(() => {
     persistCurrent()
@@ -680,17 +747,61 @@ export default function App() {
     }
   }, [loadCanvas, setCanvases])
 
+  // ── Sharing: refresh the "shared with me" list ────────────────────────────
+  const refreshSharedCanvases = useCallback(async () => {
+    try {
+      setSharedCanvases(await listSharedWithMe())
+    } catch (err) {
+      console.error('[shares] refreshSharedCanvases:', err.message)
+    }
+  }, [])
+
+  // Kept fresh every render (not in the auth effect's deps, which stay stable
+  // like before) so the auth listener can call the latest closures without
+  // re-subscribing on every node/edge edit.
+  const sharedFnRef = useRef({})
+  useEffect(() => { sharedFnRef.current = { persistCurrent, loadSharedCanvas, refreshSharedCanvases } })
+
   // ── Auth listener ─────────────────────────────────────────────────────────
   useEffect(() => {
+    // Link share: #share=<token>. Claim immediately if already logged in,
+    // otherwise stash it and claim right after SIGNED_IN.
+    const hashMatch = location.hash.match(/^#share=(.+)$/)
+    if (hashMatch) pendingShareTokenRef.current = hashMatch[1]
+
+    const afterLogin = async (u) => {
+      loadFromCloud(u.id)
+      try { await claimEmailInvites() } catch (err) { console.error('[shares] claimEmailInvites:', err.message) }
+
+      if (pendingShareTokenRef.current) {
+        const token = pendingShareTokenRef.current
+        pendingShareTokenRef.current = null
+        try {
+          const claimed = await claimShareToken(token)
+          await sharedFnRef.current.refreshSharedCanvases()
+          if (claimed) {
+            sharedFnRef.current.persistCurrent()
+            sharedFnRef.current.loadSharedCanvas(claimed.owner_id, claimed.canvas_id)
+          }
+        } catch (err) {
+          console.error('[shares] claimShareToken:', err.message)
+        }
+        history.replaceState(null, '', location.pathname + location.search)
+        return
+      }
+
+      sharedFnRef.current.refreshSharedCanvases()
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       const u = session?.user ?? null
       setUser(u)
-      if (u) loadFromCloud(u.id)
+      if (u) afterLogin(u)
     })
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       const u = session?.user ?? null
       setUser(u)
-      if (event === 'SIGNED_IN' && u) loadFromCloud(u.id)
+      if (event === 'SIGNED_IN' && u) afterLogin(u)
     })
     return () => subscription.unsubscribe()
   }, [loadFromCloud])
@@ -776,6 +887,70 @@ export default function App() {
     return () => { supabase.removeChannel(channel) }
   }, [user, loadCanvas, setNodes, setEdges])
 
+  // ── Realtime: mirror the OWNER's canvas while a shared canvas is active ──
+  // Same shape as the effect above, but filtered on the owner's user_id
+  // (invitees don't have their own row for this canvas) and scoped to just
+  // the one shared canvas currently open — it doesn't touch the tab list.
+  useEffect(() => {
+    if (!user) return
+    const shared = parseSharedId(activeCanvasId)
+    if (!shared) return
+    const { ownerId, canvasId } = shared
+
+    const handler = async (payload) => {
+      const id = payload.new?.canvas_id ?? payload.old?.canvas_id
+      if (id !== canvasId || payload.eventType === 'DELETE') return
+
+      const { data: row } = await supabase
+        .from('canvases')
+        .select('nodes, edges, views, stage_types')
+        .eq('user_id', ownerId)
+        .eq('canvas_id', canvasId)
+        .maybeSingle()
+      if (!row) return
+
+      const mirror = {
+        nodes: sortParentsFirst(row.nodes ?? []),
+        edges: row.edges ?? [],
+        views: row.views ?? [],
+        stageTypes: row.stage_types?.length ? row.stage_types : undefined,
+      }
+      if (isAnyEditingRef.current) return
+      const local = loadCanvasData(activeCanvasId) ?? {}
+      if (JSON.stringify({ n: local.nodes ?? [], e: local.edges ?? [] }) ===
+          JSON.stringify({ n: mirror.nodes, e: mirror.edges })) return
+
+      isRestoring.current = true
+      const nEdges = normalizeEdges(mirror.edges)
+      setNodes(mirror.nodes)
+      setEdges(nEdges)
+      setViews(mirror.views)
+      setStageTypes(mirror.stageTypes ?? DEFAULT_STAGE_TYPES)
+      counterRef.current = maxNodeId(mirror.nodes)
+      const snap = { nodes: mirror.nodes.map(stripNode), edges: nEdges.map(stripEdge) }
+      historyStack.current = [...historyStack.current.slice(0, historyPointer.current + 1), snap]
+      historyPointer.current = historyStack.current.length - 1
+      saveCanvasData(activeCanvasId, mirror)
+      setTimeout(() => { isRestoring.current = false }, 400)
+    }
+
+    const channel = supabase
+      .channel(`shared-canvas-live-${ownerId}-${canvasId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'canvases', filter: `user_id=eq.${ownerId}` }, handler)
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [user, activeCanvasId, setNodes, setEdges])
+
+  // ── Presence: who else is viewing the active canvas ───────────────────────
+  useEffect(() => {
+    if (!user || !activeCanvasId) { setOnlineUsers([]); return }
+    const shared = parseSharedId(activeCanvasId)
+    const ownerId = shared ? shared.ownerId : user.id
+    const canvasId = shared ? shared.canvasId : activeCanvasId
+    const { unsubscribe } = joinCanvasPresence({ ownerId, canvasId, user, onlineRef_or_callback: setOnlineUsers })
+    return () => { unsubscribe(); setOnlineUsers([]) }
+  }, [user, activeCanvasId])
+
   // ── Cloud auto-save (debounced 1.5 s, only when logged in) ───────────────
   const cloudSaveTimer = useRef(null)
   useEffect(() => {
@@ -784,6 +959,24 @@ export default function App() {
     cloudSaveTimer.current = setTimeout(async () => {
       const { canvases: cvs, activeCanvasId: aid, stageTypes: types, views: vws } = latestRef.current
       const snapshot = { nodes: nodes.map(stripNode), edges: edges.map(stripEdge) }
+      const shared = parseSharedId(aid)
+
+      // Shared canvas: invitee saves land directly on the owner's row —
+      // nodes/edges only, never name or user_prefs (those are owner-only).
+      if (shared) {
+        const payload = JSON.stringify({ aid, nodes: snapshot.nodes, edges: snapshot.edges })
+        if (payload === lastPushedCanvasRef.current) return
+        setCloudSyncing(true)
+        try {
+          await cloudUpdateSharedCanvas(shared.ownerId, shared.canvasId, snapshot.nodes, snapshot.edges)
+          lastPushedCanvasRef.current = payload
+        } catch (err) {
+          console.error('[cloud] shared autosave:', err.message)
+        }
+        setCloudSyncing(false)
+        return
+      }
+
       const name = cvs.find((c) => c.id === aid)?.name ?? '캔버스'
       // Dirty-check: skip writes whose payload didn't change since the last
       // push. An idle browser must not keep rewriting the row — that would
@@ -810,6 +1003,79 @@ export default function App() {
     }, 1500)
     return () => clearTimeout(cloudSaveTimer.current)
   }, [user, nodes, edges, stageTypes, canvases, activeCanvasId, views])
+
+  // ── Sharing: permission model for the active canvas ───────────────────────
+  // Own canvases (and canvases before any share info has loaded) are always
+  // full-edit 'owner'. A shared composite activeCanvasId resolves to whichever
+  // matching share is most permissive (canvas > group > node).
+  const perm = useMemo(() => {
+    const parsed = parseSharedId(activeCanvasId)
+    if (!parsed) return { role: 'owner', scope: 'canvas', targetId: null, restrictView: false }
+    const matches = sharedCanvases.filter((s) => s.ownerId === parsed.ownerId && s.canvasId === parsed.canvasId)
+    if (!matches.length) return { role: 'owner', scope: 'canvas', targetId: null, restrictView: false }
+    const priority = { canvas: 0, group: 1, node: 2 }
+    const best = [...matches].sort((a, b) => priority[a.scope] - priority[b.scope])[0]
+    return { role: 'invitee', scope: best.scope, targetId: best.targetId, restrictView: best.restrictView }
+  }, [activeCanvasId, sharedCanvases])
+
+  // Kept fresh every render so the touch long-press gesture handler (bound
+  // once, high up in the file, well before `perm` exists) can read the
+  // current permission without needing to be in that effect's deps.
+  const permRef = useRef(perm)
+  useEffect(() => { permRef.current = perm })
+
+  // Set of node ids an invitee may edit; null means "everything" (owner or canvas-scope).
+  const editableSet = useMemo(() => {
+    if (perm.role === 'owner' || perm.scope === 'canvas') return null
+    if (perm.scope === 'group') return new Set(nodes.filter((n) => n.parentId === perm.targetId).map((n) => n.id))
+    if (perm.scope === 'node') return new Set([perm.targetId])
+    return new Set()
+  }, [perm, nodes])
+  const isNodeEditable = useCallback((id) => editableSet === null || editableSet.has(id), [editableSet])
+
+  // Someone other than me online in the active canvas → glow the invite icons.
+  const presenceGlow = user ? onlineUsers.some((u) => u.user_id !== user.id) : false
+
+  // Open the invite popover near the icon that was clicked, clamped to the viewport.
+  const openInvite = useCallback((scope, targetId, anchorRect) => {
+    const POPOVER_W = 280, POPOVER_H = 340
+    let x = anchorRect ? anchorRect.left : window.innerWidth / 2 - POPOVER_W / 2
+    let y = anchorRect ? anchorRect.bottom + 6 : window.innerHeight / 2 - POPOVER_H / 2
+    x = Math.min(Math.max(8, x), window.innerWidth - POPOVER_W - 8)
+    y = Math.min(Math.max(8, y), window.innerHeight - POPOVER_H - 8)
+    setInvite({ scope, targetId, x, y })
+  }, [])
+
+  // Dedupe sharedCanvases (which can hold multiple distinct scope/target
+  // entries per canvas) down to one tab row per owner+canvas.
+  const sharedCanvasList = useMemo(() => {
+    const seen = new Map()
+    sharedCanvases.forEach((s) => {
+      const key = `${s.ownerId}:${s.canvasId}`
+      if (!seen.has(key)) seen.set(key, { id: sharedCanvasId(s.ownerId, s.canvasId), name: s.name })
+    })
+    return Array.from(seen.values())
+  }, [sharedCanvases])
+
+  // restrict_view: clamp the invitee's viewport to the invited region (canvas scope has no region).
+  const restrictBounds = useMemo(() => {
+    if (perm.role !== 'invitee' || !perm.restrictView || perm.scope === 'canvas' || !perm.targetId) return null
+    const byId = new Map(nodes.map((n) => [n.id, n]))
+    const target = byId.get(perm.targetId)
+    if (!target) return null
+    const { x, y } = absolutePosition(target, byId)
+    const w = target.measured?.width ?? target.width ?? 200
+    const h = target.measured?.height ?? target.height ?? 80
+    const MARGIN = 200
+    return [[x - MARGIN, y - MARGIN], [x + w + MARGIN, y + h + MARGIN]]
+  }, [perm, nodes])
+
+  // Fit the viewport to the restricted region once, when entering it (not on every edit).
+  useEffect(() => {
+    if (!rfInstance || !restrictBounds) return
+    const [[minX, minY], [maxX, maxY]] = restrictBounds
+    rfInstance.fitBounds({ x: minX, y: minY, width: maxX - minX, height: maxY - minY }, { padding: 0, duration: 0 })
+  }, [rfInstance, activeCanvasId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Node data ────────────────────────────────────────────────────────────
   const updateNodeData = useCallback((id, patch) => {
@@ -852,15 +1118,31 @@ export default function App() {
   }, [stageTypes.length])
 
   // ── Add nodes ─────────────────────────────────────────────────────────────
+  // Group-scope invitees can only add inside their invited frame (forced
+  // parentId + a position inside it); node-scope invitees can't add at all.
   const addStage = useCallback(() => {
+    if (perm.role === 'invitee' && perm.scope === 'node') return
     const id = nextId()
+    if (perm.role === 'invitee' && perm.scope === 'group') {
+      const frame = nodes.find((n) => n.id === perm.targetId)
+      if (!frame) return
+      setNodes((nds) => [...nds, { id, type: 'stage', parentId: perm.targetId, position: centerInFrame(frame, 200, 80), data: { label: '새 단계', description: '', colorIdx: 0 } }])
+      return
+    }
     setNodes((nds) => [...nds, { id, type: 'stage', position: { x: 200 + Math.random() * 400, y: 150 + Math.random() * 300 }, data: { label: '새 단계', description: '', colorIdx: 0 } }])
-  }, [setNodes])
+  }, [setNodes, perm, nodes])
 
   const addMemo = useCallback(() => {
+    if (perm.role === 'invitee' && perm.scope === 'node') return
     const id = nextId()
+    if (perm.role === 'invitee' && perm.scope === 'group') {
+      const frame = nodes.find((n) => n.id === perm.targetId)
+      if (!frame) return
+      setNodes((nds) => [...nds, { id, type: 'memo', parentId: perm.targetId, position: centerInFrame(frame, 160, 80), data: { header: '', text: '' } }])
+      return
+    }
     setNodes((nds) => [...nds, { id, type: 'memo', position: { x: 300 + Math.random() * 400, y: 200 + Math.random() * 200 }, data: { header: '', text: '' } }])
-  }, [setNodes])
+  }, [setNodes, perm, nodes])
 
   const addStageAt = useCallback((pos) => {
     const id = nextId()
@@ -878,6 +1160,7 @@ export default function App() {
   // point can spawn multiple edges — including several to the same node, which
   // the parallel-separation routing then fans out.
   const onConnect = useCallback((params) => {
+    if (perm.role === 'invitee' && (!isNodeEditable(params.source) || !isNodeEditable(params.target))) return
     const isMemoSource = nodes.find((n) => n.id === params.source)?.type === 'memo'
     const isMemoTarget = nodes.find((n) => n.id === params.target)?.type === 'memo'
     const isMemo = isMemoSource || isMemoTarget
@@ -888,17 +1171,18 @@ export default function App() {
       markerEnd: { type: MarkerType.ArrowClosed, color: isMemo ? '#f59e0b88' : '#4a4a5a' },
     }
     setEdges((eds) => eds.concat(newEdge))
-  }, [nodes, setEdges])
+  }, [nodes, setEdges, perm, isNodeEditable])
 
   // ── Reconnect: drag an edge endpoint onto another node/handle ──────────────
   const onReconnect = useCallback((oldEdge, newConnection) => {
+    if (perm.role === 'invitee' && (!isNodeEditable(newConnection.source) || !isNodeEditable(newConnection.target))) return
     // Reconnect the clean edge from state, not the styled (bold) object React
     // Flow hands back — otherwise the selection styling gets baked in permanently.
     setEdges((eds) => {
       const clean = eds.find((e) => e.id === oldEdge.id) ?? oldEdge
       return reconnectEdge(clean, newConnection, eds)
     })
-  }, [setEdges])
+  }, [setEdges, perm, isNodeEditable])
 
   // ── Snap-to-straight: when a dragged node's center nearly aligns with a
   // directly-connected neighbor, snap it so the shared edge becomes straight.
@@ -957,10 +1241,13 @@ export default function App() {
   // ── Context menus ─────────────────────────────────────────────────────────
   const onPaneContextMenu = useCallback((e) => {
     e.preventDefault()
+    // Group/node-scope invitees can't add nodes "elsewhere" on the pane —
+    // there's nothing this menu could offer them, so don't open it.
+    if (perm.role === 'invitee' && perm.scope !== 'canvas') return
     const bounds = reactFlowRef.current?.getBoundingClientRect()
     setContextMenu({ x: e.clientX, y: e.clientY, flowX: e.clientX - (bounds?.left ?? 0), flowY: e.clientY - (bounds?.top ?? 0) })
     setRenamingTypeIdx(null)
-  }, [])
+  }, [perm])
 
   const onNodeContextMenu = useCallback((e, node) => {
     e.preventDefault()
@@ -994,6 +1281,7 @@ export default function App() {
   const handleContextDeleteNode = () => {
     if (!contextMenu?.nodeId) return
     const ids = contextMenu.selectedIds?.length ? contextMenu.selectedIds : [contextMenu.nodeId]
+    if (perm.role === 'invitee' && perm.scope !== 'canvas' && !ids.every(isNodeEditable)) { closeContext(); return }
     const set = new Set(ids)
     setNodes((nds) => nds.filter((n) => !set.has(n.id)))
     setEdges((eds) => eds.filter((e) => !set.has(e.source) && !set.has(e.target)))
@@ -1002,11 +1290,14 @@ export default function App() {
 
   const handleContextDeleteEdge = () => {
     if (!contextMenu?.edgeId) return
+    const edge = edges.find((e) => e.id === contextMenu.edgeId)
+    if (perm.role === 'invitee' && edge && (!isNodeEditable(edge.source) || !isNodeEditable(edge.target))) { closeContext(); return }
     setEdges((eds) => eds.filter((e) => e.id !== contextMenu.edgeId))
     closeContext()
   }
 
   const handleContextGroupSelection = () => {
+    if (perm.role === 'invitee' && perm.scope !== 'canvas') return
     const ids = contextMenu?.selectedIds ?? []
     if (ids.length < 2) return
     groupSelection(ids)
@@ -1015,13 +1306,15 @@ export default function App() {
 
   const handleContextUngroup = () => {
     if (!contextMenu?.nodeId) return
+    if (perm.role === 'invitee' && perm.scope !== 'canvas') return
     ungroup(contextMenu.nodeId)
     closeContext()
   }
 
   const clearAll = useCallback(() => {
+    if (perm.role === 'invitee') return
     if (window.confirm('현재 캔버스의 모든 노드와 연결을 삭제할까요?')) { setNodes([]); setEdges([]) }
-  }, [setNodes, setEdges])
+  }, [setNodes, setEdges, perm])
 
   const fitView = useCallback(() => {
     rfInstance?.fitView({ padding: 0.1, duration: 500 })
@@ -1125,11 +1418,14 @@ export default function App() {
   // Non-selected edges get a forced base style so baked-in bold can never linger.
   // Selected edges get reconnectable + bold stroke + drop-shadow + colored marker.
   const styledEdges = edges.map((e) => {
-    if (!e.selected) return { ...e, ...baseEdgeStyle(e) }
+    // Delete key / built-in delete UI must also respect the edit gating.
+    const deletable = perm.role === 'owner' || perm.scope === 'canvas' || (isNodeEditable(e.source) && isNodeEditable(e.target))
+    if (!e.selected) return { ...e, ...baseEdgeStyle(e), deletable }
     const isMemo = !!e.style?.strokeDasharray
     const color = isMemo ? '#f59e0b' : '#60a5fa'
     return {
       ...e,
+      deletable,
       // Only a selected (bold) edge can be snatched/reconnected.
       reconnectable: true,
       zIndex: 1001,
@@ -1165,6 +1461,14 @@ export default function App() {
   const ctxIds = contextMenu?.selectedIds?.length ? contextMenu.selectedIds : (contextMenu?.nodeId ? [contextMenu.nodeId] : [])
   const ctxMulti = (contextMenu?.selectedIds?.length ?? 0) >= 2
 
+  // Sharing: canvas-scope invitees get full edit (including stage-type
+  // editing); group/node-scope invitees only touch nodes in their editable set.
+  const ctxFullEdit = perm.role === 'owner' || perm.scope === 'canvas'
+  const ctxCanDelete = ctxFullEdit || ctxIds.every(isNodeEditable)
+  const ctxEdgeEditable = contextMenu?.edgeId
+    ? (() => { const e = edges.find((x) => x.id === contextMenu.edgeId); return ctxFullEdit || (e && isNodeEditable(e.source) && isNodeEditable(e.target)) })()
+    : false
+
   return (
     <div
       style={{ width: '100vw', height: '100vh', position: 'relative' }}
@@ -1188,6 +1492,9 @@ export default function App() {
         onRename={renameCanvas}
         onDelete={deleteCanvas}
         mobile={mobile}
+        sharedCanvases={sharedCanvasList}
+        onInvite={openInvite}
+        presenceGlow={presenceGlow}
       />
 
       <Toolbar
@@ -1207,25 +1514,55 @@ export default function App() {
 
       <AuthPanel user={user} syncing={cloudSyncing} mobile={mobile} />
 
+      {invite && (
+        <div style={{ position: 'fixed', left: invite.x, top: invite.y, zIndex: 1000 }} onClick={(e) => e.stopPropagation()}>
+          <InvitePopover
+            scope={invite.scope}
+            targetId={invite.targetId}
+            canvasId={activeCanvasId}
+            onClose={() => setInvite(null)}
+            onlineUserIds={new Set(onlineUsers.map((u) => u.user_id))}
+          />
+        </div>
+      )}
+
       <ReactFlow
         ref={reactFlowRef}
         className={reconnecting ? 'rf-reconnecting' : undefined}
-        nodes={nodes.map((n) => ({
-          ...n,
-          data: {
-            ...n.data,
-            stageTypes,
-            lodThreshold,
-            onUpdate: (patch) => updateNodeData(n.id, patch),
-            onEditStart: () => setIsAnyEditing(true),
-            onEditEnd: () => setIsAnyEditing(false),
-            onLongPress: (clientX, clientY) => {
-              const selectedIds = nodes.filter((x) => x.selected).map((x) => x.id)
-              setContextMenu({ x: clientX, y: clientY, nodeId: n.id, nodeType: n.type, selectedIds })
-              setRenamingTypeIdx(null)
+        nodes={nodes.map((n) => {
+          const isOwner = perm.role === 'owner'
+          // Only group/node scopes carve out a restricted subset of nodes;
+          // canvas-scope invitees get full edit, same as owner (left as
+          // React Flow defaults so the isAnyEditing/isPinching global drag
+          // gate above still applies to them).
+          const restrictedScope = !isOwner && (perm.scope === 'group' || perm.scope === 'node')
+          const editable = restrictedScope ? isNodeEditable(n.id) : true
+          const isNodeScopeTarget = restrictedScope && perm.scope === 'node' && n.id === perm.targetId
+          const overrides = restrictedScope
+            ? { draggable: editable && !isNodeScopeTarget, deletable: editable && !isNodeScopeTarget, selectable: editable }
+            : {}
+          return {
+            ...n,
+            ...overrides,
+            data: {
+              ...n.data,
+              stageTypes,
+              lodThreshold,
+              readOnly: restrictedScope && !editable,
+              canInvite: isOwner,
+              presenceGlow,
+              onInvite: isOwner ? openInvite : undefined,
+              onUpdate: (patch) => updateNodeData(n.id, patch),
+              onEditStart: () => setIsAnyEditing(true),
+              onEditEnd: () => setIsAnyEditing(false),
+              onLongPress: (clientX, clientY) => {
+                const selectedIds = nodes.filter((x) => x.selected).map((x) => x.id)
+                setContextMenu({ x: clientX, y: clientY, nodeId: n.id, nodeType: n.type, selectedIds })
+                setRenamingTypeIdx(null)
+              },
             },
-          },
-        }))}
+          }
+        })}
         edges={styledEdges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
@@ -1246,6 +1583,7 @@ export default function App() {
           setEdges((eds) => eds.some((e) => e.selected) ? eds.map((e) => ({ ...e, selected: false })) : eds)
         }}
         nodesDraggable={!isAnyEditing && !isPinching}
+        translateExtent={restrictBounds ?? undefined}
         edgesReconnectable={false}
         reconnectRadius={mobile ? 40 : 20}
         connectionMode="loose"
@@ -1313,7 +1651,7 @@ export default function App() {
             minWidth: 200,
           }}
         >
-          {/* Pane: add nodes */}
+          {/* Pane: add nodes (group/node-scope invitees can't add "elsewhere" — menu doesn't even open for them) */}
           {!contextMenu.nodeId && !contextMenu.edgeId && (
             <>
               <ContextItem icon="＋" label="단계 노드 추가" color="#3b82f6" onClick={handleContextAddStage} />
@@ -1322,7 +1660,7 @@ export default function App() {
           )}
 
           {/* Edge: delete */}
-          {contextMenu.edgeId && (
+          {contextMenu.edgeId && ctxEdgeEditable && (
             <ContextItem icon="🗑" label="연결선 삭제" color="#ef4444" onClick={handleContextDeleteEdge} />
           )}
 
@@ -1335,7 +1673,7 @@ export default function App() {
                 color="#06b6d4"
                 onClick={() => { saveViewFromSelection(ctxIds); closeContext() }}
               />
-              {ctxMulti && (
+              {ctxMulti && ctxFullEdit && (
                 <ContextItem icon="⬚" label="그룹으로 묶기" color="#8b94a7" onClick={handleContextGroupSelection} />
               )}
               <div style={{ height: 1, background: '#ffffff18', margin: '4px 2px' }} />
@@ -1343,7 +1681,7 @@ export default function App() {
           )}
 
           {/* Group node: ungroup (frame removed, children kept) */}
-          {contextMenu.nodeId && contextMenu.nodeType === 'group' && (
+          {contextMenu.nodeId && contextMenu.nodeType === 'group' && ctxFullEdit && (
             <>
               <ContextItem icon="⬚" label="그룹 해제" color="#8b94a7" onClick={handleContextUngroup} />
               <ContextItem icon="🗑" label="그룹 삭제 (노드 유지)" color="#8b94a7" onClick={handleContextUngroup} />
@@ -1353,79 +1691,85 @@ export default function App() {
           {/* Stage node: type selector + delete */}
           {contextMenu.nodeId && contextMenu.nodeType === 'stage' && (
             <>
-              <div style={{ padding: '4px 8px 4px', color: '#555', fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
-                {ctxMulti ? '종류 일괄 변경' : '종류 선택'}
-              </div>
-              {stageTypes.map((type, idx) => (
-                <div key={type.id} style={{ display: 'flex', alignItems: 'center', gap: 2, padding: '1px 4px' }}>
-                  {renamingTypeIdx === idx ? (
-                    <input
-                      autoFocus
-                      value={renameValue}
-                      placeholder="종류 이름"
-                      onFocus={(e) => e.target.select()}
-                      onChange={(e) => setRenameValue(e.target.value)}
-                      onBlur={() => { renameStageType(idx, renameValue); setRenamingTypeIdx(null) }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') { renameStageType(idx, renameValue); setRenamingTypeIdx(null) }
-                        if (e.key === 'Escape') setRenamingTypeIdx(null)
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                      style={{
-                        flex: 1,
-                        background: '#2a2a36',
-                        border: `1px solid ${type.border}`,
-                        borderRadius: 4,
-                        color: '#f0f0f0',
-                        fontSize: 12,
-                        padding: '3px 8px',
-                        outline: 'none',
-                        fontFamily: 'inherit',
-                      }}
-                    />
-                  ) : (
-                    <TypeItem
-                      type={type}
-                      onClick={() => { changeNodeStageType(ctxIds, idx); closeContext() }}
-                    />
-                  )}
-                  {renamingTypeIdx !== idx && (
-                    <>
-                      <IconBtn
-                        title="이름 변경"
-                        onClick={(e) => { e.stopPropagation(); setRenamingTypeIdx(idx); setRenameValue(type.label === '새 종류' ? '' : type.label) }}
-                        hoverColor="#aaa"
-                      >✎</IconBtn>
-                      {stageTypes.length > 1 && (
-                        <IconBtn
-                          title="삭제"
-                          onClick={(e) => { e.stopPropagation(); deleteStageType(idx) }}
-                          hoverColor="#ef4444"
-                        >✕</IconBtn>
+              {ctxFullEdit && (
+                <>
+                  <div style={{ padding: '4px 8px 4px', color: '#555', fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
+                    {ctxMulti ? '종류 일괄 변경' : '종류 선택'}
+                  </div>
+                  {stageTypes.map((type, idx) => (
+                    <div key={type.id} style={{ display: 'flex', alignItems: 'center', gap: 2, padding: '1px 4px' }}>
+                      {renamingTypeIdx === idx ? (
+                        <input
+                          autoFocus
+                          value={renameValue}
+                          placeholder="종류 이름"
+                          onFocus={(e) => e.target.select()}
+                          onChange={(e) => setRenameValue(e.target.value)}
+                          onBlur={() => { renameStageType(idx, renameValue); setRenamingTypeIdx(null) }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') { renameStageType(idx, renameValue); setRenamingTypeIdx(null) }
+                            if (e.key === 'Escape') setRenamingTypeIdx(null)
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          style={{
+                            flex: 1,
+                            background: '#2a2a36',
+                            border: `1px solid ${type.border}`,
+                            borderRadius: 4,
+                            color: '#f0f0f0',
+                            fontSize: 12,
+                            padding: '3px 8px',
+                            outline: 'none',
+                            fontFamily: 'inherit',
+                          }}
+                        />
+                      ) : (
+                        <TypeItem
+                          type={type}
+                          onClick={() => { changeNodeStageType(ctxIds, idx); closeContext() }}
+                        />
                       )}
-                    </>
-                  )}
-                </div>
-              ))}
-              <button
-                onClick={(e) => { e.stopPropagation(); handleAddStageType() }}
-                style={{
-                  width: '100%', background: 'transparent', border: 'none',
-                  borderRadius: 6, padding: '5px 12px', color: '#555',
-                  fontSize: 12, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#aaa')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = '#555')}
-              >
-                + 새 종류 추가
-              </button>
-              <div style={{ height: 1, background: '#ffffff18', margin: '4px 2px' }} />
-              <ContextItem icon="🗑" label={ctxMulti ? '전체 삭제' : '노드 삭제'} color="#ef4444" onClick={handleContextDeleteNode} />
+                      {renamingTypeIdx !== idx && (
+                        <>
+                          <IconBtn
+                            title="이름 변경"
+                            onClick={(e) => { e.stopPropagation(); setRenamingTypeIdx(idx); setRenameValue(type.label === '새 종류' ? '' : type.label) }}
+                            hoverColor="#aaa"
+                          >✎</IconBtn>
+                          {stageTypes.length > 1 && (
+                            <IconBtn
+                              title="삭제"
+                              onClick={(e) => { e.stopPropagation(); deleteStageType(idx) }}
+                              hoverColor="#ef4444"
+                            >✕</IconBtn>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  ))}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleAddStageType() }}
+                    style={{
+                      width: '100%', background: 'transparent', border: 'none',
+                      borderRadius: 6, padding: '5px 12px', color: '#555',
+                      fontSize: 12, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#aaa')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#555')}
+                  >
+                    + 새 종류 추가
+                  </button>
+                  <div style={{ height: 1, background: '#ffffff18', margin: '4px 2px' }} />
+                </>
+              )}
+              {ctxCanDelete && (
+                <ContextItem icon="🗑" label={ctxMulti ? '전체 삭제' : '노드 삭제'} color="#ef4444" onClick={handleContextDeleteNode} />
+              )}
             </>
           )}
 
           {/* Memo node: just delete */}
-          {contextMenu.nodeId && contextMenu.nodeType === 'memo' && (
+          {contextMenu.nodeId && contextMenu.nodeType === 'memo' && ctxCanDelete && (
             <ContextItem icon="🗑" label={ctxMulti ? '전체 삭제' : '노드 삭제'} color="#ef4444" onClick={handleContextDeleteNode} />
           )}
         </div>

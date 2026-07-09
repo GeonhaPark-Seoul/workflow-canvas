@@ -117,12 +117,14 @@ export default function StageNode({ data, selected, id }) {
   const cycleColor = (e) => {
     e.stopPropagation()
     if (suppressClick.current) { suppressClick.current = false; return }
+    if (data.readOnly) return
     const next = (colorIdx + 1) % stageTypes.length
     data.onUpdate?.({ colorIdx: next })
   }
 
   const onDimPointerDown = (e) => {
     e.stopPropagation()
+    if (data.readOnly) return
     dimPressTimer.current = setTimeout(() => {
       data.onUpdate?.({ dimmed: !data.dimmed })
       suppressClick.current = true
@@ -134,6 +136,7 @@ export default function StageNode({ data, selected, id }) {
   const onDimPointerCancel = () => { clearTimeout(dimPressTimer.current); dimPressTimer.current = null }
 
   const startEdit = (field) => {
+    if (data.readOnly) return
     setEditing(field)
     data.onEditStart?.()
   }
@@ -152,6 +155,7 @@ export default function StageNode({ data, selected, id }) {
   // Display-mode checkbox toggle: persist innerHTML after flipping
   const handleDisplayClick = (field) => (e) => {
     if (e.target.tagName === 'INPUT' && e.target.type === 'checkbox') {
+      if (data.readOnly) { e.preventDefault(); return }
       e.stopPropagation()
       e.target.toggleAttribute('checked')
       const html = e.currentTarget.innerHTML
@@ -162,6 +166,7 @@ export default function StageNode({ data, selected, id }) {
 
   // Parts list handlers
   const startPartEdit = (part) => {
+    if (data.readOnly) return
     if (editingPartId === part.id) return
     setEditingPartId(part.id)
     setPartDraft(part.text ?? '')
@@ -188,10 +193,12 @@ export default function StageNode({ data, selected, id }) {
   }
 
   const addPart = () => {
+    if (data.readOnly) return
     const newPart = { id: 'pt-' + Date.now().toString(36), text: '새 파츠' }
     data.onUpdate?.({ parts: [...(data.parts ?? []), newPart] })
   }
   const removePart = (partId) => {
+    if (data.readOnly) return
     data.onUpdate?.({ parts: (data.parts ?? []).filter((p) => p.id !== partId) })
   }
 
@@ -295,6 +302,7 @@ export default function StageNode({ data, selected, id }) {
                 />
               )}
             </div>
+            {selected && data.canInvite && <InviteButton data={data} id={id} />}
           </div>
         ) : (
           /* Normal mode: unchanged — circle + label row, then title below */
@@ -318,39 +326,42 @@ export default function StageNode({ data, selected, id }) {
             </div>
 
             {/* Title field */}
-            <div ref={titleContainerRef}>
-              {editing === 'title' ? (
-                <div
-                  ref={titleRef}
-                  contentEditable
-                  suppressContentEditableWarning
-                  className="nodrag nowheel rich-content"
-                  onBlur={() => stopEdit('title', titleRef)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); stopEdit('title', titleRef) } if (e.key === 'Escape') { e.preventDefault(); stopEdit('title', titleRef) } }}
-                  style={{
-                    background: 'transparent',
-                    borderBottom: `1px solid ${color.border}`,
-                    color: '#f0f0f0', fontSize: titleFontSize, fontWeight: 700,
-                    width: '100%', outline: 'none', marginBottom: 4,
-                    minHeight: titleLineH, lineHeight: `${titleLineH}px`, whiteSpace: 'pre-wrap',
-                    wordBreak: 'break-word',
-                  }}
-                />
-              ) : (
-                <div
-                  className="rich-content"
-                  onDoubleClick={() => startEdit('title')}
-                  onTouchStart={touchEdit('title')}
-                  onClick={handleDisplayClick('title')}
-                  dangerouslySetInnerHTML={{ __html: titleValue || (data.titleTouched ? '' : '단계 이름 (더블클릭하여 편집)') }}
-                  style={{
-                    color: titleValue ? '#f0f0f0' : '#ffffff66', fontSize: titleFontSize, fontWeight: 700,
-                    marginBottom: 4, cursor: 'text', minHeight: titleLineH, lineHeight: `${titleLineH}px`,
-                    whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-                    touchAction: 'manipulation',
-                  }}
-                />
-              )}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+              <div ref={titleContainerRef} style={{ flex: 1, minWidth: 0 }}>
+                {editing === 'title' ? (
+                  <div
+                    ref={titleRef}
+                    contentEditable
+                    suppressContentEditableWarning
+                    className="nodrag nowheel rich-content"
+                    onBlur={() => stopEdit('title', titleRef)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); stopEdit('title', titleRef) } if (e.key === 'Escape') { e.preventDefault(); stopEdit('title', titleRef) } }}
+                    style={{
+                      background: 'transparent',
+                      borderBottom: `1px solid ${color.border}`,
+                      color: '#f0f0f0', fontSize: titleFontSize, fontWeight: 700,
+                      width: '100%', outline: 'none', marginBottom: 4,
+                      minHeight: titleLineH, lineHeight: `${titleLineH}px`, whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-word',
+                    }}
+                  />
+                ) : (
+                  <div
+                    className="rich-content"
+                    onDoubleClick={() => startEdit('title')}
+                    onTouchStart={touchEdit('title')}
+                    onClick={handleDisplayClick('title')}
+                    dangerouslySetInnerHTML={{ __html: titleValue || (data.titleTouched ? '' : '단계 이름 (더블클릭하여 편집)') }}
+                    style={{
+                      color: titleValue ? '#f0f0f0' : '#ffffff66', fontSize: titleFontSize, fontWeight: 700,
+                      marginBottom: 4, cursor: 'text', minHeight: titleLineH, lineHeight: `${titleLineH}px`,
+                      whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                      touchAction: 'manipulation',
+                    }}
+                  />
+                )}
+              </div>
+              {selected && data.canInvite && <InviteButton data={data} id={id} />}
             </div>
           </>
         )}
@@ -480,6 +491,28 @@ export default function StageNode({ data, selected, id }) {
         editRef={editing === 'title' ? titleRef : editing === 'desc' ? descRef : null}
         anchorRef={editing === 'title' ? titleContainerRef : editing === 'desc' ? descContainerRef : null}
       />
+      <style>{`@keyframes wfcInviteGlow { 0%,100% { box-shadow: 0 0 0 2px #22c55e55, 0 0 8px 2px #22c55e77; } 50% { box-shadow: 0 0 0 3px #22c55e77, 0 0 16px 6px #22c55eaa; } }`}</style>
     </div>
+  )
+}
+
+// Owner-only "invite" icon shown next to a selected stage node's title.
+function InviteButton({ data, id }) {
+  return (
+    <button
+      type="button"
+      className="nodrag"
+      onClick={(e) => { e.stopPropagation(); const r = e.currentTarget.getBoundingClientRect(); data.onInvite?.('node', id, r) }}
+      title="공유 초대"
+      style={{
+        width: 18, height: 18, borderRadius: '50%', border: 'none', flexShrink: 0,
+        background: '#ffffff14', color: '#f0f0f0', fontSize: 12, lineHeight: '18px',
+        padding: 0, cursor: 'pointer', marginTop: 1,
+        boxShadow: data.presenceGlow ? '0 0 0 2px #22c55e55, 0 0 10px 2px #22c55e88' : 'none',
+        animation: data.presenceGlow ? 'wfcInviteGlow 1.6s ease-in-out infinite' : 'none',
+      }}
+    >
+      ＋
+    </button>
   )
 }

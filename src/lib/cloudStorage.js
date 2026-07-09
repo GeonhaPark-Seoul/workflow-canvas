@@ -24,6 +24,16 @@ export async function deleteCanvas(userId, canvasId) {
   if (error) console.error('[cloud] deleteCanvas:', error.message)
 }
 
+// Phase 2 sharing: an invitee editing a shared canvas saves only nodes/edges
+// to the OWNER's row — no upsert (row must already exist), no name/user_prefs
+// writes (those are owner-only concerns).
+export async function updateSharedCanvas(ownerId, canvasId, nodes, edges) {
+  const { error } = await supabase.from('canvases')
+    .update({ nodes, edges, updated_at: new Date().toISOString() })
+    .eq('user_id', ownerId).eq('canvas_id', canvasId)
+  if (error) { console.error('[cloud] updateSharedCanvas:', error.message); throw new Error('updateSharedCanvas: ' + error.message) }
+}
+
 export async function saveUserPrefs(userId, prefs) {
   const { error } = await supabase.from('user_prefs').upsert(
     { user_id: userId, ...prefs },

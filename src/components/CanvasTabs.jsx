@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 
-export default function CanvasTabs({ canvases, activeId, onSwitch, onAdd, onRename, onDelete, mobile }) {
+export default function CanvasTabs({ canvases, activeId, onSwitch, onAdd, onRename, onDelete, mobile, sharedCanvases = [], onInvite, presenceGlow }) {
   const [open, setOpen] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [value, setValue] = useState('')
@@ -39,7 +39,8 @@ export default function CanvasTabs({ canvases, activeId, onSwitch, onAdd, onRena
     setEditingId(null)
   }
 
-  const activeCanvas = canvases.find((c) => c.id === activeId) ?? canvases[0]
+  const activeCanvas = canvases.find((c) => c.id === activeId) ?? sharedCanvases.find((c) => c.id === activeId) ?? canvases[0]
+  const isOwnActive = canvases.some((c) => c.id === activeId)
 
   return (
     <div
@@ -78,8 +79,24 @@ export default function CanvasTabs({ canvases, activeId, onSwitch, onAdd, onRena
         }}
       >
         <span style={{ flex: 1, textAlign: 'left' }}>{activeCanvas?.name ?? '캔버스'}</span>
+        {isOwnActive && onInvite && (
+          <span
+            onClick={(e) => { e.stopPropagation(); const r = e.currentTarget.getBoundingClientRect(); onInvite('canvas', null, r) }}
+            title="공유 초대"
+            style={{
+              width: 18, height: 18, borderRadius: '50%', flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: '#ffffff14', color: '#ccc', fontSize: 12, cursor: 'pointer',
+              boxShadow: presenceGlow ? '0 0 0 2px #22c55e55, 0 0 10px 2px #22c55e88' : 'none',
+              animation: presenceGlow ? 'wfcInviteGlow 1.6s ease-in-out infinite' : 'none',
+            }}
+          >
+            ＋
+          </span>
+        )}
         <span style={{ color: '#888', fontSize: 11, flexShrink: 0 }}>▾</span>
       </button>
+      <style>{`@keyframes wfcInviteGlow { 0%,100% { box-shadow: 0 0 0 2px #22c55e55, 0 0 8px 2px #22c55e77; } 50% { box-shadow: 0 0 0 3px #22c55e77, 0 0 16px 6px #22c55eaa; } }`}</style>
 
       {/* Expanded dropdown panel */}
       {open && (
@@ -160,6 +177,44 @@ export default function CanvasTabs({ canvases, activeId, onSwitch, onAdd, onRena
               </div>
             )
           })}
+
+          {/* Shared-with-me canvases */}
+          {sharedCanvases.length > 0 && (
+            <>
+              <div style={{ padding: '6px 12px 4px', borderTop: '1px solid #ffffff10', color: '#666', fontSize: 10, fontWeight: 700, letterSpacing: 1 }}>
+                공유받음
+              </div>
+              {sharedCanvases.map((c) => {
+                const active = c.id === activeId
+                return (
+                  <div
+                    key={c.id}
+                    onClick={() => { onSwitch(c.id); setOpen(false) }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      padding: '7px 12px',
+                      cursor: 'pointer',
+                      background: active ? '#3b82f622' : 'transparent',
+                      borderLeft: active ? '2px solid #3b82f6' : '2px solid transparent',
+                      transition: 'background 0.1s',
+                    }}
+                    onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = '#ffffff0a' }}
+                    onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = 'transparent' }}
+                  >
+                    <span style={{ fontSize: 12, flexShrink: 0 }}>🤝</span>
+                    <span style={{
+                      flex: 1, color: active ? '#fff' : '#aaa', fontSize: 13, fontWeight: active ? 700 : 500,
+                      minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    }}>
+                      {c.name}
+                    </span>
+                  </div>
+                )
+              })}
+            </>
+          )}
 
           {/* Add canvas row */}
           <div

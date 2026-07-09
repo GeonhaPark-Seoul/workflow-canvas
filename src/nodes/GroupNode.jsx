@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { NodeResizer, useStore } from '@xyflow/react'
 
-export default function GroupNode({ data, selected }) {
+export default function GroupNode({ data, selected, id }) {
   // Abstract (LOD) mode: re-renders only when crossing the threshold, not every zoom tick.
   const abstract = useStore((s) => s.transform[2] < (data.lodThreshold ?? 0.55))
 
@@ -40,6 +40,11 @@ export default function GroupNode({ data, selected }) {
     if (value.trim()) data.onUpdate?.({ label: value.trim() })
   }
 
+  const startEditing = () => {
+    if (data.readOnly) return
+    setEditing(true)
+  }
+
   const labelFontSize = abstract ? Math.round(13 * 1.9) : 13
 
   return (
@@ -68,7 +73,7 @@ export default function GroupNode({ data, selected }) {
         lineStyle={{ borderColor: '#8b94a766' }}
       />
 
-      <div style={{ position: 'absolute', top: 0, left: 0, padding: '8px 12px' }}>
+      <div style={{ position: 'absolute', top: 0, left: 0, padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 6 }}>
         {editing ? (
           <input
             ref={inputRef}
@@ -94,13 +99,31 @@ export default function GroupNode({ data, selected }) {
           />
         ) : (
           <div
-            onDoubleClick={() => setEditing(true)}
+            onDoubleClick={startEditing}
             style={{ color: '#aab', fontSize: labelFontSize, fontWeight: 700, cursor: 'text' }}
           >
             {data.label || '새 그룹'}
           </div>
         )}
+        {!editing && data.onInvite && (
+          <button
+            type="button"
+            className="nodrag"
+            onClick={(e) => { e.stopPropagation(); const r = e.currentTarget.getBoundingClientRect(); data.onInvite('group', id, r) }}
+            title="공유 초대"
+            style={{
+              width: 18, height: 18, borderRadius: '50%', border: 'none', flexShrink: 0,
+              background: '#ffffff14', color: '#aab', fontSize: 12, lineHeight: '18px',
+              padding: 0, cursor: 'pointer',
+              boxShadow: data.presenceGlow ? '0 0 0 2px #22c55e55, 0 0 10px 2px #22c55e88' : 'none',
+              animation: data.presenceGlow ? 'wfcInviteGlow 1.6s ease-in-out infinite' : 'none',
+            }}
+          >
+            ＋
+          </button>
+        )}
       </div>
+      <style>{`@keyframes wfcInviteGlow { 0%,100% { box-shadow: 0 0 0 2px #22c55e55, 0 0 8px 2px #22c55e77; } 50% { box-shadow: 0 0 0 3px #22c55e77, 0 0 16px 6px #22c55eaa; } }`}</style>
     </div>
   )
 }
