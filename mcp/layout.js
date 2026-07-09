@@ -204,15 +204,41 @@ function radialLayout({ newNodes, newEdges }) {
   const connected = new Set(level.keys())
   const disconnected = stages.filter((n) => !connected.has(n.tmp_id))
 
-  // Direction assigned to each level-1 node (from root), inherited by descendants
-  // Distribute level-1 children across 4 sides: right, left, bottom, top (in order)
+  // Direction assigned to each level-1 node (from root), inherited by descendants.
+  // Count-specific arrangements (input order fills the listed sides in order):
+  //   1 → [right]; 2 → [right, left]; 3 → [top, bottom, bottom] (삼각형);
+  //   4 → [top, bottom, left, right] (상하좌우 하나씩); ≥5 → balanced round-robin.
   const SIDES = ['right', 'left', 'bottom', 'top']
   const level1 = stages.filter((n) => level.get(n.tmp_id) === 1)
   const sideOf = new Map() // tmp_id -> 'right'|'left'|'bottom'|'top'
   if (level1.length > 0) {
-    // Distribute: assign sides round-robin by slot to balance counts
-    // e.g. 7 children → sides get [2,2,2,1]
-    level1.forEach((n, i) => sideOf.set(n.tmp_id, SIDES[i % 4]))
+    const n = level1.length
+    let sides
+    if (n === 1) sides = ['right']
+    else if (n === 2) sides = ['right', 'left']
+    else if (n === 3) sides = ['top', 'bottom', 'bottom']
+    else if (n === 4) {
+      // Subtree-aware assignment (still 상하좌우 하나씩, but WHICH child gets which
+      // side is chosen by branch size): the two largest descendant-subtrees take
+      // the horizontal sides (right = largest, left = 2nd largest), the remaining
+      // two take bottom (3rd) / top (4th). Ties keep input order (stable sort).
+      // This keeps big fans off the narrower vertical sides, where wrapped rows
+      // would otherwise reuse column-0's offsets and cross through it.
+      const childrenOf = new Map(stages.map((s) => [s.tmp_id, []]))
+      for (const [id, par] of parentId) {
+        if (par != null) childrenOf.get(par)?.push(id)
+      }
+      const subtreeSize = (id) =>
+        (childrenOf.get(id) ?? []).reduce((sum, c) => sum + 1 + subtreeSize(c), 0)
+      const bySize = level1
+        .map((node, i) => ({ i, size: subtreeSize(node.tmp_id) }))
+        .sort((a, b) => b.size - a.size || a.i - b.i)
+      const rankSide = ['right', 'left', 'bottom', 'top']
+      sides = new Array(4)
+      bySize.forEach((entry, rank) => { sides[entry.i] = rankSide[rank] })
+    }
+    else sides = level1.map((_, i) => SIDES[i % 4]) // ≥5: round-robin by slot
+    level1.forEach((node, i) => sideOf.set(node.tmp_id, sides[i]))
   }
 
   // Inherit side from level-1 ancestor
@@ -233,12 +259,17 @@ function radialLayout({ newNodes, newEdges }) {
     bottom: { dx: 0, dy: 1 },
     top:    { dx: 0, dy: -1 },
   }
+  const OPPOSITE = { right: 'left', left: 'right', top: 'bottom', bottom: 'top' }
   // Distance from parent center to child center (outward), by side
   const DIST = { right: 480, left: 480, bottom: 320, top: 320 }
   // Perpendicular spacing between siblings, by side
   const FAN_SPACING = { right: 210, left: 210, bottom: 340, top: 340 }
   // Level ≥2 distance
   const DIST2 = { right: 460, left: 460, bottom: 300, top: 300 }
+  // Extra outward distance per wrap column (when children.length > MAX_FAN_PER_COL)
+  const WRAP_DIST = { right: 460, left: 460, bottom: 300, top: 300 }
+  // Max children per column before wrapping to next outward column
+  const MAX_FAN_PER_COL = 4
 
   // Center position (will convert to top-left after placing)
   const center = new Map() // tmp_id -> {cx, cy, w, h}
@@ -276,11 +307,52 @@ function radialLayout({ newNodes, newEdges }) {
         const n = children[ci]
         const side = getSide(n.tmp_id)
         const dir = DIR[side]
-        const dist = lv === 1 ? DIST[side] : DIST2[side]
+        const baseDist = lv === 1 ? DIST[side] : DIST2[side]
         const fanSpacing = FAN_SPACING[side]
 
-        // Center the fan around the parent's position on the perpendicular axis
-        const fanOffset = (ci - (children.length - 1) / 2) * fanSpacing
+        // Fan wrapping: cap children per column at MAX_FAN_PER_COL; extras go outward.
+        //
+        // Geometry constraint: straight edges all leave the parent's single anchor, and
+        // a full 4-child inner fan blocks every angular window through its own band
+        // EXCEPT the central one (node boxes are wide relative to the gaps between
+        // lanes, so the side gaps close). The only crossing-free way to reach wrapped
+        // children is therefore the CENTER corridor: |perp/dist| ≲ 0.10 clears the
+        // inner fan's bodies. That corridor fits at most 2 extra nodes (±0.08·dist,
+        // vertically separated just past the overlap padding) — and only on horizontal
+        // sides, where the perpendicular axis is y (node heights ~115) rather than
+        // x (widths ~250, too wide to fit two in the corridor).
+        const isHoriz = side === 'right' || side === 'left'
+        const overflowCount = children.length - MAX_FAN_PER_COL
+
+        let dist, fanOffset
+        if (overflowCount > 0 && overflowCount <= 2 && isHoriz) {
+          // 5-6 children on a horizontal side: full inner fan + center-corridor overflow.
+          if (ci < MAX_FAN_PER_COL) {
+            dist = baseDist
+            fanOffset = (ci - (MAX_FAN_PER_COL - 1) / 2) * fanSpacing
+          } else {
+            dist = baseDist + WRAP_DIST[side]
+            fanOffset = overflowCount === 1 ? 0 : (ci === MAX_FAN_PER_COL ? -1 : 1) * 0.08 * dist
+          }
+        } else {
+          // General wrap (vertical sides, or ≥7 children): staggered columns, best effort.
+          const colIdx = Math.floor(ci / MAX_FAN_PER_COL)
+          const posInCol = ci % MAX_FAN_PER_COL
+          const colStart = colIdx * MAX_FAN_PER_COL
+          const colCount = Math.min(MAX_FAN_PER_COL, children.length - colStart)
+          dist = baseDist + colIdx * WRAP_DIST[side]
+
+          // Center the fan of this column on its own subset, then stagger wrapped
+          // columns into the gaps of column 0's lanes. Whether a half-spacing shift is
+          // needed depends on parity: a centered fan of m children occupies integer
+          // lanes when m is odd and half-integer lanes when m is even, so column k
+          // collides with column 0 exactly when their counts share parity. The offset
+          // is scaled by dist/baseDist so the ray from the parent's anchor is aimed
+          // through the same ANGULAR gap at every distance.
+          const col0Count = Math.min(MAX_FAN_PER_COL, children.length)
+          const stagger = colIdx > 0 && (col0Count - colCount) % 2 === 0 ? fanSpacing / 2 : 0
+          fanOffset = ((posInCol - (colCount - 1) / 2) * fanSpacing + stagger) * (dist / baseDist)
+        }
 
         const cx = pcx + dir.dx * dist + dir.dy * fanOffset  // dir.dy is perp for horiz dirs: 0 for right/left
         const cy = pcy + dir.dy * dist + dir.dx * fanOffset   // dir.dx is perp for vert dirs: 0 for bottom/top
@@ -309,10 +381,60 @@ function radialLayout({ newNodes, newEdges }) {
     pos.set(id, entry)
   }
 
-  // ── Memos: hang perpendicular to their stage's outward direction ─────────
+  // ── Memos: prefer the stage's FREE connection points ──────────────────────
+  // A stage's "used" sides are: its inbound side (OPPOSITE of its dir — where
+  // it connects to its parent; for the root, there's no parent, so instead the
+  // root's used sides are simply the union of all its children's dirs), its
+  // outbound side (its dir — where its own children branch out, if it has any;
+  // for the root this collapses to the same children-dirs set), and any side
+  // already claimed by a previously-placed memo of that stage. We place each
+  // new memo on the first free side in preference order (the two sides
+  // perpendicular to the stage's reference dir first, then the rest); if all
+  // four sides are taken, fall back to the old perpendicular alternation.
   const memoCountPerStage = new Map()
+  const memoSidesUsed = new Map() // stageId -> Set<side> claimed by memos already placed
   const memoW = SIZE.memo.w
   const memoH = SIZE.memo.h
+
+  const parentSet = new Set([...parentId.values()].filter((p) => p != null)) // stages that have a stage child
+  const rootChildDirs = new Set()
+  for (const [id, par] of parentId) {
+    if (par === rootId) {
+      const d = sideOf.get(id)
+      if (d) rootChildDirs.add(d)
+    }
+  }
+
+  // Reference dir used purely to decide which pair of sides counts as
+  // "perpendicular" for preference ordering. Root has no real dir; 'top'
+  // matches the old default (root memos alternated left/right).
+  const refDir = (stageId) => (stageId === rootId ? 'top' : (getSide(stageId) ?? 'top'))
+
+  const baseUsedSides = (stageId) => {
+    if (stageId === rootId) return new Set(rootChildDirs)
+    const used = new Set()
+    const dir = getSide(stageId)
+    if (dir) {
+      used.add(OPPOSITE[dir])              // inbound: side facing its parent
+      if (parentSet.has(stageId)) used.add(dir) // outbound: side facing its own children
+    }
+    return used
+  }
+
+  const preferredOrder = (stageId) => {
+    const isHorizDir = refDir(stageId) === 'right' || refDir(stageId) === 'left'
+    return isHorizDir ? ['top', 'bottom', 'right', 'left'] : ['left', 'right', 'top', 'bottom']
+  }
+
+  const pickSide = (stageId, count) => {
+    const used = new Set([...baseUsedSides(stageId), ...(memoSidesUsed.get(stageId) ?? [])])
+    for (const s of preferredOrder(stageId)) if (!used.has(s)) return s
+    // All four sides taken: fall back to the old perpendicular alternation.
+    const isHorizDir = refDir(stageId) === 'right' || refDir(stageId) === 'left'
+    const options = isHorizDir ? ['top', 'bottom'] : ['left', 'right']
+    return options[count % 2]
+  }
+
   for (const m of memos) {
     const link = newEdges.find((e) =>
       (e.source === m.tmp_id && pos.has(e.target)) || (e.target === m.tmp_id && pos.has(e.source)))
@@ -322,60 +444,30 @@ function radialLayout({ newNodes, newEdges }) {
     if (!stagePos) continue
     const { cx: scx, cy: scy } = center.get(stageId) ?? { cx: stagePos.x + (sizeOut.get(stageId)?.w ?? SIZE.stage.w) / 2, cy: stagePos.y + (sizeOut.get(stageId)?.h ?? SIZE.stage.h) / 2 }
 
-    const side = stageId === rootId ? 'top' : (getSide(stageId) ?? 'top')
     const count = memoCountPerStage.get(stageId) ?? 0
     memoCountPerStage.set(stageId, count + 1)
 
-    // Perpendicular direction: if stage is on right/left side, memos hang up/down; else left/right
-    const isHoriz = side === 'right' || side === 'left'
-    const perpSign = count % 2 === 0 ? -1 : 1
-    const perpDist = (Math.floor(count / 2) + 1) * (isHoriz ? 200 : 340)
+    const side = pickSide(stageId, count)
+    const sideSet = memoSidesUsed.get(stageId) ?? new Set()
+    sideSet.add(side)
+    memoSidesUsed.set(stageId, sideSet)
+
+    // Place just beyond the chosen side (half stage thickness + half memo
+    // thickness + gap, along that side's axis — existing distance math).
     const sStageH = sizeOut.get(stageId)?.h ?? SIZE.stage.h
     const sStageW = sizeOut.get(stageId)?.w ?? SIZE.stage.w
-    const outwardDist = isHoriz ? (sStageH / 2 + memoH / 2 + 60) : (sStageW / 2 + memoW / 2 + 60)
-
-    let mcx, mcy
-    if (isHoriz) {
-      // Outward = along stage's direction (horiz); perpendicular = vertical
-      const stageDirX = DIR[side].dx
-      mcx = scx + stageDirX * 0 // stay on same horizontal center as stage
-      // Actually hang off the perpendicular axis (above/below)
-      mcx = scx + perpSign * outwardDist * 0 // no outward offset needed; perp is vertical
-      // Simpler: place directly above or below the stage
-      mcy = scy + perpSign * (sStageH / 2 + memoH / 2 + 60 + Math.floor(count / 2) * 110)
-      mcx = scx + (count % 2 === 0 ? 0 : 0) // centered
-      // Actually alternate left/right for multiple memos
-      const memoSide = count % 2 === 0 ? -1 : 1
-      mcx = scx + memoSide * perpDist
-      mcy = scy
-    } else {
-      // Stage on top/bottom; perpendicular = horizontal
-      const memoSide = count % 2 === 0 ? -1 : 1
-      mcx = scx + memoSide * perpDist
-      mcy = scy
-    }
+    const isHorizSide = side === 'right' || side === 'left'
+    const dist = isHorizSide ? (sStageW / 2 + memoW / 2 + 60) : (sStageH / 2 + memoH / 2 + 60)
+    const mcx = scx + DIR[side].dx * dist
+    const mcy = scy + DIR[side].dy * dist
 
     const desired = { x: mcx - memoW / 2, y: mcy - memoH / 2 }
     const spot = findNonOverlapping(placedRects, desired, memoW, memoH)
     placedRects.push({ x: spot.x, y: spot.y, w: memoW, h: memoH })
-    // memoStageSide: the side of the stage that faces the memo (perpendicular to branch)
-    // memoOwnSide: the side of the memo that faces the stage
-    // For right/left stages, memos hang above/below → stage-facing side is top or bottom,
-    // memo-facing side is bottom or top.
-    // For top/bottom stages, memos hang left/right → stage-facing side is left or right,
-    // memo-facing side is right or left.
-    const memoSide = count % 2 === 0 ? -1 : 1
-    let stageFacing, memoFacing
-    if (isHoriz) {
-      // memo is to left or right of the stage (perpendicular = horizontal)
-      stageFacing = memoSide < 0 ? 'left' : 'right'
-      memoFacing  = memoSide < 0 ? 'right' : 'left'
-    } else {
-      // memo is above or below the stage (perpendicular = vertical)
-      stageFacing = memoSide < 0 ? 'top' : 'bottom'
-      memoFacing  = memoSide < 0 ? 'bottom' : 'top'
-    }
-    pos.set(m.tmp_id, { x: spot.x, y: spot.y, memoStageFacing: stageFacing, memoOwnFacing: memoFacing })
+
+    // memoStageFacing: the side of the stage that faces the memo (= chosen side).
+    // memoOwnFacing: the side of the memo that faces the stage (= opposite).
+    pos.set(m.tmp_id, { x: spot.x, y: spot.y, memoStageFacing: side, memoOwnFacing: OPPOSITE[side] })
   }
 
   // Unlinked memos
@@ -448,6 +540,261 @@ export function radialLevels(nodeInputs, edgeInputs) {
   return level
 }
 
+// ── Real-handle anchor computation (exported for tests and avoidEdgeCrossings) ─
+// Computes the exact handle anchor points for an edge using the same pinning
+// rules that createGraph applies:
+//   root → child:       sourceHandle = child.dir,  targetHandle = OPPOSITE[child.dir]
+//   non-root parent → child: sourceHandle = parent.dir, targetHandle = OPPOSITE[child.dir]
+//   memo edge:          handles = memoStageFacing / memoOwnFacing (or reverse)
+//   directional preset: sourceHandle/targetHandle come from the preset direction
+// Falls back to center-to-center when info is missing.
+//
+// params:
+//   srcId, tgtId  — tmp_ids of the edge endpoints
+//   pos           — Map<tmp_id, entry> (entry has .x, .y, optionally .dir,
+//                   .memoStageFacing, .memoOwnFacing)
+//   newNodes      — array of node input objects (to get .type, .width, .height)
+//   level         — Map<tmp_id, number> BFS depth (0=root, 1=L1 child, …)
+//                   Pass null/undefined for non-radial layouts.
+//   rootId        — tmp_id of the radial root (or null for non-radial)
+//
+// Returns { p1, p2 } — the two anchor {x, y} points for the segment check.
+export function edgeAnchors(srcId, tgtId, pos, newNodes, level, rootId) {
+  const OPPOSITE = { right: 'left', left: 'right', top: 'bottom', bottom: 'top' }
+
+  const getRect = (id) => {
+    const p = pos.get(id)
+    if (!p) return null
+    const n = newNodes.find((x) => x.tmp_id === id)
+    const w = n?.width  ?? SIZE[n?.type]?.w ?? SIZE.stage.w
+    const h = n?.height ?? SIZE[n?.type]?.h ?? SIZE.stage.h
+    return { x: p.x, y: p.y, w, h }
+  }
+
+  const srcRect = getRect(srcId)
+  const tgtRect = getRect(tgtId)
+  if (!srcRect || !tgtRect) {
+    return { p1: { x: 0, y: 0 }, p2: { x: 0, y: 0 } }
+  }
+
+  const srcEntry = pos.get(srcId) ?? {}
+  const tgtEntry = pos.get(tgtId) ?? {}
+  const srcNode = newNodes.find((x) => x.tmp_id === srcId)
+  const tgtNode = newNodes.find((x) => x.tmp_id === tgtId)
+
+  let sh = null, th = null
+
+  // ── Memo edge ──────────────────────────────────────────────────────────────
+  if (srcNode?.type === 'memo') {
+    // src is memo, tgt is stage: memo's own facing → stage's facing side
+    sh = srcEntry.memoOwnFacing   ?? null
+    th = srcEntry.memoStageFacing ?? null
+  } else if (tgtNode?.type === 'memo') {
+    // tgt is memo: stage's facing → memo's own facing
+    sh = tgtEntry.memoStageFacing ?? null
+    th = tgtEntry.memoOwnFacing   ?? null
+  // ── Radial edge ────────────────────────────────────────────────────────────
+  } else if (level != null) {
+    const srcLv = level.get(srcId) ?? -1
+    const tgtLv = level.get(tgtId) ?? -1
+    const srcDir = srcEntry.dir ?? null
+    const tgtDir = tgtEntry.dir ?? null
+
+    // Determine which node is the parent and which is the child by BFS level.
+    // parent is the one with lower level (or the one that is the root).
+    let parentId = null, childId = null
+    if (srcLv < tgtLv) { parentId = srcId; childId = tgtId }
+    else if (tgtLv < srcLv) { parentId = tgtId; childId = srcId }
+    else {
+      // Same level — lateral edge; fall back to center-to-center
+      parentId = null; childId = null
+    }
+
+    if (parentId != null && childId != null) {
+      const childDir = pos.get(childId)?.dir ?? null
+      if (childDir) {
+        if (parentId === rootId) {
+          // root → child: source handle = child's dir, target handle = opposite
+          if (parentId === srcId) { sh = childDir; th = OPPOSITE[childDir] }
+          else                     { sh = OPPOSITE[childDir]; th = childDir }
+        } else {
+          // non-root parent → child: source handle = parent's dir, target = opposite of child's dir
+          const parentDir = pos.get(parentId)?.dir ?? childDir
+          if (parentId === srcId) { sh = parentDir; th = OPPOSITE[childDir] }
+          else                     { sh = OPPOSITE[childDir]; th = parentDir }
+        }
+      }
+    }
+  }
+
+  const p1 = handleAnchor(srcRect, sh)
+  const p2 = handleAnchor(tgtRect, th)
+  return { p1, p2 }
+}
+
+// ── Segment-vs-rect intersection (exported for tests) ────────────────────────
+// Returns true when the line segment p1→p2 intersects or passes through the
+// axis-aligned rect {x, y, w, h}. Uses Liang-Barsky clipping.
+export function segmentIntersectsRect(p1, p2, rect) {
+  const { x, y, w, h } = rect
+  const dx = p2.x - p1.x
+  const dy = p2.y - p1.y
+  // p = direction component magnitudes, q = distance from boundary
+  const p = [-dx, dx, -dy, dy]
+  const q = [p1.x - x, x + w - p1.x, p1.y - y, y + h - p1.y]
+  let tMin = 0, tMax = 1
+  for (let i = 0; i < 4; i++) {
+    if (p[i] === 0) {
+      if (q[i] < 0) return false // parallel and outside
+    } else {
+      const t = q[i] / p[i]
+      if (p[i] < 0) { if (t > tMax) return false; if (t > tMin) tMin = t }
+      else          { if (t < tMin) return false; if (t < tMax) tMax = t }
+    }
+  }
+  return tMin <= tMax
+}
+
+// Anchor point on a node's rect edge for a given handle side (center of that edge).
+function handleAnchor(rect, side) {
+  const { x, y, w, h } = rect
+  if (side === 'right')  return { x: x + w, y: y + h / 2 }
+  if (side === 'left')   return { x,        y: y + h / 2 }
+  if (side === 'bottom') return { x: x + w / 2, y: y + h }
+  if (side === 'top')    return { x: x + w / 2, y }
+  return { x: x + w / 2, y: y + h / 2 } // center fallback
+}
+
+// ── Edge-over-node crossing avoidance post-pass ───────────────────────────────
+// For each new edge, check whether any non-endpoint new node's rect intersects
+// the edge segment. If so, shift the offending node perpendicular to the segment
+// until it clears (bounded: up to 6 steps of 60px in each perpendicular direction).
+// Two sweeps over all edges. Modifies positions Map in-place.
+//
+// Anchors are computed via edgeAnchors() using real pinning rules (same as
+// createGraph) when level/rootId context is available, so the pass detects
+// crossings that actually exist for the rendered edge, not just center-to-center.
+//
+// When a memo node is shifted, its memoStageFacing/memoOwnFacing fields are
+// updated to reflect the new side it ended up on (relative to its linked stage).
+//
+// level:  Map<tmp_id, number> BFS depth — pass null for non-radial layouts.
+// rootId: tmp_id of the radial root — pass null for non-radial layouts.
+// newEdges must already be filtered to edges whose both endpoints are in positions.
+export function avoidEdgeCrossings(positions, newNodes, newEdges, level, rootId) {
+  const PAD = 6
+  const STEP = 60
+  const MAX_STEPS = 6
+
+  const getRect = (tmp_id) => {
+    const p = positions.get(tmp_id)
+    if (!p) return null
+    const n = newNodes.find((x) => x.tmp_id === tmp_id)
+    const w = (n?.width ?? SIZE[n?.type]?.w ?? SIZE.stage.w)
+    const h = (n?.height ?? SIZE[n?.type]?.h ?? SIZE.stage.h)
+    return { x: p.x, y: p.y, w, h }
+  }
+
+  const paddedRect = (r) => ({ x: r.x - PAD, y: r.y - PAD, w: r.w + 2 * PAD, h: r.h + 2 * PAD })
+
+  // Build a quick lookup from memo tmp_id -> its linked stage tmp_id (for facing updates)
+  const memoLinkedStage = new Map()
+  for (const e of newEdges) {
+    const srcNode = newNodes.find((x) => x.tmp_id === e.source)
+    const tgtNode = newNodes.find((x) => x.tmp_id === e.target)
+    if (srcNode?.type === 'memo' && tgtNode?.type === 'stage') memoLinkedStage.set(e.source, e.target)
+    if (tgtNode?.type === 'memo' && srcNode?.type === 'stage') memoLinkedStage.set(e.target, e.source)
+  }
+
+  for (let sweep = 0; sweep < 2; sweep++) {
+    for (let ei = 0; ei < newEdges.length; ei++) {
+      const e = newEdges[ei]
+      const srcId = e.source
+      const tgtId = e.target
+      if (!positions.has(srcId) || !positions.has(tgtId)) continue
+
+      // Use real anchor rules via edgeAnchors
+      const { p1, p2 } = edgeAnchors(srcId, tgtId, positions, newNodes, level, rootId)
+
+      // Perpendicular direction to the segment
+      const dx = p2.x - p1.x
+      const dy = p2.y - p1.y
+      const len = Math.sqrt(dx * dx + dy * dy)
+      if (len < 1) continue
+      // Perpendicular unit vector: (-dy, dx) and (dy, -dx)
+      const px = -dy / len
+      const py =  dx / len
+
+      for (const n of newNodes) {
+        if (n.tmp_id === srcId || n.tmp_id === tgtId) continue
+        if (!positions.has(n.tmp_id)) continue
+
+        const nr = getRect(n.tmp_id)
+        if (!segmentIntersectsRect(p1, p2, paddedRect(nr))) continue
+
+        // Try shifting in both perpendicular directions
+        let moved = false
+        outer: for (const sign of [1, -1]) {
+          for (let step = 1; step <= MAX_STEPS; step++) {
+            const ox = px * sign * step * STEP
+            const oy = py * sign * step * STEP
+            const orig = positions.get(n.tmp_id)
+            const candidate = { x: orig.x + ox, y: orig.y + oy }
+            const candidateRect = { x: candidate.x, y: candidate.y, w: nr.w, h: nr.h }
+
+            // Check clears this segment
+            if (segmentIntersectsRect(p1, p2, paddedRect(candidateRect))) continue
+
+            // Check doesn't overlap other placed rects
+            const overlapsOther = newNodes.some((other) => {
+              if (other.tmp_id === n.tmp_id) return false
+              if (!positions.has(other.tmp_id)) return false
+              return overlaps(candidateRect, getRect(other.tmp_id))
+            })
+            if (overlapsOther) continue
+
+            const newEntry = { ...orig, x: candidate.x, y: candidate.y }
+
+            // If this is a memo node, update its facing fields to reflect new position
+            if (n.type === 'memo' && memoLinkedStage.has(n.tmp_id)) {
+              const stageId = memoLinkedStage.get(n.tmp_id)
+              const stagePos = positions.get(stageId)
+              if (stagePos) {
+                const stageNode = newNodes.find((x) => x.tmp_id === stageId)
+                const sw = stageNode?.width  ?? SIZE.stage.w
+                const sh = stageNode?.height ?? SIZE.stage.h
+                const stageCx = stagePos.x + sw / 2
+                const stageCy = stagePos.y + sh / 2
+                const memoCx  = candidate.x + (nr.w / 2)
+                const memoCy  = candidate.y + (nr.h / 2)
+                const relX = memoCx - stageCx
+                const relY = memoCy - stageCy
+                // Determine which side the memo ended up on relative to its stage
+                let stageFacing, memoFacing
+                if (Math.abs(relX) >= Math.abs(relY)) {
+                  stageFacing = relX >= 0 ? 'right' : 'left'
+                  memoFacing  = relX >= 0 ? 'left'  : 'right'
+                } else {
+                  stageFacing = relY >= 0 ? 'bottom' : 'top'
+                  memoFacing  = relY >= 0 ? 'top'    : 'bottom'
+                }
+                newEntry.memoStageFacing = stageFacing
+                newEntry.memoOwnFacing   = memoFacing
+              }
+            }
+
+            positions.set(n.tmp_id, newEntry)
+            moved = true
+            break outer
+          }
+        }
+        // If no spot found, leave in place (best-effort)
+        void moved
+      }
+    }
+  }
+}
+
 // ── Main layoutGraph export ───────────────────────────────────────────────────
 // preset: 'right' (default), 'left', 'down', 'up', 'radial'
 // Returns Map<tmp_id, {x, y, width?, height?}>
@@ -480,6 +827,26 @@ export function layoutGraph({ newNodes, newEdges, existingNodes, colGap = 320, r
       const maxX = Math.max(...[...pos.values()].map((p) => p.x))
       for (const [id, p] of pos) pos.set(id, { x: maxX - p.x, y: p.y })
     }
+  }
+
+  // ── Edge-over-node avoidance post-pass (all presets, before translate) ───────
+  // avoidEdgeCrossings now uses edgeAnchors() internally with the real pinning
+  // rules, so we only need to pass BFS level info (for radial) or null (others).
+  {
+    // For radial, reconstruct BFS level from the pos entries: root has no dir
+    // and level 0; other nodes' levels are inferred by BFS on the stage graph.
+    let avoidLevel = null
+    let avoidRootId = null
+    if (preset === 'radial') {
+      avoidLevel = radialLevels(newNodes, newEdges)
+      // Root = stage whose pos entry has no dir field
+      const stages = newNodes.filter((n) => n.type === 'stage')
+      const rootStage = stages.find((n) => pos.has(n.tmp_id) && pos.get(n.tmp_id).dir == null)
+      avoidRootId = rootStage?.tmp_id ?? null
+    }
+    // Only run avoidance for new-node pairs (both endpoints in pos)
+    const newEdgesForAvoidance = newEdges.filter((e) => pos.has(e.source) && pos.has(e.target))
+    avoidEdgeCrossings(pos, newNodes, newEdgesForAvoidance, avoidLevel, avoidRootId)
   }
 
   // ── Translate the whole layout onto the canvas ──────────────────────────────

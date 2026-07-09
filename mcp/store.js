@@ -565,12 +565,41 @@ export async function createGraph(userId, canvasId, { nodes: nodeInputs, edges: 
     return node
   })
 
-  // BFS level map (radial): used to determine parent vs child in edge pinning.
-  // Built from input edges using the same logic as radialLevels.
-  const bfsLevel = preset === 'radial' ? radialLevels(nodeInputs, edgeInputs) : null
+  // BFS/layer level map: used to determine parent vs child in edge handle pinning.
+  // For radial: use radialLevels. For directional presets: compute Kahn layers.
+  const bfsLevel = preset === 'radial' ? radialLevels(nodeInputs, edgeInputs) : (() => {
+    if (!['right', 'left', 'down', 'up'].includes(preset)) return null
+    const stageIds = new Set(nodeInputs.filter((n) => n.type === 'stage').map((n) => n.tmp_id))
+    const stageEdges = (edgeInputs ?? []).filter((e) => stageIds.has(e.source) && stageIds.has(e.target))
+    const succ = new Map([...stageIds].map((id) => [id, []]))
+    const inDeg = new Map([...stageIds].map((id) => [id, 0]))
+    for (const e of stageEdges) {
+      succ.get(e.source).push(e.target)
+      inDeg.set(e.target, inDeg.get(e.target) + 1)
+    }
+    const layer = new Map()
+    const queue = [...stageIds].filter((id) => inDeg.get(id) === 0)
+    for (const id of queue) layer.set(id, 0)
+    const q = [...queue]
+    while (q.length) {
+      const cur = q.shift()
+      for (const next of succ.get(cur)) {
+        const nl = (layer.get(cur) ?? 0) + 1
+        if (!layer.has(next) || layer.get(next) < nl) layer.set(next, nl)
+        if (layer.get(next) === nl) q.push(next)
+      }
+    }
+    // Unreachable stages get level -1
+    for (const id of stageIds) if (!layer.has(id)) layer.set(id, -1)
+    return layer
+  })()
 
   // Opposite handle for a given direction
   const OPPOSITE = { right: 'left', left: 'right', top: 'bottom', bottom: 'top' }
+
+  // Flow-side handle for directional presets: the side of the parent that faces the child.
+  // right→parent's right, left→parent's left, down→parent's bottom, up→parent's top.
+  const FLOW_SIDE = { right: 'right', left: 'left', down: 'bottom', up: 'top' }
 
   // Materialize edges: resolve refs, silently dedupe (within call + vs existing)
   const allNodes = [...existing, ...newNodes]
@@ -585,62 +614,101 @@ export async function createGraph(userId, canvasId, { nodes: nodeInputs, edges: 
     if (seenPairs.has(key)) { skippedDuplicates.push({ source: e.source, target: e.target }); continue }
     seenPairs.add(key)
 
-    // Radial handle pinning (Task 1): when preset is radial and handles are not
-    // explicitly provided, pin them so all children of the same non-root parent
-    // leave from the parent's single outward connection point.
     let { sourceHandle, targetHandle } = e
-    if (preset === 'radial' && (!sourceHandle || !targetHandle)) {
-      const srcTmp = e.source   // original tmp_id (before idMap resolution)
-      const tgtTmp = e.target
-      const srcInNew = idMap.has(srcTmp)
-      const tgtInNew = idMap.has(tgtTmp)
+    const srcTmp = e.source
+    const tgtTmp = e.target
+    const srcInNew = idMap.has(srcTmp)
+    const tgtInNew = idMap.has(tgtTmp)
 
-      if (srcInNew && tgtInNew) {
-        // Both nodes are from this call — check if this is a stage-stage edge
-        const srcNode = nodeInputs.find((n) => n.tmp_id === srcTmp)
-        const tgtNode = nodeInputs.find((n) => n.tmp_id === tgtTmp)
-        const bothStages = srcNode?.type === 'stage' && tgtNode?.type === 'stage'
+    if (preset === 'radial' && (!sourceHandle || !targetHandle) && srcInNew && tgtInNew) {
+      // Radial handle pinning: pin so all children of the same non-root parent
+      // leave from the parent's single outward connection point.
+      const srcNode = nodeInputs.find((n) => n.tmp_id === srcTmp)
+      const tgtNode = nodeInputs.find((n) => n.tmp_id === tgtTmp)
+      const bothStages = srcNode?.type === 'stage' && tgtNode?.type === 'stage'
 
-        if (bothStages) {
-          const srcLevel = bfsLevel?.get(srcTmp) ?? -1
-          const tgtLevel = bfsLevel?.get(tgtTmp) ?? -1
-          // Determine which is parent (lower level) and which is child
-          if (srcLevel < tgtLevel) {
-            // source = parent, target = child
-            const childDir = layoutDirs.get(tgtTmp)
-            if (childDir) {
-              const parentIsRoot = srcLevel === 0
-              const parentDir = parentIsRoot ? childDir : layoutDirs.get(srcTmp)
-              if (parentDir) {
-                if (!sourceHandle) sourceHandle = parentDir
-                if (!targetHandle) targetHandle = OPPOSITE[childDir]
-              }
-            }
-          } else if (tgtLevel < srcLevel) {
-            // target = parent, source = child
-            const childDir = layoutDirs.get(srcTmp)
-            if (childDir) {
-              const parentIsRoot = tgtLevel === 0
-              const parentDir = parentIsRoot ? childDir : layoutDirs.get(tgtTmp)
-              if (parentDir) {
-                if (!targetHandle) targetHandle = parentDir
-                if (!sourceHandle) sourceHandle = OPPOSITE[childDir]
-              }
+      if (bothStages) {
+        const srcLevel = bfsLevel?.get(srcTmp) ?? -1
+        const tgtLevel = bfsLevel?.get(tgtTmp) ?? -1
+        if (srcLevel < tgtLevel) {
+          // source = parent, target = child
+          const childDir = layoutDirs.get(tgtTmp)
+          if (childDir) {
+            const parentDir = srcLevel === 0 ? childDir : layoutDirs.get(srcTmp)
+            if (parentDir) {
+              if (!sourceHandle) sourceHandle = parentDir
+              if (!targetHandle) targetHandle = OPPOSITE[childDir]
             }
           }
-        } else if (srcNode?.type === 'memo' || tgtNode?.type === 'memo') {
-          // Memo edge pinning: use the facing directions computed by the layout
-          const memoTmp = srcNode?.type === 'memo' ? srcTmp : tgtTmp
-          const stageTmp = srcNode?.type === 'memo' ? tgtTmp : srcTmp
-          const facing = layoutMemoFacing.get(memoTmp)
-          if (facing) {
-            if (srcNode?.type === 'memo') {
-              if (!sourceHandle) sourceHandle = facing.memoOwnFacing
-              if (!targetHandle) targetHandle = facing.stageFacing
-            } else {
-              if (!sourceHandle) sourceHandle = facing.stageFacing
-              if (!targetHandle) targetHandle = facing.memoOwnFacing
+        } else if (tgtLevel < srcLevel) {
+          // target = parent, source = child
+          const childDir = layoutDirs.get(srcTmp)
+          if (childDir) {
+            const parentDir = tgtLevel === 0 ? childDir : layoutDirs.get(tgtTmp)
+            if (parentDir) {
+              if (!targetHandle) targetHandle = parentDir
+              if (!sourceHandle) sourceHandle = OPPOSITE[childDir]
             }
+          }
+        }
+      } else if (srcNode?.type === 'memo' || tgtNode?.type === 'memo') {
+        const memoTmp = srcNode?.type === 'memo' ? srcTmp : tgtTmp
+        const facing = layoutMemoFacing.get(memoTmp)
+        if (facing) {
+          if (srcNode?.type === 'memo') {
+            if (!sourceHandle) sourceHandle = facing.memoOwnFacing
+            if (!targetHandle) targetHandle = facing.stageFacing
+          } else {
+            if (!sourceHandle) sourceHandle = facing.stageFacing
+            if (!targetHandle) targetHandle = facing.memoOwnFacing
+          }
+        }
+      }
+    } else if (FLOW_SIDE[preset] && (!sourceHandle || !targetHandle) && srcInNew && tgtInNew) {
+      // Directional preset handle pinning: single connection point on parent's flow side.
+      const flowSide = FLOW_SIDE[preset]
+      const srcNode = nodeInputs.find((n) => n.tmp_id === srcTmp)
+      const tgtNode = nodeInputs.find((n) => n.tmp_id === tgtTmp)
+      const bothStages = srcNode?.type === 'stage' && tgtNode?.type === 'stage'
+
+      if (bothStages) {
+        const srcLevel = bfsLevel?.get(srcTmp) ?? -1
+        const tgtLevel = bfsLevel?.get(tgtTmp) ?? -1
+        if (srcLevel < tgtLevel) {
+          // source = parent, target = child
+          if (!sourceHandle) sourceHandle = flowSide
+          if (!targetHandle) targetHandle = OPPOSITE[flowSide]
+        } else if (tgtLevel < srcLevel) {
+          // target = parent, source = child
+          if (!targetHandle) targetHandle = flowSide
+          if (!sourceHandle) sourceHandle = OPPOSITE[flowSide]
+        }
+      } else if (srcNode?.type === 'memo' || tgtNode?.type === 'memo') {
+        // Memo pinning for directional presets:
+        // right/left flow (horizontal): memos above/below → stage bottom/top, memo top/bottom
+        // down/up flow (vertical): memos left/right → stage right/left, memo left/right
+        const memoTmp = srcNode?.type === 'memo' ? srcTmp : tgtTmp
+        const stageTmp = srcNode?.type === 'memo' ? tgtTmp : srcTmp
+        const memoPos = positions.get(memoTmp)
+        const stagePos = positions.get(stageTmp)
+        if (memoPos && stagePos) {
+          const isHorizFlow = preset === 'right' || preset === 'left'
+          let stageFacing, memoFacing
+          if (isHorizFlow) {
+            // memo hangs above or below the stage node
+            stageFacing = memoPos.y < stagePos.y ? 'top' : 'bottom'
+            memoFacing = OPPOSITE[stageFacing]
+          } else {
+            // memo hangs left or right of the stage node
+            stageFacing = memoPos.x < stagePos.x ? 'left' : 'right'
+            memoFacing = OPPOSITE[stageFacing]
+          }
+          if (srcNode?.type === 'memo') {
+            if (!sourceHandle) sourceHandle = memoFacing
+            if (!targetHandle) targetHandle = stageFacing
+          } else {
+            if (!sourceHandle) sourceHandle = stageFacing
+            if (!targetHandle) targetHandle = memoFacing
           }
         }
       }
