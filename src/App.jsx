@@ -43,8 +43,9 @@ const nodeTypes = { stage: StageNode, memo: MemoNode, group: GroupNode }
 
 const defaultEdgeOptions = {
   animated: false,
-  style: { stroke: '#4a4a5a', strokeWidth: 2 },
+  style: { stroke: '#4a4a5a', strokeWidth: 3 },
   markerEnd: { type: MarkerType.ArrowClosed, color: '#4a4a5a' },
+  pathOptions: { curvature: 0.45 },
 }
 
 // ── Stage type definitions ──────────────────────────────────────────────────
@@ -165,8 +166,8 @@ function baseEdgeStyle(e) {
   const isMemo = !!e.style?.strokeDasharray
   return {
     style: isMemo
-      ? { stroke: '#f59e0b88', strokeWidth: 1.5, strokeDasharray: '5,4' }
-      : { stroke: '#4a4a5a', strokeWidth: 2 },
+      ? { stroke: '#f59e0b88', strokeWidth: 2.25, strokeDasharray: '5,4' }
+      : { stroke: '#4a4a5a', strokeWidth: 3 },
     markerEnd: { type: MarkerType.ArrowClosed, color: isMemo ? '#f59e0b88' : '#4a4a5a' },
   }
 }
@@ -199,6 +200,7 @@ export default function App() {
   const [isAnyEditing, setIsAnyEditing] = useState(false)
   const [isPinching, setIsPinching] = useState(false)
   const [lassoRect, setLassoRect] = useState(null) // screen-space rubber-band box
+  const [alignGuides, setAlignGuides] = useState([]) // [{axis:'x'|'y', value}] in flow-space coords, drawn while dragging
   const [lodThreshold, setLodThreshold] = useState(() => loadLodThreshold())
 
   // Saved views (per canvas): [{ id, name, bounds: {x,y,width,height} }]
@@ -518,6 +520,52 @@ export default function App() {
     el.addEventListener('touchstart', onTouchStart, { passive: false, capture: true })
     return () => el.removeEventListener('touchstart', onTouchStart, { capture: true })
   }, [touchDevice, rfInstance])
+
+  // ── Touch: additive tap selection for nodes AND edges ───────────────────────
+  // Desktop multi-selects with Shift/Cmd/Ctrl, but touch has no modifier keys.
+  // Once something is selected, tapping another node/edge ADDS it to the
+  // selection (tapping an already-selected one removes it). React Flow's own
+  // click handling replaces the selection, so we snapshot the selection from
+  // the DOM in the capture phase (before RF mutates it) and merge it back
+  // right after. The tapped element itself keeps RF's own selection verdict
+  // (so invitee-gated `selectable:false` nodes can't sneak in) unless it was
+  // already selected, in which case we toggle it off.
+  useEffect(() => {
+    if (!touchDevice) return
+    const el = reactFlowRef.current
+    if (!el || !rfInstance) return
+
+    const onClickCapture = (e) => {
+      const nodeEl = e.target.closest?.('.react-flow__node')
+      const edgeEl = e.target.closest?.('.react-flow__edge')
+      const tappedEl = nodeEl || edgeEl
+      if (!tappedEl) return
+      const tappedId = tappedEl.getAttribute('data-id')
+      if (!tappedId) return
+      const prevNodeIds = [...el.querySelectorAll('.react-flow__node.selected')].map((n) => n.getAttribute('data-id'))
+      const prevEdgeIds = [...el.querySelectorAll('.react-flow__edge.selected')].map((n) => n.getAttribute('data-id'))
+      if (prevNodeIds.length + prevEdgeIds.length === 0) return // first tap: default behavior
+      const tappedWasSelected = tappedEl.classList.contains('selected')
+
+      setTimeout(() => {
+        setNodes((nds) => nds.map((n) => {
+          const isTapped = !!nodeEl && n.id === tappedId
+          if (isTapped) return tappedWasSelected && n.selected ? { ...n, selected: false } : n
+          if (prevNodeIds.includes(n.id) && !n.selected) return { ...n, selected: true }
+          return n
+        }))
+        setEdges((eds) => eds.map((ed) => {
+          const isTapped = !!edgeEl && ed.id === tappedId
+          if (isTapped) return tappedWasSelected && ed.selected ? { ...ed, selected: false } : ed
+          if (prevEdgeIds.includes(ed.id) && !ed.selected) return { ...ed, selected: true }
+          return ed
+        }))
+      }, 0)
+    }
+
+    el.addEventListener('click', onClickCapture, true)
+    return () => el.removeEventListener('click', onClickCapture, true)
+  }, [touchDevice, rfInstance, setNodes, setEdges])
 
   // ── Desktop: forgiving grab radius for edge reconnect endpoints ─────────────
   // index.css renders `.react-flow__edgeupdater` at a small, fixed CSS `r`
@@ -1300,69 +1348,18 @@ export default function App() {
     const newEdge = {
       ...params,
       id: `e-${uid()}`,
-      style: isMemo ? { stroke: '#f59e0b88', strokeWidth: 1.5, strokeDasharray: '5,4' } : { stroke: '#4a4a5a', strokeWidth: 2 },
+      style: isMemo ? { stroke: '#f59e0b88', strokeWidth: 2.25, strokeDasharray: '5,4' } : { stroke: '#4a4a5a', strokeWidth: 3 },
       markerEnd: { type: MarkerType.ArrowClosed, color: isMemo ? '#f59e0b88' : '#4a4a5a' },
     }
     setEdges((eds) => eds.concat(newEdge))
   }, [nodes, setEdges, perm, isNodeEditable])
 
   // ── Reconnect: drag an edge endpoint onto another node/handle ──────────────
-  // Bundle-snatch: when several selected nodes' edges all converge on ONE
-  // shared (node, handle) point, dragging any one of them at that shared
-  // point moves all of them together. See onReconnectStart below.
-  const reconnectBundleRef = useRef(null) // { point: {nodeId, handleId}, edgeIds: [...] } | null
-
-  const onReconnectStart = useCallback((_event, edge, handleType) => {
+  const onReconnectStart = useCallback(() => {
     setReconnecting(true)
-    reconnectBundleRef.current = null
-
-    // xyflow passes the handleType of the FIXED (non-dragged) end; the
-    // dragged end is the opposite side of the edge.
-    const fixedIsTarget = handleType === 'target'
-    const draggedNodeId = fixedIsTarget ? edge.source : edge.target
-    const draggedHandleId = (fixedIsTarget ? edge.sourceHandle : edge.targetHandle) ?? null
-    const fixedNodeId = fixedIsTarget ? edge.target : edge.source
-
-    const selectedIds = new Set(nodes.filter((n) => n.selected).map((n) => n.id))
-    if (selectedIds.size < 2 || !selectedIds.has(fixedNodeId)) return
-
-    // Every edge with exactly one endpoint among the selected nodes — the
-    // "outward" edges connecting the selection to the rest of the canvas.
-    const pointKey = (nodeId, handleId) => `${nodeId}::${handleId ?? ''}`
-    const outward = edges.filter((e) => selectedIds.has(e.source) !== selectedIds.has(e.target))
-    const points = new Set(outward.map((e) =>
-      selectedIds.has(e.source) ? pointKey(e.target, e.targetHandle) : pointKey(e.source, e.sourceHandle)
-    ))
-    // Only bundle when ALL outward edges converge on this exact single point
-    // and there are at least two of them (otherwise: normal single-edge reconnect).
-    if (points.size !== 1 || !points.has(pointKey(draggedNodeId, draggedHandleId)) || outward.length < 2) return
-
-    reconnectBundleRef.current = {
-      point: { nodeId: draggedNodeId, handleId: draggedHandleId },
-      edgeIds: outward.map((e) => e.id),
-    }
-  }, [nodes, edges])
+  }, [])
 
   const onReconnect = useCallback((oldEdge, newConnection) => {
-    const bundle = reconnectBundleRef.current
-    if (bundle && bundle.edgeIds.length >= 2 && bundle.edgeIds.includes(oldEdge.id)) {
-      const movedIsSource = oldEdge.source === bundle.point.nodeId && (oldEdge.sourceHandle ?? null) === bundle.point.handleId
-      const newPoint = movedIsSource
-        ? { nodeId: newConnection.source, handleId: newConnection.sourceHandle ?? null }
-        : { nodeId: newConnection.target, handleId: newConnection.targetHandle ?? null }
-
-      setEdges((eds) => eds.map((e) => {
-        if (!bundle.edgeIds.includes(e.id)) return e
-        const eMovedIsSource = e.source === bundle.point.nodeId && (e.sourceHandle ?? null) === bundle.point.handleId
-        const otherNodeId = eMovedIsSource ? e.target : e.source
-        if (perm.role === 'invitee' && (!isNodeEditable(newPoint.nodeId) || !isNodeEditable(otherNodeId))) return e
-        return eMovedIsSource
-          ? { ...e, source: newPoint.nodeId, sourceHandle: newPoint.handleId }
-          : { ...e, target: newPoint.nodeId, targetHandle: newPoint.handleId }
-      }))
-      return
-    }
-
     if (perm.role === 'invitee' && (!isNodeEditable(newConnection.source) || !isNodeEditable(newConnection.target))) return
     // Reconnect the clean edge from state, not the styled (bold) object React
     // Flow hands back — otherwise the selection styling gets baked in permanently.
@@ -1372,50 +1369,66 @@ export default function App() {
     })
   }, [setEdges, perm, isNodeEditable])
 
-  // ── Snap-to-straight: when a dragged node's center nearly aligns with a
-  // directly-connected neighbor, snap it so the shared edge becomes straight.
-  // Runs live during drag (magnetic feel) and again on drop (guarantees it sticks).
-  const SNAP = 9
-  const snapNodeToNeighbors = useCallback((dragged) => {
+  // ── Alignment guides (Obsidian-style): while dragging a node, compare its
+  // absolute edges/center against every other visible node's and snap +
+  // draw a guide line when within ALIGN_SNAP px. Bails out on large canvases.
+  const ALIGN_SNAP = 6
+  const ALIGN_MAX_NODES = 150
+  const computeAlignSnap = useCallback((dragged) => {
+    if (nodes.length > ALIGN_MAX_NODES) return null
+    const byId = new Map(nodes.map((n) => [n.id, n]))
     const dim = (n) => ({ w: n.measured?.width ?? n.width ?? 0, h: n.measured?.height ?? n.height ?? 0 })
-    const d = dim(dragged)
-    const cx = dragged.position.x + d.w / 2
-    const cy = dragged.position.y + d.h / 2
+    const findAxisSnap = (draggedVals, neighborVals) => {
+      for (const dv of draggedVals) {
+        for (const nv of neighborVals) {
+          if (Math.abs(dv - nv) <= ALIGN_SNAP) return { delta: nv - dv, guide: nv }
+        }
+      }
+      return null
+    }
 
-    const neighborIds = new Set()
-    edges.forEach((e) => {
-      if (e.source === dragged.id) neighborIds.add(e.target)
-      if (e.target === dragged.id) neighborIds.add(e.source)
-    })
-    if (!neighborIds.size) return
+    const dd = dim(dragged)
+    const dPos = absolutePosition(dragged, byId)
+    const dXs = [dPos.x, dPos.x + dd.w / 2, dPos.x + dd.w] // left, centerX, right
+    const dYs = [dPos.y, dPos.y + dd.h / 2, dPos.y + dd.h] // top, centerY, bottom
 
-    let snapX = null
-    let snapY = null
-    nodes.forEach((n) => {
-      if (!neighborIds.has(n.id)) return
+    let xSnap = null
+    let ySnap = null
+    for (const n of nodes) {
+      if (n.id === dragged.id) continue
       const nd = dim(n)
-      const ncx = n.position.x + nd.w / 2
-      const ncy = n.position.y + nd.h / 2
-      if (snapX === null && Math.abs(cx - ncx) <= SNAP) snapX = ncx
-      if (snapY === null && Math.abs(cy - ncy) <= SNAP) snapY = ncy
-    })
-    if (snapX === null && snapY === null) return
+      const nPos = absolutePosition(n, byId)
+      if (!xSnap) xSnap = findAxisSnap(dXs, [nPos.x, nPos.x + nd.w / 2, nPos.x + nd.w])
+      if (!ySnap) ySnap = findAxisSnap(dYs, [nPos.y, nPos.y + nd.h / 2, nPos.y + nd.h])
+      if (xSnap && ySnap) break
+    }
+    if (!xSnap && !ySnap) return null
+    return { xSnap, ySnap }
+  }, [nodes])
 
-    setNodes((nds) => nds.map((n) => {
-      if (n.id !== dragged.id) return n
-      const nd = dim(n)
+  const onNodeDrag = useCallback((_e, n) => {
+    const snap = computeAlignSnap(n)
+    if (!snap) { setAlignGuides([]); return }
+    const { xSnap, ySnap } = snap
+    setNodes((nds) => nds.map((nn) => {
+      if (nn.id !== n.id) return nn
       return {
-        ...n,
+        ...nn,
         position: {
-          x: snapX !== null ? snapX - nd.w / 2 : n.position.x,
-          y: snapY !== null ? snapY - nd.h / 2 : n.position.y,
+          x: xSnap ? nn.position.x + xSnap.delta : nn.position.x,
+          y: ySnap ? nn.position.y + ySnap.delta : nn.position.y,
         },
       }
     }))
-  }, [nodes, edges, setNodes])
+    const guides = []
+    if (xSnap) guides.push({ axis: 'x', value: xSnap.guide })
+    if (ySnap) guides.push({ axis: 'y', value: ySnap.guide })
+    setAlignGuides(guides)
+  }, [computeAlignSnap, setNodes])
 
-  const onNodeDrag = useCallback((_e, n) => snapNodeToNeighbors(n), [snapNodeToNeighbors])
-  const onNodeDragStop = useCallback((_e, n) => snapNodeToNeighbors(n), [snapNodeToNeighbors])
+  const onNodeDragStop = useCallback(() => {
+    setAlignGuides([])
+  }, [])
 
   // Clicking a node bolds every edge connected to it (reuses the same
   // selected-edge bold styling as clicking an edge directly — see styledEdges).
@@ -1629,16 +1642,18 @@ export default function App() {
   const styledEdges = edges.map((e) => {
     // Delete key / built-in delete UI must also respect the edit gating.
     const deletable = perm.role === 'owner' || perm.scope === 'canvas' || (isNodeEditable(e.source) && isNodeEditable(e.target))
-    if (!e.selected) return { ...e, ...baseEdgeStyle(e), deletable }
+    const pathOptions = { curvature: 0.45 }
+    if (!e.selected) return { ...e, ...baseEdgeStyle(e), deletable, pathOptions }
     const isMemo = !!e.style?.strokeDasharray
     const color = isMemo ? '#f59e0b' : '#60a5fa'
     return {
       ...e,
       deletable,
+      pathOptions,
       // Only a selected (bold) edge can be snatched/reconnected.
       reconnectable: true,
       zIndex: 1001,
-      style: { ...baseEdgeStyle(e).style, stroke: color, strokeWidth: isMemo ? 2.5 : 3.5, filter: `drop-shadow(0 0 6px ${color}88)` },
+      style: { ...baseEdgeStyle(e).style, stroke: color, strokeWidth: isMemo ? 3.5 : 4.5, filter: `drop-shadow(0 0 6px ${color}88)` },
       markerEnd: { type: MarkerType.ArrowClosed, color },
     }
   })
@@ -1778,7 +1793,7 @@ export default function App() {
         onConnect={onConnect}
         onReconnect={onReconnect}
         onReconnectStart={onReconnectStart}
-        onReconnectEnd={() => { setReconnecting(false); reconnectBundleRef.current = null }}
+        onReconnectEnd={() => setReconnecting(false)}
         onNodeDrag={onNodeDrag}
         onNodeDragStop={onNodeDragStop}
         onNodeClick={onNodeClick}
@@ -1792,13 +1807,15 @@ export default function App() {
           setEdges((eds) => eds.some((e) => e.selected) ? eds.map((e) => ({ ...e, selected: false })) : eds)
         }}
         nodesDraggable={!isAnyEditing && !isPinching}
+        snapToGrid
+        snapGrid={[12, 12]}
         translateExtent={restrictBounds ?? undefined}
         edgesReconnectable={false}
         reconnectRadius={mobile ? 40 : 20}
         connectionMode="loose"
         connectionRadius={0}
         panOnDrag={false}
-        multiSelectionKeyCode={['Shift', 'Meta']}
+        multiSelectionKeyCode={['Shift', 'Meta', 'Control']}
         panOnScroll={false}
         zoomOnPinch={false}
         zoomOnScroll={false}
@@ -1811,7 +1828,8 @@ export default function App() {
         deleteKeyCode={['Delete', 'Backspace']}
         style={{ background: '#0f0f13' }}
       >
-        <Background variant={BackgroundVariant.Dots} gap={28} size={1} color="#ffffff12" />
+        <Background id="minor" variant={BackgroundVariant.Lines} gap={24} color="#ffffff07" />
+        <Background id="major" variant={BackgroundVariant.Lines} gap={120} color="#ffffff0d" />
         {!mobile && <Controls style={{ background: '#1a1a22', border: '1px solid #ffffff18', borderRadius: 8 }} />}
         {!mobile && (
           <MiniMap
@@ -1841,6 +1859,26 @@ export default function App() {
           }}
         />
       )}
+
+      {/* ── Alignment guides (shown while dragging a node near another) ───── */}
+      {rfInstance && alignGuides.map((g, i) => {
+        if (g.axis === 'x') {
+          const sx = rfInstance.flowToScreenPosition({ x: g.value, y: 0 }).x
+          return (
+            <div
+              key={i}
+              style={{ position: 'fixed', left: sx, top: 0, width: 1, height: '100vh', background: '#06b6d4', zIndex: 6, pointerEvents: 'none' }}
+            />
+          )
+        }
+        const sy = rfInstance.flowToScreenPosition({ x: 0, y: g.value }).y
+        return (
+          <div
+            key={i}
+            style={{ position: 'fixed', left: 0, top: sy, width: '100vw', height: 1, background: '#06b6d4', zIndex: 6, pointerEvents: 'none' }}
+          />
+        )
+      })}
 
       {/* ── Context Menu ─────────────────────────────────────────────────── */}
       {contextMenu && (

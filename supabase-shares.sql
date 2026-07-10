@@ -165,3 +165,11 @@ $$;
 
 revoke execute on function claim_email_invites() from anon;
 grant execute on function claim_email_invites() to authenticated;
+
+-- ── Table grants ─────────────────────────────────────────────────────────────
+-- RLS policies alone are not enough: the authenticated role also needs
+-- table-level privileges (this project's default privileges don't cover
+-- newly created tables). RLS still restricts which rows are reachable.
+grant select, insert, update, delete on canvas_shares to authenticated;
+grant select on share_members to authenticated;
+grant all on canvas_shares, share_members to service_role;

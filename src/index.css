@@ -36,7 +36,7 @@ html, body, #root {
 
 /* Edge reconnect grab handles: larger on touch, and show target handles while dragging */
 .react-flow__edgeupdater {
-  r: 8;
+  r: 10;
   cursor: crosshair;
 }
 @media (pointer: coarse) {
@@ -46,6 +46,33 @@ html, body, #root {
 }
 .rf-reconnecting .react-flow__node .react-flow__handle {
   opacity: 1 !important;
+}
+
+/* Edge hover: bold the stroke (no !important, so App's inline selected style — also
+   4.5px — keeps winning/matching once an edge is both hovered and selected). Memo's
+   dashed edges also get a subtle glow on hover. */
+.react-flow__edge:hover .react-flow__edge-path {
+  stroke-width: 4.5px;
+}
+.react-flow__edge:hover .react-flow__edge-path[style*="stroke-dasharray"] {
+  filter: drop-shadow(0 0 3px currentColor);
+}
+
+/* Part-row outlet sockets: the handle is a rounded rect (sized inline per part);
+   the two pseudo-elements are the vertical slots of the "콘센트" look. */
+.part-socket {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+.part-socket::before,
+.part-socket::after {
+  content: '';
+  width: 2px;
+  height: 6px;
+  border-radius: 1px;
+  background: #aab2c5;
 }
 
 /* Safe-area padding for notch / home-bar devices */

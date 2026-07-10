@@ -4,6 +4,9 @@ import { NodeResizer, useStore } from '@xyflow/react'
 export default function GroupNode({ data, selected, id }) {
   // Abstract (LOD) mode: re-renders only when crossing the threshold, not every zoom tick.
   const abstract = useStore((s) => s.transform[2] < (data.lodThreshold ?? 0.55))
+  // Shape-only (deeper LOD) mode: the frame loses everything but its outline — the
+  // title tab is the one exception, it must stay legible at every zoom level.
+  const shapeOnly = useStore((s) => s.transform[2] < (data.lodThreshold ?? 0.55) * 0.45)
 
   const [editing, setEditing] = useState(false)
   const [value, setValue] = useState(data.label ?? '')
@@ -45,7 +48,9 @@ export default function GroupNode({ data, selected, id }) {
     setEditing(true)
   }
 
-  const labelFontSize = abstract ? Math.round(13 * 1.9) : 13
+  // Title tab survives all LOD tiers and enlarges further in shape-only (the deepest tier).
+  const tabScale = shapeOnly ? 2.4 : abstract ? 1.9 : 1
+  const labelFontSize = Math.round(13 * tabScale)
 
   return (
     <div
@@ -73,7 +78,25 @@ export default function GroupNode({ data, selected, id }) {
         lineStyle={{ borderColor: '#8b94a766' }}
       />
 
-      <div style={{ position: 'absolute', top: 0, left: 0, padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 6 }}>
+      {/* Title tab — protrudes above the frame's top-left corner like a folder tab.
+          Survives every LOD tier (including shape-only) so the group stays identifiable
+          however far the canvas is zoomed out. */}
+      <div
+        style={{
+          position: 'absolute',
+          top: -34 * tabScale,
+          left: 10,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          background: '#20242e',
+          border: '1.5px solid #8b94a7',
+          borderBottom: 'none',
+          borderRadius: '8px 8px 0 0',
+          padding: '4px 14px',
+          fontWeight: 700,
+        }}
+      >
         {editing ? (
           <input
             ref={inputRef}

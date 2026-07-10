@@ -6,8 +6,8 @@ import EditToolbar from '../components/EditToolbar'
 // canvas in connectionMode="loose", a source handle can also receive a
 // connection, so any port can be both an input and an output.
 const HANDLE = {
-  width: 24, height: 24, border: 'none',
-  background: 'radial-gradient(circle, #f59e0b 3px, #0f0f13 3px 5px, transparent 5px)',
+  width: 30, height: 30, border: 'none',
+  background: 'radial-gradient(circle, #f59e0b 4.5px, #0f0f13 4.5px 7px, transparent 7px)',
 }
 const PORTS = [
   { id: 'left', position: Position.Left },
@@ -38,6 +38,8 @@ function selectAll(el) {
 export default function MemoNode({ data, selected, id }) {
   // Abstract (LOD) mode: re-renders only when crossing the threshold, not every zoom tick.
   const abstract = useStore((s) => s.transform[2] < (data.lodThreshold ?? 0.55))
+  // Shape-only (deeper LOD) mode: below this, all text/content disappears — only the colored shape + handles remain.
+  const shapeOnly = useStore((s) => s.transform[2] < (data.lodThreshold ?? 0.55) * 0.45)
 
   const [editing, setEditing] = useState(null) // 'header' | 'text' | null
   const headerRef = useRef(null)
@@ -171,7 +173,8 @@ export default function MemoNode({ data, selected, id }) {
         <Handle key={p.id} type="source" id={p.id} position={p.position} style={HANDLE} />
       ))}
 
-      {/* Header strip — editable, blank by default */}
+      {/* Header strip — editable, blank by default; fully hidden in the shape-only tier */}
+      {!shapeOnly && (
       <div
         style={{
           background: '#f59e0b22',
@@ -231,6 +234,7 @@ export default function MemoNode({ data, selected, id }) {
           )}
         </div>
       </div>
+      )}
 
       {/* Content — only rendered in normal (non-abstract) mode, or when being edited */}
       {(!abstract || editing === 'text') && (

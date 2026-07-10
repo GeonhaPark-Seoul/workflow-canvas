@@ -13,8 +13,8 @@ const DEFAULT_TYPES = [
 // Bidirectional ports: type="source" + canvas connectionMode="loose" lets every
 // handle act as both input and output.
 const HANDLE_STYLE = (borderColor) => ({
-  width: 24, height: 24, border: 'none',
-  background: `radial-gradient(circle, ${borderColor} 3px, #0f0f13 3px 5px, transparent 5px)`,
+  width: 30, height: 30, border: 'none',
+  background: `radial-gradient(circle, ${borderColor} 4.5px, #0f0f13 4.5px 7px, transparent 7px)`,
 })
 const PORTS = [
   { id: 'left', position: Position.Left },
@@ -23,10 +23,10 @@ const PORTS = [
   { id: 'bottom', position: Position.Bottom },
 ]
 
-// Per-part handles: smaller port dots, colored per-part.
-const PART_HANDLE_STYLE = (partColor) => ({
-  width: 16, height: 16, border: 'none',
-  background: `radial-gradient(circle, ${partColor} 2px, #0f0f13 2px 4px, transparent 4px)`,
+// Per-part ports: outlet-style sockets. See .part-socket in index.css for the slot pseudo-elements.
+const PART_SOCKET_STYLE = (partColor) => ({
+  width: 14, height: 18, borderRadius: 4,
+  background: '#0f0f13', border: `1.5px solid ${partColor}`,
 })
 
 // Place caret at end of contentEditable element
@@ -55,6 +55,8 @@ export default function StageNode({ data, selected, id }) {
 
   // Abstract (LOD) mode: re-renders only when crossing the threshold, not every zoom tick.
   const abstract = useStore((s) => s.transform[2] < (data.lodThreshold ?? 0.55))
+  // Shape-only (deeper LOD) mode: below this, all text/content disappears — only the colored shape + handles remain.
+  const shapeOnly = useStore((s) => s.transform[2] < (data.lodThreshold ?? 0.55) * 0.45)
 
   const [editing, setEditing] = useState(null) // 'title' | 'desc' | null
   const titleRef = useRef(null)
@@ -251,7 +253,8 @@ export default function StageNode({ data, selected, id }) {
         <Handle key={p.id} type="source" id={p.id} position={p.position} style={HANDLE_STYLE(color.border)} />
       ))}
 
-      {/* Header */}
+      {/* Header — fully hidden in the shape-only tier */}
+      {!shapeOnly && (
       <div style={{ padding: '10px 12px 4px', flexShrink: 0 }}>
         {abstract ? (
           /* Abstract mode: circle + title on one horizontal row, label hidden */
@@ -366,6 +369,7 @@ export default function StageNode({ data, selected, id }) {
           </>
         )}
       </div>
+      )}
 
       {/* Description — only rendered in normal (non-abstract) mode, or when being edited */}
       {(!abstract || editing === 'desc') && (
@@ -404,8 +408,8 @@ export default function StageNode({ data, selected, id }) {
         </div>
       )}
 
-      {/* Parts list — only rendered in normal (non-abstract) mode, same as description */}
-      {!abstract && (
+      {/* Parts list — only rendered in normal (non-abstract, non-shape-only) mode, same as description */}
+      {!abstract && !shapeOnly && (
         <div style={{ padding: '0 12px 10px', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
           {(data.parts ?? []).map((part) => {
             const partColor = part.color || '#8b94a7'
@@ -417,20 +421,21 @@ export default function StageNode({ data, selected, id }) {
                   display: 'flex',
                   alignItems: 'center',
                   gap: 6,
-                  marginTop: 3,
-                  padding: '3px 8px',
+                  margin: '3px -12px 0',
+                  padding: '4px 12px',
                   borderLeft: `3px solid ${partColor}`,
-                  background: '#ffffff0a',
-                  borderRadius: 4,
+                  background: '#00000038',
+                  borderRadius: 0,
                 }}
                 onDoubleClick={() => startPartEdit(part)}
                 onTouchStart={touchEditPart(part)}
               >
                 <Handle
-                  type="source"
+                  type="target"
                   position={Position.Left}
                   id={`p-${part.id}-l`}
-                  style={{ ...PART_HANDLE_STYLE(partColor), left: -13, top: '50%', transform: 'translateY(-50%)' }}
+                  className="part-socket"
+                  style={{ ...PART_SOCKET_STYLE(partColor), left: 0, top: '50%', transform: 'translate(-50%, -50%)' }}
                 />
 
                 {editingPartId === part.id ? (
@@ -472,7 +477,8 @@ export default function StageNode({ data, selected, id }) {
                   type="source"
                   position={Position.Right}
                   id={`p-${part.id}-r`}
-                  style={{ ...PART_HANDLE_STYLE(partColor), right: -13, top: '50%', transform: 'translateY(-50%)' }}
+                  className="part-socket"
+                  style={{ ...PART_SOCKET_STYLE(partColor), right: 0, top: '50%', transform: 'translate(50%, -50%)' }}
                 />
               </div>
             )
