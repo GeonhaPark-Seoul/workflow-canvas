@@ -14,6 +14,15 @@ export default function GroupNode({ data, selected, id }) {
   const longPressTimer = useRef(null)
   const longPressStart = useRef(null)
 
+  // Click-to-edit cycle: click 1 selects (React Flow default), click 2 (while already
+  // selected) starts editing. React Flow selects on mousedown, so the first click's
+  // `click` event already sees selected===true — guard with a timestamp so a fresh
+  // selection can't be instantly followed by an edit-start on the same click.
+  const selectedAtRef = useRef(0)
+  useEffect(() => {
+    if (selected) selectedAtRef.current = Date.now()
+  }, [selected])
+
   useEffect(() => {
     if (editing) {
       setValue(data.label ?? '')
@@ -46,6 +55,11 @@ export default function GroupNode({ data, selected, id }) {
   const startEditing = () => {
     if (data.readOnly) return
     setEditing(true)
+  }
+
+  const handleLabelClick = () => {
+    if (!selected || Date.now() - selectedAtRef.current < 300) return
+    startEditing()
   }
 
   // Title tab survives all LOD tiers and enlarges further in shape-only (the deepest tier).
@@ -118,11 +132,13 @@ export default function GroupNode({ data, selected, id }) {
               outline: 'none',
               fontFamily: 'inherit',
               minWidth: 80,
+              cursor: 'text',
             }}
           />
         ) : (
           <div
-            onDoubleClick={startEditing}
+            className="text-hover-line"
+            onClick={handleLabelClick}
             style={{ color: '#aab', fontSize: labelFontSize, fontWeight: 700, cursor: 'text' }}
           >
             {data.label || '새 그룹'}

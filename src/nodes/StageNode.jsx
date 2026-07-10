@@ -13,8 +13,8 @@ const DEFAULT_TYPES = [
 // Bidirectional ports: type="source" + canvas connectionMode="loose" lets every
 // handle act as both input and output.
 const HANDLE_STYLE = (borderColor) => ({
-  width: 30, height: 30, border: 'none',
-  background: `radial-gradient(circle, ${borderColor} 4.5px, #0f0f13 4.5px 7px, transparent 7px)`,
+  width: 60, height: 60, border: 'none',
+  background: `radial-gradient(circle, ${borderColor} 9px, #0f0f13 9px 14px, transparent 14px)`,
 })
 const PORTS = [
   { id: 'left', position: Position.Left },
@@ -25,7 +25,7 @@ const PORTS = [
 
 // Per-part ports: outlet-style sockets. See .part-socket in index.css for the slot pseudo-elements.
 const PART_SOCKET_STYLE = (partColor) => ({
-  width: 14, height: 18, borderRadius: 4,
+  width: 20, height: 26, borderRadius: 4,
   background: '#0f0f13', border: `1.5px solid ${partColor}`,
 })
 
@@ -63,7 +63,6 @@ export default function StageNode({ data, selected, id }) {
   const descRef = useRef(null)
   const longPressTimer = useRef(null)
   const longPressStart = useRef(null)
-  const lastTapRef = useRef(0)
   const dimPressTimer = useRef(null)
   const suppressClick = useRef(false)
   const titleContainerRef = useRef(null)
@@ -72,19 +71,16 @@ export default function StageNode({ data, selected, id }) {
   // Parts list: inline text editing per-row (id of the part currently being edited)
   const [editingPartId, setEditingPartId] = useState(null)
   const [partDraft, setPartDraft] = useState('')
-  const partLastTapRef = useRef({})
 
-  // Touch double-tap → edit, while preventing the browser's double-tap zoom.
-  const touchEdit = (field) => (e) => {
-    const now = Date.now()
-    if (now - lastTapRef.current < 300) {
-      e.preventDefault()
-      lastTapRef.current = 0
-      startEdit(field)
-    } else {
-      lastTapRef.current = now
-    }
-  }
+  // Click-to-edit cycle: click 1 selects (React Flow default), click 2 (while already
+  // selected) starts editing. React Flow selects on mousedown, so the first click's
+  // `click` event already sees selected===true — guard with a timestamp so a fresh
+  // selection can't be instantly followed by an edit-start on the same click.
+  const selectedAtRef = useRef(0)
+  useEffect(() => {
+    if (selected) selectedAtRef.current = Date.now()
+  }, [selected])
+  const justSelected = () => Date.now() - selectedAtRef.current < 300
 
   const handlePointerDown = (e) => {
     if (e.pointerType !== 'touch') return
@@ -154,7 +150,8 @@ export default function StageNode({ data, selected, id }) {
     data.onUpdate?.(patch)
   }
 
-  // Display-mode checkbox toggle: persist innerHTML after flipping
+  // Display-mode click: toggles a checkbox if that's what was clicked, otherwise
+  // starts editing the field once the node is selected (click-to-edit cycle).
   const handleDisplayClick = (field) => (e) => {
     if (e.target.tagName === 'INPUT' && e.target.type === 'checkbox') {
       if (data.readOnly) { e.preventDefault(); return }
@@ -163,7 +160,10 @@ export default function StageNode({ data, selected, id }) {
       const html = e.currentTarget.innerHTML
       if (field === 'title') data.onUpdate?.({ label: html })
       if (field === 'desc') data.onUpdate?.({ description: html })
+      return
     }
+    if (!selected || editing || justSelected()) return
+    startEdit(field)
   }
 
   // Parts list handlers
@@ -181,17 +181,10 @@ export default function StageNode({ data, selected, id }) {
   }
   const cancelPartEdit = () => setEditingPartId(null)
 
-  // Touch double-tap → edit a part row, mirroring touchEdit() but keyed per-part id.
-  const touchEditPart = (part) => (e) => {
-    if (editingPartId === part.id) return
-    const now = Date.now()
-    if (now - (partLastTapRef.current[part.id] || 0) < 300) {
-      e.preventDefault()
-      partLastTapRef.current[part.id] = 0
-      startPartEdit(part)
-    } else {
-      partLastTapRef.current[part.id] = now
-    }
+  // Click-to-edit a part row: click 2 while the node is already selected.
+  const handlePartClick = (part) => () => {
+    if (!selected || editingPartId != null || justSelected()) return
+    startPartEdit(part)
   }
 
   const addPart = () => {
@@ -271,7 +264,7 @@ export default function StageNode({ data, selected, id }) {
                 background: color.border, border: 'none', cursor: 'pointer', flexShrink: 0,
               }}
             />
-            <div ref={titleContainerRef} style={{ flex: 1, minWidth: 0 }}>
+            <div ref={titleContainerRef} style={{ flex: 1, minWidth: 0, position: 'relative' }}>
               {editing === 'title' ? (
                 <div
                   ref={titleRef}
@@ -284,18 +277,16 @@ export default function StageNode({ data, selected, id }) {
                     background: 'transparent',
                     borderBottom: `1px solid ${color.border}`,
                     color: '#f0f0f0', fontSize: titleFontSize, fontWeight: 700,
-                    width: '100%', outline: 'none',
+                    width: '100%', outline: 'none', cursor: 'text',
                     minHeight: titleLineH, lineHeight: `${titleLineH}px`, whiteSpace: 'pre-wrap',
                     wordBreak: 'break-word',
                   }}
                 />
               ) : (
                 <div
-                  className="rich-content"
-                  onDoubleClick={() => startEdit('title')}
-                  onTouchStart={touchEdit('title')}
+                  className="rich-content text-hover-line"
                   onClick={handleDisplayClick('title')}
-                  dangerouslySetInnerHTML={{ __html: titleValue || (data.titleTouched ? '' : '단계 이름 (더블클릭하여 편집)') }}
+                  dangerouslySetInnerHTML={{ __html: titleValue || (data.titleTouched ? '' : '단계 이름') }}
                   style={{
                     color: titleValue ? '#f0f0f0' : '#ffffff66', fontSize: titleFontSize, fontWeight: 700,
                     cursor: 'text', minHeight: titleLineH, lineHeight: `${titleLineH}px`,
@@ -330,7 +321,7 @@ export default function StageNode({ data, selected, id }) {
 
             {/* Title field */}
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
-              <div ref={titleContainerRef} style={{ flex: 1, minWidth: 0 }}>
+              <div ref={titleContainerRef} style={{ flex: 1, minWidth: 0, position: 'relative' }}>
                 {editing === 'title' ? (
                   <div
                     ref={titleRef}
@@ -343,18 +334,16 @@ export default function StageNode({ data, selected, id }) {
                       background: 'transparent',
                       borderBottom: `1px solid ${color.border}`,
                       color: '#f0f0f0', fontSize: titleFontSize, fontWeight: 700,
-                      width: '100%', outline: 'none', marginBottom: 4,
+                      width: '100%', outline: 'none', marginBottom: 4, cursor: 'text',
                       minHeight: titleLineH, lineHeight: `${titleLineH}px`, whiteSpace: 'pre-wrap',
                       wordBreak: 'break-word',
                     }}
                   />
                 ) : (
                   <div
-                    className="rich-content"
-                    onDoubleClick={() => startEdit('title')}
-                    onTouchStart={touchEdit('title')}
+                    className="rich-content text-hover-line"
                     onClick={handleDisplayClick('title')}
-                    dangerouslySetInnerHTML={{ __html: titleValue || (data.titleTouched ? '' : '단계 이름 (더블클릭하여 편집)') }}
+                    dangerouslySetInnerHTML={{ __html: titleValue || (data.titleTouched ? '' : '단계 이름') }}
                     style={{
                       color: titleValue ? '#f0f0f0' : '#ffffff66', fontSize: titleFontSize, fontWeight: 700,
                       marginBottom: 4, cursor: 'text', minHeight: titleLineH, lineHeight: `${titleLineH}px`,
@@ -374,7 +363,7 @@ export default function StageNode({ data, selected, id }) {
       {/* Description — only rendered in normal (non-abstract) mode, or when being edited */}
       {(!abstract || editing === 'desc') && (
         <div style={{ flex: 1, padding: '0 12px 10px', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-          <div ref={descContainerRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+          <div ref={descContainerRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, position: 'relative' }}>
             {editing === 'desc' ? (
               <div
                 ref={descRef}
@@ -384,20 +373,18 @@ export default function StageNode({ data, selected, id }) {
                 onBlur={() => stopEdit('desc', descRef)}
                 style={{
                   flex: 1, background: 'transparent',
-                  color: '#aaa', fontSize: 12, width: '100%',
-                  outline: 'none', lineHeight: 1.5, minHeight: 0,
+                  color: '#f0f0f0', fontSize: 12, width: '100%',
+                  outline: 'none', lineHeight: 1.5, minHeight: 0, cursor: 'text',
                   whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowY: 'auto',
                 }}
               />
             ) : (
               <div
-                className="rich-content"
-                onDoubleClick={() => startEdit('desc')}
-                onTouchStart={touchEdit('desc')}
+                className="rich-content text-hover-line"
                 onClick={handleDisplayClick('desc')}
-                dangerouslySetInnerHTML={{ __html: descValue || (data.descTouched ? '' : '설명 (더블클릭하여 편집)') }}
+                dangerouslySetInnerHTML={{ __html: descValue || (data.descTouched ? '' : '설명') }}
                 style={{
-                  flex: 1, color: descValue ? '#aaa' : '#888', fontSize: 12,
+                  flex: 1, color: descValue ? '#f0f0f0' : '#888', fontSize: 12,
                   whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text',
                   overflow: 'auto', lineHeight: 1.5, minHeight: 0,
                   touchAction: 'manipulation',
@@ -427,8 +414,7 @@ export default function StageNode({ data, selected, id }) {
                   background: '#00000038',
                   borderRadius: 0,
                 }}
-                onDoubleClick={() => startPartEdit(part)}
-                onTouchStart={touchEditPart(part)}
+                onClick={handlePartClick(part)}
               >
                 <Handle
                   type="target"
@@ -453,11 +439,11 @@ export default function StageNode({ data, selected, id }) {
                     style={{
                       flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none',
                       borderBottom: `1px solid ${partColor}`,
-                      color: '#ccc', fontSize: 11, fontFamily: 'inherit', padding: 0,
+                      color: '#ccc', fontSize: 11, fontFamily: 'inherit', padding: 0, cursor: 'text',
                     }}
                   />
                 ) : (
-                  <span style={{ flex: 1, minWidth: 0, color: '#ccc', fontSize: 11, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                  <span className="text-hover-line" style={{ flex: 1, minWidth: 0, color: '#ccc', fontSize: 11, whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text' }}>
                     {part.text}
                   </span>
                 )}

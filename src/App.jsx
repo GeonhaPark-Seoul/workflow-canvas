@@ -226,6 +226,11 @@ export default function App() {
   // ── Auth + cloud sync ─────────────────────────────────────────────────────
   const [user, setUser] = useState(null)
   const userRef = useRef(null)
+  // Tracks which user id has already run the full afterLogin() sequence, so a
+  // tab-refocus re-emitting SIGNED_IN for the SAME user (supabase-js token
+  // revalidation) doesn't re-run loadFromCloud() and yank the viewer back to
+  // their own active_canvas_id while they're looking at a shared canvas.
+  const initializedUserRef = useRef(null)
   const [cloudSyncing, setCloudSyncing] = useState(false)
   // Stable ref to always-current state for use inside async callbacks
   const latestRef = useRef({ canvases: initCanvasList, activeCanvasId: initActiveId, stageTypes: [], views: [] })
@@ -897,6 +902,7 @@ export default function App() {
     if (hashMatch) pendingShareTokenRef.current = hashMatch[1]
 
     const afterLogin = async (u) => {
+      initializedUserRef.current = u.id
       setAuthNotice(null)
       loadFromCloud(u.id)
       getMyProfile().then(setMyProfile).catch((err) => console.error('[profiles] getMyProfile:', err.message))
@@ -933,7 +939,12 @@ export default function App() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       const u = session?.user ?? null
       setUser(u)
-      if (event === 'SIGNED_IN' && u) afterLogin(u)
+      // supabase-js re-emits SIGNED_IN on tab-refocus (token revalidation) even
+      // when it's the same user already signed in — only run afterLogin (which
+      // ends by switching to this browser's active_canvas_id) on an actual new
+      // sign-in, not that revalidation echo.
+      if (event === 'SIGNED_IN' && u && u.id !== initializedUserRef.current) afterLogin(u)
+      if (event === 'SIGNED_OUT') initializedUserRef.current = null
     })
     return () => subscription.unsubscribe()
   }, [loadFromCloud])
@@ -1300,8 +1311,10 @@ export default function App() {
   const clipboardRef = useRef(null) // { nodes, edges } — stripped copies, original ids
   const pasteCountRef = useRef(0) // repeated pastes offset further each time
 
-  const copySelection = useCallback(() => {
-    const selected = nodes.filter((n) => n.selected)
+  const copySelection = useCallback((explicitIds) => {
+    const selected = explicitIds
+      ? nodes.filter((n) => explicitIds.includes(n.id))
+      : nodes.filter((n) => n.selected)
     if (!selected.length) return
     const byId = new Map(nodes.map((n) => [n.id, n]))
     // A selected group frame brings its children along even if they weren't
@@ -1336,7 +1349,11 @@ export default function App() {
     return newPartId ? `p-${newPartId}-${m[2]}` : handle
   }
 
-  const pasteClipboard = useCallback(() => {
+  // atFlowPos (optional): flow-space point to paste at (pane context menu) —
+  // each node is offset relative to the clipboard bbox top-left, so the
+  // pasted group lands with that corner under the clicked point. Omitted
+  // (keyboard / node-menu paste): falls back to the existing +40/+40 stagger.
+  const pasteClipboard = useCallback((atFlowPos) => {
     const clip = clipboardRef.current
     if (!clip || !clip.nodes.length) return
     if (perm.role === 'invitee' && perm.scope === 'node') return // nowhere to paste
@@ -1345,17 +1362,28 @@ export default function App() {
     if (forceFrame && !frame) return
 
     pasteCountRef.current += 1
-    const offset = 40 * pasteCountRef.current
 
     const idMap = new Map()
     clip.nodes.forEach((n) => idMap.set(n.id, nextId()))
     const partIdMap = new Map()
     clip.nodes.forEach((n) => (n.data?.parts ?? []).forEach((p) => partIdMap.set(p.id, `pt-${uid()}`)))
 
+    // Delta applied to top-level (not parented within this clip) node positions.
+    let delta
+    if (atFlowPos) {
+      const topLevel = clip.nodes.filter((n) => !(n.parentId && idMap.has(n.parentId)))
+      const minX = Math.min(...topLevel.map((n) => n.position.x))
+      const minY = Math.min(...topLevel.map((n) => n.position.y))
+      delta = { x: atFlowPos.x - minX, y: atFlowPos.y - minY }
+    } else {
+      const offset = 40 * pasteCountRef.current
+      delta = { x: offset, y: offset }
+    }
+
     const newNodes = clip.nodes.map((n) => {
       const hasCopiedParent = !!(n.parentId && idMap.has(n.parentId))
       let parentId = hasCopiedParent ? idMap.get(n.parentId) : undefined
-      let position = hasCopiedParent ? { ...n.position } : { x: n.position.x + offset, y: n.position.y + offset }
+      let position = hasCopiedParent ? { ...n.position } : { x: n.position.x + delta.x, y: n.position.y + delta.y }
 
       if (forceFrame && !hasCopiedParent) {
         parentId = perm.targetId
@@ -1546,6 +1574,16 @@ export default function App() {
   const handleContextAddMemo = () => {
     if (!rfInstance || !contextMenu) return
     addMemoAt(rfInstance.screenToFlowPosition({ x: contextMenu.flowX, y: contextMenu.flowY }))
+    closeContext()
+  }
+
+  const handleContextPaste = () => {
+    if (!contextMenu) return
+    if (contextMenu.flowX != null && rfInstance) {
+      pasteClipboard(rfInstance.screenToFlowPosition({ x: contextMenu.flowX, y: contextMenu.flowY }))
+    } else {
+      pasteClipboard()
+    }
     closeContext()
   }
 
@@ -1947,7 +1985,7 @@ export default function App() {
           return (
             <div
               key={i}
-              style={{ position: 'fixed', left: sx, top: 0, width: 1, height: '100vh', background: '#06b6d4', zIndex: 6, pointerEvents: 'none' }}
+              style={{ position: 'fixed', left: sx, top: 0, width: 0.7, height: '100vh', background: '#ffffffcc', zIndex: 6, pointerEvents: 'none' }}
             />
           )
         }
@@ -1955,7 +1993,7 @@ export default function App() {
         return (
           <div
             key={i}
-            style={{ position: 'fixed', left: 0, top: sy, width: '100vw', height: 1, background: '#06b6d4', zIndex: 6, pointerEvents: 'none' }}
+            style={{ position: 'fixed', left: 0, top: sy, width: '100vw', height: 0.7, background: '#ffffffcc', zIndex: 6, pointerEvents: 'none' }}
           />
         )
       })}
@@ -1983,6 +2021,9 @@ export default function App() {
             <>
               <ContextItem icon="＋" label="단계 노드 추가" color="#3b82f6" onClick={handleContextAddStage} />
               <ContextItem icon="📝" label="메모 노드 추가" color="#f59e0b" onClick={handleContextAddMemo} />
+              {clipboardRef.current && (
+                <ContextItem icon="📋" label="붙여넣기" color="#8b94a7" onClick={handleContextPaste} />
+              )}
             </>
           )}
 
@@ -2004,6 +2045,10 @@ export default function App() {
                 <ContextItem icon="⬚" label="그룹으로 묶기" color="#8b94a7" onClick={handleContextGroupSelection} />
               )}
               <ContextItem icon="⇢" label="연결선 정리" color="#8b94a7" onClick={handleContextCleanupEdges} />
+              <ContextItem icon="⧉" label="복사" color="#8b94a7" onClick={() => { copySelection(ctxIds); closeContext() }} />
+              {clipboardRef.current && !(perm.role === 'invitee' && perm.scope === 'node') && (
+                <ContextItem icon="📋" label="붙여넣기" color="#8b94a7" onClick={handleContextPaste} />
+              )}
               <div style={{ height: 1, background: '#ffffff18', margin: '4px 2px' }} />
             </>
           )}

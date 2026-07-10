@@ -6,8 +6,8 @@ import EditToolbar from '../components/EditToolbar'
 // canvas in connectionMode="loose", a source handle can also receive a
 // connection, so any port can be both an input and an output.
 const HANDLE = {
-  width: 30, height: 30, border: 'none',
-  background: 'radial-gradient(circle, #f59e0b 4.5px, #0f0f13 4.5px 7px, transparent 7px)',
+  width: 60, height: 60, border: 'none',
+  background: 'radial-gradient(circle, #f59e0b 9px, #0f0f13 9px 14px, transparent 14px)',
 }
 const PORTS = [
   { id: 'left', position: Position.Left },
@@ -46,22 +46,19 @@ export default function MemoNode({ data, selected, id }) {
   const textRef = useRef(null)
   const longPressTimer = useRef(null)
   const longPressStart = useRef(null)
-  const lastTapRef = useRef(0)
   const dimPressTimer = useRef(null)
   const headerContainerRef = useRef(null)
   const textContainerRef = useRef(null)
 
-  // Touch double-tap → edit, while preventing the browser's double-tap zoom.
-  const touchEdit = (field) => (e) => {
-    const now = Date.now()
-    if (now - lastTapRef.current < 300) {
-      e.preventDefault()
-      lastTapRef.current = 0
-      startEdit(field)
-    } else {
-      lastTapRef.current = now
-    }
-  }
+  // Click-to-edit cycle: click 1 selects (React Flow default), click 2 (while already
+  // selected) starts editing. React Flow selects on mousedown, so the first click's
+  // `click` event already sees selected===true — guard with a timestamp so a fresh
+  // selection can't be instantly followed by an edit-start on the same click.
+  const selectedAtRef = useRef(0)
+  useEffect(() => {
+    if (selected) selectedAtRef.current = Date.now()
+  }, [selected])
+  const justSelected = () => Date.now() - selectedAtRef.current < 300
 
   const handlePointerDown = (e) => {
     if (e.pointerType !== 'touch') return
@@ -117,7 +114,8 @@ export default function MemoNode({ data, selected, id }) {
     data.onUpdate?.(patch)
   }
 
-  // Display-mode checkbox toggle: persist innerHTML after flipping
+  // Display-mode click: toggles a checkbox if that's what was clicked, otherwise
+  // starts editing the field once the node is selected (click-to-edit cycle).
   const handleDisplayClick = (field) => (e) => {
     if (e.target.tagName === 'INPUT' && e.target.type === 'checkbox') {
       e.stopPropagation()
@@ -125,7 +123,10 @@ export default function MemoNode({ data, selected, id }) {
       const html = e.currentTarget.innerHTML
       if (field === 'header') data.onUpdate?.({ header: html })
       if (field === 'text') data.onUpdate?.({ text: html })
+      return
     }
+    if (!selected || editing || justSelected()) return
+    startEdit(field)
   }
 
   const headerValue = data.header ?? ''
@@ -199,7 +200,7 @@ export default function MemoNode({ data, selected, id }) {
             background: '#f59e0b', border: 'none', cursor: 'pointer', flexShrink: 0,
           }}
         />
-        <div ref={headerContainerRef} style={{ flex: 1, minWidth: 0 }}>
+        <div ref={headerContainerRef} style={{ flex: 1, minWidth: 0, position: 'relative' }}>
           {editing === 'header' ? (
             <div
               ref={headerRef}
@@ -213,15 +214,14 @@ export default function MemoNode({ data, selected, id }) {
                 borderBottom: '1px solid #f59e0b88',
                 color: '#f59e0b', fontSize: headerFontSize, fontWeight: 800, letterSpacing: 0.3,
                 outline: 'none', minHeight: 18, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                cursor: 'text',
               }}
             />
           ) : (
             <div
-              className="rich-content"
-              onDoubleClick={() => startEdit('header')}
-              onTouchStart={touchEdit('header')}
+              className="rich-content text-hover-line"
               onClick={handleDisplayClick('header')}
-              dangerouslySetInnerHTML={{ __html: headerValue || (data.headerTouched ? '' : '제목 (더블클릭)') }}
+              dangerouslySetInnerHTML={{ __html: headerValue || (data.headerTouched ? '' : '제목') }}
               style={{
                 flex: 1, color: headerValue ? '#f59e0b' : '#f59e0b66',
                 fontSize: headerFontSize, fontWeight: 800, letterSpacing: 0.3, cursor: 'text',
@@ -239,7 +239,7 @@ export default function MemoNode({ data, selected, id }) {
       {/* Content — only rendered in normal (non-abstract) mode, or when being edited */}
       {(!abstract || editing === 'text') && (
         <div style={{ flex: 1, padding: '8px 10px', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-          <div ref={textContainerRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+          <div ref={textContainerRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, position: 'relative' }}>
             {editing === 'text' ? (
               <div
                 ref={textRef}
@@ -250,17 +250,15 @@ export default function MemoNode({ data, selected, id }) {
                 style={{
                   flex: 1, background: 'transparent',
                   color: '#e8d88a', fontSize: 12, width: '100%',
-                  outline: 'none', lineHeight: 1.6, minHeight: 0,
+                  outline: 'none', lineHeight: 1.6, minHeight: 0, cursor: 'text',
                   whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowY: 'auto',
                 }}
               />
             ) : (
               <div
-                className="rich-content"
-                onDoubleClick={() => startEdit('text')}
-                onTouchStart={touchEdit('text')}
+                className="rich-content text-hover-line"
                 onClick={handleDisplayClick('text')}
-                dangerouslySetInnerHTML={{ __html: textValue || (data.textTouched ? '' : '메모 내용 (더블클릭하여 편집)') }}
+                dangerouslySetInnerHTML={{ __html: textValue || (data.textTouched ? '' : '메모 내용') }}
                 style={{
                   flex: 1, color: textValue ? '#e8d88a' : '#e8d88a55', fontSize: 12,
                   whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text',

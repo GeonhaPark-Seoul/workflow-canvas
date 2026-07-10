@@ -36,13 +36,18 @@ html, body, #root {
 
 /* Edge reconnect grab handles: larger on touch, and show target handles while dragging */
 .react-flow__edgeupdater {
-  r: 10;
+  r: 14;
   cursor: crosshair;
 }
 @media (pointer: coarse) {
   .react-flow__edgeupdater {
-    r: 18;
+    r: 22;
   }
+}
+
+/* Edge selection hit area: widen React Flow's invisible interaction path (default 20px). */
+.react-flow__edge .react-flow__edge-interaction {
+  stroke-width: 60px;
 }
 .rf-reconnecting .react-flow__node .react-flow__handle {
   opacity: 1 !important;
@@ -69,8 +74,8 @@ html, body, #root {
 .part-socket::before,
 .part-socket::after {
   content: '';
-  width: 2px;
-  height: 6px;
+  width: 3px;
+  height: 9px;
   border-radius: 1px;
   background: #aab2c5;
 }
@@ -79,6 +84,25 @@ html, body, #root {
 :root {
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-top: env(safe-area-inset-top, 0px);
+}
+
+/* Notion-like hover affordance for display-mode text lines (title/description/part/
+   memo/group label). Padding+negative margin lets the pill hug the text without
+   shifting layout. Touch devices have no hover, so show a fainter pill once the
+   node is selected instead (the "about to touch" affordance). */
+.text-hover-line {
+  border-radius: 6px;
+  padding: 1px 4px;
+  margin: -1px -4px;
+  transition: background 0.1s;
+}
+.text-hover-line:hover {
+  background: #ffffff12;
+}
+@media (pointer: coarse) {
+  .react-flow__node.selected .text-hover-line {
+    background: #ffffff0a;
+  }
 }
 
 /* Rich-text display/edit shared styles */
