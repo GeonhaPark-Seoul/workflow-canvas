@@ -92,6 +92,14 @@ stageTypeIdx는 stage 노드가 속한 계층을 나타내는 index입니다 (ge
 sourceHandle/targetHandle은 생략 가능 — 생략하면 실제 좌표 기반으로 자동 계산됩니다.
 같은 방향의 중복 연결(같은 source→target)은 거부됩니다. 새 노드 여럿과 연결선을 함께 만들 때는 create_graph를 사용하세요.
 
+### 공유 캔버스
+- 초대받은 캔버스도 get_canvases 목록에 나타납니다 (shared:true + permission_scope).
+- 편집은 초대 구역 안에서만 서버가 허용합니다: canvas=전체 편집(단, 캔버스 삭제/이름 변경/초기화는 소유자만),
+  group=해당 그룹 프레임 안 노드만(새 노드는 자동으로 프레임 안에 생성되고 x/y는 프레임 기준 상대 좌표),
+  node=그 노드의 내용·크기만 (이동/삭제/연결선 불가).
+- 공유 캔버스에서는 먼저 get_canvas 응답의 my_permission(editable_node_ids)을 확인하세요. 구역 밖 수정 시도는 에러가 됩니다.
+- 그룹/노드 초대 권한에서는 create_graph와 단계 종류 편집을 쓸 수 없습니다.
+
 ### 반영
 로그인된 브라우저는 MCP 변경을 몇 초 내 자동으로 반영합니다 (새로고침 불필요).
 `.trim()
@@ -104,7 +112,7 @@ export function buildServer(getUserId) {
   const g = (fn) => guard(getUserId, fn)
 
   server.registerTool('get_canvases', {
-    description: '로그인한 사용자의 캔버스 목록을 가져옵니다 (canvas_id, 이름, 노드/연결선 개수).',
+    description: '로그인한 사용자의 캔버스 목록을 가져옵니다 (canvas_id, 이름, 노드/연결선 개수). 초대받은 공유 캔버스도 포함됩니다 (shared:true + permission_scope).',
     inputSchema: {},
   }, g(async (userId) => ok(await store.listCanvases(userId))))
 
@@ -112,7 +120,8 @@ export function buildServer(getUserId) {
     description:
       '특정 캔버스의 노드/연결선 데이터를 가져옵니다. 각 노드의 position(x,y)과 width/height, ' +
       '단계 종류 목록(stage_types)이 포함되므로, 노드를 추가/이동/크기조절하기 전에 항상 먼저 호출해 ' +
-      '기존 배치와 간격을 파악할 것.',
+      '기존 배치와 간격을 파악할 것. 공유 캔버스에서는 my_permission(초대 구역·editable_node_ids)이 ' +
+      '포함되니 편집 전에 반드시 확인할 것.',
     inputSchema: { canvas_id: z.string().describe('캔버스 ID (get_canvases로 조회)') },
   }, g(async (userId, a) => ok(await store.getCanvas(userId, a.canvas_id))))
 
@@ -166,6 +175,7 @@ export function buildServer(getUserId) {
       '- 간격: 노드 중심 간 가로 ≥ 320px, 세로 ≥ 200px. 메모는 관련 stage 노드 위/아래 ~250px에 배치.\n' +
       '- 겹침 금지: get_canvas로 기존 노드의 position과 width/height를 확인한 뒤 x/y를 명시해 배치할 것. ' +
       '겹치는 좌표를 지정하면 서버가 가장 가까운 빈 자리로 이동시키고 shifted로 알려줌.\n' +
+      '- 공유 캔버스(그룹 초대)에서는 새 노드가 자동으로 초대 그룹 프레임 안에 생성되며 x/y는 프레임 기준 상대 좌표다.\n' +
       '- 흐름·인과·순서가 있는 노드들을 만들었으면, 사용자가 시키지 않아도 create_edge로 바로 연결까지 마칠 것.\n\n' +
       '⚠️ 노드를 2개 이상 만들 계획이면 이 도구를 반복 호출하지 말고 create_graph 하나로 만들 것 (훨씬 빠름).',
     inputSchema: {
@@ -200,7 +210,8 @@ export function buildServer(getUserId) {
   server.registerTool('create_graph', {
     description:
       '노드와 연결선으로 이루어진 그래프 전체를 **한 번의 호출**로 생성합니다. ' +
-      '노드를 2개 이상 만들 때는 반드시 create_node 반복 대신 이 도구를 사용할 것 (왕복이 수십 배 절약됨).\n\n' +
+      '노드를 2개 이상 만들 때는 반드시 create_node 반복 대신 이 도구를 사용할 것 (왕복이 수십 배 절약됨).\n' +
+      '공유 캔버스의 그룹/노드 초대 권한에서는 사용할 수 없다 (단건/복수 도구 사용).\n\n' +
       '【긴 텍스트 → 구조화 레시피】\n' +
       '긴 대화·요리법·제품 구조·아키텍처를 캔버스로 변환할 때:\n' +
       '- 주제·단계·산출물 = stage 노드 (stageTypeIdx로 계층(깊이) 구분 — 먼저 get_stage_types 확인)\n' +

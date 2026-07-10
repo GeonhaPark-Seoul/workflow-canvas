@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { upsertMyProfile } from '../lib/profiles'
+import { listMyTokens, createToken, deleteToken } from '../lib/mcpTokens'
+
+const MCP_CONNECTOR_URL = 'https://workflow-canvas-orpin.vercel.app/api/mcp?token='
 
 const GLYPH_COLORS = ['#8b94a7', '#3b82f6', '#22c55e', '#ef4444', '#f59e0b', '#a855f7', '#ec4899', '#06b6d4']
 
@@ -56,7 +59,56 @@ export default function AuthPanel({
   const [nicknameInput, setNicknameInput] = useState('')
   const [profileSaving, setProfileSaving] = useState(false)
 
+  // MCP token list state
+  const [tokens, setTokens] = useState(null) // null = not loaded yet
+  const [tokensLoading, setTokensLoading] = useState(false)
+  const [tokensError, setTokensError] = useState(null)
+  const [tokenCreating, setTokenCreating] = useState(false)
+  const [copiedToken, setCopiedToken] = useState(null)
+
   const reset = () => { setError(null); setMessage(null) }
+
+  const loadTokens = async () => {
+    setTokensLoading(true)
+    setTokensError(null)
+    try {
+      setTokens(await listMyTokens())
+    } catch (err) {
+      setTokensError(err.message)
+    }
+    setTokensLoading(false)
+  }
+
+  const handleCreateToken = async () => {
+    setTokenCreating(true)
+    try {
+      const row = await createToken(`클로드 ${new Date().toLocaleDateString('ko-KR')}`)
+      setTokens((prev) => [row, ...(prev ?? [])])
+    } catch (err) {
+      setTokensError(err.message)
+    }
+    setTokenCreating(false)
+  }
+
+  const handleDeleteToken = async (token) => {
+    if (!window.confirm('이 토큰을 삭제할까요? 이 토큰을 사용하는 AI 연결이 즉시 끊어집니다.')) return
+    try {
+      await deleteToken(token)
+      setTokens((prev) => (prev ?? []).filter((t) => t.token !== token))
+    } catch (err) {
+      setTokensError(err.message)
+    }
+  }
+
+  const handleCopyToken = async (token) => {
+    try {
+      await navigator.clipboard.writeText(MCP_CONNECTOR_URL + token)
+      setCopiedToken(token)
+      setTimeout(() => setCopiedToken((c) => (c === token ? null : c)), 1500)
+    } catch (err) {
+      console.error('[mcpTokens] copy:', err.message)
+    }
+  }
 
   // Share-link login gate: App sets forceOpen when a logged-out visitor
   // follows a #share=<token> link.
@@ -68,6 +120,12 @@ export default function AuthPanel({
     setColorInput(myProfile?.color ?? GLYPH_COLORS[0])
     setNicknameInput(myProfile?.nickname ?? '')
   }, [myProfile, open])
+
+  // Lazily load MCP tokens the first time the popover opens.
+  useEffect(() => {
+    if (open && user && tokens === null && !tokensLoading) loadTokens()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, user])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -210,6 +268,56 @@ export default function AuthPanel({
                 <span style={{ color: '#555', fontSize: 10 }}>빨리 숨김</span>
               </div>
 
+              <div style={{ height: 1, background: '#ffffff18', margin: '14px 0' }} />
+
+              <div style={{ fontSize: 11, color: '#555', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>🤖 MCP 연결</div>
+              <div style={{ color: '#999', fontSize: 11, lineHeight: 1.5, marginBottom: 10 }}>
+                클로드 등 AI가 내 캔버스를 직접 읽고 편집할 수 있게 하는 개인 토큰입니다.<br />
+                토큰은 비밀번호처럼 다루세요.
+              </div>
+
+              {tokensLoading && <div style={{ color: '#555', fontSize: 12, marginBottom: 8 }}>불러오는 중...</div>}
+              {tokensError && (
+                <div style={{ fontSize: 11, color: '#ef4444', lineHeight: 1.5, marginBottom: 8 }}>
+                  토큰을 불러올 권한이 없습니다. supabase-mcp-schema.sql의 self-service 정책을 Supabase에서 실행했는지 확인하세요.
+                </div>
+              )}
+
+              {!tokensLoading && tokens && tokens.length > 0 && (
+                <div style={{ marginBottom: 10 }}>
+                  {tokens.map((t) => (
+                    <div key={t.token} style={{
+                      background: '#12121a', border: '1px solid #ffffff18', borderRadius: 6,
+                      padding: '8px 10px', marginBottom: 6,
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+                        <span style={{ color: '#ddd', fontSize: 12, fontWeight: 600 }}>{t.label || '토큰'}</span>
+                        <span style={{ color: '#555', fontSize: 10 }}>{formatDate(t.created_at)}</span>
+                      </div>
+                      <div style={{ color: '#777', fontSize: 11, fontFamily: 'monospace', marginBottom: 6 }}>
+                        {t.token.slice(0, 6)}…
+                      </div>
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <button onClick={() => handleCopyToken(t.token)} style={smallBtn()}>
+                          {copiedToken === t.token ? '복사됨!' : '복사'}
+                        </button>
+                        <button onClick={() => handleDeleteToken(t.token)} style={smallBtn('#ef4444')}>삭제</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {!tokensLoading && tokens && tokens.length === 0 && !tokensError && (
+                <div style={{ color: '#555', fontSize: 11, marginBottom: 10 }}>아직 만든 토큰이 없습니다.</div>
+              )}
+
+              <button onClick={handleCreateToken} disabled={tokenCreating} style={outlineBtn('#3b82f6')}>
+                {tokenCreating ? '만드는 중...' : '+ 새 토큰 만들기'}
+              </button>
+              <div style={{ color: '#555', fontSize: 10, lineHeight: 1.5, marginTop: 8, marginBottom: 14 }}>
+                복사한 URL을 claude.ai → 설정 → 커넥터 → 커스텀 커넥터 추가에 붙여넣으면 채팅에서 캔버스를 조작할 수 있습니다.
+              </div>
+
               <button onClick={handleLogout} style={outlineBtn('#ef4444')}>로그아웃</button>
             </>
           ) : (
@@ -316,3 +424,15 @@ const outlineBtn = (color) => ({
   borderRadius: 6, color, fontSize: 13, fontWeight: 600, padding: '9px 0',
   cursor: 'pointer', fontFamily: 'inherit',
 })
+
+const smallBtn = (color = '#8b94a7') => ({
+  background: 'transparent', border: `1px solid ${color}55`, borderRadius: 4,
+  color, fontSize: 11, fontWeight: 600, padding: '4px 8px',
+  cursor: 'pointer', fontFamily: 'inherit',
+})
+
+function formatDate(iso) {
+  if (!iso) return ''
+  const d = new Date(iso)
+  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`
+}

@@ -8,10 +8,25 @@ create table if not exists mcp_tokens (
   created_at  timestamptz default now()
 );
 
--- RLS on, no policies: only the service role (the MCP server) can read tokens.
+-- RLS on: by default only the service role (the MCP server) can read tokens.
+-- The self-service policies below additionally let a logged-in user manage
+-- their own tokens directly from the app UI.
 alter table mcp_tokens enable row level security;
 
--- ── Issue a token for yourself ───────────────────────────────────────────────
+-- ── Self-service token management from the app (안전한 재실행 가능) ──────────
+drop policy if exists "user reads own tokens" on mcp_tokens;
+create policy "user reads own tokens" on mcp_tokens for select using (user_id = auth.uid());
+
+drop policy if exists "user creates own tokens" on mcp_tokens;
+create policy "user creates own tokens" on mcp_tokens for insert with check (user_id = auth.uid());
+
+drop policy if exists "user deletes own tokens" on mcp_tokens;
+create policy "user deletes own tokens" on mcp_tokens for delete using (user_id = auth.uid());
+
+grant select, insert, delete on mcp_tokens to authenticated;
+grant all on mcp_tokens to service_role;
+
+-- ── Issue a token manually (alternative to the in-app "MCP 연결" UI) ─────────
 -- 1) Find your user id:
 --      select id, email from auth.users;
 --

@@ -2,7 +2,7 @@
 // Run: node scripts/test-mcp-logic.mjs
 import assert from 'node:assert/strict'
 import { layoutGraph, findNonOverlapping, validateGraphInput, overlaps, nodeRect, radialLevels, segmentIntersectsRect, avoidEdgeCrossings, edgeAnchors, SIZE } from '../mcp/layout.js'
-import { checkRadialLevelMixing } from '../mcp/store.js'
+import { checkRadialLevelMixing, editableNodeIdSet, assertRegionEdit } from '../mcp/store.js'
 import { sanitizeHtml } from '../mcp/sanitize.js'
 
 let passed = 0
@@ -678,5 +678,66 @@ t('radial regression: subtree-aware side assignment + staggered wrap (5/6/4/4 ch
     }
   }
 })
+
+
+// ── Shared-canvas region gating (pure helpers) ───────────────────────────────
+console.log('assertRegionEdit / editableNodeIdSet')
+
+{
+  const NODES = [
+    { id: 'grp', type: 'group' },
+    { id: 'a', type: 'stage', parentId: 'grp' },
+    { id: 'b', type: 'stage', parentId: 'grp' },
+    { id: 'out', type: 'stage' },
+  ]
+  const owner = { role: 'owner' }
+  const canvasInv = { role: 'invitee', scope: 'canvas' }
+  const groupInv = { role: 'invitee', scope: 'group', targetId: 'grp' }
+  const nodeInv = { role: 'invitee', scope: 'node', targetId: 'a' }
+
+  t('owner: everything allowed incl. canvas-admin', () => {
+    for (const kind of ['canvas-admin', 'types', 'graph', 'node-create', 'edge']) {
+      assertRegionEdit(owner, NODES, { kind, nodeId: 'out', source: 'a', target: 'out' })
+    }
+  })
+
+  t('canvas-scope invitee: edits allowed, canvas-admin denied', () => {
+    assertRegionEdit(canvasInv, NODES, { kind: 'node-update', nodeId: 'out' })
+    assertRegionEdit(canvasInv, NODES, { kind: 'types' })
+    assertRegionEdit(canvasInv, NODES, { kind: 'graph' })
+    assert.throws(() => assertRegionEdit(canvasInv, NODES, { kind: 'canvas-admin' }), /소유자만/)
+  })
+
+  t('group-scope: editable set = frame children only', () => {
+    const set = editableNodeIdSet(groupInv, NODES)
+    assert.deepEqual([...set].sort(), ['a', 'b'])
+    assert.equal(editableNodeIdSet(owner, NODES), null)
+    assert.equal(editableNodeIdSet(canvasInv, NODES), null)
+  })
+
+  t('group-scope: inside edits ok, outside denied, frame itself denied', () => {
+    assertRegionEdit(groupInv, NODES, { kind: 'node-update', nodeIds: ['a', 'b'] })
+    assertRegionEdit(groupInv, NODES, { kind: 'node-delete', nodeId: 'b' })
+    assertRegionEdit(groupInv, NODES, { kind: 'node-create' })
+    assert.throws(() => assertRegionEdit(groupInv, NODES, { kind: 'node-update', nodeId: 'out' }), /밖 노드입니다/)
+    assert.throws(() => assertRegionEdit(groupInv, NODES, { kind: 'node-delete', nodeId: 'grp' }), /밖 노드입니다/)
+  })
+
+  t('group-scope: edge needs both endpoints inside; types/graph denied', () => {
+    assertRegionEdit(groupInv, NODES, { kind: 'edge', source: 'a', target: 'b' })
+    assert.throws(() => assertRegionEdit(groupInv, NODES, { kind: 'edge', source: 'a', target: 'out' }), /양 끝/)
+    assert.throws(() => assertRegionEdit(groupInv, NODES, { kind: 'types' }), /캔버스 전체 초대/)
+    assert.throws(() => assertRegionEdit(groupInv, NODES, { kind: 'graph' }), /create_graph/)
+  })
+
+  t('node-scope: content update on target only; move/delete/create/edge denied', () => {
+    assertRegionEdit(nodeInv, NODES, { kind: 'node-update', nodeId: 'a' })
+    assert.throws(() => assertRegionEdit(nodeInv, NODES, { kind: 'node-update', nodeId: 'b' }), /외에는 수정할 수 없습니다/)
+    assert.throws(() => assertRegionEdit(nodeInv, NODES, { kind: 'node-update', nodeId: 'a', movesPosition: true }), /위치\(x\/y\)/)
+    assert.throws(() => assertRegionEdit(nodeInv, NODES, { kind: 'node-delete', nodeId: 'a' }), /내용·크기 수정만/)
+    assert.throws(() => assertRegionEdit(nodeInv, NODES, { kind: 'node-create' }), /내용·크기 수정만/)
+    assert.throws(() => assertRegionEdit(nodeInv, NODES, { kind: 'edge', source: 'a', target: 'b' }), /내용·크기 수정만/)
+  })
+}
 
 console.log(`\n${passed} tests passed${process.exitCode ? ' (with failures)' : ''}`)
