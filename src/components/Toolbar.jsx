@@ -3,10 +3,8 @@ import { useState, useEffect, useRef } from 'react'
 export default function Toolbar({
   onAddStage, onAddMemo, onClearAll, onUndo, mobile,
   views = [], currentViewId, onSelectView, onRenameView, onDeleteView,
-  lodThreshold = 0.55, onChangeLodThreshold,
 }) {
   const viewProps = { views, currentViewId, onSelectView, onRenameView, onDeleteView, mobile }
-  const lodProps = { lodThreshold, onChangeLodThreshold, mobile }
 
   if (mobile) {
     return (
@@ -33,7 +31,6 @@ export default function Toolbar({
         <MobileBtn onClick={onAddMemo} color="#f59e0b" icon="✎" label="메모" />
         <ViewSelector {...viewProps} />
         <MobileBtn onClick={onUndo} color="#06b6d4" icon="↩︎" label="되돌리기" />
-        <LodSettings {...lodProps} />
       </div>
     )
   }
@@ -61,107 +58,6 @@ export default function Toolbar({
       <div style={{ width: 1, background: '#ffffff18', margin: '0 4px' }} />
       <ViewSelector {...viewProps} />
       <ToolBtn onClick={onUndo} color="#06b6d4" icon="↩︎" label="되돌리기" />
-      <div style={{ width: 1, background: '#ffffff18', margin: '0 4px' }} />
-      <LodSettings {...lodProps} />
-    </div>
-  )
-}
-
-// ── LOD settings popover ─────────────────────────────────────────────────────
-function LodSettings({ lodThreshold, onChangeLodThreshold, mobile }) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef(null)
-
-  useEffect(() => {
-    if (!open) return
-    const onDoc = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
-    document.addEventListener('mousedown', onDoc)
-    document.addEventListener('touchstart', onDoc)
-    return () => { document.removeEventListener('mousedown', onDoc); document.removeEventListener('touchstart', onDoc) }
-  }, [open])
-
-  const popover = (
-    <div
-      onClick={(e) => e.stopPropagation()}
-      style={{
-        position: 'absolute',
-        [mobile ? 'bottom' : 'top']: mobile ? 56 : 44,
-        right: 0,
-        minWidth: 220,
-        background: '#1e1e2a',
-        border: '1px solid #ffffff22',
-        borderRadius: 10,
-        padding: '12px 14px',
-        boxShadow: '0 8px 32px #000c',
-        zIndex: 50,
-      }}
-    >
-      <div style={{ color: '#ccc', fontSize: 12, fontWeight: 600, marginBottom: 10 }}>카드 내용 숨김 시점</div>
-      <input
-        type="range"
-        min="0"
-        max="0.9"
-        step="0.05"
-        value={lodThreshold}
-        onChange={(e) => onChangeLodThreshold?.(Number(e.target.value))}
-        style={{ width: '100%', accentColor: '#a855f7', cursor: 'pointer' }}
-      />
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
-        <span style={{ color: '#555', fontSize: 10 }}>항상 표시</span>
-        <span style={{ color: '#555', fontSize: 10 }}>빨리 숨김</span>
-      </div>
-    </div>
-  )
-
-  if (mobile) {
-    return (
-      <div
-        ref={ref}
-        style={{
-          position: 'relative', display: 'flex', flexDirection: 'column',
-          alignItems: 'center', minWidth: 56, padding: '0 6px',
-        }}
-      >
-        <button
-          onClick={(e) => { e.stopPropagation(); setOpen((o) => !o) }}
-          title="표시 설정"
-          style={{
-            background: 'transparent', border: 'none', color: '#888',
-            fontSize: 22, lineHeight: 1, padding: 0, marginTop: -4, cursor: 'pointer', fontFamily: 'inherit',
-          }}
-        >
-          ⚙
-        </button>
-        <span style={{ fontSize: 10, fontWeight: 600, color: '#aaa', marginTop: 7 }}>설정</span>
-        {open && popover}
-      </div>
-    )
-  }
-
-  return (
-    <div ref={ref} style={{ position: 'relative' }}>
-      <button
-        onClick={(e) => { e.stopPropagation(); setOpen((o) => !o) }}
-        title="표시 설정"
-        style={{
-          background: open ? '#a855f722' : 'transparent',
-          border: '1px solid #a855f744',
-          borderRadius: 8,
-          color: '#a855f7',
-          fontSize: 14,
-          padding: '6px 10px',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          fontFamily: 'inherit',
-          transition: 'background 0.15s, border-color 0.15s',
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.background = '#a855f718'; e.currentTarget.style.borderColor = '#a855f7' }}
-        onMouseLeave={(e) => { e.currentTarget.style.background = open ? '#a855f722' : 'transparent'; e.currentTarget.style.borderColor = '#a855f744' }}
-      >
-        ⚙
-      </button>
-      {open && popover}
     </div>
   )
 }

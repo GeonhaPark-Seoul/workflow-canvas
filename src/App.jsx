@@ -37,7 +37,8 @@ import {
   updateSharedCanvas as cloudUpdateSharedCanvas,
 } from './lib/cloudStorage'
 import { joinCanvasPresence } from './lib/presence'
-import { claimEmailInvites, claimShareToken, listSharedWithMe } from './lib/shares'
+import { claimEmailInvites, claimShareToken, listSharedWithMe, listShares } from './lib/shares'
+import { getMyProfile, getProfiles } from './lib/profiles'
 
 const nodeTypes = { stage: StageNode, memo: MemoNode, group: GroupNode }
 
@@ -237,6 +238,16 @@ export default function App() {
   const [onlineUsers, setOnlineUsers] = useState([]) // [{ user_id, email }] in the active canvas
   const [sharedCanvases, setSharedCanvases] = useState([]) // canvases shared WITH me (listSharedWithMe())
   const pendingShareTokenRef = useRef(null) // #share=<token> claimed right after SIGNED_IN
+  const [authNotice, setAuthNotice] = useState(null) // share-link login gate notice shown in AuthPanel
+
+  // ── Profiles (nickname/avatar) ────────────────────────────────────────────
+  const [myProfile, setMyProfile] = useState(null)
+  useEffect(() => { if (!user) setMyProfile(null) }, [user])
+
+  // Participants shown in the CanvasTabs avatar row for the ACTIVE canvas.
+  const [shareParticipantsBase, setShareParticipantsBase] = useState([]) // [{ userId, email, profile, isOwner }]
+  // Own canvases with at least one active share (moved into "공유 캔버스" in CanvasTabs).
+  const [sharedOutCanvasIds, setSharedOutCanvasIds] = useState(new Set())
 
   const nextId = () => String(++counterRef.current)
 
@@ -828,11 +839,55 @@ export default function App() {
     }
   }, [])
 
+  // ── Sharing: participants shown in the CanvasTabs avatar row for the
+  // active canvas. Own canvas: every distinct member across its shares, plus
+  // pending (unclaimed) email invites. Shared-with-me canvas: just the owner
+  // + me — invitee RLS on share_members doesn't expose other members.
+  const refreshShareParticipants = useCallback(async () => {
+    const u = userRef.current
+    const aid = latestRef.current.activeCanvasId
+    if (!u || !aid) { setShareParticipantsBase([]); return }
+    const shared = parseSharedId(aid)
+    try {
+      if (!shared) {
+        const shares = await listShares(aid)
+        const memberIds = new Set()
+        shares.forEach((s) => (s.memberUserIds ?? []).forEach((id) => memberIds.add(id)))
+        const profiles = await getProfiles([...memberIds])
+        const members = [...memberIds].map((id) => ({ userId: id, profile: profiles.get(id) ?? null, isOwner: false }))
+        const pending = shares
+          .filter((s) => s.invitee_email && !(s.memberUserIds?.length))
+          .map((s) => ({ userId: null, email: s.invitee_email, profile: null, isOwner: false }))
+        setShareParticipantsBase([...members, ...pending])
+      } else {
+        const ids = [shared.ownerId, u.id]
+        const profiles = await getProfiles(ids)
+        setShareParticipantsBase(ids.map((id) => ({ userId: id, profile: profiles.get(id) ?? null, isOwner: id === shared.ownerId })))
+      }
+    } catch (err) {
+      console.error('[profiles] refreshShareParticipants:', err.message)
+    }
+  }, [])
+
+  // ── Sharing: which of MY OWN canvases have at least one active share
+  // (moves that tab row into the "공유 캔버스" dropdown section).
+  const refreshSharedOutCanvasIds = useCallback(async () => {
+    const u = userRef.current
+    if (!u) { setSharedOutCanvasIds(new Set()); return }
+    try {
+      const { data, error } = await supabase.from('canvas_shares').select('canvas_id').eq('owner_id', u.id)
+      if (error) throw error
+      setSharedOutCanvasIds(new Set((data ?? []).map((r) => r.canvas_id)))
+    } catch (err) {
+      console.error('[shares] refreshSharedOutCanvasIds:', err.message)
+    }
+  }, [])
+
   // Kept fresh every render (not in the auth effect's deps, which stay stable
   // like before) so the auth listener can call the latest closures without
   // re-subscribing on every node/edge edit.
   const sharedFnRef = useRef({})
-  useEffect(() => { sharedFnRef.current = { persistCurrent, loadSharedCanvas, refreshSharedCanvases } })
+  useEffect(() => { sharedFnRef.current = { persistCurrent, loadSharedCanvas, refreshSharedCanvases, refreshSharedOutCanvasIds } })
 
   // ── Auth listener ─────────────────────────────────────────────────────────
   useEffect(() => {
@@ -842,7 +897,10 @@ export default function App() {
     if (hashMatch) pendingShareTokenRef.current = hashMatch[1]
 
     const afterLogin = async (u) => {
+      setAuthNotice(null)
       loadFromCloud(u.id)
+      getMyProfile().then(setMyProfile).catch((err) => console.error('[profiles] getMyProfile:', err.message))
+      sharedFnRef.current.refreshSharedOutCanvasIds()
       try { await claimEmailInvites() } catch (err) { console.error('[shares] claimEmailInvites:', err.message) }
 
       if (pendingShareTokenRef.current) {
@@ -869,6 +927,8 @@ export default function App() {
       const u = session?.user ?? null
       setUser(u)
       if (u) afterLogin(u)
+      // Logged-out visitor following a share link: gate access behind login.
+      else if (pendingShareTokenRef.current) setAuthNotice('공유받은 캔버스를 보려면 로그인이 필요합니다')
     })
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       const u = session?.user ?? null
@@ -1022,6 +1082,16 @@ export default function App() {
     const { unsubscribe } = joinCanvasPresence({ ownerId, canvasId, user, onlineRef_or_callback: setOnlineUsers })
     return () => { unsubscribe(); setOnlineUsers([]) }
   }, [user, activeCanvasId])
+
+  // Refresh the CanvasTabs avatar-row participants whenever the active canvas changes.
+  useEffect(() => { refreshShareParticipants() }, [refreshShareParticipants, activeCanvasId, user])
+
+  // Merge in live online status without re-fetching profiles on every presence tick.
+  const onlineIdSet = useMemo(() => new Set(onlineUsers.map((u) => u.user_id)), [onlineUsers])
+  const shareParticipants = useMemo(
+    () => shareParticipantsBase.map((p) => ({ ...p, online: p.userId ? onlineIdSet.has(p.userId) : false })),
+    [shareParticipantsBase, onlineIdSet],
+  )
 
   // ── Cloud auto-save (debounced 1.5 s, only when logged in) ───────────────
   const cloudSaveTimer = useRef(null)
@@ -1719,6 +1789,8 @@ export default function App() {
         sharedCanvases={sharedCanvasList}
         onInvite={openInvite}
         presenceGlow={presenceGlow}
+        participants={shareParticipants}
+        sharedOutIds={sharedOutCanvasIds}
       />
 
       <Toolbar
@@ -1732,11 +1804,19 @@ export default function App() {
         onSelectView={selectView}
         onRenameView={renameView}
         onDeleteView={deleteView}
+      />
+
+      <AuthPanel
+        user={user}
+        syncing={cloudSyncing}
+        mobile={mobile}
+        forceOpen={!!authNotice}
+        notice={authNotice}
+        myProfile={myProfile}
+        onProfileSaved={setMyProfile}
         lodThreshold={lodThreshold}
         onChangeLodThreshold={(v) => { setLodThreshold(v); saveLodThreshold(v) }}
       />
-
-      <AuthPanel user={user} syncing={cloudSyncing} mobile={mobile} />
 
       {invite && (
         <div style={{ position: 'fixed', left: invite.x, top: invite.y, zIndex: 1000 }} onClick={(e) => e.stopPropagation()}>
@@ -1744,7 +1824,7 @@ export default function App() {
             scope={invite.scope}
             targetId={invite.targetId}
             canvasId={activeCanvasId}
-            onClose={() => setInvite(null)}
+            onClose={() => { setInvite(null); refreshShareParticipants(); refreshSharedOutCanvasIds() }}
             onlineUserIds={new Set(onlineUsers.map((u) => u.user_id))}
           />
         </div>
