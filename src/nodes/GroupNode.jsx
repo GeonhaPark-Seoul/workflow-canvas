@@ -6,7 +6,10 @@ export default function GroupNode({ data, selected, id }) {
   const abstract = useStore((s) => s.transform[2] < (data.lodThreshold ?? 0.55))
   // Shape-only (deeper LOD) mode: the frame loses everything but its outline — the
   // title tab is the one exception, it must stay legible at every zoom level.
-  const shapeOnly = useStore((s) => s.transform[2] < (data.lodThreshold ?? 0.55) * 0.45)
+  // Also forced by the App agent (data.forceShapeOnly) for out-of-region nodes under
+  // view-restricted sharing — in that case the tab itself is hidden too (frame only).
+  const zoomShapeOnly = useStore((s) => s.transform[2] < (data.lodThreshold ?? 0.55) * 0.45)
+  const shapeOnly = zoomShapeOnly || data.forceShapeOnly
 
   const [editing, setEditing] = useState(false)
   const [value, setValue] = useState(data.label ?? '')
@@ -74,7 +77,7 @@ export default function GroupNode({ data, selected, id }) {
         minWidth: 240,
         minHeight: 160,
         boxSizing: 'border-box',
-        background: '#ffffff06',
+        background: '#ffffff02',
         border: '1.5px dashed #8b94a766',
         borderRadius: 14,
       }}
@@ -88,13 +91,19 @@ export default function GroupNode({ data, selected, id }) {
         minWidth={240}
         minHeight={160}
         color="#8b94a7"
-        handleStyle={{ width: 10, height: 10, borderRadius: 2, border: '2px solid #8b94a7' }}
+        handleStyle={{
+          width: 20, height: 20, background: 'transparent', border: 'none',
+          backgroundImage: 'radial-gradient(circle, #8b94a7 5px, transparent 5px)',
+          backgroundRepeat: 'no-repeat', backgroundPosition: 'center',
+        }}
         lineStyle={{ borderColor: '#8b94a766' }}
       />
 
       {/* Title tab — protrudes above the frame's top-left corner like a folder tab.
           Survives every LOD tier (including shape-only) so the group stays identifiable
-          however far the canvas is zoomed out. */}
+          however far the canvas is zoomed out — except under a forced (view-restricted)
+          shape-only, where the tab is hidden too so only the frame shape remains. */}
+      {!data.forceShapeOnly && (
       <div
         style={{
           position: 'absolute',
@@ -162,6 +171,7 @@ export default function GroupNode({ data, selected, id }) {
           </button>
         )}
       </div>
+      )}
       <style>{`@keyframes wfcInviteGlow { 0%,100% { box-shadow: 0 0 0 2px #22c55e55, 0 0 8px 2px #22c55e77; } 50% { box-shadow: 0 0 0 3px #22c55e77, 0 0 16px 6px #22c55eaa; } }`}</style>
     </div>
   )

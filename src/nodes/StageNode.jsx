@@ -13,8 +13,8 @@ const DEFAULT_TYPES = [
 // Bidirectional ports: type="source" + canvas connectionMode="loose" lets every
 // handle act as both input and output.
 const HANDLE_STYLE = (borderColor) => ({
-  width: 60, height: 60, border: 'none',
-  background: `radial-gradient(circle, ${borderColor} 9px, #0f0f13 9px 14px, transparent 14px)`,
+  width: 45, height: 45, border: 'none',
+  background: `radial-gradient(circle, ${borderColor} 7px, #0f0f13 7px 10.5px, transparent 10.5px)`,
 })
 const PORTS = [
   { id: 'left', position: Position.Left },
@@ -39,13 +39,34 @@ function caretAtEnd(el) {
   sel.addRange(range)
 }
 
-// Select all content of contentEditable element
-function selectAll(el) {
-  const range = document.createRange()
-  range.selectNodeContents(el)
-  const sel = window.getSelection()
-  sel.removeAllRanges()
-  sel.addRange(range)
+// Place the caret at a viewport point (click position) inside el, falling back to
+// end-of-content if the point can't be resolved to a range inside el.
+function placeCaretAt(el, pos) {
+  if (pos) {
+    let range = null
+    if (document.caretRangeFromPoint) {
+      range = document.caretRangeFromPoint(pos.x, pos.y)
+    } else if (document.caretPositionFromPoint) {
+      const cp = document.caretPositionFromPoint(pos.x, pos.y)
+      if (cp) { range = document.createRange(); range.setStart(cp.offsetNode, cp.offset) }
+    }
+    if (range && el.contains(range.startContainer)) {
+      range.collapse(true)
+      const sel = window.getSelection()
+      sel.removeAllRanges()
+      sel.addRange(range)
+      return
+    }
+  }
+  caretAtEnd(el)
+}
+
+// Wrap br-separated top-level text into <div> lines so per-line hover/caret-line CSS
+// can target individual lines. Content that already has block-level tags is untouched.
+function wrapLines(html) {
+  if (!html) return html
+  if (/<(div|p|li|summary|ul|ol)[\s>]/i.test(html)) return html
+  return html.split(/<br\s*\/?>/i).map((line) => `<div>${line}</div>`).join('')
 }
 
 export default function StageNode({ data, selected, id }) {
@@ -56,7 +77,9 @@ export default function StageNode({ data, selected, id }) {
   // Abstract (LOD) mode: re-renders only when crossing the threshold, not every zoom tick.
   const abstract = useStore((s) => s.transform[2] < (data.lodThreshold ?? 0.55))
   // Shape-only (deeper LOD) mode: below this, all text/content disappears — only the colored shape + handles remain.
-  const shapeOnly = useStore((s) => s.transform[2] < (data.lodThreshold ?? 0.55) * 0.45)
+  // Also forced by the App agent (data.forceShapeOnly) for out-of-region nodes under view-restricted sharing.
+  const zoomShapeOnly = useStore((s) => s.transform[2] < (data.lodThreshold ?? 0.55) * 0.45)
+  const shapeOnly = zoomShapeOnly || data.forceShapeOnly
 
   const [editing, setEditing] = useState(null) // 'title' | 'desc' | null
   const titleRef = useRef(null)
@@ -67,6 +90,7 @@ export default function StageNode({ data, selected, id }) {
   const suppressClick = useRef(false)
   const titleContainerRef = useRef(null)
   const descContainerRef = useRef(null)
+  const caretPosRef = useRef(null)
 
   // Parts list: inline text editing per-row (id of the part currently being edited)
   const [editingPartId, setEditingPartId] = useState(null)
@@ -98,19 +122,41 @@ export default function StageNode({ data, selected, id }) {
   }
   const handlePointerUp = () => { clearTimeout(longPressTimer.current); longPressStart.current = null }
 
-  // Set innerHTML once when entering edit mode, then focus
+  // Set innerHTML once when entering edit mode, then focus with the caret at the
+  // click position that triggered the edit (falls back to end-of-content).
   useEffect(() => {
     if (editing === 'title' && titleRef.current) {
       titleRef.current.innerHTML = data.label ?? ''
       titleRef.current.focus()
-      selectAll(titleRef.current)
+      placeCaretAt(titleRef.current, caretPosRef.current)
     }
     if (editing === 'desc' && descRef.current) {
-      descRef.current.innerHTML = data.description || ''
+      descRef.current.innerHTML = wrapLines(data.description || '')
       descRef.current.focus()
-      caretAtEnd(descRef.current)
+      placeCaretAt(descRef.current, caretPosRef.current)
     }
   }, [editing]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // While editing, keep the line under the caret highlighted (.caret-line). "Line" means
+  // the direct block-level child of the editor that contains the current selection.
+  useEffect(() => {
+    if (!editing) return
+    const root = editing === 'title' ? titleRef.current : editing === 'desc' ? descRef.current : null
+    if (!root) return
+    const onSelectionChange = () => {
+      const sel = window.getSelection()
+      if (!sel || sel.rangeCount === 0 || !root.contains(sel.anchorNode)) return
+      let el = sel.anchorNode.nodeType === Node.TEXT_NODE ? sel.anchorNode.parentElement : sel.anchorNode
+      while (el && el !== root && el.parentElement !== root) el = el.parentElement
+      root.querySelectorAll('.caret-line').forEach((n) => { if (n !== el) n.classList.remove('caret-line') })
+      if (el && el !== root) el.classList.add('caret-line')
+    }
+    document.addEventListener('selectionchange', onSelectionChange)
+    return () => {
+      document.removeEventListener('selectionchange', onSelectionChange)
+      root.querySelectorAll('.caret-line').forEach((n) => n.classList.remove('caret-line'))
+    }
+  }, [editing])
 
   const cycleColor = (e) => {
     e.stopPropagation()
@@ -133,8 +179,9 @@ export default function StageNode({ data, selected, id }) {
   const onDimPointerLeave = () => { clearTimeout(dimPressTimer.current); dimPressTimer.current = null }
   const onDimPointerCancel = () => { clearTimeout(dimPressTimer.current); dimPressTimer.current = null }
 
-  const startEdit = (field) => {
+  const startEdit = (field, pos) => {
     if (data.readOnly) return
+    caretPosRef.current = pos ?? null
     setEditing(field)
     data.onEditStart?.()
   }
@@ -163,7 +210,7 @@ export default function StageNode({ data, selected, id }) {
       return
     }
     if (!selected || editing || justSelected()) return
-    startEdit(field)
+    startEdit(field, { x: e.clientX, y: e.clientY })
   }
 
   // Parts list handlers
@@ -238,7 +285,11 @@ export default function StageNode({ data, selected, id }) {
         minWidth={200}
         minHeight={80}
         color={color.border}
-        handleStyle={{ width: 10, height: 10, borderRadius: 2, border: `2px solid ${color.border}` }}
+        handleStyle={{
+          width: 20, height: 20, background: 'transparent', border: 'none',
+          backgroundImage: `radial-gradient(circle, ${color.border} 5px, transparent 5px)`,
+          backgroundRepeat: 'no-repeat', backgroundPosition: 'center',
+        }}
         lineStyle={{ borderColor: `${color.border}66` }}
       />
 
@@ -380,9 +431,9 @@ export default function StageNode({ data, selected, id }) {
               />
             ) : (
               <div
-                className="rich-content text-hover-line"
+                className="rich-content"
                 onClick={handleDisplayClick('desc')}
-                dangerouslySetInnerHTML={{ __html: descValue || (data.descTouched ? '' : '설명') }}
+                dangerouslySetInnerHTML={{ __html: wrapLines(descValue || (data.descTouched ? '' : '설명')) }}
                 style={{
                   flex: 1, color: descValue ? '#f0f0f0' : '#888', fontSize: 12,
                   whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text',

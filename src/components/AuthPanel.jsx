@@ -4,6 +4,13 @@ import { upsertMyProfile } from '../lib/profiles'
 
 const GLYPH_COLORS = ['#8b94a7', '#3b82f6', '#22c55e', '#ef4444', '#f59e0b', '#a855f7', '#ec4899', '#06b6d4']
 
+// Selectable glyph options: '' = 기본 (bust icon, glyph null), then A–Z, then 0–9.
+const GLYPH_OPTIONS = [
+  '',
+  ...Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i)),
+  ...Array.from({ length: 10 }, (_, i) => String(i)),
+]
+
 // Small circular avatar: glyph letter (or a generic bust icon) inside a
 // colored ring. `online === false` dims it (grayscale/40% opacity) — used
 // for offline shared-user avatars and pending email invites.
@@ -130,16 +137,33 @@ export default function AuthPanel({
               </div>
 
               <div style={{ fontSize: 11, color: '#555', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>아바타 아이콘</div>
-              <input
-                value={glyphInput}
-                onChange={(e) => {
-                  const c = e.target.value.slice(-1).toUpperCase()
-                  setGlyphInput(/^[A-Z0-9]$/.test(c) ? c : '')
-                }}
-                maxLength={1}
-                placeholder="기본 아이콘"
-                style={{ ...inputStyle, width: 64, textAlign: 'center', marginBottom: 10 }}
-              />
+              <div style={{
+                display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', justifyItems: 'center',
+                gap: 6, maxHeight: 150, overflowY: 'auto', marginBottom: 10, padding: 2,
+              }}>
+                {GLYPH_OPTIONS.map((g) => (
+                  <button
+                    key={g || '__default'}
+                    type="button"
+                    onClick={() => setGlyphInput(g)}
+                    title={g || '기본'}
+                    style={{
+                      width: 26, height: 26, borderRadius: '50%', flexShrink: 0, boxSizing: 'border-box',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      background: '#12121a',
+                      border: glyphInput === g ? '2px solid #fff' : '1px solid #ffffff22',
+                      color: '#ccc', fontSize: 11, fontWeight: 700, cursor: 'pointer', padding: 0,
+                    }}
+                  >
+                    {g ? g : (
+                      <svg width={13} height={13} viewBox="0 0 24 24">
+                        <circle cx="12" cy="8" r="4" fill="#ccc" />
+                        <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" fill="#ccc" />
+                      </svg>
+                    )}
+                  </button>
+                ))}
+              </div>
 
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>
                 {GLYPH_COLORS.map((c) => (

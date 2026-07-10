@@ -15,6 +15,7 @@ import '@xyflow/react/dist/style.css'
 import StageNode from './nodes/StageNode'
 import MemoNode from './nodes/MemoNode'
 import GroupNode from './nodes/GroupNode'
+import StubEdge from './edges/StubEdge'
 import { DEMO_CANVASES } from './demoCanvases'
 import Toolbar from './components/Toolbar'
 import HelpPanel from './components/HelpPanel'
@@ -38,15 +39,16 @@ import {
 } from './lib/cloudStorage'
 import { joinCanvasPresence } from './lib/presence'
 import { claimEmailInvites, claimShareToken, listSharedWithMe, listShares } from './lib/shares'
-import { getMyProfile, getProfiles } from './lib/profiles'
+import { getMyProfile, getProfiles, upsertMyEmail, touchLastSeen } from './lib/profiles'
 
 const nodeTypes = { stage: StageNode, memo: MemoNode, group: GroupNode }
+const edgeTypes = { stub: StubEdge }
 
 const defaultEdgeOptions = {
+  type: 'stub',
   animated: false,
   style: { stroke: '#4a4a5a', strokeWidth: 3 },
   markerEnd: { type: MarkerType.ArrowClosed, color: '#4a4a5a' },
-  pathOptions: { curvature: 0.45 },
 }
 
 // ── Stage type definitions ──────────────────────────────────────────────────
@@ -71,11 +73,13 @@ const TYPE_PALETTE = [
 
 // ── Initial canvas data (seed for the very first canvas) ─────────────────────
 // ── Helpers ──────────────────────────────────────────────────────────────────
-// Strip type and data from saved edges so old 'separable' type (and any other
-// removed custom type) doesn't cause React Flow to emit unknown-type warnings.
-// Keeps style/markerEnd so visual appearance is preserved.
+// Strip data and force type 'stub' on every saved edge — old 'separable' type
+// (and any other removed/foreign custom type, incl. MCP-created edges with no
+// type) would otherwise cause React Flow to emit unknown-type warnings or fall
+// back to the default bezier look. Keeps style/markerEnd so appearance (color,
+// dash pattern) survives; the stub geometry itself comes from edgeTypes.stub.
 function normalizeEdges(edges) {
-  return (edges ?? []).map(({ data, type, ...e }) => ({ ...e }))
+  return (edges ?? []).map(({ data, type, ...e }) => ({ ...e, type: 'stub' }))
 }
 
 function maxNodeId(nodes) {
@@ -859,15 +863,21 @@ export default function App() {
         const memberIds = new Set()
         shares.forEach((s) => (s.memberUserIds ?? []).forEach((id) => memberIds.add(id)))
         const profiles = await getProfiles([...memberIds])
-        const members = [...memberIds].map((id) => ({ userId: id, profile: profiles.get(id) ?? null, isOwner: false }))
+        const members = [...memberIds].map((id) => {
+          const p = profiles.get(id)
+          return { userId: id, profile: p ?? null, isOwner: false, email: p?.email ?? null, lastSeenAt: p?.lastSeenAt ?? null }
+        })
         const pending = shares
           .filter((s) => s.invitee_email && !(s.memberUserIds?.length))
-          .map((s) => ({ userId: null, email: s.invitee_email, profile: null, isOwner: false }))
+          .map((s) => ({ userId: null, email: s.invitee_email, profile: null, isOwner: false, lastSeenAt: null }))
         setShareParticipantsBase([...members, ...pending])
       } else {
         const ids = [shared.ownerId, u.id]
         const profiles = await getProfiles(ids)
-        setShareParticipantsBase(ids.map((id) => ({ userId: id, profile: profiles.get(id) ?? null, isOwner: id === shared.ownerId })))
+        setShareParticipantsBase(ids.map((id) => {
+          const p = profiles.get(id)
+          return { userId: id, profile: p ?? null, isOwner: id === shared.ownerId, email: p?.email ?? null, lastSeenAt: p?.lastSeenAt ?? null }
+        }))
       }
     } catch (err) {
       console.error('[profiles] refreshShareParticipants:', err.message)
@@ -906,6 +916,7 @@ export default function App() {
       setAuthNotice(null)
       loadFromCloud(u.id)
       getMyProfile().then(setMyProfile).catch((err) => console.error('[profiles] getMyProfile:', err.message))
+      if (u.email) upsertMyEmail(u.email).catch((err) => console.error('[profiles] upsertMyEmail:', err.message))
       sharedFnRef.current.refreshSharedOutCanvasIds()
       try { await claimEmailInvites() } catch (err) { console.error('[shares] claimEmailInvites:', err.message) }
 
@@ -1094,6 +1105,18 @@ export default function App() {
     return () => { unsubscribe(); setOnlineUsers([]) }
   }, [user, activeCanvasId])
 
+  // ── Presence heartbeat: bump my profiles.last_seen_at while a canvas is
+  // open, so other participants' mini profile cards can show a relative
+  // "마지막 접속" time even when I'm not currently online.
+  useEffect(() => {
+    if (!user || !activeCanvasId) return
+    touchLastSeen().catch((err) => console.error('[profiles] touchLastSeen:', err.message))
+    const timer = setInterval(() => {
+      touchLastSeen().catch((err) => console.error('[profiles] touchLastSeen:', err.message))
+    }, 60000)
+    return () => clearInterval(timer)
+  }, [user, activeCanvasId])
+
   // Refresh the CanvasTabs avatar-row participants whenever the active canvas changes.
   useEffect(() => { refreshShareParticipants() }, [refreshShareParticipants, activeCanvasId, user])
 
@@ -1210,7 +1233,9 @@ export default function App() {
     return Array.from(seen.values())
   }, [sharedCanvases])
 
-  // restrict_view: clamp the invitee's viewport to the invited region (canvas scope has no region).
+  // restrict_view: the invited region (canvas scope has no region — null).
+  // Used only for the one-time fitBounds-on-open below and to compute which
+  // nodes get forceShapeOnly (panning itself stays free, no viewport clamp).
   const restrictBounds = useMemo(() => {
     if (perm.role !== 'invitee' || !perm.restrictView || perm.scope === 'canvas' || !perm.targetId) return null
     const byId = new Map(nodes.map((n) => [n.id, n]))
@@ -1229,6 +1254,17 @@ export default function App() {
     const [[minX, minY], [maxX, maxY]] = restrictBounds
     rfInstance.fitBounds({ x: minX, y: minY, width: maxX - minX, height: maxY - minY }, { padding: 0, duration: 0 })
   }, [rfInstance, activeCanvasId]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // restrict_view: nodes OUTSIDE the invited region (region = the target node
+  // for node-scope, or the group frame + its children for group-scope) get
+  // `data.forceShapeOnly` — they lose all text/content and render as bare
+  // shapes. Canvas-scope invitees have no region, so this is a no-op for them.
+  const forceShapeOnlySet = useMemo(() => {
+    if (perm.role !== 'invitee' || !perm.restrictView || perm.scope === 'canvas' || !perm.targetId) return null
+    const visible = new Set([perm.targetId])
+    if (perm.scope === 'group') nodes.forEach((n) => { if (n.parentId === perm.targetId) visible.add(n.id) })
+    return new Set(nodes.filter((n) => !visible.has(n.id)).map((n) => n.id))
+  }, [perm, nodes])
 
   // ── Node data ────────────────────────────────────────────────────────────
   const updateNodeData = useCallback((id, patch) => {
@@ -1750,14 +1786,14 @@ export default function App() {
   const styledEdges = edges.map((e) => {
     // Delete key / built-in delete UI must also respect the edit gating.
     const deletable = perm.role === 'owner' || perm.scope === 'canvas' || (isNodeEditable(e.source) && isNodeEditable(e.target))
-    const pathOptions = { curvature: 0.45 }
-    if (!e.selected) return { ...e, ...baseEdgeStyle(e), deletable, pathOptions }
+    const type = 'stub'
+    if (!e.selected) return { ...e, ...baseEdgeStyle(e), deletable, type }
     const isMemo = !!e.style?.strokeDasharray
     const color = isMemo ? '#f59e0b' : '#60a5fa'
     return {
       ...e,
       deletable,
-      pathOptions,
+      type,
       // Only a selected (bold) edge can be snatched/reconnected.
       reconnectable: true,
       zIndex: 1001,
@@ -1891,6 +1927,7 @@ export default function App() {
               stageTypes,
               lodThreshold,
               readOnly: restrictedScope && !editable,
+              forceShapeOnly: forceShapeOnlySet?.has(n.id) ?? false,
               canInvite: isOwner,
               presenceGlow,
               onInvite: isOwner ? openInvite : undefined,
@@ -1917,6 +1954,7 @@ export default function App() {
         onNodeClick={onNodeClick}
         onInit={setRfInstance}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
         onPaneContextMenu={onPaneContextMenu}
         onNodeContextMenu={onNodeContextMenu}
@@ -1927,7 +1965,6 @@ export default function App() {
         nodesDraggable={!isAnyEditing && !isPinching}
         snapToGrid
         snapGrid={[12, 12]}
-        translateExtent={restrictBounds ?? undefined}
         edgesReconnectable={false}
         reconnectRadius={mobile ? 40 : 20}
         connectionMode="loose"

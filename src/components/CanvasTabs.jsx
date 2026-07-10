@@ -11,10 +11,51 @@ export default function CanvasTabs({
   const [value, setValue] = useState('')
   const inputRef = useRef(null)
   const containerRef = useRef(null)
+  const [profileCard, setProfileCard] = useState(null) // { p, x, y } | null
+  const profileCardRef = useRef(null)
 
   useEffect(() => {
     if (editingId && inputRef.current) { inputRef.current.focus(); inputRef.current.select() }
   }, [editingId])
+
+  // Mini profile card: close on outside click / Escape.
+  useEffect(() => {
+    if (!profileCard) return
+    const handler = (e) => {
+      if (profileCardRef.current && !profileCardRef.current.contains(e.target)) setProfileCard(null)
+    }
+    document.addEventListener('mousedown', handler)
+    document.addEventListener('touchstart', handler)
+    return () => { document.removeEventListener('mousedown', handler); document.removeEventListener('touchstart', handler) }
+  }, [profileCard])
+
+  useEffect(() => {
+    if (!profileCard) return
+    const handler = (e) => { if (e.key === 'Escape') setProfileCard(null) }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [profileCard])
+
+  const openProfileCard = (p, e) => {
+    e.stopPropagation()
+    const CARD_W = 240
+    const r = e.currentTarget.getBoundingClientRect()
+    let x = r.left
+    const y = r.bottom + 6
+    x = Math.min(Math.max(8, x), window.innerWidth - CARD_W - 8)
+    setProfileCard({ p, x, y })
+  }
+
+  // '방금 전' / 'N분 전' / 'N시간 전' / 'N일 전', or '기록 없음' with no data.
+  const relativeLastSeen = (iso) => {
+    if (!iso) return '기록 없음'
+    const min = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
+    if (min < 1) return '방금 전'
+    if (min < 60) return `${min}분 전`
+    const hr = Math.floor(min / 60)
+    if (hr < 24) return `${hr}시간 전`
+    return `${Math.floor(hr / 24)}일 전`
+  }
 
   // Close on outside click
   useEffect(() => {
@@ -116,6 +157,7 @@ export default function CanvasTabs({
   }
 
   return (
+    <>
     <div
       ref={containerRef}
       onClick={(e) => e.stopPropagation()}
@@ -158,7 +200,8 @@ export default function CanvasTabs({
               <span
                 key={p.userId ?? p.email ?? i}
                 title={p.isOwner ? '소유자' : (p.userId ? (p.profile?.nickname || undefined) : p.email)}
-                style={{ marginLeft: i === 0 ? 0 : -6, display: 'inline-block', lineHeight: 0 }}
+                onClick={(e) => openProfileCard(p, e)}
+                style={{ marginLeft: i === 0 ? 0 : 3, display: 'inline-block', lineHeight: 0, cursor: 'pointer' }}
               >
                 <Avatar
                   profile={p.profile ?? (p.email ? { glyph: p.email[0]?.toUpperCase() } : null)}
@@ -170,7 +213,7 @@ export default function CanvasTabs({
             {participants.length > 5 && (
               <span
                 style={{
-                  marginLeft: -6, width: 18, height: 18, borderRadius: '50%',
+                  marginLeft: 3, width: 18, height: 18, borderRadius: '50%',
                   background: '#2a2a36', border: '2px solid #ffffff33', boxSizing: 'border-box',
                   color: '#aaa', fontSize: 9, fontWeight: 700,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -280,6 +323,54 @@ export default function CanvasTabs({
           </div>
         </div>
       )}
-    </div>
+      </div>
+
+      {profileCard && (() => {
+        const { p, x, y } = profileCard
+        const nickname = p.profile?.nickname || '이름 없음'
+        const email = p.email ?? p.profile?.email ?? '-'
+        const lastSeen = p.online ? '접속 중' : relativeLastSeen(p.profile?.lastSeenAt ?? p.lastSeenAt)
+        return (
+          <div
+            ref={profileCardRef}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: 'fixed',
+              left: x,
+              top: y,
+              width: 240,
+              zIndex: 1000,
+              background: '#1a1a22',
+              border: '1px solid #ffffff18',
+              borderRadius: 12,
+              boxShadow: '0 8px 32px #000c',
+              backdropFilter: 'blur(8px)',
+              padding: 14,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 8,
+              boxSizing: 'border-box',
+            }}
+          >
+            <Avatar
+              profile={p.profile ?? (p.email ? { glyph: p.email[0]?.toUpperCase() } : null)}
+              size={40}
+              online={p.online}
+              opacityOffState={false}
+            />
+            <div style={{ color: '#f0f0f0', fontSize: 14, fontWeight: 700, textAlign: 'center', wordBreak: 'break-word' }}>
+              {nickname}
+            </div>
+            <div style={{ color: '#aaa', fontSize: 12, textAlign: 'center', wordBreak: 'break-all' }}>
+              {email}
+            </div>
+            <div style={{ color: '#666', fontSize: 11, marginTop: 2 }}>
+              마지막 접속: {lastSeen}
+            </div>
+          </div>
+        )
+      })()}
+    </>
   )
 }

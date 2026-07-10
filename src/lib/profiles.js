@@ -29,26 +29,57 @@ export async function getMyProfile() {
   return data
 }
 
-export async function upsertMyProfile({ nickname, glyph, color }) {
+export async function upsertMyProfile({ nickname, glyph, color, email }) {
   const userId = await currentUserId()
   const { data, error } = await supabase.from('profiles').upsert(
-    { user_id: userId, nickname: nickname ?? null, glyph: sanitizeGlyph(glyph), color: color ?? null, updated_at: new Date().toISOString() },
+    { user_id: userId, nickname: nickname ?? null, glyph: sanitizeGlyph(glyph), color: color ?? null, email, updated_at: new Date().toISOString() },
     { onConflict: 'user_id' }
   ).select().single()
   if (error) { console.error('[profiles] upsertMyProfile:', error.message); throw new Error('upsertMyProfile: ' + error.message) }
   return data
 }
 
-// Returns Map(userId → { nickname, glyph, color }) for the given user ids.
+// Login-time: record my email + last_seen_at only — NOT via upsertMyProfile,
+// which would null out nickname/glyph/color when they're omitted. Tries
+// UPDATE first (the common case, profile row already exists); falls back to
+// upsert (INSERT) only for a brand-new user with no profile row yet.
+export async function upsertMyEmail(email) {
+  const userId = await currentUserId()
+  if (!userId) return
+  const now = new Date().toISOString()
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({ email, last_seen_at: now })
+    .eq('user_id', userId)
+    .select('user_id')
+  if (error) { console.error('[profiles] upsertMyEmail:', error.message); throw new Error('upsertMyEmail: ' + error.message) }
+  if (data && data.length) return
+  const { error: upsertError } = await supabase
+    .from('profiles')
+    .upsert({ user_id: userId, email, last_seen_at: now }, { onConflict: 'user_id' })
+  if (upsertError) { console.error('[profiles] upsertMyEmail fallback:', upsertError.message); throw new Error('upsertMyEmail: ' + upsertError.message) }
+}
+
+// Returns Map(userId → { nickname, glyph, color, email, lastSeenAt }) for the given user ids.
 export async function getProfiles(userIds) {
   const ids = Array.from(new Set(userIds ?? [])).filter(Boolean)
   const map = new Map()
   if (!ids.length) return map
   const { data, error } = await supabase
     .from('profiles')
-    .select('user_id, nickname, glyph, color')
+    .select('user_id, nickname, glyph, color, email, last_seen_at')
     .in('user_id', ids)
   if (error) { console.error('[profiles] getProfiles:', error.message); throw new Error('getProfiles: ' + error.message) }
-  ;(data ?? []).forEach((p) => map.set(p.user_id, { nickname: p.nickname, glyph: p.glyph, color: p.color }))
+  ;(data ?? []).forEach((p) => map.set(p.user_id, { nickname: p.nickname, glyph: p.glyph, color: p.color, email: p.email, lastSeenAt: p.last_seen_at }))
   return map
+}
+
+// Heartbeat: bump my own last_seen_at so other participants' mini profile
+// cards can show "방금 전 / N분 전 / ..." when I'm not currently online via
+// presence. Called on canvas open + every 60s (see App.jsx).
+export async function touchLastSeen() {
+  const userId = await currentUserId()
+  if (!userId) return
+  const { error } = await supabase.from('profiles').update({ last_seen_at: new Date().toISOString() }).eq('user_id', userId)
+  if (error) { console.error('[profiles] touchLastSeen:', error.message); throw new Error('touchLastSeen: ' + error.message) }
 }

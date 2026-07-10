@@ -16,3 +16,7 @@ create policy "user updates own profile" on profiles for update using (user_id =
 -- CRITICAL (lesson from canvas_shares): table-level grants are NOT automatic here
 grant select, insert, update on profiles to authenticated;
 grant all on profiles to service_role;
+
+-- Avatar click → mini profile card (email + last-seen). Safe to re-run.
+alter table profiles add column if not exists email text;
+alter table profiles add column if not exists last_seen_at timestamptz;

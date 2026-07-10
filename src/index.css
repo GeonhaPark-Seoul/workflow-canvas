@@ -105,6 +105,27 @@ html, body, #root {
   }
 }
 
+/* Per-line hover pill for rich-content display areas (multi-line description/memo
+   text): each block-level line gets its own pill instead of the whole block lighting
+   up together. Also applies inside the contentEditable editor while editing, and the
+   .caret-line class (toggled in JS via selectionchange) keeps the caret's line lit even
+   without a hover. */
+.rich-content > div:hover,
+.rich-content > p:hover,
+.rich-content li:hover,
+.rich-content summary:hover,
+[contenteditable] > div:hover,
+[contenteditable] > p:hover,
+[contenteditable] li:hover,
+[contenteditable] summary:hover {
+  background: #ffffff12;
+  border-radius: 6px;
+}
+.caret-line {
+  background: #ffffff12;
+  border-radius: 6px;
+}
+
 /* Rich-text display/edit shared styles */
 .rich-content img { max-width: 100%; border-radius: 6px; display: block; }
 .rich-content input[type="checkbox"] { vertical-align: middle; margin-right: 4px; cursor: pointer; }
