@@ -534,7 +534,6 @@ export default function StageNode({ data, selected, id }) {
         editRef={editing === 'title' ? titleRef : editing === 'desc' ? descRef : null}
         anchorRef={editing === 'title' ? titleContainerRef : editing === 'desc' ? descContainerRef : null}
       />
-      <style>{`@keyframes wfcInviteGlow { 0%,100% { box-shadow: 0 0 0 2px #22c55e55, 0 0 8px 2px #22c55e77; } 50% { box-shadow: 0 0 0 3px #22c55e77, 0 0 16px 6px #22c55eaa; } }`}</style>
     </div>
   )
 }
@@ -551,8 +550,6 @@ function InviteButton({ data, id }) {
         width: 18, height: 18, borderRadius: '50%', border: 'none', flexShrink: 0,
         background: '#ffffff14', color: '#f0f0f0', fontSize: 12, lineHeight: '18px',
         padding: 0, cursor: 'pointer', marginTop: 1,
-        boxShadow: data.presenceGlow ? '0 0 0 2px #22c55e55, 0 0 10px 2px #22c55e88' : 'none',
-        animation: data.presenceGlow ? 'wfcInviteGlow 1.6s ease-in-out infinite' : 'none',
       }}
     >
       ＋

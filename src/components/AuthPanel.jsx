@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { upsertMyProfile } from '../lib/profiles'
 import { listMyTokens, createToken, deleteToken } from '../lib/mcpTokens'
@@ -110,6 +110,24 @@ export default function AuthPanel({
     }
   }
 
+  // Close the popover on outside click / Escape.
+  const panelRef = useRef(null)
+  useEffect(() => {
+    if (!open) return
+    const onDown = (e) => {
+      if (panelRef.current && !panelRef.current.contains(e.target)) setOpen(false)
+    }
+    const onKey = (e) => { if (e.key === 'Escape') setOpen(false) }
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('touchstart', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('touchstart', onDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
   // Share-link login gate: App sets forceOpen when a logged-out visitor
   // follows a #share=<token> link.
   useEffect(() => { if (forceOpen) setOpen(true) }, [forceOpen])
@@ -172,6 +190,7 @@ export default function AuthPanel({
 
   return (
     <div
+      ref={panelRef}
       onClick={(e) => e.stopPropagation()}
       style={{ position: 'absolute', top: mobile ? 56 : 20, right: 20, zIndex: 10 }}
     >

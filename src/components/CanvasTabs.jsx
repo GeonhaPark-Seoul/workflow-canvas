@@ -3,7 +3,7 @@ import { Avatar } from './AuthPanel'
 
 export default function CanvasTabs({
   canvases, activeId, onSwitch, onAdd, onRename, onDelete, mobile,
-  sharedCanvases = [], onInvite, presenceGlow,
+  sharedCanvases = [], onInvite,
   participants = [], sharedOutIds = new Set(),
 }) {
   const [open, setOpen] = useState(false)
@@ -11,40 +11,29 @@ export default function CanvasTabs({
   const [value, setValue] = useState('')
   const inputRef = useRef(null)
   const containerRef = useRef(null)
-  const [profileCard, setProfileCard] = useState(null) // { p, x, y } | null
-  const profileCardRef = useRef(null)
+  const [peopleOpen, setPeopleOpen] = useState(false) // 참여자 전체 목록 모달
+  const peopleRef = useRef(null)
 
   useEffect(() => {
     if (editingId && inputRef.current) { inputRef.current.focus(); inputRef.current.select() }
   }, [editingId])
 
-  // Mini profile card: close on outside click / Escape.
+  // Participants modal: close on outside click / Escape.
   useEffect(() => {
-    if (!profileCard) return
-    const handler = (e) => {
-      if (profileCardRef.current && !profileCardRef.current.contains(e.target)) setProfileCard(null)
+    if (!peopleOpen) return
+    const onDown = (e) => {
+      if (peopleRef.current && !peopleRef.current.contains(e.target)) setPeopleOpen(false)
     }
-    document.addEventListener('mousedown', handler)
-    document.addEventListener('touchstart', handler)
-    return () => { document.removeEventListener('mousedown', handler); document.removeEventListener('touchstart', handler) }
-  }, [profileCard])
-
-  useEffect(() => {
-    if (!profileCard) return
-    const handler = (e) => { if (e.key === 'Escape') setProfileCard(null) }
-    document.addEventListener('keydown', handler)
-    return () => document.removeEventListener('keydown', handler)
-  }, [profileCard])
-
-  const openProfileCard = (p, e) => {
-    e.stopPropagation()
-    const CARD_W = 240
-    const r = e.currentTarget.getBoundingClientRect()
-    let x = r.left
-    const y = r.bottom + 6
-    x = Math.min(Math.max(8, x), window.innerWidth - CARD_W - 8)
-    setProfileCard({ p, x, y })
-  }
+    const onKey = (e) => { if (e.key === 'Escape') setPeopleOpen(false) }
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('touchstart', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('touchstart', onDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [peopleOpen])
 
   // '방금 전' / 'N분 전' / 'N시간 전' / 'N일 전', or '기록 없음' with no data.
   const relativeLastSeen = (iso) => {
@@ -87,6 +76,23 @@ export default function CanvasTabs({
 
   const activeCanvas = canvases.find((c) => c.id === activeId) ?? sharedCanvases.find((c) => c.id === activeId) ?? canvases[0]
   const isOwnActive = canvases.some((c) => c.id === activeId)
+
+  // People bar: owner leftmost, then one more (online preferred, else the
+  // earliest invite). 3+ participants collapse to just these two — the full
+  // list lives in the participants modal (click any avatar).
+  const ownerP = participants.find((p) => p.isOwner)
+  const othersP = participants.filter((p) => !p.isOwner)
+  const secondP = othersP.find((p) => p.online) ?? othersP[0]
+  const shownPeople = participants.length >= 3
+    ? [ownerP, secondP].filter(Boolean)
+    : [ownerP, ...othersP.filter((p) => p !== ownerP)].filter(Boolean)
+  const avatarOf = (p, size) => (
+    <Avatar
+      profile={p.profile ?? (p.email ? { glyph: p.email[0]?.toUpperCase() } : null)}
+      size={size}
+      online={p.online}
+    />
+  )
 
   // Own canvases the owner has shared out (any active canvas_shares row)
   // move into the "공유 캔버스" section alongside canvases shared TO me.
@@ -156,6 +162,8 @@ export default function CanvasTabs({
     )
   }
 
+  const showPeopleBar = participants.length > 0 || (isOwnActive && onInvite)
+
   return (
     <>
     <div
@@ -167,210 +175,244 @@ export default function CanvasTabs({
         left: mobile ? 0 : 20,
         right: mobile ? 0 : 'auto',
         zIndex: 10,
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: 8,
       }}
     >
-      {/* Collapsed trigger button */}
-      <button
-        onClick={() => setOpen((v) => !v)}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          width: mobile ? '100%' : 'auto',
-          background: '#1a1a22',
-          border: '1px solid #ffffff18',
-          borderRadius: mobile ? (open ? '0 0 0 0' : '0 0 12px 12px') : (open ? '12px 12px 0 0' : 12),
-          padding: mobile ? 'calc(env(safe-area-inset-top, 0px) + 6px) 12px 6px' : '6px 12px',
-          boxShadow: open ? 'none' : '0 4px 24px #000a',
-          backdropFilter: 'blur(8px)',
-          color: '#f0f0f0',
-          fontSize: 13,
-          fontWeight: 600,
-          cursor: 'pointer',
-          fontFamily: 'inherit',
-          whiteSpace: 'nowrap',
-          transition: 'border-radius 0.1s',
-          boxSizing: 'border-box',
-        }}
-      >
-        <span style={{ flex: 1, textAlign: 'left' }}>{activeCanvas?.name ?? '캔버스'}</span>
-        {participants.length > 0 && (
-          <span onClick={(e) => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-            {participants.slice(0, 5).map((p, i) => (
-              <span
-                key={p.userId ?? p.email ?? i}
-                title={p.isOwner ? '소유자' : (p.userId ? (p.profile?.nickname || undefined) : p.email)}
-                onClick={(e) => openProfileCard(p, e)}
-                style={{ marginLeft: i === 0 ? 0 : 3, display: 'inline-block', lineHeight: 0, cursor: 'pointer' }}
-              >
-                <Avatar
-                  profile={p.profile ?? (p.email ? { glyph: p.email[0]?.toUpperCase() } : null)}
-                  size={18}
-                  online={p.online}
-                />
-              </span>
-            ))}
-            {participants.length > 5 && (
-              <span
-                style={{
-                  marginLeft: 3, width: 18, height: 18, borderRadius: '50%',
-                  background: '#2a2a36', border: '2px solid #ffffff33', boxSizing: 'border-box',
-                  color: '#aaa', fontSize: 9, fontWeight: 700,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}
-              >
-                +{participants.length - 5}
-              </span>
-            )}
-          </span>
-        )}
-        {isOwnActive && onInvite && (
-          <span
-            onClick={(e) => { e.stopPropagation(); const r = e.currentTarget.getBoundingClientRect(); onInvite('canvas', null, r) }}
-            title="공유 초대"
-            style={{
-              width: 18, height: 18, borderRadius: '50%', flexShrink: 0,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: '#ffffff14', color: '#ccc', fontSize: 12, cursor: 'pointer',
-              boxShadow: presenceGlow ? '0 0 0 2px #22c55e55, 0 0 10px 2px #22c55e88' : 'none',
-              animation: presenceGlow ? 'wfcInviteGlow 1.6s ease-in-out infinite' : 'none',
-            }}
-          >
-            ＋
-          </span>
-        )}
-        <span style={{ color: '#888', fontSize: 11, flexShrink: 0 }}>▾</span>
-      </button>
-      <style>{`@keyframes wfcInviteGlow { 0%,100% { box-shadow: 0 0 0 2px #22c55e55, 0 0 8px 2px #22c55e77; } 50% { box-shadow: 0 0 0 3px #22c55e77, 0 0 16px 6px #22c55eaa; } }`}</style>
-
-      {/* Expanded dropdown panel */}
-      {open && (
-        <div
+      <div style={{ position: 'relative', flex: mobile ? 1 : 'none', minWidth: 0 }}>
+        {/* Collapsed trigger button */}
+        <button
+          onClick={() => setOpen((v) => !v)}
           style={{
-            position: mobile ? 'relative' : 'absolute',
-            top: mobile ? 0 : '100%',
-            left: 0,
-            right: mobile ? 0 : 'auto',
-            minWidth: mobile ? '100%' : 220,
-            maxHeight: '60vh',
-            overflowY: 'auto',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            width: mobile ? '100%' : 'auto',
             background: '#1a1a22',
             border: '1px solid #ffffff18',
-            borderTop: mobile ? '1px solid #ffffff18' : 'none',
-            borderRadius: mobile ? '0 0 12px 12px' : '0 12px 12px 12px',
-            boxShadow: '0 8px 32px #000c',
+            borderRadius: mobile ? (open ? '0 0 0 0' : '0 0 12px 12px') : (open ? '12px 12px 0 0' : 12),
+            padding: mobile ? 'calc(env(safe-area-inset-top, 0px) + 6px) 12px 6px' : '6px 12px',
+            boxShadow: open ? 'none' : '0 4px 24px #000a',
             backdropFilter: 'blur(8px)',
-            zIndex: 11,
+            color: '#f0f0f0',
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+            whiteSpace: 'nowrap',
+            transition: 'border-radius 0.1s',
+            boxSizing: 'border-box',
           }}
         >
-          {ownRegular.map((c) => renderOwnRow(c, { shared: false }))}
+          <span style={{ flex: 1, textAlign: 'left' }}>{activeCanvas?.name ?? '캔버스'}</span>
+          <span style={{ color: '#888', fontSize: 11, flexShrink: 0 }}>▾</span>
+        </button>
 
-          {/* Shared canvases: mine shared out + canvases shared to me */}
-          {(ownShared.length > 0 || sharedCanvases.length > 0) && (
-            <>
-              <div style={{ padding: '6px 12px 4px', borderTop: '1px solid #ffffff10', color: '#666', fontSize: 10, fontWeight: 700, letterSpacing: 1 }}>
-                공유 캔버스
-              </div>
-              {ownShared.map((c) => renderOwnRow(c, { shared: true }))}
-              {sharedCanvases.map((c) => {
-                const active = c.id === activeId
-                return (
-                  <div
-                    key={c.id}
-                    onClick={() => { onSwitch(c.id); setOpen(false) }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                      padding: '7px 12px',
-                      cursor: 'pointer',
-                      background: active ? '#3b82f622' : 'transparent',
-                      borderLeft: active ? '2px solid #3b82f6' : '2px solid transparent',
-                      transition: 'background 0.1s',
-                    }}
-                    onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = '#ffffff0a' }}
-                    onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = 'transparent' }}
-                  >
-                    <span style={{ fontSize: 12, flexShrink: 0 }}>🤝</span>
-                    <span style={{
-                      flex: 1, color: active ? '#fff' : '#aaa', fontSize: 13, fontWeight: active ? 700 : 500,
-                      minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    }}>
-                      {c.name}
-                    </span>
-                  </div>
-                )
-              })}
-            </>
-          )}
-
-          {/* Add canvas row */}
+        {/* Expanded dropdown panel */}
+        {open && (
           <div
-            onClick={() => { onAdd(); setOpen(false) }}
             style={{
-              padding: '7px 12px',
-              borderTop: '1px solid #ffffff10',
-              color: '#888',
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'color 0.1s',
+              position: mobile ? 'relative' : 'absolute',
+              top: mobile ? 0 : '100%',
+              left: 0,
+              right: mobile ? 0 : 'auto',
+              minWidth: mobile ? '100%' : 220,
+              maxHeight: '60vh',
+              overflowY: 'auto',
+              background: '#1a1a22',
+              border: '1px solid #ffffff18',
+              borderTop: mobile ? '1px solid #ffffff18' : 'none',
+              borderRadius: mobile ? '0 0 12px 12px' : '0 12px 12px 12px',
+              boxShadow: '0 8px 32px #000c',
+              backdropFilter: 'blur(8px)',
+              zIndex: 11,
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = '#fff')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = '#888')}
           >
-            + 새 캔버스
+            {ownRegular.map((c) => renderOwnRow(c, { shared: false }))}
+
+            {/* Shared canvases: mine shared out + canvases shared to me */}
+            {(ownShared.length > 0 || sharedCanvases.length > 0) && (
+              <>
+                <div style={{ padding: '6px 12px 4px', borderTop: '1px solid #ffffff10', color: '#666', fontSize: 10, fontWeight: 700, letterSpacing: 1 }}>
+                  공유 캔버스
+                </div>
+                {ownShared.map((c) => renderOwnRow(c, { shared: true }))}
+                {sharedCanvases.map((c) => {
+                  const active = c.id === activeId
+                  return (
+                    <div
+                      key={c.id}
+                      onClick={() => { onSwitch(c.id); setOpen(false) }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        padding: '7px 12px',
+                        cursor: 'pointer',
+                        background: active ? '#3b82f622' : 'transparent',
+                        borderLeft: active ? '2px solid #3b82f6' : '2px solid transparent',
+                        transition: 'background 0.1s',
+                      }}
+                      onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = '#ffffff0a' }}
+                      onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = 'transparent' }}
+                    >
+                      <span style={{ fontSize: 12, flexShrink: 0 }}>🤝</span>
+                      <span style={{
+                        flex: 1, color: active ? '#fff' : '#aaa', fontSize: 13, fontWeight: active ? 700 : 500,
+                        minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      }}>
+                        {c.name}
+                      </span>
+                    </div>
+                  )
+                })}
+              </>
+            )}
+
+            {/* Add canvas row */}
+            <div
+              onClick={() => { onAdd(); setOpen(false) }}
+              style={{
+                padding: '7px 12px',
+                borderTop: '1px solid #ffffff10',
+                color: '#888',
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'color 0.1s',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#fff')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#888')}
+            >
+              + 새 캔버스
+            </div>
           </div>
+        )}
+      </div>
+
+      {/* People bar: avatars + invite, separate from the trigger button */}
+      {showPeopleBar && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
+            flexShrink: 0,
+            background: '#1a1a22',
+            border: '1px solid #ffffff18',
+            borderRadius: 12,
+            padding: mobile ? 'calc(env(safe-area-inset-top, 0px) + 6px) 8px 6px' : '5px 8px',
+            boxShadow: '0 4px 24px #000a',
+            backdropFilter: 'blur(8px)',
+            boxSizing: 'border-box',
+          }}
+        >
+          {shownPeople.map((p) => (
+            <span
+              key={p.userId ?? p.email}
+              onClick={(e) => { e.stopPropagation(); setPeopleOpen(true) }}
+              title={p.profile?.nickname || p.email || (p.isOwner ? '소유자' : '')}
+              style={{ cursor: 'pointer', display: 'flex' }}
+            >
+              {avatarOf(p, 20)}
+            </span>
+          ))}
+          {isOwnActive && onInvite && (
+            <span
+              onClick={(e) => { e.stopPropagation(); const rect = e.currentTarget.getBoundingClientRect(); onInvite('canvas', null, rect) }}
+              title="초대"
+              style={{
+                width: 18,
+                height: 18,
+                borderRadius: '50%',
+                border: '1px dashed #666',
+                color: '#888',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 12,
+                lineHeight: 1,
+                cursor: 'pointer',
+                flexShrink: 0,
+              }}
+            >
+              +
+            </span>
+          )}
         </div>
       )}
       </div>
 
-      {profileCard && (() => {
-        const { p, x, y } = profileCard
-        const nickname = p.profile?.nickname || '이름 없음'
-        const email = p.email ?? p.profile?.email ?? '-'
-        const lastSeen = p.online ? '접속 중' : relativeLastSeen(p.profile?.lastSeenAt ?? p.lastSeenAt)
-        return (
+      {/* Participants modal: full list, click any avatar to open */}
+      {peopleOpen && (
+        <div
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: '#000000aa',
+            zIndex: 1001,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
           <div
-            ref={profileCardRef}
-            onClick={(e) => e.stopPropagation()}
+            ref={peopleRef}
             style={{
-              position: 'fixed',
-              left: x,
-              top: y,
-              width: 240,
-              zIndex: 1000,
               background: '#1a1a22',
-              border: '1px solid #ffffff18',
-              borderRadius: 12,
-              boxShadow: '0 8px 32px #000c',
-              backdropFilter: 'blur(8px)',
-              padding: 14,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 8,
+              border: '1px solid #ffffff22',
+              borderRadius: 14,
+              width: 300,
+              maxHeight: '70vh',
+              overflowY: 'auto',
+              padding: 16,
               boxSizing: 'border-box',
             }}
           >
-            <Avatar
-              profile={p.profile ?? (p.email ? { glyph: p.email[0]?.toUpperCase() } : null)}
-              size={40}
-              online={p.online}
-              opacityOffState={false}
-            />
-            <div style={{ color: '#f0f0f0', fontSize: 14, fontWeight: 700, textAlign: 'center', wordBreak: 'break-word' }}>
-              {nickname}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <span style={{ color: '#f0f0f0', fontSize: 14, fontWeight: 700 }}>참여자 {participants.length}</span>
+              <button
+                onClick={() => setPeopleOpen(false)}
+                style={{ background: 'transparent', border: 'none', color: '#888', cursor: 'pointer', fontSize: 14, padding: 0, lineHeight: 1 }}
+              >
+                ✕
+              </button>
             </div>
-            <div style={{ color: '#aaa', fontSize: 12, textAlign: 'center', wordBreak: 'break-all' }}>
-              {email}
-            </div>
-            <div style={{ color: '#666', fontSize: 11, marginTop: 2 }}>
-              마지막 접속: {lastSeen}
-            </div>
+
+            {participants.map((p) => {
+              const nickname = p.profile?.nickname || '이름 없음'
+              const email = p.email ?? p.profile?.email ?? '-'
+              const lastSeen = p.online ? '접속 중' : `마지막 접속: ${relativeLastSeen(p.profile?.lastSeenAt ?? p.lastSeenAt)}`
+              return (
+                <div
+                  key={p.userId ?? p.email}
+                  style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderTop: '1px solid #ffffff0e' }}
+                >
+                  {avatarOf(p, 28)}
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ color: '#f0f0f0', fontSize: 13, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {nickname}
+                      </span>
+                      {p.isOwner && (
+                        <span style={{ background: '#3b82f6', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 4, padding: '1px 5px', flexShrink: 0 }}>
+                          소유자
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ color: '#888', fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {email}
+                    </div>
+                    <div style={{ color: '#666', fontSize: 10 }}>{lastSeen}</div>
+                  </div>
+                </div>
+              )
+            })}
           </div>
-        )
-      })()}
+        </div>
+      )}
     </>
   )
 }

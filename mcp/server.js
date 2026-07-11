@@ -19,7 +19,12 @@ const fail = (msg) => ({ content: [{ type: 'text', text: `❌ ${msg}` }], isErro
 const guard = (getUserId, fn) => async (args) => {
   try {
     const userId = getUserId()
-    if (!userId) throw new Error('인증 실패: 유효한 토큰이 필요합니다 (Authorization: Bearer <token>).')
+    if (!userId) {
+      throw new Error(
+        '인증 실패: 유효한 토큰이 필요합니다. 커넥터 URL이 ".../api/mcp?token=<토큰>" 형태인지 확인하고, ' +
+        '앱의 프로필 → MCP 연결에서 URL을 다시 복사해 커넥터를 재등록하세요. ' +
+        '(커넥터의 "연결됨" 표시는 토큰 검증과 무관합니다)')
+    }
     return await fn(userId, args ?? {})
   } catch (e) {
     return fail(e?.message || String(e))
@@ -388,9 +393,14 @@ export default async function handler(req, res) {
 
   if (req.method === 'OPTIONS') { res.statusCode = 204; res.end(); return }
   if (req.method === 'GET') {
-    res.statusCode = 200
+    // Streamable HTTP: a GET is the client trying to open a server→client SSE
+    // stream. We don't offer one, and the spec requires 405 in that case —
+    // answering 200 with plain JSON sends clients into a reconnect loop that
+    // blocks all tool calls.
+    res.statusCode = 405
+    res.setHeader('Allow', 'POST, OPTIONS')
     res.setHeader('Content-Type', 'application/json')
-    res.end(JSON.stringify({ name: 'workflow-canvas MCP', status: 'ok', transport: 'streamable-http' }))
+    res.end(JSON.stringify({ error: 'Method not allowed. POST JSON-RPC to this endpoint (no SSE stream offered).' }))
     return
   }
   if (req.method !== 'POST') {

@@ -248,10 +248,13 @@ export default function App() {
   const [sharedCanvases, setSharedCanvases] = useState([]) // canvases shared WITH me (listSharedWithMe())
   const pendingShareTokenRef = useRef(null) // #share=<token> claimed right after SIGNED_IN
   const [authNotice, setAuthNotice] = useState(null) // share-link login gate notice shown in AuthPanel
+  const inviteWrapRef = useRef(null) // invite popover wrapper (outside-click close)
 
   // ── Profiles (nickname/avatar) ────────────────────────────────────────────
   const [myProfile, setMyProfile] = useState(null)
+  const myProfileRef = useRef(null) // fresh-value mirror for refreshShareParticipants (stable useCallback)
   useEffect(() => { if (!user) setMyProfile(null) }, [user])
+  useEffect(() => { myProfileRef.current = myProfile }, [myProfile])
 
   // Participants shown in the CanvasTabs avatar row for the ACTIVE canvas.
   const [shareParticipantsBase, setShareParticipantsBase] = useState([]) // [{ userId, email, profile, isOwner }]
@@ -870,7 +873,13 @@ export default function App() {
         const pending = shares
           .filter((s) => s.invitee_email && !(s.memberUserIds?.length))
           .map((s) => ({ userId: null, email: s.invitee_email, profile: null, isOwner: false, lastSeenAt: null }))
-        setShareParticipantsBase([...members, ...pending])
+        const mp = myProfileRef.current
+        const ownerProfile = mp ? { nickname: mp.nickname, glyph: mp.glyph, color: mp.color, email: mp.email, lastSeenAt: mp.last_seen_at } : null
+        const owner = {
+          userId: u.id, profile: ownerProfile, isOwner: true,
+          email: ownerProfile?.email ?? u.email ?? null, lastSeenAt: ownerProfile?.lastSeenAt ?? null,
+        }
+        setShareParticipantsBase([owner, ...members, ...pending])
       } else {
         const ids = [shared.ownerId, u.id]
         const profiles = await getProfiles(ids)
@@ -1210,7 +1219,24 @@ export default function App() {
   const isNodeEditable = useCallback((id) => editableSet === null || editableSet.has(id), [editableSet])
 
   // Someone other than me online in the active canvas → glow the invite icons.
-  const presenceGlow = user ? onlineUsers.some((u) => u.user_id !== user.id) : false
+  // Close the invite popover on outside click / Escape.
+  useEffect(() => {
+    if (!invite) return
+    const onDown = (e) => {
+      if (inviteWrapRef.current && !inviteWrapRef.current.contains(e.target)) {
+        setInvite(null); refreshShareParticipants(); refreshSharedOutCanvasIds()
+      }
+    }
+    const onKey = (e) => { if (e.key === 'Escape') { setInvite(null); refreshShareParticipants(); refreshSharedOutCanvasIds() } }
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('touchstart', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('touchstart', onDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [invite])
 
   // Open the invite popover near the icon that was clicked, clamped to the viewport.
   const openInvite = useCallback((scope, targetId, anchorRect) => {
@@ -1862,7 +1888,6 @@ export default function App() {
         mobile={mobile}
         sharedCanvases={sharedCanvasList}
         onInvite={openInvite}
-        presenceGlow={presenceGlow}
         participants={shareParticipants}
         sharedOutIds={sharedOutCanvasIds}
       />
@@ -1893,7 +1918,7 @@ export default function App() {
       />
 
       {invite && (
-        <div style={{ position: 'fixed', left: invite.x, top: invite.y, zIndex: 1000 }} onClick={(e) => e.stopPropagation()}>
+        <div ref={inviteWrapRef} style={{ position: 'fixed', left: invite.x, top: invite.y, zIndex: 1000 }} onClick={(e) => e.stopPropagation()}>
           <InvitePopover
             scope={invite.scope}
             targetId={invite.targetId}
@@ -1901,6 +1926,27 @@ export default function App() {
             onClose={() => { setInvite(null); refreshShareParticipants(); refreshSharedOutCanvasIds() }}
             onlineUserIds={new Set(onlineUsers.map((u) => u.user_id))}
           />
+        </div>
+      )}
+
+      {/* Share-link login gate: centered notice for logged-out visitors */}
+      {authNotice && !user && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 900,
+          background: '#000000aa', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <div style={{
+            background: '#1a1a22', border: '1px solid #ffffff22', borderRadius: 14,
+            padding: '28px 32px', maxWidth: 340, textAlign: 'center', boxShadow: '0 12px 48px #000d',
+          }}>
+            <div style={{ fontSize: 28, marginBottom: 12 }}>🔒</div>
+            <div style={{ color: '#f0f0f0', fontSize: 15, fontWeight: 700, marginBottom: 8 }}>
+              공유받은 캔버스를 보려면 로그인이 필요합니다
+            </div>
+            <div style={{ color: '#888', fontSize: 12, lineHeight: 1.6 }}>
+              오른쪽 위 로그인 패널에서 로그인하거나 가입하면<br />초대된 캔버스로 바로 이동합니다.
+            </div>
+          </div>
         </div>
       )}
 
@@ -1929,7 +1975,6 @@ export default function App() {
               readOnly: restrictedScope && !editable,
               forceShapeOnly: forceShapeOnlySet?.has(n.id) ?? false,
               canInvite: isOwner,
-              presenceGlow,
               onInvite: isOwner ? openInvite : undefined,
               onUpdate: (patch) => updateNodeData(n.id, patch),
               onEditStart: () => setIsAnyEditing(true),

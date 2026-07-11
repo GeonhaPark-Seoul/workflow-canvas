@@ -163,8 +163,6 @@ export default function GroupNode({ data, selected, id }) {
               width: 18, height: 18, borderRadius: '50%', border: 'none', flexShrink: 0,
               background: '#ffffff14', color: '#aab', fontSize: 12, lineHeight: '18px',
               padding: 0, cursor: 'pointer',
-              boxShadow: data.presenceGlow ? '0 0 0 2px #22c55e55, 0 0 10px 2px #22c55e88' : 'none',
-              animation: data.presenceGlow ? 'wfcInviteGlow 1.6s ease-in-out infinite' : 'none',
             }}
           >
             ＋
@@ -172,7 +170,6 @@ export default function GroupNode({ data, selected, id }) {
         )}
       </div>
       )}
-      <style>{`@keyframes wfcInviteGlow { 0%,100% { box-shadow: 0 0 0 2px #22c55e55, 0 0 8px 2px #22c55e77; } 50% { box-shadow: 0 0 0 3px #22c55e77, 0 0 16px 6px #22c55eaa; } }`}</style>
     </div>
   )
 }
