@@ -176,16 +176,19 @@ export default function InvitePopover({ scope, targetId, canvasId, onClose, onli
         </button>
       )}
 
-      {/* Restrict view checkbox */}
-      <label style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, cursor: 'pointer' }}>
-        <input
-          type="checkbox"
-          checked={restrictView}
-          onChange={(e) => setRestrictView(e.target.checked)}
-          style={{ accentColor: '#a855f7', cursor: 'pointer' }}
-        />
-        <span style={{ fontSize: 11, color: '#aaa' }}>시야를 초대 구역으로 제한</span>
-      </label>
+      {/* Restrict view checkbox — meaningless for canvas scope (the invited
+          region IS the whole canvas, so there is no "outside" to hide). */}
+      {scope !== 'canvas' && (
+        <label style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={restrictView}
+            onChange={(e) => setRestrictView(e.target.checked)}
+            style={{ accentColor: '#a855f7', cursor: 'pointer' }}
+          />
+          <span style={{ fontSize: 11, color: '#aaa' }}>시야를 초대 구역으로 제한 (구역 밖은 도형만 표시)</span>
+        </label>
+      )}
 
       {error && (
         <div style={{ fontSize: 11, color: '#ef4444', marginBottom: 8 }}>{error}</div>

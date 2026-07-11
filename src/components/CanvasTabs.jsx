@@ -137,7 +137,7 @@ export default function CanvasTabs({
           />
         ) : (
           <>
-            {shared && <span style={{ fontSize: 11, color: '#888', flexShrink: 0 }} title="공유 중">⤴</span>}
+            {shared && <span style={{ fontSize: 11, color: '#888', flexShrink: 0 }} title="공유 중">↑</span>}
             <span style={{ flex: 1, color: active ? '#fff' : '#aaa', fontSize: 13, fontWeight: active ? 700 : 500, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {c.name}
             </span>
@@ -257,7 +257,7 @@ export default function CanvasTabs({
                       onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = '#ffffff0a' }}
                       onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = 'transparent' }}
                     >
-                      <span style={{ fontSize: 12, flexShrink: 0 }}>🤝</span>
+                      <span style={{ fontSize: 12, flexShrink: 0 }}>↓</span>
                       <span style={{
                         flex: 1, color: active ? '#fff' : '#aaa', fontSize: 13, fontWeight: active ? 700 : 500,
                         minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',

@@ -18,7 +18,6 @@ import GroupNode from './nodes/GroupNode'
 import StubEdge from './edges/StubEdge'
 import { DEMO_CANVASES } from './demoCanvases'
 import Toolbar from './components/Toolbar'
-import HelpPanel from './components/HelpPanel'
 import CanvasTabs from './components/CanvasTabs'
 import AuthPanel from './components/AuthPanel'
 import InvitePopover from './components/InvitePopover'
@@ -2040,7 +2039,6 @@ export default function App() {
         )}
       </ReactFlow>
 
-      <HelpPanel mobile={mobile} />
 
       {/* ── Selection rubber-band (long-press drag) ──────────────────────── */}
       {lassoRect && (

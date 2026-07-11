@@ -77,7 +77,7 @@ export default function GroupNode({ data, selected, id }) {
         minWidth: 240,
         minHeight: 160,
         boxSizing: 'border-box',
-        background: '#ffffff02',
+        background: '#ffffff0f',
         border: '1.5px dashed #8b94a766',
         borderRadius: 14,
       }}
