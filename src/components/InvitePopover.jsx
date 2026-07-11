@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
-import { createShare, createLinkShare, listShares, deleteShare } from '../lib/shares'
+import { createShare, createLinkShare, listShares, deleteShare, listShareMembers } from '../lib/shares'
+import { Avatar } from './AuthPanel'
 
 // Phase 1: pure popover UI for the sharing/invite feature. Not mounted
 // anywhere yet — phase 2 positions it near the canvas/group/node header and
@@ -13,6 +14,7 @@ const SCOPE_LABEL = {
 
 export default function InvitePopover({ scope, targetId, canvasId, onClose, onlineUserIds }) {
   const [shares, setShares] = useState([])
+  const [members, setMembers] = useState([]) // claimed members across all my shares for this canvas
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -27,9 +29,10 @@ export default function InvitePopover({ scope, targetId, canvasId, onClose, onli
 
   const refresh = useCallback(() => {
     setLoading(true)
-    listShares(canvasId)
-      .then((all) => {
+    Promise.all([listShares(canvasId), listShareMembers(canvasId)])
+      .then(([all, mem]) => {
         setShares(all.filter((s) => s.scope === scope && (s.target_id ?? null) === (targetId ?? null)))
+        setMembers(mem)
         setError(null)
       })
       .catch((e) => setError(e.message))
@@ -236,6 +239,11 @@ export default function InvitePopover({ scope, targetId, canvasId, onClose, onli
                   시야제한
                 </span>
               )}
+              {members.filter((m) => m.shareId === s.id).map((m) => (
+                <span key={m.userId} title={m.profile?.nickname || m.profile?.email || ''} style={{ flexShrink: 0, display: 'flex' }}>
+                  <Avatar profile={m.profile} size={16} />
+                </span>
+              ))}
               <button
                 onClick={() => handleDelete(s.id)}
                 title="삭제"

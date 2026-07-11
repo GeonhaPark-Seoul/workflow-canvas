@@ -81,9 +81,12 @@ export default function StageNode({ data, selected, id }) {
   const zoomShapeOnly = useStore((s) => s.transform[2] < (data.lodThreshold ?? 0.55) * 0.45)
   const shapeOnly = zoomShapeOnly || data.forceShapeOnly
 
+  const filled = data.nodeFill !== false
+
   const [editing, setEditing] = useState(null) // 'title' | 'desc' | null
   const titleRef = useRef(null)
   const descRef = useRef(null)
+  const descDisplayRef = useRef(null)
   const longPressTimer = useRef(null)
   const longPressStart = useRef(null)
   const dimPressTimer = useRef(null)
@@ -91,6 +94,8 @@ export default function StageNode({ data, selected, id }) {
   const titleContainerRef = useRef(null)
   const descContainerRef = useRef(null)
   const caretPosRef = useRef(null)
+  const [descHover, setDescHover] = useState(null) // { top, height } | null — mousemove-follow line strip
+  const [descCaret, setDescCaret] = useState(null) // { top, height } | null — always-on caret line strip while editing
 
   // Parts list: inline text editing per-row (id of the part currently being edited)
   const [editingPartId, setEditingPartId] = useState(null)
@@ -137,26 +142,60 @@ export default function StageNode({ data, selected, id }) {
     }
   }, [editing]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // While editing, keep the line under the caret highlighted (.caret-line). "Line" means
-  // the direct block-level child of the editor that contains the current selection.
+  // Caret-line strip for the desc field while editing: an always-on overlay positioned
+  // from the current selection's bounding rect. Both rects are viewport-relative and
+  // already reflect live scroll position, so no manual scroll math is needed. Cleared
+  // whenever `editing` changes (including on edit end), so no stuck strip can remain.
   useEffect(() => {
-    if (!editing) return
-    const root = editing === 'title' ? titleRef.current : editing === 'desc' ? descRef.current : null
-    if (!root) return
-    const onSelectionChange = () => {
+    if (editing !== 'desc') { setDescCaret(null); return }
+    const root = descRef.current
+    const container = descContainerRef.current
+    if (!root || !container) return
+    const update = () => {
       const sel = window.getSelection()
       if (!sel || sel.rangeCount === 0 || !root.contains(sel.anchorNode)) return
-      let el = sel.anchorNode.nodeType === Node.TEXT_NODE ? sel.anchorNode.parentElement : sel.anchorNode
-      while (el && el !== root && el.parentElement !== root) el = el.parentElement
-      root.querySelectorAll('.caret-line').forEach((n) => { if (n !== el) n.classList.remove('caret-line') })
-      if (el && el !== root) el.classList.add('caret-line')
+      const range = sel.getRangeAt(0)
+      let rect = range.getBoundingClientRect()
+      if (rect.width === 0 && rect.height === 0) {
+        const rects = range.getClientRects()
+        if (rects.length) rect = rects[0]
+      }
+      if (!rect || (rect.width === 0 && rect.height === 0)) return
+      const containerRect = container.getBoundingClientRect()
+      const style = getComputedStyle(root)
+      let lineHeight = parseFloat(style.lineHeight)
+      if (!lineHeight || Number.isNaN(lineHeight)) lineHeight = parseFloat(style.fontSize) * 1.5
+      setDescCaret({ top: rect.top - containerRect.top, height: lineHeight })
     }
-    document.addEventListener('selectionchange', onSelectionChange)
+    document.addEventListener('selectionchange', update)
+    update()
     return () => {
-      document.removeEventListener('selectionchange', onSelectionChange)
-      root.querySelectorAll('.caret-line').forEach((n) => n.classList.remove('caret-line'))
+      document.removeEventListener('selectionchange', update)
+      setDescCaret(null)
     }
   }, [editing])
+
+  // Hover-follow line strip for the desc field (display or edit): tracks the mouse and
+  // highlights whichever soft-wrapped line it's under. Cleared on edit-mode transitions
+  // and on mouseleave, so nothing can get stuck once the pointer moves away. Skipped on
+  // coarse (touch) pointers — the selected-state pill affordance (.text-hover-line, CSS)
+  // covers that case instead.
+  useEffect(() => { setDescHover(null) }, [editing])
+  const handleDescMouseMove = (e) => {
+    if (window.matchMedia?.('(pointer: coarse)').matches) return
+    const el = editing === 'desc' ? descRef.current : descDisplayRef.current
+    const container = descContainerRef.current
+    if (!el || !container) return
+    const elRect = el.getBoundingClientRect()
+    const containerRect = container.getBoundingClientRect()
+    const style = getComputedStyle(el)
+    let lineHeight = parseFloat(style.lineHeight)
+    if (!lineHeight || Number.isNaN(lineHeight)) lineHeight = parseFloat(style.fontSize) * 1.5
+    const y = e.clientY - elRect.top + el.scrollTop
+    const lineIndex = Math.max(0, Math.floor(y / lineHeight))
+    setDescHover({ top: (elRect.top - containerRect.top) + lineIndex * lineHeight - el.scrollTop, height: lineHeight })
+  }
+  const handleDescMouseLeave = () => setDescHover(null)
 
   const cycleColor = (e) => {
     e.stopPropagation()
@@ -264,7 +303,7 @@ export default function StageNode({ data, selected, id }) {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: abstract ? 'center' : undefined,
-        background: color.bg,
+        background: filled ? color.bg : 'transparent',
         border: `2px solid ${selected ? '#ffffff' : color.border}`,
         borderRadius: 0,
         boxShadow: selected
@@ -414,7 +453,12 @@ export default function StageNode({ data, selected, id }) {
       {/* Description — only rendered in normal (non-abstract) mode, or when being edited */}
       {(!abstract || editing === 'desc') && (
         <div style={{ flex: 1, padding: '0 12px 10px', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-          <div ref={descContainerRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, position: 'relative' }}>
+          <div
+            ref={descContainerRef}
+            style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, position: 'relative' }}
+            onMouseMove={handleDescMouseMove}
+            onMouseLeave={handleDescMouseLeave}
+          >
             {editing === 'desc' ? (
               <div
                 ref={descRef}
@@ -431,6 +475,7 @@ export default function StageNode({ data, selected, id }) {
               />
             ) : (
               <div
+                ref={descDisplayRef}
                 className="rich-content"
                 onClick={handleDisplayClick('desc')}
                 dangerouslySetInnerHTML={{ __html: wrapLines(descValue || (data.descTouched ? '' : '설명')) }}
@@ -441,6 +486,12 @@ export default function StageNode({ data, selected, id }) {
                   touchAction: 'manipulation',
                 }}
               />
+            )}
+            {descHover && (
+              <div style={{ position: 'absolute', left: -4, right: -4, top: descHover.top, height: descHover.height, borderRadius: 6, background: '#ffffff12', pointerEvents: 'none' }} />
+            )}
+            {descCaret && (
+              <div style={{ position: 'absolute', left: -4, right: -4, top: descCaret.top, height: descCaret.height, borderRadius: 6, background: '#ffffff12', pointerEvents: 'none' }} />
             )}
           </div>
         </div>

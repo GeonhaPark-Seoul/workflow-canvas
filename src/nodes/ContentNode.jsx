@@ -7,7 +7,7 @@ import EditToolbar from '../components/EditToolbar'
 // connection, so any port can be both an input and an output.
 const HANDLE = {
   width: 45, height: 45, border: 'none',
-  background: 'radial-gradient(circle, #f59e0b 7px, #0f0f13 7px 10.5px, transparent 10.5px)',
+  background: 'radial-gradient(circle, #8b94a7 7px, #0f0f13 7px 10.5px, transparent 10.5px)',
 }
 const PORTS = [
   { id: 'left', position: Position.Left },
@@ -15,6 +15,39 @@ const PORTS = [
   { id: 'top', position: Position.Top },
   { id: 'bottom', position: Position.Bottom },
 ]
+
+const KIND_LABEL = {
+  photo: '🖼 사진',
+  database: '🗄 데이터베이스',
+  browser: '🌐 브라우저',
+}
+
+// Downscale an image file to a data URL (max dimension 1200px, JPEG quality 0.85).
+function downscaleImage(file, maxSize = 1200, quality = 0.85) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      const img = new Image()
+      img.onload = () => {
+        let { width, height } = img
+        if (width > maxSize || height > maxSize) {
+          const scale = maxSize / Math.max(width, height)
+          width = Math.round(width * scale)
+          height = Math.round(height * scale)
+        }
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height)
+        resolve(canvas.toDataURL('image/jpeg', quality))
+      }
+      img.onerror = reject
+      img.src = reader.result
+    }
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
+}
 
 // Place caret at end of contentEditable element
 function caretAtEnd(el) {
@@ -48,15 +81,7 @@ function placeCaretAt(el, pos) {
   caretAtEnd(el)
 }
 
-// Wrap br-separated top-level text into <div> lines so per-line hover/caret-line CSS
-// can target individual lines. Content that already has block-level tags is untouched.
-function wrapLines(html) {
-  if (!html) return html
-  if (/<(div|p|li|summary|ul|ol)[\s>]/i.test(html)) return html
-  return html.split(/<br\s*\/?>/i).map((line) => `<div>${line}</div>`).join('')
-}
-
-export default function MemoNode({ data, selected, id }) {
+export default function ContentNode({ data, selected, id }) {
   // Abstract (LOD) mode: re-renders only when crossing the threshold, not every zoom tick.
   const abstract = useStore((s) => s.transform[2] < (data.lodThreshold ?? 0.55))
   // Shape-only (deeper LOD) mode: below this, all text/content disappears — only the colored shape + handles remain.
@@ -66,18 +91,15 @@ export default function MemoNode({ data, selected, id }) {
 
   const filled = data.nodeFill !== false
 
-  const [editing, setEditing] = useState(null) // 'header' | 'text' | null
+  const [editing, setEditing] = useState(null) // 'header' | null
   const headerRef = useRef(null)
-  const textRef = useRef(null)
-  const textDisplayRef = useRef(null)
   const longPressTimer = useRef(null)
   const longPressStart = useRef(null)
   const dimPressTimer = useRef(null)
   const headerContainerRef = useRef(null)
-  const textContainerRef = useRef(null)
   const caretPosRef = useRef(null)
-  const [textHover, setTextHover] = useState(null) // { top, height } | null — mousemove-follow line strip
-  const [textCaret, setTextCaret] = useState(null) // { top, height } | null — always-on caret line strip while editing
+  const fileInputRef = useRef(null)
+  const [urlDraft, setUrlDraft] = useState(data.url ?? '')
 
   // Click-to-edit cycle: click 1 selects (React Flow default), click 2 (while already
   // selected) starts editing. React Flow selects on mousedown, so the first click's
@@ -113,67 +135,11 @@ export default function MemoNode({ data, selected, id }) {
       headerRef.current.focus()
       placeCaretAt(headerRef.current, caretPosRef.current)
     }
-    if (editing === 'text' && textRef.current) {
-      textRef.current.innerHTML = wrapLines(data.text || '')
-      textRef.current.focus()
-      placeCaretAt(textRef.current, caretPosRef.current)
-    }
   }, [editing]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Caret-line strip for the text field while editing: an always-on overlay positioned
-  // from the current selection's bounding rect. Both rects are viewport-relative and
-  // already reflect live scroll position, so no manual scroll math is needed. Cleared
-  // whenever `editing` changes (including on edit end), so no stuck strip can remain.
   useEffect(() => {
-    if (editing !== 'text') { setTextCaret(null); return }
-    const root = textRef.current
-    const container = textContainerRef.current
-    if (!root || !container) return
-    const update = () => {
-      const sel = window.getSelection()
-      if (!sel || sel.rangeCount === 0 || !root.contains(sel.anchorNode)) return
-      const range = sel.getRangeAt(0)
-      let rect = range.getBoundingClientRect()
-      if (rect.width === 0 && rect.height === 0) {
-        const rects = range.getClientRects()
-        if (rects.length) rect = rects[0]
-      }
-      if (!rect || (rect.width === 0 && rect.height === 0)) return
-      const containerRect = container.getBoundingClientRect()
-      const style = getComputedStyle(root)
-      let lineHeight = parseFloat(style.lineHeight)
-      if (!lineHeight || Number.isNaN(lineHeight)) lineHeight = parseFloat(style.fontSize) * 1.5
-      setTextCaret({ top: rect.top - containerRect.top, height: lineHeight })
-    }
-    document.addEventListener('selectionchange', update)
-    update()
-    return () => {
-      document.removeEventListener('selectionchange', update)
-      setTextCaret(null)
-    }
-  }, [editing])
-
-  // Hover-follow line strip for the text field (display or edit): tracks the mouse and
-  // highlights whichever soft-wrapped line it's under. Cleared on edit-mode transitions
-  // and on mouseleave, so nothing can get stuck once the pointer moves away. Skipped on
-  // coarse (touch) pointers — the selected-state pill affordance (.text-hover-line, CSS)
-  // covers that case instead.
-  useEffect(() => { setTextHover(null) }, [editing])
-  const handleTextMouseMove = (e) => {
-    if (window.matchMedia?.('(pointer: coarse)').matches) return
-    const el = editing === 'text' ? textRef.current : textDisplayRef.current
-    const container = textContainerRef.current
-    if (!el || !container) return
-    const elRect = el.getBoundingClientRect()
-    const containerRect = container.getBoundingClientRect()
-    const style = getComputedStyle(el)
-    let lineHeight = parseFloat(style.lineHeight)
-    if (!lineHeight || Number.isNaN(lineHeight)) lineHeight = parseFloat(style.fontSize) * 1.5
-    const y = e.clientY - elRect.top + el.scrollTop
-    const lineIndex = Math.max(0, Math.floor(y / lineHeight))
-    setTextHover({ top: (elRect.top - containerRect.top) + lineIndex * lineHeight - el.scrollTop, height: lineHeight })
-  }
-  const handleTextMouseLeave = () => setTextHover(null)
+    setUrlDraft(data.url ?? '')
+  }, [data.url])
 
   const onDimPointerDown = (e) => {
     e.stopPropagation()
@@ -191,31 +157,37 @@ export default function MemoNode({ data, selected, id }) {
   const stopEdit = (field, ref) => {
     if (editing !== field) return
     const html = ref.current?.innerHTML ?? ''
-    const patch = { header: data.header, text: data.text }
+    const patch = { header: data.header }
     if (field === 'header') { patch.header = html; patch.headerTouched = true }
-    if (field === 'text') { patch.text = html; patch.textTouched = true }
     setEditing(null)
     data.onEditEnd?.()
     data.onUpdate?.(patch)
   }
 
-  // Display-mode click: toggles a checkbox if that's what was clicked, otherwise
-  // starts editing the field once the node is selected (click-to-edit cycle).
   const handleDisplayClick = (field) => (e) => {
-    if (e.target.tagName === 'INPUT' && e.target.type === 'checkbox') {
-      e.stopPropagation()
-      e.target.toggleAttribute('checked')
-      const html = e.currentTarget.innerHTML
-      if (field === 'header') data.onUpdate?.({ header: html })
-      if (field === 'text') data.onUpdate?.({ text: html })
-      return
-    }
     if (!selected || editing || justSelected()) return
     startEdit(field, { x: e.clientX, y: e.clientY })
   }
 
+  const onPickFile = () => fileInputRef.current?.click()
+  const onFileChange = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    try {
+      const src = await downscaleImage(file)
+      data.onUpdate?.({ src })
+    } finally {
+      e.target.value = ''
+    }
+  }
+
+  const commitUrl = () => {
+    const url = urlDraft.trim()
+    if (url !== (data.url ?? '')) data.onUpdate?.({ url })
+  }
+
   const headerValue = data.header ?? ''
-  const textValue = data.text || ''
+  const kindLabel = KIND_LABEL[data.kind] ?? '콘텐츠'
 
   const headerFontSize = abstract ? Math.round(13 * 1.9) : 13
   const circleSize = abstract ? Math.round(14 * 1.9) : 14
@@ -226,16 +198,16 @@ export default function MemoNode({ data, selected, id }) {
         width: '100%',
         height: '100%',
         minWidth: 160,
-        minHeight: 80,
+        minHeight: 100,
         boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: abstract ? 'center' : undefined,
-        background: filled ? '#2a2510' : 'transparent',
-        border: `2px solid ${selected ? '#ffffff' : '#f59e0b88'}`,
+        background: filled ? '#20242e' : 'transparent',
+        border: `2px solid ${selected ? '#ffffff' : '#8b94a788'}`,
         borderRadius: 12,
         boxShadow: selected
-          ? '0 0 0 2px #f59e0b44, 0 8px 32px #0008'
+          ? '0 0 0 2px #8b94a744, 0 8px 32px #0008'
           : '0 4px 16px #0005',
         transition: 'border-color 0.15s, box-shadow 0.15s',
         touchAction: 'manipulation',
@@ -249,26 +221,26 @@ export default function MemoNode({ data, selected, id }) {
       <NodeResizer
         isVisible={selected}
         minWidth={160}
-        minHeight={80}
-        color="#f59e0b"
+        minHeight={100}
+        color="#8b94a7"
         handleStyle={{
           width: 20, height: 20, background: 'transparent', border: 'none',
-          backgroundImage: 'radial-gradient(circle, #f59e0b 5px, transparent 5px)',
+          backgroundImage: 'radial-gradient(circle, #8b94a7 5px, transparent 5px)',
           backgroundRepeat: 'no-repeat', backgroundPosition: 'center',
         }}
-        lineStyle={{ borderColor: '#f59e0b44' }}
+        lineStyle={{ borderColor: '#8b94a744' }}
       />
 
       {PORTS.map((p) => (
         <Handle key={p.id} type="source" id={p.id} position={p.position} style={HANDLE} />
       ))}
 
-      {/* Header strip — editable, blank by default; fully hidden in the shape-only tier */}
+      {/* Header strip — editable, defaults to the kind label; fully hidden in the shape-only tier */}
       {!shapeOnly && (
       <div
         style={{
-          background: filled ? '#f59e0b22' : 'transparent',
-          borderBottom: abstract ? 'none' : '1px solid #f59e0b44',
+          background: filled ? '#8b94a722' : 'transparent',
+          borderBottom: abstract ? 'none' : '1px solid #8b94a744',
           padding: '5px 10px',
           borderRadius: abstract ? 10 : '10px 10px 0 0',
           display: 'flex',
@@ -286,7 +258,7 @@ export default function MemoNode({ data, selected, id }) {
           title="길게 누르기: 끄기/켜기"
           style={{
             width: circleSize, height: circleSize, borderRadius: '50%',
-            background: '#f59e0b', border: 'none', cursor: 'pointer', flexShrink: 0,
+            background: '#8b94a7', border: 'none', cursor: 'pointer', flexShrink: 0,
           }}
         />
         <div ref={headerContainerRef} style={{ flex: 1, minWidth: 0, position: 'relative' }}>
@@ -300,8 +272,8 @@ export default function MemoNode({ data, selected, id }) {
               onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); stopEdit('header', headerRef) } if (e.key === 'Escape') { e.preventDefault(); stopEdit('header', headerRef) } }}
               style={{
                 flex: 1, background: 'transparent',
-                borderBottom: '1px solid #f59e0b88',
-                color: '#f59e0b', fontSize: headerFontSize, fontWeight: 800, letterSpacing: 0.3,
+                borderBottom: '1px solid #8b94a7',
+                color: '#c7cbd6', fontSize: headerFontSize, fontWeight: 800, letterSpacing: 0.3,
                 outline: 'none', minHeight: 18, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
                 cursor: 'text',
               }}
@@ -310,9 +282,9 @@ export default function MemoNode({ data, selected, id }) {
             <div
               className="rich-content text-hover-line"
               onClick={handleDisplayClick('header')}
-              dangerouslySetInnerHTML={{ __html: headerValue || (data.headerTouched ? '' : '제목') }}
+              dangerouslySetInnerHTML={{ __html: headerValue || (data.headerTouched ? '' : kindLabel) }}
               style={{
-                flex: 1, color: headerValue ? '#f59e0b' : '#f59e0b66',
+                flex: 1, color: headerValue ? '#c7cbd6' : '#8b94a7',
                 fontSize: headerFontSize, fontWeight: 800, letterSpacing: 0.3, cursor: 'text',
                 whiteSpace: abstract ? 'pre-wrap' : 'nowrap',
                 overflow: abstract ? 'visible' : 'hidden',
@@ -325,57 +297,98 @@ export default function MemoNode({ data, selected, id }) {
       </div>
       )}
 
-      {/* Content — only rendered in normal (non-abstract) mode, or when being edited */}
-      {(!abstract || editing === 'text') && (
+      {/* Body — kind-specific content; only rendered in normal (non-abstract) mode */}
+      {!abstract && !shapeOnly && (
         <div style={{ flex: 1, padding: '8px 10px', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-          <div
-            ref={textContainerRef}
-            style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, position: 'relative' }}
-            onMouseMove={handleTextMouseMove}
-            onMouseLeave={handleTextMouseLeave}
-          >
-            {editing === 'text' ? (
-              <div
-                ref={textRef}
-                contentEditable
-                suppressContentEditableWarning
-                className="nodrag nowheel rich-content"
-                onBlur={() => stopEdit('text', textRef)}
+          {data.kind === 'photo' && (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, gap: 6 }}>
+              {data.src ? (
+                <>
+                  <div style={{ flex: 1, minHeight: 0, overflow: 'auto', display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}>
+                    <img src={data.src} alt="" style={{ maxWidth: '100%', borderRadius: 8 }} />
+                  </div>
+                  {selected && (
+                    <button
+                      type="button"
+                      className="nodrag"
+                      onClick={onPickFile}
+                      style={{
+                        alignSelf: 'flex-start', background: '#8b94a722', border: '1px solid #8b94a766',
+                        color: '#c7cbd6', fontSize: 11, borderRadius: 6, padding: '4px 10px', cursor: 'pointer',
+                      }}
+                    >
+                      사진 교체
+                    </button>
+                  )}
+                </>
+              ) : (
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <button
+                    type="button"
+                    className="nodrag"
+                    onClick={onPickFile}
+                    style={{
+                      background: '#8b94a722', border: '1px solid #8b94a766',
+                      color: '#c7cbd6', fontSize: 12, borderRadius: 6, padding: '6px 14px', cursor: 'pointer',
+                    }}
+                  >
+                    사진 선택
+                  </button>
+                </div>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={onFileChange}
+                style={{ display: 'none' }}
+              />
+            </div>
+          )}
+
+          {data.kind === 'browser' && (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, gap: 4 }}>
+              <input
+                className="nodrag"
+                value={urlDraft}
+                onChange={(e) => setUrlDraft(e.target.value)}
+                onBlur={commitUrl}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commitUrl() } }}
+                placeholder="https://..."
                 style={{
-                  flex: 1, background: 'transparent',
-                  color: '#e8d88a', fontSize: 12, width: '100%',
-                  outline: 'none', lineHeight: 1.6, minHeight: 0, cursor: 'text',
-                  whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowY: 'auto',
+                  flexShrink: 0, background: 'transparent', border: '1px solid #8b94a766',
+                  borderRadius: 6, color: '#c7cbd6', fontSize: 11, padding: '4px 8px', outline: 'none',
                 }}
               />
-            ) : (
-              <div
-                ref={textDisplayRef}
-                className="rich-content"
-                onClick={handleDisplayClick('text')}
-                dangerouslySetInnerHTML={{ __html: wrapLines(textValue || (data.textTouched ? '' : '메모 내용')) }}
-                style={{
-                  flex: 1, color: textValue ? '#e8d88a' : '#e8d88a55', fontSize: 12,
-                  whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text',
-                  overflow: 'auto', lineHeight: 1.6, minHeight: 0,
-                  touchAction: 'manipulation',
-                }}
-              />
-            )}
-            {textHover && (
-              <div style={{ position: 'absolute', left: -4, right: -4, top: textHover.top, height: textHover.height, borderRadius: 6, background: '#ffffff12', pointerEvents: 'none' }} />
-            )}
-            {textCaret && (
-              <div style={{ position: 'absolute', left: -4, right: -4, top: textCaret.top, height: textCaret.height, borderRadius: 6, background: '#ffffff12', pointerEvents: 'none' }} />
-            )}
-          </div>
+              <div style={{ flexShrink: 0, fontSize: 9, color: '#8b94a7' }}>
+                사이트에 따라 임베드가 차단될 수 있습니다
+              </div>
+              {data.url && (
+                <div className="nodrag nowheel" style={{ flex: 1, minHeight: 0 }}>
+                  <iframe
+                    src={data.url}
+                    title="browser-content"
+                    sandbox="allow-scripts allow-same-origin allow-forms"
+                    style={{ width: '100%', height: '100%', border: 'none', borderRadius: 8, background: '#fff' }}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {data.kind === 'database' && (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+              <div style={{ fontSize: 28 }}>🗄</div>
+              <div style={{ color: '#888', fontSize: 12 }}>데이터베이스 (준비 중)</div>
+            </div>
+          )}
         </div>
       )}
 
       {/* Rich-text toolbar — portalled to body */}
       <EditToolbar
-        editRef={editing === 'header' ? headerRef : editing === 'text' ? textRef : null}
-        anchorRef={editing === 'header' ? headerContainerRef : editing === 'text' ? textContainerRef : null}
+        editRef={editing === 'header' ? headerRef : null}
+        anchorRef={editing === 'header' ? headerContainerRef : null}
       />
     </div>
   )

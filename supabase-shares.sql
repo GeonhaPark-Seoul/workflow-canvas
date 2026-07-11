@@ -173,3 +173,34 @@ grant execute on function claim_email_invites() to authenticated;
 grant select, insert, update, delete on canvas_shares to authenticated;
 grant select on share_members to authenticated;
 grant all on canvas_shares, share_members to service_role;
+
+-- ── Phase 4: per-member edit permission + owner/member management ──────────
+-- Safe to re-run.
+
+alter table share_members add column if not exists can_edit boolean not null default true;
+
+-- Owner manages members of their shares (view/update/delete membership rows).
+drop policy if exists "owner selects share members" on share_members;
+create policy "owner selects share members" on share_members
+  for select using (
+    exists (select 1 from canvas_shares s where s.id = share_members.share_id and s.owner_id = auth.uid())
+  );
+
+drop policy if exists "owner updates share members" on share_members;
+create policy "owner updates share members" on share_members
+  for update using (
+    exists (select 1 from canvas_shares s where s.id = share_members.share_id and s.owner_id = auth.uid())
+  );
+
+drop policy if exists "owner deletes share members" on share_members;
+create policy "owner deletes share members" on share_members
+  for delete using (
+    exists (select 1 from canvas_shares s where s.id = share_members.share_id and s.owner_id = auth.uid())
+  );
+
+-- Invitee can leave a shared canvas (delete their own membership row).
+drop policy if exists "member leaves share" on share_members;
+create policy "member leaves share" on share_members
+  for delete using (user_id = auth.uid());
+
+grant update, delete on share_members to authenticated;

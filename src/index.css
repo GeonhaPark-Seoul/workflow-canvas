@@ -105,26 +105,13 @@ html, body, #root {
   }
 }
 
-/* Per-line hover pill for rich-content display areas (multi-line description/memo
-   text): each block-level line gets its own pill instead of the whole block lighting
-   up together. Also applies inside the contentEditable editor while editing, and the
-   .caret-line class (toggled in JS via selectionchange) keeps the caret's line lit even
-   without a hover. */
-.rich-content > div:hover,
-.rich-content > p:hover,
-.rich-content li:hover,
-.rich-content summary:hover,
-[contenteditable] > div:hover,
-[contenteditable] > p:hover,
-[contenteditable] li:hover,
-[contenteditable] summary:hover {
-  background: #ffffff12;
-  border-radius: 6px;
-}
-.caret-line {
-  background: #ffffff12;
-  border-radius: 6px;
-}
+/* Per-line hover for rich-content display areas (stage desc, memo text): instead of a
+   CSS :hover per block child, MemoNode/StageNode track mousemove and position a single
+   absolute strip over whichever soft-wrapped line the pointer is on (JS-computed, since
+   a "line" after soft-wrap isn't a DOM node CSS can target). A second, always-on strip
+   marks the caret's line while editing, positioned from the selection's bounding rect.
+   Both strips are inline-styled and cleared on mouseleave/edit-end, so nothing can get
+   stuck the way the old CSS :hover approach could. */
 
 /* Rich-text display/edit shared styles */
 .rich-content img { max-width: 100%; border-radius: 6px; display: block; }

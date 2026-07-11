@@ -15,6 +15,7 @@ import '@xyflow/react/dist/style.css'
 import StageNode from './nodes/StageNode'
 import MemoNode from './nodes/MemoNode'
 import GroupNode from './nodes/GroupNode'
+import ContentNode from './nodes/ContentNode'
 import StubEdge from './edges/StubEdge'
 import { DEMO_CANVASES } from './demoCanvases'
 import Toolbar from './components/Toolbar'
@@ -37,10 +38,13 @@ import {
   updateSharedCanvas as cloudUpdateSharedCanvas,
 } from './lib/cloudStorage'
 import { joinCanvasPresence } from './lib/presence'
-import { claimEmailInvites, claimShareToken, listSharedWithMe, listShares } from './lib/shares'
+import {
+  claimEmailInvites, claimShareToken, listSharedWithMe, listShares,
+  listShareMembers, setMemberEdit, kickMember, leaveSharedCanvas,
+} from './lib/shares'
 import { getMyProfile, getProfiles, upsertMyEmail, touchLastSeen } from './lib/profiles'
 
-const nodeTypes = { stage: StageNode, memo: MemoNode, group: GroupNode }
+const nodeTypes = { stage: StageNode, memo: MemoNode, group: GroupNode, content: ContentNode }
 const edgeTypes = { stub: StubEdge }
 
 const defaultEdgeOptions = {
@@ -163,10 +167,20 @@ function sortParentsFirst(nodes) {
   return result
 }
 
+// A "부품(part) 연결선" links two part handles (ids starting 'p-') on stage
+// nodes — dashed, no arrowhead, distinct from memo links.
+function isPartEdge(e) {
+  return !!e.data?.partsLink || (!!e.sourceHandle?.startsWith('p-') && !!e.targetHandle?.startsWith('p-'))
+}
+
 // Base (unselected) appearance for an edge, derived purely from whether it's a
-// dashed memo link. Used to force a clean look on deselect so selection-bold can
-// never linger — even if a stale bold style got baked into the edge by reconnect.
+// dashed memo link or a part link. Used to force a clean look on deselect so
+// selection-bold can never linger — even if a stale bold style got baked into
+// the edge by reconnect.
 function baseEdgeStyle(e) {
+  if (isPartEdge(e)) {
+    return { style: { stroke: '#8b94a7', strokeWidth: 2, strokeDasharray: '6,4' }, markerEnd: undefined }
+  }
   const isMemo = !!e.style?.strokeDasharray
   return {
     style: isMemo
@@ -205,7 +219,16 @@ export default function App() {
   const [isPinching, setIsPinching] = useState(false)
   const [lassoRect, setLassoRect] = useState(null) // screen-space rubber-band box
   const [alignGuides, setAlignGuides] = useState([]) // [{axis:'x'|'y', value}] in flow-space coords, drawn while dragging
-  const [lodThreshold, setLodThreshold] = useState(() => loadLodThreshold())
+  // Unified canvas settings (theme / node-fill / LOD threshold). AuthPanel owns
+  // the editor UI and cloud persistence (profiles.settings) — it calls
+  // onSettingsChange(next) below on every change; lodThreshold keeps its
+  // localStorage mirror so logged-out visitors still get a sensible default.
+  const [settings, setSettings] = useState(() => ({ theme: 'dark', nodeFill: true, lodThreshold: loadLodThreshold() }))
+  const onSettingsChange = useCallback((next) => {
+    setSettings((prev) => ({ ...prev, ...next }))
+    if (next.lodThreshold !== undefined) saveLodThreshold(next.lodThreshold)
+  }, [])
+  useEffect(() => { document.body.dataset.theme = settings.theme }, [settings.theme])
 
   // Saved views (per canvas): [{ id, name, bounds: {x,y,width,height} }]
   const [views, setViews] = useState(initData.views ?? [])
@@ -469,7 +492,7 @@ export default function App() {
           const swallow = (ev) => { ev.stopPropagation(); window.removeEventListener('click', swallow, true) }
           window.addEventListener('click', swallow, true)
           setTimeout(() => window.removeEventListener('click', swallow, true), 50)
-        } else if (touchDevice && !(permRef.current.role === 'invitee' && permRef.current.scope !== 'canvas')) {
+        } else if (touchDevice && !(permRef.current.role === 'invitee' && (permRef.current.scope !== 'canvas' || permRef.current.canEdit === false))) {
           // Stationary long-press on empty space (touch) → pane context menu,
           // the mobile equivalent of a right-click.
           const r = reactFlowRef.current?.getBoundingClientRect()
@@ -861,17 +884,16 @@ export default function App() {
     const shared = parseSharedId(aid)
     try {
       if (!shared) {
-        const shares = await listShares(aid)
-        const memberIds = new Set()
-        shares.forEach((s) => (s.memberUserIds ?? []).forEach((id) => memberIds.add(id)))
-        const profiles = await getProfiles([...memberIds])
-        const members = [...memberIds].map((id) => {
-          const p = profiles.get(id)
-          return { userId: id, profile: p ?? null, isOwner: false, email: p?.email ?? null, lastSeenAt: p?.lastSeenAt ?? null }
-        })
+        const [shares, shareMembers] = await Promise.all([listShares(aid), listShareMembers(aid)])
+        const claimedShareIds = new Set(shareMembers.map((m) => m.shareId))
+        const members = shareMembers.map((m) => ({
+          userId: m.userId, profile: m.profile ?? null, isOwner: false,
+          email: m.profile?.email ?? null, lastSeenAt: m.profile?.lastSeenAt ?? null,
+          shareId: m.shareId, canEdit: m.canEdit !== false,
+        }))
         const pending = shares
-          .filter((s) => s.invitee_email && !(s.memberUserIds?.length))
-          .map((s) => ({ userId: null, email: s.invitee_email, profile: null, isOwner: false, lastSeenAt: null }))
+          .filter((s) => s.invitee_email && !claimedShareIds.has(s.id))
+          .map((s) => ({ userId: null, email: s.invitee_email, profile: null, isOwner: false, lastSeenAt: null, shareId: s.id, canEdit: true }))
         const mp = myProfileRef.current
         const ownerProfile = mp ? { nickname: mp.nickname, glyph: mp.glyph, color: mp.color, email: mp.email, lastSeenAt: mp.last_seen_at } : null
         const owner = {
@@ -906,6 +928,41 @@ export default function App() {
     }
   }, [])
 
+  // Leave a canvas shared to me: drop my membership rows on every share the
+  // owner has on it, then fall back to my first own canvas.
+  const onLeaveShared = useCallback(async (sharedId) => {
+    const parsed = parseSharedId(sharedId)
+    if (!parsed) return
+    try {
+      await leaveSharedCanvas(parsed.ownerId, parsed.canvasId)
+    } catch (err) {
+      console.error('[shares] leaveSharedCanvas:', err.message)
+    }
+    await refreshSharedCanvases()
+    const firstOwn = latestRef.current.canvases[0]
+    if (firstOwn) switchCanvas(firstOwn.id)
+  }, [refreshSharedCanvases, switchCanvas])
+
+  // Owner controls in the participants modal: toggle a member's edit access
+  // / kick them off the share entirely.
+  const onToggleMemberEdit = useCallback(async (p) => {
+    try {
+      await setMemberEdit(p.shareId, p.userId, !p.canEdit)
+    } catch (err) {
+      console.error('[shares] setMemberEdit:', err.message)
+    }
+    refreshShareParticipants()
+  }, [refreshShareParticipants])
+
+  const onKickMember = useCallback(async (p) => {
+    try {
+      await kickMember(p.shareId, p.userId)
+    } catch (err) {
+      console.error('[shares] kickMember:', err.message)
+    }
+    refreshShareParticipants()
+  }, [refreshShareParticipants])
+
   // Kept fresh every render (not in the auth effect's deps, which stay stable
   // like before) so the auth listener can call the latest closures without
   // re-subscribing on every node/edge edit.
@@ -923,7 +980,13 @@ export default function App() {
       initializedUserRef.current = u.id
       setAuthNotice(null)
       loadFromCloud(u.id)
-      getMyProfile().then(setMyProfile).catch((err) => console.error('[profiles] getMyProfile:', err.message))
+      getMyProfile().then((p) => {
+        setMyProfile(p)
+        // Seed App-level settings (theme/canvas background, etc.) from the
+        // saved profile; any field the profile hasn't saved yet keeps its
+        // current value (localStorage lodThreshold / 'dark' theme default).
+        if (p?.settings) setSettings((prev) => ({ ...prev, ...p.settings }))
+      }).catch((err) => console.error('[profiles] getMyProfile:', err.message))
       if (u.email) upsertMyEmail(u.email).catch((err) => console.error('[profiles] upsertMyEmail:', err.message))
       sharedFnRef.current.refreshSharedOutCanvasIds()
       try { await claimEmailInvites() } catch (err) { console.error('[shares] claimEmailInvites:', err.message) }
@@ -1194,12 +1257,12 @@ export default function App() {
   // matching share is most permissive (canvas > group > node).
   const perm = useMemo(() => {
     const parsed = parseSharedId(activeCanvasId)
-    if (!parsed) return { role: 'owner', scope: 'canvas', targetId: null, restrictView: false }
+    if (!parsed) return { role: 'owner', scope: 'canvas', targetId: null, restrictView: false, canEdit: true }
     const matches = sharedCanvases.filter((s) => s.ownerId === parsed.ownerId && s.canvasId === parsed.canvasId)
-    if (!matches.length) return { role: 'owner', scope: 'canvas', targetId: null, restrictView: false }
+    if (!matches.length) return { role: 'owner', scope: 'canvas', targetId: null, restrictView: false, canEdit: true }
     const priority = { canvas: 0, group: 1, node: 2 }
     const best = [...matches].sort((a, b) => priority[a.scope] - priority[b.scope])[0]
-    return { role: 'invitee', scope: best.scope, targetId: best.targetId, restrictView: best.restrictView }
+    return { role: 'invitee', scope: best.scope, targetId: best.targetId, restrictView: best.restrictView, canEdit: best.canEdit !== false }
   }, [activeCanvasId, sharedCanvases])
 
   // Kept fresh every render so the touch long-press gesture handler (bound
@@ -1208,13 +1271,19 @@ export default function App() {
   const permRef = useRef(perm)
   useEffect(() => { permRef.current = perm })
 
+  // canEdit === false (read-only share): the whole canvas is view-only,
+  // regardless of scope — this overrides the group/node scope carve-out below.
+  const canEditCanvas = !(perm.role === 'invitee' && perm.canEdit === false)
+
   // Set of node ids an invitee may edit; null means "everything" (owner or canvas-scope).
   const editableSet = useMemo(() => {
-    if (perm.role === 'owner' || perm.scope === 'canvas') return null
+    if (perm.role === 'owner') return null
+    if (!canEditCanvas) return new Set()
+    if (perm.scope === 'canvas') return null
     if (perm.scope === 'group') return new Set(nodes.filter((n) => n.parentId === perm.targetId).map((n) => n.id))
     if (perm.scope === 'node') return new Set([perm.targetId])
     return new Set()
-  }, [perm, nodes])
+  }, [perm, nodes, canEditCanvas])
   const isNodeEditable = useCallback((id) => editableSet === null || editableSet.has(id), [editableSet])
 
   // Someone other than me online in the active canvas → glow the invite icons.
@@ -1335,7 +1404,7 @@ export default function App() {
   // Group-scope invitees can only add inside their invited frame (forced
   // parentId + a position inside it); node-scope invitees can't add at all.
   const addStage = useCallback(() => {
-    if (perm.role === 'invitee' && perm.scope === 'node') return
+    if (perm.role === 'invitee' && (!canEditCanvas || perm.scope === 'node')) return
     const id = nextId()
     if (perm.role === 'invitee' && perm.scope === 'group') {
       const frame = nodes.find((n) => n.id === perm.targetId)
@@ -1344,10 +1413,10 @@ export default function App() {
       return
     }
     setNodes((nds) => [...nds, { id, type: 'stage', position: { x: 200 + Math.random() * 400, y: 150 + Math.random() * 300 }, data: { label: '새 단계', description: '', colorIdx: 0 } }])
-  }, [setNodes, perm, nodes])
+  }, [setNodes, perm, nodes, canEditCanvas])
 
   const addMemo = useCallback(() => {
-    if (perm.role === 'invitee' && perm.scope === 'node') return
+    if (perm.role === 'invitee' && (!canEditCanvas || perm.scope === 'node')) return
     const id = nextId()
     if (perm.role === 'invitee' && perm.scope === 'group') {
       const frame = nodes.find((n) => n.id === perm.targetId)
@@ -1356,7 +1425,7 @@ export default function App() {
       return
     }
     setNodes((nds) => [...nds, { id, type: 'memo', position: { x: 300 + Math.random() * 400, y: 200 + Math.random() * 200 }, data: { header: '', text: '' } }])
-  }, [setNodes, perm, nodes])
+  }, [setNodes, perm, nodes, canEditCanvas])
 
   const addStageAt = useCallback((pos) => {
     const id = nextId()
@@ -1367,6 +1436,60 @@ export default function App() {
     const id = nextId()
     setNodes((nds) => [...nds, { id, type: 'memo', position: pos, data: { header: '', text: '' } }])
   }, [setNodes])
+
+  // ── Palette (드래그&드롭 / 탭) node creation ──────────────────────────────
+  // Shared by the canvas drop target (onDrop) and Toolbar's tap-to-add
+  // fallback (onPaletteAdd). Respects the same gating as addStage/addMemo:
+  // node-scope invitees and read-only shares can't add anywhere; group-scope
+  // invitees get forced into their invited frame.
+  const addFromPalette = useCallback((payload, pos) => {
+    if (perm.role === 'invitee' && (!canEditCanvas || perm.scope === 'node')) return
+    if (!payload?.nodeType) return
+    const forceFrame = perm.role === 'invitee' && perm.scope === 'group'
+    const frame = forceFrame ? nodes.find((n) => n.id === perm.targetId) : null
+    if (forceFrame && !frame) return
+
+    if (payload.nodeType === 'content') {
+      const id = nextId()
+      const position = forceFrame ? centerInFrame(frame, 220, 140) : pos
+      const node = { id, type: 'content', position, data: { kind: payload.contentKind } }
+      setNodes((nds) => [...nds, forceFrame ? { ...node, parentId: perm.targetId } : node])
+      return
+    }
+    if (payload.nodeType === 'stage') {
+      if (forceFrame) {
+        const id = nextId()
+        setNodes((nds) => [...nds, { id, type: 'stage', parentId: perm.targetId, position: centerInFrame(frame, 200, 80), data: { label: '새 단계', description: '', colorIdx: 0 } }])
+      } else addStageAt(pos)
+      return
+    }
+    if (payload.nodeType === 'memo') {
+      if (forceFrame) {
+        const id = nextId()
+        setNodes((nds) => [...nds, { id, type: 'memo', parentId: perm.targetId, position: centerInFrame(frame, 160, 80), data: { header: '', text: '' } }])
+      } else addMemoAt(pos)
+    }
+  }, [perm, canEditCanvas, nodes, addStageAt, addMemoAt, setNodes])
+
+  const onDragOver = useCallback((e) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'copy'
+  }, [])
+
+  const onDrop = useCallback((e) => {
+    e.preventDefault()
+    if (!rfInstance) return
+    let payload
+    try { payload = JSON.parse(e.dataTransfer.getData('application/wfc-node') || '') } catch { return }
+    addFromPalette(payload, rfInstance.screenToFlowPosition({ x: e.clientX, y: e.clientY }))
+  }, [rfInstance, addFromPalette])
+
+  // Touch fallback: Toolbar's palette has no native drag on touch devices, so
+  // tapping a card adds it at the viewport center instead.
+  const onPaletteAdd = useCallback((payload) => {
+    if (!rfInstance) return
+    addFromPalette(payload, rfInstance.screenToFlowPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 }))
+  }, [rfInstance, addFromPalette])
 
   // ── Copy / Paste (in-app clipboard, not the OS clipboard) ─────────────────
   const clipboardRef = useRef(null) // { nodes, edges } — stripped copies, original ids
@@ -1417,7 +1540,7 @@ export default function App() {
   const pasteClipboard = useCallback((atFlowPos) => {
     const clip = clipboardRef.current
     if (!clip || !clip.nodes.length) return
-    if (perm.role === 'invitee' && perm.scope === 'node') return // nowhere to paste
+    if (perm.role === 'invitee' && (!canEditCanvas || perm.scope === 'node')) return // nowhere to paste
     const forceFrame = perm.role === 'invitee' && perm.scope === 'group'
     const frame = forceFrame ? nodes.find((n) => n.id === perm.targetId) : null
     if (forceFrame && !frame) return
@@ -1476,7 +1599,7 @@ export default function App() {
 
     setNodes((nds) => sortParentsFirst([...nds.map((n) => (n.selected ? { ...n, selected: false } : n)), ...newNodes]))
     setEdges((eds) => eds.concat(newEdges))
-  }, [nodes, setNodes, setEdges, perm])
+  }, [nodes, setNodes, setEdges, perm, canEditCanvas])
 
   useEffect(() => {
     const handler = (e) => {
@@ -1501,6 +1624,21 @@ export default function App() {
   // the parallel-separation routing then fans out.
   const onConnect = useCallback((params) => {
     if (perm.role === 'invitee' && (!isNodeEditable(params.source) || !isNodeEditable(params.target))) return
+    // 파츠 연결 규칙: exactly one side a part handle ('p-...') → reject; both → dashed no-arrow part link.
+    const sourceIsPart = !!params.sourceHandle?.startsWith('p-')
+    const targetIsPart = !!params.targetHandle?.startsWith('p-')
+    if (sourceIsPart !== targetIsPart) return
+    if (sourceIsPart && targetIsPart) {
+      const newEdge = {
+        ...params,
+        id: `e-${uid()}`,
+        data: { partsLink: true },
+        style: { stroke: '#8b94a7', strokeWidth: 2, strokeDasharray: '6,4' },
+        markerEnd: undefined,
+      }
+      setEdges((eds) => eds.concat(newEdge))
+      return
+    }
     const isMemoSource = nodes.find((n) => n.id === params.source)?.type === 'memo'
     const isMemoTarget = nodes.find((n) => n.id === params.target)?.type === 'memo'
     const isMemo = isMemoSource || isMemoTarget
@@ -1520,6 +1658,11 @@ export default function App() {
 
   const onReconnect = useCallback((oldEdge, newConnection) => {
     if (perm.role === 'invitee' && (!isNodeEditable(newConnection.source) || !isNodeEditable(newConnection.target))) return
+    // 파츠 연결 규칙: part edges may only reconnect part↔part; normal edges may never gain a part endpoint.
+    const oldIsPart = isPartEdge(oldEdge)
+    const newSourceIsPart = !!newConnection.sourceHandle?.startsWith('p-')
+    const newTargetIsPart = !!newConnection.targetHandle?.startsWith('p-')
+    if (oldIsPart ? !(newSourceIsPart && newTargetIsPart) : (newSourceIsPart || newTargetIsPart)) return
     // Reconnect the clean edge from state, not the styled (bold) object React
     // Flow hands back — otherwise the selection styling gets baked in permanently.
     setEdges((eds) => {
@@ -1601,13 +1744,14 @@ export default function App() {
   // ── Context menus ─────────────────────────────────────────────────────────
   const onPaneContextMenu = useCallback((e) => {
     e.preventDefault()
-    // Group/node-scope invitees can't add nodes "elsewhere" on the pane —
-    // there's nothing this menu could offer them, so don't open it.
-    if (perm.role === 'invitee' && perm.scope !== 'canvas') return
+    // Group/node-scope invitees (and read-only invitees of any scope) can't
+    // add nodes "elsewhere" on the pane — there's nothing this menu could
+    // offer them, so don't open it.
+    if (perm.role === 'invitee' && (perm.scope !== 'canvas' || !canEditCanvas)) return
     const bounds = reactFlowRef.current?.getBoundingClientRect()
     setContextMenu({ x: e.clientX, y: e.clientY, flowX: e.clientX - (bounds?.left ?? 0), flowY: e.clientY - (bounds?.top ?? 0) })
     setRenamingTypeIdx(null)
-  }, [perm])
+  }, [perm, canEditCanvas])
 
   const onNodeContextMenu = useCallback((e, node) => {
     e.preventDefault()
@@ -1638,6 +1782,22 @@ export default function App() {
     closeContext()
   }
 
+  const handleContextAddGroup = () => {
+    if (!rfInstance || !contextMenu) return
+    const pos = rfInstance.screenToFlowPosition({ x: contextMenu.flowX, y: contextMenu.flowY })
+    const id = nextId()
+    setNodes((nds) => [...nds, { id, type: 'group', position: pos, width: 320, height: 220, zIndex: -1, data: { label: '새 그룹' } }])
+    closeContext()
+  }
+
+  const handleContextAddContent = (kind) => {
+    if (!rfInstance || !contextMenu) return
+    const pos = rfInstance.screenToFlowPosition({ x: contextMenu.flowX, y: contextMenu.flowY })
+    const id = nextId()
+    setNodes((nds) => [...nds, { id, type: 'content', position: pos, data: { kind } }])
+    closeContext()
+  }
+
   const handleContextPaste = () => {
     if (!contextMenu) return
     if (contextMenu.flowX != null && rfInstance) {
@@ -1651,7 +1811,7 @@ export default function App() {
   const handleContextDeleteNode = () => {
     if (!contextMenu?.nodeId) return
     const ids = contextMenu.selectedIds?.length ? contextMenu.selectedIds : [contextMenu.nodeId]
-    if (perm.role === 'invitee' && perm.scope !== 'canvas' && !ids.every(isNodeEditable)) { closeContext(); return }
+    if (perm.role === 'invitee' && !ids.every(isNodeEditable)) { closeContext(); return }
     const set = new Set(ids)
     setNodes((nds) => nds.filter((n) => !set.has(n.id)))
     setEdges((eds) => eds.filter((e) => !set.has(e.source) && !set.has(e.target)))
@@ -1667,7 +1827,7 @@ export default function App() {
   }
 
   const handleContextGroupSelection = () => {
-    if (perm.role === 'invitee' && perm.scope !== 'canvas') return
+    if (perm.role === 'invitee' && (perm.scope !== 'canvas' || !canEditCanvas)) return
     const ids = contextMenu?.selectedIds ?? []
     if (ids.length < 2) return
     groupSelection(ids)
@@ -1697,7 +1857,7 @@ export default function App() {
 
   const handleContextUngroup = () => {
     if (!contextMenu?.nodeId) return
-    if (perm.role === 'invitee' && perm.scope !== 'canvas') return
+    if (perm.role === 'invitee' && (perm.scope !== 'canvas' || !canEditCanvas)) return
     ungroup(contextMenu.nodeId)
     closeContext()
   }
@@ -1810,9 +1970,22 @@ export default function App() {
   // Selected edges get reconnectable + bold stroke + drop-shadow + colored marker.
   const styledEdges = edges.map((e) => {
     // Delete key / built-in delete UI must also respect the edit gating.
-    const deletable = perm.role === 'owner' || perm.scope === 'canvas' || (isNodeEditable(e.source) && isNodeEditable(e.target))
+    // (isNodeEditable already resolves to "always true" for owners/full-edit
+    // canvas-scope invitees via editableSet === null.)
+    const deletable = isNodeEditable(e.source) && isNodeEditable(e.target)
     const type = 'stub'
     if (!e.selected) return { ...e, ...baseEdgeStyle(e), deletable, type }
+    if (isPartEdge(e)) {
+      return {
+        ...e,
+        deletable,
+        type,
+        reconnectable: true,
+        zIndex: 1001,
+        style: { ...baseEdgeStyle(e).style, stroke: '#c3cad9', strokeWidth: 3 },
+        markerEnd: undefined,
+      }
+    }
     const isMemo = !!e.style?.strokeDasharray
     const color = isMemo ? '#f59e0b' : '#60a5fa'
     return {
@@ -1855,8 +2028,9 @@ export default function App() {
   const ctxMulti = (contextMenu?.selectedIds?.length ?? 0) >= 2
 
   // Sharing: canvas-scope invitees get full edit (including stage-type
-  // editing); group/node-scope invitees only touch nodes in their editable set.
-  const ctxFullEdit = perm.role === 'owner' || perm.scope === 'canvas'
+  // editing); group/node-scope invitees only touch nodes in their editable
+  // set; a read-only share (canEdit === false) never gets full edit.
+  const ctxFullEdit = perm.role === 'owner' || (perm.scope === 'canvas' && canEditCanvas)
   const ctxCanDelete = ctxFullEdit || ctxIds.every(isNodeEditable)
   const ctxEdgeEditable = contextMenu?.edgeId
     ? (() => { const e = edges.find((x) => x.id === contextMenu.edgeId); return ctxFullEdit || (e && isNodeEditable(e.source) && isNodeEditable(e.target)) })()
@@ -1889,6 +2063,9 @@ export default function App() {
         onInvite={openInvite}
         participants={shareParticipants}
         sharedOutIds={sharedOutCanvasIds}
+        onLeaveShared={onLeaveShared}
+        onToggleMemberEdit={onToggleMemberEdit}
+        onKickMember={onKickMember}
       />
 
       <Toolbar
@@ -1902,6 +2079,7 @@ export default function App() {
         onSelectView={selectView}
         onRenameView={renameView}
         onDeleteView={deleteView}
+        onPaletteAdd={onPaletteAdd}
       />
 
       <AuthPanel
@@ -1912,8 +2090,8 @@ export default function App() {
         notice={authNotice}
         myProfile={myProfile}
         onProfileSaved={setMyProfile}
-        lodThreshold={lodThreshold}
-        onChangeLodThreshold={(v) => { setLodThreshold(v); saveLodThreshold(v) }}
+        lodThreshold={settings.lodThreshold}
+        onSettingsChange={onSettingsChange}
       />
 
       {invite && (
@@ -1954,14 +2132,20 @@ export default function App() {
         className={reconnecting ? 'rf-reconnecting' : undefined}
         nodes={nodes.map((n) => {
           const isOwner = perm.role === 'owner'
+          // canEdit === false: the whole canvas is view-only regardless of
+          // scope — every node stays selectable (so it can still be viewed/
+          // pinned) but never draggable or deletable.
+          const viewOnly = !isOwner && !canEditCanvas
           // Only group/node scopes carve out a restricted subset of nodes;
           // canvas-scope invitees get full edit, same as owner (left as
           // React Flow defaults so the isAnyEditing/isPinching global drag
           // gate above still applies to them).
-          const restrictedScope = !isOwner && (perm.scope === 'group' || perm.scope === 'node')
-          const editable = restrictedScope ? isNodeEditable(n.id) : true
+          const restrictedScope = !isOwner && !viewOnly && (perm.scope === 'group' || perm.scope === 'node')
+          const editable = restrictedScope ? isNodeEditable(n.id) : !viewOnly
           const isNodeScopeTarget = restrictedScope && perm.scope === 'node' && n.id === perm.targetId
-          const overrides = restrictedScope
+          const overrides = viewOnly
+            ? { draggable: false, deletable: false, selectable: true }
+            : restrictedScope
             ? { draggable: editable && !isNodeScopeTarget, deletable: editable && !isNodeScopeTarget, selectable: editable }
             : {}
           return {
@@ -1970,8 +2154,9 @@ export default function App() {
             data: {
               ...n.data,
               stageTypes,
-              lodThreshold,
-              readOnly: restrictedScope && !editable,
+              lodThreshold: settings.lodThreshold,
+              nodeFill: settings.nodeFill,
+              readOnly: viewOnly || (restrictedScope && !editable),
               forceShapeOnly: forceShapeOnlySet?.has(n.id) ?? false,
               canInvite: isOwner,
               onInvite: isOwner ? openInvite : undefined,
@@ -2006,6 +2191,8 @@ export default function App() {
         onPaneClick={() => {
           setEdges((eds) => eds.some((e) => e.selected) ? eds.map((e) => ({ ...e, selected: false })) : eds)
         }}
+        onDragOver={onDragOver}
+        onDrop={onDrop}
         nodesDraggable={!isAnyEditing && !isPinching}
         snapToGrid
         snapGrid={[12, 12]}
@@ -2025,10 +2212,10 @@ export default function App() {
         minZoom={0.1}
         maxZoom={2}
         deleteKeyCode={['Delete', 'Backspace']}
-        style={{ background: '#0f0f13' }}
+        style={{ background: settings.theme === 'light' ? '#f5f5f7' : '#0f0f13' }}
       >
-        <Background id="minor" variant={BackgroundVariant.Lines} gap={24} color="#ffffff07" />
-        <Background id="major" variant={BackgroundVariant.Lines} gap={120} color="#ffffff0d" />
+        <Background id="minor" variant={BackgroundVariant.Lines} gap={24} color={settings.theme === 'light' ? '#00000010' : '#ffffff07'} />
+        <Background id="major" variant={BackgroundVariant.Lines} gap={120} color={settings.theme === 'light' ? '#00000018' : '#ffffff0d'} />
         {!mobile && <Controls style={{ background: '#1a1a22', border: '1px solid #ffffff18', borderRadius: 8 }} />}
         {!mobile && (
           <MiniMap
@@ -2096,11 +2283,19 @@ export default function App() {
             minWidth: 200,
           }}
         >
-          {/* Pane: add nodes (group/node-scope invitees can't add "elsewhere" — menu doesn't even open for them) */}
+          {/* Pane: add nodes (group/node-scope invitees, and read-only shares,
+              can't add "elsewhere" — menu doesn't even open for them) */}
           {!contextMenu.nodeId && !contextMenu.edgeId && (
             <>
-              <ContextItem icon="＋" label="단계 노드 추가" color="#3b82f6" onClick={handleContextAddStage} />
-              <ContextItem icon="📝" label="메모 노드 추가" color="#f59e0b" onClick={handleContextAddMemo} />
+              <ContextItem label="단계 노드 추가" color="#3b82f6" onClick={handleContextAddStage} />
+              <ContextItem label="메모 노드 추가" color="#f59e0b" onClick={handleContextAddMemo} />
+              <ContextItem icon="⬚" label="그룹 추가" color="#8b94a7" onClick={handleContextAddGroup} />
+              <div style={{ padding: '6px 12px 2px', color: '#555', fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
+                컨텐츠 추가
+              </div>
+              <ContextItem icon="🖼" label="사진" color="#22c55e" indent onClick={() => handleContextAddContent('photo')} />
+              <ContextItem icon="🗄" label="데이터베이스" color="#a855f7" indent onClick={() => handleContextAddContent('database')} />
+              <ContextItem icon="🌐" label="브라우저" color="#06b6d4" indent onClick={() => handleContextAddContent('browser')} />
               {clipboardRef.current && (
                 <ContextItem icon="📋" label="붙여넣기" color="#8b94a7" onClick={handleContextPaste} />
               )}
@@ -2126,7 +2321,7 @@ export default function App() {
               )}
               <ContextItem icon="⇢" label="연결선 정리" color="#8b94a7" onClick={handleContextCleanupEdges} />
               <ContextItem icon="⧉" label="복사" color="#8b94a7" onClick={() => { copySelection(ctxIds); closeContext() }} />
-              {clipboardRef.current && !(perm.role === 'invitee' && perm.scope === 'node') && (
+              {clipboardRef.current && !(perm.role === 'invitee' && (!canEditCanvas || perm.scope === 'node')) && (
                 <ContextItem icon="📋" label="붙여넣기" color="#8b94a7" onClick={handleContextPaste} />
               )}
               <div style={{ height: 1, background: '#ffffff18', margin: '4px 2px' }} />
@@ -2232,14 +2427,14 @@ export default function App() {
 }
 
 // ── Sub-components ──────────────────────────────────────────────────────────
-function ContextItem({ icon, label, color, onClick }) {
+function ContextItem({ icon, label, color, onClick, indent }) {
   return (
     <button
       onClick={onClick}
       style={{
         display: 'flex', alignItems: 'center', gap: 8, width: '100%',
         background: 'transparent', border: 'none', borderRadius: 6,
-        padding: '8px 12px', color: '#ccc', fontSize: 13, cursor: 'pointer',
+        padding: indent ? '7px 12px 7px 26px' : '8px 12px', color: '#ccc', fontSize: 13, cursor: 'pointer',
         textAlign: 'left', fontFamily: 'inherit', transition: 'background 0.1s',
       }}
       onMouseEnter={(e) => (e.currentTarget.style.background = `${color}22`)}

@@ -1,10 +1,21 @@
 import { useState, useRef, useEffect } from 'react'
 import { Avatar } from './AuthPanel'
 
+// Compact count formatter: 1000 → 1k, 1500 → 1.5k, 1000000 → 1m (1 decimal,
+// trailing .0 stripped).
+const formatCount = (n) => {
+  const fmt = (v, suffix) => `${(Math.floor(v * 10) / 10).toFixed(1).replace(/\.0$/, '')}${suffix}`
+  if (n >= 1000000000) return fmt(n / 1000000000, 'b')
+  if (n >= 1000000) return fmt(n / 1000000, 'm')
+  if (n >= 1000) return fmt(n / 1000, 'k')
+  return String(n)
+}
+
 export default function CanvasTabs({
   canvases, activeId, onSwitch, onAdd, onRename, onDelete, mobile,
   sharedCanvases = [], onInvite,
   participants = [], sharedOutIds = new Set(),
+  onLeaveShared = () => {}, onToggleMemberEdit = () => {}, onKickMember = () => {},
 }) {
   const [open, setOpen] = useState(false)
   const [editingId, setEditingId] = useState(null)
@@ -264,6 +275,18 @@ export default function CanvasTabs({
                       }}>
                         {c.name}
                       </span>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); if (window.confirm('이 공유에서 나갈까요?')) onLeaveShared(c.id) }}
+                        title="나가기"
+                        style={{
+                          background: 'transparent', border: 'none', color: '#555',
+                          cursor: 'pointer', padding: 0, fontSize: 12, lineHeight: 1, flexShrink: 0,
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
+                        onMouseLeave={(e) => (e.currentTarget.style.color = '#555')}
+                      >
+                        ✕
+                      </button>
                     </div>
                   )
                 })}
@@ -372,7 +395,7 @@ export default function CanvasTabs({
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <span style={{ color: '#f0f0f0', fontSize: 14, fontWeight: 700 }}>참여자 {participants.length}</span>
+              <span style={{ color: '#f0f0f0', fontSize: 14, fontWeight: 700 }}>참여자 {formatCount(participants.length)}</span>
               <button
                 onClick={() => setPeopleOpen(false)}
                 style={{ background: 'transparent', border: 'none', color: '#888', cursor: 'pointer', fontSize: 14, padding: 0, lineHeight: 1 }}
@@ -407,6 +430,32 @@ export default function CanvasTabs({
                     </div>
                     <div style={{ color: '#666', fontSize: 10 }}>{lastSeen}</div>
                   </div>
+                  {isOwnActive && p.shareId && p.userId && !p.isOwner && (
+                    <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+                      <button
+                        onClick={() => onToggleMemberEdit(p)}
+                        title="편집 권한 전환"
+                        style={{
+                          background: 'transparent', border: '1px solid #3b82f655', borderRadius: 4,
+                          color: '#3b82f6', fontSize: 10, fontWeight: 600, padding: '3px 6px',
+                          cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {p.canEdit ? '편집' : '읽기'}
+                      </button>
+                      <button
+                        onClick={() => { if (window.confirm(`"${nickname}"님을 추방할까요?`)) onKickMember(p) }}
+                        title="추방"
+                        style={{
+                          background: 'transparent', border: '1px solid #ef444455', borderRadius: 4,
+                          color: '#ef4444', fontSize: 10, fontWeight: 600, padding: '3px 6px',
+                          cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
+                        }}
+                      >
+                        추방
+                      </button>
+                    </div>
+                  )}
                 </div>
               )
             })}

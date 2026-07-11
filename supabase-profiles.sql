@@ -20,3 +20,6 @@ grant all on profiles to service_role;
 -- Avatar click → mini profile card (email + last-seen). Safe to re-run.
 alter table profiles add column if not exists email text;
 alter table profiles add column if not exists last_seen_at timestamptz;
+
+-- Per-user canvas settings (theme, node fill, LOD threshold). Safe to re-run.
+alter table profiles add column if not exists settings jsonb;

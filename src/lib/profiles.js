@@ -67,11 +67,19 @@ export async function getProfiles(userIds) {
   if (!ids.length) return map
   const { data, error } = await supabase
     .from('profiles')
-    .select('user_id, nickname, glyph, color, email, last_seen_at')
+    .select('user_id, nickname, glyph, color, email, last_seen_at, settings')
     .in('user_id', ids)
   if (error) { console.error('[profiles] getProfiles:', error.message); throw new Error('getProfiles: ' + error.message) }
-  ;(data ?? []).forEach((p) => map.set(p.user_id, { nickname: p.nickname, glyph: p.glyph, color: p.color, email: p.email, lastSeenAt: p.last_seen_at }))
+  ;(data ?? []).forEach((p) => map.set(p.user_id, { nickname: p.nickname, glyph: p.glyph, color: p.color, email: p.email, lastSeenAt: p.last_seen_at, settings: p.settings }))
   return map
+}
+
+// Persist my canvas settings (theme, node fill, LOD threshold) to my profile row.
+export async function saveMySettings(settings) {
+  const userId = await currentUserId()
+  if (!userId) return
+  const { error } = await supabase.from('profiles').update({ settings }).eq('user_id', userId)
+  if (error) { console.error('[profiles] saveMySettings:', error.message); throw new Error('saveMySettings: ' + error.message) }
 }
 
 // Heartbeat: bump my own last_seen_at so other participants' mini profile

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
-import { upsertMyProfile } from '../lib/profiles'
+import { upsertMyProfile, saveMySettings } from '../lib/profiles'
 import { listMyTokens, createToken, deleteToken } from '../lib/mcpTokens'
 
 const MCP_CONNECTOR_URL = 'https://workflow-canvas-orpin.vercel.app/api/mcp?token='
@@ -44,6 +44,7 @@ export default function AuthPanel({
   forceOpen, notice,
   myProfile, onProfileSaved,
   lodThreshold = 0.55, onChangeLodThreshold,
+  onSettingsChange = () => {},
 }) {
   const [open, setOpen] = useState(false)
   const [mode, setMode] = useState('login') // 'login' | 'signup'
@@ -58,6 +59,22 @@ export default function AuthPanel({
   const [colorInput, setColorInput] = useState(GLYPH_COLORS[0])
   const [nicknameInput, setNicknameInput] = useState('')
   const [profileSaving, setProfileSaving] = useState(false)
+
+  // Unified canvas settings (theme, node fill, LOD threshold): persisted to
+  // my profile row, debounced.
+  const [settings, setSettings] = useState({ theme: 'dark', nodeFill: true, lodThreshold })
+  const settingsTimerRef = useRef(null)
+  const updateSettings = (patch) => {
+    setSettings((prev) => {
+      const next = { ...prev, ...patch }
+      onSettingsChange(next)
+      if (settingsTimerRef.current) clearTimeout(settingsTimerRef.current)
+      settingsTimerRef.current = setTimeout(() => {
+        saveMySettings(next).catch((err) => console.error('[settings] save:', err.message))
+      }, 400)
+      return next
+    })
+  }
 
   // MCP token list state
   const [tokens, setTokens] = useState(null) // null = not loaded yet
@@ -137,6 +154,15 @@ export default function AuthPanel({
     setGlyphInput(myProfile?.glyph ?? '')
     setColorInput(myProfile?.color ?? GLYPH_COLORS[0])
     setNicknameInput(myProfile?.nickname ?? '')
+  }, [myProfile, open])
+
+  useEffect(() => {
+    setSettings({
+      theme: myProfile?.settings?.theme ?? 'dark',
+      nodeFill: myProfile?.settings?.nodeFill ?? true,
+      lodThreshold: myProfile?.settings?.lodThreshold ?? lodThreshold,
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [myProfile, open])
 
   // Lazily load MCP tokens the first time the popover opens.
@@ -271,15 +297,36 @@ export default function AuthPanel({
 
               <div style={{ height: 1, background: '#ffffff18', margin: '14px 0' }} />
 
-              <div style={{ fontSize: 11, color: '#555', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>캔버스 설정</div>
+              <div style={{ fontSize: 11, color: '#555', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>설정</div>
+
+              <div style={{ color: '#ccc', fontSize: 12, fontWeight: 600, marginBottom: 8 }}>테마</div>
+              <div style={{ display: 'flex', border: '1px solid #ffffff22', borderRadius: 6, overflow: 'hidden', marginBottom: 14 }}>
+                <button type="button" onClick={() => updateSettings({ theme: 'dark' })} style={segBtn(settings.theme !== 'light')}>다크</button>
+                <button type="button" onClick={() => updateSettings({ theme: 'light' })} style={segBtn(settings.theme === 'light')}>화이트</button>
+              </div>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={settings.nodeFill}
+                  onChange={(e) => updateSettings({ nodeFill: e.target.checked })}
+                  style={{ accentColor: '#3b82f6', cursor: 'pointer' }}
+                />
+                <span style={{ color: '#ccc', fontSize: 12, fontWeight: 600 }}>노드 색 채움</span>
+              </label>
+
               <div style={{ color: '#ccc', fontSize: 12, fontWeight: 600, marginBottom: 10 }}>카드 내용 숨김 시점</div>
               <input
                 type="range"
                 min="0"
                 max="0.9"
                 step="0.05"
-                value={lodThreshold}
-                onChange={(e) => onChangeLodThreshold?.(Number(e.target.value))}
+                value={settings.lodThreshold}
+                onChange={(e) => {
+                  const v = Number(e.target.value)
+                  onChangeLodThreshold?.(v)
+                  updateSettings({ lodThreshold: v })
+                }}
                 style={{ width: '100%', accentColor: '#a855f7', cursor: 'pointer' }}
               />
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4, marginBottom: 16 }}>
@@ -441,6 +488,12 @@ const fillBtn = (bg, color = '#fff') => ({
 const outlineBtn = (color) => ({
   width: '100%', background: 'transparent', border: `1px solid ${color}55`,
   borderRadius: 6, color, fontSize: 13, fontWeight: 600, padding: '9px 0',
+  cursor: 'pointer', fontFamily: 'inherit',
+})
+
+const segBtn = (active) => ({
+  flex: 1, background: active ? '#3b82f622' : 'transparent', border: 'none',
+  color: active ? '#3b82f6' : '#888', fontSize: 12, fontWeight: 600, padding: '7px 0',
   cursor: 'pointer', fontFamily: 'inherit',
 })
 

@@ -1,10 +1,15 @@
 import { useState, useEffect, useRef } from 'react'
+import NodePalette from './NodePalette'
 
 export default function Toolbar({
   onAddStage, onAddMemo, onClearAll, onUndo, mobile,
   views = [], currentViewId, onSelectView, onRenameView, onDeleteView,
+  onPaletteAdd = () => {},
 }) {
   const viewProps = { views, currentViewId, onSelectView, onRenameView, onDeleteView, mobile }
+  const [paletteOpen, setPaletteOpen] = useState(false)
+  const closePalette = () => setPaletteOpen(false)
+  const handlePick = (payload) => { onPaletteAdd(payload); closePalette() }
 
   if (mobile) {
     return (
@@ -27,8 +32,10 @@ export default function Toolbar({
           boxShadow: '0 -4px 24px #000a',
         }}
       >
-        <MobileBtn onClick={onAddStage} color="#3b82f6" icon="＋" label="단계" />
-        <MobileBtn onClick={onAddMemo} color="#f59e0b" icon="✎" label="메모" />
+        <div style={{ position: 'relative' }}>
+          <MobileBtn onClick={() => setPaletteOpen((v) => !v)} color="#3b82f6" icon="＋" label="노드" />
+          {paletteOpen && <NodePalette mobile onClose={closePalette} onPick={handlePick} />}
+        </div>
         <ViewSelector {...viewProps} />
         <MobileBtn onClick={onUndo} color="#06b6d4" icon="↩︎" label="되돌리기" />
       </div>
@@ -53,8 +60,10 @@ export default function Toolbar({
         backdropFilter: 'blur(8px)',
       }}
     >
-      <ToolBtn onClick={onAddStage} color="#3b82f6" icon="＋" label="단계 추가" />
-      <ToolBtn onClick={onAddMemo} color="#f59e0b" icon="📝" label="메모 추가" />
+      <div style={{ position: 'relative' }}>
+        <ToolBtn onClick={() => setPaletteOpen((v) => !v)} color="#3b82f6" icon="＋" label="노드" />
+        {paletteOpen && <NodePalette onClose={closePalette} onPick={handlePick} />}
+      </div>
       <div style={{ width: 1, background: '#ffffff18', margin: '0 4px' }} />
       <ViewSelector {...viewProps} />
       <ToolBtn onClick={onUndo} color="#06b6d4" icon="↩︎" label="되돌리기" />

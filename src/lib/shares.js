@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { getProfiles } from './profiles'
 
 // Phase 1: client API for the sharing/invite feature. Mirrors cloudStorage.js's
 // error-log-then-throw style. Nothing in the app calls this yet (phase 2 wires
@@ -66,6 +67,77 @@ export async function listShares(canvasId) {
   }))
 }
 
+// Members (claimed users) across all of my shares for a canvas, resolved to
+// their profiles. Used by InvitePopover to show avatars inline on each
+// invite row.
+export async function listShareMembers(canvasId) {
+  const ownerId = await currentUserId()
+  const { data: shares, error } = await supabase
+    .from('canvas_shares')
+    .select('id')
+    .eq('owner_id', ownerId)
+    .eq('canvas_id', canvasId)
+  if (error) { console.error('[shares] listShareMembers:', error.message); throw new Error('listShareMembers: ' + error.message) }
+
+  const shareIds = (shares ?? []).map((s) => s.id)
+  if (!shareIds.length) return []
+
+  const { data: memberRows, error: memberError } = await supabase
+    .from('share_members')
+    .select('share_id, user_id, can_edit')
+    .in('share_id', shareIds)
+  if (memberError) { console.error('[shares] listShareMembers (members):', memberError.message); throw new Error('listShareMembers: ' + memberError.message) }
+
+  const profiles = await getProfiles((memberRows ?? []).map((m) => m.user_id))
+
+  return (memberRows ?? []).map((m) => ({
+    shareId: m.share_id,
+    userId: m.user_id,
+    canEdit: m.can_edit,
+    profile: profiles.get(m.user_id) ?? null,
+  }))
+}
+
+export async function setMemberEdit(shareId, userId, canEdit) {
+  const { error } = await supabase
+    .from('share_members')
+    .update({ can_edit: canEdit })
+    .eq('share_id', shareId)
+    .eq('user_id', userId)
+  if (error) { console.error('[shares] setMemberEdit:', error.message); throw new Error('setMemberEdit: ' + error.message) }
+}
+
+export async function kickMember(shareId, userId) {
+  const { error } = await supabase
+    .from('share_members')
+    .delete()
+    .eq('share_id', shareId)
+    .eq('user_id', userId)
+  if (error) { console.error('[shares] kickMember:', error.message); throw new Error('kickMember: ' + error.message) }
+}
+
+// Delete MY membership rows for every share this owner has on this canvas —
+// i.e. leave a canvas that was shared to me.
+export async function leaveSharedCanvas(ownerId, canvasId) {
+  const userId = await currentUserId()
+  const { data: shares, error } = await supabase
+    .from('canvas_shares')
+    .select('id')
+    .eq('owner_id', ownerId)
+    .eq('canvas_id', canvasId)
+  if (error) { console.error('[shares] leaveSharedCanvas:', error.message); throw new Error('leaveSharedCanvas: ' + error.message) }
+
+  const shareIds = (shares ?? []).map((s) => s.id)
+  if (!shareIds.length) return
+
+  const { error: deleteError } = await supabase
+    .from('share_members')
+    .delete()
+    .eq('user_id', userId)
+    .in('share_id', shareIds)
+  if (deleteError) { console.error('[shares] leaveSharedCanvas (delete):', deleteError.message); throw new Error('leaveSharedCanvas: ' + deleteError.message) }
+}
+
 export async function deleteShare(id) {
   const { error } = await supabase.from('canvas_shares').delete().eq('id', id)
   if (error) { console.error('[shares] deleteShare:', error.message); throw new Error('deleteShare: ' + error.message) }
@@ -102,6 +174,22 @@ export async function listSharedWithMe() {
     deduped.push(s)
   }
 
+  // My own membership rows (if any) for these shares, to read my can_edit
+  // flag. A pending (unclaimed) email invite has no membership row yet —
+  // defaults to true.
+  const shareIds = deduped.map((s) => s.id)
+  let myMemberships = []
+  if (shareIds.length) {
+    const { data: memberRows, error: memberError } = await supabase
+      .from('share_members')
+      .select('share_id, can_edit')
+      .eq('user_id', userId)
+      .in('share_id', shareIds)
+    if (memberError) { console.error('[shares] listSharedWithMe (members):', memberError.message); throw new Error('listSharedWithMe: ' + memberError.message) }
+    myMemberships = memberRows ?? []
+  }
+  const canEditByShareId = new Map(myMemberships.map((m) => [m.share_id, m.can_edit]))
+
   const results = []
   for (const s of deduped) {
     const { data: canvas, error: canvasError } = await supabase
@@ -119,6 +207,7 @@ export async function listSharedWithMe() {
       scope: s.scope,
       targetId: s.target_id,
       restrictView: s.restrict_view,
+      canEdit: canEditByShareId.has(s.id) ? canEditByShareId.get(s.id) : true,
     })
   }
   return results

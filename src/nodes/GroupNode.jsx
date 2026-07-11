@@ -11,6 +11,8 @@ export default function GroupNode({ data, selected, id }) {
   const zoomShapeOnly = useStore((s) => s.transform[2] < (data.lodThreshold ?? 0.55) * 0.45)
   const shapeOnly = zoomShapeOnly || data.forceShapeOnly
 
+  const filled = data.nodeFill !== false
+
   const [editing, setEditing] = useState(false)
   const [value, setValue] = useState(data.label ?? '')
   const inputRef = useRef(null)
@@ -77,7 +79,7 @@ export default function GroupNode({ data, selected, id }) {
         minWidth: 240,
         minHeight: 160,
         boxSizing: 'border-box',
-        background: '#ffffff0f',
+        background: filled ? '#ffffff0f' : 'transparent',
         border: '1.5px dashed #8b94a766',
         borderRadius: 14,
       }}
