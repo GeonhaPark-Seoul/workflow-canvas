@@ -1087,11 +1087,29 @@ export default function App() {
     const u = userRef.current
     if (!u) { setSharedOutCanvasIds(new Set()); return }
     try {
-      const { data, error } = await supabase.from('canvas_shares').select('canvas_id')
+      // A canvas counts as "shared out" when someone can currently reach it:
+      // an accepted member exists, OR there is a live invitation (an active row
+      // that still carries a link token or an invitee email). This keeps a
+      // canvas in the shared group after its invitation is deleted but members
+      // remain, and drops ghost rows that grant access to nobody.
+      const { data: shares, error } = await supabase.from('canvas_shares')
+        .select('id, canvas_id, invitation_active, link_token, invitee_email')
         .eq('owner_id', u.id)
-        .eq('invitation_active', true)
       if (error) throw error
-      setSharedOutCanvasIds(new Set((data ?? []).map((r) => r.canvas_id)))
+      const shareIds = (shares ?? []).map((s) => s.id)
+      let membered = new Set()
+      if (shareIds.length) {
+        const { data: mems, error: memErr } = await supabase.from('share_members')
+          .select('share_id').in('share_id', shareIds)
+        if (memErr) throw memErr
+        membered = new Set((mems ?? []).map((m) => m.share_id))
+      }
+      const ids = new Set()
+      for (const s of shares ?? []) {
+        const liveInvite = s.invitation_active && (s.link_token || s.invitee_email)
+        if (membered.has(s.id) || liveInvite) ids.add(s.canvas_id)
+      }
+      setSharedOutCanvasIds(ids)
     } catch (err) {
       console.error('[shares] refreshSharedOutCanvasIds:', err.message)
     }
@@ -1462,6 +1480,21 @@ export default function App() {
     }, 1500)
     return () => clearTimeout(cloudSaveTimer.current)
   }, [user, nodes, edges, stageTypes, canvases, activeCanvasId, views])
+
+  // Persist the active canvas id promptly (the 1.5 s content autosave is
+  // debounced and skipped on shared canvases, so a quick refresh could restore
+  // a stale tab). Only own-canvas ids are stored — a shared composite id has no
+  // canvases row and would reload blank. Waits for cloud hydration so the
+  // transient guest canvas never overwrites the real active id.
+  useEffect(() => {
+    if (!user || cloudHydratedUserRef.current !== user.id) return
+    if (parseSharedId(activeCanvasId)) return
+    const t = setTimeout(() => {
+      cloudSaveUserPrefs(user.id, { active_canvas_id: activeCanvasId, canvas_order: latestRef.current.canvases })
+        .catch((err) => console.error('[cloud] persist active id:', err.message))
+    }, 300)
+    return () => clearTimeout(t)
+  }, [user, activeCanvasId])
 
   // ── Sharing: permission model for the active canvas ───────────────────────
   // Own canvases are always full-edit 'owner'. A shared composite activeCanvasId resolves to whichever
