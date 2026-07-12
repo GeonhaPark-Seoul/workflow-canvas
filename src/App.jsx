@@ -28,8 +28,10 @@ import {
   saveCanvasList, saveActiveId, uid,
   loadCanvasList, loadActiveId,
   loadLodThreshold, saveLodThreshold,
+  loadCanvasStorageOwner, resetCanvasStorage, saveCanvasStorageOwner,
 } from './storage'
 import { supabase } from './lib/supabase'
+import { sanitizeNodeData } from './lib/sanitizeHtml'
 import {
   saveCanvas as cloudSaveCanvas,
   loadAllCanvases as cloudLoadAllCanvases,
@@ -40,10 +42,10 @@ import {
 import { getSharedCanvas, listSharedCanvases, updateSharedCanvas } from './lib/sharedCanvasApi'
 import { joinCanvasPresence } from './lib/presence'
 import {
-  claimEmailInvites, claimShareToken, listShares,
+  claimEmailInvites, claimShareToken, isShareLinkActive, listShares,
   listShareMembers, setMemberEdit, kickMember, leaveSharedCanvas,
 } from './lib/shares'
-import { getMyProfile, getProfiles, upsertMyEmail, touchLastSeen } from './lib/profiles'
+import { getMyProfile, getProfiles, loadMySettings, upsertMyEmail, touchLastSeen } from './lib/profiles'
 
 const nodeTypes = { stage: StageNode, memo: MemoNode, group: GroupNode, content: ContentNode }
 const edgeTypes = { stub: StubEdge }
@@ -168,6 +170,10 @@ function sortParentsFirst(nodes) {
   return result
 }
 
+function sanitizeNodes(nodes) {
+  return (nodes ?? []).map((node) => ({ ...node, data: sanitizeNodeData(node.data) }))
+}
+
 // A "부품(part) 연결선" links two part handles (ids starting 'p-') on stage
 // nodes — dashed, no arrowhead, distinct from memo links.
 function isPartEdge(e) {
@@ -212,7 +218,7 @@ export default function App() {
   const [canvases, setCanvases] = useState(initCanvasList)
   const [activeCanvasId, setActiveCanvasId] = useState(initActiveId)
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(sortParentsFirst(initData.nodes ?? []))
+  const [nodes, setNodes, onNodesChange] = useNodesState(sortParentsFirst(sanitizeNodes(initData.nodes)))
   const [edges, setEdges, onEdgesChange] = useEdgesState(normalizeEdges(initData.edges))
   const [stageTypes, setStageTypes] = useState(() => initData.stageTypes ?? DEFAULT_STAGE_TYPES)
   const [contextMenu, setContextMenu] = useState(null)
@@ -227,7 +233,7 @@ export default function App() {
   const [lassoRect, setLassoRect] = useState(null) // screen-space rubber-band box
   const [alignGuides, setAlignGuides] = useState([]) // [{axis:'x'|'y', value}] in flow-space coords, drawn while dragging
   // Unified canvas settings (theme / node-fill / LOD threshold). AuthPanel owns
-  // the editor UI and cloud persistence (profiles.settings) — it calls
+  // the editor UI and cloud persistence (user_prefs.settings) — it calls
   // onSettingsChange(next) below on every change; lodThreshold keeps its
   // localStorage mirror so logged-out visitors still get a sensible default.
   const [settings, setSettings] = useState(() => ({ theme: 'dark', nodeFill: true, lodThreshold: loadLodThreshold() }))
@@ -264,6 +270,7 @@ export default function App() {
   // revalidation) doesn't re-run loadFromCloud() and yank the viewer back to
   // their own active_canvas_id while they're looking at a shared canvas.
   const initializedUserRef = useRef(null)
+  const cloudHydratedUserRef = useRef(null)
   const [cloudSyncing, setCloudSyncing] = useState(false)
   // Stable ref to always-current state for use inside async callbacks
   const latestRef = useRef({ canvases: initCanvasList, activeCanvasId: initActiveId, stageTypes: [], views: [] })
@@ -278,6 +285,7 @@ export default function App() {
   const loadedSharedIdRef = useRef(null)
   const pendingShareTokenRef = useRef(null) // #share=<token> claimed right after SIGNED_IN
   const [authNotice, setAuthNotice] = useState(null) // share-link login gate notice shown in AuthPanel
+  const [shareLinkError, setShareLinkError] = useState(null)
   const inviteWrapRef = useRef(null) // invite popover wrapper (outside-click close)
 
   // ── Profiles (nickname/avatar) ────────────────────────────────────────────
@@ -292,6 +300,26 @@ export default function App() {
   const [sharedOutCanvasIds, setSharedOutCanvasIds] = useState(new Set())
 
   const nextId = () => String(++counterRef.current)
+
+  // Discard the previous account's browser cache. Signed-in data is restored
+  // from Supabase; an unsigned visitor gets a fresh local workspace instead.
+  const resetToGuestCanvas = useCallback(() => {
+    const { list, activeId } = resetCanvasStorage(DEMO_CANVASES)
+    const data = loadCanvasData(activeId) ?? { nodes: [], edges: [] }
+    const nNodes = sortParentsFirst(sanitizeNodes(data.nodes))
+    isRestoring.current = true
+    setCanvases(list)
+    setActiveCanvasId(activeId)
+    setNodes(nNodes)
+    setEdges(normalizeEdges(data.edges))
+    setViews(data.views ?? [])
+    setStageTypes(data.stageTypes ?? DEFAULT_STAGE_TYPES)
+    setCurrentViewId(null)
+    counterRef.current = maxNodeId(nNodes)
+    historyStack.current = [{ nodes: nNodes.map(stripNode), edges: normalizeEdges(data.edges).map(stripEdge) }]
+    historyPointer.current = 0
+    setTimeout(() => { isRestoring.current = false }, 400)
+  }, [setNodes, setEdges])
 
   // Keep latestRef and userRef in sync so async callbacks always see fresh state
   useEffect(() => { latestRef.current = { canvases, activeCanvasId, stageTypes, views } }, [canvases, activeCanvasId, stageTypes, views])
@@ -744,7 +772,7 @@ export default function App() {
         }
       }
     }
-    const nNodes = sortParentsFirst(data.nodes ?? [])
+    const nNodes = sortParentsFirst(sanitizeNodes(data.nodes))
     const nEdges = normalizeEdges(data.edges)
     isRestoring.current = true
     setActiveCanvasId(id)
@@ -850,6 +878,7 @@ export default function App() {
         active_canvas_id: loadActiveId(),
         canvas_order: list,
       })
+      cloudHydratedUserRef.current = userId
       return
     }
 
@@ -871,6 +900,7 @@ export default function App() {
         : null
       loadCanvas(activeId, prefetched)
     }
+    cloudHydratedUserRef.current = userId
   }, [loadCanvas, setCanvases])
 
   // ── Sharing: refresh the "shared with me" list ────────────────────────────
@@ -983,19 +1013,33 @@ export default function App() {
     // Link share: #share=<token>. Claim immediately if already logged in,
     // otherwise stash it and claim right after SIGNED_IN.
     const hashMatch = location.hash.match(/^#share=(.+)$/)
-    if (hashMatch) pendingShareTokenRef.current = hashMatch[1]
+    if (hashMatch) {
+      const token = hashMatch[1]
+      pendingShareTokenRef.current = token
+      isShareLinkActive(token).then((active) => {
+        if (active || pendingShareTokenRef.current !== token) return
+        pendingShareTokenRef.current = null
+        setAuthNotice(null)
+        setShareLinkError('이 공유 링크는 더 이상 유효하지 않습니다.')
+        history.replaceState(null, '', location.pathname + location.search)
+      }).catch((err) => console.error('[shares] share link check:', err.message))
+    }
 
     const afterLogin = async (u) => {
+      const cachedOwner = loadCanvasStorageOwner()
+      if (cachedOwner && cachedOwner !== u.id) resetToGuestCanvas()
+      saveCanvasStorageOwner(u.id)
       initializedUserRef.current = u.id
+      cloudHydratedUserRef.current = null
       setAuthNotice(null)
       loadFromCloud(u.id)
-      getMyProfile().then((p) => {
+      Promise.all([getMyProfile(), loadMySettings()]).then(([p, privateSettings]) => {
         setMyProfile(p)
-        // Seed App-level settings (theme/canvas background, etc.) from the
-        // saved profile; any field the profile hasn't saved yet keeps its
+        // Seed App-level settings from the private own-user preference row;
+        // any missing field keeps its
         // current value (localStorage lodThreshold / 'dark' theme default).
-        if (p?.settings) setSettings((prev) => ({ ...prev, ...p.settings }))
-      }).catch((err) => console.error('[profiles] getMyProfile:', err.message))
+        if (privateSettings) setSettings((prev) => ({ ...prev, ...privateSettings }))
+      }).catch((err) => console.error('[profiles] load profile/settings:', err.message))
       if (u.email) upsertMyEmail(u.email).catch((err) => console.error('[profiles] upsertMyEmail:', err.message))
       sharedFnRef.current.refreshSharedOutCanvasIds()
       try { await claimEmailInvites() } catch (err) { console.error('[shares] claimEmailInvites:', err.message) }
@@ -1012,6 +1056,12 @@ export default function App() {
           }
         } catch (err) {
           console.error('[shares] claimShareToken:', err.message)
+          if (/invalid share link|share access revoked/i.test(err.message)) {
+            setAuthNotice(null)
+            setShareLinkError(err.message.includes('revoked')
+              ? '이 공유 캔버스에 대한 접근 권한이 철회되었습니다.'
+              : '이 공유 링크는 더 이상 유효하지 않습니다.')
+          }
         }
         history.replaceState(null, '', location.pathname + location.search)
         return
@@ -1035,10 +1085,14 @@ export default function App() {
       // ends by switching to this browser's active_canvas_id) on an actual new
       // sign-in, not that revalidation echo.
       if (event === 'SIGNED_IN' && u && u.id !== initializedUserRef.current) afterLogin(u)
-      if (event === 'SIGNED_OUT') initializedUserRef.current = null
+      if (event === 'SIGNED_OUT') {
+        if (initializedUserRef.current) resetToGuestCanvas()
+        initializedUserRef.current = null
+        cloudHydratedUserRef.current = null
+      }
     })
     return () => subscription.unsubscribe()
-  }, [loadFromCloud])
+  }, [loadFromCloud, resetToGuestCanvas])
 
   // ── Realtime: reflect MCP(AI)/other-device writes live ───────────────────
   // Events are treated as signals only — large jsonb payloads can be truncated,
@@ -1171,6 +1225,7 @@ export default function App() {
     if (!user) return
     clearTimeout(cloudSaveTimer.current)
     cloudSaveTimer.current = setTimeout(async () => {
+      if (cloudHydratedUserRef.current !== user.id) return
       const { canvases: cvs, activeCanvasId: aid, stageTypes: types, views: vws } = latestRef.current
       const snapshot = { nodes: nodes.map(stripNode), edges: edges.map(stripEdge) }
       const shared = parseSharedId(aid)
@@ -1329,7 +1384,7 @@ export default function App() {
 
   // ── Node data ────────────────────────────────────────────────────────────
   const updateNodeData = useCallback((id, patch) => {
-    setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, ...patch } } : n))
+    setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: sanitizeNodeData({ ...n.data, ...patch }) } : n))
   }, [setNodes])
 
   // ── Stage type management ─────────────────────────────────────────────────
@@ -2169,6 +2224,7 @@ export default function App() {
         forceOpen={!!authNotice}
         notice={authNotice}
         myProfile={myProfile}
+        settings={settings}
         onProfileSaved={setMyProfile}
         lodThreshold={settings.lodThreshold}
         onSettingsChange={onSettingsChange}
@@ -2203,6 +2259,28 @@ export default function App() {
             <div style={{ color: '#888', fontSize: 12, lineHeight: 1.6 }}>
               오른쪽 위 로그인 패널에서 로그인하거나 가입하면<br />초대된 캔버스로 바로 이동합니다.
             </div>
+          </div>
+        </div>
+      )}
+
+      {shareLinkError && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 1200,
+          background: '#000000aa', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <div style={{
+            background: '#1a1a22', border: '1px solid #ffffff22', borderRadius: 10,
+            padding: '24px 28px', maxWidth: 340, textAlign: 'center', boxShadow: '0 12px 48px #000d',
+          }}>
+            <div style={{ fontSize: 28, marginBottom: 12 }}>⚠</div>
+            <div style={{ color: '#f0f0f0', fontSize: 15, fontWeight: 700, marginBottom: 8 }}>
+              공유 링크를 열 수 없습니다
+            </div>
+            <div style={{ color: '#aaa', fontSize: 12, lineHeight: 1.6, marginBottom: 16 }}>{shareLinkError}</div>
+            <button onClick={() => setShareLinkError(null)} style={{
+              background: '#3b82f6', border: 'none', borderRadius: 6, color: '#fff',
+              fontSize: 12, fontWeight: 700, padding: '8px 16px', cursor: 'pointer', fontFamily: 'inherit',
+            }}>확인</button>
           </div>
         </div>
       )}

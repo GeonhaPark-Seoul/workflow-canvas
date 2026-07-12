@@ -1,5 +1,6 @@
 // Shared-canvas authorization for server-only callers (MCP and browser API).
 import { createClient } from '@supabase/supabase-js'
+import { sanitizeHtml, sanitizeTextFields } from './sanitize.js'
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://tuaifwiigkacrflbhjmu.supabase.co'
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -10,11 +11,6 @@ export function admin() {
   if (!SERVICE_KEY) throw new Error('SUPABASE_SERVICE_ROLE_KEY 환경변수가 설정되지 않았습니다.')
   if (!client) client = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false, autoRefreshToken: false } })
   return client
-}
-
-async function userEmail(userId) {
-  const { data } = await admin().auth.admin.getUserById(userId)
-  return data?.user?.email?.toLowerCase() ?? null
 }
 
 export async function resolveBrowserUser(token) {
@@ -35,13 +31,8 @@ export async function mySharesFor(userId, canvasId = null) {
     .from('share_members').select('share_id, can_edit').eq('user_id', userId)
   if (membersError) throw new Error(membersError.message)
   const canEditByShare = new Map((members ?? []).map((member) => [member.share_id, member.can_edit]))
-  const email = shares.some((share) => share.invitee_email) ? await userEmail(userId) : null
-
   return shares
-    .filter((share) => share.owner_id !== userId && (
-      canEditByShare.has(share.id) ||
-      (share.invitee_email && email && share.invitee_email.toLowerCase() === email)
-    ))
+    .filter((share) => share.owner_id !== userId && canEditByShare.has(share.id))
     .map((share) => ({ ...share, can_edit: canEditByShare.has(share.id) ? canEditByShare.get(share.id) : true }))
 }
 
@@ -87,6 +78,14 @@ export function redactCanvas(access) {
 }
 
 const same = (left, right) => JSON.stringify(left) === JSON.stringify(right)
+
+function sanitizeNode(node) {
+  const data = sanitizeTextFields({ ...(node.data ?? {}) })
+  if (Array.isArray(data.parts)) {
+    data.parts = data.parts.map((part) => ({ ...part, text: typeof part.text === 'string' ? sanitizeHtml(part.text) : part.text }))
+  }
+  return { ...node, data }
+}
 
 export function applySharedCanvasUpdate(access, submittedNodes, submittedEdges) {
   if (!access.canEdit) throw new Error('읽기 전용 초대에서는 변경할 수 없습니다.')
@@ -149,5 +148,5 @@ export function applySharedCanvasUpdate(access, submittedNodes, submittedEdges) 
       throw new Error('연결선의 양 끝은 모두 초대된 편집 범위 안에 있어야 합니다.')
     }
   }
-  return { nodes: mergedNodes, edges: submittedEdges }
+  return { nodes: mergedNodes.map(sanitizeNode), edges: submittedEdges }
 }

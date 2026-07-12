@@ -60,26 +60,36 @@ export async function upsertMyEmail(email) {
   if (upsertError) { console.error('[profiles] upsertMyEmail fallback:', upsertError.message); throw new Error('upsertMyEmail: ' + upsertError.message) }
 }
 
-// Returns Map(userId → { nickname, glyph, color, email, lastSeenAt }) for the given user ids.
+// Returns profiles only when RLS confirms the caller shares a canvas with them.
 export async function getProfiles(userIds) {
   const ids = Array.from(new Set(userIds ?? [])).filter(Boolean)
   const map = new Map()
   if (!ids.length) return map
   const { data, error } = await supabase
     .from('profiles')
-    .select('user_id, nickname, glyph, color, email, last_seen_at, settings')
+    .select('user_id, nickname, glyph, color, email, last_seen_at')
     .in('user_id', ids)
   if (error) { console.error('[profiles] getProfiles:', error.message); throw new Error('getProfiles: ' + error.message) }
-  ;(data ?? []).forEach((p) => map.set(p.user_id, { nickname: p.nickname, glyph: p.glyph, color: p.color, email: p.email, lastSeenAt: p.last_seen_at, settings: p.settings }))
+  ;(data ?? []).forEach((p) => map.set(p.user_id, { nickname: p.nickname, glyph: p.glyph, color: p.color, email: p.email, lastSeenAt: p.last_seen_at }))
   return map
 }
 
-// Persist my canvas settings (theme, node fill, LOD threshold) to my profile row.
+// Persist private UI settings to user_prefs, never the share-visible profile row.
 export async function saveMySettings(settings) {
   const userId = await currentUserId()
   if (!userId) return
-  const { error } = await supabase.from('profiles').update({ settings }).eq('user_id', userId)
+  const { error } = await supabase.from('user_prefs').upsert(
+    { user_id: userId, settings }, { onConflict: 'user_id' },
+  )
   if (error) { console.error('[profiles] saveMySettings:', error.message); throw new Error('saveMySettings: ' + error.message) }
+}
+
+export async function loadMySettings() {
+  const userId = await currentUserId()
+  if (!userId) return null
+  const { data, error } = await supabase.from('user_prefs').select('settings').eq('user_id', userId).maybeSingle()
+  if (error) { console.error('[profiles] loadMySettings:', error.message); throw new Error('loadMySettings: ' + error.message) }
+  return data?.settings ?? null
 }
 
 // Heartbeat: bump my own last_seen_at so other participants' mini profile

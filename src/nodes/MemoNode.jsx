@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Handle, Position, NodeResizer, useStore } from '@xyflow/react'
 import EditToolbar from '../components/EditToolbar'
 import { useTheme } from './useTheme'
+import { sanitizeHtml } from '../lib/sanitizeHtml'
 
 // Bidirectional connection ports: every handle is type="source"; with the
 // canvas in connectionMode="loose", a source handle can also receive a
@@ -118,12 +119,12 @@ export default function MemoNode({ data, selected, id }) {
   // click position that triggered the edit (falls back to end-of-content).
   useEffect(() => {
     if (editing === 'header' && headerRef.current) {
-      headerRef.current.innerHTML = data.header ?? ''
+      headerRef.current.innerHTML = sanitizeHtml(data.header ?? '')
       headerRef.current.focus()
       placeCaretAt(headerRef.current, caretPosRef.current)
     }
     if (editing === 'text' && textRef.current) {
-      textRef.current.innerHTML = wrapLines(data.text || '')
+      textRef.current.innerHTML = wrapLines(sanitizeHtml(data.text || ''))
       textRef.current.focus()
       placeCaretAt(textRef.current, caretPosRef.current)
     }
@@ -325,7 +326,7 @@ export default function MemoNode({ data, selected, id }) {
             <div
               className="rich-content text-hover-line"
               onClick={handleDisplayClick('header')}
-              dangerouslySetInnerHTML={{ __html: headerValue || (data.headerTouched ? '' : '제목') }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(headerValue || (data.headerTouched ? '' : '제목')) }}
               style={{
                 flex: 1, color: headerValue ? headerColor : headerPlaceholderColor,
                 fontSize: headerFontSize, fontWeight: 800, letterSpacing: 0.3, cursor: 'text',
@@ -370,7 +371,7 @@ export default function MemoNode({ data, selected, id }) {
                 ref={textDisplayRef}
                 className="rich-content nowheel"
                 onClick={handleDisplayClick('text')}
-                dangerouslySetInnerHTML={{ __html: wrapLines(textValue || (data.textTouched ? '' : '메모 내용')) }}
+                dangerouslySetInnerHTML={{ __html: wrapLines(sanitizeHtml(textValue || (data.textTouched ? '' : '메모 내용'))) }}
                 style={{
                   flex: 1, color: textValue ? textColor : textPlaceholderColor, fontSize: 12,
                   whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text',

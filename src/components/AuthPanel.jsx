@@ -44,6 +44,7 @@ export default function AuthPanel({
   forceOpen, notice,
   myProfile, onProfileSaved,
   lodThreshold = 0.55, onChangeLodThreshold,
+  settings: savedSettings,
   onSettingsChange = () => {},
 }) {
   const [open, setOpen] = useState(false)
@@ -61,7 +62,7 @@ export default function AuthPanel({
   const [profileSaving, setProfileSaving] = useState(false)
 
   // Unified canvas settings (theme, node fill, LOD threshold): persisted to
-  // my profile row, debounced.
+  // my own user_prefs row, debounced.
   const [settings, setSettings] = useState({ theme: 'dark', nodeFill: true, lodThreshold })
   const settingsTimerRef = useRef(null)
   const updateSettings = (patch) => {
@@ -157,7 +158,7 @@ export default function AuthPanel({
   // follows a #share=<token> link.
   useEffect(() => { if (forceOpen) setOpen(true) }, [forceOpen])
 
-  // Sync the editor fields whenever the popover opens or the loaded profile changes.
+  // Sync the profile editor whenever the popover opens or the loaded profile changes.
   useEffect(() => {
     setGlyphInput(myProfile?.glyph ?? '')
     setColorInput(myProfile?.color ?? GLYPH_COLORS[0])
@@ -166,12 +167,12 @@ export default function AuthPanel({
 
   useEffect(() => {
     setSettings({
-      theme: myProfile?.settings?.theme ?? 'dark',
-      nodeFill: myProfile?.settings?.nodeFill ?? true,
-      lodThreshold: myProfile?.settings?.lodThreshold ?? lodThreshold,
+      theme: savedSettings?.theme ?? 'dark',
+      nodeFill: savedSettings?.nodeFill ?? true,
+      lodThreshold: savedSettings?.lodThreshold ?? lodThreshold,
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [myProfile, open])
+  }, [savedSettings, open])
 
   // Token values are secrets. Reset them when the account changes and ignore
   // a stale request that finishes after another user has signed in.

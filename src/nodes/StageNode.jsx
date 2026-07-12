@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Handle, Position, NodeResizer, useStore } from '@xyflow/react'
 import EditToolbar from '../components/EditToolbar'
 import { useTheme } from './useTheme'
+import { sanitizeHtml } from '../lib/sanitizeHtml'
 
 const DEFAULT_TYPES = [
   { bg: '#1e3a5f', border: '#3b82f6', label: '기획' },
@@ -140,12 +141,12 @@ export default function StageNode({ data, selected, id }) {
   // click position that triggered the edit (falls back to end-of-content).
   useEffect(() => {
     if (editing === 'title' && titleRef.current) {
-      titleRef.current.innerHTML = data.label ?? ''
+      titleRef.current.innerHTML = sanitizeHtml(data.label ?? '')
       titleRef.current.focus()
       placeCaretAt(titleRef.current, caretPosRef.current)
     }
     if (editing === 'desc' && descRef.current) {
-      descRef.current.innerHTML = wrapLines(data.description || '')
+      descRef.current.innerHTML = wrapLines(sanitizeHtml(data.description || ''))
       descRef.current.focus()
       placeCaretAt(descRef.current, caretPosRef.current)
     }
@@ -385,7 +386,7 @@ export default function StageNode({ data, selected, id }) {
                 <div
                   className="rich-content text-hover-line"
                   onClick={handleDisplayClick('title')}
-                  dangerouslySetInnerHTML={{ __html: titleValue || (data.titleTouched ? '' : '단계 이름') }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(titleValue || (data.titleTouched ? '' : '단계 이름')) }}
                   style={{
                     color: titleValue ? titleColor : titlePlaceholderColor, fontSize: titleFontSize, fontWeight: 700,
                     cursor: 'text', minHeight: titleLineH, lineHeight: `${titleLineH}px`, textAlign: 'center',
@@ -442,7 +443,7 @@ export default function StageNode({ data, selected, id }) {
                   <div
                     className="rich-content text-hover-line"
                     onClick={handleDisplayClick('title')}
-                    dangerouslySetInnerHTML={{ __html: titleValue || (data.titleTouched ? '' : '단계 이름') }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(titleValue || (data.titleTouched ? '' : '단계 이름')) }}
                     style={{
                       color: titleValue ? titleColor : titlePlaceholderColor, fontSize: titleFontSize, fontWeight: 700,
                       marginBottom: 4, cursor: 'text', minHeight: titleLineH, lineHeight: `${titleLineH}px`,
@@ -488,7 +489,7 @@ export default function StageNode({ data, selected, id }) {
                 ref={descDisplayRef}
                 className="rich-content nowheel"
                 onClick={handleDisplayClick('desc')}
-                dangerouslySetInnerHTML={{ __html: wrapLines(descValue || (data.descTouched ? '' : '설명')) }}
+                dangerouslySetInnerHTML={{ __html: wrapLines(sanitizeHtml(descValue || (data.descTouched ? '' : '설명'))) }}
                 style={{
                   flex: 1, color: descValue ? descColor : descPlaceholderColor, fontSize: 12,
                   whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text',

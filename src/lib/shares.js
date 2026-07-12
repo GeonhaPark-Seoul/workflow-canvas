@@ -108,11 +108,7 @@ export async function setMemberEdit(shareId, userId, canEdit) {
 }
 
 export async function kickMember(shareId, userId) {
-  const { error } = await supabase
-    .from('share_members')
-    .delete()
-    .eq('share_id', shareId)
-    .eq('user_id', userId)
+  const { error } = await supabase.rpc('revoke_share_member', { p_share_id: shareId, p_user_id: userId })
   if (error) { console.error('[shares] kickMember:', error.message); throw new Error('kickMember: ' + error.message) }
 }
 
@@ -130,12 +126,10 @@ export async function leaveSharedCanvas(ownerId, canvasId) {
   const shareIds = (shares ?? []).map((s) => s.id)
   if (!shareIds.length) return
 
-  const { error: deleteError } = await supabase
-    .from('share_members')
-    .delete()
-    .eq('user_id', userId)
-    .in('share_id', shareIds)
-  if (deleteError) { console.error('[shares] leaveSharedCanvas (delete):', deleteError.message); throw new Error('leaveSharedCanvas: ' + deleteError.message) }
+  await Promise.all(shareIds.map(async (shareId) => {
+    const { error: revokeError } = await supabase.rpc('revoke_share_member', { p_share_id: shareId, p_user_id: userId })
+    if (revokeError) throw new Error('leaveSharedCanvas: ' + revokeError.message)
+  }))
 }
 
 export async function deleteShare(id) {
@@ -147,6 +141,12 @@ export async function claimShareToken(token) {
   const { data, error } = await supabase.rpc('claim_share', { token })
   if (error) { console.error('[shares] claimShareToken:', error.message); throw new Error('claimShareToken: ' + error.message) }
   return Array.isArray(data) ? data[0] : data
+}
+
+export async function isShareLinkActive(token) {
+  const { data, error } = await supabase.rpc('share_link_is_active', { token })
+  if (error) { console.error('[shares] isShareLinkActive:', error.message); throw new Error('isShareLinkActive: ' + error.message) }
+  return data === true
 }
 
 export async function claimEmailInvites() {

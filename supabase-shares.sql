@@ -28,8 +28,18 @@ create table if not exists share_members (
   primary key (share_id, user_id)
 );
 
+-- A revoked user cannot reclaim the same email/link invitation. Re-inviting
+-- creates a new canvas_shares row, so the owner can explicitly grant access again.
+create table if not exists share_revocations (
+  share_id uuid references canvas_shares(id) on delete cascade,
+  user_id uuid references auth.users(id) on delete cascade,
+  revoked_at timestamptz default now(),
+  primary key (share_id, user_id)
+);
+
 alter table canvas_shares enable row level security;
 alter table share_members enable row level security;
+alter table share_revocations enable row level security;
 
 -- ── canvas_shares policies ──────────────────────────────────────────────────
 
@@ -132,6 +142,9 @@ begin
   if not found then
     raise exception 'invalid share link';
   end if;
+  if exists (select 1 from share_revocations r where r.share_id = found_share.id and r.user_id = auth.uid()) then
+    raise exception 'share access revoked';
+  end if;
 
   insert into share_members (share_id, user_id)
   values (found_share.id, auth.uid())
@@ -160,16 +173,50 @@ begin
   select cs.id, auth.uid()
   from canvas_shares cs
   where lower(cs.invitee_email) = lower(auth.email())
+    and not exists (select 1 from share_revocations r where r.share_id = cs.id and r.user_id = auth.uid())
   on conflict do nothing;
 
   return query
     select cs.* from canvas_shares cs
-    where lower(cs.invitee_email) = lower(auth.email());
+    where lower(cs.invitee_email) = lower(auth.email())
+      and not exists (select 1 from share_revocations r where r.share_id = cs.id and r.user_id = auth.uid());
 end;
 $$;
 
 revoke execute on function claim_email_invites() from anon;
 grant execute on function claim_email_invites() to authenticated;
+
+-- Used before opening a #share= link so deleted links receive a clear message.
+create or replace function share_link_is_active(token text)
+returns boolean language sql security definer stable set search_path = public as $$
+  select exists (select 1 from canvas_shares where link_token = token);
+$$;
+revoke execute on function share_link_is_active(text) from anon;
+grant execute on function share_link_is_active(text) to anon, authenticated;
+
+-- Owners can revoke a participant; a participant can revoke their own access.
+create or replace function revoke_share_member(p_share_id uuid, p_user_id uuid)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  if p_user_id <> auth.uid() and not exists (
+    select 1 from canvas_shares s where s.id = p_share_id and s.owner_id = auth.uid()
+  ) then
+    raise exception 'not allowed to revoke this share member';
+  end if;
+  -- An email invite is one-person-only, so removing that row fully revokes it
+  -- and keeps it out of the owner's pending-invite list. Link shares can have
+  -- several people, so retain the link and revoke only this account.
+  if exists (select 1 from canvas_shares s where s.id = p_share_id and s.invitee_email is not null) then
+    delete from canvas_shares where id = p_share_id;
+  else
+    insert into share_revocations (share_id, user_id) values (p_share_id, p_user_id)
+    on conflict do nothing;
+    delete from share_members where share_id = p_share_id and user_id = p_user_id;
+  end if;
+end;
+$$;
+revoke execute on function revoke_share_member(uuid, uuid) from anon;
+grant execute on function revoke_share_member(uuid, uuid) to authenticated;
 
 -- ── Table grants ─────────────────────────────────────────────────────────────
 -- RLS policies alone are not enough: the authenticated role also needs
@@ -177,7 +224,8 @@ grant execute on function claim_email_invites() to authenticated;
 -- newly created tables). RLS still restricts which rows are reachable.
 grant select, insert, update, delete on canvas_shares to authenticated;
 grant select on share_members to authenticated;
-grant all on canvas_shares, share_members to service_role;
+grant select on share_revocations to authenticated;
+grant all on canvas_shares, share_members, share_revocations to service_role;
 
 -- ── Phase 4: per-member edit permission + owner/member management ──────────
 -- Safe to re-run.

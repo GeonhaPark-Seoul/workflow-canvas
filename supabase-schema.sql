@@ -8,6 +8,7 @@ create table if not exists canvases (
   name        text        not null default '캔버스',
   nodes       jsonb       not null default '[]',
   edges       jsonb       not null default '[]',
+  views       jsonb       not null default '[]', -- saved canvas viewport presets
   stage_types jsonb, -- per-canvas stage-node categories; null = built-in defaults
   updated_at  timestamptz default now(),
   unique (user_id, canvas_id)
@@ -23,7 +24,8 @@ create table if not exists user_prefs (
   user_id           uuid  references auth.users(id) on delete cascade primary key,
   active_canvas_id  text,
   stage_types       jsonb, -- legacy, unused (stage types now live on canvases.stage_types)
-  canvas_order      jsonb  -- [{id, name}]
+  canvas_order      jsonb, -- [{id, name}]
+  settings          jsonb  -- private UI preferences (theme, node fill, LOD threshold)
 );
 
 alter table user_prefs enable row level security;

@@ -7,6 +7,7 @@ const LIST_KEY = 'workflow-canvas-list'
 const ACTIVE_KEY = 'workflow-canvas-active'
 const LEGACY_KEY = 'workflow-canvas' // pre-multi-canvas single store
 const LEGACY_TYPES_KEY = 'workflow-canvas-types' // pre-per-canvas global stage types
+const OWNER_KEY = 'workflow-canvas-owner-id' // authenticated account owning this local mirror
 const dataKey = (id) => `workflow-canvas-data-${id}`
 
 export const uid = () => `c-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
@@ -29,6 +30,27 @@ export function loadCanvasList() { return read(LIST_KEY) }
 export function saveCanvasList(list) { write(LIST_KEY, list) }
 export function loadActiveId() { return read(ACTIVE_KEY) }
 export function saveActiveId(id) { write(ACTIVE_KEY, id) }
+export function loadCanvasStorageOwner() { return read(OWNER_KEY) }
+export function saveCanvasStorageOwner(userId) { write(OWNER_KEY, userId) }
+
+// Canvas data is a cache for a signed-in account, not a cross-account workspace.
+// Delete it on account changes while leaving unrelated app/site localStorage alone.
+export function clearCanvasStorage() {
+  try {
+    const keys = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key?.startsWith('workflow-canvas-data-')) keys.push(key)
+    }
+    keys.forEach((key) => localStorage.removeItem(key))
+    ;[LIST_KEY, ACTIVE_KEY, LEGACY_KEY, LEGACY_TYPES_KEY, LOD_KEY, OWNER_KEY].forEach((key) => localStorage.removeItem(key))
+  } catch {}
+}
+
+export function resetCanvasStorage(seeds) {
+  clearCanvasStorage()
+  return initCanvases(seeds)
+}
 
 const LOD_KEY = 'wfc:lodThreshold'
 export function loadLodThreshold() {
@@ -42,6 +64,9 @@ export function saveLodThreshold(v) { write(LOD_KEY, Math.min(Math.max(Number(v)
 // single-canvas data (if any) or the provided demo seeds. `seeds` is an array
 // of { name, nodes, edges }; the first becomes the active canvas.
 export function initCanvases(seeds) {
+  // A persisted owner means this is a signed-in user's cache. Never show it
+  // while the auth session is still being resolved on a fresh page load.
+  if (loadCanvasStorageOwner()) clearCanvasStorage()
   const list = loadCanvasList()
   if (list && list.length) {
     let activeId = loadActiveId()

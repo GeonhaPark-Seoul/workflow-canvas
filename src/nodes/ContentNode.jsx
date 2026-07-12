@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Handle, Position, NodeResizer, useStore } from '@xyflow/react'
 import EditToolbar from '../components/EditToolbar'
 import { useTheme } from './useTheme'
+import { sanitizeHtml } from '../lib/sanitizeHtml'
 
 // Bidirectional connection ports: every handle is type="source"; with the
 // canvas in connectionMode="loose", a source handle can also receive a
@@ -138,7 +139,7 @@ export default function ContentNode({ data, selected, id }) {
   // click position that triggered the edit (falls back to end-of-content).
   useEffect(() => {
     if (editing === 'header' && headerRef.current) {
-      headerRef.current.innerHTML = data.header ?? ''
+      headerRef.current.innerHTML = sanitizeHtml(data.header ?? '')
       headerRef.current.focus()
       placeCaretAt(headerRef.current, caretPosRef.current)
     }
@@ -297,7 +298,7 @@ export default function ContentNode({ data, selected, id }) {
             <div
               className="rich-content text-hover-line"
               onClick={handleDisplayClick('header')}
-              dangerouslySetInnerHTML={{ __html: headerValue || (data.headerTouched ? '' : kindLabel) }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(headerValue || (data.headerTouched ? '' : kindLabel)) }}
               style={{
                 flex: 1, color: headerValue ? headerColor : headerPlaceholderColor,
                 fontSize: headerFontSize, fontWeight: 800, letterSpacing: 0.3, cursor: 'text',

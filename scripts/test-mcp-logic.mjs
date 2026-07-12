@@ -5,6 +5,7 @@ import { layoutGraph, findNonOverlapping, validateGraphInput, overlaps, nodeRect
 import { checkRadialLevelMixing, editableNodeIdSet, assertRegionEdit } from '../mcp/store.js'
 import { sanitizeHtml } from '../mcp/sanitize.js'
 import { applySharedCanvasUpdate, redactCanvas } from '../mcp/shareAccess.js'
+import { sanitizeHtml as sanitizeBrowserHtml } from '../src/lib/sanitizeHtml.js'
 
 let passed = 0
 function t(name, fn) {
@@ -326,6 +327,13 @@ t('is idempotent', () => {
   const src = '<div class="cl-item"><input type="checkbox">&nbsp;x</div><details><summary>t</summary><div>d</div></details><b>y</b>'
   const once = sanitizeHtml(src)
   assert.equal(sanitizeHtml(once), once)
+})
+
+t('browser sanitizer blocks stored-XSS markup while preserving safe formatting', () => {
+  const out = sanitizeBrowserHtml('<img src=x onerror=alert(1)><a href="javascript:alert(1)">x</a><b>ok</b>')
+  assert.equal(out.includes('onerror'), false)
+  assert.equal(out.includes('javascript:'), false)
+  assert.equal(out.includes('<b>ok</b>'), true)
 })
 
 console.log('segmentIntersectsRect')

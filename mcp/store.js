@@ -177,14 +177,8 @@ export async function listCanvases(userId) {
 
 const SCOPE_RANK = { canvas: 0, group: 1, node: 2 }
 
-async function userEmail(userId) {
-  try {
-    const { data } = await admin().auth.admin.getUserById(userId)
-    return data?.user?.email?.toLowerCase() ?? null
-  } catch { return null }
-}
-
-// Shares addressed to this user: claimed memberships + unclaimed email invites.
+// Shares addressed to this user. Email invitations are converted to memberships
+// at login, so a revoked membership cannot regain access through email matching.
 async function mySharesFor(userId, canvasId) {
   const db = admin()
   let q = db.from('canvas_shares').select('id, owner_id, canvas_id, scope, target_id, invitee_email, restrict_view')
@@ -195,10 +189,8 @@ async function mySharesFor(userId, canvasId) {
   const { data: mems, error: e2 } = await db.from('share_members').select('share_id, can_edit').eq('user_id', userId)
   if (e2) throw new Error(e2.message)
   const canEditByShareId = new Map((mems ?? []).map((m) => [m.share_id, m.can_edit]))
-  const email = shares.some((s) => s.invitee_email) ? await userEmail(userId) : null
   return shares
-    .filter((s) => s.owner_id !== userId &&
-      (canEditByShareId.has(s.id) || (s.invitee_email && email && s.invitee_email.toLowerCase() === email)))
+    .filter((s) => s.owner_id !== userId && canEditByShareId.has(s.id))
     .map((s) => ({ ...s, can_edit: canEditByShareId.has(s.id) ? canEditByShareId.get(s.id) : true }))
 }
 

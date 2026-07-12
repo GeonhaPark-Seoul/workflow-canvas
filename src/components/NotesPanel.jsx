@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { sanitizeHtml } from '../lib/sanitizeHtml'
 
 // ── Notes-app-style right-docked panel ───────────────────────────────────────
 // LIST column (node titles, tree for stage / flat for memo & content) +
@@ -12,7 +13,7 @@ const NO_TITLE = '(제목 없음)'
 function stripHtml(html) {
   if (!html) return ''
   const div = document.createElement('div')
-  div.innerHTML = html
+  div.innerHTML = sanitizeHtml(html)
   return (div.textContent || div.innerText || '').trim()
 }
 
@@ -279,7 +280,7 @@ function NotePage({ node, byId, outMap, isEditable, onUpdateNode, onFocusNode, o
             key={`body-${node.id}`}
             contentEditable={isEditable}
             suppressContentEditableWarning
-            dangerouslySetInnerHTML={{ __html: node.data?.[bodyField] ?? '' }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(node.data?.[bodyField] ?? '') }}
             onInput={(e) => scheduleBodySave(e.currentTarget.innerHTML)}
             style={{
               minHeight: 160, background: '#12121a', border: '1px solid #ffffff18', borderRadius: 6,
