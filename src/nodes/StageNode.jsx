@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Handle, Position, NodeResizer, useStore } from '@xyflow/react'
 import EditToolbar from '../components/EditToolbar'
+import ScopedParticipants from '../components/ScopedParticipants'
 import { useTheme } from './useTheme'
 import { sanitizeHtml } from '../lib/sanitizeHtml'
 
@@ -396,7 +397,13 @@ export default function StageNode({ data, selected, id }) {
                 />
               )}
             </div>
-            {selected && data.canInvite && <InviteButton data={data} id={id} />}
+            <ScopedParticipants
+              participants={data.scopedParticipants}
+              canInvite={selected && data.canInvite && !data.readOnly}
+              onInvite={data.onInvite}
+              scope="node"
+              targetId={id}
+            />
           </div>
         ) : (
           /* Normal mode: unchanged — circle + label row, then title below */
@@ -453,7 +460,13 @@ export default function StageNode({ data, selected, id }) {
                   />
                 )}
               </div>
-              {selected && data.canInvite && <InviteButton data={data} id={id} />}
+              <ScopedParticipants
+                participants={data.scopedParticipants}
+                canInvite={selected && data.canInvite && !data.readOnly}
+                onInvite={data.onInvite}
+                scope="node"
+                targetId={id}
+              />
             </div>
           </>
         )}
@@ -597,24 +610,5 @@ export default function StageNode({ data, selected, id }) {
         anchorRef={editing === 'title' ? titleContainerRef : editing === 'desc' ? descContainerRef : null}
       />
     </div>
-  )
-}
-
-// Owner-only "invite" icon shown next to a selected stage node's title.
-function InviteButton({ data, id }) {
-  return (
-    <button
-      type="button"
-      className="nodrag"
-      onClick={(e) => { e.stopPropagation(); const r = e.currentTarget.getBoundingClientRect(); data.onInvite?.('node', id, r) }}
-      title="공유 초대"
-      style={{
-        width: 18, height: 18, borderRadius: '50%', border: 'none', flexShrink: 0,
-        background: '#ffffff14', color: '#f0f0f0', fontSize: 12, lineHeight: '18px',
-        padding: 0, cursor: 'pointer', marginTop: 1,
-      }}
-    >
-      ＋
-    </button>
   )
 }

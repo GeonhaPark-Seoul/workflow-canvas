@@ -2,9 +2,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { createShare, createLinkShare, listShares, deleteShare, listShareMembers } from '../lib/shares'
 import { Avatar } from './AuthPanel'
 
-// Phase 1: pure popover UI for the sharing/invite feature. Not mounted
-// anywhere yet — phase 2 positions it near the canvas/group/node header and
-// wires up `onlineUserIds` from presence.js.
+// Sharing controls positioned near the canvas/group/node header. Online state
+// comes from presence.js; accepted members are resolved through shares.js.
 
 const SCOPE_LABEL = {
   canvas: '캔버스 공유',
@@ -25,13 +24,18 @@ export default function InvitePopover({ scope, targetId, canvasId, onClose, onli
 
   const [creatingLink, setCreatingLink] = useState(false)
   const [linkUrl, setLinkUrl] = useState(null)
+  const [linkShareId, setLinkShareId] = useState(null)
   const [copied, setCopied] = useState(false)
 
   const refresh = useCallback(() => {
     setLoading(true)
     Promise.all([listShares(canvasId), listShareMembers(canvasId)])
       .then(([all, mem]) => {
-        setShares(all.filter((s) => s.scope === scope && (s.target_id ?? null) === (targetId ?? null)))
+        const scopedShares = all.filter((s) => s.scope === scope && (s.target_id ?? null) === (targetId ?? null))
+        const linkShare = scopedShares.find((s) => s.link_token)
+        setShares(scopedShares)
+        setLinkShareId(linkShare?.id ?? null)
+        setLinkUrl(linkShare?.link_token ? `${location.origin}/#share=${linkShare.link_token}` : null)
         setMembers(mem)
         setError(null)
       })
@@ -62,8 +66,9 @@ export default function InvitePopover({ scope, targetId, canvasId, onClose, onli
     setCreatingLink(true)
     setError(null)
     try {
-      const { url } = await createLinkShare({ canvasId, scope, targetId, restrictView })
+      const { share, url } = await createLinkShare({ canvasId, scope, targetId, restrictView })
       setLinkUrl(url)
+      setLinkShareId(share.id)
       refresh()
       onSharesChanged?.()
     } catch (e2) {
@@ -84,6 +89,10 @@ export default function InvitePopover({ scope, targetId, canvasId, onClose, onli
     setError(null)
     try {
       await deleteShare(id)
+      if (id === linkShareId) {
+        setLinkUrl(null)
+        setLinkShareId(null)
+      }
       refresh()
       onSharesChanged?.()
     } catch (e2) {

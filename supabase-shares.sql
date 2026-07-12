@@ -1,6 +1,6 @@
 -- Run this in Supabase Dashboard → SQL Editor (after supabase-schema.sql)
--- Phase 1 of the sharing/invite feature: tables, RLS, and claim RPCs.
--- Nothing in the app calls this yet — phase 2 wires the client up to it.
+-- Sharing/invite tables, RLS, membership management, and claim RPCs.
+-- Safe to re-run when deploying sharing changes.
 
 -- ── Tables ───────────────────────────────────────────────────────────────────
 
@@ -15,6 +15,7 @@ create table if not exists canvas_shares (
   target_id text,
   invitee_email text,          -- lowercase; null for link shares
   link_token text unique,      -- null for email invites
+  invitation_active boolean not null default true,
   restrict_view boolean not null default false,
   created_at timestamptz default now()
 );
@@ -40,6 +41,7 @@ create table if not exists share_revocations (
 alter table canvas_shares enable row level security;
 alter table share_members enable row level security;
 alter table share_revocations enable row level security;
+alter table canvas_shares add column if not exists invitation_active boolean not null default true;
 
 -- ── canvas_shares policies ──────────────────────────────────────────────────
 
@@ -53,7 +55,7 @@ create policy "owner manages own shares" on canvas_shares
 drop policy if exists "invitee selects own invites" on canvas_shares;
 create policy "invitee selects own invites" on canvas_shares
   for select using (
-    lower(invitee_email) = lower(auth.email())
+    (invitation_active and lower(invitee_email) = lower(auth.email()))
     or exists (
       select 1 from share_members sm
       where sm.share_id = canvas_shares.id and sm.user_id = auth.uid()
@@ -138,7 +140,7 @@ as $$
 declare
   found_share canvas_shares%rowtype;
 begin
-  select * into found_share from canvas_shares cs where cs.link_token = token;
+  select * into found_share from canvas_shares cs where cs.link_token = token and cs.invitation_active;
   if not found then
     raise exception 'invalid share link';
   end if;
@@ -174,7 +176,7 @@ begin
       insert into share_members (share_id, user_id)
       select cs.id, auth.uid()
       from canvas_shares cs
-      where lower(cs.invitee_email) = lower(auth.email())
+      where cs.invitation_active and lower(cs.invitee_email) = lower(auth.email())
         and not exists (select 1 from share_revocations r where r.share_id = cs.id and r.user_id = auth.uid())
       on conflict do nothing
       returning share_id
@@ -191,7 +193,7 @@ returns table (id uuid, owner_id uuid, canvas_id text, scope text, target_id tex
 language sql security definer stable set search_path = public as $$
   select s.id, s.owner_id, s.canvas_id, s.scope, s.target_id, s.restrict_view, c.name
   from canvas_shares s join canvases c on c.user_id = s.owner_id and c.canvas_id = s.canvas_id
-  where lower(s.invitee_email) = lower(auth.email())
+  where s.invitation_active and lower(s.invitee_email) = lower(auth.email())
     and not exists (select 1 from share_members m where m.share_id = s.id and m.user_id = auth.uid())
     and not exists (select 1 from share_revocations r where r.share_id = s.id and r.user_id = auth.uid());
 $$;
@@ -201,7 +203,7 @@ create or replace function claim_email_invite(p_share_id uuid)
 returns canvas_shares language plpgsql security definer set search_path = public as $$
 declare found_share canvas_shares%rowtype;
 begin
-  select * into found_share from canvas_shares where id = p_share_id and lower(invitee_email) = lower(auth.email());
+  select * into found_share from canvas_shares where id = p_share_id and invitation_active and lower(invitee_email) = lower(auth.email());
   if not found or exists (select 1 from share_revocations r where r.share_id = p_share_id and r.user_id = auth.uid()) then
     raise exception 'invalid email invitation';
   end if;
@@ -214,7 +216,16 @@ grant execute on function claim_email_invite(uuid) to authenticated;
 -- Used before opening a #share= link so deleted links receive a clear message.
 create or replace function share_link_is_active(token text)
 returns boolean language sql security definer stable set search_path = public as $$
-  select exists (select 1 from canvas_shares where link_token = token);
+  select exists (
+    select 1
+    from canvas_shares s
+    where s.link_token = token
+      and s.invitation_active
+      and not exists (
+        select 1 from share_revocations r
+        where r.share_id = s.id and r.user_id = auth.uid()
+      )
+  );
 $$;
 revoke execute on function share_link_is_active(text) from anon;
 grant execute on function share_link_is_active(text) to anon, authenticated;
@@ -224,16 +235,167 @@ returns table (id uuid, owner_id uuid, canvas_id text, scope text, target_id tex
 language sql security definer stable set search_path = public as $$
   select s.id, s.owner_id, s.canvas_id, s.scope, s.target_id, s.restrict_view, c.name
   from canvas_shares s join canvases c on c.user_id = s.owner_id and c.canvas_id = s.canvas_id
-  where s.link_token = token;
+  where s.link_token = token and s.invitation_active
+    and not exists (
+      select 1 from share_revocations r
+      where r.share_id = s.id and r.user_id = auth.uid()
+    );
 $$;
 grant execute on function share_link_preview(text) to anon, authenticated;
+
+-- Removing an invitation stops new joins but preserves accepted members.
+-- If nobody accepted it yet, the now-useless row is removed completely.
+create or replace function disable_share_invitation(p_share_id uuid)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  if not exists (select 1 from canvas_shares s where s.id = p_share_id and s.owner_id = auth.uid()) then
+    raise exception 'not allowed to remove this invitation';
+  end if;
+  update canvas_shares
+  set invitation_active = false, invitee_email = null, link_token = null
+  where id = p_share_id;
+  if not exists (select 1 from share_members m where m.share_id = p_share_id) then
+    delete from canvas_shares where id = p_share_id;
+  end if;
+end;
+$$;
+revoke execute on function disable_share_invitation(uuid) from anon;
+grant execute on function disable_share_invitation(uuid) to authenticated;
+
+-- A canvas-level kick revokes every existing invitation path for that user.
+-- The same person may have joined through multiple links or scoped invites;
+-- deleting just one membership would leave another path active.
+create or replace function revoke_canvas_member(p_canvas_id text, p_user_id uuid)
+returns integer language plpgsql security definer set search_path = public as $$
+declare
+  removed_count integer;
+begin
+  if auth.uid() is null or p_user_id = auth.uid() or not exists (
+    select 1
+    from canvas_shares s
+    join share_members m on m.share_id = s.id
+    where s.owner_id = auth.uid()
+      and s.canvas_id = p_canvas_id
+      and m.user_id = p_user_id
+  ) then
+    raise exception 'not allowed to revoke this canvas member';
+  end if;
+
+  insert into share_revocations (share_id, user_id)
+  select s.id, p_user_id
+  from canvas_shares s
+  where s.owner_id = auth.uid() and s.canvas_id = p_canvas_id
+  on conflict do nothing;
+
+  -- An email invitation belongs to one recipient. Once that accepted member
+  -- is explicitly kicked, keeping the invitation active would make them show
+  -- up again as a misleading "pending" participant in the owner's UI.
+  update canvas_shares s
+  set invitation_active = false, invitee_email = null
+  where s.owner_id = auth.uid()
+    and s.canvas_id = p_canvas_id
+    and s.invitee_email is not null
+    and exists (
+      select 1 from share_members m
+      where m.share_id = s.id and m.user_id = p_user_id
+    );
+
+  delete from share_members m
+  using canvas_shares s
+  where m.share_id = s.id
+    and s.owner_id = auth.uid()
+    and s.canvas_id = p_canvas_id
+    and m.user_id = p_user_id;
+  get diagnostics removed_count = row_count;
+
+  delete from canvas_shares s
+  where s.owner_id = auth.uid()
+    and s.canvas_id = p_canvas_id
+    and not s.invitation_active
+    and not exists (select 1 from share_members m where m.share_id = s.id);
+
+  return removed_count;
+end;
+$$;
+revoke execute on function revoke_canvas_member(text, uuid) from anon;
+grant execute on function revoke_canvas_member(text, uuid) to authenticated;
+
+-- Leaving is canvas-wide too. Every currently issued path is revoked, so an
+-- old live link cannot silently add the user back. A newly created invitation
+-- has a new share id and can grant access again.
+create or replace function leave_shared_canvas(p_owner_id uuid, p_canvas_id text)
+returns integer language plpgsql security definer set search_path = public as $$
+declare
+  removed_count integer;
+begin
+  if auth.uid() is null or p_owner_id = auth.uid() then
+    raise exception 'not allowed to leave this canvas';
+  end if;
+
+  insert into share_revocations (share_id, user_id)
+  select s.id, auth.uid()
+  from canvas_shares s
+  where s.owner_id = p_owner_id and s.canvas_id = p_canvas_id
+  on conflict do nothing;
+
+  update canvas_shares s
+  set invitation_active = false, invitee_email = null
+  where s.owner_id = p_owner_id
+    and s.canvas_id = p_canvas_id
+    and s.invitee_email is not null
+    and exists (
+      select 1 from share_members m
+      where m.share_id = s.id and m.user_id = auth.uid()
+    );
+
+  delete from share_members m
+  using canvas_shares s
+  where m.share_id = s.id
+    and s.owner_id = p_owner_id
+    and s.canvas_id = p_canvas_id
+    and m.user_id = auth.uid();
+  get diagnostics removed_count = row_count;
+
+  if removed_count = 0 then
+    raise exception 'shared canvas membership not found';
+  end if;
+
+  delete from canvas_shares s
+  where s.owner_id = p_owner_id
+    and s.canvas_id = p_canvas_id
+    and not s.invitation_active
+    and not exists (select 1 from share_members m where m.share_id = s.id);
+
+  return removed_count;
+end;
+$$;
+revoke execute on function leave_shared_canvas(uuid, text) from anon;
+grant execute on function leave_shared_canvas(uuid, text) to authenticated;
 
 -- Owners can revoke a participant; a participant can revoke their own access.
 create or replace function revoke_share_member(p_share_id uuid, p_user_id uuid)
 returns void language plpgsql security definer set search_path = public as $$
 begin
+  if auth.uid() is null then
+    raise exception 'not allowed to revoke this share member';
+  end if;
   if p_user_id <> auth.uid() and not exists (
     select 1 from canvas_shares s where s.id = p_share_id and s.owner_id = auth.uid()
+  ) then
+    raise exception 'not allowed to revoke this share member';
+  end if;
+  if p_user_id = auth.uid() and not exists (
+    select 1
+    from canvas_shares s
+    where s.id = p_share_id
+      and (
+        (s.invitation_active and lower(s.invitee_email) = lower(auth.email()))
+        or (s.invitation_active and s.link_token is not null)
+        or exists (
+          select 1 from share_members m
+          where m.share_id = s.id and m.user_id = auth.uid()
+        )
+      )
   ) then
     raise exception 'not allowed to revoke this share member';
   end if;
@@ -246,6 +408,10 @@ begin
     insert into share_revocations (share_id, user_id) values (p_share_id, p_user_id)
     on conflict do nothing;
     delete from share_members where share_id = p_share_id and user_id = p_user_id;
+  end if;
+  if exists (select 1 from canvas_shares s where s.id = p_share_id and not s.invitation_active)
+     and not exists (select 1 from share_members m where m.share_id = p_share_id) then
+    delete from canvas_shares where id = p_share_id;
   end if;
 end;
 $$;
@@ -328,7 +494,7 @@ grant execute on function can_access_canvas(uuid, text, uuid, text) to authentic
 drop policy if exists "invitee selects own invites" on canvas_shares;
 create policy "invitee selects own invites" on canvas_shares
   for select using (
-    lower(invitee_email) = lower(auth.email())
+    (invitation_active and lower(invitee_email) = lower(auth.email()))
     or is_share_member(canvas_shares.id, auth.uid())
   );
 

@@ -13,6 +13,7 @@ async function currentUser(req) {
 }
 
 export default async function handler(req, res) {
+  res.setHeader('Cache-Control', 'no-store')
   try {
     const user = await currentUser(req)
     if (!user) return send(res, 401, { error: '로그인이 필요합니다.' })

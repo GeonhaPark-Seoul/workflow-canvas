@@ -94,6 +94,7 @@ function maxNodeId(nodes) {
 // ── Phase 2 sharing: shared canvases live under a composite localStorage/
 // activeCanvasId key so they never collide with the owner's own canvas ids.
 const SHARED_PREFIX = 'shared:'
+const PENDING_SHARE_TOKEN_KEY = 'wfc:pending-share-token'
 function sharedCanvasId(ownerId, canvasId) { return `${SHARED_PREFIX}${ownerId}:${canvasId}` }
 function parseSharedId(id) {
   if (typeof id !== 'string' || !id.startsWith(SHARED_PREFIX)) return null
@@ -283,11 +284,15 @@ export default function App() {
   const [onlineUsers, setOnlineUsers] = useState([]) // [{ user_id, email }] in the active canvas
   const [sharedCanvases, setSharedCanvases] = useState([]) // canvases shared WITH me (listSharedWithMe())
   const loadedSharedIdRef = useRef(null)
-  const pendingShareTokenRef = useRef(null) // #share=<token> claimed right after SIGNED_IN
+  const pendingShareTokenRef = useRef(null) // #share=<token> waiting for preview + explicit acceptance
   const [authNotice, setAuthNotice] = useState(null) // share-link login gate notice shown in AuthPanel
   const [shareLinkError, setShareLinkError] = useState(null)
   const [emailInviteNotices, setEmailInviteNotices] = useState([])
   const [linkInviteNotice, setLinkInviteNotice] = useState(null)
+  const [inviteActionError, setInviteActionError] = useState(null)
+  const [inviteActionBusy, setInviteActionBusy] = useState(false)
+  const inviteActionPendingRef = useRef(false)
+  const [scopedParticipantMap, setScopedParticipantMap] = useState({})
   const inviteWrapRef = useRef(null) // invite popover wrapper (outside-click close)
 
   // ── Profiles (nickname/avatar) ────────────────────────────────────────────
@@ -803,56 +808,96 @@ export default function App() {
       row = await getSharedCanvas(ownerId, canvasId)
     } catch (err) {
       console.error('[shares] loadSharedCanvas:', err.message)
-      return
+      throw err
     }
     const compositeId = sharedCanvasId(ownerId, canvasId)
     const data = { nodes: row.nodes ?? [], edges: row.edges ?? [], views: row.views ?? [], stageTypes: row.stageTypes?.length ? row.stageTypes : undefined }
     const existing = loadCanvasData(compositeId)
-    if (loadedSharedIdRef.current === compositeId && existing && JSON.stringify(existing) === JSON.stringify(data)) return
+    if (latestRef.current.activeCanvasId === compositeId && loadedSharedIdRef.current === compositeId && existing && JSON.stringify(existing) === JSON.stringify(data)) return
     saveCanvasData(compositeId, data)
     loadedSharedIdRef.current = compositeId
     loadCanvas(compositeId, data)
   }, [loadCanvas])
 
+  const handleSharedAccessLost = useCallback((ownerId, canvasId, error) => {
+    if (!/권한|찾을 수 없습니다/.test(error?.message ?? '')) return false
+    const compositeId = sharedCanvasId(ownerId, canvasId)
+    setSharedCanvases((prev) => prev.filter((item) => item.ownerId !== ownerId || item.canvasId !== canvasId))
+    deleteCanvasData(compositeId)
+    loadedSharedIdRef.current = null
+    const firstOwn = latestRef.current.canvases[0]
+    if (firstOwn) loadCanvas(firstOwn.id)
+    setShareLinkError('이 공유 캔버스에 대한 접근 권한이 종료되었습니다.')
+    return true
+  }, [loadCanvas])
+
   const acceptEmailInvite = useCallback(async (incoming) => {
+    setInviteActionError(null)
     await claimEmailInvite(incoming.id)
-    persistCurrent()
-    loadSharedCanvas(incoming.ownerId, incoming.canvasId)
     setSharedCanvases(await listSharedCanvases())
+    persistCurrent()
+    await loadSharedCanvas(incoming.ownerId, incoming.canvasId)
     setEmailInviteNotices((prev) => prev.filter((invite) => invite.id !== incoming.id))
   }, [persistCurrent, loadSharedCanvas])
 
   const rejectEmailInvite = useCallback(async (id) => {
+    setInviteActionError(null)
     if (user?.id) await revokeShareMember(id, user.id)
     setEmailInviteNotices((prev) => prev.filter((invite) => invite.id !== id))
   }, [user])
 
   const acceptLinkInvite = useCallback(async (incoming) => {
+    setInviteActionError(null)
     const claimed = await claimShareToken(incoming.token)
     setSharedCanvases(await listSharedCanvases())
     if (claimed) {
       persistCurrent()
-      loadSharedCanvas(claimed.owner_id, claimed.canvas_id)
+      await loadSharedCanvas(claimed.owner_id, claimed.canvas_id)
     }
     pendingShareTokenRef.current = null
+    sessionStorage.removeItem(PENDING_SHARE_TOKEN_KEY)
     setLinkInviteNotice(null)
     history.replaceState(null, '', location.pathname + location.search)
   }, [persistCurrent, loadSharedCanvas])
 
   const rejectLinkInvite = useCallback(async (incoming) => {
+    setInviteActionError(null)
     if (user?.id) await revokeShareMember(incoming.id, user.id)
     pendingShareTokenRef.current = null
+    sessionStorage.removeItem(PENDING_SHARE_TOKEN_KEY)
     setLinkInviteNotice(null)
     history.replaceState(null, '', location.pathname + location.search)
   }, [user])
+
+  const runInviteAction = useCallback(async (label, action) => {
+    if (inviteActionPendingRef.current) return
+    inviteActionPendingRef.current = true
+    setInviteActionBusy(true)
+    try {
+      await action()
+    } catch (err) {
+      console.error(`[shares] ${label}:`, err.message)
+      setInviteActionError(err.message)
+    } finally {
+      inviteActionPendingRef.current = false
+      setInviteActionBusy(false)
+    }
+  }, [])
 
   const switchCanvas = useCallback((id) => {
     if (id === activeCanvasId) return
     persistCurrent()
     const shared = parseSharedId(id)
-    if (shared) { loadSharedCanvas(shared.ownerId, shared.canvasId); return }
+    if (shared) {
+      loadSharedCanvas(shared.ownerId, shared.canvasId).catch((err) => {
+        if (!handleSharedAccessLost(shared.ownerId, shared.canvasId, err)) {
+          window.alert(`공유 캔버스를 열지 못했습니다: ${err.message}`)
+        }
+      })
+      return
+    }
     loadCanvas(id)
-  }, [activeCanvasId, persistCurrent, loadCanvas, loadSharedCanvas])
+  }, [activeCanvasId, persistCurrent, loadCanvas, loadSharedCanvas, handleSharedAccessLost])
 
   const addCanvas = useCallback(() => {
     persistCurrent()
@@ -948,16 +993,17 @@ export default function App() {
 
   const loadPendingEmailInvites = useCallback(async () => {
     const pending = await listPendingEmailInvites()
-    setEmailInviteNotices((prev) => {
-      const known = new Set(prev.map((invite) => invite.id))
-      return [...prev, ...pending.filter((share) => !known.has(share.id)).map((share) => ({
-        id: share.id, ownerId: share.owner_id, canvasId: share.canvas_id, name: share.name ?? '공유 캔버스', scope: share.scope,
-      }))]
-    })
+    setEmailInviteNotices(pending.map((share) => ({
+      id: share.id,
+      ownerId: share.owner_id,
+      canvasId: share.canvas_id,
+      name: share.name ?? '공유 캔버스',
+      scope: share.scope,
+    })))
   }, [])
 
   // Email invites are not in the canvases Realtime publication. Polling the
-  // idempotent claim RPC keeps an already-open recipient tab informed too.
+  // pending-invite RPC keeps an already-open recipient tab informed too.
   useEffect(() => {
     if (!user) return
     const timer = setInterval(() => {
@@ -973,7 +1019,11 @@ export default function App() {
   const refreshShareParticipants = useCallback(async () => {
     const u = userRef.current
     const aid = latestRef.current.activeCanvasId
-    if (!u || !aid) { setShareParticipantsBase([]); return }
+    if (!u || !aid) {
+      setShareParticipantsBase([])
+      setScopedParticipantMap({})
+      return
+    }
     const shared = parseSharedId(aid)
     try {
       if (!shared) {
@@ -983,18 +1033,42 @@ export default function App() {
           userId: m.userId, profile: m.profile ?? null, isOwner: false,
           email: m.profile?.email ?? null, lastSeenAt: m.profile?.lastSeenAt ?? null,
           shareId: m.shareId, canEdit: m.canEdit !== false,
+          scope: m.scope, targetId: m.targetId,
         }))
         const pending = shares
           .filter((s) => s.invitee_email && !claimedShareIds.has(s.id))
-          .map((s) => ({ userId: null, email: s.invitee_email, profile: null, isOwner: false, lastSeenAt: null, shareId: s.id, canEdit: true }))
+          .map((s) => ({
+            userId: null, email: s.invitee_email, profile: null, isOwner: false,
+            lastSeenAt: null, shareId: s.id, canEdit: true,
+            scope: s.scope, targetId: s.target_id,
+          }))
         const mp = myProfileRef.current
         const ownerProfile = mp ? { nickname: mp.nickname, glyph: mp.glyph, color: mp.color, email: mp.email, lastSeenAt: mp.last_seen_at } : null
         const owner = {
           userId: u.id, profile: ownerProfile, isOwner: true,
           email: ownerProfile?.email ?? u.email ?? null, lastSeenAt: ownerProfile?.lastSeenAt ?? null,
         }
-        setShareParticipantsBase([owner, ...members, ...pending])
+        const dedupe = (people) => {
+          const unique = new Map()
+          people.forEach((person) => {
+            const key = person.userId ? `user:${person.userId}` : `email:${person.email ?? person.shareId}`
+            if (!unique.has(key)) unique.set(key, person)
+          })
+          return [...unique.values()]
+        }
+        const scoped = {}
+        const scopedPeople = [...members, ...pending]
+        scopedPeople.forEach((member) => {
+          if (member.scope === 'canvas' || !member.targetId) return
+          const key = `${member.scope}:${member.targetId}`
+          if (!scoped[key]) scoped[key] = []
+          scoped[key].push(member)
+        })
+        Object.keys(scoped).forEach((key) => { scoped[key] = dedupe([owner, ...scoped[key]]) })
+        setScopedParticipantMap(scoped)
+        setShareParticipantsBase(dedupe([owner, ...members, ...pending]))
       } else {
+        setScopedParticipantMap({})
         const ids = [shared.ownerId, u.id]
         const profiles = await getProfiles(ids)
         setShareParticipantsBase(ids.map((id) => {
@@ -1013,7 +1087,9 @@ export default function App() {
     const u = userRef.current
     if (!u) { setSharedOutCanvasIds(new Set()); return }
     try {
-      const { data, error } = await supabase.from('canvas_shares').select('canvas_id').eq('owner_id', u.id)
+      const { data, error } = await supabase.from('canvas_shares').select('canvas_id')
+        .eq('owner_id', u.id)
+        .eq('invitation_active', true)
       if (error) throw error
       setSharedOutCanvasIds(new Set((data ?? []).map((r) => r.canvas_id)))
     } catch (err) {
@@ -1028,13 +1104,18 @@ export default function App() {
     if (!parsed) return
     try {
       await leaveSharedCanvas(parsed.ownerId, parsed.canvasId)
+      const nextShared = await listSharedCanvases()
+      setSharedCanvases(nextShared)
+      deleteCanvasData(sharedId)
+      loadedSharedIdRef.current = null
     } catch (err) {
       console.error('[shares] leaveSharedCanvas:', err.message)
+      window.alert(`공유 캔버스에서 나가지 못했습니다: ${err.message}`)
+      return
     }
-    await refreshSharedCanvases()
     const firstOwn = latestRef.current.canvases[0]
-    if (firstOwn) switchCanvas(firstOwn.id)
-  }, [refreshSharedCanvases, switchCanvas])
+    if (firstOwn) loadCanvas(firstOwn.id)
+  }, [loadCanvas])
 
   // Owner controls in the participants modal: toggle a member's edit access
   // / kick them off the share entirely.
@@ -1048,31 +1129,46 @@ export default function App() {
   }, [refreshShareParticipants])
 
   const onKickMember = useCallback(async (p) => {
+    const canvasId = latestRef.current.activeCanvasId
+    if (!canvasId || parseSharedId(canvasId)) return
     try {
-      await kickMember(p.shareId, p.userId)
+      await kickMember(canvasId, p.userId)
+      setShareParticipantsBase((prev) => prev.filter((member) => member.userId !== p.userId))
+      setScopedParticipantMap((prev) => {
+        const next = {}
+        Object.entries(prev).forEach(([key, members]) => { next[key] = members.filter((member) => member.userId !== p.userId) })
+        return next
+      })
     } catch (err) {
       console.error('[shares] kickMember:', err.message)
+      window.alert(`참여자를 추방하지 못했습니다: ${err.message}`)
+      return
     }
-    refreshShareParticipants()
+    await refreshShareParticipants()
   }, [refreshShareParticipants])
 
   // Kept fresh every render (not in the auth effect's deps, which stay stable
   // like before) so the auth listener can call the latest closures without
   // re-subscribing on every node/edge edit.
   const sharedFnRef = useRef({})
-  useEffect(() => { sharedFnRef.current = { persistCurrent, loadSharedCanvas, refreshSharedCanvases, refreshSharedOutCanvasIds } })
+  useEffect(() => { sharedFnRef.current = { refreshSharedCanvases, refreshSharedOutCanvasIds } })
 
   // ── Auth listener ─────────────────────────────────────────────────────────
   useEffect(() => {
-    // Link share: #share=<token>. Claim immediately if already logged in,
-    // otherwise stash it and claim right after SIGNED_IN.
+    // Link share: #share=<token>. Store it across an OAuth redirect, remove it
+    // from the address bar, then show the explicit accept/decline preview.
     const hashMatch = location.hash.match(/^#share=(.+)$/)
-    if (hashMatch) {
-      const token = hashMatch[1]
+    const storedToken = sessionStorage.getItem(PENDING_SHARE_TOKEN_KEY)
+    const initialToken = hashMatch?.[1] ?? storedToken
+    if (initialToken) {
+      const token = initialToken
       pendingShareTokenRef.current = token
+      sessionStorage.setItem(PENDING_SHARE_TOKEN_KEY, token)
+      if (hashMatch) history.replaceState(null, '', location.pathname + location.search)
       isShareLinkActive(token).then((active) => {
         if (active || pendingShareTokenRef.current !== token) return
         pendingShareTokenRef.current = null
+        sessionStorage.removeItem(PENDING_SHARE_TOKEN_KEY)
         setAuthNotice(null)
         setShareLinkError('이 공유 링크는 더 이상 유효하지 않습니다.')
         history.replaceState(null, '', location.pathname + location.search)
@@ -1086,7 +1182,11 @@ export default function App() {
       initializedUserRef.current = u.id
       cloudHydratedUserRef.current = null
       setAuthNotice(null)
-      loadFromCloud(u.id)
+      try {
+        await loadFromCloud(u.id)
+      } catch (err) {
+        console.error('[cloud] hydrate before invite:', err.message)
+      }
       Promise.all([getMyProfile(), loadMySettings()]).then(([p, privateSettings]) => {
         setMyProfile(p)
         // Seed App-level settings from the private own-user preference row;
@@ -1103,8 +1203,12 @@ export default function App() {
         pendingShareTokenRef.current = null
         try {
           const preview = await getShareLinkPreview(token)
-          if (preview) setLinkInviteNotice({ ...preview, token })
-          else setShareLinkError('이 공유 링크는 더 이상 유효하지 않습니다.')
+          if (preview) {
+            setLinkInviteNotice({ ...preview, token })
+          } else {
+            sessionStorage.removeItem(PENDING_SHARE_TOKEN_KEY)
+            setShareLinkError('이 공유 링크는 더 이상 사용할 수 없습니다.')
+          }
         } catch (err) {
           console.error('[shares] share link preview:', err.message)
           setShareLinkError('이 공유 링크를 확인할 수 없습니다.')
@@ -1118,7 +1222,9 @@ export default function App() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       const u = session?.user ?? null
       setUser(u)
-      if (u) afterLogin(u)
+      if (u) {
+        if (u.id !== initializedUserRef.current) afterLogin(u)
+      }
       // Logged-out visitor following a share link: gate access behind login.
       else if (pendingShareTokenRef.current) setAuthNotice('공유받은 캔버스를 보려면 로그인이 필요합니다')
     })
@@ -1134,6 +1240,15 @@ export default function App() {
         if (initializedUserRef.current) resetToGuestCanvas()
         initializedUserRef.current = null
         cloudHydratedUserRef.current = null
+        loadedSharedIdRef.current = null
+        inviteActionPendingRef.current = false
+        setInviteActionBusy(false)
+        setInviteActionError(null)
+        setEmailInviteNotices([])
+        setLinkInviteNotice(null)
+        setSharedCanvases([])
+        setSharedOutCanvasIds(new Set())
+        setScopedParticipantMap({})
       }
     })
     return () => subscription.unsubscribe()
@@ -1227,10 +1342,17 @@ export default function App() {
     const shared = parseSharedId(activeCanvasId)
     if (!shared) return
     const timer = setInterval(() => {
-      if (!isAnyEditingRef.current) loadSharedCanvas(shared.ownerId, shared.canvasId)
+      if (!isAnyEditingRef.current) {
+        loadSharedCanvas(shared.ownerId, shared.canvasId)
+          .catch((err) => {
+            if (!handleSharedAccessLost(shared.ownerId, shared.canvasId, err)) {
+              console.error('[shares] shared refresh:', err.message)
+            }
+          })
+      }
     }, 5000)
     return () => clearInterval(timer)
-  }, [user, activeCanvasId, loadSharedCanvas])
+  }, [user, activeCanvasId, loadSharedCanvas, handleSharedAccessLost])
 
   // ── Presence: who else is viewing the active canvas ───────────────────────
   useEffect(() => {
@@ -1257,12 +1379,35 @@ export default function App() {
   // Refresh the CanvasTabs avatar-row participants whenever the active canvas changes.
   useEffect(() => { refreshShareParticipants() }, [refreshShareParticipants, activeCanvasId, user])
 
+  // Invitations are changed from other browsers and are not part of the
+  // canvases Realtime publication. Periodically refresh only the small sharing
+  // metadata so accepted/rejected invites and scoped avatars do not stay stale.
+  useEffect(() => {
+    if (!user) return
+    const timer = setInterval(() => {
+      refreshShareParticipants()
+      refreshSharedOutCanvasIds()
+      refreshSharedCanvases()
+    }, 20000)
+    return () => clearInterval(timer)
+  }, [user, refreshShareParticipants, refreshSharedOutCanvasIds, refreshSharedCanvases])
+
   // Merge in live online status without re-fetching profiles on every presence tick.
   const onlineIdSet = useMemo(() => new Set(onlineUsers.map((u) => u.user_id)), [onlineUsers])
   const shareParticipants = useMemo(
     () => shareParticipantsBase.map((p) => ({ ...p, online: p.userId ? onlineIdSet.has(p.userId) : false })),
     [shareParticipantsBase, onlineIdSet],
   )
+  const scopedParticipantsByTarget = useMemo(() => {
+    const next = {}
+    Object.entries(scopedParticipantMap).forEach(([key, participants]) => {
+      next[key] = participants.map((participant) => ({
+        ...participant,
+        online: participant.userId ? onlineIdSet.has(participant.userId) : false,
+      }))
+    })
+    return next
+  }, [scopedParticipantMap, onlineIdSet])
 
   // ── Cloud auto-save (debounced 1.5 s, only when logged in) ───────────────
   const cloudSaveTimer = useRef(null)
@@ -2283,7 +2428,7 @@ export default function App() {
             canvasId={activeCanvasId}
             onClose={() => { setInvite(null); refreshShareParticipants(); refreshSharedOutCanvasIds() }}
             onlineUserIds={new Set(onlineUsers.map((u) => u.user_id))}
-            onSharesChanged={refreshSharedOutCanvasIds}
+            onSharesChanged={() => { refreshShareParticipants(); refreshSharedOutCanvasIds() }}
           />
         </div>
       )}
@@ -2291,14 +2436,19 @@ export default function App() {
       {/* Share-link login gate: centered notice for logged-out visitors */}
       {authNotice && !user && (
         <div style={{
-          display: 'none',
           position: 'fixed', inset: 0, zIndex: 900,
-          background: '#000000aa', alignItems: 'center', justifyContent: 'center',
+          background: '#000000aa', display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
           <div style={{
+            position: 'relative',
             background: '#1a1a22', border: '1px solid #ffffff22', borderRadius: 14,
-            padding: '28px 32px', maxWidth: 340, textAlign: 'center', boxShadow: '0 12px 48px #000d',
+            padding: '28px 32px', width: 'min(340px, calc(100vw - 24px))', boxSizing: 'border-box',
+            textAlign: 'center', boxShadow: '0 12px 48px #000d',
           }}>
+            <button type="button" title="닫기" onClick={() => setAuthNotice(null)} style={{
+              position: 'absolute', top: 8, right: 10, background: 'transparent', border: 'none',
+              color: '#888', fontSize: 16, cursor: 'pointer', padding: 4,
+            }}>✕</button>
             <div style={{ fontSize: 28, marginBottom: 12 }}>🔒</div>
             <div style={{ color: '#f0f0f0', fontSize: 15, fontWeight: 700, marginBottom: 8 }}>
               공유받은 캔버스를 보려면 로그인이 필요합니다
@@ -2317,11 +2467,12 @@ export default function App() {
         }}>
           <div style={{
             background: '#1a1a22', border: '1px solid #ffffff22', borderRadius: 10,
-            padding: '24px 28px', maxWidth: 340, textAlign: 'center', boxShadow: '0 12px 48px #000d',
+            padding: '24px 28px', width: 'min(340px, calc(100vw - 24px))', boxSizing: 'border-box',
+            textAlign: 'center', boxShadow: '0 12px 48px #000d',
           }}>
             <div style={{ fontSize: 28, marginBottom: 12 }}>⚠</div>
             <div style={{ color: '#f0f0f0', fontSize: 15, fontWeight: 700, marginBottom: 8 }}>
-              공유 링크를 열 수 없습니다
+              공유 캔버스를 열 수 없습니다
             </div>
             <div style={{ color: '#aaa', fontSize: 12, lineHeight: 1.6, marginBottom: 16 }}>{shareLinkError}</div>
             <button onClick={() => setShareLinkError(null)} style={{
@@ -2342,7 +2493,8 @@ export default function App() {
           }}>
             <div style={{
               background: '#1a1a22', border: '1px solid #ffffff22', borderRadius: 10,
-              padding: '24px 28px', maxWidth: 360, textAlign: 'center', boxShadow: '0 12px 48px #000d',
+              padding: '24px 28px', width: 'min(360px, calc(100vw - 24px))', boxSizing: 'border-box',
+              textAlign: 'center', boxShadow: '0 12px 48px #000d',
             }}>
               <div style={{ fontSize: 28, marginBottom: 12 }}>✉</div>
               <div style={{ color: '#f0f0f0', fontSize: 15, fontWeight: 700, marginBottom: 8 }}>새 공유 초대</div>
@@ -2350,15 +2502,18 @@ export default function App() {
                 <strong style={{ color: '#e4e6ec' }}>{incoming.name}</strong> {scopeLabel}에 초대받았습니다.
               </div>
               <div style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
-                <button onClick={() => rejectEmailInvite(incoming.id).catch((err) => console.error('[shares] reject email invite:', err.message))} style={{
+                <button disabled={inviteActionBusy} onClick={() => runInviteAction('reject email invite', () => rejectEmailInvite(incoming.id))} style={{
                   background: 'transparent', border: '1px solid #ffffff22', borderRadius: 6, color: '#aaa',
-                  fontSize: 12, fontWeight: 600, padding: '8px 14px', cursor: 'pointer', fontFamily: 'inherit',
+                  fontSize: 12, fontWeight: 600, padding: '8px 14px', cursor: inviteActionBusy ? 'default' : 'pointer',
+                  opacity: inviteActionBusy ? 0.6 : 1, fontFamily: 'inherit',
                 }}>거절</button>
-                <button onClick={() => acceptEmailInvite(incoming).catch((err) => console.error('[shares] accept email invite:', err.message))} style={{
+                <button disabled={inviteActionBusy} onClick={() => runInviteAction('accept email invite', () => acceptEmailInvite(incoming))} style={{
                   background: '#3b82f6', border: 'none', borderRadius: 6, color: '#fff',
-                  fontSize: 12, fontWeight: 700, padding: '8px 14px', cursor: 'pointer', fontFamily: 'inherit',
+                  fontSize: 12, fontWeight: 700, padding: '8px 14px', cursor: inviteActionBusy ? 'default' : 'pointer',
+                  opacity: inviteActionBusy ? 0.6 : 1, fontFamily: 'inherit',
                 }}>열기</button>
               </div>
+              {inviteActionError && <div style={{ color: '#ef4444', fontSize: 11, marginTop: 10 }}>{inviteActionError}</div>}
             </div>
           </div>
         )
@@ -2369,16 +2524,17 @@ export default function App() {
         const scopeLabel = { canvas: '캔버스', group: '그룹', node: '노드' }[incoming.scope] ?? '캔버스'
         return (
           <div style={{ position: 'fixed', inset: 0, zIndex: 1200, background: '#000000aa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ background: '#1a1a22', border: '1px solid #ffffff22', borderRadius: 10, padding: '24px 28px', maxWidth: 360, textAlign: 'center', boxShadow: '0 12px 48px #000d' }}>
+            <div style={{ background: '#1a1a22', border: '1px solid #ffffff22', borderRadius: 10, padding: '24px 28px', width: 'min(360px, calc(100vw - 24px))', boxSizing: 'border-box', textAlign: 'center', boxShadow: '0 12px 48px #000d' }}>
               <div style={{ fontSize: 28, marginBottom: 12 }}>🔗</div>
               <div style={{ color: '#f0f0f0', fontSize: 15, fontWeight: 700, marginBottom: 8 }}>공유 캔버스 참여</div>
               <div style={{ color: '#aaa', fontSize: 12, lineHeight: 1.6, marginBottom: 18 }}>
                 <strong style={{ color: '#e4e6ec' }}>{incoming.name ?? '공유 캔버스'}</strong> {scopeLabel}에 참여할까요?
               </div>
               <div style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
-                <button onClick={() => rejectLinkInvite(incoming).catch((err) => console.error('[shares] reject link invite:', err.message))} style={{ background: 'transparent', border: '1px solid #ffffff22', borderRadius: 6, color: '#aaa', fontSize: 12, fontWeight: 600, padding: '8px 14px', cursor: 'pointer', fontFamily: 'inherit' }}>거절</button>
-                <button onClick={() => acceptLinkInvite(incoming).catch((err) => console.error('[shares] accept link invite:', err.message))} style={{ background: '#3b82f6', border: 'none', borderRadius: 6, color: '#fff', fontSize: 12, fontWeight: 700, padding: '8px 14px', cursor: 'pointer', fontFamily: 'inherit' }}>참여</button>
+                <button disabled={inviteActionBusy} onClick={() => runInviteAction('reject link invite', () => rejectLinkInvite(incoming))} style={{ background: 'transparent', border: '1px solid #ffffff22', borderRadius: 6, color: '#aaa', fontSize: 12, fontWeight: 600, padding: '8px 14px', cursor: inviteActionBusy ? 'default' : 'pointer', opacity: inviteActionBusy ? 0.6 : 1, fontFamily: 'inherit' }}>거절</button>
+                <button disabled={inviteActionBusy} onClick={() => runInviteAction('accept link invite', () => acceptLinkInvite(incoming))} style={{ background: '#3b82f6', border: 'none', borderRadius: 6, color: '#fff', fontSize: 12, fontWeight: 700, padding: '8px 14px', cursor: inviteActionBusy ? 'default' : 'pointer', opacity: inviteActionBusy ? 0.6 : 1, fontFamily: 'inherit' }}>참여</button>
               </div>
+              {inviteActionError && <div style={{ color: '#ef4444', fontSize: 11, marginTop: 10 }}>{inviteActionError}</div>}
             </div>
           </div>
         )
@@ -2389,6 +2545,11 @@ export default function App() {
         className={reconnecting ? 'rf-reconnecting' : undefined}
         nodes={nodes.map((n) => {
           const isOwner = perm.role === 'owner'
+          const nodeScope = n.type === 'group' ? 'group' : 'node'
+          const ownerScopedParticipants = scopedParticipantsByTarget[`${nodeScope}:${n.id}`] ?? []
+          const receivedScopedParticipants = !isOwner && perm.scope === nodeScope && perm.targetId === n.id
+            ? shareParticipants
+            : []
           // canEdit === false: the whole canvas is view-only regardless of
           // scope — every node stays selectable (so it can still be viewed/
           // pinned) but never draggable or deletable.
@@ -2418,6 +2579,7 @@ export default function App() {
               forceShapeOnly: forceShapeOnlySet?.has(n.id) ?? false,
               canInvite: isOwner,
               onInvite: isOwner ? openInvite : undefined,
+              scopedParticipants: isOwner ? ownerScopedParticipants : receivedScopedParticipants,
               onUpdate: (patch) => updateNodeData(n.id, patch),
               onEditStart: () => setIsAnyEditing(true),
               onEditEnd: () => setIsAnyEditing(false),

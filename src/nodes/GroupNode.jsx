@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { NodeResizer, useStore } from '@xyflow/react'
+import ScopedParticipants from '../components/ScopedParticipants'
 
 // Linear interpolation (unclamped) of value from [inMin, inMax] to [outMin, outMax].
 function mapRange(value, inMin, inMax, outMin, outMax) {
@@ -162,21 +163,13 @@ export default function GroupNode({ data, selected, id }) {
             {data.label || '새 그룹'}
           </div>
         )}
-        {!editing && data.onInvite && (
-          <button
-            type="button"
-            className="nodrag"
-            onClick={(e) => { e.stopPropagation(); const r = e.currentTarget.getBoundingClientRect(); data.onInvite('group', id, r) }}
-            title="공유 초대"
-            style={{
-              width: 18, height: 18, borderRadius: '50%', border: 'none', flexShrink: 0,
-              background: '#ffffff14', color: '#aab', fontSize: 12, lineHeight: '18px',
-              padding: 0, cursor: 'pointer',
-            }}
-          >
-            ＋
-          </button>
-        )}
+        <ScopedParticipants
+          participants={data.scopedParticipants}
+          canInvite={!editing && data.canInvite && !data.readOnly}
+          onInvite={data.onInvite}
+          scope="group"
+          targetId={id}
+        />
       </div>
       )}
     </div>

@@ -1,9 +1,8 @@
 import { supabase } from './supabase'
 import { getProfiles } from './profiles'
 
-// Phase 1: client API for the sharing/invite feature. Mirrors cloudStorage.js's
-// error-log-then-throw style. Nothing in the app calls this yet (phase 2 wires
-// it up); requires supabase-shares.sql to have been run.
+// Client API for sharing/invitations. Mirrors cloudStorage.js's
+// error-log-then-throw style and requires supabase-shares.sql.
 
 async function currentUserId() {
   const { data, error } = await supabase.auth.getUser()
@@ -47,6 +46,7 @@ export async function listShares(canvasId) {
     .select('*')
     .eq('owner_id', ownerId)
     .eq('canvas_id', canvasId)
+    .eq('invitation_active', true)
     .order('created_at', { ascending: true })
   if (error) { console.error('[shares] listShares:', error.message); throw new Error('listShares: ' + error.message) }
 
@@ -74,7 +74,7 @@ export async function listShareMembers(canvasId) {
   const ownerId = await currentUserId()
   const { data: shares, error } = await supabase
     .from('canvas_shares')
-    .select('id')
+    .select('id, scope, target_id, invitation_active')
     .eq('owner_id', ownerId)
     .eq('canvas_id', canvasId)
   if (error) { console.error('[shares] listShareMembers:', error.message); throw new Error('listShareMembers: ' + error.message) }
@@ -95,6 +95,8 @@ export async function listShareMembers(canvasId) {
     userId: m.user_id,
     canEdit: m.can_edit,
     profile: profiles.get(m.user_id) ?? null,
+    scope: shares.find((s) => s.id === m.share_id)?.scope ?? 'canvas',
+    targetId: shares.find((s) => s.id === m.share_id)?.target_id ?? null,
   }))
 }
 
@@ -107,33 +109,19 @@ export async function setMemberEdit(shareId, userId, canEdit) {
   if (error) { console.error('[shares] setMemberEdit:', error.message); throw new Error('setMemberEdit: ' + error.message) }
 }
 
-export async function kickMember(shareId, userId) {
-  const { error } = await supabase.rpc('revoke_share_member', { p_share_id: shareId, p_user_id: userId })
+export async function kickMember(canvasId, userId) {
+  const { error } = await supabase.rpc('revoke_canvas_member', { p_canvas_id: canvasId, p_user_id: userId })
   if (error) { console.error('[shares] kickMember:', error.message); throw new Error('kickMember: ' + error.message) }
 }
 
-// Delete MY membership rows for every share this owner has on this canvas —
-// i.e. leave a canvas that was shared to me.
+// Leave the whole shared canvas, including overlapping scope/link paths.
 export async function leaveSharedCanvas(ownerId, canvasId) {
-  const userId = await currentUserId()
-  const { data: shares, error } = await supabase
-    .from('canvas_shares')
-    .select('id')
-    .eq('owner_id', ownerId)
-    .eq('canvas_id', canvasId)
+  const { error } = await supabase.rpc('leave_shared_canvas', { p_owner_id: ownerId, p_canvas_id: canvasId })
   if (error) { console.error('[shares] leaveSharedCanvas:', error.message); throw new Error('leaveSharedCanvas: ' + error.message) }
-
-  const shareIds = (shares ?? []).map((s) => s.id)
-  if (!shareIds.length) return
-
-  await Promise.all(shareIds.map(async (shareId) => {
-    const { error: revokeError } = await supabase.rpc('revoke_share_member', { p_share_id: shareId, p_user_id: userId })
-    if (revokeError) throw new Error('leaveSharedCanvas: ' + revokeError.message)
-  }))
 }
 
 export async function deleteShare(id) {
-  const { error } = await supabase.from('canvas_shares').delete().eq('id', id)
+  const { error } = await supabase.rpc('disable_share_invitation', { p_share_id: id })
   if (error) { console.error('[shares] deleteShare:', error.message); throw new Error('deleteShare: ' + error.message) }
 }
 

@@ -5,6 +5,7 @@ async function request(path, options = {}) {
   if (!session?.access_token) throw new Error('로그인이 필요합니다.')
   const response = await fetch(path, {
     ...options,
+    cache: 'no-store',
     headers: {
       Authorization: `Bearer ${session.access_token}`,
       ...(options.body ? { 'Content-Type': 'application/json' } : {}),
