@@ -209,7 +209,7 @@ function SubNoteRow({ id, depth, byId, outMap, expanded, onToggle, onFocusNode, 
 // ── Page column: full note editor for the selected node ────────────────────
 // Keyed by node.id at the call site so switching pages remounts this fresh
 // (simplest way to reset all local editing state).
-function NotePage({ node, byId, outMap, isEditable, onUpdateNode, onFocusNode, onOpen, onBack, onClose }) {
+function NotePage({ node, byId, outMap, isEditable, onUpdateNode, onFocusNode, onOpen, onBack }) {
   const titleSaveTimer = useRef(null)
   const bodySaveTimer = useRef(null)
   useEffect(() => () => { clearTimeout(titleSaveTimer.current); clearTimeout(bodySaveTimer.current) }, [])
@@ -256,7 +256,7 @@ function NotePage({ node, byId, outMap, isEditable, onUpdateNode, onFocusNode, o
           {nodeTitle(node)}
         </div>
         <IconBtn title="캔버스에서 보기" onClick={() => onFocusNode(node.id)}>⌖</IconBtn>
-        <IconBtn title="패널 닫기" onClick={onClose}>✕</IconBtn>
+        <IconBtn title="패널 닫기" onClick={onBack}>✕</IconBtn>
       </div>
 
       {/* Body (scrollable) */}
@@ -555,7 +555,6 @@ export default function NotesPanel({ type, nodes, edges, selectedId, onSelect, o
             onFocusNode={onFocusNode}
             onOpen={onSelect}
             onBack={handleBack}
-            onClose={onClose}
           />
         </div>
       )}

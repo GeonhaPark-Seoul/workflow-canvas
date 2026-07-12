@@ -187,7 +187,7 @@ function baseEdgeStyle(e) {
     style: isMemo
       ? { stroke: '#f59e0b88', strokeWidth: 2.25, strokeDasharray: '5,4' }
       : { stroke: '#4a4a5a', strokeWidth: 3 },
-    markerEnd: { type: MarkerType.ArrowClosed, color: isMemo ? '#f59e0b88' : '#4a4a5a' },
+    markerEnd: isMemo ? undefined : { type: MarkerType.ArrowClosed, color: '#4a4a5a' },
   }
 }
 
@@ -1649,7 +1649,7 @@ export default function App() {
       ...params,
       id: `e-${uid()}`,
       style: isMemo ? { stroke: '#f59e0b88', strokeWidth: 2.25, strokeDasharray: '5,4' } : { stroke: '#4a4a5a', strokeWidth: 3 },
-      markerEnd: { type: MarkerType.ArrowClosed, color: isMemo ? '#f59e0b88' : '#4a4a5a' },
+      markerEnd: isMemo ? undefined : { type: MarkerType.ArrowClosed, color: '#4a4a5a' },
     }
     setEdges((eds) => eds.concat(newEdge))
   }, [nodes, setEdges, perm, isNodeEditable])
@@ -2112,7 +2112,7 @@ export default function App() {
       reconnectable: true,
       zIndex: 1001,
       style: { ...baseEdgeStyle(e).style, stroke: color, strokeWidth: isMemo ? 3.5 : 4.5, filter: `drop-shadow(0 0 6px ${color}88)` },
-      markerEnd: { type: MarkerType.ArrowClosed, color },
+      markerEnd: isMemo ? undefined : { type: MarkerType.ArrowClosed, color },
     }
   })
 
