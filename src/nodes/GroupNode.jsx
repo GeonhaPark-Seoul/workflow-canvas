@@ -57,6 +57,7 @@ export default function GroupNode({ data, selected, id }) {
   const handlePointerUp = () => { clearTimeout(longPressTimer.current); longPressStart.current = null }
 
   const commit = () => {
+    if (data.readOnly) return
     setEditing(false)
     if (value.trim()) data.onUpdate?.({ label: value.trim() })
   }
@@ -94,7 +95,7 @@ export default function GroupNode({ data, selected, id }) {
       onPointerCancel={handlePointerUp}
     >
       <NodeResizer
-        isVisible={selected}
+        isVisible={selected && !data.readOnly}
         minWidth={240}
         minHeight={160}
         color="#8b94a7"

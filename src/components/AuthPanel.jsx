@@ -82,38 +82,46 @@ export default function AuthPanel({
   const [tokensError, setTokensError] = useState(null)
   const [tokenCreating, setTokenCreating] = useState(false)
   const [copiedToken, setCopiedToken] = useState(null)
+  const tokenOwnerIdRef = useRef(null)
 
   const reset = () => { setError(null); setMessage(null) }
 
   const loadTokens = async () => {
+    const ownerId = user?.id
+    if (!ownerId) return
     setTokensLoading(true)
     setTokensError(null)
     try {
-      setTokens(await listMyTokens())
+      const nextTokens = await listMyTokens()
+      if (tokenOwnerIdRef.current === ownerId) setTokens(nextTokens)
     } catch (err) {
-      setTokensError(err.message)
+      if (tokenOwnerIdRef.current === ownerId) setTokensError(err.message)
     }
-    setTokensLoading(false)
+    if (tokenOwnerIdRef.current === ownerId) setTokensLoading(false)
   }
 
   const handleCreateToken = async () => {
+    const ownerId = user?.id
+    if (!ownerId) return
     setTokenCreating(true)
     try {
       const row = await createToken(`클로드 ${new Date().toLocaleDateString('ko-KR')}`)
-      setTokens((prev) => [row, ...(prev ?? [])])
+      if (tokenOwnerIdRef.current === ownerId) setTokens((prev) => [row, ...(prev ?? [])])
     } catch (err) {
-      setTokensError(err.message)
+      if (tokenOwnerIdRef.current === ownerId) setTokensError(err.message)
     }
-    setTokenCreating(false)
+    if (tokenOwnerIdRef.current === ownerId) setTokenCreating(false)
   }
 
   const handleDeleteToken = async (token) => {
     if (!window.confirm('이 토큰을 삭제할까요? 이 토큰을 사용하는 AI 연결이 즉시 끊어집니다.')) return
+    const ownerId = user?.id
+    if (!ownerId) return
     try {
       await deleteToken(token)
-      setTokens((prev) => (prev ?? []).filter((t) => t.token !== token))
+      if (tokenOwnerIdRef.current === ownerId) setTokens((prev) => (prev ?? []).filter((t) => t.token !== token))
     } catch (err) {
-      setTokensError(err.message)
+      if (tokenOwnerIdRef.current === ownerId) setTokensError(err.message)
     }
   }
 
@@ -165,11 +173,24 @@ export default function AuthPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [myProfile, open])
 
+  // Token values are secrets. Reset them when the account changes and ignore
+  // a stale request that finishes after another user has signed in.
+  useEffect(() => {
+    tokenOwnerIdRef.current = user?.id ?? null
+    setTokens(null)
+    setTokensLoading(false)
+    setTokensError(null)
+    setTokenCreating(false)
+    setCopiedToken(null)
+  }, [user?.id])
+
+  const currentTokens = tokenOwnerIdRef.current === user?.id ? tokens : null
+
   // Lazily load MCP tokens the first time the popover opens.
   useEffect(() => {
-    if (open && user && tokens === null && !tokensLoading) loadTokens()
+    if (open && user && currentTokens === null && !tokensLoading) loadTokens()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, user])
+  }, [open, user, currentTokens, tokensLoading])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -349,9 +370,9 @@ export default function AuthPanel({
                 </div>
               )}
 
-              {!tokensLoading && tokens && tokens.length > 0 && (
+              {!tokensLoading && currentTokens && currentTokens.length > 0 && (
                 <div style={{ marginBottom: 10 }}>
-                  {tokens.map((t) => (
+                  {currentTokens.map((t) => (
                     <div key={t.token} style={{
                       background: '#12121a', border: '1px solid #ffffff18', borderRadius: 6,
                       padding: '8px 10px', marginBottom: 6,
@@ -373,7 +394,7 @@ export default function AuthPanel({
                   ))}
                 </div>
               )}
-              {!tokensLoading && tokens && tokens.length === 0 && !tokensError && (
+              {!tokensLoading && currentTokens && currentTokens.length === 0 && !tokensError && (
                 <div style={{ color: '#555', fontSize: 11, marginBottom: 10 }}>아직 만든 토큰이 없습니다.</div>
               )}
 

@@ -187,18 +187,19 @@ async function userEmail(userId) {
 // Shares addressed to this user: claimed memberships + unclaimed email invites.
 async function mySharesFor(userId, canvasId) {
   const db = admin()
-  let q = db.from('canvas_shares').select('id, owner_id, canvas_id, scope, target_id, invitee_email')
+  let q = db.from('canvas_shares').select('id, owner_id, canvas_id, scope, target_id, invitee_email, restrict_view')
   if (canvasId) q = q.eq('canvas_id', canvasId)
   const { data: shares, error } = await q
   if (error) throw new Error(error.message)
   if (!shares?.length) return []
-  const { data: mems, error: e2 } = await db.from('share_members').select('share_id').eq('user_id', userId)
+  const { data: mems, error: e2 } = await db.from('share_members').select('share_id, can_edit').eq('user_id', userId)
   if (e2) throw new Error(e2.message)
-  const memberOf = new Set((mems ?? []).map((m) => m.share_id))
+  const canEditByShareId = new Map((mems ?? []).map((m) => [m.share_id, m.can_edit]))
   const email = shares.some((s) => s.invitee_email) ? await userEmail(userId) : null
-  return shares.filter((s) =>
-    s.owner_id !== userId &&
-    (memberOf.has(s.id) || (s.invitee_email && email && s.invitee_email.toLowerCase() === email)))
+  return shares
+    .filter((s) => s.owner_id !== userId &&
+      (canEditByShareId.has(s.id) || (s.invitee_email && email && s.invitee_email.toLowerCase() === email)))
+    .map((s) => ({ ...s, can_edit: canEditByShareId.has(s.id) ? canEditByShareId.get(s.id) : true }))
 }
 
 // Resolve what `userId` may do with `canvasId`: own it, or hold an invite.
@@ -218,7 +219,10 @@ async function resolveCanvasAccess(userId, canvasId) {
     const { data: row, error: e3 } = await db
       .from('canvases').select('*').eq('user_id', best.owner_id).eq('canvas_id', canvasId).maybeSingle()
     if (e3) throw new Error(e3.message)
-    if (row) return { row, role: 'invitee', ownerId: best.owner_id, scope: best.scope, targetId: best.target_id }
+    if (row) return {
+      row, role: 'invitee', ownerId: best.owner_id, scope: best.scope, targetId: best.target_id,
+      canEdit: best.can_edit !== false, restrictView: !!best.restrict_view,
+    }
   }
   throw new Error(`캔버스를 찾을 수 없습니다: ${canvasId}`)
 }
@@ -243,6 +247,7 @@ export function editableNodeIdSet(access, nodes) {
 export function assertRegionEdit(access, nodes, action) {
   if (access.role === 'owner') return
   const deny = (msg) => { throw new Error(msg) }
+  if (access.canEdit === false) deny('읽기 전용 초대에서는 변경할 수 없습니다.')
   if (action.kind === 'canvas-admin') deny('캔버스 삭제/이름 변경/초기화는 소유자만 할 수 있습니다.')
   if (access.scope === 'canvas') return
 
@@ -353,6 +358,8 @@ export async function getCanvas(userId, canvasId) {
         target_id: access.targetId,
         // null = 전체 편집 가능 (canvas 범위 초대)
         editable_node_ids: editable === null ? null : [...editable],
+        can_edit: access.canEdit !== false,
+        restrict_view: !!access.restrictView,
       }
     : undefined
   return {
@@ -360,17 +367,17 @@ export async function getCanvas(userId, canvasId) {
     canvas_id: row.canvas_id,
     name: row.name,
     stage_types: toExternal(rowStageTypes(row)),
-    nodes: (row.nodes ?? []).map((n) => ({
-      id: n.id,
-      type: n.type,
-      position: n.position,
-      width: nodeW(n),
-      height: nodeH(n),
-      dimmed: n.data?.dimmed ?? false,
-      ...(n.type === 'memo'
-        ? { header: n.data?.header ?? '', text: n.data?.text ?? '' }
-        : { label: n.data?.label ?? '', description: n.data?.description ?? '', stageTypeIdx: n.data?.colorIdx ?? 0 }),
-    })),
+    nodes: (row.nodes ?? []).map((n) => {
+      const shape = { id: n.id, type: n.type, position: n.position, width: nodeW(n), height: nodeH(n), dimmed: n.data?.dimmed ?? false }
+      const hidden = access.role === 'invitee' && access.restrictView && editable !== null && !editable.has(n.id)
+      if (hidden) return { ...shape, redacted: true }
+      return {
+        ...shape,
+        ...(n.type === 'memo'
+          ? { header: n.data?.header ?? '', text: n.data?.text ?? '' }
+          : { label: n.data?.label ?? '', description: n.data?.description ?? '', stageTypeIdx: n.data?.colorIdx ?? 0 }),
+      }
+    }),
     edges: (row.edges ?? []).map((e) => ({
       id: e.id, source: e.source, target: e.target,
       ...(e.sourceHandle ? { sourceHandle: e.sourceHandle } : {}),

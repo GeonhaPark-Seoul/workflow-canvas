@@ -149,6 +149,7 @@ export default function ContentNode({ data, selected, id }) {
   }, [data.url])
 
   const onDimPointerDown = (e) => {
+    if (data.readOnly) return
     e.stopPropagation()
     dimPressTimer.current = setTimeout(() => {
       data.onUpdate?.({ dimmed: !data.dimmed })
@@ -159,7 +160,10 @@ export default function ContentNode({ data, selected, id }) {
   const onDimPointerLeave = () => { clearTimeout(dimPressTimer.current); dimPressTimer.current = null }
   const onDimPointerCancel = () => { clearTimeout(dimPressTimer.current); dimPressTimer.current = null }
 
-  const startEdit = (field, pos) => { caretPosRef.current = pos ?? null; setEditing(field); data.onEditStart?.() }
+  const startEdit = (field, pos) => {
+    if (data.readOnly) return
+    caretPosRef.current = pos ?? null; setEditing(field); data.onEditStart?.()
+  }
 
   const stopEdit = (field, ref) => {
     if (editing !== field) return
@@ -172,12 +176,14 @@ export default function ContentNode({ data, selected, id }) {
   }
 
   const handleDisplayClick = (field) => (e) => {
+    if (data.readOnly) return
     if (!selected || editing || justSelected()) return
     startEdit(field, { x: e.clientX, y: e.clientY })
   }
 
-  const onPickFile = () => fileInputRef.current?.click()
+  const onPickFile = () => { if (!data.readOnly) fileInputRef.current?.click() }
   const onFileChange = async (e) => {
+    if (data.readOnly) return
     const file = e.target.files?.[0]
     if (!file) return
     try {
@@ -189,6 +195,7 @@ export default function ContentNode({ data, selected, id }) {
   }
 
   const commitUrl = () => {
+    if (data.readOnly) return
     const url = urlDraft.trim()
     if (url !== (data.url ?? '')) data.onUpdate?.({ url })
   }
@@ -226,7 +233,7 @@ export default function ContentNode({ data, selected, id }) {
       onPointerCancel={handlePointerUp}
     >
       <NodeResizer
-        isVisible={selected}
+        isVisible={selected && !data.readOnly}
         minWidth={160}
         minHeight={100}
         color="#aeb6c6"
@@ -316,7 +323,7 @@ export default function ContentNode({ data, selected, id }) {
                   <div className="nowheel" style={{ flex: 1, minHeight: 0, overflowY: 'auto', overscrollBehavior: 'contain', display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}>
                     <img src={data.src} alt="" style={{ maxWidth: '100%', borderRadius: 8 }} />
                   </div>
-                  {selected && (
+                  {selected && !data.readOnly && (
                     <button
                       type="button"
                       className="nodrag"
@@ -360,6 +367,7 @@ export default function ContentNode({ data, selected, id }) {
               <input
                 className="nodrag"
                 value={urlDraft}
+                disabled={data.readOnly}
                 onChange={(e) => setUrlDraft(e.target.value)}
                 onBlur={commitUrl}
                 onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commitUrl() } }}

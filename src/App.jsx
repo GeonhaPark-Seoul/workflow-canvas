@@ -36,11 +36,11 @@ import {
   deleteCanvas as cloudDeleteCanvas,
   saveUserPrefs as cloudSaveUserPrefs,
   loadUserPrefs as cloudLoadUserPrefs,
-  updateSharedCanvas as cloudUpdateSharedCanvas,
 } from './lib/cloudStorage'
+import { getSharedCanvas, listSharedCanvases, updateSharedCanvas } from './lib/sharedCanvasApi'
 import { joinCanvasPresence } from './lib/presence'
 import {
-  claimEmailInvites, claimShareToken, listSharedWithMe, listShares,
+  claimEmailInvites, claimShareToken, listShares,
   listShareMembers, setMemberEdit, kickMember, leaveSharedCanvas,
 } from './lib/shares'
 import { getMyProfile, getProfiles, upsertMyEmail, touchLastSeen } from './lib/profiles'
@@ -201,7 +201,11 @@ const stripEdge = ({ selected, ...e }) => e
 
 // ── Bootstrap canvases (runs once at module load) ────────────────────────────
 const { list: initCanvasList, activeId: initActiveId } = initCanvases(DEMO_CANVASES)
-const initData = loadCanvasData(initActiveId) ?? { nodes: DEMO_CANVASES[0].nodes, edges: DEMO_CANVASES[0].edges }
+// Never render an old local mirror for a shared canvas before the server has
+// re-checked its current permission and redacted it if necessary.
+const initData = parseSharedId(initActiveId)
+  ? { nodes: [], edges: [] }
+  : (loadCanvasData(initActiveId) ?? { nodes: DEMO_CANVASES[0].nodes, edges: DEMO_CANVASES[0].edges })
 
 // ── App ─────────────────────────────────────────────────────────────────────
 export default function App() {
@@ -271,6 +275,7 @@ export default function App() {
   const [invite, setInvite] = useState(null) // { scope, targetId, x, y } | null
   const [onlineUsers, setOnlineUsers] = useState([]) // [{ user_id, email }] in the active canvas
   const [sharedCanvases, setSharedCanvases] = useState([]) // canvases shared WITH me (listSharedWithMe())
+  const loadedSharedIdRef = useRef(null)
   const pendingShareTokenRef = useRef(null) // #share=<token> claimed right after SIGNED_IN
   const [authNotice, setAuthNotice] = useState(null) // share-link login gate notice shown in AuthPanel
   const inviteWrapRef = useRef(null) // invite popover wrapper (outside-click close)
@@ -760,21 +765,22 @@ export default function App() {
     saveCanvasData(activeCanvasId, { nodes: nodes.map(stripNode), edges: edges.map(stripEdge), views, stageTypes })
   }, [activeCanvasId, nodes, edges, views, stageTypes])
 
-  // Load a canvas I was invited to: fetched directly off the OWNER's row
-  // (RLS grants invitees select access), then fed through loadCanvas's
-  // existing prefetched-data path under a composite localStorage id.
+  // Invited canvases always pass through the server permission gateway. It
+  // redacts restricted nodes before the browser sees them.
   const loadSharedCanvas = useCallback(async (ownerId, canvasId) => {
-    const { data: row, error } = await supabase
-      .from('canvases')
-      .select('name, nodes, edges, views, stage_types')
-      .eq('user_id', ownerId)
-      .eq('canvas_id', canvasId)
-      .maybeSingle()
-    if (error) { console.error('[shares] loadSharedCanvas:', error.message); return }
-    if (!row) return
+    let row
+    try {
+      row = await getSharedCanvas(ownerId, canvasId)
+    } catch (err) {
+      console.error('[shares] loadSharedCanvas:', err.message)
+      return
+    }
     const compositeId = sharedCanvasId(ownerId, canvasId)
-    const data = { nodes: row.nodes ?? [], edges: row.edges ?? [], views: row.views ?? [], stageTypes: row.stage_types?.length ? row.stage_types : undefined }
+    const data = { nodes: row.nodes ?? [], edges: row.edges ?? [], views: row.views ?? [], stageTypes: row.stageTypes?.length ? row.stageTypes : undefined }
+    const existing = loadCanvasData(compositeId)
+    if (loadedSharedIdRef.current === compositeId && existing && JSON.stringify(existing) === JSON.stringify(data)) return
     saveCanvasData(compositeId, data)
+    loadedSharedIdRef.current = compositeId
     loadCanvas(compositeId, data)
   }, [loadCanvas])
 
@@ -870,7 +876,7 @@ export default function App() {
   // ── Sharing: refresh the "shared with me" list ────────────────────────────
   const refreshSharedCanvases = useCallback(async () => {
     try {
-      setSharedCanvases(await listSharedWithMe())
+      setSharedCanvases(await listSharedCanvases())
     } catch (err) {
       console.error('[shares] refreshSharedCanvases:', err.message)
     }
@@ -1115,59 +1121,17 @@ export default function App() {
     return () => { supabase.removeChannel(channel) }
   }, [user, loadCanvas, setNodes, setEdges])
 
-  // ── Realtime: mirror the OWNER's canvas while a shared canvas is active ──
-  // Same shape as the effect above, but filtered on the owner's user_id
-  // (invitees don't have their own row for this canvas) and scoped to just
-  // the one shared canvas currently open — it doesn't touch the tab list.
+  // ── Shared refresh: direct owner-row Realtime would bypass the permission
+  // gateway, so invitees poll the same redacting server endpoint instead.
   useEffect(() => {
     if (!user) return
     const shared = parseSharedId(activeCanvasId)
     if (!shared) return
-    const { ownerId, canvasId } = shared
-
-    const handler = async (payload) => {
-      const id = payload.new?.canvas_id ?? payload.old?.canvas_id
-      if (id !== canvasId || payload.eventType === 'DELETE') return
-
-      const { data: row } = await supabase
-        .from('canvases')
-        .select('nodes, edges, views, stage_types')
-        .eq('user_id', ownerId)
-        .eq('canvas_id', canvasId)
-        .maybeSingle()
-      if (!row) return
-
-      const mirror = {
-        nodes: sortParentsFirst(row.nodes ?? []),
-        edges: row.edges ?? [],
-        views: row.views ?? [],
-        stageTypes: row.stage_types?.length ? row.stage_types : undefined,
-      }
-      if (isAnyEditingRef.current) return
-      const local = loadCanvasData(activeCanvasId) ?? {}
-      if (JSON.stringify({ n: local.nodes ?? [], e: local.edges ?? [] }) ===
-          JSON.stringify({ n: mirror.nodes, e: mirror.edges })) return
-
-      isRestoring.current = true
-      const nEdges = normalizeEdges(mirror.edges)
-      setNodes(mirror.nodes)
-      setEdges(nEdges)
-      setViews(mirror.views)
-      setStageTypes(mirror.stageTypes ?? DEFAULT_STAGE_TYPES)
-      counterRef.current = maxNodeId(mirror.nodes)
-      const snap = { nodes: mirror.nodes.map(stripNode), edges: nEdges.map(stripEdge) }
-      historyStack.current = [...historyStack.current.slice(0, historyPointer.current + 1), snap]
-      historyPointer.current = historyStack.current.length - 1
-      saveCanvasData(activeCanvasId, mirror)
-      setTimeout(() => { isRestoring.current = false }, 400)
-    }
-
-    const channel = supabase
-      .channel(`shared-canvas-live-${ownerId}-${canvasId}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'canvases', filter: `user_id=eq.${ownerId}` }, handler)
-      .subscribe()
-    return () => { supabase.removeChannel(channel) }
-  }, [user, activeCanvasId, setNodes, setEdges])
+    const timer = setInterval(() => {
+      if (!isAnyEditingRef.current) loadSharedCanvas(shared.ownerId, shared.canvasId)
+    }, 5000)
+    return () => clearInterval(timer)
+  }, [user, activeCanvasId, loadSharedCanvas])
 
   // ── Presence: who else is viewing the active canvas ───────────────────────
   useEffect(() => {
@@ -1211,14 +1175,14 @@ export default function App() {
       const snapshot = { nodes: nodes.map(stripNode), edges: edges.map(stripEdge) }
       const shared = parseSharedId(aid)
 
-      // Shared canvas: invitee saves land directly on the owner's row —
-      // nodes/edges only, never name or user_prefs (those are owner-only).
+      // The server validates the invite scope and read-only flag before saving.
       if (shared) {
+        if (loadedSharedIdRef.current !== aid) return
         const payload = JSON.stringify({ aid, nodes: snapshot.nodes, edges: snapshot.edges })
         if (payload === lastPushedCanvasRef.current) return
         setCloudSyncing(true)
         try {
-          await cloudUpdateSharedCanvas(shared.ownerId, shared.canvasId, snapshot.nodes, snapshot.edges)
+          await updateSharedCanvas(shared.ownerId, shared.canvasId, snapshot.nodes, snapshot.edges)
           lastPushedCanvasRef.current = payload
         } catch (err) {
           console.error('[cloud] shared autosave:', err.message)
@@ -1255,14 +1219,14 @@ export default function App() {
   }, [user, nodes, edges, stageTypes, canvases, activeCanvasId, views])
 
   // ── Sharing: permission model for the active canvas ───────────────────────
-  // Own canvases (and canvases before any share info has loaded) are always
-  // full-edit 'owner'. A shared composite activeCanvasId resolves to whichever
+  // Own canvases are always full-edit 'owner'. A shared composite activeCanvasId resolves to whichever
   // matching share is most permissive (canvas > group > node).
   const perm = useMemo(() => {
     const parsed = parseSharedId(activeCanvasId)
     if (!parsed) return { role: 'owner', scope: 'canvas', targetId: null, restrictView: false, canEdit: true }
     const matches = sharedCanvases.filter((s) => s.ownerId === parsed.ownerId && s.canvasId === parsed.canvasId)
-    if (!matches.length) return { role: 'owner', scope: 'canvas', targetId: null, restrictView: false, canEdit: true }
+    // Fail closed while an invite list is loading or an invite was revoked.
+    if (!matches.length) return { role: 'invitee', scope: 'node', targetId: null, restrictView: true, canEdit: false }
     const priority = { canvas: 0, group: 1, node: 2 }
     const best = [...matches].sort((a, b) => priority[a.scope] - priority[b.scope])[0]
     return { role: 'invitee', scope: best.scope, targetId: best.targetId, restrictView: best.restrictView, canEdit: best.canEdit !== false }
@@ -2372,7 +2336,7 @@ export default function App() {
       {notesPanel && (
         <NotesPanel
           type={notesPanel.type}
-          nodes={nodes}
+          nodes={nodes.filter((node) => !node.data?.redacted)}
           edges={edges}
           stageTypes={stageTypes}
           selectedId={notesSelectedId}

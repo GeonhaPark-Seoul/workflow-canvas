@@ -185,6 +185,7 @@ export default function MemoNode({ data, selected, id }) {
   const handleTextMouseLeave = () => setTextHover(null)
 
   const onDimPointerDown = (e) => {
+    if (data.readOnly) return
     e.stopPropagation()
     dimPressTimer.current = setTimeout(() => {
       data.onUpdate?.({ dimmed: !data.dimmed })
@@ -195,7 +196,10 @@ export default function MemoNode({ data, selected, id }) {
   const onDimPointerLeave = () => { clearTimeout(dimPressTimer.current); dimPressTimer.current = null }
   const onDimPointerCancel = () => { clearTimeout(dimPressTimer.current); dimPressTimer.current = null }
 
-  const startEdit = (field, pos) => { caretPosRef.current = pos ?? null; setEditing(field); data.onEditStart?.() }
+  const startEdit = (field, pos) => {
+    if (data.readOnly) return
+    caretPosRef.current = pos ?? null; setEditing(field); data.onEditStart?.()
+  }
 
   const stopEdit = (field, ref) => {
     if (editing !== field) return
@@ -211,6 +215,7 @@ export default function MemoNode({ data, selected, id }) {
   // Display-mode click: toggles a checkbox if that's what was clicked, otherwise
   // starts editing the field once the node is selected (click-to-edit cycle).
   const handleDisplayClick = (field) => (e) => {
+    if (data.readOnly) return
     if (e.target.tagName === 'INPUT' && e.target.type === 'checkbox') {
       e.stopPropagation()
       e.target.toggleAttribute('checked')
@@ -256,7 +261,7 @@ export default function MemoNode({ data, selected, id }) {
       onPointerCancel={handlePointerUp}
     >
       <NodeResizer
-        isVisible={selected}
+        isVisible={selected && !data.readOnly}
         minWidth={160}
         minHeight={80}
         color="#f59e0b"

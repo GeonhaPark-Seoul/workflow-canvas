@@ -329,7 +329,7 @@ export default function StageNode({ data, selected, id }) {
       onPointerCancel={handlePointerUp}
     >
       <NodeResizer
-        isVisible={selected}
+        isVisible={selected && !data.readOnly}
         minWidth={200}
         minHeight={80}
         color={color.border}

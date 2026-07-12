@@ -4,6 +4,7 @@ import assert from 'node:assert/strict'
 import { layoutGraph, findNonOverlapping, validateGraphInput, overlaps, nodeRect, radialLevels, segmentIntersectsRect, avoidEdgeCrossings, edgeAnchors, SIZE } from '../mcp/layout.js'
 import { checkRadialLevelMixing, editableNodeIdSet, assertRegionEdit } from '../mcp/store.js'
 import { sanitizeHtml } from '../mcp/sanitize.js'
+import { applySharedCanvasUpdate, redactCanvas } from '../mcp/shareAccess.js'
 
 let passed = 0
 function t(name, fn) {
@@ -730,14 +731,46 @@ console.log('assertRegionEdit / editableNodeIdSet')
     assert.throws(() => assertRegionEdit(groupInv, NODES, { kind: 'graph' }), /create_graph/)
   })
 
-  t('node-scope: content update on target only; move/delete/create/edge denied', () => {
+t('node-scope: content update on target only; move/delete/create/edge denied', () => {
     assertRegionEdit(nodeInv, NODES, { kind: 'node-update', nodeId: 'a' })
     assert.throws(() => assertRegionEdit(nodeInv, NODES, { kind: 'node-update', nodeId: 'b' }), /외에는 수정할 수 없습니다/)
     assert.throws(() => assertRegionEdit(nodeInv, NODES, { kind: 'node-update', nodeId: 'a', movesPosition: true }), /위치\(x\/y\)/)
     assert.throws(() => assertRegionEdit(nodeInv, NODES, { kind: 'node-delete', nodeId: 'a' }), /내용·크기 수정만/)
     assert.throws(() => assertRegionEdit(nodeInv, NODES, { kind: 'node-create' }), /내용·크기 수정만/)
     assert.throws(() => assertRegionEdit(nodeInv, NODES, { kind: 'edge', source: 'a', target: 'b' }), /내용·크기 수정만/)
-  })
+})
+
+console.log('shared canvas server gateway')
+
+const sharedRow = {
+  nodes: [
+    { id: 'frame', type: 'group', position: { x: 0, y: 0 }, data: { label: '비공개 그룹' } },
+    { id: 'inside', type: 'memo', parentId: 'frame', position: { x: 10, y: 10 }, data: { header: '허용', text: '볼 수 있음' } },
+    { id: 'outside', type: 'memo', position: { x: 500, y: 10 }, data: { header: '비공개', text: '보이면 안 됨' } },
+  ],
+  edges: [{ id: 'inside-edge', source: 'inside', target: 'outside' }],
+}
+
+t('restrict_view: server redacts body data outside the invited group', () => {
+  const result = redactCanvas({ row: sharedRow, scope: 'group', targetId: 'frame', canEdit: true, restrictView: true })
+  const hidden = result.nodes.find((node) => node.id === 'outside')
+  assert.deepEqual(hidden.data, { redacted: true })
+  assert.equal(JSON.stringify(hidden).includes('비공개'), false)
+})
+
+t('group invite: server rejects moving a child outside the group', () => {
+  const submitted = structuredClone(sharedRow.nodes)
+  submitted.find((node) => node.id === 'inside').parentId = undefined
+  assert.throws(() => applySharedCanvasUpdate(
+    { row: sharedRow, scope: 'group', targetId: 'frame', canEdit: true, restrictView: false }, submitted, sharedRow.edges,
+  ), /그룹 밖/)
+})
+
+t('read-only invite: server rejects every save attempt', () => {
+  assert.throws(() => applySharedCanvasUpdate(
+    { row: sharedRow, scope: 'canvas', targetId: null, canEdit: false, restrictView: false }, sharedRow.nodes, sharedRow.edges,
+  ), /읽기 전용/)
+})
 }
 
 console.log(`\n${passed} tests passed${process.exitCode ? ' (with failures)' : ''}`)

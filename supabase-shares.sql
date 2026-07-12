@@ -266,3 +266,10 @@ create policy "invitee selects shared canvases" on canvases
 drop policy if exists "invitee updates shared canvases" on canvases;
 create policy "invitee updates shared canvases" on canvases
   for update using (can_access_canvas(canvases.user_id, canvases.canvas_id, auth.uid(), auth.email()));
+
+-- Phase 6: shared canvas rows must no longer be directly readable or writable
+-- by invitees. The Vercel /api/shared-canvas endpoint now authenticates the
+-- invitee, applies can_edit/scope/restrict_view server-side, and uses the
+-- service role only after that check. Run this after deploying that endpoint.
+drop policy if exists "invitee selects shared canvases" on canvases;
+drop policy if exists "invitee updates shared canvases" on canvases;
