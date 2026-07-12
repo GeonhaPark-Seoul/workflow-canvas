@@ -22,6 +22,7 @@ import Toolbar from './components/Toolbar'
 import CanvasTabs from './components/CanvasTabs'
 import AuthPanel from './components/AuthPanel'
 import InvitePopover from './components/InvitePopover'
+import NotesPanel from './components/NotesPanel'
 import {
   initCanvases, loadCanvasData, saveCanvasData, deleteCanvasData,
   saveCanvasList, saveActiveId, uid,
@@ -212,6 +213,8 @@ export default function App() {
   const [stageTypes, setStageTypes] = useState(() => initData.stageTypes ?? DEFAULT_STAGE_TYPES)
   const [contextMenu, setContextMenu] = useState(null)
   const [renamingTypeIdx, setRenamingTypeIdx] = useState(null)
+  const [notesPanel, setNotesPanel] = useState(null) // { type: 'stage'|'memo'|'content' } | null
+  const [notesSelectedId, setNotesSelectedId] = useState(null)
   const [renameValue, setRenameValue] = useState('')
   const reactFlowRef = useRef(null)
   const [rfInstance, setRfInstance] = useState(null)
@@ -1732,6 +1735,103 @@ export default function App() {
     setAlignGuides([])
   }, [])
 
+  // ── Alignment guides while RESIZING: same edge-snap idea as drag, applied
+  // to whichever edge of the box is actually moving. A NodeResizer drag from
+  // the right/bottom handles only changes width/height (the left/top edge
+  // stays put); a drag from the left/top handles also emits a position
+  // change on that axis (the opposite edge stays put instead). hasPosX/
+  // hasPosY tell us which edge moved so we snap the right one and keep the
+  // other edge fixed — otherwise "snapping" would silently translate the box.
+  const computeResizeAlignSnap = useCallback((nodeId, newWidth, newHeight, newPosX, newPosY, hasPosX, hasPosY) => {
+    if (nodes.length > ALIGN_MAX_NODES) return null
+    const byId = new Map(nodes.map((n) => [n.id, n]))
+    const dragged = byId.get(nodeId)
+    if (!dragged) return null
+    const dim = (n) => ({ w: n.measured?.width ?? n.width ?? 0, h: n.measured?.height ?? n.height ?? 0 })
+
+    const oldAbs = absolutePosition(dragged, byId)
+    const oldDim = dim(dragged)
+    const parentAbsX = oldAbs.x - dragged.position.x
+    const parentAbsY = oldAbs.y - dragged.position.y
+
+    const movingX = hasPosX ? { edge: 'left', value: parentAbsX + newPosX } : { edge: 'right', value: oldAbs.x + newWidth }
+    const movingY = hasPosY ? { edge: 'top', value: parentAbsY + newPosY } : { edge: 'bottom', value: oldAbs.y + newHeight }
+
+    let xSnap = null, ySnap = null
+    for (const n of nodes) {
+      if (n.id === nodeId) continue
+      const nd = dim(n)
+      const nPos = absolutePosition(n, byId)
+      if (!xSnap && Math.abs(movingX.value - nPos.x) <= ALIGN_SNAP) xSnap = { value: nPos.x }
+      if (!xSnap && Math.abs(movingX.value - (nPos.x + nd.w)) <= ALIGN_SNAP) xSnap = { value: nPos.x + nd.w }
+      if (!ySnap && Math.abs(movingY.value - nPos.y) <= ALIGN_SNAP) ySnap = { value: nPos.y }
+      if (!ySnap && Math.abs(movingY.value - (nPos.y + nd.h)) <= ALIGN_SNAP) ySnap = { value: nPos.y + nd.h }
+      if (xSnap && ySnap) break
+    }
+    if (!xSnap && !ySnap) return null
+
+    let width = newWidth, height = newHeight, posX = newPosX, posY = newPosY
+    const guides = []
+    if (xSnap) {
+      guides.push({ axis: 'x', value: xSnap.value })
+      if (movingX.edge === 'left') {
+        width = Math.max(40, (oldAbs.x + oldDim.w) - xSnap.value)
+        posX = xSnap.value - parentAbsX
+      } else {
+        width = Math.max(40, xSnap.value - oldAbs.x)
+      }
+    }
+    if (ySnap) {
+      guides.push({ axis: 'y', value: ySnap.value })
+      if (movingY.edge === 'top') {
+        height = Math.max(40, (oldAbs.y + oldDim.h) - ySnap.value)
+        posY = ySnap.value - parentAbsY
+      } else {
+        height = Math.max(40, ySnap.value - oldAbs.y)
+      }
+    }
+    return { width, height, posX, posY, guides }
+  }, [nodes])
+
+  // Wraps useNodesState's onNodesChange: after the raw change is applied,
+  // detect an interactive NodeResizer dimension change (resizing is only set
+  // — true or false — by the resizer's own drag/end handlers, never by the
+  // plain ResizeObserver auto-measure) and overlay the same alignment snap
+  // used for drag. Re-applied on the final (resizing:false) change too,
+  // since the resizer's own onEnd recomputes size from the raw pointer
+  // delta and would otherwise snap the box back out of alignment on release.
+  const handleNodesChange = useCallback((changes) => {
+    onNodesChange(changes)
+
+    const dimChange = changes.find((c) => c.type === 'dimensions' && typeof c.resizing === 'boolean')
+    if (!dimChange) return
+
+    const posChange = changes.find((c) => c.type === 'position' && c.id === dimChange.id)
+    const dragged = nodes.find((n) => n.id === dimChange.id)
+    if (!dragged) { setAlignGuides([]); return }
+
+    const newWidth = dimChange.dimensions.width
+    const newHeight = dimChange.dimensions.height
+    const hasPosX = !!posChange && posChange.position.x !== dragged.position.x
+    const hasPosY = !!posChange && posChange.position.y !== dragged.position.y
+    const newPosX = posChange ? posChange.position.x : dragged.position.x
+    const newPosY = posChange ? posChange.position.y : dragged.position.y
+
+    const snap = computeResizeAlignSnap(dimChange.id, newWidth, newHeight, newPosX, newPosY, hasPosX, hasPosY)
+    if (!snap) { setAlignGuides([]); return }
+
+    setNodes((nds) => nds.map((n) => n.id === dimChange.id
+      ? {
+          ...n,
+          position: { x: snap.posX, y: snap.posY },
+          width: snap.width,
+          height: snap.height,
+          measured: { ...(n.measured ?? {}), width: snap.width, height: snap.height },
+        }
+      : n))
+    setAlignGuides(dimChange.resizing ? snap.guides : [])
+  }, [onNodesChange, nodes, computeResizeAlignSnap, setNodes])
+
   // Clicking a node bolds every edge connected to it (reuses the same
   // selected-edge bold styling as clicking an edge directly — see styledEdges).
   const onNodeClick = useCallback((_e, node) => {
@@ -1871,6 +1971,17 @@ export default function App() {
     rfInstance?.fitView({ padding: 0.1, duration: 500 })
   }, [rfInstance])
 
+  // ── Notes panel: move the canvas viewport to focus a given node ───────────
+  const focusNode = useCallback((id) => {
+    if (!rfInstance) return
+    rfInstance.fitView({ nodes: [{ id }], duration: 400, padding: 0.3, maxZoom: 1.1 })
+  }, [rfInstance])
+
+  const openNotesPanel = useCallback((type) => {
+    setNotesSelectedId(null)
+    setNotesPanel((prev) => (prev?.type === type ? null : { type }))
+  }, [])
+
   // ── Saved views ───────────────────────────────────────────────────────────
   // Compute the bounding box (in flow coords) of the given node ids.
   const boundsOf = useCallback((ids) => {
@@ -1974,12 +2085,16 @@ export default function App() {
     // canvas-scope invitees via editableSet === null.)
     const deletable = isNodeEditable(e.source) && isNodeEditable(e.target)
     const type = 'stub'
-    if (!e.selected) return { ...e, ...baseEdgeStyle(e), deletable, type }
+    // Stable hook class so CSS can target `.wfc-edge:hover` for the hover
+    // glow (bold stroke handled by css agent's `.react-flow__edge:hover`).
+    const className = `wfc-edge${e.className ? ` ${e.className}` : ''}`
+    if (!e.selected) return { ...e, ...baseEdgeStyle(e), deletable, type, className }
     if (isPartEdge(e)) {
       return {
         ...e,
         deletable,
         type,
+        className,
         reconnectable: true,
         zIndex: 1001,
         style: { ...baseEdgeStyle(e).style, stroke: '#c3cad9', strokeWidth: 3 },
@@ -1992,6 +2107,7 @@ export default function App() {
       ...e,
       deletable,
       type,
+      className,
       // Only a selected (bold) edge can be snatched/reconnected.
       reconnectable: true,
       zIndex: 1001,
@@ -2156,6 +2272,7 @@ export default function App() {
               stageTypes,
               lodThreshold: settings.lodThreshold,
               nodeFill: settings.nodeFill,
+              theme: settings.theme,
               readOnly: viewOnly || (restrictedScope && !editable),
               forceShapeOnly: forceShapeOnlySet?.has(n.id) ?? false,
               canInvite: isOwner,
@@ -2172,7 +2289,7 @@ export default function App() {
           }
         })}
         edges={styledEdges}
-        onNodesChange={onNodesChange}
+        onNodesChange={handleNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onReconnect={onReconnect}
@@ -2214,8 +2331,8 @@ export default function App() {
         deleteKeyCode={['Delete', 'Backspace']}
         style={{ background: settings.theme === 'light' ? '#f5f5f7' : '#0f0f13' }}
       >
-        <Background id="minor" variant={BackgroundVariant.Lines} gap={24} color={settings.theme === 'light' ? '#00000010' : '#ffffff07'} />
-        <Background id="major" variant={BackgroundVariant.Lines} gap={120} color={settings.theme === 'light' ? '#00000018' : '#ffffff0d'} />
+        <Background id="minor" variant={BackgroundVariant.Lines} gap={14} color="#ffffff08" />
+        <Background id="major" variant={BackgroundVariant.Lines} gap={70} color="#ffffff08" />
         {!mobile && <Controls style={{ background: '#1a1a22', border: '1px solid #ffffff18', borderRadius: 8 }} />}
         {!mobile && (
           <MiniMap
@@ -2226,6 +2343,46 @@ export default function App() {
         )}
       </ReactFlow>
 
+
+      {/* ── Notes panel: right-edge open buttons + the panel itself ───────── */}
+      <div
+        style={{
+          position: 'fixed', right: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 15,
+          display: 'flex', flexDirection: 'column', gap: 4,
+          background: '#1a1a22', border: '1px solid #ffffff18', borderRight: 'none',
+          borderRadius: '10px 0 0 10px', padding: 5,
+        }}
+      >
+        {[['stage', '단계'], ['memo', '메모'], ['content', '컨텐츠']].map(([t, label]) => (
+          <button
+            key={t}
+            onClick={() => openNotesPanel(t)}
+            style={{
+              background: notesPanel?.type === t ? '#3b82f633' : 'transparent',
+              border: 'none', borderRadius: 6, color: notesPanel?.type === t ? '#8ab4ff' : '#ccc',
+              fontSize: 12, fontWeight: 600, padding: '8px 6px', cursor: 'pointer',
+              writingMode: 'vertical-rl', letterSpacing: 1, fontFamily: 'inherit',
+            }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {notesPanel && (
+        <NotesPanel
+          type={notesPanel.type}
+          nodes={nodes}
+          edges={edges}
+          stageTypes={stageTypes}
+          selectedId={notesSelectedId}
+          onSelect={setNotesSelectedId}
+          onClose={() => setNotesPanel(null)}
+          onFocusNode={focusNode}
+          onUpdateNode={updateNodeData}
+          isNodeEditable={isNodeEditable}
+        />
+      )}
 
       {/* ── Selection rubber-band (long-press drag) ──────────────────────── */}
       {lassoRect && (

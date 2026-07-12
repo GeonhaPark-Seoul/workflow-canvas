@@ -1,15 +1,19 @@
 import { useState, useRef, useEffect } from 'react'
 import { NodeResizer, useStore } from '@xyflow/react'
 
+// Linear interpolation (unclamped) of value from [inMin, inMax] to [outMin, outMax].
+function mapRange(value, inMin, inMax, outMin, outMax) {
+  const t = (value - inMin) / (inMax - inMin)
+  return outMin + t * (outMax - outMin)
+}
+const clamp = (v, min, max) => Math.min(Math.max(v, min), max)
+
 export default function GroupNode({ data, selected, id }) {
-  // Abstract (LOD) mode: re-renders only when crossing the threshold, not every zoom tick.
-  const abstract = useStore((s) => s.transform[2] < (data.lodThreshold ?? 0.55))
-  // Shape-only (deeper LOD) mode: the frame loses everything but its outline — the
-  // title tab is the one exception, it must stay legible at every zoom level.
-  // Also forced by the App agent (data.forceShapeOnly) for out-of-region nodes under
-  // view-restricted sharing — in that case the tab itself is hidden too (frame only).
-  const zoomShapeOnly = useStore((s) => s.transform[2] < (data.lodThreshold ?? 0.55) * 0.45)
-  const shapeOnly = zoomShapeOnly || data.forceShapeOnly
+  // The group label scales continuously with zoom (not a discrete LOD tier, unlike the
+  // other node types) so it grows smoothly as the canvas zooms out, up to ×4.5.
+  const threshold = data.lodThreshold ?? 0.55
+  const zoom = useStore((s) => s.transform[2])
+  const tabScale = clamp(mapRange(zoom, threshold, threshold * 0.3, 1, 4.5), 1, 4.5)
 
   const filled = data.nodeFill !== false
 
@@ -67,9 +71,10 @@ export default function GroupNode({ data, selected, id }) {
     startEditing()
   }
 
-  // Title tab survives all LOD tiers and enlarges further in shape-only (the deepest tier).
-  const tabScale = shapeOnly ? 2.4 : abstract ? 1.9 : 1
   const labelFontSize = Math.round(13 * tabScale)
+  // Not gated by theme/darkText: the tab always sits on its own fixed dark background
+  // (#20242e below, independent of node fill), so the light label color is always correct.
+  const labelColor = '#aab'
 
   return (
     <div
@@ -137,20 +142,21 @@ export default function GroupNode({ data, selected, id }) {
               background: 'transparent',
               border: 'none',
               borderBottom: '1px solid #8b94a7',
-              color: '#aab',
+              color: labelColor,
               fontSize: labelFontSize,
               fontWeight: 700,
               outline: 'none',
               fontFamily: 'inherit',
               minWidth: 80,
               cursor: 'text',
+              transition: 'font-size 0.08s linear',
             }}
           />
         ) : (
           <div
             className="text-hover-line"
             onClick={handleLabelClick}
-            style={{ color: '#aab', fontSize: labelFontSize, fontWeight: 700, cursor: 'text' }}
+            style={{ color: labelColor, fontSize: labelFontSize, fontWeight: 700, cursor: 'text', transition: 'font-size 0.08s linear' }}
           >
             {data.label || '새 그룹'}
           </div>

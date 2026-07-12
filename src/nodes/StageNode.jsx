@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Handle, Position, NodeResizer, useStore } from '@xyflow/react'
 import EditToolbar from '../components/EditToolbar'
+import { useTheme } from './useTheme'
 
 const DEFAULT_TYPES = [
   { bg: '#1e3a5f', border: '#3b82f6', label: '기획' },
@@ -82,6 +83,14 @@ export default function StageNode({ data, selected, id }) {
   const shapeOnly = zoomShapeOnly || data.forceShapeOnly
 
   const filled = data.nodeFill !== false
+  const theme = useTheme()
+  // Light theme + fill off ⇒ the node's background is transparent over a light page,
+  // so text drawn in the usual light-on-dark colors would go invisible — use dark text instead.
+  const darkText = theme === 'light' && !filled
+  const titleColor = darkText ? '#1a1a22' : '#f0f0f0'
+  const titlePlaceholderColor = darkText ? '#999' : '#ffffff66'
+  const descColor = darkText ? '#333' : '#f0f0f0'
+  const descPlaceholderColor = darkText ? '#999' : '#888'
 
   const [editing, setEditing] = useState(null) // 'title' | 'desc' | null
   const titleRef = useRef(null)
@@ -286,9 +295,9 @@ export default function StageNode({ data, selected, id }) {
   const titleValue = data.label ?? ''
   const descValue = data.description || ''
 
-  // In abstract mode, font sizes get a ×1.9 multiplier.
-  const titleFontSize = abstract ? Math.round(15 * 1.9) : 15
-  const titleLineH = abstract ? Math.round(22 * 1.9) : 22
+  // In abstract mode, title font sizes get a ×1.15 multiplier (and are centered — see below).
+  const titleFontSize = abstract ? Math.round(15 * 1.15) : 15
+  const titleLineH = abstract ? Math.round(22 * 1.15) : 22
   const typeFontSize = abstract ? Math.round(10 * 1.9) : 10
   const circleSize = abstract ? Math.round(14 * 1.9) : 14
 
@@ -340,8 +349,8 @@ export default function StageNode({ data, selected, id }) {
       {!shapeOnly && (
       <div style={{ padding: '10px 12px 4px', flexShrink: 0 }}>
         {abstract ? (
-          /* Abstract mode: circle + title on one horizontal row, label hidden */
-          <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+          /* Abstract mode: circle + title on one horizontal row, label hidden, title centered */
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9 }}>
             <button
               onClick={cycleColor}
               onPointerDown={onDimPointerDown}
@@ -366,8 +375,8 @@ export default function StageNode({ data, selected, id }) {
                   style={{
                     background: 'transparent',
                     borderBottom: `1px solid ${color.border}`,
-                    color: '#f0f0f0', fontSize: titleFontSize, fontWeight: 700,
-                    width: '100%', outline: 'none', cursor: 'text',
+                    color: titleColor, fontSize: titleFontSize, fontWeight: 700,
+                    width: '100%', outline: 'none', cursor: 'text', textAlign: 'center',
                     minHeight: titleLineH, lineHeight: `${titleLineH}px`, whiteSpace: 'pre-wrap',
                     wordBreak: 'break-word',
                   }}
@@ -378,8 +387,8 @@ export default function StageNode({ data, selected, id }) {
                   onClick={handleDisplayClick('title')}
                   dangerouslySetInnerHTML={{ __html: titleValue || (data.titleTouched ? '' : '단계 이름') }}
                   style={{
-                    color: titleValue ? '#f0f0f0' : '#ffffff66', fontSize: titleFontSize, fontWeight: 700,
-                    cursor: 'text', minHeight: titleLineH, lineHeight: `${titleLineH}px`,
+                    color: titleValue ? titleColor : titlePlaceholderColor, fontSize: titleFontSize, fontWeight: 700,
+                    cursor: 'text', minHeight: titleLineH, lineHeight: `${titleLineH}px`, textAlign: 'center',
                     whiteSpace: 'pre-wrap', wordBreak: 'break-word',
                     touchAction: 'manipulation',
                   }}
@@ -423,7 +432,7 @@ export default function StageNode({ data, selected, id }) {
                     style={{
                       background: 'transparent',
                       borderBottom: `1px solid ${color.border}`,
-                      color: '#f0f0f0', fontSize: titleFontSize, fontWeight: 700,
+                      color: titleColor, fontSize: titleFontSize, fontWeight: 700,
                       width: '100%', outline: 'none', marginBottom: 4, cursor: 'text',
                       minHeight: titleLineH, lineHeight: `${titleLineH}px`, whiteSpace: 'pre-wrap',
                       wordBreak: 'break-word',
@@ -435,7 +444,7 @@ export default function StageNode({ data, selected, id }) {
                     onClick={handleDisplayClick('title')}
                     dangerouslySetInnerHTML={{ __html: titleValue || (data.titleTouched ? '' : '단계 이름') }}
                     style={{
-                      color: titleValue ? '#f0f0f0' : '#ffffff66', fontSize: titleFontSize, fontWeight: 700,
+                      color: titleValue ? titleColor : titlePlaceholderColor, fontSize: titleFontSize, fontWeight: 700,
                       marginBottom: 4, cursor: 'text', minHeight: titleLineH, lineHeight: `${titleLineH}px`,
                       whiteSpace: 'pre-wrap', wordBreak: 'break-word',
                       touchAction: 'manipulation',
@@ -468,21 +477,22 @@ export default function StageNode({ data, selected, id }) {
                 onBlur={() => stopEdit('desc', descRef)}
                 style={{
                   flex: 1, background: 'transparent',
-                  color: '#f0f0f0', fontSize: 12, width: '100%',
+                  color: descColor, fontSize: 12, width: '100%',
                   outline: 'none', lineHeight: 1.5, minHeight: 0, cursor: 'text',
                   whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowY: 'auto',
+                  overscrollBehavior: 'contain',
                 }}
               />
             ) : (
               <div
                 ref={descDisplayRef}
-                className="rich-content"
+                className="rich-content nowheel"
                 onClick={handleDisplayClick('desc')}
                 dangerouslySetInnerHTML={{ __html: wrapLines(descValue || (data.descTouched ? '' : '설명')) }}
                 style={{
-                  flex: 1, color: descValue ? '#f0f0f0' : '#888', fontSize: 12,
+                  flex: 1, color: descValue ? descColor : descPlaceholderColor, fontSize: 12,
                   whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text',
-                  overflow: 'auto', lineHeight: 1.5, minHeight: 0,
+                  overflowY: 'auto', overscrollBehavior: 'contain', lineHeight: 1.5, minHeight: 0,
                   touchAction: 'manipulation',
                 }}
               />

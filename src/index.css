@@ -59,6 +59,11 @@ html, body, #root {
 .react-flow__edge:hover .react-flow__edge-path {
   stroke-width: 4.5px;
 }
+/* Hover glow: a soft shadow around the whole edge (item 12). Selected edges use
+   an inline filter that wins by specificity, so this only affects idle-hover. */
+.react-flow__edge.wfc-edge:hover .react-flow__edge-path {
+  filter: drop-shadow(0 0 5px currentColor);
+}
 .react-flow__edge:hover .react-flow__edge-path[style*="stroke-dasharray"] {
   filter: drop-shadow(0 0 3px currentColor);
 }
@@ -143,3 +148,15 @@ html, body, #root {
   cursor: pointer;
 }
 .stage-part-remove:hover { color: #ef4444; }
+
+/* Background grid: unify both pattern layers (minor/major) to a single faint line color.
+   React Flow sets the pattern's stroke from a CSS custom property consumed by its own
+   `.react-flow__background-pattern.lines` rule (2-class specificity) — match/beat it with
+   !important so both layers always render the same faint color regardless of the `color`
+   prop passed to each <Background>. */
+.react-flow__background-pattern {
+  stroke: #ffffff08 !important;
+}
+body[data-theme='light'] .react-flow__background-pattern {
+  stroke: #00000010 !important;
+}

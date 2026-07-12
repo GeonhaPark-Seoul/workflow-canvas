@@ -1,13 +1,14 @@
 import { useState, useRef, useEffect } from 'react'
 import { Handle, Position, NodeResizer, useStore } from '@xyflow/react'
 import EditToolbar from '../components/EditToolbar'
+import { useTheme } from './useTheme'
 
 // Bidirectional connection ports: every handle is type="source"; with the
 // canvas in connectionMode="loose", a source handle can also receive a
 // connection, so any port can be both an input and an output.
 const HANDLE = {
   width: 45, height: 45, border: 'none',
-  background: 'radial-gradient(circle, #8b94a7 7px, #0f0f13 7px 10.5px, transparent 10.5px)',
+  background: 'radial-gradient(circle, #aeb6c6 7px, #0f0f13 7px 10.5px, transparent 10.5px)',
 }
 const PORTS = [
   { id: 'left', position: Position.Left },
@@ -90,6 +91,12 @@ export default function ContentNode({ data, selected, id }) {
   const shapeOnly = zoomShapeOnly || data.forceShapeOnly
 
   const filled = data.nodeFill !== false
+  const theme = useTheme()
+  // Light theme + fill off ⇒ the node's background is transparent over a light page,
+  // so the usual light-on-dark text would go invisible — use dark text instead.
+  const darkText = theme === 'light' && !filled
+  const headerColor = darkText ? '#1a1a22' : '#d3d8e4'
+  const headerPlaceholderColor = darkText ? '#999' : '#aeb6c6'
 
   const [editing, setEditing] = useState(null) // 'header' | null
   const headerRef = useRef(null)
@@ -189,7 +196,7 @@ export default function ContentNode({ data, selected, id }) {
   const headerValue = data.header ?? ''
   const kindLabel = KIND_LABEL[data.kind] ?? '콘텐츠'
 
-  const headerFontSize = abstract ? Math.round(13 * 1.9) : 13
+  const headerFontSize = abstract ? Math.round(13 * 1.15) : 13
   const circleSize = abstract ? Math.round(14 * 1.9) : 14
 
   return (
@@ -204,10 +211,10 @@ export default function ContentNode({ data, selected, id }) {
         flexDirection: 'column',
         justifyContent: abstract ? 'center' : undefined,
         background: filled ? '#20242e' : 'transparent',
-        border: `2px solid ${selected ? '#ffffff' : '#8b94a788'}`,
+        border: `2px solid ${selected ? '#ffffff' : '#aeb6c688'}`,
         borderRadius: 12,
         boxShadow: selected
-          ? '0 0 0 2px #8b94a744, 0 8px 32px #0008'
+          ? '0 0 0 2px #aeb6c644, 0 8px 32px #0008'
           : '0 4px 16px #0005',
         transition: 'border-color 0.15s, box-shadow 0.15s',
         touchAction: 'manipulation',
@@ -222,13 +229,13 @@ export default function ContentNode({ data, selected, id }) {
         isVisible={selected}
         minWidth={160}
         minHeight={100}
-        color="#8b94a7"
+        color="#aeb6c6"
         handleStyle={{
           width: 20, height: 20, background: 'transparent', border: 'none',
-          backgroundImage: 'radial-gradient(circle, #8b94a7 5px, transparent 5px)',
+          backgroundImage: 'radial-gradient(circle, #aeb6c6 5px, transparent 5px)',
           backgroundRepeat: 'no-repeat', backgroundPosition: 'center',
         }}
-        lineStyle={{ borderColor: '#8b94a744' }}
+        lineStyle={{ borderColor: '#aeb6c644' }}
       />
 
       {PORTS.map((p) => (
@@ -239,12 +246,13 @@ export default function ContentNode({ data, selected, id }) {
       {!shapeOnly && (
       <div
         style={{
-          background: filled ? '#8b94a722' : 'transparent',
-          borderBottom: abstract ? 'none' : '1px solid #8b94a744',
+          background: filled ? '#aeb6c622' : 'transparent',
+          borderBottom: abstract ? 'none' : '1px solid #aeb6c644',
           padding: '5px 10px',
           borderRadius: abstract ? 10 : '10px 10px 0 0',
           display: 'flex',
           alignItems: 'center',
+          justifyContent: abstract ? 'center' : undefined,
           gap: 6,
           flexShrink: 0,
           minHeight: 26,
@@ -258,7 +266,7 @@ export default function ContentNode({ data, selected, id }) {
           title="길게 누르기: 끄기/켜기"
           style={{
             width: circleSize, height: circleSize, borderRadius: '50%',
-            background: '#8b94a7', border: 'none', cursor: 'pointer', flexShrink: 0,
+            background: '#aeb6c6', border: 'none', cursor: 'pointer', flexShrink: 0,
           }}
         />
         <div ref={headerContainerRef} style={{ flex: 1, minWidth: 0, position: 'relative' }}>
@@ -272,10 +280,10 @@ export default function ContentNode({ data, selected, id }) {
               onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); stopEdit('header', headerRef) } if (e.key === 'Escape') { e.preventDefault(); stopEdit('header', headerRef) } }}
               style={{
                 flex: 1, background: 'transparent',
-                borderBottom: '1px solid #8b94a7',
-                color: '#c7cbd6', fontSize: headerFontSize, fontWeight: 800, letterSpacing: 0.3,
+                borderBottom: '1px solid #aeb6c6',
+                color: headerColor, fontSize: headerFontSize, fontWeight: 800, letterSpacing: 0.3,
                 outline: 'none', minHeight: 18, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-                cursor: 'text',
+                cursor: 'text', textAlign: abstract ? 'center' : undefined,
               }}
             />
           ) : (
@@ -284,11 +292,12 @@ export default function ContentNode({ data, selected, id }) {
               onClick={handleDisplayClick('header')}
               dangerouslySetInnerHTML={{ __html: headerValue || (data.headerTouched ? '' : kindLabel) }}
               style={{
-                flex: 1, color: headerValue ? '#c7cbd6' : '#8b94a7',
+                flex: 1, color: headerValue ? headerColor : headerPlaceholderColor,
                 fontSize: headerFontSize, fontWeight: 800, letterSpacing: 0.3, cursor: 'text',
                 whiteSpace: abstract ? 'pre-wrap' : 'nowrap',
                 overflow: abstract ? 'visible' : 'hidden',
                 textOverflow: abstract ? 'unset' : 'ellipsis',
+                textAlign: abstract ? 'center' : undefined,
                 touchAction: 'manipulation',
               }}
             />
@@ -304,7 +313,7 @@ export default function ContentNode({ data, selected, id }) {
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, gap: 6 }}>
               {data.src ? (
                 <>
-                  <div style={{ flex: 1, minHeight: 0, overflow: 'auto', display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}>
+                  <div className="nowheel" style={{ flex: 1, minHeight: 0, overflowY: 'auto', overscrollBehavior: 'contain', display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}>
                     <img src={data.src} alt="" style={{ maxWidth: '100%', borderRadius: 8 }} />
                   </div>
                   {selected && (
@@ -313,8 +322,8 @@ export default function ContentNode({ data, selected, id }) {
                       className="nodrag"
                       onClick={onPickFile}
                       style={{
-                        alignSelf: 'flex-start', background: '#8b94a722', border: '1px solid #8b94a766',
-                        color: '#c7cbd6', fontSize: 11, borderRadius: 6, padding: '4px 10px', cursor: 'pointer',
+                        alignSelf: 'flex-start', background: '#aeb6c622', border: '1px solid #aeb6c666',
+                        color: '#d3d8e4', fontSize: 11, borderRadius: 6, padding: '4px 10px', cursor: 'pointer',
                       }}
                     >
                       사진 교체
@@ -328,8 +337,8 @@ export default function ContentNode({ data, selected, id }) {
                     className="nodrag"
                     onClick={onPickFile}
                     style={{
-                      background: '#8b94a722', border: '1px solid #8b94a766',
-                      color: '#c7cbd6', fontSize: 12, borderRadius: 6, padding: '6px 14px', cursor: 'pointer',
+                      background: '#aeb6c622', border: '1px solid #aeb6c666',
+                      color: '#d3d8e4', fontSize: 12, borderRadius: 6, padding: '6px 14px', cursor: 'pointer',
                     }}
                   >
                     사진 선택
@@ -356,11 +365,11 @@ export default function ContentNode({ data, selected, id }) {
                 onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commitUrl() } }}
                 placeholder="https://..."
                 style={{
-                  flexShrink: 0, background: 'transparent', border: '1px solid #8b94a766',
-                  borderRadius: 6, color: '#c7cbd6', fontSize: 11, padding: '4px 8px', outline: 'none',
+                  flexShrink: 0, background: 'transparent', border: '1px solid #aeb6c666',
+                  borderRadius: 6, color: '#d3d8e4', fontSize: 11, padding: '4px 8px', outline: 'none',
                 }}
               />
-              <div style={{ flexShrink: 0, fontSize: 9, color: '#8b94a7' }}>
+              <div style={{ flexShrink: 0, fontSize: 9, color: '#aeb6c6' }}>
                 사이트에 따라 임베드가 차단될 수 있습니다
               </div>
               {data.url && (

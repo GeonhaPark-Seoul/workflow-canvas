@@ -204,3 +204,65 @@ create policy "member leaves share" on share_members
   for delete using (user_id = auth.uid());
 
 grant update, delete on share_members to authenticated;
+
+-- ── Phase 5: FIX infinite recursion between canvas_shares & share_members ─────
+-- The invitee policy on canvas_shares selects from share_members, and the owner
+-- policies on share_members select from canvas_shares → each policy re-triggers
+-- the other's RLS → "infinite recursion detected in policy". SECURITY DEFINER
+-- functions run with the definer's rights and BYPASS RLS, breaking the cycle.
+-- Safe to re-run.
+
+create or replace function is_share_member(p_share_id uuid, p_user uuid)
+  returns boolean language sql security definer stable set search_path = public as $$
+  select exists (select 1 from share_members m where m.share_id = p_share_id and m.user_id = p_user);
+$$;
+
+create or replace function owns_share(p_share_id uuid, p_user uuid)
+  returns boolean language sql security definer stable set search_path = public as $$
+  select exists (select 1 from canvas_shares s where s.id = p_share_id and s.owner_id = p_user);
+$$;
+
+-- Whether p_user may access (owner or invitee) the canvas (owner_user, canvas_id).
+create or replace function can_access_canvas(p_owner uuid, p_canvas text, p_user uuid, p_email text)
+  returns boolean language sql security definer stable set search_path = public as $$
+  select exists (
+    select 1 from canvas_shares s
+    where s.canvas_id = p_canvas and s.owner_id = p_owner
+      and (lower(s.invitee_email) = lower(p_email)
+           or exists (select 1 from share_members m where m.share_id = s.id and m.user_id = p_user))
+  );
+$$;
+
+grant execute on function is_share_member(uuid, uuid) to authenticated;
+grant execute on function owns_share(uuid, uuid) to authenticated;
+grant execute on function can_access_canvas(uuid, text, uuid, text) to authenticated;
+
+-- canvas_shares: invitee sees invites to their email or ones they've joined.
+drop policy if exists "invitee selects own invites" on canvas_shares;
+create policy "invitee selects own invites" on canvas_shares
+  for select using (
+    lower(invitee_email) = lower(auth.email())
+    or is_share_member(canvas_shares.id, auth.uid())
+  );
+
+-- share_members: owner management via SECURITY DEFINER (no direct canvas_shares read).
+drop policy if exists "owner selects share members" on share_members;
+create policy "owner selects share members" on share_members
+  for select using (owns_share(share_members.share_id, auth.uid()));
+
+drop policy if exists "owner updates share members" on share_members;
+create policy "owner updates share members" on share_members
+  for update using (owns_share(share_members.share_id, auth.uid()));
+
+drop policy if exists "owner deletes share members" on share_members;
+create policy "owner deletes share members" on share_members
+  for delete using (owns_share(share_members.share_id, auth.uid()));
+
+-- canvases: invitee read/update via the access helper (no inline cross-table RLS).
+drop policy if exists "invitee selects shared canvases" on canvases;
+create policy "invitee selects shared canvases" on canvases
+  for select using (can_access_canvas(canvases.user_id, canvases.canvas_id, auth.uid(), auth.email()));
+
+drop policy if exists "invitee updates shared canvases" on canvases;
+create policy "invitee updates shared canvases" on canvases
+  for update using (can_access_canvas(canvases.user_id, canvases.canvas_id, auth.uid(), auth.email()));

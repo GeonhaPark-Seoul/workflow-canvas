@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Handle, Position, NodeResizer, useStore } from '@xyflow/react'
 import EditToolbar from '../components/EditToolbar'
+import { useTheme } from './useTheme'
 
 // Bidirectional connection ports: every handle is type="source"; with the
 // canvas in connectionMode="loose", a source handle can also receive a
@@ -65,6 +66,14 @@ export default function MemoNode({ data, selected, id }) {
   const shapeOnly = zoomShapeOnly || data.forceShapeOnly
 
   const filled = data.nodeFill !== false
+  const theme = useTheme()
+  // Light theme + fill off ⇒ the node's background is transparent over a light page,
+  // so the usual amber/yellow text would go low-contrast — use dark text instead.
+  const darkText = theme === 'light' && !filled
+  const headerColor = darkText ? '#1a1a22' : '#f59e0b'
+  const headerPlaceholderColor = darkText ? '#999' : '#f59e0b66'
+  const textColor = darkText ? '#333' : '#e8d88a'
+  const textPlaceholderColor = darkText ? '#999' : '#e8d88a55'
 
   const [editing, setEditing] = useState(null) // 'header' | 'text' | null
   const headerRef = useRef(null)
@@ -217,7 +226,7 @@ export default function MemoNode({ data, selected, id }) {
   const headerValue = data.header ?? ''
   const textValue = data.text || ''
 
-  const headerFontSize = abstract ? Math.round(13 * 1.9) : 13
+  const headerFontSize = abstract ? Math.round(13 * 1.15) : 13
   const circleSize = abstract ? Math.round(14 * 1.9) : 14
 
   return (
@@ -273,6 +282,7 @@ export default function MemoNode({ data, selected, id }) {
           borderRadius: abstract ? 10 : '10px 10px 0 0',
           display: 'flex',
           alignItems: 'center',
+          justifyContent: abstract ? 'center' : undefined,
           gap: 6,
           flexShrink: 0,
           minHeight: 26,
@@ -301,9 +311,9 @@ export default function MemoNode({ data, selected, id }) {
               style={{
                 flex: 1, background: 'transparent',
                 borderBottom: '1px solid #f59e0b88',
-                color: '#f59e0b', fontSize: headerFontSize, fontWeight: 800, letterSpacing: 0.3,
+                color: headerColor, fontSize: headerFontSize, fontWeight: 800, letterSpacing: 0.3,
                 outline: 'none', minHeight: 18, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-                cursor: 'text',
+                cursor: 'text', textAlign: abstract ? 'center' : undefined,
               }}
             />
           ) : (
@@ -312,11 +322,12 @@ export default function MemoNode({ data, selected, id }) {
               onClick={handleDisplayClick('header')}
               dangerouslySetInnerHTML={{ __html: headerValue || (data.headerTouched ? '' : '제목') }}
               style={{
-                flex: 1, color: headerValue ? '#f59e0b' : '#f59e0b66',
+                flex: 1, color: headerValue ? headerColor : headerPlaceholderColor,
                 fontSize: headerFontSize, fontWeight: 800, letterSpacing: 0.3, cursor: 'text',
                 whiteSpace: abstract ? 'pre-wrap' : 'nowrap',
                 overflow: abstract ? 'visible' : 'hidden',
                 textOverflow: abstract ? 'unset' : 'ellipsis',
+                textAlign: abstract ? 'center' : undefined,
                 touchAction: 'manipulation',
               }}
             />
@@ -325,8 +336,8 @@ export default function MemoNode({ data, selected, id }) {
       </div>
       )}
 
-      {/* Content — only rendered in normal (non-abstract) mode, or when being edited */}
-      {(!abstract || editing === 'text') && (
+      {/* Content — only rendered in normal (non-abstract) mode, or when being edited; always hidden under shapeOnly */}
+      {!shapeOnly && (!abstract || editing === 'text') && (
         <div style={{ flex: 1, padding: '8px 10px', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
           <div
             ref={textContainerRef}
@@ -343,21 +354,22 @@ export default function MemoNode({ data, selected, id }) {
                 onBlur={() => stopEdit('text', textRef)}
                 style={{
                   flex: 1, background: 'transparent',
-                  color: '#e8d88a', fontSize: 12, width: '100%',
+                  color: textColor, fontSize: 12, width: '100%',
                   outline: 'none', lineHeight: 1.6, minHeight: 0, cursor: 'text',
                   whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowY: 'auto',
+                  overscrollBehavior: 'contain',
                 }}
               />
             ) : (
               <div
                 ref={textDisplayRef}
-                className="rich-content"
+                className="rich-content nowheel"
                 onClick={handleDisplayClick('text')}
                 dangerouslySetInnerHTML={{ __html: wrapLines(textValue || (data.textTouched ? '' : '메모 내용')) }}
                 style={{
-                  flex: 1, color: textValue ? '#e8d88a' : '#e8d88a55', fontSize: 12,
+                  flex: 1, color: textValue ? textColor : textPlaceholderColor, fontSize: 12,
                   whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text',
-                  overflow: 'auto', lineHeight: 1.6, minHeight: 0,
+                  overflowY: 'auto', overscrollBehavior: 'contain', lineHeight: 1.6, minHeight: 0,
                   touchAction: 'manipulation',
                 }}
               />
