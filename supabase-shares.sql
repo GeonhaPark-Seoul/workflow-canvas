@@ -34,11 +34,13 @@ alter table share_members enable row level security;
 -- ── canvas_shares policies ──────────────────────────────────────────────────
 
 -- Owner: full CRUD on their own shares.
+drop policy if exists "owner manages own shares" on canvas_shares;
 create policy "owner manages own shares" on canvas_shares
   for all using (owner_id = auth.uid()) with check (owner_id = auth.uid());
 
 -- Invitee: can see invites addressed to their email, or that they've already
 -- claimed (membership row exists).
+drop policy if exists "invitee selects own invites" on canvas_shares;
 create policy "invitee selects own invites" on canvas_shares
   for select using (
     lower(invitee_email) = lower(auth.email())
@@ -52,11 +54,13 @@ create policy "invitee selects own invites" on canvas_shares
 
 -- Users can see their own membership rows. No insert policy here on purpose —
 -- rows are only ever created by the security-definer RPCs below.
+drop policy if exists "user selects own memberships" on share_members;
 create policy "user selects own memberships" on share_members
   for select using (user_id = auth.uid());
 
 -- ── canvases: add invitee access (existing owner policy is untouched) ──────
 
+drop policy if exists "invitee selects shared canvases" on canvases;
 create policy "invitee selects shared canvases" on canvases
   for select using (
     exists (
@@ -73,6 +77,7 @@ create policy "invitee selects shared canvases" on canvases
     )
   );
 
+drop policy if exists "invitee updates shared canvases" on canvases;
 create policy "invitee updates shared canvases" on canvases
   for update using (
     exists (
