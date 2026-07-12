@@ -149,6 +149,29 @@ export async function isShareLinkActive(token) {
   return data === true
 }
 
+export async function getShareLinkPreview(token) {
+  const { data, error } = await supabase.rpc('share_link_preview', { token })
+  if (error) throw new Error('share_link_preview: ' + error.message)
+  return Array.isArray(data) ? data[0] ?? null : data
+}
+
+export async function listPendingEmailInvites() {
+  const { data, error } = await supabase.rpc('list_pending_email_invites')
+  if (error) throw new Error('list_pending_email_invites: ' + error.message)
+  return data ?? []
+}
+
+export async function claimEmailInvite(shareId) {
+  const { data, error } = await supabase.rpc('claim_email_invite', { p_share_id: shareId })
+  if (error) throw new Error('claim_email_invite: ' + error.message)
+  return data
+}
+
+export async function revokeShareMember(shareId, userId) {
+  const { error } = await supabase.rpc('revoke_share_member', { p_share_id: shareId, p_user_id: userId })
+  if (error) throw new Error('revoke_share_member: ' + error.message)
+}
+
 export async function claimEmailInvites() {
   const { data, error } = await supabase.rpc('claim_email_invites')
   if (error) { console.error('[shares] claimEmailInvites:', error.message); throw new Error('claimEmailInvites: ' + error.message) }

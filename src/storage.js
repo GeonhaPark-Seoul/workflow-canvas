@@ -88,7 +88,8 @@ export function initCanvases(seeds) {
   }
 
   // Fresh install: seed all demo canvases.
-  const seedArr = Array.isArray(seeds) ? seeds : [seeds]
+  const seedArr = (Array.isArray(seeds) ? seeds : [seeds]).filter(Boolean)
+  if (!seedArr.length) seedArr.push({ name: '캔버스 1', nodes: [], edges: [] })
   const newList = seedArr.map((s, i) => ({ id: `${uid()}-${i}`, name: s.name }))
   newList.forEach((c, i) => saveCanvasData(c.id, { nodes: seedArr[i].nodes, edges: seedArr[i].edges }))
   saveCanvasList(newList)

@@ -17,7 +17,6 @@ import MemoNode from './nodes/MemoNode'
 import GroupNode from './nodes/GroupNode'
 import ContentNode from './nodes/ContentNode'
 import StubEdge from './edges/StubEdge'
-import { DEMO_CANVASES } from './demoCanvases'
 import Toolbar from './components/Toolbar'
 import CanvasTabs from './components/CanvasTabs'
 import AuthPanel from './components/AuthPanel'
@@ -42,7 +41,7 @@ import {
 import { getSharedCanvas, listSharedCanvases, updateSharedCanvas } from './lib/sharedCanvasApi'
 import { joinCanvasPresence } from './lib/presence'
 import {
-  claimEmailInvites, claimShareToken, isShareLinkActive, listShares,
+  claimEmailInvite, claimShareToken, getShareLinkPreview, isShareLinkActive, listPendingEmailInvites, listShares, revokeShareMember,
   listShareMembers, setMemberEdit, kickMember, leaveSharedCanvas,
 } from './lib/shares'
 import { getMyProfile, getProfiles, loadMySettings, upsertMyEmail, touchLastSeen } from './lib/profiles'
@@ -206,12 +205,13 @@ function stripNode(n) {
 const stripEdge = ({ selected, ...e }) => e
 
 // ── Bootstrap canvases (runs once at module load) ────────────────────────────
-const { list: initCanvasList, activeId: initActiveId } = initCanvases(DEMO_CANVASES)
+const EMPTY_CANVAS_SEEDS = []
+const { list: initCanvasList, activeId: initActiveId } = initCanvases(EMPTY_CANVAS_SEEDS)
 // Never render an old local mirror for a shared canvas before the server has
 // re-checked its current permission and redacted it if necessary.
 const initData = parseSharedId(initActiveId)
   ? { nodes: [], edges: [] }
-  : (loadCanvasData(initActiveId) ?? { nodes: DEMO_CANVASES[0].nodes, edges: DEMO_CANVASES[0].edges })
+  : (loadCanvasData(initActiveId) ?? { nodes: [], edges: [] })
 
 // ── App ─────────────────────────────────────────────────────────────────────
 export default function App() {
@@ -286,6 +286,8 @@ export default function App() {
   const pendingShareTokenRef = useRef(null) // #share=<token> claimed right after SIGNED_IN
   const [authNotice, setAuthNotice] = useState(null) // share-link login gate notice shown in AuthPanel
   const [shareLinkError, setShareLinkError] = useState(null)
+  const [emailInviteNotices, setEmailInviteNotices] = useState([])
+  const [linkInviteNotice, setLinkInviteNotice] = useState(null)
   const inviteWrapRef = useRef(null) // invite popover wrapper (outside-click close)
 
   // ── Profiles (nickname/avatar) ────────────────────────────────────────────
@@ -304,7 +306,7 @@ export default function App() {
   // Discard the previous account's browser cache. Signed-in data is restored
   // from Supabase; an unsigned visitor gets a fresh local workspace instead.
   const resetToGuestCanvas = useCallback(() => {
-    const { list, activeId } = resetCanvasStorage(DEMO_CANVASES)
+    const { list, activeId } = resetCanvasStorage(EMPTY_CANVAS_SEEDS)
     const data = loadCanvasData(activeId) ?? { nodes: [], edges: [] }
     const nNodes = sortParentsFirst(sanitizeNodes(data.nodes))
     isRestoring.current = true
@@ -812,6 +814,38 @@ export default function App() {
     loadCanvas(compositeId, data)
   }, [loadCanvas])
 
+  const acceptEmailInvite = useCallback(async (incoming) => {
+    await claimEmailInvite(incoming.id)
+    persistCurrent()
+    loadSharedCanvas(incoming.ownerId, incoming.canvasId)
+    setSharedCanvases(await listSharedCanvases())
+    setEmailInviteNotices((prev) => prev.filter((invite) => invite.id !== incoming.id))
+  }, [persistCurrent, loadSharedCanvas])
+
+  const rejectEmailInvite = useCallback(async (id) => {
+    if (user?.id) await revokeShareMember(id, user.id)
+    setEmailInviteNotices((prev) => prev.filter((invite) => invite.id !== id))
+  }, [user])
+
+  const acceptLinkInvite = useCallback(async (incoming) => {
+    const claimed = await claimShareToken(incoming.token)
+    setSharedCanvases(await listSharedCanvases())
+    if (claimed) {
+      persistCurrent()
+      loadSharedCanvas(claimed.owner_id, claimed.canvas_id)
+    }
+    pendingShareTokenRef.current = null
+    setLinkInviteNotice(null)
+    history.replaceState(null, '', location.pathname + location.search)
+  }, [persistCurrent, loadSharedCanvas])
+
+  const rejectLinkInvite = useCallback(async (incoming) => {
+    if (user?.id) await revokeShareMember(incoming.id, user.id)
+    pendingShareTokenRef.current = null
+    setLinkInviteNotice(null)
+    history.replaceState(null, '', location.pathname + location.search)
+  }, [user])
+
   const switchCanvas = useCallback((id) => {
     if (id === activeCanvasId) return
     persistCurrent()
@@ -911,6 +945,26 @@ export default function App() {
       console.error('[shares] refreshSharedCanvases:', err.message)
     }
   }, [])
+
+  const loadPendingEmailInvites = useCallback(async () => {
+    const pending = await listPendingEmailInvites()
+    setEmailInviteNotices((prev) => {
+      const known = new Set(prev.map((invite) => invite.id))
+      return [...prev, ...pending.filter((share) => !known.has(share.id)).map((share) => ({
+        id: share.id, ownerId: share.owner_id, canvasId: share.canvas_id, name: share.name ?? '공유 캔버스', scope: share.scope,
+      }))]
+    })
+  }, [])
+
+  // Email invites are not in the canvases Realtime publication. Polling the
+  // idempotent claim RPC keeps an already-open recipient tab informed too.
+  useEffect(() => {
+    if (!user) return
+    const timer = setInterval(() => {
+      loadPendingEmailInvites().catch((err) => console.error('[shares] loadPendingEmailInvites:', err.message))
+    }, 20000)
+    return () => clearInterval(timer)
+  }, [user, loadPendingEmailInvites])
 
   // ── Sharing: participants shown in the CanvasTabs avatar row for the
   // active canvas. Own canvas: every distinct member across its shares, plus
@@ -1042,28 +1096,19 @@ export default function App() {
       }).catch((err) => console.error('[profiles] load profile/settings:', err.message))
       if (u.email) upsertMyEmail(u.email).catch((err) => console.error('[profiles] upsertMyEmail:', err.message))
       sharedFnRef.current.refreshSharedOutCanvasIds()
-      try { await claimEmailInvites() } catch (err) { console.error('[shares] claimEmailInvites:', err.message) }
+      try { await loadPendingEmailInvites() } catch (err) { console.error('[shares] loadPendingEmailInvites:', err.message) }
 
       if (pendingShareTokenRef.current) {
         const token = pendingShareTokenRef.current
         pendingShareTokenRef.current = null
         try {
-          const claimed = await claimShareToken(token)
-          await sharedFnRef.current.refreshSharedCanvases()
-          if (claimed) {
-            sharedFnRef.current.persistCurrent()
-            sharedFnRef.current.loadSharedCanvas(claimed.owner_id, claimed.canvas_id)
-          }
+          const preview = await getShareLinkPreview(token)
+          if (preview) setLinkInviteNotice({ ...preview, token })
+          else setShareLinkError('이 공유 링크는 더 이상 유효하지 않습니다.')
         } catch (err) {
-          console.error('[shares] claimShareToken:', err.message)
-          if (/invalid share link|share access revoked/i.test(err.message)) {
-            setAuthNotice(null)
-            setShareLinkError(err.message.includes('revoked')
-              ? '이 공유 캔버스에 대한 접근 권한이 철회되었습니다.'
-              : '이 공유 링크는 더 이상 유효하지 않습니다.')
-          }
+          console.error('[shares] share link preview:', err.message)
+          setShareLinkError('이 공유 링크를 확인할 수 없습니다.')
         }
-        history.replaceState(null, '', location.pathname + location.search)
         return
       }
 
@@ -1092,7 +1137,7 @@ export default function App() {
       }
     })
     return () => subscription.unsubscribe()
-  }, [loadFromCloud, resetToGuestCanvas])
+  }, [loadFromCloud, resetToGuestCanvas, loadPendingEmailInvites])
 
   // ── Realtime: reflect MCP(AI)/other-device writes live ───────────────────
   // Events are treated as signals only — large jsonb payloads can be truncated,
@@ -2238,6 +2283,7 @@ export default function App() {
             canvasId={activeCanvasId}
             onClose={() => { setInvite(null); refreshShareParticipants(); refreshSharedOutCanvasIds() }}
             onlineUserIds={new Set(onlineUsers.map((u) => u.user_id))}
+            onSharesChanged={refreshSharedOutCanvasIds}
           />
         </div>
       )}
@@ -2245,8 +2291,9 @@ export default function App() {
       {/* Share-link login gate: centered notice for logged-out visitors */}
       {authNotice && !user && (
         <div style={{
+          display: 'none',
           position: 'fixed', inset: 0, zIndex: 900,
-          background: '#000000aa', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: '#000000aa', alignItems: 'center', justifyContent: 'center',
         }}>
           <div style={{
             background: '#1a1a22', border: '1px solid #ffffff22', borderRadius: 14,
@@ -2284,6 +2331,58 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {emailInviteNotices[0] && (() => {
+        const incoming = emailInviteNotices[0]
+        const scopeLabel = { canvas: '캔버스', group: '그룹', node: '노드' }[incoming.scope] ?? '캔버스'
+        return (
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 1200,
+            background: '#000000aa', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <div style={{
+              background: '#1a1a22', border: '1px solid #ffffff22', borderRadius: 10,
+              padding: '24px 28px', maxWidth: 360, textAlign: 'center', boxShadow: '0 12px 48px #000d',
+            }}>
+              <div style={{ fontSize: 28, marginBottom: 12 }}>✉</div>
+              <div style={{ color: '#f0f0f0', fontSize: 15, fontWeight: 700, marginBottom: 8 }}>새 공유 초대</div>
+              <div style={{ color: '#aaa', fontSize: 12, lineHeight: 1.6, marginBottom: 18 }}>
+                <strong style={{ color: '#e4e6ec' }}>{incoming.name}</strong> {scopeLabel}에 초대받았습니다.
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
+                <button onClick={() => rejectEmailInvite(incoming.id).catch((err) => console.error('[shares] reject email invite:', err.message))} style={{
+                  background: 'transparent', border: '1px solid #ffffff22', borderRadius: 6, color: '#aaa',
+                  fontSize: 12, fontWeight: 600, padding: '8px 14px', cursor: 'pointer', fontFamily: 'inherit',
+                }}>거절</button>
+                <button onClick={() => acceptEmailInvite(incoming).catch((err) => console.error('[shares] accept email invite:', err.message))} style={{
+                  background: '#3b82f6', border: 'none', borderRadius: 6, color: '#fff',
+                  fontSize: 12, fontWeight: 700, padding: '8px 14px', cursor: 'pointer', fontFamily: 'inherit',
+                }}>열기</button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
+
+      {linkInviteNotice && (() => {
+        const incoming = linkInviteNotice
+        const scopeLabel = { canvas: '캔버스', group: '그룹', node: '노드' }[incoming.scope] ?? '캔버스'
+        return (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 1200, background: '#000000aa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ background: '#1a1a22', border: '1px solid #ffffff22', borderRadius: 10, padding: '24px 28px', maxWidth: 360, textAlign: 'center', boxShadow: '0 12px 48px #000d' }}>
+              <div style={{ fontSize: 28, marginBottom: 12 }}>🔗</div>
+              <div style={{ color: '#f0f0f0', fontSize: 15, fontWeight: 700, marginBottom: 8 }}>공유 캔버스 참여</div>
+              <div style={{ color: '#aaa', fontSize: 12, lineHeight: 1.6, marginBottom: 18 }}>
+                <strong style={{ color: '#e4e6ec' }}>{incoming.name ?? '공유 캔버스'}</strong> {scopeLabel}에 참여할까요?
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
+                <button onClick={() => rejectLinkInvite(incoming).catch((err) => console.error('[shares] reject link invite:', err.message))} style={{ background: 'transparent', border: '1px solid #ffffff22', borderRadius: 6, color: '#aaa', fontSize: 12, fontWeight: 600, padding: '8px 14px', cursor: 'pointer', fontFamily: 'inherit' }}>거절</button>
+                <button onClick={() => acceptLinkInvite(incoming).catch((err) => console.error('[shares] accept link invite:', err.message))} style={{ background: '#3b82f6', border: 'none', borderRadius: 6, color: '#fff', fontSize: 12, fontWeight: 700, padding: '8px 14px', cursor: 'pointer', fontFamily: 'inherit' }}>참여</button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       <ReactFlow
         ref={reactFlowRef}

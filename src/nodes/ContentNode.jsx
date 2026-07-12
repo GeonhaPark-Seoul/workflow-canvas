@@ -311,6 +311,11 @@ export default function ContentNode({ data, selected, id }) {
             />
           )}
         </div>
+        {selected && data.canInvite && !data.readOnly && (
+          <button type="button" className="nodrag" title="공유 초대"
+            onClick={(e) => { e.stopPropagation(); data.onInvite?.('node', id, e.currentTarget.getBoundingClientRect()) }}
+            style={{ width: 18, height: 18, borderRadius: '50%', border: 'none', background: '#ffffff14', color: '#aab', fontSize: 12, lineHeight: '18px', padding: 0, cursor: 'pointer', flexShrink: 0 }}>＋</button>
+        )}
       </div>
       )}
 

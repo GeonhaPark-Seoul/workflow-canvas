@@ -169,22 +169,47 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into share_members (share_id, user_id)
-  select cs.id, auth.uid()
-  from canvas_shares cs
-  where lower(cs.invitee_email) = lower(auth.email())
-    and not exists (select 1 from share_revocations r where r.share_id = cs.id and r.user_id = auth.uid())
-  on conflict do nothing;
-
   return query
-    select cs.* from canvas_shares cs
-    where lower(cs.invitee_email) = lower(auth.email())
-      and not exists (select 1 from share_revocations r where r.share_id = cs.id and r.user_id = auth.uid());
+    with claimed as (
+      insert into share_members (share_id, user_id)
+      select cs.id, auth.uid()
+      from canvas_shares cs
+      where lower(cs.invitee_email) = lower(auth.email())
+        and not exists (select 1 from share_revocations r where r.share_id = cs.id and r.user_id = auth.uid())
+      on conflict do nothing
+      returning share_id
+    )
+    select cs.* from canvas_shares cs join claimed c on c.share_id = cs.id;
 end;
 $$;
 
 revoke execute on function claim_email_invites() from anon;
 grant execute on function claim_email_invites() to authenticated;
+
+create or replace function list_pending_email_invites()
+returns table (id uuid, owner_id uuid, canvas_id text, scope text, target_id text, restrict_view boolean, name text)
+language sql security definer stable set search_path = public as $$
+  select s.id, s.owner_id, s.canvas_id, s.scope, s.target_id, s.restrict_view, c.name
+  from canvas_shares s join canvases c on c.user_id = s.owner_id and c.canvas_id = s.canvas_id
+  where lower(s.invitee_email) = lower(auth.email())
+    and not exists (select 1 from share_members m where m.share_id = s.id and m.user_id = auth.uid())
+    and not exists (select 1 from share_revocations r where r.share_id = s.id and r.user_id = auth.uid());
+$$;
+grant execute on function list_pending_email_invites() to authenticated;
+
+create or replace function claim_email_invite(p_share_id uuid)
+returns canvas_shares language plpgsql security definer set search_path = public as $$
+declare found_share canvas_shares%rowtype;
+begin
+  select * into found_share from canvas_shares where id = p_share_id and lower(invitee_email) = lower(auth.email());
+  if not found or exists (select 1 from share_revocations r where r.share_id = p_share_id and r.user_id = auth.uid()) then
+    raise exception 'invalid email invitation';
+  end if;
+  insert into share_members (share_id, user_id) values (p_share_id, auth.uid()) on conflict do nothing;
+  return found_share;
+end;
+$$;
+grant execute on function claim_email_invite(uuid) to authenticated;
 
 -- Used before opening a #share= link so deleted links receive a clear message.
 create or replace function share_link_is_active(token text)
@@ -193,6 +218,15 @@ returns boolean language sql security definer stable set search_path = public as
 $$;
 revoke execute on function share_link_is_active(text) from anon;
 grant execute on function share_link_is_active(text) to anon, authenticated;
+
+create or replace function share_link_preview(token text)
+returns table (id uuid, owner_id uuid, canvas_id text, scope text, target_id text, restrict_view boolean, name text)
+language sql security definer stable set search_path = public as $$
+  select s.id, s.owner_id, s.canvas_id, s.scope, s.target_id, s.restrict_view, c.name
+  from canvas_shares s join canvases c on c.user_id = s.owner_id and c.canvas_id = s.canvas_id
+  where s.link_token = token;
+$$;
+grant execute on function share_link_preview(text) to anon, authenticated;
 
 -- Owners can revoke a participant; a participant can revoke their own access.
 create or replace function revoke_share_member(p_share_id uuid, p_user_id uuid)

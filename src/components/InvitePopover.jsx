@@ -12,7 +12,7 @@ const SCOPE_LABEL = {
   node: '노드 공유',
 }
 
-export default function InvitePopover({ scope, targetId, canvasId, onClose, onlineUserIds }) {
+export default function InvitePopover({ scope, targetId, canvasId, onClose, onlineUserIds, onSharesChanged }) {
   const [shares, setShares] = useState([])
   const [members, setMembers] = useState([]) // claimed members across all my shares for this canvas
   const [loading, setLoading] = useState(true)
@@ -50,6 +50,7 @@ export default function InvitePopover({ scope, targetId, canvasId, onClose, onli
       await createShare({ canvasId, scope, targetId, email, restrictView })
       setEmail('')
       refresh()
+      onSharesChanged?.()
     } catch (e2) {
       setError(e2.message)
     } finally {
@@ -64,6 +65,7 @@ export default function InvitePopover({ scope, targetId, canvasId, onClose, onli
       const { url } = await createLinkShare({ canvasId, scope, targetId, restrictView })
       setLinkUrl(url)
       refresh()
+      onSharesChanged?.()
     } catch (e2) {
       setError(e2.message)
     } finally {
@@ -83,6 +85,7 @@ export default function InvitePopover({ scope, targetId, canvasId, onClose, onli
     try {
       await deleteShare(id)
       refresh()
+      onSharesChanged?.()
     } catch (e2) {
       setError(e2.message)
     }
