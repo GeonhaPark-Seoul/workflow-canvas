@@ -59,7 +59,9 @@ export default function AuthPanel({
   const [glyphInput, setGlyphInput] = useState('')
   const [colorInput, setColorInput] = useState(GLYPH_COLORS[0])
   const [nicknameInput, setNicknameInput] = useState('')
-  const [profileSaving, setProfileSaving] = useState(false)
+  const [profileSaveState, setProfileSaveState] = useState('idle') // idle | saving | saved | error
+  const [profileSaveError, setProfileSaveError] = useState(null)
+  const profileSaveTimerRef = useRef(null)
 
   // Unified canvas settings (theme, node fill, LOD threshold): persisted to
   // my own user_prefs row, debounced.
@@ -166,6 +168,15 @@ export default function AuthPanel({
   }, [myProfile, open])
 
   useEffect(() => {
+    if (open) return
+    clearTimeout(profileSaveTimerRef.current)
+    setProfileSaveState('idle')
+    setProfileSaveError(null)
+  }, [open])
+
+  useEffect(() => () => clearTimeout(profileSaveTimerRef.current), [])
+
+  useEffect(() => {
     setSettings({
       theme: savedSettings?.theme ?? 'light',
       nodeFill: savedSettings?.nodeFill ?? false,
@@ -223,15 +234,35 @@ export default function AuthPanel({
   }
 
   const handleSaveProfile = async () => {
-    setProfileSaving(true)
+    if (profileSaveState === 'saving') return
+    clearTimeout(profileSaveTimerRef.current)
+    setProfileSaveState('saving')
+    setProfileSaveError(null)
     try {
       const saved = await upsertMyProfile({ nickname: nicknameInput.trim() || null, glyph: glyphInput, color: colorInput })
       onProfileSaved?.(saved)
+      setProfileSaveState('saved')
+      profileSaveTimerRef.current = setTimeout(() => setProfileSaveState('idle'), 1800)
     } catch (err) {
       console.error('[profile] save:', err.message)
+      setProfileSaveState('error')
+      setProfileSaveError(`프로필을 저장하지 못했습니다: ${err.message}`)
     }
-    setProfileSaving(false)
   }
+
+  const beginProfileEdit = () => {
+    clearTimeout(profileSaveTimerRef.current)
+    setProfileSaveState('idle')
+    setProfileSaveError(null)
+  }
+
+  const savedNickname = myProfile?.nickname?.trim() || null
+  const nextNickname = nicknameInput.trim() || null
+  const profileDirty = nextNickname !== savedNickname
+    || glyphInput !== (myProfile?.glyph ?? '')
+    || colorInput !== (myProfile?.color ?? GLYPH_COLORS[0])
+  const profileSaveBusy = profileSaveState === 'saving'
+  const profileSaveDisabled = profileSaveBusy || profileSaveState === 'saved' || !profileDirty
 
   const emailLocalPart = user?.email?.split('@')[0] ?? ''
   const displayName = myProfile?.nickname || emailLocalPart || '사용자'
@@ -271,14 +302,15 @@ export default function AuthPanel({
                     className="profile-glyph-option"
                     key={g || '__default'}
                     type="button"
-                    onClick={() => setGlyphInput(g)}
+                    disabled={profileSaveBusy}
+                    onClick={() => { beginProfileEdit(); setGlyphInput(g) }}
                     title={g || '기본'}
                     style={{
                       width: 26, height: 26, borderRadius: '50%', flexShrink: 0, boxSizing: 'border-box',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       background: '#12121a',
                       border: glyphInput === g ? '2px solid #fff' : '1px solid #ffffff22',
-                      color: '#ccc', fontSize: 11, fontWeight: 700, cursor: 'pointer', padding: 0,
+                      color: '#ccc', fontSize: 11, fontWeight: 700, cursor: profileSaveBusy ? 'default' : 'pointer', padding: 0,
                     }}
                   >
                     {g ? g : (
@@ -297,10 +329,11 @@ export default function AuthPanel({
                     className="profile-color-option"
                     key={c}
                     type="button"
-                    onClick={() => setColorInput(c)}
+                    disabled={profileSaveBusy}
+                    onClick={() => { beginProfileEdit(); setColorInput(c) }}
                     title={c}
                     style={{
-                      width: 22, height: 22, borderRadius: '50%', background: c, cursor: 'pointer',
+                      width: 22, height: 22, borderRadius: '50%', background: c, cursor: profileSaveBusy ? 'default' : 'pointer',
                       border: colorInput === c ? '2px solid #fff' : '2px solid transparent',
                       boxSizing: 'border-box', padding: 0,
                     }}
@@ -311,13 +344,26 @@ export default function AuthPanel({
               <div style={{ fontSize: 11, color: '#555', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>닉네임</div>
               <input
                 value={nicknameInput}
-                onChange={(e) => setNicknameInput(e.target.value)}
+                disabled={profileSaveBusy}
+                onChange={(e) => { beginProfileEdit(); setNicknameInput(e.target.value) }}
                 placeholder={emailLocalPart}
                 style={{ ...inputStyle, marginBottom: 10 }}
               />
-              <button onClick={handleSaveProfile} disabled={profileSaving} style={fillBtn('#3b82f6')}>
-                {profileSaving ? '...' : '저장'}
+              <button
+                onClick={handleSaveProfile}
+                disabled={profileSaveDisabled}
+                style={{
+                  ...fillBtn(profileSaveState === 'saved' ? '#22c55e' : '#3b82f6'),
+                  cursor: profileSaveDisabled ? 'default' : 'pointer',
+                  opacity: profileSaveDisabled && profileSaveState !== 'saved' ? 0.55 : 1,
+                }}
+              >
+                {profileSaveBusy ? '저장 중...' : profileSaveState === 'saved' ? '✓ 저장됨' : '저장'}
               </button>
+              <div aria-live="polite" style={{ minHeight: 17, marginTop: 5, fontSize: 11, lineHeight: 1.45 }}>
+                {profileSaveState === 'saved' && <span style={{ color: '#22c55e' }}>프로필이 저장되었습니다.</span>}
+                {profileSaveState === 'error' && <span role="alert" style={{ color: '#ef4444' }}>{profileSaveError}</span>}
+              </div>
 
               <div style={{ height: 1, background: '#ffffff18', margin: '14px 0' }} />
 

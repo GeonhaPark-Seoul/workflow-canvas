@@ -9,6 +9,7 @@ import { sanitizeExternalUrl as sanitizeBrowserUrl, sanitizeHtml as sanitizeBrow
 import { appendHistorySnapshot, sameCanvasSnapshot } from '../src/lib/canvasSync.js'
 import { absoluteNodePosition, boundsForNodeIds } from '../src/lib/canvasGeometry.js'
 import { mergeCanvasSnapshots } from '../src/lib/canvasMerge.js'
+import { getStubEdgeGeometry } from '../src/edges/stubEdgeGeometry.js'
 import { chooseOwnCanvasToRestore } from '../src/lib/canvasNavigation.js'
 
 let passed = 0
@@ -20,6 +21,39 @@ function t(name, fn) {
 const stage = (tmp_id) => ({ tmp_id, type: 'stage' })
 const memo = (tmp_id) => ({ tmp_id, type: 'memo' })
 const edge = (source, target) => ({ source, target })
+
+console.log('stub edge geometry')
+
+t('main 45px handles are corrected from their outside edge to the node border', () => {
+  const horizontal = getStubEdgeGeometry({
+    sourceX: 222.5, sourceY: 100,
+    targetX: 377.5, targetY: 100,
+    sourcePosition: 'right', targetPosition: 'left',
+    sourceHandleId: 'right', targetHandleId: 'left',
+  })
+  assert.deepEqual(horizontal.source, { x: 199, y: 100 })
+  assert.deepEqual(horizontal.target, { x: 401, y: 100 })
+
+  const vertical = getStubEdgeGeometry({
+    sourceX: 100, sourceY: 77.5,
+    targetX: 100, targetY: 322.5,
+    sourcePosition: 'top', targetPosition: 'bottom',
+    sourceHandleId: 'top', targetHandleId: 'bottom',
+  })
+  assert.deepEqual(vertical.source, { x: 100, y: 101 })
+  assert.deepEqual(vertical.target, { x: 100, y: 299 })
+})
+
+t('visible part sockets keep their own outside-edge anchors', () => {
+  const geometry = getStubEdgeGeometry({
+    sourceX: 210, sourceY: 120,
+    targetX: 390, targetY: 120,
+    sourcePosition: 'right', targetPosition: 'left',
+    sourceHandleId: 'p-a-r', targetHandleId: 'p-b-l',
+  })
+  assert.deepEqual(geometry.source, { x: 210, y: 120 })
+  assert.deepEqual(geometry.target, { x: 390, y: 120 })
+})
 
 console.log('layoutGraph')
 

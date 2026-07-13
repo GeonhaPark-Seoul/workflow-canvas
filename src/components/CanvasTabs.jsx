@@ -149,8 +149,7 @@ export default function CanvasTabs({
       <div
         key={c.id}
         onClick={() => { if (editingId !== c.id) { onSwitch(c.id); setOpen(false); setEditingId(null) } }}
-        onDoubleClick={(e) => startRename(c, e)}
-        title="클릭: 전환 · 더블클릭: 이름 변경"
+        title="캔버스 전환"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -167,6 +166,7 @@ export default function CanvasTabs({
         {editingId === c.id ? (
           <input
             ref={inputRef}
+            aria-label="캔버스 이름"
             value={value}
             onChange={(e) => setValue(e.target.value)}
             onBlur={commit}
@@ -186,6 +186,23 @@ export default function CanvasTabs({
               {c.name}
             </span>
           </>
+        )}
+
+        {editingId !== c.id && (
+          <button
+            type="button"
+            onClick={(e) => startRename(c, e)}
+            title="이름 변경"
+            aria-label={`\"${c.name}\" 이름 변경`}
+            style={{
+              background: 'transparent', border: 'none', color: '#666',
+              cursor: 'pointer', padding: '1px 2px', fontSize: 12, lineHeight: 1, flexShrink: 0,
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = '#60a5fa')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = '#666')}
+          >
+            ✎
+          </button>
         )}
 
         {canvases.length > 1 && editingId !== c.id && (
