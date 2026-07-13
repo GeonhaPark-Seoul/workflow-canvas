@@ -60,6 +60,7 @@ export function mergeCanvasSnapshots(base = {}, local = {}, remote = {}) {
     name: mergeValue(base.name ?? '', local.name ?? '', remote.name ?? '', 'name', conflicts),
     nodes: mergeItemsById(base.nodes, local.nodes, remote.nodes, 'nodes', conflicts),
     edges: mergeItemsById(base.edges, local.edges, remote.edges, 'edges', conflicts),
+    notes: mergeItemsById(base.notes, local.notes, remote.notes, 'notes', conflicts),
     views: mergeValue(base.views ?? [], local.views ?? [], remote.views ?? [], 'views', conflicts),
     stageTypes: mergeValue(base.stageTypes ?? null, local.stageTypes ?? null, remote.stageTypes ?? null, 'stageTypes', conflicts),
   }

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Handle, Position, NodeResizer, useStore } from '@xyflow/react'
 import EditToolbar from '../components/EditToolbar'
 import ScopedParticipants from '../components/ScopedParticipants'
+import OpenInNotesButton from '../components/OpenInNotesButton'
 import CanvasImage from '../components/CanvasImage'
 import { sanitizeExternalUrl, sanitizeHtml } from '../lib/sanitizeHtml'
 import { uploadCanvasImage } from '../lib/imageStorage'
@@ -97,7 +98,7 @@ export default function ContentNode({ data, selected, id }) {
   const shapeOnly = zoomShapeOnly || data.forceShapeOnly
 
   const filled = data.nodeFill !== false
-  const theme = data.theme ?? 'dark'
+  const theme = data.theme ?? 'light'
   // Light theme + fill off ⇒ the node's background is transparent over a light page,
   // so the usual light-on-dark text would go invisible — use dark text instead.
   const darkText = theme === 'light' && !filled
@@ -233,22 +234,22 @@ export default function ContentNode({ data, selected, id }) {
 
   return (
     <div
+      className="canvas-node-card"
       style={{
         width: '100%',
         height: '100%',
         minWidth: 160,
         minHeight: 100,
         boxSizing: 'border-box',
+        position: 'relative',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: abstract ? 'center' : undefined,
         background: filled ? '#20242e' : 'transparent',
         border: `2px solid ${selected ? '#ffffff' : '#aeb6c688'}`,
         borderRadius: 12,
-        boxShadow: selected
-          ? '0 0 0 2px #aeb6c644, 0 8px 32px #0008'
-          : '0 4px 16px #0005',
-        transition: 'border-color 0.15s, box-shadow 0.15s',
+        boxShadow: 'none',
+        transition: 'border-color 0.15s, outline-color 0.15s, background-color 0.15s',
         touchAction: 'manipulation',
         filter: data.dimmed ? 'grayscale(0.85) brightness(0.55)' : undefined,
       }}
@@ -257,6 +258,7 @@ export default function ContentNode({ data, selected, id }) {
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
     >
+      <OpenInNotesButton visible={selected && !data.forceShapeOnly} onOpen={data.onOpenInNotes} />
       <NodeResizer
         isVisible={selected && !data.readOnly}
         minWidth={160}
@@ -340,7 +342,7 @@ export default function ContentNode({ data, selected, id }) {
           canInvite={selected && data.canInvite && !data.readOnly}
           onInvite={data.onInvite}
           canManageRestrictions={data.canManageParticipants}
-          onRemoveViewRestriction={data.onRemoveViewRestriction}
+          onToggleViewRestriction={data.onToggleViewRestriction}
           scope="node"
           targetId={id}
         />

@@ -1,6 +1,6 @@
 import {
   admin, applySharedCanvasUpdate, listCanvasParticipants, mySharesFor, redactCanvas,
-  removeCanvasMemberViewRestriction, resolveBrowserUser, resolveSharedCanvasAccess,
+  setCanvasMemberViewRestriction, resolveBrowserUser, resolveSharedCanvasAccess,
 } from '../mcp/shareAccess.js'
 
 function send(res, status, body) {
@@ -54,8 +54,9 @@ export default async function handler(req, res) {
     const { ownerId, canvasId } = input ?? {}
     if (!ownerId || !canvasId) return send(res, 400, { error: 'ownerId와 canvasId가 필요합니다.' })
 
-    if (req.method === 'PATCH' && input.action === 'remove-view-restriction') {
-      await removeCanvasMemberViewRestriction(ownerId, canvasId, input.userId, user.id)
+    if (req.method === 'PATCH' && input.action === 'set-view-restriction') {
+      if (typeof input.restricted !== 'boolean') return send(res, 400, { error: 'restricted 값이 필요합니다.' })
+      await setCanvasMemberViewRestriction(ownerId, canvasId, input.userId, input.restricted, user.id)
       return send(res, 200, { ok: true })
     }
 
@@ -65,11 +66,13 @@ export default async function handler(req, res) {
     if (req.method === 'PUT') {
       if (typeof input.revision !== 'string' || input.revision !== access.row.updated_at) throw conflict()
       const update = applySharedCanvasUpdate(access, input.nodes, input.edges, {
+        notes: input.notes,
         views: input.views,
         stageTypes: input.stageTypes,
       })
       const patch = { nodes: update.nodes, edges: update.edges, updated_at: nextRevision(input.revision) }
       if (access.scope === 'canvas') {
+        patch.notes = update.notes
         patch.views = update.views
         patch.stage_types = update.stageTypes
       }

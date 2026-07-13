@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { sanitizeExternalUrl, sanitizeHtml } from '../lib/sanitizeHtml'
+import { uploadCanvasImage } from '../lib/imageStorage'
 import CanvasImage from './CanvasImage'
 
-// ── Notes-app-style right-docked panel ───────────────────────────────────────
+// ── Notes-app-style split pane ───────────────────────────────────────────────
 // LIST column (node titles, tree for stage / flat for memo & content) +
 // resizable PAGE column (full note editor for the selected node).
-// See task spec for full behavior; kept deliberately simple (not pixel-perfect).
+// The pane can be resized and moved to either side of the canvas.
 
 const TYPE_LABEL = { stage: '단계', memo: '메모', content: '컨텐츠' }
 const CONTENT_KIND_LABEL = { photo: '사진', database: '데이터베이스', browser: '브라우저' }
@@ -54,6 +55,7 @@ function IconBtn({ onClick, title, children, style }) {
   return (
     <button
       onClick={onClick}
+      onPointerDown={(event) => event.stopPropagation()}
       title={title}
       style={{
         background: 'transparent', border: 'none', color: '#8b94a7', cursor: 'pointer',
@@ -67,15 +69,34 @@ function IconBtn({ onClick, title, children, style }) {
   )
 }
 
-function ListRow({ title, depth, dim, expandable, expanded, onToggle, onClickTitle, onFocus, selected }) {
+function ListRow({
+  title, depth, dim, expandable, expanded, onToggle, onClickTitle, onFocus, selected,
+  noteOnly = false, canPromote = false, onPromoteMenu,
+}) {
   return (
     <div
+      className="notes-list-row"
+      draggable={noteOnly && canPromote}
+      onDragStart={(event) => {
+        if (!noteOnly || !canPromote) return
+        window.dispatchEvent(new Event('wfc:flush-note-edits'))
+        event.dataTransfer.effectAllowed = 'move'
+        event.dataTransfer.setData('application/wfc-note', event.currentTarget.dataset.noteId)
+      }}
+      data-note-id={noteOnly ? onPromoteMenu?.noteId : undefined}
+      onContextMenu={(event) => {
+        if (!noteOnly || !canPromote || !onPromoteMenu) return
+        event.preventDefault()
+        window.dispatchEvent(new Event('wfc:flush-note-edits'))
+        onPromoteMenu.open(event)
+      }}
       style={{
         display: 'flex', alignItems: 'center', gap: 4,
         paddingLeft: 8 + depth * 16, paddingRight: 6, height: 30,
         opacity: dim ? 0.6 : 1,
         background: selected ? '#ffffff12' : 'transparent',
         borderRadius: 6,
+        cursor: noteOnly && canPromote ? 'grab' : 'default',
       }}
     >
       {expandable ? (
@@ -96,14 +117,14 @@ function ListRow({ title, depth, dim, expandable, expanded, onToggle, onClickTit
       >
         {title}
       </button>
-      <IconBtn title="캔버스에서 보기" onClick={onFocus}>⌖</IconBtn>
+      {onFocus && <IconBtn title="캔버스에서 보기" onClick={onFocus}>⌖</IconBtn>}
     </div>
   )
 }
 
 // Recursive stage tree row (children = other stage nodes via source→target
 // hierarchy edges; attachments = connected non-stage nodes, dimmer, leaves).
-function StageTreeRow({ id, depth, byId, childrenMap, attachMap, expanded, onToggle, selectedId, onSelect, onFocusNode, ancestors }) {
+function StageTreeRow({ id, depth, byId, childrenMap, attachMap, expanded, onToggle, selectedId, onSelect, onFocusNode, onPromoteMenu, canPromote, ancestors }) {
   const node = byId.get(id)
   if (!node) return null
   const isCycle = ancestors.has(id)
@@ -123,7 +144,10 @@ function StageTreeRow({ id, depth, byId, childrenMap, attachMap, expanded, onTog
         expanded={isExpanded}
         onToggle={() => onToggle(id)}
         onClickTitle={() => onSelect(id)}
-        onFocus={() => onFocusNode(id)}
+        onFocus={node.noteOnly ? null : () => onFocusNode(id)}
+        noteOnly={node.noteOnly}
+        canPromote={canPromote}
+        onPromoteMenu={node.noteOnly ? { noteId: id, open: (event) => onPromoteMenu(event, id) } : null}
         selected={selectedId === id}
       />
       {isExpanded && hasChildren && (
@@ -134,6 +158,7 @@ function StageTreeRow({ id, depth, byId, childrenMap, attachMap, expanded, onTog
               childrenMap={childrenMap} attachMap={attachMap}
               expanded={expanded} onToggle={onToggle}
               selectedId={selectedId} onSelect={onSelect} onFocusNode={onFocusNode}
+              onPromoteMenu={onPromoteMenu} canPromote={canPromote}
               ancestors={nextAncestors}
             />
           ))}
@@ -190,7 +215,7 @@ function SubNoteRow({ id, depth, byId, outMap, expanded, onToggle, onFocusNode, 
         >
           {nodeTitle(node)}
         </button>
-        <IconBtn title="캔버스에서 보기" onClick={() => onFocusNode(id)}>⌖</IconBtn>
+        {!node.noteOnly && <IconBtn title="캔버스에서 보기" onClick={() => onFocusNode(id)}>⌖</IconBtn>}
       </div>
       {isExpanded && preview && (
         <div style={{ marginLeft: 18, marginBottom: 4, fontSize: 11.5, color: '#888', whiteSpace: 'pre-wrap', opacity: dim ? 0.6 : 1 }}>
@@ -211,13 +236,15 @@ function SubNoteRow({ id, depth, byId, outMap, expanded, onToggle, onFocusNode, 
 // ── Page column: full note editor for the selected node ────────────────────
 // Keyed by node.id at the call site so switching pages remounts this fresh
 // (simplest way to reset all local editing state).
-function NotePage({ node, byId, outMap, isEditable, onUpdateNode, onFocusNode, onOpen, onBack }) {
+function NotePage({ node, byId, outMap, isEditable, onUpdateNode, onFocusNode, onOpen, onBack, onClose, imageContext }) {
   const titleSaveTimer = useRef(null)
   const bodySaveTimer = useRef(null)
   const pendingTitle = useRef(null)
   const pendingBody = useRef(null)
 
   const [subExpanded, setSubExpanded] = useState(() => new Set())
+  const [imageBusy, setImageBusy] = useState(false)
+  const [imageError, setImageError] = useState(null)
   const toggleSub = useCallback((id) => {
     setSubExpanded((prev) => {
       const next = new Set(prev)
@@ -243,6 +270,11 @@ function NotePage({ node, byId, outMap, isEditable, onUpdateNode, onFocusNode, o
   }, [bodyField, node.id, onUpdateNode, titleField])
 
   useEffect(() => () => flushPending(), [flushPending])
+  useEffect(() => {
+    const flush = () => flushPending()
+    window.addEventListener('wfc:flush-note-edits', flush)
+    return () => window.removeEventListener('wfc:flush-note-edits', flush)
+  }, [flushPending])
 
   const scheduleTitleSave = (value) => {
     pendingTitle.current = value
@@ -266,6 +298,27 @@ function NotePage({ node, byId, outMap, isEditable, onUpdateNode, onFocusNode, o
 
   const kids = outMap.get(node.id) ?? []
 
+  const uploadImage = async (event) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file || !isEditable || !imageContext) return
+    setImageBusy(true)
+    setImageError(null)
+    try {
+      const { storagePath } = await uploadCanvasImage({
+        ...imageContext,
+        nodeId: node.id,
+        blob: file,
+        previousPath: node.data?.storagePath,
+      })
+      onUpdateNode(node.id, { storagePath, src: null })
+    } catch (error) {
+      setImageError(error.message)
+    } finally {
+      setImageBusy(false)
+    }
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minWidth: 0 }}>
       {/* Header */}
@@ -283,8 +336,8 @@ function NotePage({ node, byId, outMap, isEditable, onUpdateNode, onFocusNode, o
         <div style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, color: '#f0f0f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {nodeTitle(node)}
         </div>
-        <IconBtn title="캔버스에서 보기" onClick={() => onFocusNode(node.id)}>⌖</IconBtn>
-        <IconBtn title="패널 닫기" onClick={onBack}>✕</IconBtn>
+        {!node.noteOnly && <IconBtn title="캔버스에서 보기" onClick={() => onFocusNode(node.id)}>⌖</IconBtn>}
+        <IconBtn title="노트 창 닫기" onClick={onClose}>✕</IconBtn>
       </div>
 
       {/* Body (scrollable) */}
@@ -324,11 +377,27 @@ function NotePage({ node, byId, outMap, isEditable, onUpdateNode, onFocusNode, o
             ) : (
               <div style={{ color: '#666', fontSize: 12, padding: '40px 0' }}>사진이 없습니다</div>
             )}
+            {isEditable && (
+              <label className="notes-image-upload">
+                {imageBusy ? '업로드 중...' : '사진 선택'}
+                <input type="file" accept="image/*" disabled={imageBusy} onChange={uploadImage} />
+              </label>
+            )}
+            {imageError && <div style={{ color: '#ef4444', fontSize: 11, marginTop: 8 }}>{imageError}</div>}
           </div>
         )}
 
         {node.type === 'content' && node.data?.kind === 'browser' && (
           <div style={{ background: '#12121a', border: '1px solid #ffffff18', borderRadius: 6, overflow: 'hidden' }}>
+            <input
+              key={`url-${node.id}`}
+              defaultValue={node.data?.url ?? ''}
+              disabled={!isEditable}
+              placeholder="https://"
+              onBlur={(event) => onUpdateNode(node.id, { url: event.target.value })}
+              onKeyDown={(event) => { if (event.key === 'Enter') event.currentTarget.blur() }}
+              style={{ width: '100%', border: 'none', borderBottom: '1px solid #ffffff18', background: '#181822', color: '#d8dae0', padding: '8px 10px', fontSize: 12, outline: 'none', fontFamily: 'inherit' }}
+            />
             {sanitizeExternalUrl(node.data?.url) ? (
               <>
                 <a
@@ -405,20 +474,53 @@ function NotePage({ node, byId, outMap, isEditable, onUpdateNode, onFocusNode, o
 }
 
 // ── Main panel ───────────────────────────────────────────────────────────────
-export default function NotesPanel({ type, nodes, edges, selectedId, onSelect, onClose, onFocusNode, onUpdateNode, isNodeEditable }) {
-  const LIST_W = 260
+export default function NotesPanel({
+  type,
+  nodes,
+  notes = [],
+  edges,
+  selectedId,
+  onSelect,
+  onClose,
+  onFocusNode,
+  onUpdateNode,
+  onUpdateNote,
+  onCreateNote,
+  onPromoteNote,
+  isNodeEditable,
+  isNoteEditable,
+  canCreateNotes = false,
+  side = 'right',
+  onSideChange,
+  imageContext,
+}) {
+  const LIST_W = 240
   const SPLIT_W = 6
-  const MIN_PAGE_W = 280
+  const MIN_PANE_W = 300
+  const MIN_CANVAS_W = 320
 
-  const [pageWidth, setPageWidth] = useState(() => Math.max(MIN_PAGE_W, Math.round(window.innerWidth / 3)))
+  const [paneWidth, setPaneWidth] = useState(() => Math.max(MIN_PANE_W, Math.round(window.innerWidth * 0.45)))
   const [expanded, setExpanded] = useState(() => new Set()) // stage-tree expand state
-  const [narrow, setNarrow] = useState(() => window.innerWidth < 700)
+  const [promoteMenu, setPromoteMenu] = useState(null)
+  const [createMenuOpen, setCreateMenuOpen] = useState(false)
 
   useEffect(() => {
-    const fn = () => setNarrow(window.innerWidth < 700)
+    const fn = () => setPaneWidth((width) => Math.min(width, Math.max(MIN_PANE_W, window.innerWidth - MIN_CANVAS_W)))
     window.addEventListener('resize', fn)
     return () => window.removeEventListener('resize', fn)
   }, [])
+
+  useEffect(() => {
+    if (!promoteMenu && !createMenuOpen) return
+    const close = () => { setPromoteMenu(null); setCreateMenuOpen(false) }
+    const onKeyDown = (event) => { if (event.key === 'Escape') close() }
+    document.addEventListener('pointerdown', close)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('pointerdown', close)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [promoteMenu, createMenuOpen])
 
   // Reset tree expand state whenever the panel is (re)opened for a type.
   useEffect(() => { setExpanded(new Set()) }, [type])
@@ -431,12 +533,16 @@ export default function NotesPanel({ type, nodes, edges, selectedId, onSelect, o
     })
   }, [])
 
-  const byId = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes])
+  const entries = useMemo(() => [
+    ...notes.map((note) => ({ ...note, noteOnly: true })),
+    ...nodes.map((node) => ({ ...node, noteOnly: false })),
+  ], [nodes, notes])
+  const byId = useMemo(() => new Map(entries.map((n) => [n.id, n])), [entries])
 
-  const typeNodes = useMemo(() => nodes.filter((n) => n.type === type), [nodes, type])
+  const typeNodes = useMemo(() => entries.filter((n) => n.type === type), [entries, type])
 
   // Stage hierarchy: source→target edges between two stage nodes (excluding part links).
-  const stageIds = useMemo(() => new Set(nodes.filter((n) => n.type === 'stage').map((n) => n.id)), [nodes])
+  const stageIds = useMemo(() => new Set(entries.filter((n) => n.type === 'stage').map((n) => n.id)), [entries])
   const hierEdges = useMemo(
     () => edges.filter((e) => !isPartEdge(e) && stageIds.has(e.source) && stageIds.has(e.target)),
     [edges, stageIds],
@@ -447,7 +553,7 @@ export default function NotesPanel({ type, nodes, edges, selectedId, onSelect, o
     return m
   }, [hierEdges])
   const hasIncoming = useMemo(() => new Set(hierEdges.map((e) => e.target)), [hierEdges])
-  const stageRoots = useMemo(() => nodes.filter((n) => n.type === 'stage' && !hasIncoming.has(n.id)), [nodes, hasIncoming])
+  const stageRoots = useMemo(() => entries.filter((n) => n.type === 'stage' && !hasIncoming.has(n.id)), [entries, hasIncoming])
 
   // Non-stage nodes attached (via any non-part edge, either direction) to a stage.
   const attachMap = useMemo(() => {
@@ -475,14 +581,15 @@ export default function NotesPanel({ type, nodes, edges, selectedId, onSelect, o
   // ── Splitter drag ──────────────────────────────────────────────────────────
   const dragRef = useRef(null)
   const onSplitterDown = useCallback((e) => {
-    dragRef.current = { startX: e.clientX, startWidth: pageWidth }
+    dragRef.current = { startX: e.clientX, startWidth: paneWidth }
     e.preventDefault()
     const onMove = (ev) => {
       if (!dragRef.current) return
-      const dx = dragRef.current.startX - ev.clientX
-      const maxW = Math.round(window.innerWidth * 0.7)
-      const next = Math.min(maxW, Math.max(MIN_PAGE_W, dragRef.current.startWidth + dx))
-      setPageWidth(next)
+      const dx = side === 'right'
+        ? dragRef.current.startX - ev.clientX
+        : ev.clientX - dragRef.current.startX
+      const maxW = Math.max(MIN_PANE_W, window.innerWidth - MIN_CANVAS_W)
+      setPaneWidth(Math.min(maxW, Math.max(MIN_PANE_W, dragRef.current.startWidth + dx)))
     }
     const onUp = () => {
       dragRef.current = null
@@ -491,99 +598,153 @@ export default function NotesPanel({ type, nodes, edges, selectedId, onSelect, o
     }
     window.addEventListener('pointermove', onMove)
     window.addEventListener('pointerup', onUp)
-  }, [pageWidth])
+  }, [paneWidth, side])
 
   const selectedNode = selectedId ? byId.get(selectedId) : null
   const pageOpen = !!selectedNode
-  const showList = !narrow || !pageOpen
+  const compact = paneWidth < 520
+  const showList = !compact || !pageOpen
 
   const handleBack = () => onSelect(null)
 
-  const totalWidth = LIST_W + (pageOpen ? SPLIT_W + pageWidth : 0)
+  const openPromoteMenu = useCallback((event, noteId) => {
+    setPromoteMenu({ noteId, x: event.clientX, y: event.clientY })
+  }, [])
+
+  const createNote = (kind) => {
+    onCreateNote?.(type, kind)
+    setCreateMenuOpen(false)
+  }
+
+  const splitter = (
+    <div
+      className="notes-pane-splitter"
+      onPointerDown={onSplitterDown}
+      title="노트 창 크기 조절"
+      style={{ width: SPLIT_W, flexShrink: 0, cursor: 'col-resize', touchAction: 'none' }}
+    />
+  )
 
   return (
     <div
+      className="notes-pane"
       style={{
-        position: 'fixed', right: 0, top: 0, height: '100vh',
-        width: narrow ? (pageOpen ? '100vw' : LIST_W) : totalWidth,
-        maxWidth: '100vw',
-        display: 'flex', zIndex: 20,
-        background: '#1a1a22', borderLeft: '1px solid #ffffff18',
-        boxShadow: '-8px 0 32px #000a',
+        position: 'relative', height: '100%', width: paneWidth, minWidth: MIN_PANE_W,
+        maxWidth: `calc(100vw - ${MIN_CANVAS_W}px)`, display: 'flex', flexShrink: 0,
+        background: '#1a1a22', zIndex: 20, overflow: 'hidden',
+        order: side === 'left' ? 0 : 2,
       }}
       onClick={(e) => e.stopPropagation()}
     >
-      {/* LIST column */}
-      {showList && (
-        <div style={{ width: LIST_W, flexShrink: 0, display: 'flex', flexDirection: 'column', height: '100%', minWidth: 0 }}>
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 6, padding: '10px 10px',
-            borderBottom: '1px solid #ffffff18', flexShrink: 0,
-          }}>
-            <div style={{ flex: 1, fontSize: 13, fontWeight: 700, color: '#f0f0f0' }}>
-              {TYPE_LABEL[type] ?? type} <span style={{ color: '#666', fontWeight: 400 }}>({typeNodes.length})</span>
+      {side === 'right' && splitter}
+      <div style={{ flex: 1, minWidth: 0, height: '100%', display: 'flex' }}>
+        {showList && (
+          <div style={{ width: pageOpen ? LIST_W : '100%', flexShrink: 0, display: 'flex', flexDirection: 'column', height: '100%', minWidth: 0 }}>
+            <div style={{
+              position: 'relative', display: 'flex', alignItems: 'center', gap: 4, padding: '9px 8px',
+              borderBottom: '1px solid #ffffff18', flexShrink: 0,
+            }}>
+              <div style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, color: '#f0f0f0' }}>
+                {TYPE_LABEL[type] ?? type} <span style={{ color: '#666', fontWeight: 400 }}>({typeNodes.length})</span>
+              </div>
+              {canCreateNotes && (
+                <IconBtn
+                  title="새 노트"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    if (type === 'content') setCreateMenuOpen((open) => !open)
+                    else createNote()
+                  }}
+                  style={{ fontSize: 18, width: 26, height: 26, padding: 0 }}
+                >+</IconBtn>
+              )}
+              <IconBtn
+                title={side === 'right' ? '노트 창을 왼쪽으로 이동' : '노트 창을 오른쪽으로 이동'}
+                onClick={() => onSideChange?.(side === 'right' ? 'left' : 'right')}
+                style={{ fontSize: 15, width: 24, height: 26, padding: 0 }}
+              >{side === 'right' ? '←' : '→'}</IconBtn>
+              <IconBtn title="닫기" onClick={onClose} style={{ fontSize: 14, width: 24, height: 26, padding: 0 }}>✕</IconBtn>
+              {createMenuOpen && type === 'content' && (
+                <div
+                  onPointerDown={(event) => event.stopPropagation()}
+                  style={{
+                    position: 'absolute', right: 34, top: 38, zIndex: 50, minWidth: 130,
+                    background: '#20202a', border: '1px solid #ffffff22', borderRadius: 6, padding: 4,
+                  }}
+                >
+                  {[['photo', '사진'], ['database', '데이터베이스'], ['browser', '브라우저']].map(([kind, label]) => (
+                    <button key={kind} type="button" className="notes-create-option" onClick={() => createNote(kind)}>{label}</button>
+                  ))}
+                </div>
+              )}
             </div>
-            <IconBtn title="닫기" onClick={onClose} style={{ fontSize: 14 }}>✕</IconBtn>
-          </div>
-          <div style={{ flex: 1, overflowY: 'auto', padding: '6px 4px' }}>
-            {type === 'stage' ? (
-              stageRoots.length === 0 ? (
-                <div style={{ color: '#555', fontSize: 12, padding: '10px 12px' }}>단계 노드가 없습니다</div>
-              ) : (
-                stageRoots.map((n) => (
+            <div style={{ flex: 1, overflowY: 'auto', padding: '6px 4px' }}>
+              {type === 'stage' ? (
+                stageRoots.length === 0 ? (
+                  <div style={{ color: '#555', fontSize: 12, padding: '10px 12px' }}>단계 노드가 없습니다</div>
+                ) : stageRoots.map((n) => (
                   <StageTreeRow
                     key={n.id} id={n.id} depth={0} byId={byId}
                     childrenMap={childrenMap} attachMap={attachMap}
                     expanded={expanded} onToggle={toggleExpand}
                     selectedId={selectedId} onSelect={onSelect} onFocusNode={onFocusNode}
+                    onPromoteMenu={openPromoteMenu} canPromote={canCreateNotes}
                     ancestors={new Set()}
                   />
                 ))
-              )
-            ) : (
-              typeNodes.length === 0 ? (
+              ) : typeNodes.length === 0 ? (
                 <div style={{ color: '#555', fontSize: 12, padding: '10px 12px' }}>노드가 없습니다</div>
-              ) : (
-                typeNodes.map((n) => (
-                  <ListRow
-                    key={n.id}
-                    title={nodeTitle(n)}
-                    depth={0}
-                    dim={false}
-                    expandable={false}
-                    onClickTitle={() => onSelect(n.id)}
-                    onFocus={() => onFocusNode(n.id)}
-                    selected={selectedId === n.id}
-                  />
-                ))
-              )
-            )}
+              ) : typeNodes.map((n) => (
+                <ListRow
+                  key={n.id}
+                  title={nodeTitle(n)}
+                  depth={0}
+                  dim={false}
+                  expandable={false}
+                  onClickTitle={() => onSelect(n.id)}
+                  onFocus={n.noteOnly ? null : () => onFocusNode(n.id)}
+                  selected={selectedId === n.id}
+                  noteOnly={n.noteOnly}
+                  canPromote={canCreateNotes}
+                  onPromoteMenu={n.noteOnly ? { noteId: n.id, open: (event) => openPromoteMenu(event, n.id) } : null}
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      )}
-
-      {/* Splitter */}
-      {pageOpen && !narrow && (
-        <div
-          onPointerDown={onSplitterDown}
-          style={{ width: SPLIT_W, flexShrink: 0, cursor: 'col-resize', background: '#ffffff08', touchAction: 'none' }}
-        />
-      )}
-
-      {/* PAGE column */}
-      {pageOpen && (
-        <div style={{ width: narrow ? '100%' : pageWidth, flexShrink: 0, height: '100%', background: '#12121a', minWidth: 0 }}>
+        )}
+        {pageOpen && (
+          <div style={{ flex: 1, height: '100%', background: '#12121a', minWidth: 0 }}>
           <NotePage
             key={selectedNode.id}
             node={selectedNode}
             byId={byId}
             outMap={outMap}
-            isEditable={isNodeEditable ? isNodeEditable(selectedNode.id) : true}
-            onUpdateNode={onUpdateNode}
+            isEditable={selectedNode.noteOnly ? !!isNoteEditable?.(selectedNode.id) : (isNodeEditable ? isNodeEditable(selectedNode.id) : true)}
+            onUpdateNode={selectedNode.noteOnly ? onUpdateNote : onUpdateNode}
             onFocusNode={onFocusNode}
             onOpen={onSelect}
             onBack={handleBack}
+            onClose={onClose}
+            imageContext={imageContext}
           />
+          </div>
+        )}
+      </div>
+      {side === 'left' && splitter}
+
+      {promoteMenu && (
+        <div
+          className="notes-promote-menu"
+          onPointerDown={(event) => event.stopPropagation()}
+          style={{ position: 'fixed', left: promoteMenu.x, top: promoteMenu.y, zIndex: 1400 }}
+        >
+          <button
+            type="button"
+            onClick={() => {
+              onPromoteNote?.(promoteMenu.noteId)
+              setPromoteMenu(null)
+            }}
+          >캔버스에 추가</button>
         </div>
       )}
     </div>

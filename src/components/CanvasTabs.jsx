@@ -11,12 +11,29 @@ const formatCount = (n) => {
   return String(n)
 }
 
+function textContent(value) {
+  if (typeof value !== 'string' || !value) return ''
+  const doc = new DOMParser().parseFromString(value, 'text/html')
+  return (doc.body.textContent ?? '').trim()
+}
+
+function targetName(node, targetId) {
+  if (!node) return targetId ? `삭제되었거나 볼 수 없는 대상 (${targetId})` : '대상 없음'
+  const raw = node.type === 'memo' || node.type === 'content' ? node.data?.header : node.data?.label
+  return textContent(raw) || targetId || '제목 없음'
+}
+
+function grantsFor(participant) {
+  if (participant.isOwner) return []
+  return participant.grants?.length ? participant.grants : [participant]
+}
+
 export default function CanvasTabs({
   canvases, activeId, onSwitch, onAdd, onRename, onDelete, mobile,
   sharedCanvases = [], onInvite,
-  participants = [], sharedOutIds = new Set(),
+  participants = [], nodes = [], sharedOutIds = new Set(),
   onLeaveShared = () => {}, onToggleMemberEdit = () => {}, onKickMember = () => {},
-  onRemoveViewRestriction = () => {},
+  onToggleViewRestriction = () => {},
 }) {
   const [open, setOpen] = useState(false)
   const [editingId, setEditingId] = useState(null)
@@ -98,14 +115,28 @@ export default function CanvasTabs({
   const shownPeople = participants.length >= 3
     ? [ownerP, secondP].filter(Boolean)
     : [ownerP, ...othersP.filter((p) => p !== ownerP)].filter(Boolean)
-  const avatarOf = (p, size) => (
-    <ParticipantAvatar
-      participant={p}
+  const nodeById = new Map(nodes.map((node) => [node.id, node]))
+  const avatarOf = (p, size) => {
+    const grants = grantsFor(p)
+    const hasCanvasGrant = grants.some((grant) => grant.scope === 'canvas')
+    const scopedGrants = grants.filter((grant) => grant.scope === 'group' || grant.scope === 'node')
+    const participant = {
+      ...p,
+      restrictView: !hasCanvasGrant && scopedGrants.some((grant) => grant.restrictView),
+    }
+    return <ParticipantAvatar
+      participant={participant}
       size={size}
-      canManageRestriction={isOwnActive && !!p.userId && !p.isOwner}
-      onRemoveRestriction={onRemoveViewRestriction}
+      canManageRestriction={isOwnActive && !!p.userId && !p.isOwner && !hasCanvasGrant && scopedGrants.length > 0}
+      onToggleRestriction={onToggleViewRestriction}
     />
-  )
+  }
+
+  const grantLabel = (grant) => {
+    if (grant.scope === 'canvas') return '캔버스 전체 초대'
+    const kind = grant.scope === 'group' ? '그룹 초대' : '노드 초대'
+    return `${kind} · ${targetName(nodeById.get(grant.targetId), grant.targetId)}`
+  }
 
   // Own canvases the owner has shared out (any active canvas_shares row)
   // move into the "공유 캔버스" section alongside canvases shared TO me.
@@ -183,7 +214,7 @@ export default function CanvasTabs({
       ref={containerRef}
       onClick={(e) => e.stopPropagation()}
       style={{
-        position: 'fixed',
+        position: 'absolute',
         top: mobile ? 0 : 20,
         left: mobile ? 0 : 20,
         right: mobile ? 0 : 'auto',
@@ -196,6 +227,7 @@ export default function CanvasTabs({
       <div style={{ position: 'relative', flex: mobile ? 1 : 'none', minWidth: 0 }}>
         {/* Collapsed trigger button */}
         <button
+          className="main-hover-control"
           onClick={() => setOpen((v) => !v)}
           style={{
             display: 'flex',
@@ -335,6 +367,7 @@ export default function CanvasTabs({
         >
           {shownPeople.map((p) => (
             <span
+              className="main-avatar-control"
               key={p.userId ?? p.email}
               onClick={(e) => { e.stopPropagation(); setPeopleOpen(true) }}
               title={p.profile?.nickname || p.email || (p.isOwner ? '소유자' : '')}
@@ -345,6 +378,7 @@ export default function CanvasTabs({
           ))}
           {isOwnActive && onInvite && (
             <span
+              className="main-avatar-control"
               onClick={(e) => { e.stopPropagation(); const rect = e.currentTarget.getBoundingClientRect(); onInvite('canvas', null, rect) }}
               title="초대"
               style={{
@@ -410,6 +444,7 @@ export default function CanvasTabs({
               const nickname = p.profile?.nickname || '이름 없음'
               const email = p.email ?? p.profile?.email ?? '-'
               const lastSeen = p.online ? '접속 중' : `마지막 접속: ${relativeLastSeen(p.profile?.lastSeenAt ?? p.lastSeenAt)}`
+              const grants = grantsFor(p)
               return (
                 <div
                   key={p.userId ?? p.email}
@@ -431,6 +466,15 @@ export default function CanvasTabs({
                       {email}
                     </div>
                     <div style={{ color: '#666', fontSize: 10 }}>{lastSeen}</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 5 }}>
+                      {p.isOwner ? (
+                        <span className="participant-scope-tag">캔버스 소유자</span>
+                      ) : grants.map((grant) => (
+                        <span key={grant.shareId ?? `${grant.scope}:${grant.targetId ?? ''}`} className="participant-scope-tag">
+                          {grantLabel(grant)}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                   {isOwnActive && p.shareId && p.userId && !p.isOwner && (
                     <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>

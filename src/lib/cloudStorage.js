@@ -13,7 +13,7 @@ function nextRevision(expectedRevision) {
   return new Date(Math.max(Date.now(), Number.isFinite(previous) ? previous + 1 : 0)).toISOString()
 }
 
-export async function saveCanvas(userId, canvasId, name, nodes, edges, views = [], stageTypes, expectedRevision = null) {
+export async function saveCanvas(userId, canvasId, name, nodes, edges, notes = [], views = [], stageTypes, expectedRevision = null) {
   const updatedAt = nextRevision(expectedRevision)
   const row = {
     user_id: userId,
@@ -21,6 +21,7 @@ export async function saveCanvas(userId, canvasId, name, nodes, edges, views = [
     name,
     nodes,
     edges,
+    notes,
     views,
     stage_types: stageTypes,
     updated_at: updatedAt,

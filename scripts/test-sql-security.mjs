@@ -2,12 +2,13 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 
 const read = (name) => readFile(new URL(`../${name}`, import.meta.url), 'utf8')
-const [shares, profiles, profilePrivacy, images, tokens] = await Promise.all([
+const [shares, profiles, profilePrivacy, images, tokens, notes] = await Promise.all([
   read('supabase-shares.sql'),
   read('supabase-profiles.sql'),
   read('supabase-profile-privacy.sql'),
   read('supabase-canvas-images.sql'),
   read('supabase-mcp-schema.sql'),
+  read('supabase-canvas-notes.sql'),
 ])
 
 const restrictedFunctions = [
@@ -48,5 +49,6 @@ assert.match(images, /coalesce\(m\.restrict_view_override,\s*s\.restrict_view\)/
 assert.match(shares, /share_members add column if not exists restrict_view_override boolean/i)
 assert.match(tokens, /token\s*=\s*encode\(digest\(token, 'sha256'\), 'hex'\)/i, 'legacy MCP tokens must be hashed in place')
 assert.doesNotMatch(tokens, /select token from mcp_tokens/i, 'raw MCP secrets must not be documented as recoverable')
+assert.match(notes, /add column if not exists notes jsonb not null default '\[\]'::jsonb/i, 'canvas notes migration must be idempotent')
 
 console.log('SQL security checks passed')

@@ -31,5 +31,16 @@ export default function StubEdge({ sourceX, sourceY, targetX, targetY, sourcePos
 
   const path = `M ${sourceX},${sourceY} L ${p1x},${p1y} C ${c1x},${c1y} ${c2x},${c2y} ${p2x},${p2y} L ${targetX},${targetY}`
 
-  return <BaseEdge path={path} markerEnd={markerEnd} style={style} />
+  return (
+    <>
+      <path
+        d={path}
+        className="wfc-edge-halo"
+        fill="none"
+        strokeDasharray={style?.strokeDasharray}
+        pointerEvents="none"
+      />
+      <BaseEdge path={path} markerEnd={markerEnd} style={style} />
+    </>
+  )
 }

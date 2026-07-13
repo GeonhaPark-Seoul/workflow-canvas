@@ -23,7 +23,7 @@ export default function ScopedParticipants({
   scope,
   targetId,
   canManageRestrictions = false,
-  onRemoveViewRestriction,
+  onToggleViewRestriction,
 }) {
   const [open, setOpen] = useState(false)
   const people = useMemo(() => {
@@ -51,14 +51,14 @@ export default function ScopedParticipants({
       participant={participant}
       size={size}
       canManageRestriction={allowManagement && canManageRestrictions && !!participant.userId && !participant.isOwner}
-      onRemoveRestriction={onRemoveViewRestriction}
+      onToggleRestriction={onToggleViewRestriction}
     />
   )
 
   return (
     <>
       <div
-        className="nodrag nowheel"
+        className="scoped-participants-main nodrag nowheel"
         onPointerDown={(event) => event.stopPropagation()}
         style={{
           display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0,
@@ -69,6 +69,7 @@ export default function ScopedParticipants({
       >
         {shown.map((participant) => (
           <button
+            className="main-avatar-control"
             key={participantKey(participant)}
             type="button"
             title={participant.profile?.nickname || participant.email || (participant.isOwner ? '소유자' : '참여자')}
@@ -80,6 +81,7 @@ export default function ScopedParticipants({
         ))}
         {people.length > 2 && (
           <button
+            className="main-hover-control"
             type="button"
             title={`참여자 ${people.length}명`}
             onClick={(event) => { event.stopPropagation(); setOpen(true) }}
@@ -94,6 +96,7 @@ export default function ScopedParticipants({
         )}
         {canInvite && onInvite && (
           <button
+            className="main-hover-control"
             type="button"
             title="공유 초대"
             onClick={(event) => {

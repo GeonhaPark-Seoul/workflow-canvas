@@ -2,6 +2,7 @@ export function canvasSnapshotSignature(data = {}) {
   return JSON.stringify({
     nodes: data.nodes ?? [],
     edges: data.edges ?? [],
+    notes: data.notes ?? [],
     views: data.views ?? [],
     stageTypes: data.stageTypes ?? null,
   })

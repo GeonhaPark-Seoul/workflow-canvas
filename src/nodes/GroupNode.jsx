@@ -80,6 +80,7 @@ export default function GroupNode({ data, selected, id }) {
 
   return (
     <div
+      className="canvas-group-frame"
       style={{
         width: '100%',
         height: '100%',
@@ -89,6 +90,8 @@ export default function GroupNode({ data, selected, id }) {
         background: filled ? '#ffffff0f' : 'transparent',
         border: '1.5px dashed #8b94a766',
         borderRadius: 14,
+        outline: '1px solid transparent',
+        transition: 'border-color 0.15s, outline-color 0.15s, background-color 0.15s',
       }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
@@ -168,7 +171,7 @@ export default function GroupNode({ data, selected, id }) {
           canInvite={!editing && data.canInvite && !data.readOnly}
           onInvite={data.onInvite}
           canManageRestrictions={data.canManageParticipants}
-          onRemoveViewRestriction={data.onRemoveViewRestriction}
+          onToggleViewRestriction={data.onToggleViewRestriction}
           scope="group"
           targetId={id}
         />

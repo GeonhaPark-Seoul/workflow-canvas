@@ -44,7 +44,7 @@ import {
 } from './lib/cloudStorage'
 import {
   getSharedCanvas, listCanvasParticipants, listSharedCanvases,
-  removeMemberViewRestriction, updateSharedCanvas,
+  setMemberViewRestriction, updateSharedCanvas,
 } from './lib/sharedCanvasApi'
 import { appendHistorySnapshot, sameCanvasSnapshot } from './lib/canvasSync'
 import {
@@ -141,7 +141,14 @@ function scopedParticipants(people) {
       if (grant.scope === 'canvas' || !grant.targetId) continue
       const key = `${grant.scope}:${grant.targetId}`
       if (!scoped[key]) scoped[key] = []
-      scoped[key].push(person)
+      scoped[key].push({
+        ...person,
+        shareId: grant.shareId ?? person.shareId,
+        scope: grant.scope,
+        targetId: grant.targetId,
+        canEdit: grant.canEdit,
+        restrictView: !!grant.restrictView,
+      })
     }
   }
   Object.keys(scoped).forEach((key) => {
@@ -209,6 +216,10 @@ function sanitizeNodes(nodes) {
   return (nodes ?? []).map((node) => ({ ...node, data: sanitizeNodeData(node.data) }))
 }
 
+function sanitizeNotes(notes) {
+  return (notes ?? []).map((note) => ({ ...note, data: sanitizeNodeData(note.data) }))
+}
+
 // A "부품(part) 연결선" links two part handles (ids starting 'p-') on stage
 // nodes — dashed, no arrowhead, distinct from memo links.
 function isPartEdge(e) {
@@ -234,10 +245,11 @@ function baseEdgeStyle(e) {
 
 // Strip runtime callbacks (and stageTypes) before snapshot / localStorage save
 function stripNode(n) {
-  const { onUpdate, onEditStart, onEditEnd, stageTypes, imageContext, ...data } = n.data ?? {}
+  const { onUpdate, onEditStart, onEditEnd, onOpenInNotes, stageTypes, imageContext, ...data } = n.data ?? {}
   const { selected, ...rest } = n
   return { ...rest, data }
 }
+const stripNote = (note) => ({ ...note, data: sanitizeNodeData(note.data) })
 const stripEdge = ({ selected, ...e }) => e
 
 function canvasSnapshot(name, data = {}) {
@@ -245,6 +257,7 @@ function canvasSnapshot(name, data = {}) {
     name: name ?? '캔버스',
     nodes: data.nodes ?? [],
     edges: data.edges ?? [],
+    notes: data.notes ?? [],
     views: data.views ?? [],
     stageTypes: data.stageTypes ?? null,
   }
@@ -254,6 +267,7 @@ function cloudRowSnapshot(row) {
   return canvasSnapshot(row.name, {
     nodes: row.nodes,
     edges: row.edges,
+    notes: row.notes,
     views: row.views,
     stageTypes: row.stage_types,
   })
@@ -275,11 +289,13 @@ export default function App() {
 
   const [nodes, setNodes, onNodesChange] = useNodesState(sortParentsFirst(sanitizeNodes(initData.nodes)))
   const [edges, setEdges, onEdgesChange] = useEdgesState(normalizeEdges(initData.edges))
+  const [notes, setNotes] = useState(() => sanitizeNotes(initData.notes))
   const [stageTypes, setStageTypes] = useState(() => initData.stageTypes ?? DEFAULT_STAGE_TYPES)
   const [contextMenu, setContextMenu] = useState(null)
   const [renamingTypeIdx, setRenamingTypeIdx] = useState(null)
   const [notesPanel, setNotesPanel] = useState(null) // { type: 'stage'|'memo'|'content' } | null
   const [notesSelectedId, setNotesSelectedId] = useState(null)
+  const [notesSide, setNotesSide] = useState('right')
   const [renameValue, setRenameValue] = useState('')
   const reactFlowRef = useRef(null)
   const [rfInstance, setRfInstance] = useState(null)
@@ -291,7 +307,7 @@ export default function App() {
   // the editor UI and cloud persistence (user_prefs.settings) — it calls
   // onSettingsChange(next) below on every change; lodThreshold keeps its
   // localStorage mirror so logged-out visitors still get a sensible default.
-  const [settings, setSettings] = useState(() => ({ theme: 'dark', nodeFill: true, lodThreshold: loadLodThreshold() }))
+  const [settings, setSettings] = useState(() => ({ theme: 'light', nodeFill: false, lodThreshold: loadLodThreshold() }))
   const onSettingsChange = useCallback((next) => {
     setSettings((prev) => ({ ...prev, ...next }))
     if (next.lodThreshold !== undefined) saveLodThreshold(next.lodThreshold)
@@ -329,7 +345,7 @@ export default function App() {
   const [cloudSyncing, setCloudSyncing] = useState(false)
   const [storageError, setStorageError] = useState(() => getLastStorageError())
   // Stable ref to always-current state for use inside async callbacks
-  const latestRef = useRef({ canvases: initCanvasList, activeCanvasId: initActiveId, stageTypes: [], views: [] })
+  const latestRef = useRef({ canvases: initCanvasList, activeCanvasId: initActiveId, stageTypes: [], views: [], notes: [] })
   const isAnyEditingRef = useRef(false) // mirror for the realtime channel callback
   const lastPushedPrefsRef = useRef('') // JSON of the last prefs payload saved to cloud
   const legacyImageMigrationsRef = useRef(new Set())
@@ -377,19 +393,20 @@ export default function App() {
     setActiveCanvasId(activeId)
     setNodes(nNodes)
     setEdges(normalizeEdges(data.edges))
+    setNotes(sanitizeNotes(data.notes))
     setViews(data.views ?? [])
     setStageTypes(data.stageTypes ?? DEFAULT_STAGE_TYPES)
     setCurrentViewId(null)
     counterRef.current = maxNodeId(nNodes)
-    historyStack.current = [{ nodes: nNodes.map(stripNode), edges: normalizeEdges(data.edges).map(stripEdge) }]
+    historyStack.current = [{ nodes: nNodes.map(stripNode), edges: normalizeEdges(data.edges).map(stripEdge), notes: sanitizeNotes(data.notes).map(stripNote) }]
     historyPointer.current = 0
     setTimeout(() => { isRestoring.current = false }, 400)
   }, [setNodes, setEdges])
 
   // Keep latestRef and userRef in sync so async callbacks always see fresh state
   useEffect(() => {
-    latestRef.current = { canvases, activeCanvasId, stageTypes, views, sharedCanvases }
-  }, [canvases, activeCanvasId, stageTypes, views, sharedCanvases])
+    latestRef.current = { canvases, activeCanvasId, stageTypes, views, notes, sharedCanvases }
+  }, [canvases, activeCanvasId, stageTypes, views, notes, sharedCanvases])
   useEffect(() => { userRef.current = user }, [user])
   useEffect(() => { isAnyEditingRef.current = isAnyEditing }, [isAnyEditing])
   useEffect(() => {
@@ -401,7 +418,7 @@ export default function App() {
   // ── Auto-save active canvas + history snapshot (debounced) ───────────────
   useEffect(() => {
     if (isRestoring.current) return
-    const histSnapshot = { nodes: nodes.map(stripNode), edges: edges.map(stripEdge) }
+    const histSnapshot = { nodes: nodes.map(stripNode), edges: edges.map(stripEdge), notes: notes.map(stripNote) }
     const name = latestRef.current.canvases.find((canvas) => canvas.id === activeCanvasId)?.name
       ?? latestRef.current.sharedCanvases?.find((canvas) => sharedCanvasId(canvas.ownerId, canvas.canvasId) === activeCanvasId)?.name
       ?? '캔버스'
@@ -434,7 +451,7 @@ export default function App() {
     }, 300)
 
     return () => { clearTimeout(lsTimer); clearTimeout(histTimer) }
-  }, [nodes, edges, activeCanvasId, views, stageTypes])
+  }, [nodes, edges, notes, activeCanvasId, views, stageTypes])
 
   // ── Undo / Redo ──────────────────────────────────────────────────────────
   const undo = useCallback(() => {
@@ -445,6 +462,7 @@ export default function App() {
     isRestoring.current = true
     setNodes(snap.nodes)
     setEdges(snap.edges)
+    setNotes(snap.notes ?? [])
     saveCanvasData(latestRef.current.activeCanvasId, {
       ...snap,
       views: latestRef.current.views,
@@ -461,6 +479,7 @@ export default function App() {
     isRestoring.current = true
     setNodes(snap.nodes)
     setEdges(snap.edges)
+    setNotes(snap.notes ?? [])
     saveCanvasData(latestRef.current.activeCanvasId, {
       ...snap,
       views: latestRef.current.views,
@@ -862,7 +881,7 @@ export default function App() {
         try {
           const { data: row } = await supabase
             .from('canvases')
-            .select('name, nodes, edges, views, stage_types, updated_at')
+            .select('name, nodes, edges, notes, views, stage_types, updated_at')
             .eq('user_id', userRef.current.id)
             .eq('canvas_id', id)
             .maybeSingle()
@@ -871,6 +890,7 @@ export default function App() {
               name: row.name,
               nodes: row.nodes ?? [],
               edges: row.edges ?? [],
+              notes: row.notes ?? [],
               views: row.views ?? [],
               stageTypes: row.stage_types?.length ? row.stage_types : undefined,
               revision: row.updated_at,
@@ -879,6 +899,7 @@ export default function App() {
             saveCanvasData(id, {
               nodes: data.nodes,
               edges: data.edges,
+              notes: data.notes,
               views: data.views,
               stageTypes: data.stageTypes,
             })
@@ -902,18 +923,20 @@ export default function App() {
     if (userRef.current?.id) saveLastOpenedCanvas(userRef.current.id, id)
     setNodes(nNodes)
     setEdges(nEdges)
+    setNotes(sanitizeNotes(data.notes))
+    setNotesSelectedId(null)
     setViews(data.views ?? [])
     setStageTypes(data.stageTypes ?? DEFAULT_STAGE_TYPES)
     setCurrentViewId(null)
     counterRef.current = maxNodeId(nNodes)
-    const snap = { nodes: nNodes.map(stripNode), edges: nEdges.map(stripEdge) }
+    const snap = { nodes: nNodes.map(stripNode), edges: nEdges.map(stripEdge), notes: sanitizeNotes(data.notes).map(stripNote) }
     historyStack.current = [snap]
     historyPointer.current = 0
     setTimeout(() => { isRestoring.current = false }, 400)
   }, [setNodes, setEdges])
 
   const persistCurrent = useCallback(() => {
-    const data = { nodes: nodes.map(stripNode), edges: edges.map(stripEdge), views, stageTypes }
+    const data = { nodes: nodes.map(stripNode), edges: edges.map(stripEdge), notes: notes.map(stripNote), views, stageTypes }
     saveCanvasData(activeCanvasId, data)
     if (user && cloudHydratedUserRef.current === user.id) {
       const shared = parseSharedId(activeCanvasId)
@@ -933,7 +956,7 @@ export default function App() {
         })
       }
     }
-  }, [activeCanvasId, nodes, edges, views, stageTypes, user, canvases, sharedCanvases])
+  }, [activeCanvasId, nodes, edges, notes, views, stageTypes, user, canvases, sharedCanvases])
 
   // Invited canvases always pass through the server permission gateway. It
   // redacts restricted nodes before the browser sees them.
@@ -949,6 +972,7 @@ export default function App() {
     const data = {
       nodes: row.nodes ?? [],
       edges: row.edges ?? [],
+      notes: row.notes ?? [],
       views: row.views ?? [],
       stageTypes: row.stageTypes?.length ? row.stageTypes : undefined,
     }
@@ -1065,7 +1089,7 @@ export default function App() {
       saveCanvasList(next)
       return next
     })
-    const data = { nodes: [], edges: [], views: [], stageTypes: DEFAULT_STAGE_TYPES }
+    const data = { nodes: [], edges: [], notes: [], views: [], stageTypes: DEFAULT_STAGE_TYPES }
     saveCanvasData(id, data)
     if (user && cloudHydratedUserRef.current === user.id) {
       dirtyCanvasSnapshotsRef.current.set(id, {
@@ -1087,8 +1111,8 @@ export default function App() {
     })
     if (user && cloudHydratedUserRef.current === user.id) {
       const data = id === activeCanvasId
-        ? { nodes: nodes.map(stripNode), edges: edges.map(stripEdge), views, stageTypes }
-        : (loadCanvasData(id) ?? { nodes: [], edges: [], views: [], stageTypes: DEFAULT_STAGE_TYPES })
+        ? { nodes: nodes.map(stripNode), edges: edges.map(stripEdge), notes: notes.map(stripNote), views, stageTypes }
+        : (loadCanvasData(id) ?? { nodes: [], edges: [], notes: [], views: [], stageTypes: DEFAULT_STAGE_TYPES })
       dirtyCanvasSnapshotsRef.current.set(id, {
         key: id,
         shared: false,
@@ -1097,7 +1121,7 @@ export default function App() {
         snapshot: canvasSnapshot(name, data),
       })
     }
-  }, [activeCanvasId, nodes, edges, views, stageTypes, user])
+  }, [activeCanvasId, nodes, edges, notes, views, stageTypes, user])
 
   const deleteCanvas = useCallback((id) => {
     setCanvases((prev) => {
@@ -1133,7 +1157,7 @@ export default function App() {
       const list = loadCanvasList() ?? []
       for (const c of list) {
         const d = loadCanvasData(c.id) ?? { nodes: [], edges: [] }
-        const revision = await cloudSaveCanvas(userId, c.id, c.name, d.nodes ?? [], d.edges ?? [], d.views ?? [], d.stageTypes, null)
+        const revision = await cloudSaveCanvas(userId, c.id, c.name, d.nodes ?? [], d.edges ?? [], d.notes ?? [], d.views ?? [], d.stageTypes, null)
         canvasSyncBaseRef.current.set(c.id, {
           revision,
           snapshot: canvasSnapshot(c.name, d),
@@ -1159,7 +1183,7 @@ export default function App() {
     ]))
     dirtyCanvasSnapshotsRef.current.clear()
     conflictedCanvasKeysRef.current.clear()
-    rows.forEach((r) => saveCanvasData(r.canvas_id, { nodes: r.nodes ?? [], edges: r.edges ?? [], views: r.views ?? [], stageTypes: r.stage_types?.length ? r.stage_types : undefined }))
+    rows.forEach((r) => saveCanvasData(r.canvas_id, { nodes: r.nodes ?? [], edges: r.edges ?? [], notes: r.notes ?? [], views: r.views ?? [], stageTypes: r.stage_types?.length ? r.stage_types : undefined }))
     saveCanvasList(canvasList)
     const activeId = chooseOwnCanvasToRestore(rows, prefs, preferredCanvasId)
 
@@ -1171,6 +1195,7 @@ export default function App() {
             name: activeRow.name,
             nodes: activeRow.nodes ?? [],
             edges: activeRow.edges ?? [],
+            notes: activeRow.notes ?? [],
             views: activeRow.views ?? [],
             stageTypes: activeRow.stage_types?.length ? activeRow.stage_types : undefined,
             revision: activeRow.updated_at,
@@ -1334,16 +1359,16 @@ export default function App() {
     await refreshShareParticipants()
   }, [refreshShareParticipants])
 
-  const onRemoveMemberViewRestriction = useCallback(async (participant) => {
+  const onToggleMemberViewRestriction = useCallback(async (participant, restricted) => {
     const canvasId = latestRef.current.activeCanvasId
     const owner = userRef.current
     if (!owner || !canvasId || parseSharedId(canvasId) || !participant?.userId) return
     try {
-      await removeMemberViewRestriction(owner.id, canvasId, participant.userId)
+      await setMemberViewRestriction(owner.id, canvasId, participant.userId, restricted)
       await refreshShareParticipants()
     } catch (err) {
-      console.error('[shares] remove view restriction:', err.message)
-      window.alert(`시야 제한을 해제하지 못했습니다: ${err.message}`)
+      console.error('[shares] set view restriction:', err.message)
+      window.alert(`시야 제한을 변경하지 못했습니다: ${err.message}`)
     }
   }, [refreshShareParticipants])
 
@@ -1516,7 +1541,7 @@ export default function App() {
 
       const { data: row } = await supabase
         .from('canvases')
-        .select('name, nodes, edges, views, stage_types, updated_at')
+        .select('name, nodes, edges, notes, views, stage_types, updated_at')
         .eq('user_id', user.id)
         .eq('canvas_id', id)
         .maybeSingle()
@@ -1538,6 +1563,7 @@ export default function App() {
       const mirror = {
         nodes: sortParentsFirst(row.nodes ?? []),
         edges: row.edges ?? [],
+        notes: sanitizeNotes(row.notes),
         views: row.views ?? [],
         stageTypes: row.stage_types?.length ? row.stage_types : undefined,
       }
@@ -1556,11 +1582,12 @@ export default function App() {
       const nEdges = normalizeEdges(mirror.edges)
       setNodes(mirror.nodes)
       setEdges(nEdges)
+      setNotes(mirror.notes)
       setViews(mirror.views)
       setStageTypes(mirror.stageTypes ?? DEFAULT_STAGE_TYPES)
       counterRef.current = maxNodeId(mirror.nodes)
       // Push (not reset) history so Ctrl+Z can undo a remote change
-      const snap = { nodes: mirror.nodes.map(stripNode), edges: nEdges.map(stripEdge) }
+      const snap = { nodes: mirror.nodes.map(stripNode), edges: nEdges.map(stripEdge), notes: mirror.notes.map(stripNote) }
       historyStack.current = appendHistorySnapshot(historyStack.current, historyPointer.current, snap)
       historyPointer.current = historyStack.current.length - 1
       saveCanvasData(id, mirror)
@@ -1653,6 +1680,7 @@ export default function App() {
     const data = {
       nodes: snapshot.nodes,
       edges: snapshot.edges,
+      notes: snapshot.notes,
       views: snapshot.views,
       stageTypes: snapshot.stageTypes,
     }
@@ -1674,9 +1702,10 @@ export default function App() {
     isRestoring.current = true
     setNodes(nextNodes)
     setEdges(nextEdges)
+    setNotes(sanitizeNotes(snapshot.notes))
     setViews(snapshot.views ?? [])
     setStageTypes(snapshot.stageTypes?.length ? snapshot.stageTypes : DEFAULT_STAGE_TYPES)
-    const historySnapshot = { nodes: nextNodes.map(stripNode), edges: nextEdges.map(stripEdge) }
+    const historySnapshot = { nodes: nextNodes.map(stripNode), edges: nextEdges.map(stripEdge), notes: sanitizeNotes(snapshot.notes).map(stripNote) }
     historyStack.current = appendHistorySnapshot(historyStack.current, historyPointer.current, historySnapshot)
     historyPointer.current = historyStack.current.length - 1
     setTimeout(() => { isRestoring.current = false }, 400)
@@ -1690,6 +1719,7 @@ export default function App() {
         entry.canvasId,
         snapshot.nodes,
         snapshot.edges,
+        snapshot.notes,
         snapshot.views,
         snapshot.stageTypes,
         expectedRevision,
@@ -1700,6 +1730,7 @@ export default function App() {
         snapshot: canvasSnapshot(saved.name, {
           nodes: saved.nodes,
           edges: saved.edges,
+          notes: saved.notes,
           views: saved.views,
           stageTypes: saved.stageTypes,
         }),
@@ -1711,6 +1742,7 @@ export default function App() {
       snapshot.name,
       snapshot.nodes,
       snapshot.edges,
+      snapshot.notes,
       snapshot.views,
       snapshot.stageTypes,
       expectedRevision,
@@ -1727,6 +1759,7 @@ export default function App() {
         snapshot: canvasSnapshot(row.name, {
           nodes: row.nodes,
           edges: row.edges,
+          notes: row.notes,
           views: row.views,
           stageTypes: row.stageTypes,
         }),
@@ -1837,7 +1870,7 @@ export default function App() {
     if (!user) return undefined
     const timer = setTimeout(flushDirtyCanvases, 1500)
     return () => clearTimeout(timer)
-  }, [user, nodes, edges, stageTypes, canvases, activeCanvasId, views, flushDirtyCanvases])
+  }, [user, nodes, edges, notes, stageTypes, canvases, activeCanvasId, views, flushDirtyCanvases])
 
   useEffect(() => {
     if (!user) return undefined
@@ -1950,6 +1983,7 @@ export default function App() {
   // canEdit === false (read-only share): the whole canvas is view-only,
   // regardless of scope — this overrides the group/node scope carve-out below.
   const canEditCanvas = !(perm.role === 'invitee' && perm.canEdit === false)
+  const canEditNotes = canEditCanvas && (perm.role === 'owner' || perm.scope === 'canvas')
 
   // Set of node ids an invitee may edit; null means "everything" (owner or canvas-scope).
   const editableSet = useMemo(() => {
@@ -2040,6 +2074,45 @@ export default function App() {
   const updateNodeData = useCallback((id, patch) => {
     setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: sanitizeNodeData({ ...n.data, ...patch }) } : n))
   }, [setNodes])
+
+  const updateNoteData = useCallback((id, patch) => {
+    if (!canEditNotes) return
+    setNotes((items) => items.map((note) => (
+      note.id === id ? { ...note, data: sanitizeNodeData({ ...note.data, ...patch }) } : note
+    )))
+  }, [canEditNotes])
+
+  const createNote = useCallback((type, contentKind) => {
+    if (!canEditNotes || !['stage', 'memo', 'content'].includes(type)) return
+    if (type === 'content' && !['photo', 'database', 'browser'].includes(contentKind)) return
+    const id = `note-${crypto.randomUUID()}`
+    const data = type === 'stage'
+      ? { label: '새 단계', description: '', colorIdx: 0 }
+      : type === 'memo'
+        ? { header: '', text: '' }
+        : { header: '', kind: contentKind }
+    setNotes((items) => [...items, { id, type, data }])
+    setNotesPanel({ type })
+    setNotesSelectedId(id)
+  }, [canEditNotes])
+
+  const promoteNoteAt = useCallback((noteId, position) => {
+    if (!canEditNotes) return
+    const note = latestRef.current.notes.find((item) => item.id === noteId)
+    if (!note || nodes.some((node) => node.id === noteId)) return
+    const node = { ...stripNote(note), position }
+    setNotes((items) => items.filter((item) => item.id !== noteId))
+    setNodes((items) => [...items, node])
+  }, [canEditNotes, nodes, setNodes])
+
+  const promoteNoteToCenter = useCallback((noteId) => {
+    if (!rfInstance || !reactFlowRef.current) return
+    const rect = reactFlowRef.current.getBoundingClientRect()
+    promoteNoteAt(noteId, rfInstance.screenToFlowPosition({
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2,
+    }))
+  }, [rfInstance, promoteNoteAt])
 
   // Existing photo nodes may still contain a large data URL from older builds.
   // Move one at a time when the owner opens that canvas; a failed migration
@@ -2177,16 +2250,21 @@ export default function App() {
 
   const onDragOver = useCallback((e) => {
     e.preventDefault()
-    e.dataTransfer.dropEffect = 'copy'
+    e.dataTransfer.dropEffect = e.dataTransfer.types.includes('application/wfc-note') ? 'move' : 'copy'
   }, [])
 
   const onDrop = useCallback((e) => {
     e.preventDefault()
     if (!rfInstance) return
+    const noteId = e.dataTransfer.getData('application/wfc-note')
+    if (noteId) {
+      promoteNoteAt(noteId, rfInstance.screenToFlowPosition({ x: e.clientX, y: e.clientY }))
+      return
+    }
     let payload
     try { payload = JSON.parse(e.dataTransfer.getData('application/wfc-node') || '') } catch { return }
     addFromPalette(payload, rfInstance.screenToFlowPosition({ x: e.clientX, y: e.clientY }))
-  }, [rfInstance, addFromPalette])
+  }, [rfInstance, addFromPalette, promoteNoteAt])
 
   // Touch fallback: Toolbar's palette has no native drag on touch devices, so
   // tapping a card adds it at the viewport center instead.
@@ -2683,6 +2761,12 @@ export default function App() {
     setNotesPanel((prev) => (prev?.type === type ? null : { type }))
   }, [])
 
+  const openNodeInNotes = useCallback((nodeId, type) => {
+    if (!['stage', 'memo', 'content'].includes(type)) return
+    setNotesPanel({ type })
+    setNotesSelectedId(nodeId)
+  }, [])
+
   // ── Saved views ───────────────────────────────────────────────────────────
   // Compute the bounding box (in flow coords) of the given node ids.
   const boundsOf = useCallback((ids) => {
@@ -2772,15 +2856,15 @@ export default function App() {
 
   // ── Selected-edge highlight ───────────────────────────────────────────────
   // Non-selected edges get a forced base style so baked-in bold can never linger.
-  // Selected edges get reconnectable + bold stroke + drop-shadow + colored marker.
+  // Selected edges get reconnectable + a bold stroke and colored marker. The
+  // cross-browser blue halo is rendered as a real SVG path by StubEdge.
   const styledEdges = edges.map((e) => {
     // Delete key / built-in delete UI must also respect the edit gating.
     // (isNodeEditable already resolves to "always true" for owners/full-edit
     // canvas-scope invitees via editableSet === null.)
     const deletable = isNodeEditable(e.source) && isNodeEditable(e.target)
     const type = 'stub'
-    // Stable hook class so CSS can target `.wfc-edge:hover` for the hover
-    // glow (bold stroke handled by css agent's `.react-flow__edge:hover`).
+    // Stable hook class so CSS can target `.wfc-edge:hover` for the hover glow.
     const className = `wfc-edge${e.className ? ` ${e.className}` : ''}`
     if (!e.selected) return { ...e, ...baseEdgeStyle(e), deletable, type, className }
     if (isPartEdge(e)) {
@@ -2805,7 +2889,7 @@ export default function App() {
       // Only a selected (bold) edge can be snatched/reconnected.
       reconnectable: true,
       zIndex: 1001,
-      style: { ...baseEdgeStyle(e).style, stroke: color, strokeWidth: isMemo ? 3.5 : 4.5, filter: `drop-shadow(0 0 6px ${color}88)` },
+      style: { ...baseEdgeStyle(e).style, stroke: color, strokeWidth: isMemo ? 3.5 : 4.5 },
       markerEnd: isMemo ? undefined : { type: MarkerType.ArrowClosed, color },
     }
   })
@@ -2848,7 +2932,8 @@ export default function App() {
 
   return (
     <div
-      style={{ width: '100vw', height: '100vh', position: 'relative' }}
+      className="app-shell"
+      style={{ width: '100vw', height: '100vh', position: 'relative', display: 'flex', overflow: 'hidden' }}
       onClick={(e) => {
         commitRename()
         closeContext()
@@ -2861,6 +2946,7 @@ export default function App() {
         }
       }}
     >
+      <div className="canvas-pane" style={{ position: 'relative', flex: '1 1 auto', minWidth: 0, height: '100%', order: 1 }}>
       <CanvasTabs
         canvases={canvases}
         activeId={activeCanvasId}
@@ -2872,11 +2958,12 @@ export default function App() {
         sharedCanvases={sharedCanvasList}
         onInvite={openInvite}
         participants={shareParticipants}
+        nodes={nodes.filter((node) => !node.data?.redacted)}
         sharedOutIds={sharedOutCanvasIds}
         onLeaveShared={onLeaveShared}
         onToggleMemberEdit={onToggleMemberEdit}
         onKickMember={onKickMember}
-        onRemoveViewRestriction={onRemoveMemberViewRestriction}
+        onToggleViewRestriction={onToggleMemberViewRestriction}
       />
 
       <Toolbar
@@ -3123,9 +3210,10 @@ export default function App() {
               canInvite: isOwner,
               onInvite: isOwner ? openInvite : undefined,
               canManageParticipants: isOwner,
-              onRemoveViewRestriction: isOwner ? onRemoveMemberViewRestriction : undefined,
+              onToggleViewRestriction: isOwner ? onToggleMemberViewRestriction : undefined,
               scopedParticipants: nodeScopedParticipants,
               onUpdate: (patch) => updateNodeData(n.id, patch),
+              onOpenInNotes: n.type === 'group' ? undefined : () => openNodeInNotes(n.id, n.type),
               onEditStart: () => setIsAnyEditing(true),
               onEditEnd: () => setIsAnyEditing(false),
               onLongPress: (clientX, clientY) => {
@@ -3179,8 +3267,7 @@ export default function App() {
         deleteKeyCode={['Delete', 'Backspace']}
         style={{ background: settings.theme === 'light' ? '#f5f5f7' : '#0f0f13' }}
       >
-        <Background id="minor" variant={BackgroundVariant.Lines} gap={14} color="#ffffff08" />
-        <Background id="major" variant={BackgroundVariant.Lines} gap={70} color="#ffffff08" />
+        <Background id="grid" variant={BackgroundVariant.Lines} gap={12} size={0.45} />
         {!mobile && <Controls style={{ background: '#1a1a22', border: '1px solid #ffffff18', borderRadius: 8 }} />}
         {!mobile && (
           <MiniMap
@@ -3194,21 +3281,27 @@ export default function App() {
 
       {/* ── Notes panel: right-edge open buttons + the panel itself ───────── */}
       <div
+        className={`notes-rail notes-rail-${notesSide}`}
         style={{
-          position: 'fixed', right: 0, top: '50%', transform: 'translateY(-50%)', zIndex: 15,
+          position: 'absolute', [notesSide === 'left' ? 'left' : 'right']: 0,
+          top: '50%', transform: 'translateY(-50%)', zIndex: 15,
           display: 'flex', flexDirection: 'column', gap: 4,
-          background: '#1a1a22', border: '1px solid #ffffff18', borderRight: 'none',
-          borderRadius: '10px 0 0 10px', padding: 5,
+          background: '#1a1a22', border: '1px solid #ffffff18',
+          borderRight: notesSide === 'right' ? 'none' : '1px solid #ffffff18',
+          borderLeft: notesSide === 'left' ? 'none' : '1px solid #ffffff18',
+          borderRadius: notesSide === 'right' ? '10px 0 0 10px' : '0 10px 10px 0', padding: 5,
         }}
       >
         {[
-          ['stage', '단계 노트', '◇'],
-          ['memo', '메모 노트', '≡'],
+          ['stage', '단계·계층 노트', '☷'],
+          ['memo', '참고·메모 노트', '※'],
           ['content', '콘텐츠 노트', '▣'],
         ].map(([t, label, icon]) => (
           <button
             key={t}
             type="button"
+            className="notes-rail-button"
+            data-tooltip={label}
             title={label}
             aria-label={label}
             onClick={() => openNotesPanel(t)}
@@ -3223,21 +3316,6 @@ export default function App() {
           </button>
         ))}
       </div>
-
-      {notesPanel && (
-        <NotesPanel
-          type={notesPanel.type}
-          nodes={nodes.filter((node) => !node.data?.redacted)}
-          edges={edges}
-          stageTypes={stageTypes}
-          selectedId={notesSelectedId}
-          onSelect={setNotesSelectedId}
-          onClose={() => setNotesPanel(null)}
-          onFocusNode={focusNode}
-          onUpdateNode={updateNodeData}
-          isNodeEditable={isNodeEditable}
-        />
-      )}
 
       {/* ── Selection rubber-band (long-press drag) ──────────────────────── */}
       {lassoRect && (
@@ -3433,6 +3511,30 @@ export default function App() {
             <ContextItem icon="🗑" label={ctxMulti ? '전체 삭제' : '노드 삭제'} color="#ef4444" onClick={handleContextDeleteNode} />
           )}
         </div>
+      )}
+      </div>
+
+      {notesPanel && (
+        <NotesPanel
+          type={notesPanel.type}
+          nodes={nodes.filter((node) => !node.data?.redacted)}
+          notes={notes}
+          edges={edges}
+          selectedId={notesSelectedId}
+          onSelect={setNotesSelectedId}
+          onClose={() => { setNotesPanel(null); setNotesSelectedId(null) }}
+          onFocusNode={focusNode}
+          onUpdateNode={updateNodeData}
+          onUpdateNote={updateNoteData}
+          onCreateNote={createNote}
+          onPromoteNote={promoteNoteToCenter}
+          isNodeEditable={isNodeEditable}
+          isNoteEditable={() => canEditNotes}
+          canCreateNotes={canEditNotes}
+          side={notesSide}
+          onSideChange={setNotesSide}
+          imageContext={imageContext}
+        />
       )}
     </div>
   )

@@ -8,6 +8,7 @@ create table if not exists canvases (
   name        text        not null default '캔버스',
   nodes       jsonb       not null default '[]',
   edges       jsonb       not null default '[]',
+  notes       jsonb       not null default '[]', -- note-only documents, promoted to nodes when placed on canvas
   views       jsonb       not null default '[]', -- saved canvas viewport presets
   stage_types jsonb, -- per-canvas stage-node categories; null = built-in defaults
   updated_at  timestamptz default now(),

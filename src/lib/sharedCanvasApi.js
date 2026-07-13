@@ -32,16 +32,16 @@ export function getSharedCanvas(ownerId, canvasId) {
   return request(`/api/shared-canvas?ownerId=${encodeURIComponent(ownerId)}&canvasId=${encodeURIComponent(canvasId)}`)
 }
 
-export function updateSharedCanvas(ownerId, canvasId, nodes, edges, views, stageTypes, revision) {
+export function updateSharedCanvas(ownerId, canvasId, nodes, edges, notes, views, stageTypes, revision) {
   return request('/api/shared-canvas', {
     method: 'PUT',
-    body: JSON.stringify({ ownerId, canvasId, nodes, edges, views, stageTypes, revision }),
+    body: JSON.stringify({ ownerId, canvasId, nodes, edges, notes, views, stageTypes, revision }),
   })
 }
 
-export function removeMemberViewRestriction(ownerId, canvasId, userId) {
+export function setMemberViewRestriction(ownerId, canvasId, userId, restricted) {
   return request('/api/shared-canvas', {
     method: 'PATCH',
-    body: JSON.stringify({ action: 'remove-view-restriction', ownerId, canvasId, userId }),
+    body: JSON.stringify({ action: 'set-view-restriction', ownerId, canvasId, userId, restricted }),
   })
 }

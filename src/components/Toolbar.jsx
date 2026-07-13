@@ -15,7 +15,7 @@ export default function Toolbar({
     return (
       <div
         style={{
-          position: 'fixed',
+          position: 'absolute',
           bottom: 0,
           left: 0,
           right: 0,
@@ -175,6 +175,7 @@ function ViewSelector({ views, currentViewId, onSelectView, onRenameView, onDele
         }}
       >
         <button
+          className="main-hover-control"
           onClick={(e) => { e.stopPropagation(); setOpen((o) => !o) }}
           title="저장된 뷰"
           style={{
@@ -185,6 +186,7 @@ function ViewSelector({ views, currentViewId, onSelectView, onRenameView, onDele
           ⊡
         </button>
         <button
+          className="main-hover-control"
           onClick={() => onSelectView(currentViewId ?? null)}
           title="현재 뷰로 이동"
           style={{
@@ -212,6 +214,7 @@ function ViewSelector({ views, currentViewId, onSelectView, onRenameView, onDele
         }}
       >
         <button
+          className="main-hover-control"
           onClick={() => setOpen((o) => !o)}
           title="저장된 뷰"
           style={{
@@ -225,6 +228,7 @@ function ViewSelector({ views, currentViewId, onSelectView, onRenameView, onDele
           <span style={{ fontSize: 10 }}>{open ? '▴' : '▾'}</span>
         </button>
         <button
+          className="main-hover-control"
           onClick={() => onSelectView(currentViewId ?? null)}
           title="현재 뷰로 이동"
           style={{
@@ -272,6 +276,7 @@ function SmallIcon({ onClick, title, hoverColor, children }) {
 function ToolBtn({ onClick, color, icon, label }) {
   return (
     <button
+      className="main-hover-control"
       onClick={onClick}
       title={label}
       style={{
@@ -308,6 +313,7 @@ function ToolBtn({ onClick, color, icon, label }) {
 function MobileBtn({ onClick, color, icon, label }) {
   return (
     <button
+      className="main-hover-control"
       onClick={onClick}
       style={{
         background: 'transparent',

@@ -63,7 +63,7 @@ export default function AuthPanel({
 
   // Unified canvas settings (theme, node fill, LOD threshold): persisted to
   // my own user_prefs row, debounced.
-  const [settings, setSettings] = useState({ theme: 'dark', nodeFill: true, lodThreshold })
+  const [settings, setSettings] = useState({ theme: 'light', nodeFill: false, lodThreshold })
   const settingsTimerRef = useRef(null)
   const updateSettings = (patch) => {
     setSettings((prev) => {
@@ -167,8 +167,8 @@ export default function AuthPanel({
 
   useEffect(() => {
     setSettings({
-      theme: savedSettings?.theme ?? 'dark',
-      nodeFill: savedSettings?.nodeFill ?? true,
+      theme: savedSettings?.theme ?? 'light',
+      nodeFill: savedSettings?.nodeFill ?? false,
       lodThreshold: savedSettings?.lodThreshold ?? lodThreshold,
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -268,6 +268,7 @@ export default function AuthPanel({
               }}>
                 {GLYPH_OPTIONS.map((g) => (
                   <button
+                    className="profile-glyph-option"
                     key={g || '__default'}
                     type="button"
                     onClick={() => setGlyphInput(g)}
@@ -293,6 +294,7 @@ export default function AuthPanel({
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>
                 {GLYPH_COLORS.map((c) => (
                   <button
+                    className="profile-color-option"
                     key={c}
                     type="button"
                     onClick={() => setColorInput(c)}
@@ -467,6 +469,7 @@ export default function AuthPanel({
       )}
 
       <button
+        className="main-hover-control profile-trigger"
         onClick={() => setOpen((v) => !v)}
         style={{
           display: 'flex', alignItems: 'center', gap: 6,

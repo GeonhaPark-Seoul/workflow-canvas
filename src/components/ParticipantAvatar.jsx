@@ -4,25 +4,25 @@ export default function ParticipantAvatar({
   participant,
   size,
   canManageRestriction = false,
-  onRemoveRestriction,
+  onToggleRestriction,
 }) {
   const profile = participant.profile
     ?? (participant.email ? { glyph: participant.email[0]?.toUpperCase() } : null)
-  const badge = participant.restrictView && (
-    canManageRestriction && onRemoveRestriction ? (
+  const restricted = !!participant.restrictView
+  const badge = canManageRestriction && onToggleRestriction ? (
       <button
         type="button"
-        className="view-restricted-badge"
-        title="시야 제한 해제"
-        aria-label="시야 제한 해제"
+        className={`view-restricted-badge${restricted ? '' : ' is-unrestricted'}`}
+        title={restricted ? '시야 제한 해제' : '시야 제한 적용'}
+        aria-label={restricted ? '시야 제한 해제' : '시야 제한 적용'}
         onClick={(event) => {
           event.stopPropagation()
-          onRemoveRestriction(participant)
+          onToggleRestriction(participant, !restricted)
         }}
       >
-        <span className="eye-off-mark" aria-hidden="true" />
+        <span className={restricted ? 'eye-off-mark' : 'eye-mark'} aria-hidden="true" />
       </button>
-    ) : (
+    ) : restricted ? (
       <span
         className="view-restricted-badge"
         title="초대 구역으로 시야가 제한된 참여자"
@@ -30,8 +30,7 @@ export default function ParticipantAvatar({
       >
         <span className="eye-off-mark" aria-hidden="true" />
       </span>
-    )
-  )
+    ) : null
 
   return (
     <span className="participant-avatar">

@@ -154,16 +154,17 @@ export async function listCanvasParticipants(ownerId, canvasId, viewerId) {
   return [...participants, ...memberParticipants]
 }
 
-export async function removeCanvasMemberViewRestriction(ownerId, canvasId, memberUserId, viewerId) {
-  if (viewerId !== ownerId || memberUserId === ownerId) throw new Error('시야 제한을 해제할 권한이 없습니다.')
+export async function setCanvasMemberViewRestriction(ownerId, canvasId, memberUserId, restricted, viewerId) {
+  if (viewerId !== ownerId || memberUserId === ownerId) throw new Error('시야 제한을 변경할 권한이 없습니다.')
+  if (typeof restricted !== 'boolean') throw new Error('시야 제한 값이 올바르지 않습니다.')
   const db = admin()
-  const { data: shares, error: sharesError } = await db.from('canvas_shares').select('id')
+  const { data: shares, error: sharesError } = await db.from('canvas_shares').select('id, scope')
     .eq('owner_id', ownerId).eq('canvas_id', canvasId)
   if (sharesError) throw new Error(sharesError.message)
-  const shareIds = (shares ?? []).map((share) => share.id)
+  const shareIds = (shares ?? []).filter((share) => share.scope !== 'canvas').map((share) => share.id)
   if (!shareIds.length) throw new Error('공유 캔버스를 찾을 수 없습니다.')
   const { data, error } = await db.from('share_members')
-    .update({ restrict_view_override: false })
+    .update({ restrict_view_override: restricted })
     .eq('user_id', memberUserId)
     .in('share_id', shareIds)
     .select('share_id')
@@ -191,6 +192,7 @@ export function redactCanvas(access) {
     revision: access.row.updated_at,
     nodes: (access.row.nodes ?? []).map((node) => redactNode(node, visibleIds)),
     edges: access.row.edges ?? [],
+    notes: access.restrictView ? [] : (access.row.notes ?? []),
     views: access.row.views ?? [],
     stageTypes: access.row.stage_types ?? [],
     permission: {
@@ -292,6 +294,15 @@ export function applySharedCanvasUpdate(access, submittedNodes, submittedEdges, 
     if (metadata.stageTypes !== undefined && !Array.isArray(metadata.stageTypes)) {
       throw new Error('stageTypes는 배열이어야 합니다.')
     }
+    if (metadata.notes !== undefined && !Array.isArray(metadata.notes)) {
+      throw new Error('notes는 배열이어야 합니다.')
+    }
+    const notes = metadata.notes ?? access.row.notes ?? []
+    const noteIds = notes.map((note) => note?.id)
+    if (noteIds.some((id) => typeof id !== 'string' || !id)) throw new Error('모든 노트에는 id가 필요합니다.')
+    if (new Set(noteIds).size !== noteIds.length) throw new Error('중복된 노트 id는 저장할 수 없습니다.')
+    if (noteIds.some((id) => nodeIds.includes(id))) throw new Error('노트와 노드 id는 중복될 수 없습니다.')
+    result.notes = notes.map(sanitizeNode)
     result.views = metadata.views ?? access.row.views ?? []
     result.stageTypes = metadata.stageTypes ?? access.row.stage_types ?? null
   }

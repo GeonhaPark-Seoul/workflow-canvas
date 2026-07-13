@@ -365,6 +365,12 @@ t('detects a saved-view-only remote change', () => {
   assert.equal(sameCanvasSnapshot(base, changed), false)
 })
 
+t('detects an independent-note-only remote change', () => {
+  const base = { nodes: [], edges: [], notes: [], views: [], stageTypes: null }
+  const changed = { ...base, notes: [{ id: 'note-1', type: 'memo', data: { text: '새 메모' } }] }
+  assert.equal(sameCanvasSnapshot(base, changed), false)
+})
+
 t('treats equivalent realtime snapshots as unchanged', () => {
   const snapshot = { nodes: [{ id: 'a' }], edges: [], views: [], stageTypes: null }
   assert.equal(sameCanvasSnapshot(snapshot, structuredClone(snapshot)), true)
@@ -450,6 +456,18 @@ t('reports delete-versus-edit as a conflict', () => {
   const result = mergeCanvasSnapshots(base, local, remote)
   assert.deepEqual(result.conflicts, ['nodes.a'])
   assert.equal(result.merged.nodes.length, 0)
+})
+
+t('merges independent notes by id without treating them as canvas nodes', () => {
+  const base = { name: 'A', nodes: [], edges: [], notes: [{ id: 'note-a', data: { text: 'old' } }], views: [], stageTypes: null }
+  const local = structuredClone(base)
+  const remote = structuredClone(base)
+  local.notes[0].data.text = 'local'
+  remote.notes.push({ id: 'note-b', data: { text: 'remote' } })
+  const result = mergeCanvasSnapshots(base, local, remote)
+  assert.deepEqual(result.conflicts, [])
+  assert.equal(result.merged.notes.find((note) => note.id === 'note-a').data.text, 'local')
+  assert.equal(result.merged.notes.find((note) => note.id === 'note-b').data.text, 'remote')
 })
 
 console.log('segmentIntersectsRect')
@@ -873,6 +891,7 @@ const sharedRow = {
     { id: 'outside', type: 'memo', position: { x: 500, y: 10 }, data: { header: '비공개', text: '보이면 안 됨' } },
   ],
   edges: [{ id: 'inside-edge', source: 'inside', target: 'outside' }],
+  notes: [{ id: 'note-private', type: 'memo', data: { header: '별도 노트', text: '보이면 안 됨' } }],
 }
 
 t('restrict_view: server redacts body data outside the invited group', () => {
@@ -880,6 +899,7 @@ t('restrict_view: server redacts body data outside the invited group', () => {
   const hidden = result.nodes.find((node) => node.id === 'outside')
   assert.deepEqual(hidden.data, { redacted: true })
   assert.equal(JSON.stringify(hidden).includes('비공개'), false)
+  assert.deepEqual(result.notes, [])
 })
 
 t('group invite: server rejects moving a child outside the group', () => {
@@ -926,15 +946,17 @@ t('shared save: server strips active protocols from browser content URLs', () =>
   assert.equal(result.nodes[0].data.url, '')
 })
 
-t('canvas invite: server accepts canvas-level views and stage types', () => {
+t('canvas invite: server accepts canvas-level notes, views and stage types', () => {
   const views = [{ id: 'view-1', name: '검토', bounds: { x: 0, y: 0, width: 800, height: 600 } }]
   const stageTypes = [{ id: 'plan', label: '계획', bg: '#111', border: '#222' }]
+  const notes = [{ id: 'note-1', type: 'memo', data: { header: '메모', text: '<b>본문</b>' } }]
   const result = applySharedCanvasUpdate(
     { row: sharedRow, scope: 'canvas', targetId: null, canEdit: true, restrictView: false },
     sharedRow.nodes,
     sharedRow.edges,
-    { views, stageTypes },
+    { notes, views, stageTypes },
   )
+  assert.deepEqual(result.notes, notes)
   assert.deepEqual(result.views, views)
   assert.deepEqual(result.stageTypes, stageTypes)
 })
@@ -944,8 +966,9 @@ t('group invite: server never accepts canvas-level metadata changes', () => {
     { row: sharedRow, scope: 'group', targetId: 'frame', canEdit: true, restrictView: false },
     sharedRow.nodes,
     sharedRow.edges,
-    { views: [{ id: 'forged' }], stageTypes: [{ id: 'forged' }] },
+    { notes: [{ id: 'forged' }], views: [{ id: 'forged' }], stageTypes: [{ id: 'forged' }] },
   )
+  assert.equal(Object.hasOwn(result, 'notes'), false)
   assert.equal(Object.hasOwn(result, 'views'), false)
   assert.equal(Object.hasOwn(result, 'stageTypes'), false)
 })
@@ -960,6 +983,7 @@ t('member restriction override removes redaction without changing the invitation
   const share = { id: 'share-1', scope: 'group', target_id: 'frame', restrict_view: true }
   assert.equal(effectiveShareGrant(share, { can_edit: true }).restrict_view, true)
   assert.equal(effectiveShareGrant(share, { can_edit: true, restrict_view_override: false }).restrict_view, false)
+  assert.equal(effectiveShareGrant(share, { can_edit: true, restrict_view_override: true }).restrict_view, true)
   assert.equal(share.restrict_view, true)
 })
 

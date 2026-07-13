@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Handle, Position, NodeResizer, useStore } from '@xyflow/react'
 import EditToolbar from '../components/EditToolbar'
 import ScopedParticipants from '../components/ScopedParticipants'
+import OpenInNotesButton from '../components/OpenInNotesButton'
 import { sanitizeHtml } from '../lib/sanitizeHtml'
 
 const DEFAULT_TYPES = [
@@ -84,7 +85,7 @@ export default function StageNode({ data, selected, id }) {
   const shapeOnly = zoomShapeOnly || data.forceShapeOnly
 
   const filled = data.nodeFill !== false
-  const theme = data.theme ?? 'dark'
+  const theme = data.theme ?? 'light'
   // Light theme + fill off ⇒ the node's background is transparent over a light page,
   // so text drawn in the usual light-on-dark colors would go invisible — use dark text instead.
   const darkText = theme === 'light' && !filled
@@ -304,22 +305,22 @@ export default function StageNode({ data, selected, id }) {
 
   return (
     <div
+      className="canvas-node-card"
       style={{
         width: '100%',
         height: '100%',
         minWidth: 200,
         minHeight: 80,
         boxSizing: 'border-box',
+        position: 'relative',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: abstract ? 'center' : undefined,
         background: filled ? color.bg : 'transparent',
         border: `2px solid ${selected ? '#ffffff' : color.border}`,
         borderRadius: 0,
-        boxShadow: selected
-          ? `0 0 0 2px ${color.border}55, 0 8px 32px #0008`
-          : '0 4px 20px #0005',
-        transition: 'border-color 0.15s, box-shadow 0.15s',
+        boxShadow: 'none',
+        transition: 'border-color 0.15s, outline-color 0.15s, background-color 0.15s',
         cursor: 'default',
         touchAction: 'manipulation',
         filter: data.dimmed ? 'grayscale(0.85) brightness(0.55)' : undefined,
@@ -329,6 +330,7 @@ export default function StageNode({ data, selected, id }) {
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
     >
+      <OpenInNotesButton visible={selected && !data.forceShapeOnly} onOpen={data.onOpenInNotes} />
       <NodeResizer
         isVisible={selected && !data.readOnly}
         minWidth={200}
@@ -401,7 +403,7 @@ export default function StageNode({ data, selected, id }) {
               canInvite={selected && data.canInvite && !data.readOnly}
               onInvite={data.onInvite}
               canManageRestrictions={data.canManageParticipants}
-              onRemoveViewRestriction={data.onRemoveViewRestriction}
+              onToggleViewRestriction={data.onToggleViewRestriction}
               scope="node"
               targetId={id}
             />
@@ -466,7 +468,7 @@ export default function StageNode({ data, selected, id }) {
                 canInvite={selected && data.canInvite && !data.readOnly}
                 onInvite={data.onInvite}
                 canManageRestrictions={data.canManageParticipants}
-                onRemoveViewRestriction={data.onRemoveViewRestriction}
+                onToggleViewRestriction={data.onToggleViewRestriction}
                 scope="node"
                 targetId={id}
               />
