@@ -22,6 +22,11 @@ import {
 import { createWorkflowCanvasSystemMap } from '../shared/workflowCanvasSystemMap.js'
 import { WORKFLOW_SYSTEM_DISCOVERY } from '../shared/workflowSystemDiscoveryManifest.js'
 import { inspectWorkflowSystemMap as buildWorkflowSystemMapInspection } from '../shared/workflowSystemDiscovery.js'
+import {
+  planWorkflowSystemMapRelationRepair,
+  restoreMissingWorkflowSystemMapRelations,
+  WORKFLOW_RELATION_REPAIR_CONFIRMATION,
+} from '../shared/workflowSystemMapRepair.js'
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://tuaifwiigkacrflbhjmu.supabase.co'
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -626,6 +631,137 @@ export async function inspectWorkflowSystemMap(userId, canvasId) {
     expectedMap: createWorkflowCanvasSystemMap(),
     discovery: WORKFLOW_SYSTEM_DISCOVERY,
   })
+}
+
+export function workflowSystemMapRelationRepairPlanId(
+  canvasId,
+  revision,
+  plan,
+  manifestId = WORKFLOW_SYSTEM_DISCOVERY.current.id,
+) {
+  return createHash('sha256').update(JSON.stringify({
+    schema_version: 1,
+    manifest_id: manifestId,
+    canvas_id: canvasId,
+    canvas_revision: revision ?? null,
+    repairs: plan.repairs,
+    blockers: plan.blockers,
+  })).digest('hex')
+}
+
+function relationRepairPreview(row) {
+  const expectedMap = createWorkflowCanvasSystemMap()
+  const plan = planWorkflowSystemMapRelationRepair({ canvas: row, expectedMap })
+  const planId = workflowSystemMapRelationRepairPlanId(row.canvas_id, row.updated_at, plan)
+  return {
+    mode: 'read-only-repair-preview',
+    writes_performed: false,
+    canvas_id: row.canvas_id,
+    canvas_name: row.name,
+    canvas_revision: row.updated_at,
+    manifest_id: WORKFLOW_SYSTEM_DISCOVERY.current.id,
+    plan_id: planId,
+    can_apply: plan.repairs.length > 0 && plan.blockers.length === 0,
+    ...plan,
+    apply_requirements: {
+      confirmation: WORKFLOW_RELATION_REPAIR_CONFIRMATION,
+      plan_id_must_match_current_revision: true,
+      close_or_reload_stale_canvas_tabs_first: true,
+    },
+    guidance: [
+      '이 미리보기는 어떤 DB나 캔버스도 수정하지 않았습니다.',
+      '기존 관계 메타데이터가 일부라도 남아 있는 연결선은 자동 복구하지 않습니다.',
+      '실제 적용 전 모든 Workflow Canvas 탭을 닫고 최신 배포를 다시 열어 오래된 앱의 재저장을 막으세요.',
+    ],
+  }
+}
+
+async function relationMetadataGuardReady() {
+  const { data, error } = await admin().rpc('canvas_relation_metadata_guard_ready')
+  return !error && data === true
+}
+
+export async function previewWorkflowSystemMapRelationRepair(userId, canvasId) {
+  const ownerUserId = process.env.WORKFLOW_CANVAS_OWNER_USER_ID?.trim()
+  if (!ownerUserId) {
+    throw new Error('내부 시스템 지도 복구 미리보기가 비활성화되어 있습니다. 서버에 WORKFLOW_CANVAS_OWNER_USER_ID를 설정하세요.')
+  }
+  if (!canCreateWorkflowSystemMap(userId, ownerUserId)) {
+    throw new Error('제품 소유자만 내부 시스템 지도 복구를 미리 볼 수 있습니다.')
+  }
+  const access = await resolveCanvasAccess(userId, canvasId)
+  assertOwner(access, '내부 시스템 지도 복구 미리보기')
+  const preview = relationRepairPreview(access.row)
+  const guardReady = await relationMetadataGuardReady()
+  return {
+    ...preview,
+    can_apply: preview.can_apply && guardReady,
+    protection_guard: {
+      installed: guardReady,
+      required_before_apply: true,
+      migration: 'supabase-relation-metadata-guard.sql',
+    },
+  }
+}
+
+export async function repairWorkflowSystemMapRelations(userId, canvasId, planId, confirmation) {
+  if (confirmation !== WORKFLOW_RELATION_REPAIR_CONFIRMATION) {
+    throw new Error('복구 확인 문구가 일치하지 않습니다. 먼저 읽기 전용 미리보기를 실행하고 사용자의 명시적 승인을 받으세요.')
+  }
+  const ownerUserId = process.env.WORKFLOW_CANVAS_OWNER_USER_ID?.trim()
+  if (!ownerUserId) {
+    throw new Error('내부 시스템 지도 관계 복구가 비활성화되어 있습니다. 서버에 WORKFLOW_CANVAS_OWNER_USER_ID를 설정하세요.')
+  }
+  if (!canCreateWorkflowSystemMap(userId, ownerUserId)) {
+    throw new Error('제품 소유자만 내부 시스템 지도 관계를 복구할 수 있습니다.')
+  }
+
+  const access = await resolveCanvasAccess(userId, canvasId)
+  assertOwner(access, '내부 시스템 지도 관계 복구')
+  if (!(await relationMetadataGuardReady())) {
+    throw new Error('관계 메타데이터 보호 트리거가 설치되지 않았습니다. supabase-relation-metadata-guard.sql을 먼저 실행하세요.')
+  }
+  const preview = relationRepairPreview(access.row)
+  if (planId !== preview.plan_id) {
+    throw new Error('복구 계획이 현재 캔버스 revision과 일치하지 않습니다. 미리보기를 다시 실행하고 새 plan_id를 검토하세요.')
+  }
+  if (preview.blockers.length) {
+    throw new Error('구조가 다른 관계가 있어 자동 복구를 중단했습니다. 미리보기의 blockers를 먼저 검토하세요.')
+  }
+  if (!preview.repairs.length) {
+    return {
+      mode: 'relation-repair',
+      writes_performed: false,
+      canvas_id: canvasId,
+      repaired_relation_count: 0,
+      message: '복구할 누락 관계 메타데이터가 없습니다.',
+    }
+  }
+
+  const expectedMap = createWorkflowCanvasSystemMap()
+  const restored = restoreMissingWorkflowSystemMapRelations({ canvas: access.row, expectedMap })
+  const updatedAt = nextRevision(access.row.updated_at)
+  const { data, error } = await admin().from('canvases')
+    .update({ edges: restored.edges, updated_at: updatedAt })
+    .eq('user_id', userId)
+    .eq('canvas_id', canvasId)
+    .eq('updated_at', access.row.updated_at)
+    .select('updated_at')
+    .maybeSingle()
+  if (error) throw new Error(error.message)
+  if (!data) throw writeConflict()
+
+  return {
+    mode: 'relation-repair',
+    writes_performed: true,
+    canvas_id: canvasId,
+    previous_revision: access.row.updated_at,
+    updated_revision: data.updated_at,
+    repaired_relation_count: restored.repaired_edge_ids.length,
+    repaired_edge_ids: restored.repaired_edge_ids,
+    protected_existing_metadata: restored.protected_relations,
+    message: '관계 메타데이터가 완전히 없던 연결선만 기준 템플릿에서 복구했습니다.',
+  }
 }
 
 export async function clearCanvas(userId, canvasId) {

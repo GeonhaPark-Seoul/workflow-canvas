@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import { CanvasConflictError } from './cloudStorage'
+import { CanvasSchemaGuardError } from './canvasSchemaGuard'
 
 async function request(path, options = {}) {
   const { data: { session } } = await supabase.auth.getSession()
@@ -15,6 +16,7 @@ async function request(path, options = {}) {
   })
   const body = await response.json().catch(() => ({}))
   if (response.status === 409) throw new CanvasConflictError(body.error)
+  if (response.status === 428) throw new CanvasSchemaGuardError()
   if (!response.ok) throw new Error(body.error || '공유 캔버스 요청에 실패했습니다.')
   return body
 }

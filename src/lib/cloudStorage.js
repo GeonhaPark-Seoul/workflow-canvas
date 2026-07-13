@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { canvasWriteError } from './canvasSchemaGuard'
 
 export class CanvasConflictError extends Error {
   constructor(message = '다른 곳에서 캔버스가 먼저 변경되었습니다.') {
@@ -30,7 +31,7 @@ export async function saveCanvas(userId, canvasId, name, nodes, edges, notes = [
   if (expectedRevision === null) {
     const { data, error } = await supabase.from('canvases').insert(row).select('updated_at').single()
     if (error?.code === '23505') throw new CanvasConflictError()
-    if (error) { console.error('[cloud] saveCanvas insert:', error.message); throw new Error('saveCanvas: ' + error.message) }
+    if (error) { console.error('[cloud] saveCanvas insert:', error.message); throw canvasWriteError(error) }
     return data.updated_at
   }
 
@@ -41,7 +42,7 @@ export async function saveCanvas(userId, canvasId, name, nodes, edges, notes = [
     .eq('updated_at', expectedRevision)
     .select('updated_at')
     .maybeSingle()
-  if (error) { console.error('[cloud] saveCanvas update:', error.message); throw new Error('saveCanvas: ' + error.message) }
+  if (error) { console.error('[cloud] saveCanvas update:', error.message); throw canvasWriteError(error) }
   if (!data) throw new CanvasConflictError()
   return data.updated_at
 }

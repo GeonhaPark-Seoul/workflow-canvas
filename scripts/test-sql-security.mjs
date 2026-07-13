@@ -2,13 +2,14 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 
 const read = (name) => readFile(new URL(`../${name}`, import.meta.url), 'utf8')
-const [shares, profiles, profilePrivacy, images, tokens, notes] = await Promise.all([
+const [shares, profiles, profilePrivacy, images, tokens, notes, relationGuard] = await Promise.all([
   read('supabase-shares.sql'),
   read('supabase-profiles.sql'),
   read('supabase-profile-privacy.sql'),
   read('supabase-canvas-images.sql'),
   read('supabase-mcp-schema.sql'),
   read('supabase-canvas-notes.sql'),
+  read('supabase-relation-metadata-guard.sql'),
 ])
 
 const restrictedFunctions = [
@@ -50,5 +51,27 @@ assert.match(shares, /share_members add column if not exists restrict_view_overr
 assert.match(tokens, /token\s*=\s*encode\(digest\(token, 'sha256'\), 'hex'\)/i, 'legacy MCP tokens must be hashed in place')
 assert.doesNotMatch(tokens, /select token from mcp_tokens/i, 'raw MCP secrets must not be documented as recoverable')
 assert.match(notes, /add column if not exists notes jsonb not null default '\[\]'::jsonb/i, 'canvas notes migration must be idempotent')
+
+assert.match(relationGuard, /create or replace function public\.prevent_canvas_relation_metadata_loss\(\)/i)
+assert.match(relationGuard, /before update of edges on public\.canvases/i)
+assert.match(relationGuard, /drop trigger if exists protect_canvas_relation_metadata on public\.canvases/i, 'guard migration must be idempotent')
+assert.match(
+  relationGuard,
+  /join jsonb_array_elements\(new\.edges\)[\s\S]*?new_item\.edge ->> 'id'\s*=\s*old_item\.edge ->> 'id'/i,
+  'guard must compare the same surviving edge id so intentional edge deletion remains allowed',
+)
+assert.match(relationGuard, /old_item\.edge -> 'data'\) \?\| relation_keys/i, 'guard must require old relation metadata')
+assert.match(relationGuard, /not \(\(new_item\.edge -> 'data'\) \?\| relation_keys\)/i, 'guard must detect complete metadata-envelope loss')
+assert.match(relationGuard, /workflow_canvas_relation_metadata_guard/i, 'guard error must have a stable client marker')
+assert.match(relationGuard, /create or replace function public\.canvas_relation_metadata_guard_ready\(\)/i)
+assert.match(relationGuard, /trigger_row\.tgenabled <> 'D'/i, 'repair readiness must require an enabled trigger')
+assert.match(
+  relationGuard,
+  /revoke execute on function public\.canvas_relation_metadata_guard_ready\(\) from PUBLIC, anon, authenticated;/i,
+)
+assert.match(relationGuard, /grant execute on function public\.canvas_relation_metadata_guard_ready\(\) to service_role;/i)
+for (const key of ['relationType', 'relationEvidence', 'relationEvidenceRef', 'relationRuntime']) {
+  assert.ok(relationGuard.includes(`'${key}'`), `relation guard key missing: ${key}`)
+}
 
 console.log('SQL security checks passed')

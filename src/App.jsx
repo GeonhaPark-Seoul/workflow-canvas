@@ -44,6 +44,7 @@ import {
   loadUserPrefs as cloudLoadUserPrefs,
   CanvasConflictError,
 } from './lib/cloudStorage'
+import { CanvasSchemaGuardError } from './lib/canvasSchemaGuard'
 import {
   getSharedCanvas, listCanvasParticipants, listSharedCanvases,
   setMemberViewRestriction, updateSharedCanvas,
@@ -387,6 +388,7 @@ export default function App() {
   const conflictedCanvasKeysRef = useRef(new Set())
   const syncFlushRunningRef = useRef(false)
   const [syncConflict, setSyncConflict] = useState(null)
+  const [canvasSchemaGuardError, setCanvasSchemaGuardError] = useState(null)
 
   // ── Sharing / invite (phase 2) ────────────────────────────────────────────
   const [invite, setInvite] = useState(null) // { scope, targetId, x, y } | null
@@ -1826,6 +1828,12 @@ export default function App() {
           const changedByServer = JSON.stringify(saved.snapshot) !== JSON.stringify(initialEntry.snapshot)
           finishQueuedSave(initialEntry, saved, changedByServer)
         } catch (error) {
+          if (error instanceof CanvasSchemaGuardError) {
+            conflictedCanvasKeysRef.current.add(initialEntry.key)
+            setCanvasSchemaGuardError(error.message)
+            console.error('[cloud] schema guard:', error.message)
+            break
+          }
           if (!(error instanceof CanvasConflictError)) {
             if (initialEntry.shared) {
               try {
@@ -1933,6 +1941,12 @@ export default function App() {
       finishQueuedSave(proposedEntry, saved, true)
       setSyncConflict(null)
     } catch (error) {
+      if (error instanceof CanvasSchemaGuardError) {
+        conflictedCanvasKeysRef.current.add(entry.key)
+        setCanvasSchemaGuardError(error.message)
+        setSyncConflict(null)
+        return
+      }
       if (error instanceof CanvasConflictError) {
         try {
           const newest = await fetchRemoteCanvas(entry)
@@ -3178,6 +3192,38 @@ export default function App() {
                 cursor: syncConflict.busy ? 'default' : 'pointer', opacity: syncConflict.busy ? 0.55 : 1,
               }}>
                 내 변경 우선 병합
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {canvasSchemaGuardError && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 1275,
+          background: '#000000aa', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }} onClick={(event) => event.stopPropagation()}>
+          <div style={{
+            background: '#1a1a22', border: '1px solid #ef444466', borderRadius: 8,
+            padding: '24px 28px', width: 'min(390px, calc(100vw - 24px))', boxSizing: 'border-box',
+            boxShadow: '0 12px 48px #000d',
+          }}>
+            <div style={{ color: '#f0f0f0', fontSize: 15, fontWeight: 700, marginBottom: 9 }}>
+              안전을 위해 저장을 중단했습니다
+            </div>
+            <div style={{ color: '#aaa', fontSize: 12, lineHeight: 1.65, marginBottom: 10 }}>
+              현재 탭에서 관계 정보가 사라질 수 있는 저장이 감지되어 서버가 변경을 거부했습니다.
+            </div>
+            <div style={{ color: '#fca5a5', fontSize: 11, lineHeight: 1.55, marginBottom: 16 }}>
+              {canvasSchemaGuardError}
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button type="button" onClick={() => window.location.reload()} style={{
+                background: '#ef4444', border: 'none', borderRadius: 6,
+                color: '#fff', fontSize: 12, fontWeight: 700, padding: '8px 12px',
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}>
+                최신 앱 다시 불러오기
               </button>
             </div>
           </div>

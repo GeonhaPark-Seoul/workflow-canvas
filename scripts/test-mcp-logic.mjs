@@ -10,6 +10,7 @@ import {
   assertRegionEdit,
   toExternalCanvasEdge,
   toExternalCanvasNode,
+  workflowSystemMapRelationRepairPlanId,
 } from '../mcp/store.js'
 import { sanitizeHtml, sanitizeTextFields } from '../mcp/sanitize.js'
 import { applySharedCanvasUpdate, effectiveShareGrant, pickBestShareAccess, redactCanvas } from '../mcp/shareAccess.js'
@@ -19,6 +20,11 @@ import { absoluteNodePosition, boundsForNodeIds } from '../src/lib/canvasGeometr
 import { mergeCanvasSnapshots } from '../src/lib/canvasMerge.js'
 import { getStubEdgeGeometry } from '../src/edges/stubEdgeGeometry.js'
 import { chooseOwnCanvasToRestore } from '../src/lib/canvasNavigation.js'
+import {
+  canvasWriteError,
+  CanvasSchemaGuardError,
+  RELATION_METADATA_GUARD_MARKER,
+} from '../src/lib/canvasSchemaGuard.js'
 import { createSystemNodeData, normalizeSystemNodeData, systemNodeReality } from '../shared/systemOntology.js'
 import {
   createEdgeRelationData,
@@ -37,6 +43,11 @@ import {
   LEGACY_SYSTEM_MAP_BASELINE_ID,
   selectWorkflowSystemMapBaseline,
 } from '../shared/workflowSystemDiscovery.js'
+import {
+  planWorkflowSystemMapRelationRepair,
+  restoreMissingWorkflowSystemMapRelations,
+  WORKFLOW_RELATION_REPAIR_CONFIRMATION,
+} from '../shared/workflowSystemMapRepair.js'
 import { buildDiscoveryManifest } from './system-discovery.mjs'
 
 let passed = 0
@@ -589,7 +600,11 @@ t('generated discovery manifest covers current API, DB, storage, realtime and MC
     'realtime-table:canvases',
     'credential-reference:SUPABASE_ANON_KEY',
   ]) assert.ok(resources[key], `missing discovery resource: ${key}`)
-  assert.ok(resources['collection:mcp-tools'].details.items.includes('inspect_workflow_system_map'))
+  for (const tool of [
+    'inspect_workflow_system_map',
+    'preview_workflow_system_map_relation_repair',
+    'repair_workflow_system_map_relations',
+  ]) assert.ok(resources['collection:mcp-tools'].details.items.includes(tool), `missing MCP tool: ${tool}`)
   assert.equal(JSON.stringify(WORKFLOW_SYSTEM_DISCOVERY).includes('eyJhbGciOi'), false)
 })
 
@@ -667,6 +682,134 @@ t('inspection detects a missing map node and a semantically edited relation', ()
   assert.ok(report.node_findings.some((item) => item.node_id === 'map-postgres' && item.status === 'missing_on_canvas'))
   assert.ok(report.relation_findings.some((item) => item.edge_id === map.edges[0].id && item.status === 'map_modified'))
   assert.ok(report.relation_findings.some((item) => item.edge_id === map.edges[1].id && item.status === 'evidence_missing'))
+})
+
+t('inspection distinguishes erased relation metadata from an intentional semantic edit', () => {
+  const map = createWorkflowCanvasSystemMap()
+  const damagedEdgeId = map.edges[0].id
+  delete map.edges[0].data
+  const report = inspectWorkflowSystemMap({
+    canvas: map,
+    expectedMap: createWorkflowCanvasSystemMap(),
+    discovery: WORKFLOW_SYSTEM_DISCOVERY,
+  })
+  const finding = report.relation_findings.find((item) => item.edge_id === damagedEdgeId)
+
+  assert.equal(finding.status, 'relation_metadata_missing')
+  assert.deepEqual(finding.differences, ['relation_metadata'])
+  assert.equal(finding.actual.relation_type, null)
+  assert.equal(finding.actual.relation_metadata_present, false)
+  assert.equal(finding.expected.relation_type, 'uses')
+  assert.equal(finding.repair_eligible, true)
+})
+
+console.log('system map relation repair safety')
+
+t('repair plan selects only structurally matching edges with completely missing metadata', () => {
+  const expected = createWorkflowCanvasSystemMap()
+  const damaged = structuredClone(expected)
+  const before = structuredClone(damaged)
+  damaged.edges = damaged.edges.map((edge, index) => {
+    const next = { ...edge }
+    delete next.data
+    if (index === 0) next.data = { legacyDecoration: 'preserve-me' }
+    return next
+  })
+  const damagedBeforePlanning = structuredClone(damaged)
+  const plan = planWorkflowSystemMapRelationRepair({ canvas: damaged, expectedMap: expected })
+
+  assert.equal(plan.summary.expected_relations, expected.edges.length)
+  assert.equal(plan.summary.repairable_missing_metadata, expected.edges.length)
+  assert.equal(plan.summary.protected_existing_metadata, 0)
+  assert.equal(plan.summary.structural_blockers, 0)
+  assert.deepEqual(damaged, damagedBeforePlanning)
+  assert.notDeepEqual(damaged, before)
+})
+
+t('repair restores expected relation data while preserving every other edge field', () => {
+  const expected = createWorkflowCanvasSystemMap()
+  const damaged = structuredClone(expected)
+  damaged.edges = damaged.edges.map((edge, index) => {
+    const next = { ...edge, untouchedField: `value-${index}` }
+    delete next.data
+    if (index === 0) next.data = { legacyDecoration: 'preserve-me' }
+    return next
+  })
+  const damagedBefore = structuredClone(damaged)
+  const result = restoreMissingWorkflowSystemMapRelations({ canvas: damaged, expectedMap: expected })
+
+  assert.equal(result.repaired_edge_ids.length, expected.edges.length)
+  assert.equal(result.edges[0].data.legacyDecoration, 'preserve-me')
+  assert.equal(result.edges[0].data.relationType, 'uses')
+  assert.equal(result.edges[0].data.relationEvidenceRef, 'src/App.jsx')
+  assert.equal(result.edges[0].untouchedField, 'value-0')
+  assert.deepEqual(damaged, damagedBefore)
+})
+
+t('repair protects an existing intentional relation edit instead of overwriting it', () => {
+  const expected = createWorkflowCanvasSystemMap()
+  const damaged = structuredClone(expected)
+  damaged.edges = damaged.edges.map((edge) => {
+    const next = { ...edge }
+    delete next.data
+    return next
+  })
+  damaged.edges[0].data = createEdgeRelationData('reads', '', true, {
+    relationSourceKind: 'manual',
+    relationEvidence: '사용자가 별도로 수정함',
+  })
+  const plan = planWorkflowSystemMapRelationRepair({ canvas: damaged, expectedMap: expected })
+  const result = restoreMissingWorkflowSystemMapRelations({ canvas: damaged, expectedMap: expected })
+
+  assert.equal(plan.summary.repairable_missing_metadata, expected.edges.length - 1)
+  assert.equal(plan.summary.protected_existing_metadata, 1)
+  assert.equal(plan.protected_relations[0].edge_id, damaged.edges[0].id)
+  assert.equal(result.edges[0].data.relationType, 'reads')
+  assert.equal(result.repaired_edge_ids.includes(damaged.edges[0].id), false)
+})
+
+t('repair refuses a missing edge or changed endpoint instead of guessing', () => {
+  const expected = createWorkflowCanvasSystemMap()
+  const damaged = structuredClone(expected)
+  delete damaged.edges[0].data
+  damaged.edges[0].target = 'map-postgres'
+  damaged.edges.pop()
+  const plan = planWorkflowSystemMapRelationRepair({ canvas: damaged, expectedMap: expected })
+
+  assert.equal(plan.summary.structural_blockers, 2)
+  assert.ok(plan.blockers.some((item) => item.reason === 'endpoint_mismatch'))
+  assert.ok(plan.blockers.some((item) => item.reason === 'edge_missing'))
+  assert.throws(
+    () => restoreMissingWorkflowSystemMapRelations({ canvas: damaged, expectedMap: expected }),
+    /구조가 다른 관계/,
+  )
+})
+
+t('repair plan id is bound to revision, manifest and exact repair list', () => {
+  const expected = createWorkflowCanvasSystemMap()
+  const damaged = structuredClone(expected)
+  delete damaged.edges[0].data
+  const plan = planWorkflowSystemMapRelationRepair({ canvas: damaged, expectedMap: expected })
+  const first = workflowSystemMapRelationRepairPlanId('canvas-1', 'revision-1', plan, 'manifest-1')
+
+  assert.match(first, /^[a-f0-9]{64}$/)
+  assert.equal(first, workflowSystemMapRelationRepairPlanId('canvas-1', 'revision-1', plan, 'manifest-1'))
+  assert.notEqual(first, workflowSystemMapRelationRepairPlanId('canvas-1', 'revision-2', plan, 'manifest-1'))
+  assert.notEqual(first, workflowSystemMapRelationRepairPlanId('canvas-1', 'revision-1', plan, 'manifest-2'))
+  assert.equal(WORKFLOW_RELATION_REPAIR_CONFIRMATION, 'RESTORE_MISSING_RELATION_METADATA')
+})
+
+t('database relation guard errors become an actionable reload error in the browser', () => {
+  const guarded = canvasWriteError({
+    message: `[${RELATION_METADATA_GUARD_MARKER}] blocked`,
+  })
+  const ordinary = canvasWriteError({ message: 'network unavailable' })
+
+  assert.ok(guarded instanceof CanvasSchemaGuardError)
+  assert.equal(guarded.code, 'CANVAS_SCHEMA_GUARD')
+  assert.match(guarded.message, /최신 앱/)
+  assert.equal(ordinary instanceof CanvasSchemaGuardError, false)
+  assert.match(ordinary.message, /network unavailable/)
 })
 
 console.log('validateGraphInput')

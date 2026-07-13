@@ -18,6 +18,7 @@ import {
   RELATION_SOURCE_DEFS,
   RELATION_TYPE_IDS,
 } from '../shared/relationOntology.js'
+import { WORKFLOW_RELATION_REPAIR_CONFIRMATION } from '../shared/workflowSystemMapRepair.js'
 
 const SYSTEM_KIND_IDS = SYSTEM_KIND_DEFS.map(({ id }) => id)
 const SYSTEM_ENVIRONMENT_IDS = SYSTEM_ENVIRONMENT_DEFS.map(({ id }) => id)
@@ -166,6 +167,14 @@ sourceHandle/targetHandle은 생략 가능 — 생략하면 실제 좌표 기반
 - changed, needs_review, unmodeled는 오류나 취약점이 확정되었다는 뜻이 아니라 사람이 확인할 지점이라는 뜻입니다.
 - 점검 결과를 근거로 지도·코드·DB를 자동 수정하지 마세요. 수정은 영향 범위와 보안 경계를 설명하고 사용자의 별도 승인을 받은 다음 진행합니다.
 - 응답의 writes_performed가 false인지 확인하고, 발견 결과와 기준선 신뢰도를 함께 설명하세요.
+
+### 시스템 지도 관계 복구
+- preview_workflow_system_map_relation_repair는 읽기 전용입니다. 먼저 실행해 repairable, protected, blockers와 plan_id를 사용자에게 그대로 설명하세요.
+- repair_workflow_system_map_relations는 기존 관계 메타데이터가 완전히 사라졌고 연결선 ID·양 끝이 기준과 일치할 때만 복구합니다. 일부라도 메타데이터가 남은 관계는 덮어쓰지 않습니다.
+- 실제 복구는 사용자가 미리보기 결과를 본 뒤 명확히 승인한 경우에만 호출하세요. AI가 스스로 승인하거나 재기준화해서는 안 됩니다.
+- 적용 전에 사용자가 오래 열린 Workflow Canvas 탭을 모두 닫거나 최신 배포로 다시 열었는지 확인하세요.
+- protection_guard.installed가 true가 아니면 복구를 시도하지 마세요. 적용 도구도 DB 보호 트리거가 없으면 거부합니다.
+- plan_id는 캔버스 revision과 manifest에 묶여 있습니다. 불일치하면 적용하지 말고 미리보기를 다시 실행하세요.
 
 ### 공유 캔버스
 - 초대받은 캔버스도 get_canvases 목록에 나타납니다 (shared:true + permission_scope).
@@ -489,6 +498,34 @@ export function buildServer(getUserId) {
       canvas_id: z.string().describe('검사할 Workflow Canvas 시스템 지도의 캔버스 ID'),
     },
   }, g(async (userId, a) => ok(await store.inspectWorkflowSystemMap(userId, a.canvas_id))))
+
+  server.registerTool('preview_workflow_system_map_relation_repair', {
+    description:
+      '제품 소유자 전용 읽기 전용 미리보기: 시스템 지도의 연결선 ID·양 끝과 관계 메타데이터를 기준 템플릿과 비교해 ' +
+      '안전하게 복구 가능한 항목, 보호할 기존 수정, 구조적 차단 항목을 보고하고 revision 고정 plan_id를 만듭니다. ' +
+      '캔버스·코드·DB를 수정하지 않습니다.',
+    inputSchema: {
+      canvas_id: z.string().describe('복구 가능 여부를 미리 볼 Workflow Canvas 시스템 지도 ID'),
+    },
+  }, g(async (userId, a) => ok(await store.previewWorkflowSystemMapRelationRepair(userId, a.canvas_id))))
+
+  server.registerTool('repair_workflow_system_map_relations', {
+    description:
+      '제품 소유자 전용 제한적 쓰기: 사용자가 읽기 전용 미리보기를 검토하고 명시적으로 승인한 뒤에만 호출합니다. ' +
+      '현재 revision의 plan_id와 연결선 ID·양 끝이 모두 일치하고 관계 메타데이터가 완전히 없는 선만 복구합니다. ' +
+      '기존 관계 정보, 노드, 배치, 사용자 추가 항목은 덮어쓰지 않습니다. 오래 열린 앱 탭을 먼저 닫아야 합니다.',
+    inputSchema: {
+      canvas_id: z.string().describe('복구할 Workflow Canvas 시스템 지도 ID'),
+      plan_id: z.string().regex(/^[a-f0-9]{64}$/).describe('직전 읽기 전용 미리보기에서 받은 현재 revision 전용 plan_id'),
+      confirmation: z.literal(WORKFLOW_RELATION_REPAIR_CONFIRMATION).describe(
+        `사용자가 미리보기 결과를 승인한 경우에만 ${WORKFLOW_RELATION_REPAIR_CONFIRMATION}`),
+    },
+  }, g(async (userId, a) => ok(await store.repairWorkflowSystemMapRelations(
+    userId,
+    a.canvas_id,
+    a.plan_id,
+    a.confirmation,
+  ))))
 
   server.registerTool('rename_canvas', {
     description: '캔버스 이름을 변경합니다 (브라우저 탭 이름에도 반영됨).',

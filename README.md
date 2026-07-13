@@ -33,6 +33,8 @@ Supabase 데이터베이스를 기반으로 동작합니다.
 | `create_canvas` | 새 캔버스 생성 |
 | `create_workflow_system_map` | 제품 소유자 전용 내부 시스템 지도 생성 (환경변수로 허용 사용자 제한) |
 | `inspect_workflow_system_map` | 제품 소유자 전용 시스템 지도 읽기 전용 점검 (코드·SQL·설정 비교, 쓰기 없음) |
+| `preview_workflow_system_map_relation_repair` | 제품 소유자 전용 관계 복구 미리보기 (revision 고정 plan 생성, 쓰기 없음) |
+| `repair_workflow_system_map_relations` | 승인된 plan에서 메타데이터가 완전히 없는 관계만 제한적으로 복구 |
 | `rename_canvas` | 캔버스 이름 변경 (탭에 반영) |
 | `delete_canvas` | 캔버스 삭제 (마지막 1개는 불가) |
 | `clear_canvas` | 캔버스 전체 초기화 |
@@ -84,6 +86,12 @@ digest로 변환됩니다.
 (또는 Dashboard → Database → Replication → `supabase_realtime`에 `canvases` 추가).
 이걸 실행해야 AI(MCP)가 캔버스를 고칠 때 열려있는 브라우저에 몇 초 내 자동 반영됩니다.
 
+구버전 탭이 새 관계 메타데이터를 통째로 지우는 저장을 막으려면
+[`supabase-relation-metadata-guard.sql`](supabase-relation-metadata-guard.sql)을 실행하세요.
+이 트리거는 같은 연결선이 유지되면서 관계 데이터 묶음만 전부 사라질 때만 저장을 거부합니다.
+연결선 삭제, 관계 타입 변경, 근거 편집은 허용됩니다.
+관계 복구 도구도 이 트리거가 설치되고 활성화된 것을 확인하기 전에는 적용을 거부합니다.
+
 ### 2) 토큰 발급
 
 앱에서 로그인한 뒤 프로필 → `MCP 연결` → `새 토큰 만들기`를 사용하세요.
@@ -97,7 +105,7 @@ Vercel 프로젝트 → Settings → Environment Variables에 추가:
 |---|---|---|
 | `SUPABASE_SERVICE_ROLE_KEY` | ✅ | Supabase Dashboard → Settings → API의 service_role 키 (서버에서만 사용, 절대 노출 금지) |
 | `SUPABASE_URL` | 선택 | 기본값은 앱의 Supabase 프로젝트 URL |
-| `WORKFLOW_CANVAS_OWNER_USER_ID` | 선택 | 내부 시스템 지도 생성·점검 도구를 허용할 제품 소유자의 Supabase Auth 사용자 UUID. 미설정 시 두 도구는 비활성화됨 |
+| `WORKFLOW_CANVAS_OWNER_USER_ID` | 선택 | 내부 시스템 지도 생성·점검·복구 도구를 허용할 제품 소유자의 Supabase Auth 사용자 UUID. 미설정 시 관련 도구는 비활성화됨 |
 
 ### 4) 배포
 
@@ -177,3 +185,8 @@ npm test
 `inspect_workflow_system_map`의 `changed`, `needs_review`, `unmodeled` 결과는 자동 수정 지시가
 아니라 사람의 재검토 신호입니다. 이 도구는 캔버스·코드·DB를 수정하지 않으며 응답에
 `writes_performed: false`를 명시합니다.
+
+관계 복구는 반드시 `preview_workflow_system_map_relation_repair`로 먼저 확인합니다. 실제 적용
+도구는 미리보기의 현재 revision 전용 `plan_id`와 별도 확인 문구가 모두 일치해야 하며,
+기존 관계 정보가 일부라도 남은 선이나 양 끝이 달라진 선은 덮어쓰지 않습니다. 실제 적용
+전에는 오래 열린 Workflow Canvas 탭을 모두 닫고 최신 배포를 다시 여세요.

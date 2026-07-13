@@ -1,3 +1,8 @@
+import {
+  compareWorkflowSystemMapRelation,
+  hasWorkflowRelationMetadata,
+} from './workflowSystemMapRepair.js'
+
 export const LEGACY_SYSTEM_MAP_BASELINE_ID = 'phase3-41ca765'
 
 export const WORKFLOW_SYSTEM_MAP_NODE_BINDINGS = Object.freeze({
@@ -188,24 +193,34 @@ export function inspectWorkflowSystemMap({ canvas, expectedMap, discovery }) {
   for (const [edgeId, expected] of expectedEdges) {
     const actual = canvasEdges.get(edgeId)
     if (!actual) {
+      const comparison = compareWorkflowSystemMapRelation(actual, expected)
       relationFindings.push({
         status: 'missing_on_canvas',
         edge_id: edgeId,
         relation_type: expected.data?.relationType,
+        differences: comparison.differences,
+        expected: comparison.expected,
         reason: '기준 시스템 지도에 있던 관계가 현재 캔버스에 없습니다.',
       })
       continue
     }
-    if (
-      actual.source !== expected.source
-      || actual.target !== expected.target
-      || actual.data?.relationType !== expected.data?.relationType
-    ) {
+    const comparison = compareWorkflowSystemMapRelation(actual, expected)
+    if (comparison.differences.length) {
+      const metadataMissing = comparison.differences.includes('relation_metadata')
       relationFindings.push({
-        status: 'map_modified',
+        status: metadataMissing ? 'relation_metadata_missing' : 'map_modified',
         edge_id: edgeId,
-        relation_type: actual.data?.relationType,
-        reason: '관계의 양 끝 또는 의미 타입이 기준 지도와 다릅니다.',
+        relation_type: actual.data?.relationType ?? null,
+        differences: comparison.differences,
+        actual: comparison.actual,
+        expected: comparison.expected,
+        repair_eligible: metadataMissing
+          && actual.source === expected.source
+          && actual.target === expected.target
+          && !hasWorkflowRelationMetadata(actual.data),
+        reason: metadataMissing
+          ? '연결선의 양 끝은 유지됐지만 관계 타입과 근거 메타데이터가 통째로 없습니다.'
+          : '관계의 양 끝 또는 의미 타입이 기준 지도와 다릅니다.',
       })
       continue
     }

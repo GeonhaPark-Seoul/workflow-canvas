@@ -92,6 +92,7 @@ export default async function handler(req, res) {
     const message = error instanceof Error ? error.message : '공유 캔버스 요청에 실패했습니다.'
     const status = error?.code === 'CANVAS_CONFLICT'
       ? 409
+      : message.includes('workflow_canvas_relation_metadata_guard') ? 428
       : message.includes('권한') || message.includes('읽기 전용') || message.includes('범위') ? 403 : 500
     return send(res, status, { error: message })
   }
