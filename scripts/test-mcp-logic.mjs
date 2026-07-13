@@ -31,6 +31,13 @@ import {
   RELATION_SOURCE_DEFS,
 } from '../shared/relationOntology.js'
 import { createWorkflowCanvasSystemMap } from '../shared/workflowCanvasSystemMap.js'
+import { WORKFLOW_SYSTEM_DISCOVERY } from '../shared/workflowSystemDiscoveryManifest.js'
+import {
+  inspectWorkflowSystemMap,
+  LEGACY_SYSTEM_MAP_BASELINE_ID,
+  selectWorkflowSystemMapBaseline,
+} from '../shared/workflowSystemDiscovery.js'
+import { buildDiscoveryManifest } from './system-discovery.mjs'
 
 let passed = 0
 function t(name, fn) {
@@ -539,6 +546,127 @@ t('self map covers the critical runtime, data, security and delivery boundaries'
     assert.equal(relationTypes.has(relationType), true, `missing system map relation: ${relationType}`)
   }
   assert.equal(JSON.stringify(map).includes('SUPABASE_SERVICE_ROLE_KEY='), false)
+})
+
+console.log('read-only system discovery')
+
+t('discovery records credential names but excludes literal values from output and fingerprints', () => {
+  const credentialName = ['PUBLIC', 'ANON', 'KEY'].join('_')
+  const environmentName = ['DISCOVERY', 'TEST', 'SECRET'].join('_')
+  const scan = (secret) => buildDiscoveryManifest(new Map([
+    ['package.json', '{}'],
+    ['src/fake.js', [
+      `let ${credentialName} = '${secret}'`,
+      `const PRIVATE_TOKEN = process.env.${environmentName} ?? 'fallback-${secret}'`,
+    ].join('\n')],
+  ]))
+  const first = scan('first-raw-secret')
+  const second = scan('second-raw-secret')
+  const serialized = JSON.stringify(first)
+
+  assert.equal(serialized.includes('first-raw-secret'), false)
+  assert.equal(serialized.includes('fallback-first-raw-secret'), false)
+  assert.ok(first.resources[`env:${environmentName}`])
+  assert.equal(
+    first.resources[`credential-reference:${credentialName}`].details.classification,
+    'public-client-reference',
+  )
+  assert.equal(
+    first.resources['file:src/fake.js'].fingerprint,
+    second.resources['file:src/fake.js'].fingerprint,
+  )
+  assert.equal(first.id, second.id)
+})
+
+t('generated discovery manifest covers current API, DB, storage, realtime and MCP surfaces', () => {
+  const resources = WORKFLOW_SYSTEM_DISCOVERY.current.resources
+  for (const key of [
+    'api:/api/mcp',
+    'api:/api/shared-canvas',
+    'db-table:canvases',
+    'db-table:share_revocations',
+    'storage-bucket:canvas-images',
+    'realtime-table:canvases',
+    'credential-reference:SUPABASE_ANON_KEY',
+  ]) assert.ok(resources[key], `missing discovery resource: ${key}`)
+  assert.ok(resources['collection:mcp-tools'].details.items.includes('inspect_workflow_system_map'))
+  assert.equal(JSON.stringify(WORKFLOW_SYSTEM_DISCOVERY).includes('eyJhbGciOi'), false)
+})
+
+t('new and legacy self maps select explicit, non-verified comparison baselines', () => {
+  const currentMap = createWorkflowCanvasSystemMap()
+  const current = selectWorkflowSystemMapBaseline(currentMap, WORKFLOW_SYSTEM_DISCOVERY)
+  assert.equal(current.id, WORKFLOW_SYSTEM_DISCOVERY.current.id)
+  assert.equal(current.source, 'canvas-declared-current')
+  assert.equal(current.trust, 'declared-not-server-verified')
+
+  const legacyMap = structuredClone(currentMap)
+  delete legacyMap.nodes.find((node) => node.data?.systemMapSnapshot)?.data.systemMapSnapshot
+  const legacy = selectWorkflowSystemMapBaseline(legacyMap, WORKFLOW_SYSTEM_DISCOVERY)
+  assert.equal(legacy.id, LEGACY_SYSTEM_MAP_BASELINE_ID)
+  assert.equal(legacy.source, 'legacy-template-inference')
+  assert.equal(legacy.trust, 'declared-not-server-verified')
+})
+
+t('unknown declared snapshot stays unavailable instead of being treated as verified current state', () => {
+  const map = createWorkflowCanvasSystemMap()
+  map.nodes.find((node) => node.data?.systemMapSnapshot).data.systemMapSnapshot.manifestId = 'unknown-manifest'
+  const baseline = selectWorkflowSystemMapBaseline(map, WORKFLOW_SYSTEM_DISCOVERY)
+  assert.equal(baseline.manifest, null)
+  assert.equal(baseline.source, 'canvas-declared-unknown')
+  assert.equal(baseline.trust, 'unavailable')
+})
+
+t('current self map inspection is read-only and reports unmodeled resources without changing the map', () => {
+  const map = createWorkflowCanvasSystemMap()
+  const before = structuredClone(map)
+  const report = inspectWorkflowSystemMap({
+    canvas: map,
+    expectedMap: createWorkflowCanvasSystemMap(),
+    discovery: WORKFLOW_SYSTEM_DISCOVERY,
+  })
+  const unmodeled = new Set(report.unmodeled_resources.map((resource) => resource.key))
+
+  assert.equal(report.mode, 'read-only-discovery')
+  assert.equal(report.writes_performed, false)
+  assert.equal(report.baseline.manifest_id, WORKFLOW_SYSTEM_DISCOVERY.current.id)
+  assert.equal(report.summary.node_findings, 0)
+  assert.equal(report.summary.relation_findings, 0)
+  assert.ok(unmodeled.has('db-table:share_revocations'))
+  assert.ok(unmodeled.has('credential-reference:SUPABASE_ANON_KEY'))
+  assert.deepEqual(map, before)
+  assert.equal(JSON.stringify(report).includes('eyJhbGciOi'), false)
+})
+
+t('legacy self map reports code drift as review signals without claiming a confirmed error', () => {
+  const map = createWorkflowCanvasSystemMap()
+  delete map.nodes.find((node) => node.data?.systemMapSnapshot)?.data.systemMapSnapshot
+  const report = inspectWorkflowSystemMap({
+    canvas: map,
+    expectedMap: createWorkflowCanvasSystemMap(),
+    discovery: WORKFLOW_SYSTEM_DISCOVERY,
+  })
+
+  assert.equal(report.baseline.manifest_id, LEGACY_SYSTEM_MAP_BASELINE_ID)
+  assert.ok(report.node_findings.some((item) => ['changed', 'discovered_since_baseline'].includes(item.status)))
+  assert.ok(report.relation_findings.some((item) => item.status === 'needs_review'))
+  assert.ok(report.guidance.some((line) => line.includes('오류 확정이 아니라')))
+})
+
+t('inspection detects a missing map node and a semantically edited relation', () => {
+  const map = createWorkflowCanvasSystemMap()
+  map.nodes = map.nodes.filter((node) => node.id !== 'map-postgres')
+  map.edges[0].data.relationType = map.edges[0].data.relationType === 'calls' ? 'reads' : 'calls'
+  map.edges[1].data.relationEvidenceRef = ''
+  const report = inspectWorkflowSystemMap({
+    canvas: map,
+    expectedMap: createWorkflowCanvasSystemMap(),
+    discovery: WORKFLOW_SYSTEM_DISCOVERY,
+  })
+
+  assert.ok(report.node_findings.some((item) => item.node_id === 'map-postgres' && item.status === 'missing_on_canvas'))
+  assert.ok(report.relation_findings.some((item) => item.edge_id === map.edges[0].id && item.status === 'map_modified'))
+  assert.ok(report.relation_findings.some((item) => item.edge_id === map.edges[1].id && item.status === 'evidence_missing'))
 })
 
 console.log('validateGraphInput')

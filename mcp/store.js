@@ -20,6 +20,8 @@ import {
   relationDefinition,
 } from '../shared/relationOntology.js'
 import { createWorkflowCanvasSystemMap } from '../shared/workflowCanvasSystemMap.js'
+import { WORKFLOW_SYSTEM_DISCOVERY } from '../shared/workflowSystemDiscoveryManifest.js'
+import { inspectWorkflowSystemMap as buildWorkflowSystemMapInspection } from '../shared/workflowSystemDiscovery.js'
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://tuaifwiigkacrflbhjmu.supabase.co'
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -607,6 +609,23 @@ export async function createWorkflowSystemMap(userId, name) {
     reality: 'declared',
     relation_reality: 'evidenced',
   }
+}
+
+export async function inspectWorkflowSystemMap(userId, canvasId) {
+  const ownerUserId = process.env.WORKFLOW_CANVAS_OWNER_USER_ID?.trim()
+  if (!ownerUserId) {
+    throw new Error('내부 시스템 지도 검사가 비활성화되어 있습니다. 서버에 WORKFLOW_CANVAS_OWNER_USER_ID를 설정하세요.')
+  }
+  if (!canCreateWorkflowSystemMap(userId, ownerUserId)) {
+    throw new Error('제품 소유자만 내부 시스템 지도를 검사할 수 있습니다.')
+  }
+  const access = await resolveCanvasAccess(userId, canvasId)
+  assertOwner(access, '내부 시스템 지도 검사')
+  return buildWorkflowSystemMapInspection({
+    canvas: access.row,
+    expectedMap: createWorkflowCanvasSystemMap(),
+    discovery: WORKFLOW_SYSTEM_DISCOVERY,
+  })
 }
 
 export async function clearCanvas(userId, canvasId) {

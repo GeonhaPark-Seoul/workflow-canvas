@@ -161,6 +161,12 @@ sourceHandle/targetHandle은 생략 가능 — 생략하면 실제 좌표 기반
 - 현재 MCP 입력으로는 verified를 만들 수 없습니다. 서버가 별도 신뢰 경계에서 evidenceId와 검증 시각을 공급해야만 verified가 됩니다.
 - 코드나 문서를 읽고 만든 관계에는 가능한 한 구체적인 파일·설정 경로를 relationEvidenceRef에 남깁니다. 비밀값은 절대 기록하지 않습니다.
 
+### 읽기 전용 시스템 지도 점검
+- inspect_workflow_system_map은 코드·SQL·설정에서 자원 이름과 지문만 읽어 시스템 지도와 비교합니다. 환경변수·키·토큰의 실제 값은 수집하거나 반환하지 않습니다.
+- changed, needs_review, unmodeled는 오류나 취약점이 확정되었다는 뜻이 아니라 사람이 확인할 지점이라는 뜻입니다.
+- 점검 결과를 근거로 지도·코드·DB를 자동 수정하지 마세요. 수정은 영향 범위와 보안 경계를 설명하고 사용자의 별도 승인을 받은 다음 진행합니다.
+- 응답의 writes_performed가 false인지 확인하고, 발견 결과와 기준선 신뢰도를 함께 설명하세요.
+
 ### 공유 캔버스
 - 초대받은 캔버스도 get_canvases 목록에 나타납니다 (shared:true + permission_scope).
 - 편집은 초대 구역 안에서만 서버가 허용합니다: canvas=전체 편집(단, 캔버스 삭제/이름 변경/초기화는 소유자만),
@@ -473,6 +479,16 @@ export function buildServer(getUserId) {
     await store.createWorkflowSystemMap(userId, a.name),
     '새 캔버스가 생성되었습니다. 브라우저에서 구역별 저장 뷰와 관계 근거를 검토하세요.',
   )))
+
+  server.registerTool('inspect_workflow_system_map', {
+    description:
+      '제품 소유자 전용 읽기 전용 검사: Workflow Canvas 시스템 지도와 배포 시점의 코드·SQL·설정 manifest를 비교해 ' +
+      '달라진 근거, 지도에서 누락된 항목, 아직 모델링되지 않은 자원을 보고합니다. 비밀값은 manifest에 저장하거나 반환하지 않으며 ' +
+      '캔버스·코드·DB를 전혀 수정하지 않습니다. changed/needs_review는 자동 수정 근거가 아니라 사람의 재검토 신호입니다.',
+    inputSchema: {
+      canvas_id: z.string().describe('검사할 Workflow Canvas 시스템 지도의 캔버스 ID'),
+    },
+  }, g(async (userId, a) => ok(await store.inspectWorkflowSystemMap(userId, a.canvas_id))))
 
   server.registerTool('rename_canvas', {
     description: '캔버스 이름을 변경합니다 (브라우저 탭 이름에도 반영됨).',

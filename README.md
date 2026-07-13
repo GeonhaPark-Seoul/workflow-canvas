@@ -32,6 +32,7 @@ Supabase 데이터베이스를 기반으로 동작합니다.
 | `delete_edge` | 연결선 삭제 |
 | `create_canvas` | 새 캔버스 생성 |
 | `create_workflow_system_map` | 제품 소유자 전용 내부 시스템 지도 생성 (환경변수로 허용 사용자 제한) |
+| `inspect_workflow_system_map` | 제품 소유자 전용 시스템 지도 읽기 전용 점검 (코드·SQL·설정 비교, 쓰기 없음) |
 | `rename_canvas` | 캔버스 이름 변경 (탭에 반영) |
 | `delete_canvas` | 캔버스 삭제 (마지막 1개는 불가) |
 | `clear_canvas` | 캔버스 전체 초기화 |
@@ -96,7 +97,7 @@ Vercel 프로젝트 → Settings → Environment Variables에 추가:
 |---|---|---|
 | `SUPABASE_SERVICE_ROLE_KEY` | ✅ | Supabase Dashboard → Settings → API의 service_role 키 (서버에서만 사용, 절대 노출 금지) |
 | `SUPABASE_URL` | 선택 | 기본값은 앱의 Supabase 프로젝트 URL |
-| `WORKFLOW_CANVAS_OWNER_USER_ID` | 선택 | 내부 `create_workflow_system_map` 도구를 허용할 제품 소유자의 Supabase Auth 사용자 UUID. 미설정 시 도구는 비활성화됨 |
+| `WORKFLOW_CANVAS_OWNER_USER_ID` | 선택 | 내부 시스템 지도 생성·점검 도구를 허용할 제품 소유자의 Supabase Auth 사용자 UUID. 미설정 시 두 도구는 비활성화됨 |
 
 ### 4) 배포
 
@@ -162,3 +163,17 @@ npm install
 npm run dev        # 앱 (Vite)
 vercel dev         # 앱 + /api/mcp 함수 로컬 실행 (Vercel CLI 필요)
 ```
+
+시스템 지도 점검용 manifest는 코드·SQL·설정에서 자원 이름과 지문만 추출합니다. 환경변수,
+API 키, 토큰의 실제 값은 생성 파일에 저장하지 않습니다. 관련 소스를 바꾼 뒤에는 manifest를
+갱신해 함께 커밋하고, 테스트에서 최신 상태를 확인하세요.
+
+```bash
+npm run discover:update  # 읽기 전용 발견 manifest 갱신
+npm run discover:check   # 커밋할 manifest가 현재 소스와 일치하는지 확인
+npm test
+```
+
+`inspect_workflow_system_map`의 `changed`, `needs_review`, `unmodeled` 결과는 자동 수정 지시가
+아니라 사람의 재검토 신호입니다. 이 도구는 캔버스·코드·DB를 수정하지 않으며 응답에
+`writes_performed: false`를 명시합니다.

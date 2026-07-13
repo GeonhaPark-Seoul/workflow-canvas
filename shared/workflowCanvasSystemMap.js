@@ -1,5 +1,6 @@
 import { createEdgeRelationData, edgeRelationInfo } from './relationOntology.js'
 import { createSystemNodeData } from './systemOntology.js'
+import { WORKFLOW_SYSTEM_DISCOVERY } from './workflowSystemDiscoveryManifest.js'
 
 const GROUPS = Object.freeze([
   { id: 'map-group-experience', label: '사용자 인터페이스층', x: 0, y: 0, width: 1000, height: 560 },
@@ -16,7 +17,18 @@ function groupNode(group) {
     width: group.width,
     height: group.height,
     zIndex: -1,
-    data: { label: group.label },
+    data: {
+      label: group.label,
+      ...(group.id === 'map-group-experience'
+        ? {
+            systemMapSnapshot: {
+              schemaVersion: WORKFLOW_SYSTEM_DISCOVERY.schemaVersion,
+              manifestId: WORKFLOW_SYSTEM_DISCOVERY.current.id,
+              source: 'server-template',
+            },
+          }
+        : {}),
+    },
   }
 }
 
