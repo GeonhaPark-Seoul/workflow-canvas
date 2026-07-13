@@ -1,17 +1,22 @@
-import { useEffect, useRef } from 'react'
+import { Fragment, useEffect, useRef } from 'react'
 
 // Drag&drop node palette: dragging a card sets `application/wfc-node` JSON
 // payload for the canvas to consume on drop. Tap (touch fallback) calls
 // onPick directly with the same payload.
 const NODE_DEFS = [
-  { key: 'stage', nodeType: 'stage', label: '단계 노드', desc: '흐름의 한 단계', border: '#3b82f6', borderStyle: 'solid' },
+  { key: 'stage', section: '정보 노드', nodeType: 'stage', label: '단계 노드', desc: '흐름의 한 단계', border: '#3b82f6', borderStyle: 'solid' },
   { key: 'memo', nodeType: 'memo', label: '메모 노드', desc: '자유 메모', border: '#f59e0b', borderStyle: 'dashed' },
-  { key: 'content-photo', nodeType: 'content', contentKind: 'photo', label: '컨텐츠 - 사진', desc: '이미지 첨부', icon: '🖼', border: '#22c55e', borderStyle: 'solid' },
+  { key: 'content-photo', section: '콘텐츠 노드', nodeType: 'content', contentKind: 'photo', label: '컨텐츠 - 사진', desc: '이미지 첨부', icon: '🖼', border: '#22c55e', borderStyle: 'solid' },
   { key: 'content-database', nodeType: 'content', contentKind: 'database', label: '컨텐츠 - 데이터베이스', desc: '구조화된 데이터', icon: '🗄', border: '#a855f7', borderStyle: 'solid', badge: '준비 중' },
   { key: 'content-browser', nodeType: 'content', contentKind: 'browser', label: '컨텐츠 - 브라우저', desc: '웹 페이지 임베드', icon: '🌐', border: '#06b6d4', borderStyle: 'solid' },
+  { key: 'system', section: '시스템 모델', nodeType: 'system', systemKind: 'service', label: '시스템 실체', desc: '앱·API·DB 등 실제 자원을 모델링', icon: '◆', border: '#06b6d4', borderStyle: 'solid', badge: '설계' },
 ]
 
-const payloadOf = (def) => ({ nodeType: def.nodeType, ...(def.contentKind ? { contentKind: def.contentKind } : {}) })
+const payloadOf = (def) => ({
+  nodeType: def.nodeType,
+  ...(def.contentKind ? { contentKind: def.contentKind } : {}),
+  ...(def.systemKind ? { systemKind: def.systemKind } : {}),
+})
 
 export default function NodePalette({ onClose, onPick, mobile }) {
   const ref = useRef(null)
@@ -56,36 +61,42 @@ export default function NodePalette({ onClose, onPick, mobile }) {
       <div style={{ color: '#fff', fontSize: 12, fontWeight: 700, marginBottom: 10 }}>노드 목록</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: mobile ? '50vh' : '60vh', overflowY: 'auto' }}>
         {NODE_DEFS.map((def) => (
-          <div
-            key={def.key}
-            draggable
-            onDragStart={(e) => handleDragStart(e, def)}
-            onClick={() => onPick?.(payloadOf(def))}
-            title={def.desc}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              background: '#0a0a0a', border: `1px ${def.borderStyle} ${def.border}`,
-              borderRadius: 8, padding: '8px 10px', cursor: 'grab',
-            }}
-          >
-            {def.icon && <span style={{ fontSize: 16, flexShrink: 0 }}>{def.icon}</span>}
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ color: '#fff', fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {def.label}
+          <Fragment key={def.key}>
+            {def.section && (
+              <div style={{ marginTop: def.key === NODE_DEFS[0].key ? 0 : 5, color: '#707786', fontSize: 9, fontWeight: 800, letterSpacing: 0.8 }}>
+                {def.section}
               </div>
-              <div style={{ color: '#ccc', fontSize: 10, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {def.desc}
-              </div>
-            </div>
-            {def.badge && (
-              <span style={{
-                fontSize: 9, fontWeight: 700, color: '#f59e0b', background: '#f59e0b22',
-                border: '1px solid #f59e0b44', borderRadius: 4, padding: '1px 5px', flexShrink: 0,
-              }}>
-                {def.badge}
-              </span>
             )}
-          </div>
+            <div
+              draggable
+              onDragStart={(e) => handleDragStart(e, def)}
+              onClick={() => onPick?.(payloadOf(def))}
+              title={def.desc}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                background: '#0a0a0a', border: `1px ${def.borderStyle} ${def.border}`,
+                borderRadius: 8, padding: '8px 10px', cursor: 'grab',
+              }}
+            >
+              {def.icon && <span style={{ fontSize: 16, flexShrink: 0 }}>{def.icon}</span>}
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ color: '#fff', fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {def.label}
+                </div>
+                <div style={{ color: '#ccc', fontSize: 10, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {def.desc}
+                </div>
+              </div>
+              {def.badge && (
+                <span style={{
+                  fontSize: 9, fontWeight: 700, color: '#f59e0b', background: '#f59e0b22',
+                  border: '1px solid #f59e0b44', borderRadius: 4, padding: '1px 5px', flexShrink: 0,
+                }}>
+                  {def.badge}
+                </span>
+              )}
+            </div>
+          </Fragment>
         ))}
       </div>
     </div>

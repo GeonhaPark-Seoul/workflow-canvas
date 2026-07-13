@@ -2,13 +2,20 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { sanitizeExternalUrl, sanitizeHtml } from '../lib/sanitizeHtml'
 import { uploadCanvasImage } from '../lib/imageStorage'
 import CanvasImage from './CanvasImage'
+import {
+  SYSTEM_ENVIRONMENT_DEFS,
+  SYSTEM_KIND_DEFS,
+  SYSTEM_SOURCE_DEFS,
+  systemKindDefinition,
+  systemNodeReality,
+} from '../../shared/systemOntology.js'
 
 // ── Notes-app-style split pane ───────────────────────────────────────────────
 // LIST column (node titles, tree for stage / flat for memo & content) +
 // resizable PAGE column (full note editor for the selected node).
 // The pane can be resized and moved to either side of the canvas.
 
-const TYPE_LABEL = { stage: '단계', memo: '메모', content: '컨텐츠' }
+const TYPE_LABEL = { stage: '단계', memo: '메모', content: '컨텐츠', system: '시스템' }
 const CONTENT_KIND_LABEL = { photo: '사진', database: '데이터베이스', browser: '브라우저' }
 const NO_TITLE = '(제목 없음)'
 
@@ -24,12 +31,14 @@ function nodeTitle(node) {
   if (node.type === 'stage') return stripHtml(node.data?.label) || NO_TITLE
   if (node.type === 'memo') return stripHtml(node.data?.header) || NO_TITLE
   if (node.type === 'content') return stripHtml(node.data?.header) || CONTENT_KIND_LABEL[node.data?.kind] || '컨텐츠'
+  if (node.type === 'system') return stripHtml(node.data?.label) || NO_TITLE
   return NO_TITLE
 }
 
 function nodeBadge(node) {
   if (!node) return ''
   if (node.type === 'content') return `컨텐츠 · ${CONTENT_KIND_LABEL[node.data?.kind] ?? ''}`
+  if (node.type === 'system') return `시스템 · ${systemKindDefinition(node.data?.systemKind).label}`
   return TYPE_LABEL[node.type] ?? node.type
 }
 
@@ -42,6 +51,7 @@ function bodyPreviewText(node) {
     if (node.data?.kind === 'browser') return node.data?.url ?? ''
     if (node.data?.kind === 'database') return '데이터베이스 (준비 중)'
   }
+  if (node.type === 'system') return stripHtml(node.data?.purpose || node.data?.description)
   return ''
 }
 
@@ -191,7 +201,7 @@ function SubNoteRow({ id, depth, byId, relationMap, expanded, onToggle, onFocusN
   const isCycle = ancestors.has(id)
   const kids = isCycle ? [] : (relationMap.get(id) ?? [])
   const isExpanded = expanded.has(id)
-  const dim = node.type !== 'stage'
+  const dim = node.type !== 'stage' && node.type !== 'system'
   const nextAncestors = useMemo(() => new Set([...ancestors, id]), [ancestors, id])
   const preview = bodyPreviewText(node)
 
@@ -253,8 +263,8 @@ function NotePage({ node, byId, inMap, outMap, isEditable, onUpdateNode, onFocus
     })
   }, [])
 
-  const titleField = node.type === 'stage' ? 'label' : 'header'
-  const bodyField = node.type === 'stage' ? 'description' : node.type === 'memo' ? 'text' : null
+  const titleField = node.type === 'stage' || node.type === 'system' ? 'label' : 'header'
+  const bodyField = node.type === 'stage' || node.type === 'system' ? 'description' : node.type === 'memo' ? 'text' : null
 
   const flushPending = useCallback(() => {
     clearTimeout(titleSaveTimer.current)
@@ -356,7 +366,7 @@ function NotePage({ node, byId, inMap, outMap, isEditable, onUpdateNode, onFocus
           }}
         />
 
-        {(node.type === 'stage' || node.type === 'memo') && (
+        {(node.type === 'stage' || node.type === 'memo' || node.type === 'system') && (
           <div
             key={`body-${node.id}`}
             contentEditable={isEditable}
@@ -370,6 +380,95 @@ function NotePage({ node, byId, inMap, outMap, isEditable, onUpdateNode, onFocus
             }}
           />
         )}
+
+        {node.type === 'system' && (() => {
+          const reality = systemNodeReality(node.data)
+          const fieldStyle = {
+            width: '100%', boxSizing: 'border-box', background: '#12121a',
+            border: '1px solid #ffffff18', borderRadius: 6, color: '#d8dae0',
+            fontSize: 12, padding: '7px 9px', outline: 'none', fontFamily: 'inherit',
+          }
+          const commit = (field) => (event) => onUpdateNode(node.id, { [field]: event.target.value })
+          return (
+            <div style={{ marginTop: 16, borderTop: '1px solid #ffffff18', paddingTop: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                <span style={{ color: '#8b94a7', fontSize: 10, fontWeight: 800, letterSpacing: 0.8 }}>실체 상태</span>
+                <span style={{
+                  color: reality.color, background: `${reality.color}18`, border: `1px solid ${reality.color}66`,
+                  borderRadius: 4, padding: '2px 6px', fontSize: 9, fontWeight: 800,
+                }}>
+                  {reality.label}
+                </span>
+                <span style={{ color: '#666', fontSize: 10.5 }}>
+                  {reality.id === 'twin' ? '서버에서 외부 자원 확인됨' : '외부 자원 검증 전'}
+                </span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10 }}>
+                <label style={{ display: 'grid', gap: 5, minWidth: 0 }}>
+                  <span style={{ color: '#777f90', fontSize: 10, fontWeight: 700 }}>무엇인가</span>
+                  <select disabled={!isEditable} value={node.data?.systemKind ?? 'service'} onChange={commit('systemKind')} style={fieldStyle}>
+                    {SYSTEM_KIND_DEFS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
+                  </select>
+                </label>
+                <label style={{ display: 'grid', gap: 5, minWidth: 0 }}>
+                  <span style={{ color: '#777f90', fontSize: 10, fontWeight: 700 }}>환경</span>
+                  <select disabled={!isEditable} value={node.data?.environment ?? 'unknown'} onChange={commit('environment')} style={fieldStyle}>
+                    {SYSTEM_ENVIRONMENT_DEFS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
+                  </select>
+                </label>
+                <label style={{ display: 'grid', gap: 5, minWidth: 0 }}>
+                  <span style={{ color: '#777f90', fontSize: 10, fontWeight: 700 }}>발견 출처</span>
+                  <select disabled={!isEditable} value={node.data?.sourceKind ?? 'manual'} onChange={commit('sourceKind')} style={fieldStyle}>
+                    {SYSTEM_SOURCE_DEFS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
+                  </select>
+                </label>
+                <label style={{ display: 'grid', gap: 5, minWidth: 0 }}>
+                  <span style={{ color: '#777f90', fontSize: 10, fontWeight: 700 }}>제공자·플랫폼</span>
+                  <input
+                    disabled={!isEditable}
+                    defaultValue={node.data?.provider ?? ''}
+                    onBlur={commit('provider')}
+                    onKeyDown={(event) => { if (event.key === 'Enter') event.currentTarget.blur() }}
+                    placeholder="예: Supabase, Vercel"
+                    style={fieldStyle}
+                  />
+                </label>
+              </div>
+
+              <label style={{ display: 'grid', gap: 5, marginTop: 10 }}>
+                <span style={{ color: '#777f90', fontSize: 10, fontWeight: 700 }}>리소스 참조</span>
+                <input
+                  disabled={!isEditable}
+                  defaultValue={node.data?.externalRef ?? ''}
+                  onBlur={commit('externalRef')}
+                  onKeyDown={(event) => { if (event.key === 'Enter') event.currentTarget.blur() }}
+                  placeholder="프로젝트 ID·테이블 이름 등, 비밀 키 값은 입력하지 않음"
+                  style={fieldStyle}
+                />
+              </label>
+
+              {[
+                ['purpose', '왜 존재하는가', '이 실체가 달성해야 하는 목적'],
+                ['responsibility', '무엇을 책임지는가', '입력·처리·출력과 책임 범위'],
+                ['constraints', '어떤 제약이 있는가', '권한·보안·성능·비용·법적 제약'],
+                ['evidence', '무엇이 이를 증명하는가', '코드·설정·로그·문서 등 근거'],
+              ].map(([field, label, placeholder]) => (
+                <label key={field} style={{ display: 'grid', gap: 5, marginTop: 10 }}>
+                  <span style={{ color: '#777f90', fontSize: 10, fontWeight: 700 }}>{label}</span>
+                  <textarea
+                    disabled={!isEditable}
+                    defaultValue={stripHtml(node.data?.[field])}
+                    onBlur={commit(field)}
+                    placeholder={placeholder}
+                    rows={3}
+                    style={{ ...fieldStyle, resize: 'vertical', minHeight: 68, lineHeight: 1.5 }}
+                  />
+                </label>
+              ))}
+            </div>
+          )
+        })()}
 
         {node.type === 'content' && node.data?.kind === 'photo' && (
           <div style={{ background: '#12121a', border: '1px solid #ffffff18', borderRadius: 6, padding: 12, textAlign: 'center' }}>
@@ -558,6 +657,7 @@ export default function NotesPanel({
   const byId = useMemo(() => new Map(entries.map((n) => [n.id, n])), [entries])
 
   const typeNodes = useMemo(() => entries.filter((n) => n.type === type), [entries, type])
+  const canCreateStandaloneNote = canCreateNotes && type !== 'system'
 
   // Stage hierarchy: source→target edges between two stage nodes (excluding part links).
   const stageIds = useMemo(() => new Set(entries.filter((n) => n.type === 'stage').map((n) => n.id)), [entries])
@@ -674,7 +774,7 @@ export default function NotesPanel({
               <div style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, color: '#f0f0f0' }}>
                 {TYPE_LABEL[type] ?? type} <span style={{ color: '#666', fontWeight: 400 }}>({typeNodes.length})</span>
               </div>
-              {canCreateNotes && (
+              {canCreateStandaloneNote && (
                 <IconBtn
                   title="새 노트"
                   onClick={(event) => {

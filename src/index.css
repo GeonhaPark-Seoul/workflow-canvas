@@ -198,6 +198,21 @@ body[data-theme='light'] .react-flow__node:hover .canvas-group-frame {
   outline-color: #2563eb66;
 }
 
+.system-node-card::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px dashed var(--system-accent);
+  border-radius: 2px;
+  opacity: 0.55;
+  pointer-events: none;
+}
+.system-node-card[data-reality='twin']::after {
+  border-style: solid;
+  border-color: #22c55e99;
+  opacity: 1;
+}
+
 .node-open-notes {
   position: absolute;
   top: -30px;

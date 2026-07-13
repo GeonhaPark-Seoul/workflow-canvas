@@ -10,8 +10,9 @@ import { createHash } from 'node:crypto'
 import { sanitizeTextFields } from './sanitize.js'
 import {
   SIZE, nodeW, nodeH, nodeRect, overlaps, findNonOverlapping,
-  layoutGraph, validateGraphInput, radialLevels,
+  isStructuralNode, layoutGraph, validateGraphInput, radialLevels,
 } from './layout.js'
+import { createSystemNodeData, normalizeSystemNodeData } from '../shared/systemOntology.js'
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://tuaifwiigkacrflbhjmu.supabase.co'
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -425,6 +426,24 @@ export function toExternalCanvasNode(node, byId, hidden = false) {
       ...(src?.startsWith('data:') ? { embedded_image: true } : {}),
     }
   }
+  if (node.type === 'system') {
+    const data = normalizeSystemNodeData(node.data)
+    return {
+      ...shape,
+      label: data.label ?? '',
+      description: data.description ?? '',
+      system_kind: data.systemKind,
+      purpose: data.purpose ?? '',
+      responsibility: data.responsibility ?? '',
+      constraints: data.constraints ?? '',
+      evidence: data.evidence ?? '',
+      environment: data.environment,
+      source_kind: data.sourceKind,
+      ...(data.provider ? { provider: data.provider } : {}),
+      ...(data.externalRef ? { external_ref: data.externalRef } : {}),
+      reality: 'declared',
+    }
+  }
   return {
     ...shape,
     label: node.data?.label ?? '',
@@ -591,17 +610,35 @@ function materializeNode(opts, position, types) {
   if (size.width != null) base.width = size.width
   if (size.height != null) base.height = size.height
   const dimmed = opts.dimmed === true ? { dimmed: true } : {}
-  return opts.type === 'memo'
-    ? { ...base, data: { header: opts.header ?? '', text: opts.text ?? '', ...dimmed } }
-    : {
-        ...base,
-        data: {
-          label: opts.label ?? '새 단계',
-          description: opts.description ?? '',
-          colorIdx: assertStageTypeIdx(types, opts.stageTypeIdx ?? opts.colorIdx),
-          ...dimmed,
-        },
-      }
+  if (opts.type === 'memo') {
+    return { ...base, data: { header: opts.header ?? '', text: opts.text ?? '', ...dimmed } }
+  }
+  if (opts.type === 'system') {
+    const defaults = createSystemNodeData(opts.systemKind)
+    const data = normalizeSystemNodeData({
+      label: opts.label ?? defaults.label,
+      description: opts.description ?? '',
+      purpose: opts.purpose ?? '',
+      responsibility: opts.responsibility ?? '',
+      constraints: opts.constraints ?? '',
+      evidence: opts.evidence ?? '',
+      systemKind: opts.systemKind ?? defaults.systemKind,
+      environment: opts.environment ?? defaults.environment,
+      sourceKind: opts.sourceKind ?? defaults.sourceKind,
+      provider: opts.provider ?? '',
+      externalRef: opts.externalRef ?? '',
+    })
+    return { ...base, data: { ...data, ...dimmed } }
+  }
+  return {
+    ...base,
+    data: {
+      label: opts.label ?? '새 단계',
+      description: opts.description ?? '',
+      colorIdx: assertStageTypeIdx(types, opts.stageTypeIdx ?? opts.colorIdx),
+      ...dimmed,
+    },
+  }
 }
 
 export async function createNode(userId, canvasId, opts) {
@@ -658,16 +695,28 @@ export async function createNode(userId, canvasId, opts) {
 function applyPatch(n, patch, types) {
   sanitizeTextFields(patch)
   const data = { ...n.data }
+  // Runtime verification is server-owned evidence, never editable canvas data.
+  delete data.twinRuntime
   if (patch.label != null) data.label = patch.label
   if (patch.description != null) data.description = patch.description
-  if (patch.stageTypeIdx != null || patch.colorIdx != null) data.colorIdx = assertStageTypeIdx(types, patch.stageTypeIdx ?? patch.colorIdx)
+  if (n.type === 'stage' && (patch.stageTypeIdx != null || patch.colorIdx != null)) {
+    data.colorIdx = assertStageTypeIdx(types, patch.stageTypeIdx ?? patch.colorIdx)
+  }
   if (patch.header != null) data.header = patch.header
   if (patch.text != null) data.text = patch.text
+  if (n.type === 'system') {
+    for (const key of [
+      'systemKind', 'purpose', 'responsibility', 'constraints', 'evidence',
+      'environment', 'sourceKind', 'provider', 'externalRef',
+    ]) {
+      if (patch[key] != null) data[key] = patch[key]
+    }
+  }
   if (patch.dimmed != null) data.dimmed = patch.dimmed === true
   const position = { ...n.position }
   if (Number.isFinite(patch.x)) position.x = patch.x
   if (Number.isFinite(patch.y)) position.y = patch.y
-  const next = { ...n, position, data }
+  const next = { ...n, position, data: n.type === 'system' ? normalizeSystemNodeData(data) : data }
   const size = clampSize(n.type, patch.width, patch.height)
   if (size.width != null) next.width = size.width
   if (size.height != null) next.height = size.height
@@ -779,10 +828,11 @@ function buildEdge({ source, target, sourceHandle, targetHandle }, sNode, tNode)
   }
 }
 
-// Auto heuristic: pick 'radial' when there is exactly one in-degree-0 stage,
-// that stage has out-degree ≥ 3, and the total stage count ≥ 5.
+// Auto heuristic: pick 'radial' when there is exactly one in-degree-0
+// structural node, it has out-degree >= 3, and there are at least 5 structural
+// nodes. Structural means a hierarchy stage or a system entity.
 function autoPreset(nodeInputs, edgeInputs) {
-  const stageIds = new Set(nodeInputs.filter((n) => n.type === 'stage').map((n) => n.tmp_id))
+  const stageIds = new Set(nodeInputs.filter(isStructuralNode).map((n) => n.tmp_id))
   const stageEdges = (edgeInputs ?? []).filter((e) => stageIds.has(e.source) && stageIds.has(e.target))
   const inDeg = new Map([...stageIds].map((id) => [id, 0]))
   const outDeg = new Map([...stageIds].map((id) => [id, 0]))
@@ -855,7 +905,7 @@ export async function createGraph(userId, canvasId, { nodes: nodeInputs, edges: 
   // For radial: use radialLevels. For directional presets: compute Kahn layers.
   const bfsLevel = preset === 'radial' ? radialLevels(nodeInputs, edgeInputs) : (() => {
     if (!['right', 'left', 'down', 'up'].includes(preset)) return null
-    const stageIds = new Set(nodeInputs.filter((n) => n.type === 'stage').map((n) => n.tmp_id))
+    const stageIds = new Set(nodeInputs.filter(isStructuralNode).map((n) => n.tmp_id))
     const stageEdges = (edgeInputs ?? []).filter((e) => stageIds.has(e.source) && stageIds.has(e.target))
     const succ = new Map([...stageIds].map((id) => [id, []]))
     const inDeg = new Map([...stageIds].map((id) => [id, 0]))
@@ -911,7 +961,7 @@ export async function createGraph(userId, canvasId, { nodes: nodeInputs, edges: 
       // leave from the parent's single outward connection point.
       const srcNode = nodeInputs.find((n) => n.tmp_id === srcTmp)
       const tgtNode = nodeInputs.find((n) => n.tmp_id === tgtTmp)
-      const bothStages = srcNode?.type === 'stage' && tgtNode?.type === 'stage'
+      const bothStages = isStructuralNode(srcNode) && isStructuralNode(tgtNode)
 
       if (bothStages) {
         const srcLevel = bfsLevel?.get(srcTmp) ?? -1
@@ -955,7 +1005,7 @@ export async function createGraph(userId, canvasId, { nodes: nodeInputs, edges: 
       const flowSide = FLOW_SIDE[preset]
       const srcNode = nodeInputs.find((n) => n.tmp_id === srcTmp)
       const tgtNode = nodeInputs.find((n) => n.tmp_id === tgtTmp)
-      const bothStages = srcNode?.type === 'stage' && tgtNode?.type === 'stage'
+      const bothStages = isStructuralNode(srcNode) && isStructuralNode(tgtNode)
 
       if (bothStages) {
         const srcLevel = bfsLevel?.get(srcTmp) ?? -1

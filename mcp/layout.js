@@ -1,7 +1,8 @@
 // Pure layout/validation helpers for the MCP server — no DB access, unit-testable.
 //
-// layoutGraph: layered or radial auto-layout for create_graph. Stages are
-// topologically layered (cycles tolerated), memos ride near their linked stage.
+// layoutGraph: layered or radial auto-layout for create_graph. Structural
+// nodes (stages and system entities) are topologically layered (cycles
+// tolerated), while memos ride near their linked structural node.
 // Supports presets: 'right' (default), 'left', 'down', 'up', 'radial'.
 
 // Default/min render sizes — must match StageNode/MemoNode minWidth/minHeight
@@ -9,11 +10,13 @@ export const SIZE = {
   stage: { w: 220, h: 90, minW: 200, minH: 80 },
   memo:  { w: 180, h: 90, minW: 160, minH: 80 },
   content: { w: 220, h: 140, minW: 160, minH: 100 },
+  system: { w: 240, h: 130, minW: 200, minH: 110 },
   group: { w: 320, h: 220, minW: 240, minH: 160 },
 }
 
 export const nodeW = (n) => n.width  ?? SIZE[n.type]?.w ?? SIZE.stage.w
 export const nodeH = (n) => n.height ?? SIZE[n.type]?.h ?? SIZE.stage.h
+export const isStructuralNode = (n) => n?.type === 'stage' || n?.type === 'system'
 
 export function nodeRect(n) {
   return { x: n.position?.x ?? 0, y: n.position?.y ?? 0, w: nodeW(n), h: nodeH(n) }
@@ -49,7 +52,7 @@ export function findNonOverlapping(existingRects, desired, w, h) {
 // Axis transforms handle the other 3 presets.
 function layeredLayout({ newNodes, newEdges, colGap = 320, rowGap = 200 }) {
   const pos = new Map() // tmp_id -> {x, y}
-  const stages = newNodes.filter((n) => n.type === 'stage')
+  const stages = newNodes.filter(isStructuralNode)
   const memos = newNodes.filter((n) => n.type === 'memo')
   const stageIds = new Set(stages.map((n) => n.tmp_id))
 
@@ -158,9 +161,10 @@ function layeredLayout({ newNodes, newEdges, colGap = 320, rowGap = 200 }) {
 // Root has dir=null (it legitimately connects on up to 4 sides).
 function radialLayout({ newNodes, newEdges }) {
   const pos = new Map() // tmp_id -> {x, y, dir?}
-  const stages = newNodes.filter((n) => n.type === 'stage')
+  const stages = newNodes.filter(isStructuralNode)
   const memos = newNodes.filter((n) => n.type === 'memo')
   const stageIds = new Set(stages.map((n) => n.tmp_id))
+  const nodeById = new Map(newNodes.map((n) => [n.tmp_id, n]))
 
   if (!stages.length) {
     // No stages: place memos in a simple column
@@ -276,9 +280,9 @@ function radialLayout({ newNodes, newEdges }) {
   // Center position (will convert to top-left after placing)
   const center = new Map() // tmp_id -> {cx, cy, w, h}
 
-  // Place root at origin center using normal stage default size
-  const rootW = root.width ?? SIZE.stage.w
-  const rootH = root.height ?? SIZE.stage.h
+  // Place root at origin center using its own node type's default size.
+  const rootW = nodeW(root)
+  const rootH = nodeH(root)
   center.set(rootId, { cx: 0, cy: 0, w: rootW, h: rootH })
   const sizeOut = new Map([[rootId, { w: rootW, h: rootH }]])
 
@@ -359,8 +363,8 @@ function radialLayout({ newNodes, newEdges }) {
         const cx = pcx + dir.dx * dist + dir.dy * fanOffset  // dir.dy is perp for horiz dirs: 0 for right/left
         const cy = pcy + dir.dy * dist + dir.dx * fanOffset   // dir.dx is perp for vert dirs: 0 for bottom/top
 
-        const w = n.width ?? SIZE.stage.w
-        const h = n.height ?? SIZE.stage.h
+        const w = nodeW(n)
+        const h = nodeH(n)
         sizeOut.set(n.tmp_id, { w, h })
 
         const desired = rectOf(cx, cy, w, h)
@@ -444,7 +448,13 @@ function radialLayout({ newNodes, newEdges }) {
     const stageId = link.source === m.tmp_id ? link.target : link.source
     const stagePos = pos.get(stageId)
     if (!stagePos) continue
-    const { cx: scx, cy: scy } = center.get(stageId) ?? { cx: stagePos.x + (sizeOut.get(stageId)?.w ?? SIZE.stage.w) / 2, cy: stagePos.y + (sizeOut.get(stageId)?.h ?? SIZE.stage.h) / 2 }
+    const linkedNode = nodeById.get(stageId)
+    const linkedW = sizeOut.get(stageId)?.w ?? (linkedNode ? nodeW(linkedNode) : SIZE.stage.w)
+    const linkedH = sizeOut.get(stageId)?.h ?? (linkedNode ? nodeH(linkedNode) : SIZE.stage.h)
+    const { cx: scx, cy: scy } = center.get(stageId) ?? {
+      cx: stagePos.x + linkedW / 2,
+      cy: stagePos.y + linkedH / 2,
+    }
 
     const count = memoCountPerStage.get(stageId) ?? 0
     memoCountPerStage.set(stageId, count + 1)
@@ -456,8 +466,8 @@ function radialLayout({ newNodes, newEdges }) {
 
     // Place just beyond the chosen side (half stage thickness + half memo
     // thickness + gap, along that side's axis — existing distance math).
-    const sStageH = sizeOut.get(stageId)?.h ?? SIZE.stage.h
-    const sStageW = sizeOut.get(stageId)?.w ?? SIZE.stage.w
+    const sStageH = linkedH
+    const sStageW = linkedW
     const isHorizSide = side === 'right' || side === 'left'
     const dist = isHorizSide ? (sStageW / 2 + memoW / 2 + 60) : (sStageH / 2 + memoH / 2 + 60)
     const mcx = scx + DIR[side].dx * dist
@@ -488,7 +498,10 @@ function radialLayout({ newNodes, newEdges }) {
     const subMinX = Math.min(...[...subPos.values()].map((p) => p.x))
     const subMinY = Math.min(...[...subPos.values()].map((p) => p.y))
     // Find bottom of radial cluster
-    const radialMaxY = Math.max(...[...pos.values()].map((p) => (p.y ?? 0) + (p.height ?? SIZE.stage.h)))
+    const radialMaxY = Math.max(...[...pos.entries()].map(([id, p]) => {
+      const node = nodeById.get(id)
+      return (p.y ?? 0) + (node ? nodeH(node) : SIZE.stage.h)
+    }))
     const offsetY = radialMaxY + 300
     for (const [id, p] of subPos) {
       pos.set(id, { x: p.x - subMinX, y: p.y - subMinY + offsetY })
@@ -498,12 +511,11 @@ function radialLayout({ newNodes, newEdges }) {
   return pos
 }
 
-// ── radialLevels: BFS depth per stage node (exported for warning checks) ─────
-// Returns Map<tmp_id, level> for stage nodes only, using the same root-selection
-// and BFS logic as radialLayout. Non-stage nodes are excluded.
-// Used by store.js to check whether same-depth nodes share stageTypeIdx.
+// ── radialLevels: BFS depth per structural node (exported for warnings) ───────
+// Returns Map<tmp_id, level> for stage and system nodes using the same
+// root-selection and BFS logic as radialLayout. Memos are excluded.
 export function radialLevels(nodeInputs, edgeInputs) {
-  const stages = nodeInputs.filter((n) => n.type === 'stage')
+  const stages = nodeInputs.filter(isStructuralNode)
   const stageIds = new Set(stages.map((n) => n.tmp_id))
   if (!stages.length) return new Map()
 
@@ -704,8 +716,8 @@ export function avoidEdgeCrossings(positions, newNodes, newEdges, level, rootId)
   for (const e of newEdges) {
     const srcNode = newNodes.find((x) => x.tmp_id === e.source)
     const tgtNode = newNodes.find((x) => x.tmp_id === e.target)
-    if (srcNode?.type === 'memo' && tgtNode?.type === 'stage') memoLinkedStage.set(e.source, e.target)
-    if (tgtNode?.type === 'memo' && srcNode?.type === 'stage') memoLinkedStage.set(e.target, e.source)
+    if (srcNode?.type === 'memo' && isStructuralNode(tgtNode)) memoLinkedStage.set(e.source, e.target)
+    if (tgtNode?.type === 'memo' && isStructuralNode(srcNode)) memoLinkedStage.set(e.target, e.source)
   }
 
   for (let sweep = 0; sweep < 2; sweep++) {
@@ -763,8 +775,8 @@ export function avoidEdgeCrossings(positions, newNodes, newEdges, level, rootId)
               const stagePos = positions.get(stageId)
               if (stagePos) {
                 const stageNode = newNodes.find((x) => x.tmp_id === stageId)
-                const sw = stageNode?.width  ?? SIZE.stage.w
-                const sh = stageNode?.height ?? SIZE.stage.h
+                const sw = stageNode ? nodeW(stageNode) : SIZE.stage.w
+                const sh = stageNode ? nodeH(stageNode) : SIZE.stage.h
                 const stageCx = stagePos.x + sw / 2
                 const stageCy = stagePos.y + sh / 2
                 const memoCx  = candidate.x + (nr.w / 2)
@@ -841,8 +853,8 @@ export function layoutGraph({ newNodes, newEdges, existingNodes, colGap = 320, r
     let avoidRootId = null
     if (preset === 'radial') {
       avoidLevel = radialLevels(newNodes, newEdges)
-      // Root = stage whose pos entry has no dir field
-      const stages = newNodes.filter((n) => n.type === 'stage')
+      // Root = structural node whose pos entry has no dir field.
+      const stages = newNodes.filter(isStructuralNode)
       const rootStage = stages.find((n) => pos.has(n.tmp_id) && pos.get(n.tmp_id).dir == null)
       avoidRootId = rootStage?.tmp_id ?? null
     }

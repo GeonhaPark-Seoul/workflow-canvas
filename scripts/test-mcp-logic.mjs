@@ -3,14 +3,15 @@
 import assert from 'node:assert/strict'
 import { layoutGraph, findNonOverlapping, validateGraphInput, overlaps, nodeRect, radialLevels, segmentIntersectsRect, avoidEdgeCrossings, edgeAnchors, SIZE } from '../mcp/layout.js'
 import { checkRadialLevelMixing, editableNodeIdSet, assertRegionEdit, toExternalCanvasNode } from '../mcp/store.js'
-import { sanitizeHtml } from '../mcp/sanitize.js'
+import { sanitizeHtml, sanitizeTextFields } from '../mcp/sanitize.js'
 import { applySharedCanvasUpdate, effectiveShareGrant, pickBestShareAccess, redactCanvas } from '../mcp/shareAccess.js'
-import { sanitizeExternalUrl as sanitizeBrowserUrl, sanitizeHtml as sanitizeBrowserHtml } from '../src/lib/sanitizeHtml.js'
+import { sanitizeExternalUrl as sanitizeBrowserUrl, sanitizeHtml as sanitizeBrowserHtml, sanitizeNodeData as sanitizeBrowserNodeData } from '../src/lib/sanitizeHtml.js'
 import { appendHistorySnapshot, sameCanvasSnapshot } from '../src/lib/canvasSync.js'
 import { absoluteNodePosition, boundsForNodeIds } from '../src/lib/canvasGeometry.js'
 import { mergeCanvasSnapshots } from '../src/lib/canvasMerge.js'
 import { getStubEdgeGeometry } from '../src/edges/stubEdgeGeometry.js'
 import { chooseOwnCanvasToRestore } from '../src/lib/canvasNavigation.js'
+import { createSystemNodeData, normalizeSystemNodeData, systemNodeReality } from '../shared/systemOntology.js'
 
 let passed = 0
 function t(name, fn) {
@@ -20,6 +21,7 @@ function t(name, fn) {
 
 const stage = (tmp_id) => ({ tmp_id, type: 'stage' })
 const memo = (tmp_id) => ({ tmp_id, type: 'memo' })
+const system = (tmp_id, systemKind = 'service') => ({ tmp_id, type: 'system', systemKind })
 const edge = (source, target) => ({ source, target })
 
 console.log('stub edge geometry')
@@ -63,6 +65,32 @@ t('linear chain A→B→C: 3 columns, same row', () => {
   assert.equal(pos.get('C').x - pos.get('B').x, 320)
   assert.equal(pos.get('A').y, pos.get('B').y)
   assert.equal(pos.get('B').y, pos.get('C').y)
+})
+
+t('system entities participate in the same structural layout as stages', () => {
+  const pos = layoutGraph({
+    newNodes: [system('APP', 'frontend'), system('API', 'api'), system('DB', 'database')],
+    newEdges: [edge('APP', 'API'), edge('API', 'DB')],
+    existingNodes: [],
+  })
+  assert.equal(pos.get('API').x - pos.get('APP').x, 320)
+  assert.equal(pos.get('DB').x - pos.get('API').x, 320)
+  assert.equal(pos.get('APP').y, pos.get('DB').y)
+})
+
+t('mixed stage and system graph can be laid out radially with a linked memo', () => {
+  const nodes = [
+    stage('ROOT'), system('WEB', 'frontend'), system('AUTH', 'auth'),
+    system('API', 'api'), system('DB', 'database'), memo('WHY'),
+  ]
+  const edges = [
+    edge('ROOT', 'WEB'), edge('ROOT', 'AUTH'), edge('ROOT', 'API'),
+    edge('ROOT', 'DB'), edge('WHY', 'DB'),
+  ]
+  const pos = layoutGraph({ newNodes: nodes, newEdges: edges, existingNodes: [], preset: 'radial' })
+  for (const node of nodes) assert.ok(pos.has(node.tmp_id), `missing position: ${node.tmp_id}`)
+  assert.equal(radialLevels(nodes, edges).get('ROOT'), 0)
+  assert.equal(radialLevels(nodes, edges).get('DB'), 1)
 })
 
 t('diamond A→B, A→C, B→D, C→D: B/C share a column, D after', () => {
@@ -240,9 +268,64 @@ t('nodeRect uses width/height with type defaults', () => {
   assert.deepEqual(nodeRect({ type: 'stage', position: { x: 0, y: 0 }, width: 300, height: 150 }), { x: 0, y: 0, w: 300, h: 150 })
 })
 
-t('nodeRect uses frontend defaults for content and group nodes', () => {
+t('nodeRect uses frontend defaults for content, system and group nodes', () => {
   assert.deepEqual(nodeRect({ type: 'content', position: { x: 1, y: 2 } }), { x: 1, y: 2, w: 220, h: 140 })
+  assert.deepEqual(nodeRect({ type: 'system', position: { x: 2, y: 3 } }), { x: 2, y: 3, w: 240, h: 130 })
   assert.deepEqual(nodeRect({ type: 'group', position: { x: 3, y: 4 } }), { x: 3, y: 4, w: 320, h: 220 })
+})
+
+console.log('system ontology')
+
+t('new system nodes are declared models, never self-verified twins', () => {
+  const data = createSystemNodeData('database')
+  assert.equal(data.systemKind, 'database')
+  assert.equal(data.sourceKind, 'manual')
+  assert.equal(systemNodeReality(data).id, 'declared')
+  assert.equal(systemNodeReality({
+    ...data,
+    twinRuntime: { verification: 'verified', resourceId: 'db-1' },
+  }).id, 'declared')
+})
+
+t('server-shaped verification evidence promotes a system model to LIVE', () => {
+  const result = systemNodeReality({
+    twinRuntime: {
+      verification: 'verified',
+      resourceId: 'db-1',
+      verifiedAt: '2026-07-14T00:00:00.000Z',
+    },
+  })
+  assert.equal(result.id, 'twin')
+  assert.equal(result.label, 'LIVE')
+})
+
+t('system metadata normalization clamps enums and plain identifiers', () => {
+  const result = normalizeSystemNodeData({
+    systemKind: 'not-a-kind', environment: 'moon', sourceKind: 'guess',
+    provider: '  Supabase\n  Cloud  ', externalRef: ' table\u0000name ',
+  })
+  assert.equal(result.systemKind, 'service')
+  assert.equal(result.environment, 'unknown')
+  assert.equal(result.sourceKind, 'manual')
+  assert.equal(result.provider, 'Supabase Cloud')
+  assert.equal(result.externalRef, 'table name')
+})
+
+t('MCP system patches sanitize provided identifiers without inventing defaults', () => {
+  const patch = { externalRef: ' public.\u0000canvases ' }
+  sanitizeTextFields(patch)
+  assert.equal(patch.externalRef, 'public. canvases')
+  assert.equal(Object.hasOwn(patch, 'systemKind'), false)
+  assert.equal(Object.hasOwn(patch, 'sourceKind'), false)
+})
+
+t('browser persistence sanitizer removes runtime proof and active markup', () => {
+  const result = sanitizeBrowserNodeData({
+    systemKind: 'database', purpose: '<script>steal()</script><b>원본 보관</b>',
+    twinRuntime: { verification: 'verified', resourceId: 'forged', verifiedAt: '2026-07-14T00:00:00Z' },
+  })
+  assert.equal(Object.hasOwn(result, 'twinRuntime'), false)
+  assert.equal(result.purpose, '<b>원본 보관</b>')
 })
 
 console.log('validateGraphInput')
@@ -251,6 +334,13 @@ const types5 = [0, 1, 2, 3, 4].map((i) => ({ label: `t${i}` }))
 
 t('accepts a valid graph', () => {
   validateGraphInput({ nodes: [stage('A'), stage('B')], edges: [edge('A', 'B')] }, [], types5)
+})
+
+t('accepts system entities without a stageTypeIdx', () => {
+  validateGraphInput({
+    nodes: [system('API', 'api'), system('DB', 'database')],
+    edges: [edge('API', 'DB')],
+  }, [], types5)
 })
 
 t('rejects duplicate tmp_id', () => {
@@ -1064,6 +1154,21 @@ t('get_canvas representation does not return legacy embedded image bytes', () =>
   assert.equal(result.embedded_image, true)
   assert.equal(Object.hasOwn(result, 'image_url'), false)
   assert.equal(JSON.stringify(result).includes('AAAA'), false)
+})
+
+t('get_canvas represents system ontology without claiming a live twin', () => {
+  const node = {
+    id: 'system-db', type: 'system', position: { x: 10, y: 20 },
+    data: {
+      label: '운영 DB', systemKind: 'database', purpose: '업무 원본 저장',
+      environment: 'production', sourceKind: 'manual', provider: 'Supabase', externalRef: 'public.canvases',
+    },
+  }
+  const result = toExternalCanvasNode(node, new Map([[node.id, node]]))
+  assert.equal(result.system_kind, 'database')
+  assert.equal(result.environment, 'production')
+  assert.equal(result.external_ref, 'public.canvases')
+  assert.equal(result.reality, 'declared')
 })
 }
 

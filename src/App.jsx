@@ -16,6 +16,7 @@ import StageNode from './nodes/StageNode'
 import MemoNode from './nodes/MemoNode'
 import GroupNode from './nodes/GroupNode'
 import ContentNode from './nodes/ContentNode'
+import SystemNode from './nodes/SystemNode'
 import StubEdge from './edges/StubEdge'
 import Toolbar from './components/Toolbar'
 import CanvasTabs from './components/CanvasTabs'
@@ -59,8 +60,9 @@ import {
   setMemberEdit, kickMember, leaveSharedCanvas,
 } from './lib/shares'
 import { getMyProfile, loadMySettings, upsertMyEmail, touchLastSeen } from './lib/profiles'
+import { createSystemNodeData } from '../shared/systemOntology.js'
 
-const nodeTypes = { stage: StageNode, memo: MemoNode, group: GroupNode, content: ContentNode }
+const nodeTypes = { stage: StageNode, memo: MemoNode, group: GroupNode, content: ContentNode, system: SystemNode }
 const edgeTypes = { stub: StubEdge }
 
 const defaultEdgeOptions = {
@@ -245,7 +247,7 @@ function baseEdgeStyle(e) {
 
 // Strip runtime callbacks (and stageTypes) before snapshot / localStorage save
 function stripNode(n) {
-  const { onUpdate, onEditStart, onEditEnd, onOpenInNotes, stageTypes, imageContext, ...data } = n.data ?? {}
+  const { onUpdate, onEditStart, onEditEnd, onOpenInNotes, stageTypes, imageContext, twinRuntime, ...data } = n.data ?? {}
   const { selected, ...rest } = n
   return { ...rest, data }
 }
@@ -293,7 +295,7 @@ export default function App() {
   const [stageTypes, setStageTypes] = useState(() => initData.stageTypes ?? DEFAULT_STAGE_TYPES)
   const [contextMenu, setContextMenu] = useState(null)
   const [renamingTypeIdx, setRenamingTypeIdx] = useState(null)
-  const [notesPanel, setNotesPanel] = useState(null) // { type: 'stage'|'memo'|'content' } | null
+  const [notesPanel, setNotesPanel] = useState(null) // { type: 'stage'|'memo'|'content'|'system' } | null
   const [notesSelectedId, setNotesSelectedId] = useState(null)
   const [notesSide, setNotesSide] = useState('right')
   const [renameValue, setRenameValue] = useState('')
@@ -2233,6 +2235,13 @@ export default function App() {
       setNodes((nds) => [...nds, forceFrame ? { ...node, parentId: perm.targetId } : node])
       return
     }
+    if (payload.nodeType === 'system') {
+      const id = nextId()
+      const position = forceFrame ? centerInFrame(frame, 240, 130) : pos
+      const node = { id, type: 'system', position, data: createSystemNodeData(payload.systemKind) }
+      setNodes((nds) => [...nds, forceFrame ? { ...node, parentId: perm.targetId } : node])
+      return
+    }
     if (payload.nodeType === 'stage') {
       if (forceFrame) {
         const id = nextId()
@@ -2677,6 +2686,14 @@ export default function App() {
     closeContext()
   }
 
+  const handleContextAddSystem = () => {
+    if (!rfInstance || !contextMenu) return
+    const pos = rfInstance.screenToFlowPosition({ x: contextMenu.flowX, y: contextMenu.flowY })
+    const id = nextId()
+    setNodes((nds) => [...nds, { id, type: 'system', position: pos, data: createSystemNodeData() }])
+    closeContext()
+  }
+
   const handleContextPaste = () => {
     if (!contextMenu) return
     if (contextMenu.flowX != null && rfInstance) {
@@ -2762,7 +2779,7 @@ export default function App() {
   }, [])
 
   const openNodeInNotes = useCallback((nodeId, type) => {
-    if (!['stage', 'memo', 'content'].includes(type)) return
+    if (!['stage', 'memo', 'content', 'system'].includes(type)) return
     setNotesPanel({ type })
     setNotesSelectedId(nodeId)
   }, [])
@@ -3271,7 +3288,7 @@ export default function App() {
         {!mobile && <Controls style={{ background: '#1a1a22', border: '1px solid #ffffff18', borderRadius: 8 }} />}
         {!mobile && (
           <MiniMap
-            nodeColor={(n) => (n.type === 'memo' ? '#f59e0b88' : n.type === 'group' ? '#8b94a733' : '#3b82f688')}
+            nodeColor={(n) => (n.type === 'memo' ? '#f59e0b88' : n.type === 'group' ? '#8b94a733' : n.type === 'system' ? '#06b6d488' : '#3b82f688')}
             maskColor="#0f0f1388"
             style={{ background: '#1a1a22', border: '1px solid #ffffff18', borderRadius: 8 }}
           />
@@ -3296,6 +3313,7 @@ export default function App() {
           ['stage', '단계·계층 노트', '☷'],
           ['memo', '참고·메모 노트', '※'],
           ['content', '콘텐츠 노트', '▣'],
+          ['system', '시스템·트윈 노트', '⌬'],
         ].map(([t, label, icon]) => (
           <button
             key={t}
@@ -3380,6 +3398,10 @@ export default function App() {
               <ContextItem label="단계 노드 추가" color="#3b82f6" onClick={handleContextAddStage} />
               <ContextItem label="메모 노드 추가" color="#f59e0b" onClick={handleContextAddMemo} />
               <ContextItem icon="⬚" label="그룹 추가" color="#8b94a7" onClick={handleContextAddGroup} />
+              <div style={{ padding: '6px 12px 2px', color: '#555', fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
+                시스템 모델
+              </div>
+              <ContextItem icon="◆" label="시스템 실체" color="#06b6d4" indent onClick={handleContextAddSystem} />
               <div style={{ padding: '6px 12px 2px', color: '#555', fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
                 컨텐츠 추가
               </div>
@@ -3508,6 +3530,11 @@ export default function App() {
 
           {/* Memo node: just delete */}
           {contextMenu.nodeId && contextMenu.nodeType === 'memo' && ctxCanDelete && (
+            <ContextItem icon="🗑" label={ctxMulti ? '전체 삭제' : '노드 삭제'} color="#ef4444" onClick={handleContextDeleteNode} />
+          )}
+
+          {/* System node: ontology fields live in the notes panel; context menu only deletes. */}
+          {contextMenu.nodeId && contextMenu.nodeType === 'system' && ctxCanDelete && (
             <ContextItem icon="🗑" label={ctxMulti ? '전체 삭제' : '노드 삭제'} color="#ef4444" onClick={handleContextDeleteNode} />
           )}
         </div>

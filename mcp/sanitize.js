@@ -1,3 +1,5 @@
+import { normalizeSystemNodeData, SYSTEM_ONTOLOGY_TEXT_FIELDS } from '../shared/systemOntology.js'
+
 // HTML allowlist sanitizer for MCP-supplied node text (label/description/header/text).
 //
 // The app renders these fields with dangerouslySetInnerHTML, so MCP input is a
@@ -87,9 +89,18 @@ export function sanitizeExternalUrl(value) {
 // Sanitize the HTML-bearing text fields of a node input/patch object, in place-ish.
 export function sanitizeTextFields(obj) {
   if (!obj || typeof obj !== 'object') return obj
-  for (const key of ['label', 'description', 'header', 'text']) {
+  for (const key of new Set(['label', 'description', 'header', 'text', ...SYSTEM_ONTOLOGY_TEXT_FIELDS])) {
     if (typeof obj[key] === 'string') obj[key] = sanitizeHtml(obj[key])
   }
   if (typeof obj.url === 'string') obj.url = sanitizeExternalUrl(obj.url)
+  const systemPlainFields = ['systemKind', 'environment', 'sourceKind', 'provider', 'externalRef']
+  if (systemPlainFields.some((key) => Object.hasOwn(obj, key))) {
+    const normalized = normalizeSystemNodeData(obj)
+    // A patch must not gain defaults for fields it did not provide, otherwise
+    // editing only externalRef could silently reset the entity kind/source.
+    for (const key of systemPlainFields) {
+      if (Object.hasOwn(obj, key)) obj[key] = normalized[key]
+    }
+  }
   return obj
 }

@@ -207,7 +207,9 @@ export function redactCanvas(access) {
 const same = (left, right) => JSON.stringify(left) === JSON.stringify(right)
 
 function sanitizeNode(node) {
-  const data = sanitizeTextFields({ ...(node.data ?? {}) })
+  const storedData = { ...(node.data ?? {}) }
+  delete storedData.twinRuntime
+  const data = sanitizeTextFields({ ...storedData })
   if (Array.isArray(data.parts)) {
     data.parts = data.parts.map((part) => ({ ...part, text: typeof part.text === 'string' ? sanitizeHtml(part.text) : part.text }))
   }

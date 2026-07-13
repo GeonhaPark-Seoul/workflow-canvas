@@ -1,3 +1,5 @@
+import { normalizeSystemNodeData, SYSTEM_ONTOLOGY_TEXT_FIELDS } from '../../shared/systemOntology.js'
+
 // Browser-side allowlist for rich-text node fields rendered as HTML.
 const ALLOWED_TAGS = new Set([
   'b', 'strong', 'i', 'em', 'u', 's', 'strike', 'font', 'span', 'div', 'p', 'br',
@@ -63,13 +65,17 @@ export function sanitizeExternalUrl(value) {
 
 export function sanitizeNodeData(data) {
   if (!data || typeof data !== 'object') return data
-  const next = { ...data }
-  for (const key of ['label', 'description', 'header', 'text']) {
+  let next = { ...data }
+  delete next.twinRuntime
+  for (const key of new Set(['label', 'description', 'header', 'text', ...SYSTEM_ONTOLOGY_TEXT_FIELDS])) {
     if (typeof next[key] === 'string') next[key] = sanitizeHtml(next[key])
   }
   if (typeof next.url === 'string') next.url = sanitizeExternalUrl(next.url)
   if (Array.isArray(next.parts)) {
     next.parts = next.parts.map((part) => ({ ...part, text: typeof part.text === 'string' ? sanitizeHtml(part.text) : part.text }))
+  }
+  if (next.systemKind != null || next.sourceKind != null || next.externalRef != null) {
+    next = normalizeSystemNodeData(next)
   }
   return next
 }
