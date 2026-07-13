@@ -48,6 +48,17 @@ import {
   restoreMissingWorkflowSystemMapRelations,
   WORKFLOW_RELATION_REPAIR_CONFIRMATION,
 } from '../shared/workflowSystemMapRepair.js'
+import {
+  clearDigitalTwinReviewDecision,
+  createDigitalTwinReviewItem,
+  digitalTwinReviewFingerprint,
+  partitionDigitalTwinReviewItems,
+  setDigitalTwinReviewDecision,
+} from '../shared/digitalTwinReview.js'
+import {
+  inspectWorkflowSystemTwin,
+  WORKFLOW_SYSTEM_TWIN_SOURCE_ID,
+} from '../shared/workflowSystemTwinAdapter.js'
 import { buildDiscoveryManifest } from './system-discovery.mjs'
 
 let passed = 0
@@ -701,6 +712,115 @@ t('inspection distinguishes erased relation metadata from an intentional semanti
   assert.equal(finding.actual.relation_metadata_present, false)
   assert.equal(finding.expected.relation_type, 'uses')
   assert.equal(finding.repair_eligible, true)
+})
+
+console.log('digital twin change review')
+
+t('review fingerprints are deterministic and independent of object key order', () => {
+  const first = digitalTwinReviewFingerprint({ alpha: 1, nested: { beta: 2, gamma: [3, 4] } })
+  const second = digitalTwinReviewFingerprint({ nested: { gamma: [3, 4], beta: 2 }, alpha: 1 })
+  const changed = digitalTwinReviewFingerprint({ alpha: 1, nested: { beta: 9, gamma: [3, 4] } })
+
+  assert.equal(first, second)
+  assert.notEqual(first, changed)
+  assert.match(first, /^[a-f0-9]{16}$/)
+})
+
+t('a reviewed item becomes pending again when its observed evidence changes', () => {
+  const first = createDigitalTwinReviewItem({
+    sourceId: 'source-one', itemKey: 'resource:orders', category: 'resource',
+    changeType: 'changed', title: 'orders changed', observation: { version: 'v1' },
+  })
+  const second = createDigitalTwinReviewItem({
+    sourceId: 'source-one', itemKey: 'resource:orders', category: 'resource',
+    changeType: 'changed', title: 'orders changed', observation: { version: 'v2' },
+  })
+  const state = setDigitalTwinReviewDecision(null, first, 'reviewed', '2026-07-14T00:00:00.000Z')
+
+  assert.equal(first.id, second.id)
+  assert.notEqual(first.fingerprint, second.fingerprint)
+  const reviewed = partitionDigitalTwinReviewItems([first], state)
+  assert.deepEqual(reviewed.reviewed.map((item) => item.id), [first.id])
+  assert.equal(reviewed.decisions[first.id].disposition, 'reviewed')
+  assert.deepEqual(partitionDigitalTwinReviewItems([second], state).pending.map((item) => item.id), [second.id])
+})
+
+t('review decisions stay isolated by source and can be returned to pending', () => {
+  const first = createDigitalTwinReviewItem({
+    sourceId: 'source-one', itemKey: 'same-key', title: 'first', observation: { value: 1 },
+  })
+  const second = createDigitalTwinReviewItem({
+    sourceId: 'source-two', itemKey: 'same-key', title: 'second', observation: { value: 1 },
+  })
+  const reviewed = setDigitalTwinReviewDecision(null, first, 'ignored', '2026-07-14T00:00:00.000Z')
+  const cleared = clearDigitalTwinReviewDecision(reviewed, first)
+
+  assert.equal(partitionDigitalTwinReviewItems([first, second], reviewed).ignored.length, 1)
+  assert.equal(partitionDigitalTwinReviewItems([first, second], reviewed).pending.length, 1)
+  assert.equal(partitionDigitalTwinReviewItems([first, second], cleared).pending.length, 2)
+})
+
+t('review decisions for different findings merge across two canvas editors', () => {
+  const first = createDigitalTwinReviewItem({
+    sourceId: 'source-one', itemKey: 'first', title: 'first', observation: { value: 1 },
+  })
+  const second = createDigitalTwinReviewItem({
+    sourceId: 'source-one', itemKey: 'second', title: 'second', observation: { value: 1 },
+  })
+  const root = { id: 'twin-root', type: 'group', data: { digitalTwinReview: null } }
+  const base = { name: 'Twin', nodes: [root], edges: [], notes: [], views: [], stageTypes: null }
+  const local = structuredClone(base)
+  const remote = structuredClone(base)
+  local.nodes[0].data.digitalTwinReview = setDigitalTwinReviewDecision(null, first, 'reviewed', '2026-07-14T00:00:00.000Z')
+  remote.nodes[0].data.digitalTwinReview = setDigitalTwinReviewDecision(null, second, 'ignored', '2026-07-14T00:00:01.000Z')
+  const { merged, conflicts } = mergeCanvasSnapshots(base, local, remote)
+  const partitions = partitionDigitalTwinReviewItems([first, second], merged.nodes[0].data.digitalTwinReview)
+
+  assert.deepEqual(conflicts, [])
+  assert.equal(partitions.reviewed.length, 1)
+  assert.equal(partitions.ignored.length, 1)
+})
+
+t('conflicting decisions for the same finding still require user resolution', () => {
+  const item = createDigitalTwinReviewItem({
+    sourceId: 'source-one', itemKey: 'same', title: 'same', observation: { value: 1 },
+  })
+  const root = { id: 'twin-root', type: 'group', data: { digitalTwinReview: null } }
+  const base = { name: 'Twin', nodes: [root], edges: [], notes: [], views: [], stageTypes: null }
+  const local = structuredClone(base)
+  const remote = structuredClone(base)
+  local.nodes[0].data.digitalTwinReview = setDigitalTwinReviewDecision(null, item, 'reviewed', '2026-07-14T00:00:00.000Z')
+  remote.nodes[0].data.digitalTwinReview = setDigitalTwinReviewDecision(null, item, 'ignored', '2026-07-14T00:00:00.000Z')
+  const { merged, conflicts } = mergeCanvasSnapshots(base, local, remote)
+  const partitions = partitionDigitalTwinReviewItems([item], merged.nodes[0].data.digitalTwinReview)
+
+  assert.ok(conflicts.some((path) => path.endsWith(`decisions.${item.id}.disposition`)))
+  assert.equal(partitions.reviewed.length, 1)
+})
+
+t('Workflow Canvas adapter emits generic discovered items without claiming live runtime', () => {
+  const map = createWorkflowCanvasSystemMap()
+  const before = structuredClone(map)
+  const review = inspectWorkflowSystemTwin(map)
+  const expectedCount = review.report.summary.node_findings
+    + review.report.summary.relation_findings
+    + review.report.summary.unmodeled_resources
+
+  assert.equal(review.source.id, WORKFLOW_SYSTEM_TWIN_SOURCE_ID)
+  assert.equal(review.source.observationLevel, 'discovered')
+  assert.equal(review.source.runtimeVerified, false)
+  assert.equal(review.items.length, expectedCount)
+  assert.equal(new Set(review.items.map((item) => item.id)).size, review.items.length)
+  assert.ok(review.items.some((item) => item.itemKey === 'resource:db-table:share_revocations'))
+  assert.ok(review.items.every((item) => item.fingerprint && item.sourceId === WORKFLOW_SYSTEM_TWIN_SOURCE_ID))
+  assert.deepEqual(map, before)
+})
+
+t('Workflow Canvas adapter ignores ordinary canvases instead of coupling the review UI to one app', () => {
+  assert.equal(inspectWorkflowSystemTwin({
+    nodes: [{ id: 'orders', type: 'system', data: { label: 'Orders' } }],
+    edges: [],
+  }), null)
 })
 
 console.log('system map relation repair safety')

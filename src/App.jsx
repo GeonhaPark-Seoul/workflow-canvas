@@ -23,6 +23,7 @@ import CanvasTabs from './components/CanvasTabs'
 import AuthPanel from './components/AuthPanel'
 import InvitePopover from './components/InvitePopover'
 import NotesPanel from './components/NotesPanel'
+import DigitalTwinReviewPanel from './components/DigitalTwinReviewPanel'
 import EdgeRelationEditor from './components/EdgeRelationEditor'
 import {
   initCanvases, loadCanvasData, saveCanvasData, deleteCanvasData,
@@ -63,6 +64,12 @@ import {
 } from './lib/shares'
 import { getMyProfile, loadMySettings, upsertMyEmail, touchLastSeen } from './lib/profiles'
 import { createSystemNodeData } from '../shared/systemOntology.js'
+import {
+  clearDigitalTwinReviewDecision,
+  partitionDigitalTwinReviewItems,
+  setDigitalTwinReviewDecision,
+} from '../shared/digitalTwinReview.js'
+import { inspectDigitalTwinCanvas } from './lib/digitalTwinAdapters.js'
 import {
   createEdgeRelationData,
   edgeRelationInfo,
@@ -328,6 +335,8 @@ export default function App() {
   const [contextMenu, setContextMenu] = useState(null)
   const [renamingTypeIdx, setRenamingTypeIdx] = useState(null)
   const [notesPanel, setNotesPanel] = useState(null) // { type: 'stage'|'memo'|'content'|'system' } | null
+  const [twinReviewOpen, setTwinReviewOpen] = useState(false)
+  const [digitalTwinReview, setDigitalTwinReview] = useState(null)
   const [notesSelectedId, setNotesSelectedId] = useState(null)
   const [notesSide, setNotesSide] = useState('right')
   const [renameValue, setRenameValue] = useState('')
@@ -2032,6 +2041,70 @@ export default function App() {
   const canEditCanvas = !(perm.role === 'invitee' && perm.canEdit === false)
   const canEditNotes = canEditCanvas && (perm.role === 'owner' || perm.scope === 'canvas')
 
+  useEffect(() => { setDigitalTwinReview(null) }, [activeCanvasId])
+  useEffect(() => {
+    let cancelled = false
+    const timer = setTimeout(() => {
+      const canvas = { nodes: nodes.map(stripNode), edges: edges.map(stripEdge) }
+      inspectDigitalTwinCanvas(canvas)
+        .then((review) => { if (!cancelled) setDigitalTwinReview(review) })
+        .catch((error) => {
+          console.error('[digital-twin] inspect canvas:', error)
+          if (!cancelled) setDigitalTwinReview(null)
+        })
+    }, 180)
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
+  }, [activeCanvasId, nodes, edges])
+  const digitalTwinReviewRoot = digitalTwinReview?.source.rootNodeId
+    ? nodes.find((node) => node.id === digitalTwinReview.source.rootNodeId)
+    : null
+  const digitalTwinReviewState = digitalTwinReviewRoot?.data?.digitalTwinReview
+  const digitalTwinReviewPartitions = useMemo(() => (
+    digitalTwinReview
+      ? partitionDigitalTwinReviewItems(digitalTwinReview.items, digitalTwinReviewState)
+      : { pending: [], reviewed: [], ignored: [], decisions: {} }
+  ), [digitalTwinReview, digitalTwinReviewState])
+  const canDecideTwinReview = perm.role === 'owner' && !!digitalTwinReview?.source.rootNodeId
+
+  useEffect(() => {
+    if (!digitalTwinReview) setTwinReviewOpen(false)
+  }, [activeCanvasId, digitalTwinReview])
+
+  const decideDigitalTwinReviewItem = useCallback((item, disposition) => {
+    if (!canDecideTwinReview || item?.sourceId !== digitalTwinReview?.source.id) return
+    const rootNodeId = digitalTwinReview.source.rootNodeId
+    setNodes((currentNodes) => currentNodes.map((node) => (
+      node.id === rootNodeId
+        ? {
+            ...node,
+            data: {
+              ...node.data,
+              digitalTwinReview: setDigitalTwinReviewDecision(node.data?.digitalTwinReview, item, disposition),
+            },
+          }
+        : node
+    )))
+  }, [canDecideTwinReview, digitalTwinReview, setNodes])
+
+  const clearDigitalTwinReviewItem = useCallback((item) => {
+    if (!canDecideTwinReview || item?.sourceId !== digitalTwinReview?.source.id) return
+    const rootNodeId = digitalTwinReview.source.rootNodeId
+    setNodes((currentNodes) => currentNodes.map((node) => (
+      node.id === rootNodeId
+        ? {
+            ...node,
+            data: {
+              ...node.data,
+              digitalTwinReview: clearDigitalTwinReviewDecision(node.data?.digitalTwinReview, item),
+            },
+          }
+        : node
+    )))
+  }, [canDecideTwinReview, digitalTwinReview, setNodes])
+
   // Set of node ids an invitee may edit; null means "everything" (owner or canvas-scope).
   const editableSet = useMemo(() => {
     if (perm.role === 'owner') return null
@@ -2841,15 +2914,41 @@ export default function App() {
     rfInstance.fitView({ nodes: [{ id }], duration: 400, padding: 0.3, maxZoom: 1.1 })
   }, [rfInstance])
 
+  const focusDigitalTwinReviewItem = useCallback((item) => {
+    if (!rfInstance || !item?.focus) return
+    const nodeId = item.focus.nodeId
+    if (nodeId && nodes.some((node) => node.id === nodeId)) {
+      setEdges((currentEdges) => currentEdges.map((edge) => ({ ...edge, selected: false })))
+      focusNode(nodeId)
+      return
+    }
+    const edgeId = item.focus.edgeId
+    const edge = edges.find((candidate) => candidate.id === edgeId)
+    const nodeIds = (item.focus.nodeIds ?? [edge?.source, edge?.target])
+      .filter((id) => nodes.some((node) => node.id === id))
+    if (edge) setEdges((currentEdges) => currentEdges.map((candidate) => ({ ...candidate, selected: candidate.id === edgeId })))
+    if (nodeIds.length) {
+      rfInstance.fitView({ nodes: nodeIds.map((id) => ({ id })), duration: 400, padding: 0.35, maxZoom: 1.1 })
+    }
+  }, [edges, focusNode, nodes, rfInstance, setEdges])
+
   const openNotesPanel = useCallback((type) => {
+    setTwinReviewOpen(false)
     setNotesSelectedId(null)
     setNotesPanel((prev) => (prev?.type === type ? null : { type }))
   }, [])
 
   const openNodeInNotes = useCallback((nodeId, type) => {
     if (!['stage', 'memo', 'content', 'system'].includes(type)) return
+    setTwinReviewOpen(false)
     setNotesPanel({ type })
     setNotesSelectedId(nodeId)
+  }, [])
+
+  const toggleDigitalTwinReview = useCallback(() => {
+    setNotesPanel(null)
+    setNotesSelectedId(null)
+    setTwinReviewOpen((open) => !open)
   }, [])
 
   // ── Saved views ───────────────────────────────────────────────────────────
@@ -3425,6 +3524,32 @@ export default function App() {
           borderRadius: notesSide === 'right' ? '10px 0 0 10px' : '0 10px 10px 0', padding: 5,
         }}
       >
+        {digitalTwinReview && (
+          <>
+            <button
+              type="button"
+              className="notes-rail-button twin-review-rail-button"
+              data-tooltip="배포·소스 변경 검토"
+              title="배포·소스 변경 검토"
+              aria-label="배포·소스 변경 검토"
+              onClick={toggleDigitalTwinReview}
+              style={{
+                position: 'relative', background: twinReviewOpen ? '#f59e0b33' : 'transparent',
+                border: 'none', borderRadius: 6, color: twinReviewOpen ? '#fbbf24' : '#ccc',
+                width: 32, height: 32, fontSize: 9, fontWeight: 800, padding: 0, cursor: 'pointer',
+                display: 'grid', placeItems: 'center', fontFamily: 'inherit',
+              }}
+            >
+              검토
+              {digitalTwinReviewPartitions.pending.length > 0 && (
+                <span className="twin-review-rail-count">
+                  {digitalTwinReviewPartitions.pending.length > 99 ? '99+' : digitalTwinReviewPartitions.pending.length}
+                </span>
+              )}
+            </button>
+            <div style={{ height: 1, background: '#ffffff18', margin: '2px 3px' }} />
+          </>
+        )}
         {[
           ['stage', '단계·계층 노트', '☷'],
           ['memo', '참고·메모 노트', '※'],
@@ -3688,6 +3813,19 @@ export default function App() {
           side={notesSide}
           onSideChange={setNotesSide}
           imageContext={imageContext}
+        />
+      )}
+      {twinReviewOpen && digitalTwinReview && (
+        <DigitalTwinReviewPanel
+          review={digitalTwinReview}
+          reviewState={digitalTwinReviewState}
+          canDecide={canDecideTwinReview}
+          side={notesSide}
+          onSideChange={setNotesSide}
+          onClose={() => setTwinReviewOpen(false)}
+          onDecision={decideDigitalTwinReviewItem}
+          onClearDecision={clearDigitalTwinReviewItem}
+          onFocus={focusDigitalTwinReviewItem}
         />
       )}
     </div>

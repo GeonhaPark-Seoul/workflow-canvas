@@ -7,6 +7,25 @@
 
 ---
 
+## 디지털 트윈 변경 검토
+
+시스템 지도 캔버스에서는 배포에 포함된 발견 manifest와 캔버스의 선언 모델을 비교해
+`실체`, `관계`, `미모델 자원` 변경을 앱 안의 검토 패널로 보여줍니다. 현재 데이터는
+코드·SQL·설정에서 **발견된 상태**이며 실제 런타임 작동을 확인한 것으로 표시하지 않습니다.
+
+- 공통 검토 모델: [`shared/digitalTwinReview.js`](shared/digitalTwinReview.js)
+- 첫 소스 어댑터: [`shared/workflowSystemTwinAdapter.js`](shared/workflowSystemTwinAdapter.js)
+- 어댑터 레지스트리: [`src/lib/digitalTwinAdapters.js`](src/lib/digitalTwinAdapters.js)
+- 검토 UI: [`src/components/DigitalTwinReviewPanel.jsx`](src/components/DigitalTwinReviewPanel.jsx)
+
+검토 결정은 시스템 지도 루트 노드에 저장되므로 기존 캔버스 동기화와 3-way 병합을 그대로
+사용합니다. `확인함` 또는 `무시`는 지도나 비교 기준을 자동으로 변경하지 않습니다. 같은
+항목의 실제 근거 지문이 다시 바뀌면 이전 결정을 재사용하지 않고 검토 대상으로 다시
+나타냅니다. Workflow Canvas 전용 지식은 어댑터에만 두므로 물류·CRM·재무 등 다른 소스도
+공통 검토 UI와 상태 모델을 재사용할 수 있습니다.
+
+---
+
 ## MCP 서버
 
 Claude 같은 MCP 클라이언트가 캔버스에 **직접 접근**해서 노드/연결선을 읽고 쓸 수 있는

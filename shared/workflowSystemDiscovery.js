@@ -6,7 +6,15 @@ import {
 export const LEGACY_SYSTEM_MAP_BASELINE_ID = 'phase3-41ca765'
 
 export const WORKFLOW_SYSTEM_MAP_NODE_BINDINGS = Object.freeze({
-  'map-web-app': ['file:src/App.jsx', 'dependency:react', 'dependency:vite'],
+  'map-web-app': [
+    'file:src/App.jsx',
+    'file:src/components/DigitalTwinReviewPanel.jsx',
+    'file:src/lib/digitalTwinAdapters.js',
+    'file:shared/digitalTwinReview.js',
+    'file:shared/workflowSystemTwinAdapter.js',
+    'dependency:react',
+    'dependency:vite',
+  ],
   'map-canvas-engine': ['dependency:@xyflow/react'],
   'map-local-cache': ['file:src/storage.js'],
   'map-pwa': ['file:vite.config.js', 'dependency:vite-plugin-pwa'],

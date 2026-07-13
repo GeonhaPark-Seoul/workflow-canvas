@@ -14,12 +14,19 @@ function mergeValue(base, local, remote, path, conflicts) {
   if (same(local, base)) return remote
   if (same(remote, base)) return local
 
-  if (plainObject(base) && plainObject(local) && plainObject(remote)) {
+  // Two editors may independently add different keys to a JSON object that
+  // did not exist in the base snapshot yet. Treat an absent/null base as an
+  // empty object so disjoint additions merge; edits to the same leaf still
+  // take the normal conflict path below.
+  const objectBase = plainObject(base)
+    ? base
+    : (base === MISSING || base === null ? {} : null)
+  if (objectBase && plainObject(local) && plainObject(remote)) {
     const result = {}
-    const keys = new Set([...Object.keys(base), ...Object.keys(local), ...Object.keys(remote)])
+    const keys = new Set([...Object.keys(objectBase), ...Object.keys(local), ...Object.keys(remote)])
     for (const key of keys) {
       const merged = mergeValue(
-        Object.hasOwn(base, key) ? base[key] : MISSING,
+        Object.hasOwn(objectBase, key) ? objectBase[key] : MISSING,
         Object.hasOwn(local, key) ? local[key] : MISSING,
         Object.hasOwn(remote, key) ? remote[key] : MISSING,
         `${path}.${key}`,
