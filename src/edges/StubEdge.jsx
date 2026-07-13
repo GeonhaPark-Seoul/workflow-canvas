@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import { BaseEdge } from '@xyflow/react'
 import { getStubEdgeGeometry } from './stubEdgeGeometry'
 
@@ -10,7 +11,9 @@ export default function StubEdge({
   sourceHandleId, targetHandleId,
   markerEnd, style,
 }) {
-  const { path, arrowPoints } = getStubEdgeGeometry({
+  const markerUid = useId().replace(/:/g, '')
+  const markerId = `wfc-edge-arrow-${markerUid}`
+  const { path } = getStubEdgeGeometry({
     sourceX, sourceY, targetX, targetY,
     sourcePosition, targetPosition,
     sourceHandleId, targetHandleId,
@@ -20,6 +23,29 @@ export default function StubEdge({
 
   return (
     <>
+      {hasArrow && (
+        <defs>
+          <marker
+            id={markerId}
+            markerWidth="20"
+            markerHeight="22"
+            refX="10"
+            refY="6"
+            viewBox="-5 -5 20 22"
+            markerUnits="userSpaceOnUse"
+            orient="auto"
+            overflow="visible"
+          >
+            <path d="M 0 0.5 L 10 6 L 0 11.5 Z" className="wfc-edge-arrow-halo" />
+            <path
+              d="M 0 0.5 L 10 6 L 0 11.5 Z"
+              className="wfc-edge-arrow"
+              fill={edgeColor}
+              stroke={edgeColor}
+            />
+          </marker>
+        </defs>
+      )}
       <path
         d={path}
         className="wfc-edge-halo"
@@ -27,23 +53,11 @@ export default function StubEdge({
         strokeDasharray={style?.strokeDasharray}
         pointerEvents="none"
       />
-      {hasArrow && (
-        <polygon
-          points={arrowPoints}
-          className="wfc-edge-arrow-halo"
-          pointerEvents="none"
-        />
-      )}
-      <BaseEdge path={path} style={style} />
-      {hasArrow && (
-        <polygon
-          points={arrowPoints}
-          className="wfc-edge-arrow"
-          fill={edgeColor}
-          stroke={edgeColor}
-          pointerEvents="none"
-        />
-      )}
+      <BaseEdge
+        path={path}
+        markerEnd={hasArrow ? `url(#${markerId})` : undefined}
+        style={style}
+      />
     </>
   )
 }

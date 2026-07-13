@@ -184,12 +184,12 @@ function StageTreeRow({ id, depth, byId, childrenMap, attachMap, expanded, onTog
   )
 }
 
-// Inline sub-note (page column "하위 노트"): recursive, read-only preview.
-function SubNoteRow({ id, depth, byId, outMap, expanded, onToggle, onFocusNode, onOpen, ancestors }) {
+// Inline related note: follows either the incoming or outgoing relation map.
+function SubNoteRow({ id, depth, byId, relationMap, expanded, onToggle, onFocusNode, onOpen, ancestors }) {
   const node = byId.get(id)
   if (!node) return null
   const isCycle = ancestors.has(id)
-  const kids = isCycle ? [] : (outMap.get(id) ?? [])
+  const kids = isCycle ? [] : (relationMap.get(id) ?? [])
   const isExpanded = expanded.has(id)
   const dim = node.type !== 'stage'
   const nextAncestors = useMemo(() => new Set([...ancestors, id]), [ancestors, id])
@@ -224,7 +224,7 @@ function SubNoteRow({ id, depth, byId, outMap, expanded, onToggle, onFocusNode, 
       )}
       {isExpanded && kids.map((cid) => (
         <SubNoteRow
-          key={cid} id={cid} depth={depth + 1} byId={byId} outMap={outMap}
+          key={cid} id={cid} depth={depth + 1} byId={byId} relationMap={relationMap}
           expanded={expanded} onToggle={onToggle} onFocusNode={onFocusNode} onOpen={onOpen}
           ancestors={nextAncestors}
         />
@@ -236,7 +236,7 @@ function SubNoteRow({ id, depth, byId, outMap, expanded, onToggle, onFocusNode, 
 // ── Page column: full note editor for the selected node ────────────────────
 // Keyed by node.id at the call site so switching pages remounts this fresh
 // (simplest way to reset all local editing state).
-function NotePage({ node, byId, outMap, isEditable, onUpdateNode, onFocusNode, onOpen, onBack, onClose, imageContext }) {
+function NotePage({ node, byId, inMap, outMap, isEditable, onUpdateNode, onFocusNode, onOpen, onBack, onClose, imageContext }) {
   const titleSaveTimer = useRef(null)
   const bodySaveTimer = useRef(null)
   const pendingTitle = useRef(null)
@@ -296,6 +296,7 @@ function NotePage({ node, byId, outMap, isEditable, onUpdateNode, onFocusNode, o
     }, 400)
   }
 
+  const parents = inMap.get(node.id) ?? []
   const kids = outMap.get(node.id) ?? []
 
   const uploadImage = async (event) => {
@@ -452,6 +453,23 @@ function NotePage({ node, byId, outMap, isEditable, onUpdateNode, onFocusNode, o
           </div>
         )}
 
+        {/* 상위 노트 (incoming edges) */}
+        {parents.length > 0 && (
+          <div style={{ marginTop: 18, borderTop: '1px solid #ffffff18', paddingTop: 10 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#666', textTransform: 'uppercase', marginBottom: 6 }}>
+              상위 노트
+            </div>
+            {parents.map((pid) => (
+              <SubNoteRow
+                key={pid} id={pid} depth={0} byId={byId} relationMap={inMap}
+                expanded={subExpanded} onToggle={toggleSub}
+                onFocusNode={onFocusNode} onOpen={onOpen}
+                ancestors={new Set([node.id])}
+              />
+            ))}
+          </div>
+        )}
+
         {/* 하위 노트 (outgoing edges) */}
         {kids.length > 0 && (
           <div style={{ marginTop: 18, borderTop: '1px solid #ffffff18', paddingTop: 10 }}>
@@ -460,7 +478,7 @@ function NotePage({ node, byId, outMap, isEditable, onUpdateNode, onFocusNode, o
             </div>
             {kids.map((cid) => (
               <SubNoteRow
-                key={cid} id={cid} depth={0} byId={byId} outMap={outMap}
+                key={cid} id={cid} depth={0} byId={byId} relationMap={outMap}
                 expanded={subExpanded} onToggle={toggleSub}
                 onFocusNode={onFocusNode} onOpen={onOpen}
                 ancestors={new Set([node.id])}
@@ -574,6 +592,15 @@ export default function NotesPanel({
       if (isPartEdge(e)) return
       if (!m.has(e.source)) m.set(e.source, [])
       m.get(e.source).push(e.target)
+    })
+    return m
+  }, [edges])
+  const inMap = useMemo(() => {
+    const m = new Map()
+    edges.forEach((e) => {
+      if (isPartEdge(e)) return
+      if (!m.has(e.target)) m.set(e.target, [])
+      m.get(e.target).push(e.source)
     })
     return m
   }, [edges])
@@ -718,6 +745,7 @@ export default function NotesPanel({
             key={selectedNode.id}
             node={selectedNode}
             byId={byId}
+            inMap={inMap}
             outMap={outMap}
             isEditable={selectedNode.noteOnly ? !!isNoteEditable?.(selectedNode.id) : (isNodeEditable ? isNodeEditable(selectedNode.id) : true)}
             onUpdateNode={selectedNode.noteOnly ? onUpdateNote : onUpdateNode}

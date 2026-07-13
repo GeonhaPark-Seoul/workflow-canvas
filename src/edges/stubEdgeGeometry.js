@@ -1,8 +1,6 @@
 const STUB = 22
 const MAIN_HANDLE_RADIUS = 22.5
 const BORDER_OVERLAP = 1
-const ARROW_LENGTH = 8
-const ARROW_HALF_WIDTH = 4.5
 
 const DIR = {
   top: { x: 0, y: -1 },
@@ -46,17 +44,5 @@ export function getStubEdgeGeometry({
   const c2 = { x: p2.x + targetDir.x * curve, y: p2.y + targetDir.y * curve }
   const path = `M ${source.x},${source.y} L ${p1.x},${p1.y} C ${c1.x},${c1.y} ${c2.x},${c2.y} ${p2.x},${p2.y} L ${target.x},${target.y}`
 
-  const incoming = { x: -targetDir.x, y: -targetDir.y }
-  const perpendicular = { x: -incoming.y, y: incoming.x }
-  const base = {
-    x: target.x - incoming.x * ARROW_LENGTH,
-    y: target.y - incoming.y * ARROW_LENGTH,
-  }
-  const arrowPoints = [
-    target,
-    { x: base.x + perpendicular.x * ARROW_HALF_WIDTH, y: base.y + perpendicular.y * ARROW_HALF_WIDTH },
-    { x: base.x - perpendicular.x * ARROW_HALF_WIDTH, y: base.y - perpendicular.y * ARROW_HALF_WIDTH },
-  ].map((point) => `${point.x},${point.y}`).join(' ')
-
-  return { path, arrowPoints, source, target }
+  return { path, source, target }
 }
