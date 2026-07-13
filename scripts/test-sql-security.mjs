@@ -38,10 +38,14 @@ for (const signature of ['share_link_is_active(text)', 'share_link_preview(text)
 
 for (const sql of [profiles, profilePrivacy]) {
   assert.match(sql, /revoke execute on function can_view_profile\(uuid, uuid\) from PUBLIC, anon;/i)
+  assert.match(sql, /viewer_member\.user_id\s*=\s*p_viewer/i, 'profile access must recognize accepted viewer membership')
+  assert.match(sql, /target_member\.user_id\s*=\s*p_target/i, 'profile access must recognize accepted teammate membership')
 }
 
 assert.match(images, /values\s*\(\s*'canvas-images'[\s\S]*?false,/i, 'canvas image bucket must stay private')
 assert.match(images, /revoke execute on function can_access_canvas_image\(text, boolean\) from PUBLIC, anon;/i)
+assert.match(images, /coalesce\(m\.restrict_view_override,\s*s\.restrict_view\)/i, 'image reads must honor per-member view restriction overrides')
+assert.match(shares, /share_members add column if not exists restrict_view_override boolean/i)
 assert.match(tokens, /token\s*=\s*encode\(digest\(token, 'sha256'\), 'hex'\)/i, 'legacy MCP tokens must be hashed in place')
 assert.doesNotMatch(tokens, /select token from mcp_tokens/i, 'raw MCP secrets must not be documented as recoverable')
 

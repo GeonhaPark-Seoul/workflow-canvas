@@ -343,6 +343,8 @@ export default function MemoNode({ data, selected, id }) {
           participants={data.scopedParticipants}
           canInvite={selected && data.canInvite && !data.readOnly}
           onInvite={data.onInvite}
+          canManageRestrictions={data.canManageParticipants}
+          onRemoveViewRestriction={data.onRemoveViewRestriction}
           scope="node"
           targetId={id}
         />

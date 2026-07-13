@@ -28,28 +28,148 @@ export async function mySharesFor(userId, canvasId = null) {
   if (!shares?.length) return []
 
   const { data: members, error: membersError } = await db
-    .from('share_members').select('share_id, can_edit').eq('user_id', userId)
+    .from('share_members').select('*').eq('user_id', userId)
   if (membersError) throw new Error(membersError.message)
-  const canEditByShare = new Map((members ?? []).map((member) => [member.share_id, member.can_edit]))
+  const memberByShare = new Map((members ?? []).map((member) => [member.share_id, member]))
   return shares
-    .filter((share) => share.owner_id !== userId && canEditByShare.has(share.id))
-    .map((share) => ({ ...share, can_edit: canEditByShare.has(share.id) ? canEditByShare.get(share.id) : true }))
+    .filter((share) => share.owner_id !== userId && memberByShare.has(share.id))
+    .map((share) => effectiveShareGrant(share, memberByShare.get(share.id)))
+}
+
+export function effectiveShareGrant(share, member = {}) {
+  return {
+    ...share,
+    can_edit: member.can_edit !== false,
+    restrict_view: member.restrict_view_override ?? !!share.restrict_view,
+  }
+}
+
+export function compareShareAccess(a, b) {
+  return SCOPE_RANK[a.scope] - SCOPE_RANK[b.scope]
+    || Number(b.can_edit) - Number(a.can_edit)
+    || Number(a.restrict_view) - Number(b.restrict_view)
+}
+
+export function pickBestShareAccess(grants) {
+  return [...(grants ?? [])].sort(compareShareAccess)[0] ?? null
 }
 
 export async function resolveSharedCanvasAccess(userId, ownerId, canvasId) {
   const shares = (await mySharesFor(userId, canvasId)).filter((share) => share.owner_id === ownerId)
   if (!shares.length) throw new Error('이 공유 캔버스에 접근할 권한이 없습니다.')
-  shares.sort((a, b) => (
-    SCOPE_RANK[a.scope] - SCOPE_RANK[b.scope]
-    || Number(b.can_edit) - Number(a.can_edit)
-    || Number(a.restrict_view) - Number(b.restrict_view)
-  ))
-  const share = shares[0]
+  const share = pickBestShareAccess(shares)
   const { data: row, error } = await admin().from('canvases').select('*')
     .eq('user_id', ownerId).eq('canvas_id', canvasId).maybeSingle()
   if (error) throw new Error(error.message)
   if (!row) throw new Error('공유 캔버스를 찾을 수 없습니다.')
   return { row, ownerId, scope: share.scope, targetId: share.target_id, canEdit: share.can_edit !== false, restrictView: !!share.restrict_view }
+}
+
+function publicProfile(row) {
+  if (!row) return null
+  return {
+    nickname: row.nickname,
+    glyph: row.glyph,
+    color: row.color,
+    email: row.email,
+    lastSeenAt: row.last_seen_at,
+  }
+}
+
+// Returns accepted team members only. Pending email addresses remain visible to
+// the owner through the invitation UI and are never exposed to collaborators.
+export async function listCanvasParticipants(ownerId, canvasId, viewerId) {
+  if (viewerId !== ownerId) await resolveSharedCanvasAccess(viewerId, ownerId, canvasId)
+
+  const db = admin()
+  const { data: canvas, error: canvasError } = await db.from('canvases').select('canvas_id')
+    .eq('user_id', ownerId).eq('canvas_id', canvasId).maybeSingle()
+  if (canvasError) throw new Error(canvasError.message)
+  if (!canvas) throw new Error('공유 캔버스를 찾을 수 없습니다.')
+
+  const { data: shares, error: sharesError } = await db.from('canvas_shares')
+    .select('id, scope, target_id, restrict_view, created_at')
+    .eq('owner_id', ownerId).eq('canvas_id', canvasId)
+  if (sharesError) throw new Error(sharesError.message)
+
+  const shareIds = (shares ?? []).map((share) => share.id)
+  let members = []
+  if (shareIds.length) {
+    const { data, error } = await db.from('share_members').select('*').in('share_id', shareIds)
+    if (error) throw new Error(error.message)
+    members = data ?? []
+  }
+
+  const userIds = [...new Set([ownerId, ...members.map((member) => member.user_id)])]
+  const { data: profiles, error: profilesError } = await db.from('profiles')
+    .select('user_id, nickname, glyph, color, email, last_seen_at').in('user_id', userIds)
+  if (profilesError) throw new Error(profilesError.message)
+  const profileByUser = new Map((profiles ?? []).map((profile) => [profile.user_id, profile]))
+  const shareById = new Map((shares ?? []).map((share) => [share.id, share]))
+  const grantsByUser = new Map()
+
+  for (const member of members) {
+    const share = shareById.get(member.share_id)
+    if (!share) continue
+    const grants = grantsByUser.get(member.user_id) ?? []
+    grants.push(effectiveShareGrant(share, member))
+    grantsByUser.set(member.user_id, grants)
+  }
+
+  const ownerProfile = publicProfile(profileByUser.get(ownerId))
+  const participants = [{
+    userId: ownerId,
+    email: ownerProfile?.email ?? null,
+    profile: ownerProfile,
+    isOwner: true,
+    canEdit: true,
+    restrictView: false,
+    grants: [],
+  }]
+
+  const memberParticipants = [...grantsByUser.entries()].map(([userId, grants]) => {
+    const best = pickBestShareAccess(grants)
+    const profile = publicProfile(profileByUser.get(userId))
+    return {
+      userId,
+      email: profile?.email ?? null,
+      profile,
+      isOwner: false,
+      shareId: best.id,
+      scope: best.scope,
+      targetId: best.target_id,
+      canEdit: best.can_edit !== false,
+      restrictView: !!best.restrict_view,
+      joinedAt: members.find((member) => member.user_id === userId)?.joined_at ?? null,
+      grants: grants.map((grant) => ({
+        shareId: grant.id,
+        scope: grant.scope,
+        targetId: grant.target_id,
+        canEdit: grant.can_edit !== false,
+        restrictView: !!grant.restrict_view,
+      })),
+    }
+  }).sort((a, b) => String(a.joinedAt ?? '').localeCompare(String(b.joinedAt ?? '')))
+
+  return [...participants, ...memberParticipants]
+}
+
+export async function removeCanvasMemberViewRestriction(ownerId, canvasId, memberUserId, viewerId) {
+  if (viewerId !== ownerId || memberUserId === ownerId) throw new Error('시야 제한을 해제할 권한이 없습니다.')
+  const db = admin()
+  const { data: shares, error: sharesError } = await db.from('canvas_shares').select('id')
+    .eq('owner_id', ownerId).eq('canvas_id', canvasId)
+  if (sharesError) throw new Error(sharesError.message)
+  const shareIds = (shares ?? []).map((share) => share.id)
+  if (!shareIds.length) throw new Error('공유 캔버스를 찾을 수 없습니다.')
+  const { data, error } = await db.from('share_members')
+    .update({ restrict_view_override: false })
+    .eq('user_id', memberUserId)
+    .in('share_id', shareIds)
+    .select('share_id')
+  if (error) throw new Error(error.message)
+  if (!data?.length) throw new Error('해당 참여자를 찾을 수 없습니다.')
+  return data.length
 }
 
 export function editableNodeIdSet(access, nodes) {

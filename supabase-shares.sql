@@ -447,6 +447,9 @@ grant all on canvas_shares, share_members, share_revocations to service_role;
 -- Safe to re-run.
 
 alter table share_members add column if not exists can_edit boolean not null default true;
+-- NULL follows the invitation's default. Owners can set FALSE for one accepted
+-- member without changing what future users of the same link receive.
+alter table share_members add column if not exists restrict_view_override boolean;
 
 -- Owner manages members of their shares (view/update/delete membership rows).
 drop policy if exists "owner selects share members" on share_members;

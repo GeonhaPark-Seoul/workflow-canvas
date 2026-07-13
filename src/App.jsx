@@ -42,17 +42,23 @@ import {
   loadUserPrefs as cloudLoadUserPrefs,
   CanvasConflictError,
 } from './lib/cloudStorage'
-import { getSharedCanvas, listSharedCanvases, updateSharedCanvas } from './lib/sharedCanvasApi'
+import {
+  getSharedCanvas, listCanvasParticipants, listSharedCanvases,
+  removeMemberViewRestriction, updateSharedCanvas,
+} from './lib/sharedCanvasApi'
 import { appendHistorySnapshot, sameCanvasSnapshot } from './lib/canvasSync'
+import {
+  chooseOwnCanvasToRestore, loadLastOpenedCanvas, saveLastOpenedCanvas,
+} from './lib/canvasNavigation'
 import { absoluteNodePosition, boundsForNodeIds } from './lib/canvasGeometry'
 import { dataUrlToBlob, uploadCanvasImage } from './lib/imageStorage'
 import { mergeCanvasSnapshots } from './lib/canvasMerge'
 import { joinCanvasPresence } from './lib/presence'
 import {
   claimEmailInvite, claimShareToken, getShareLinkPreview, isShareLinkActive, listPendingEmailInvites, listShares, revokeShareMember,
-  listShareMembers, setMemberEdit, kickMember, leaveSharedCanvas,
+  setMemberEdit, kickMember, leaveSharedCanvas,
 } from './lib/shares'
-import { getMyProfile, getProfiles, loadMySettings, upsertMyEmail, touchLastSeen } from './lib/profiles'
+import { getMyProfile, loadMySettings, upsertMyEmail, touchLastSeen } from './lib/profiles'
 
 const nodeTypes = { stage: StageNode, memo: MemoNode, group: GroupNode, content: ContentNode }
 const edgeTypes = { stub: StubEdge }
@@ -110,6 +116,38 @@ function parseSharedId(id) {
   const sep = rest.indexOf(':')
   if (sep === -1) return null
   return { ownerId: rest.slice(0, sep), canvasId: rest.slice(sep + 1) }
+}
+
+function participantKey(person) {
+  return person.userId ? `user:${person.userId}` : `email:${person.email ?? person.shareId}`
+}
+
+function dedupeParticipants(people) {
+  const unique = new Map()
+  ;(people ?? []).forEach((person) => {
+    const key = participantKey(person)
+    if (!unique.has(key)) unique.set(key, person)
+  })
+  return [...unique.values()]
+}
+
+function scopedParticipants(people) {
+  const owner = people.find((person) => person.isOwner)
+  const scoped = {}
+  for (const person of people) {
+    if (person.isOwner) continue
+    const grants = person.grants?.length ? person.grants : [person]
+    for (const grant of grants) {
+      if (grant.scope === 'canvas' || !grant.targetId) continue
+      const key = `${grant.scope}:${grant.targetId}`
+      if (!scoped[key]) scoped[key] = []
+      scoped[key].push(person)
+    }
+  }
+  Object.keys(scoped).forEach((key) => {
+    scoped[key] = dedupeParticipants(owner ? [owner, ...scoped[key]] : scoped[key])
+  })
+  return scoped
 }
 
 // "연결선 정리": pick the nearest-side handle pair between two nodes, based on
@@ -319,9 +357,7 @@ export default function App() {
 
   // ── Profiles (nickname/avatar) ────────────────────────────────────────────
   const [myProfile, setMyProfile] = useState(null)
-  const myProfileRef = useRef(null) // fresh-value mirror for refreshShareParticipants (stable useCallback)
   useEffect(() => { if (!user) setMyProfile(null) }, [user])
-  useEffect(() => { myProfileRef.current = myProfile }, [myProfile])
 
   // Participants shown in the CanvasTabs avatar row for the ACTIVE canvas.
   const [shareParticipantsBase, setShareParticipantsBase] = useState([]) // [{ userId, email, profile, isOwner }]
@@ -863,6 +899,7 @@ export default function App() {
     isRestoring.current = true
     setActiveCanvasId(id)
     saveActiveId(id)
+    if (userRef.current?.id) saveLastOpenedCanvas(userRef.current.id, id)
     setNodes(nNodes)
     setEdges(nEdges)
     setViews(data.views ?? [])
@@ -920,6 +957,17 @@ export default function App() {
       snapshot: canvasSnapshot(row.name, data),
       permission: row.permission,
     })
+    setSharedCanvases((previous) => previous.map((item) => (
+      item.ownerId === ownerId && item.canvasId === canvasId
+        ? {
+            ...item,
+            scope: row.permission?.scope ?? item.scope,
+            targetId: row.permission?.targetId ?? item.targetId,
+            canEdit: row.permission?.canEdit ?? item.canEdit,
+            restrictView: row.permission?.restrictView ?? item.restrictView,
+          }
+        : item
+    )))
     const existing = loadCanvasData(compositeId)
     if (latestRef.current.activeCanvasId === compositeId && loadedSharedIdRef.current === compositeId && existing && JSON.stringify(existing) === JSON.stringify(data)) return
     saveCanvasData(compositeId, data)
@@ -994,6 +1042,7 @@ export default function App() {
 
   const switchCanvas = useCallback((id) => {
     if (id === activeCanvasId) return
+    if (user?.id) saveLastOpenedCanvas(user.id, id)
     persistCurrent()
     const shared = parseSharedId(id)
     if (shared) {
@@ -1005,7 +1054,7 @@ export default function App() {
       return
     }
     loadCanvas(id)
-  }, [activeCanvasId, persistCurrent, loadCanvas, loadSharedCanvas, handleSharedAccessLost])
+  }, [activeCanvasId, user, persistCurrent, loadCanvas, loadSharedCanvas, handleSharedAccessLost])
 
   const addCanvas = useCallback(() => {
     persistCurrent()
@@ -1067,7 +1116,7 @@ export default function App() {
 
   // ── Cloud: load all canvases from Supabase into memory + localStorage ────
   // Placed after loadCanvas so it can be a stable dep reference (no TDZ).
-  const loadFromCloud = useCallback(async (userId) => {
+  const loadFromCloud = useCallback(async (userId, preferredCanvasId = null) => {
     let rows, prefs
     try {
       ;[rows, prefs] = await Promise.all([
@@ -1112,7 +1161,7 @@ export default function App() {
     conflictedCanvasKeysRef.current.clear()
     rows.forEach((r) => saveCanvasData(r.canvas_id, { nodes: r.nodes ?? [], edges: r.edges ?? [], views: r.views ?? [], stageTypes: r.stage_types?.length ? r.stage_types : undefined }))
     saveCanvasList(canvasList)
-    const activeId = prefs?.active_canvas_id ?? canvasList[0]?.id
+    const activeId = chooseOwnCanvasToRestore(rows, prefs, preferredCanvasId)
 
     setCanvases(canvasList)
     if (activeId) {
@@ -1163,9 +1212,9 @@ export default function App() {
   }, [user, loadPendingEmailInvites])
 
   // ── Sharing: participants shown in the CanvasTabs avatar row for the
-  // active canvas. Own canvas: every distinct member across its shares, plus
-  // pending (unclaimed) email invites. Shared-with-me canvas: just the owner
-  // + me — invitee RLS on share_members doesn't expose other members.
+  // active canvas. Accepted members come from the permission-checked server
+  // endpoint so every collaborator sees the same team roster. Pending email
+  // addresses are owner-only and are appended from the invitation table.
   const refreshShareParticipants = useCallback(async () => {
     const u = userRef.current
     const aid = latestRef.current.activeCanvasId
@@ -1176,55 +1225,25 @@ export default function App() {
     }
     const shared = parseSharedId(aid)
     try {
+      const ownerId = shared?.ownerId ?? u.id
+      const canvasId = shared?.canvasId ?? aid
+      const accepted = await listCanvasParticipants(ownerId, canvasId)
       if (!shared) {
-        const [shares, shareMembers] = await Promise.all([listShares(aid), listShareMembers(aid)])
-        const claimedShareIds = new Set(shareMembers.map((m) => m.shareId))
-        const members = shareMembers.map((m) => ({
-          userId: m.userId, profile: m.profile ?? null, isOwner: false,
-          email: m.profile?.email ?? null, lastSeenAt: m.profile?.lastSeenAt ?? null,
-          shareId: m.shareId, canEdit: m.canEdit !== false,
-          scope: m.scope, targetId: m.targetId,
-        }))
+        const shares = await listShares(aid)
+        const claimedShareIds = new Set(accepted.flatMap((person) => person.grants ?? []).map((grant) => grant.shareId))
         const pending = shares
           .filter((s) => s.invitee_email && !claimedShareIds.has(s.id))
           .map((s) => ({
             userId: null, email: s.invitee_email, profile: null, isOwner: false,
             lastSeenAt: null, shareId: s.id, canEdit: true,
-            scope: s.scope, targetId: s.target_id,
+            scope: s.scope, targetId: s.target_id, restrictView: !!s.restrict_view,
           }))
-        const mp = myProfileRef.current
-        const ownerProfile = mp ? { nickname: mp.nickname, glyph: mp.glyph, color: mp.color, email: mp.email, lastSeenAt: mp.last_seen_at } : null
-        const owner = {
-          userId: u.id, profile: ownerProfile, isOwner: true,
-          email: ownerProfile?.email ?? u.email ?? null, lastSeenAt: ownerProfile?.lastSeenAt ?? null,
-        }
-        const dedupe = (people) => {
-          const unique = new Map()
-          people.forEach((person) => {
-            const key = person.userId ? `user:${person.userId}` : `email:${person.email ?? person.shareId}`
-            if (!unique.has(key)) unique.set(key, person)
-          })
-          return [...unique.values()]
-        }
-        const scoped = {}
-        const scopedPeople = [...members, ...pending]
-        scopedPeople.forEach((member) => {
-          if (member.scope === 'canvas' || !member.targetId) return
-          const key = `${member.scope}:${member.targetId}`
-          if (!scoped[key]) scoped[key] = []
-          scoped[key].push(member)
-        })
-        Object.keys(scoped).forEach((key) => { scoped[key] = dedupe([owner, ...scoped[key]]) })
-        setScopedParticipantMap(scoped)
-        setShareParticipantsBase(dedupe([owner, ...members, ...pending]))
+        const people = dedupeParticipants([...accepted, ...pending])
+        setScopedParticipantMap(scopedParticipants(people))
+        setShareParticipantsBase(people)
       } else {
-        setScopedParticipantMap({})
-        const ids = [shared.ownerId, u.id]
-        const profiles = await getProfiles(ids)
-        setShareParticipantsBase(ids.map((id) => {
-          const p = profiles.get(id)
-          return { userId: id, profile: p ?? null, isOwner: id === shared.ownerId, email: p?.email ?? null, lastSeenAt: p?.lastSeenAt ?? null }
-        }))
+        setScopedParticipantMap(scopedParticipants(accepted))
+        setShareParticipantsBase(accepted)
       }
     } catch (err) {
       console.error('[profiles] refreshShareParticipants:', err.message)
@@ -1315,6 +1334,19 @@ export default function App() {
     await refreshShareParticipants()
   }, [refreshShareParticipants])
 
+  const onRemoveMemberViewRestriction = useCallback(async (participant) => {
+    const canvasId = latestRef.current.activeCanvasId
+    const owner = userRef.current
+    if (!owner || !canvasId || parseSharedId(canvasId) || !participant?.userId) return
+    try {
+      await removeMemberViewRestriction(owner.id, canvasId, participant.userId)
+      await refreshShareParticipants()
+    } catch (err) {
+      console.error('[shares] remove view restriction:', err.message)
+      window.alert(`시야 제한을 해제하지 못했습니다: ${err.message}`)
+    }
+  }, [refreshShareParticipants])
+
   // Kept fresh every render (not in the auth effect's deps, which stay stable
   // like before) so the auth listener can call the latest closures without
   // re-subscribing on every node/edge edit.
@@ -1354,8 +1386,9 @@ export default function App() {
       initializedUserRef.current = u.id
       cloudHydratedUserRef.current = null
       setAuthNotice(null)
+      const preferredCanvasId = loadLastOpenedCanvas(u.id)
       try {
-        await loadFromCloud(u.id)
+        await loadFromCloud(u.id, preferredCanvasId)
       } catch (err) {
         console.error('[cloud] hydrate before invite:', err.message)
       }
@@ -1369,6 +1402,16 @@ export default function App() {
       if (u.email) upsertMyEmail(u.email).catch((err) => console.error('[profiles] upsertMyEmail:', err.message))
       sharedFnRef.current.refreshSharedOutCanvasIds()
       try { await loadPendingEmailInvites() } catch (err) { console.error('[shares] loadPendingEmailInvites:', err.message) }
+
+      let availableShared = []
+      let sharedListLoaded = false
+      try {
+        availableShared = await listSharedCanvases()
+        sharedListLoaded = true
+        setSharedCanvases(availableShared)
+      } catch (err) {
+        console.error('[shares] restore shared canvases:', err.message)
+      }
 
       if (pendingShareTokenRef.current) {
         const token = pendingShareTokenRef.current
@@ -1388,11 +1431,29 @@ export default function App() {
         return
       }
 
-      sharedFnRef.current.refreshSharedCanvases()
+      const preferredShared = parseSharedId(preferredCanvasId)
+      if (preferredShared && !sharedListLoaded) {
+        // The own-canvas hydration above is provisional. Keep the tab-local
+        // target on a transient network failure so the next refresh can retry.
+        saveLastOpenedCanvas(u.id, preferredCanvasId)
+      }
+      if (preferredShared && availableShared.some((item) => (
+        item.ownerId === preferredShared.ownerId && item.canvasId === preferredShared.canvasId
+      ))) {
+        try {
+          await loadSharedCanvas(preferredShared.ownerId, preferredShared.canvasId)
+        } catch (err) {
+          if (!handleSharedAccessLost(preferredShared.ownerId, preferredShared.canvasId, err)) {
+            console.error('[shares] restore active shared canvas:', err.message)
+            saveLastOpenedCanvas(u.id, preferredCanvasId)
+          }
+        }
+      }
     }
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       const u = session?.user ?? null
+      userRef.current = u
       setUser(u)
       if (u) {
         if (u.id !== initializedUserRef.current) afterLogin(u)
@@ -1402,6 +1463,7 @@ export default function App() {
     })
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       const u = session?.user ?? null
+      userRef.current = u
       setUser(u)
       // supabase-js re-emits SIGNED_IN on tab-refocus (token revalidation) even
       // when it's the same user already signed in — only run afterLogin (which
@@ -1428,7 +1490,7 @@ export default function App() {
       }
     })
     return () => subscription.unsubscribe()
-  }, [loadFromCloud, resetToGuestCanvas, loadPendingEmailInvites])
+  }, [loadFromCloud, resetToGuestCanvas, loadPendingEmailInvites, loadSharedCanvas, handleSharedAccessLost])
 
   // ── Realtime: reflect MCP(AI)/other-device writes live ───────────────────
   // Events are treated as signals only — large jsonb payloads can be truncated,
@@ -2814,6 +2876,7 @@ export default function App() {
         onLeaveShared={onLeaveShared}
         onToggleMemberEdit={onToggleMemberEdit}
         onKickMember={onKickMember}
+        onRemoveViewRestriction={onRemoveMemberViewRestriction}
       />
 
       <Toolbar
@@ -3028,10 +3091,7 @@ export default function App() {
         nodes={nodes.map((n) => {
           const isOwner = perm.role === 'owner'
           const nodeScope = n.type === 'group' ? 'group' : 'node'
-          const ownerScopedParticipants = scopedParticipantsByTarget[`${nodeScope}:${n.id}`] ?? []
-          const receivedScopedParticipants = !isOwner && perm.scope === nodeScope && perm.targetId === n.id
-            ? shareParticipants
-            : []
+          const nodeScopedParticipants = scopedParticipantsByTarget[`${nodeScope}:${n.id}`] ?? []
           // canEdit === false: the whole canvas is view-only regardless of
           // scope — every node stays selectable (so it can still be viewed/
           // pinned) but never draggable or deletable.
@@ -3062,7 +3122,9 @@ export default function App() {
               forceShapeOnly: forceShapeOnlySet?.has(n.id) ?? false,
               canInvite: isOwner,
               onInvite: isOwner ? openInvite : undefined,
-              scopedParticipants: isOwner ? ownerScopedParticipants : receivedScopedParticipants,
+              canManageParticipants: isOwner,
+              onRemoveViewRestriction: isOwner ? onRemoveMemberViewRestriction : undefined,
+              scopedParticipants: nodeScopedParticipants,
               onUpdate: (patch) => updateNodeData(n.id, patch),
               onEditStart: () => setIsAnyEditing(true),
               onEditEnd: () => setIsAnyEditing(false),

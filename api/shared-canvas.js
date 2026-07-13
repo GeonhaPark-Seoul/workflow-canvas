@@ -1,6 +1,6 @@
 import {
-  admin, applySharedCanvasUpdate, mySharesFor, redactCanvas,
-  resolveBrowserUser, resolveSharedCanvasAccess,
+  admin, applySharedCanvasUpdate, listCanvasParticipants, mySharesFor, redactCanvas,
+  removeCanvasMemberViewRestriction, resolveBrowserUser, resolveSharedCanvasAccess,
 } from '../mcp/shareAccess.js'
 
 function send(res, status, body) {
@@ -43,9 +43,22 @@ export default async function handler(req, res) {
       return send(res, 200, { canvases: canvases.filter(Boolean) })
     }
 
+    if (req.method === 'GET' && req.query.mode === 'participants') {
+      const { ownerId, canvasId } = req.query
+      if (!ownerId || !canvasId) return send(res, 400, { error: 'ownerId와 canvasId가 필요합니다.' })
+      const participants = await listCanvasParticipants(ownerId, canvasId, user.id)
+      return send(res, 200, { participants })
+    }
+
     const input = req.method === 'GET' ? req.query : req.body
     const { ownerId, canvasId } = input ?? {}
     if (!ownerId || !canvasId) return send(res, 400, { error: 'ownerId와 canvasId가 필요합니다.' })
+
+    if (req.method === 'PATCH' && input.action === 'remove-view-restriction') {
+      await removeCanvasMemberViewRestriction(ownerId, canvasId, input.userId, user.id)
+      return send(res, 200, { ok: true })
+    }
+
     const access = await resolveSharedCanvasAccess(user.id, ownerId, canvasId)
 
     if (req.method === 'GET') return send(res, 200, redactCanvas(access))

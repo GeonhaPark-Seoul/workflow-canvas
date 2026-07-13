@@ -167,6 +167,8 @@ export default function GroupNode({ data, selected, id }) {
           participants={data.scopedParticipants}
           canInvite={!editing && data.canInvite && !data.readOnly}
           onInvite={data.onInvite}
+          canManageRestrictions={data.canManageParticipants}
+          onRemoveViewRestriction={data.onRemoveViewRestriction}
           scope="group"
           targetId={id}
         />

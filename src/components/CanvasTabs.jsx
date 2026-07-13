@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Avatar } from './AuthPanel'
+import ParticipantAvatar from './ParticipantAvatar'
 
 // Compact count formatter: 1000 → 1k, 1500 → 1.5k, 1000000 → 1m (1 decimal,
 // trailing .0 stripped).
@@ -16,6 +16,7 @@ export default function CanvasTabs({
   sharedCanvases = [], onInvite,
   participants = [], sharedOutIds = new Set(),
   onLeaveShared = () => {}, onToggleMemberEdit = () => {}, onKickMember = () => {},
+  onRemoveViewRestriction = () => {},
 }) {
   const [open, setOpen] = useState(false)
   const [editingId, setEditingId] = useState(null)
@@ -98,10 +99,11 @@ export default function CanvasTabs({
     ? [ownerP, secondP].filter(Boolean)
     : [ownerP, ...othersP.filter((p) => p !== ownerP)].filter(Boolean)
   const avatarOf = (p, size) => (
-    <Avatar
-      profile={p.profile ?? (p.email ? { glyph: p.email[0]?.toUpperCase() } : null)}
+    <ParticipantAvatar
+      participant={p}
       size={size}
-      online={p.online}
+      canManageRestriction={isOwnActive && !!p.userId && !p.isOwner}
+      onRemoveRestriction={onRemoveViewRestriction}
     />
   )
 

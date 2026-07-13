@@ -53,7 +53,7 @@ begin
       and (
         -- An unrestricted-view invite may read the rest of the canvas, but
         -- writes always stay inside the explicitly delegated region.
-        (not p_write and not s.restrict_view)
+        (not p_write and not coalesce(m.restrict_view_override, s.restrict_view))
         or s.scope = 'canvas'
         or (s.scope = 'node' and s.target_id = v_node_id)
         or (

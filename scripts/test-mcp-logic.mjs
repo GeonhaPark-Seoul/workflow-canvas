@@ -4,11 +4,12 @@ import assert from 'node:assert/strict'
 import { layoutGraph, findNonOverlapping, validateGraphInput, overlaps, nodeRect, radialLevels, segmentIntersectsRect, avoidEdgeCrossings, edgeAnchors, SIZE } from '../mcp/layout.js'
 import { checkRadialLevelMixing, editableNodeIdSet, assertRegionEdit, toExternalCanvasNode } from '../mcp/store.js'
 import { sanitizeHtml } from '../mcp/sanitize.js'
-import { applySharedCanvasUpdate, redactCanvas } from '../mcp/shareAccess.js'
+import { applySharedCanvasUpdate, effectiveShareGrant, pickBestShareAccess, redactCanvas } from '../mcp/shareAccess.js'
 import { sanitizeExternalUrl as sanitizeBrowserUrl, sanitizeHtml as sanitizeBrowserHtml } from '../src/lib/sanitizeHtml.js'
 import { appendHistorySnapshot, sameCanvasSnapshot } from '../src/lib/canvasSync.js'
 import { absoluteNodePosition, boundsForNodeIds } from '../src/lib/canvasGeometry.js'
 import { mergeCanvasSnapshots } from '../src/lib/canvasMerge.js'
+import { chooseOwnCanvasToRestore } from '../src/lib/canvasNavigation.js'
 
 let passed = 0
 function t(name, fn) {
@@ -953,6 +954,34 @@ t('read-only invite: server rejects every save attempt', () => {
   assert.throws(() => applySharedCanvasUpdate(
     { row: sharedRow, scope: 'canvas', targetId: null, canEdit: false, restrictView: false }, sharedRow.nodes, sharedRow.edges,
   ), /읽기 전용/)
+})
+
+t('member restriction override removes redaction without changing the invitation default', () => {
+  const share = { id: 'share-1', scope: 'group', target_id: 'frame', restrict_view: true }
+  assert.equal(effectiveShareGrant(share, { can_edit: true }).restrict_view, true)
+  assert.equal(effectiveShareGrant(share, { can_edit: true, restrict_view_override: false }).restrict_view, false)
+  assert.equal(share.restrict_view, true)
+})
+
+t('participant roster permission uses the same strongest-grant ordering as canvas access', () => {
+  const best = pickBestShareAccess([
+    { id: 'node', scope: 'node', can_edit: true, restrict_view: false },
+    { id: 'canvas-read', scope: 'canvas', can_edit: false, restrict_view: false },
+    { id: 'canvas-edit', scope: 'canvas', can_edit: true, restrict_view: true },
+  ])
+  assert.equal(best.id, 'canvas-edit')
+})
+
+console.log('canvas refresh navigation')
+
+t('refresh restores the tab-local own canvas before a stale cloud preference', () => {
+  const rows = [{ canvas_id: 'first' }, { canvas_id: 'current' }]
+  assert.equal(chooseOwnCanvasToRestore(rows, { active_canvas_id: 'first' }, 'current'), 'current')
+})
+
+t('refresh ignores deleted or shared ids until server access is revalidated', () => {
+  const rows = [{ canvas_id: 'safe' }]
+  assert.equal(chooseOwnCanvasToRestore(rows, { active_canvas_id: 'deleted' }, 'shared:owner:canvas'), 'safe')
 })
 
 console.log('MCP canvas node representation')

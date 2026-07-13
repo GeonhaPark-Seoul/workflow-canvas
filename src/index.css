@@ -160,3 +160,70 @@ html, body, #root {
 body[data-theme='light'] .react-flow__background-pattern {
   stroke: #00000010 !important;
 }
+
+.participant-avatar {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.view-restricted-badge {
+  position: absolute;
+  right: -4px;
+  bottom: -3px;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border: 1px solid #c084fc;
+  border-radius: 50%;
+  background: #21142d;
+  color: #d8b4fe;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  z-index: 2;
+}
+
+button.view-restricted-badge {
+  cursor: pointer;
+}
+
+button.view-restricted-badge:hover {
+  background: #3b1d52;
+  color: #f3e8ff;
+}
+
+.eye-off-mark {
+  position: relative;
+  width: 8px;
+  height: 5px;
+  border: 1px solid currentColor;
+  border-radius: 60% 40%;
+  transform: rotate(-8deg);
+  box-sizing: border-box;
+}
+
+.eye-off-mark::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 1px;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.eye-off-mark::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: -3px;
+  width: 1px;
+  height: 10px;
+  background: currentColor;
+  box-shadow: 0 0 0 1px #21142d;
+  transform: rotate(-45deg);
+  transform-origin: center;
+}

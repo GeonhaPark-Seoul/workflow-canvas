@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Avatar } from './AuthPanel'
+import ParticipantAvatar from './ParticipantAvatar'
 
 function relativeLastSeen(iso) {
   if (!iso) return '기록 없음'
@@ -22,6 +22,8 @@ export default function ScopedParticipants({
   onInvite,
   scope,
   targetId,
+  canManageRestrictions = false,
+  onRemoveViewRestriction,
 }) {
   const [open, setOpen] = useState(false)
   const people = useMemo(() => {
@@ -44,11 +46,12 @@ export default function ScopedParticipants({
 
   const shown = people.slice(0, 2)
   const scopeLabel = scope === 'group' ? '그룹 참여자' : '노드 참여자'
-  const avatar = (participant, size) => (
-    <Avatar
-      profile={participant.profile ?? (participant.email ? { glyph: participant.email[0]?.toUpperCase() } : null)}
+  const avatar = (participant, size, allowManagement = true) => (
+    <ParticipantAvatar
+      participant={participant}
       size={size}
-      online={participant.userId ? participant.online : false}
+      canManageRestriction={allowManagement && canManageRestrictions && !!participant.userId && !participant.isOwner}
+      onRemoveRestriction={onRemoveViewRestriction}
     />
   )
 
@@ -72,7 +75,7 @@ export default function ScopedParticipants({
             onClick={(event) => { event.stopPropagation(); setOpen(true) }}
             style={{ display: 'flex', background: 'transparent', border: 'none', padding: 0, cursor: 'pointer' }}
           >
-            {avatar(participant, 16)}
+            {avatar(participant, 16, false)}
           </button>
         ))}
         {people.length > 2 && (
