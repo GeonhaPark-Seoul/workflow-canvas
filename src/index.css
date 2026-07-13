@@ -93,6 +93,43 @@ html, body, #root {
 .react-flow__edge.wfc-edge.selected .wfc-edge-arrow-halo {
   opacity: 0.24;
 }
+.wfc-relation-label rect {
+  fill: #181820;
+  stroke: var(--relation-color);
+  stroke-width: 1px;
+  opacity: 0.96;
+  transition: fill 0.12s ease, stroke 0.12s ease;
+}
+.wfc-relation-label text {
+  fill: var(--relation-color);
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0;
+  transition: fill 0.12s ease;
+}
+.react-flow__edge.wfc-edge:hover .wfc-relation-label rect,
+.react-flow__edge.wfc-edge.selected .wfc-relation-label rect {
+  fill: #17233a;
+  stroke: #3b82f6;
+}
+.react-flow__edge.wfc-edge:hover .wfc-relation-label text,
+.react-flow__edge.wfc-edge.selected .wfc-relation-label text {
+  fill: #bfdbfe;
+}
+body[data-theme='light'] .wfc-relation-label rect {
+  fill: #ffffff;
+}
+body[data-theme='light'] .wfc-relation-label text {
+  fill: #273142;
+}
+body[data-theme='light'] .react-flow__edge.wfc-edge:hover .wfc-relation-label rect,
+body[data-theme='light'] .react-flow__edge.wfc-edge.selected .wfc-relation-label rect {
+  fill: #eff6ff;
+}
+body[data-theme='light'] .react-flow__edge.wfc-edge:hover .wfc-relation-label text,
+body[data-theme='light'] .react-flow__edge.wfc-edge.selected .wfc-relation-label text {
+  fill: #1d4ed8;
+}
 
 /* Part-row outlet sockets: the handle is a rounded rect (sized inline per part);
    the two pseudo-elements are the vertical slots of the "콘센트" look. */

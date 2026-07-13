@@ -13,6 +13,13 @@ import {
   isStructuralNode, layoutGraph, validateGraphInput, radialLevels,
 } from './layout.js'
 import { createSystemNodeData, normalizeSystemNodeData } from '../shared/systemOntology.js'
+import {
+  createEdgeRelationData,
+  edgeRelationInfo,
+  normalizeEdgeRelationData,
+  relationDefinition,
+} from '../shared/relationOntology.js'
+import { createWorkflowCanvasSystemMap } from '../shared/workflowCanvasSystemMap.js'
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://tuaifwiigkacrflbhjmu.supabase.co'
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -51,8 +58,24 @@ function assertStageTypeIdx(types, idx) {
   return idx
 }
 
-const findDuplicateEdge = (edges, source, target) =>
-  (edges ?? []).find((e) => e.source === source && e.target === target)
+const edgeRelationIdentity = (data, fallbackType = 'flows_to') => {
+  const relation = edgeRelationInfo(data, fallbackType)
+  return relation.id === 'custom'
+    ? `${relation.id}:${relation.label.toLocaleLowerCase()}`
+    : relation.id
+}
+
+const storedEdgeRelationIdentity = (edge) => edgeRelationIdentity(
+  edge?.data,
+  edge?.style?.strokeDasharray ? 'references' : 'flows_to',
+)
+
+const findDuplicateEdge = (edges, source, target, relationIdentity) =>
+  (edges ?? []).find((edge) => (
+    edge.source === source
+    && edge.target === target
+    && storedEdgeRelationIdentity(edge) === relationIdentity
+  ))
 
 // Teaching warning: for a radial graph, check whether same-depth stage nodes
 // share a single stageTypeIdx. Returns a warning string if mixing is detected,
@@ -453,6 +476,40 @@ export function toExternalCanvasNode(node, byId, hidden = false) {
   }
 }
 
+export function toExternalCanvasEdge(edge, hidden = false, trustedRuntime = null) {
+  const shape = {
+    id: edge.id,
+    source: edge.source,
+    target: edge.target,
+    ...(edge.sourceHandle ? { sourceHandle: edge.sourceHandle } : {}),
+    ...(edge.targetHandle ? { targetHandle: edge.targetHandle } : {}),
+  }
+  if (hidden) return { ...shape, redacted: true }
+  const safeData = normalizeEdgeRelationData(
+    edge?.data,
+    edge?.style?.strokeDasharray ? 'references' : 'flows_to',
+  )
+  const relation = edgeRelationInfo(
+    trustedRuntime ? { ...safeData, relationRuntime: trustedRuntime } : safeData,
+    edge?.style?.strokeDasharray ? 'references' : 'flows_to',
+  )
+  return {
+    ...shape,
+    relation_type: relation.id,
+    relation_label: relation.label,
+    relation_family: relation.family,
+    directed: relation.directed,
+    show_relation_label: relation.explicit,
+    relation_reality: relation.provenance.reality.id,
+    relation_source_kind: relation.provenance.source.id,
+    relation_confidence: relation.provenance.confidence.id,
+    ...(relation.provenance.evidence ? { relation_evidence: relation.provenance.evidence } : {}),
+    ...(relation.provenance.evidenceRef ? { relation_evidence_ref: relation.provenance.evidenceRef } : {}),
+    server_verified: relation.provenance.reality.id === 'verified',
+    ...(relation.provenance.verifiedAt ? { verified_at: relation.provenance.verifiedAt } : {}),
+  }
+}
+
 export async function getCanvas(userId, canvasId) {
   const access = await resolveCanvasAccess(userId, canvasId)
   const row = access.row
@@ -481,11 +538,13 @@ export async function getCanvas(userId, canvasId) {
       byId,
       access.role === 'invitee' && access.restrictView && editable !== null && !editable.has(node.id),
     )),
-    edges: (row.edges ?? []).map((e) => ({
-      id: e.id, source: e.source, target: e.target,
-      ...(e.sourceHandle ? { sourceHandle: e.sourceHandle } : {}),
-      ...(e.targetHandle ? { targetHandle: e.targetHandle } : {}),
-    })),
+    edges: (row.edges ?? []).map((edge) => toExternalCanvasEdge(
+      edge,
+      access.role === 'invitee'
+        && access.restrictView
+        && editable !== null
+        && (!editable.has(edge.source) || !editable.has(edge.target)),
+    )),
   }
 }
 
@@ -509,6 +568,45 @@ export async function createCanvas(userId, name) {
   })
   if (error) throw new Error(error.message)
   return { canvas_id: canvasId, name: name || '새 캔버스' }
+}
+
+export function canCreateWorkflowSystemMap(userId, configuredOwnerId = process.env.WORKFLOW_CANVAS_OWNER_USER_ID) {
+  return typeof userId === 'string'
+    && typeof configuredOwnerId === 'string'
+    && configuredOwnerId.trim().length > 0
+    && userId === configuredOwnerId.trim()
+}
+
+export async function createWorkflowSystemMap(userId, name) {
+  const ownerUserId = process.env.WORKFLOW_CANVAS_OWNER_USER_ID?.trim()
+  if (!ownerUserId) {
+    throw new Error('내부 시스템 지도 생성이 비활성화되어 있습니다. 서버에 WORKFLOW_CANVAS_OWNER_USER_ID를 설정하세요.')
+  }
+  if (!canCreateWorkflowSystemMap(userId, ownerUserId)) throw new Error('제품 소유자만 내부 시스템 지도를 생성할 수 있습니다.')
+
+  const template = createWorkflowCanvasSystemMap()
+  const canvasId = `c-${uid()}`
+  const canvasName = name?.trim().slice(0, 120) || template.name
+  const { error } = await admin().from('canvases').insert({
+    user_id: userId,
+    canvas_id: canvasId,
+    name: canvasName,
+    nodes: template.nodes,
+    edges: template.edges,
+    notes: template.notes,
+    views: template.views,
+    stage_types: template.stageTypes,
+  })
+  if (error) throw new Error(error.message)
+  return {
+    canvas_id: canvasId,
+    name: canvasName,
+    nodes: template.nodes.length,
+    edges: template.edges.length,
+    saved_views: template.views.map((view) => view.name),
+    reality: 'declared',
+    relation_reality: 'evidenced',
+  }
 }
 
 export async function clearCanvas(userId, canvasId) {
@@ -792,7 +890,8 @@ export async function deleteNodes(userId, canvasId, nodeIds) {
 }
 
 // ── Edge-level ───────────────────────────────────────────────────────────────
-export async function createEdge(userId, canvasId, { source, target, sourceHandle, targetHandle }) {
+export async function createEdge(userId, canvasId, opts) {
+  const { source, target } = opts
   const access = await resolveCanvasAccess(userId, canvasId)
   const row = access.row
   assertRegionEdit(access, row.nodes, { kind: 'edge', source, target })
@@ -801,30 +900,56 @@ export async function createEdge(userId, canvasId, { source, target, sourceHandl
   const tNode = nodes.find((n) => n.id === target)
   if (!sNode) throw new Error(`출발 노드를 찾을 수 없습니다: ${source}`)
   if (!tNode) throw new Error(`도착 노드를 찾을 수 없습니다: ${target}`)
-  const dup = findDuplicateEdge(row.edges, source, target)
+  const isMemo = sNode.type === 'memo' || tNode.type === 'memo'
+  const relationType = relationDefinition(opts.relationType ?? (isMemo ? 'references' : 'flows_to')).id
+  const relationIdentity = edgeRelationIdentity(
+    createEdgeRelationData(relationType, opts.relationLabel ?? '', true),
+    isMemo ? 'references' : 'flows_to',
+  )
+  const dup = findDuplicateEdge(row.edges, source, target, relationIdentity)
   if (dup) {
     throw new Error(
-      `이미 같은 방향의 연결이 있습니다 (edge_id: ${dup.id}). 중복 연결은 대부분 실수입니다 — ` +
-      '정말 평행선이 필요하면 먼저 delete_edge로 기존 것을 지우세요.')
+      `이미 같은 방향·같은 관계(${relationType})의 연결이 있습니다 (edge_id: ${dup.id}). ` +
+      '두 자원 사이에 다른 의미가 필요하면 다른 relationType을 사용하세요.')
   }
-  const edge = buildEdge({ source, target, sourceHandle, targetHandle }, sNode, tNode)
+  const edge = buildEdge(opts, sNode, tNode)
   await saveArrays(access.ownerId, canvasId, nodes, [...(row.edges ?? []), edge], row.updated_at)
   return edge
 }
 
 // Shared edge construction (createEdge + createGraph): memo links are dashed,
-// missing handles are auto-computed from the two nodes' final positions.
-function buildEdge({ source, target, sourceHandle, targetHandle }, sNode, tNode) {
+// missing handles are auto-computed, and explicit semantic relationships use
+// their ontology-family color. Symmetric relations omit the arrowhead.
+function buildEdge({
+  source, target, sourceHandle, targetHandle,
+  relationType, relationLabel, showRelationLabel,
+  relationSourceKind, relationConfidence, relationEvidence, relationEvidenceRef,
+}, sNode, tNode) {
   const isMemo = sNode.type === 'memo' || tNode.type === 'memo'
   const auto = (!sourceHandle || !targetHandle) ? closestHandles(sNode, tNode) : {}
+  const fallbackType = isMemo ? 'references' : 'flows_to'
+  const explicit = showRelationLabel ?? (relationType != null || relationLabel != null)
+  const data = createEdgeRelationData(relationType ?? fallbackType, relationLabel ?? '', explicit, {
+    relationSourceKind,
+    relationConfidence,
+    relationEvidence,
+    relationEvidenceRef,
+  })
+  const relation = edgeRelationInfo(data, fallbackType)
+  const style = isMemo
+    ? NOTE_STYLE
+    : { ...FLOW_STYLE, ...(relation.explicit ? { stroke: relation.color } : {}) }
   return {
     id: newEdgeId(),
     source,
     target,
     sourceHandle: sourceHandle || auto.sourceHandle,
     targetHandle: targetHandle || auto.targetHandle,
-    style: isMemo ? NOTE_STYLE : FLOW_STYLE,
-    markerEnd: { type: 'arrowclosed', color: isMemo ? '#f59e0b88' : '#4a4a5a' },
+    data,
+    style,
+    markerEnd: isMemo || !relation.directed
+      ? undefined
+      : { type: 'arrowclosed', color: style.stroke },
   }
 }
 
@@ -942,11 +1067,21 @@ export async function createGraph(userId, canvasId, { nodes: nodeInputs, edges: 
   const byId = new Map(allNodes.map((n) => [n.id, n]))
   const newEdges = []
   const skippedDuplicates = []
-  const seenPairs = new Set((row.edges ?? []).map((e) => `${e.source}→${e.target}`))
+  const seenPairs = new Set((row.edges ?? []).map((edge) => (
+    `${edge.source}→${edge.target}→${storedEdgeRelationIdentity(edge)}`
+  )))
   for (const e of edgeInputs) {
     const source = idMap.get(e.source) ?? e.source
     const target = idMap.get(e.target) ?? e.target
-    const key = `${source}→${target}`
+    const sourceNode = byId.get(source)
+    const targetNode = byId.get(target)
+    const isMemoRelation = sourceNode?.type === 'memo' || targetNode?.type === 'memo'
+    const relationType = relationDefinition(e.relationType ?? (isMemoRelation ? 'references' : 'flows_to')).id
+    const relationIdentity = edgeRelationIdentity(
+      createEdgeRelationData(relationType, e.relationLabel ?? '', true),
+      isMemoRelation ? 'references' : 'flows_to',
+    )
+    const key = `${source}→${target}→${relationIdentity}`
     if (seenPairs.has(key)) { skippedDuplicates.push({ source: e.source, target: e.target }); continue }
     seenPairs.add(key)
 
@@ -1050,7 +1185,7 @@ export async function createGraph(userId, canvasId, { nodes: nodeInputs, edges: 
       }
     }
 
-    newEdges.push(buildEdge({ source, target, sourceHandle, targetHandle }, byId.get(source), byId.get(target)))
+    newEdges.push(buildEdge({ ...e, source, target, sourceHandle, targetHandle }, sourceNode, targetNode))
   }
 
   await saveArrays(access.ownerId, canvasId, allNodes, [...(row.edges ?? []), ...newEdges], row.updated_at)
@@ -1060,12 +1195,88 @@ export async function createGraph(userId, canvasId, { nodes: nodeInputs, edges: 
 
   return {
     created_nodes: nodeInputs.map((n) => ({ tmp_id: n.tmp_id, id: idMap.get(n.tmp_id), ...positions.get(n.tmp_id) })),
-    created_edges: newEdges.map((e) => ({ id: e.id, source: e.source, target: e.target })),
+    created_edges: newEdges.map((edge) => toExternalCanvasEdge(edge)),
     ...(skippedDuplicates.length ? { skipped_duplicate_edges: skippedDuplicates } : {}),
     ...(shifted.length ? { shifted } : {}),
     layout: preset ?? mode,
     ...(warning ? { warning } : {}),
   }
+}
+
+export function applyEdgeRelationPatch(edge, patch = {}) {
+  const isMemo = !!edge.style?.strokeDasharray
+  const fallbackType = isMemo ? 'references' : 'flows_to'
+  const current = normalizeEdgeRelationData(edge.data, fallbackType)
+  const relationType = patch.relationType ?? current.relationType ?? fallbackType
+  const relationLabel = patch.relationLabel ?? current.relationLabel ?? ''
+  const explicitlyChanged = patch.relationType != null || patch.relationLabel != null
+  const showRelationLabel = patch.showRelationLabel
+    ?? (explicitlyChanged ? true : current.relationExplicit === true)
+  const data = {
+    ...createEdgeRelationData(relationType, relationLabel, showRelationLabel, {
+      relationSourceKind: patch.relationSourceKind ?? current.relationSourceKind,
+      relationConfidence: patch.relationConfidence ?? current.relationConfidence,
+      relationEvidence: patch.relationEvidence ?? current.relationEvidence,
+      relationEvidenceRef: patch.relationEvidenceRef ?? current.relationEvidenceRef,
+    }),
+    ...(current.partsLink ? { partsLink: true } : {}),
+  }
+  const relation = edgeRelationInfo(data, fallbackType)
+  const style = isMemo
+    ? { ...edge.style, ...NOTE_STYLE }
+    : {
+        ...edge.style,
+        ...FLOW_STYLE,
+        ...(relation.explicit ? { stroke: relation.color } : {}),
+      }
+  return {
+    ...edge,
+    data,
+    style,
+    markerEnd: isMemo || !relation.directed
+      ? undefined
+      : { type: 'arrowclosed', color: style.stroke },
+  }
+}
+
+export async function updateEdge(userId, canvasId, edgeId, patch) {
+  const access = await resolveCanvasAccess(userId, canvasId)
+  const row = access.row
+  const edges = [...(row.edges ?? [])]
+  const index = edges.findIndex((edge) => edge.id === edgeId)
+  if (index < 0) throw new Error(`연결선을 찾을 수 없습니다: ${edgeId}`)
+  const edge = edges[index]
+  assertRegionEdit(access, row.nodes, { kind: 'edge', source: edge.source, target: edge.target })
+  if (edge.data?.partsLink === true || (edge.sourceHandle?.startsWith('p-') && edge.targetHandle?.startsWith('p-'))) {
+    throw new Error('파트 연결선은 고정된 연결 의미를 사용합니다.')
+  }
+  edges[index] = applyEdgeRelationPatch(edge, patch)
+  await saveArrays(access.ownerId, canvasId, row.nodes ?? [], edges, row.updated_at)
+  return toExternalCanvasEdge(edges[index])
+}
+
+export async function updateEdges(userId, canvasId, patches) {
+  const access = await resolveCanvasAccess(userId, canvasId)
+  const row = access.row
+  const edges = [...(row.edges ?? [])]
+  const byId = new Map(edges.map((edge, index) => [edge.id, index]))
+  const missing = patches.filter((patch) => !byId.has(patch.edge_id)).map((patch) => patch.edge_id)
+  if (missing.length) throw new Error(`연결선을 찾을 수 없습니다: ${missing.join(', ')}. get_canvas로 현재 edge id를 확인하세요.`)
+
+  for (const patch of patches) {
+    const index = byId.get(patch.edge_id)
+    const edge = edges[index]
+    assertRegionEdit(access, row.nodes, { kind: 'edge', source: edge.source, target: edge.target })
+    if (edge.data?.partsLink === true || (edge.sourceHandle?.startsWith('p-') && edge.targetHandle?.startsWith('p-'))) {
+      throw new Error(`파트 연결선은 관계를 바꿀 수 없습니다: ${edge.id}`)
+    }
+  }
+  for (const patch of patches) {
+    const index = byId.get(patch.edge_id)
+    edges[index] = applyEdgeRelationPatch(edges[index], patch)
+  }
+  await saveArrays(access.ownerId, canvasId, row.nodes ?? [], edges, row.updated_at)
+  return { updated: patches.map((patch) => patch.edge_id), count: patches.length }
 }
 
 export async function deleteEdge(userId, canvasId, edgeId) {

@@ -43,6 +43,10 @@ export function getStubEdgeGeometry({
   const c1 = { x: p1.x + sourceDir.x * curve, y: p1.y + sourceDir.y * curve }
   const c2 = { x: p2.x + targetDir.x * curve, y: p2.y + targetDir.y * curve }
   const path = `M ${source.x},${source.y} L ${p1.x},${p1.y} C ${c1.x},${c1.y} ${c2.x},${c2.y} ${p2.x},${p2.y} L ${target.x},${target.y}`
+  // Cubic Bezier at t=0.5. This stays on the rendered curve and gives typed
+  // relationship labels a stable center even when the edge bends sharply.
+  const labelX = (p1.x + 3 * c1.x + 3 * c2.x + p2.x) / 8
+  const labelY = (p1.y + 3 * c1.y + 3 * c2.y + p2.y) / 8
 
-  return { path, source, target }
+  return { path, source, target, labelX, labelY }
 }

@@ -1,6 +1,7 @@
 import { useId } from 'react'
 import { BaseEdge } from '@xyflow/react'
 import { getStubEdgeGeometry } from './stubEdgeGeometry'
+import { edgeRelationInfo } from '../../shared/relationOntology.js'
 
 // Perpendicular stub: the line leaves each connection point straight out
 // (perpendicular to the node side) for a fixed stub length, then curves
@@ -9,17 +10,23 @@ export default function StubEdge({
   sourceX, sourceY, targetX, targetY,
   sourcePosition, targetPosition,
   sourceHandleId, targetHandleId,
-  markerEnd, style,
+  markerEnd, style, data,
 }) {
   const markerUid = useId().replace(/:/g, '')
   const markerId = `wfc-edge-arrow-${markerUid}`
-  const { path } = getStubEdgeGeometry({
+  const { path, labelX, labelY } = getStubEdgeGeometry({
     sourceX, sourceY, targetX, targetY,
     sourcePosition, targetPosition,
     sourceHandleId, targetHandleId,
   })
   const hasArrow = !!markerEnd
   const edgeColor = style?.stroke ?? '#8b94a7'
+  const partLink = data?.partsLink === true
+    || (sourceHandleId?.startsWith('p-') && targetHandleId?.startsWith('p-'))
+  const relation = edgeRelationInfo(data, style?.strokeDasharray ? 'references' : 'flows_to')
+  const relationLabel = relation.label.length > 16 ? `${relation.label.slice(0, 15)}…` : relation.label
+  const relationWidth = Math.max(58, Math.min(162, relationLabel.length * 11 + 32))
+  const showRelation = relation.explicit && !partLink
 
   return (
     <>
@@ -58,6 +65,20 @@ export default function StubEdge({
         markerEnd={hasArrow ? `url(#${markerId})` : undefined}
         style={style}
       />
+      {showRelation && (
+        <g
+          className="wfc-relation-label"
+          data-reality={relation.provenance.reality.id}
+          transform={`translate(${labelX} ${labelY})`}
+          style={{ '--relation-color': relation.color }}
+          pointerEvents="none"
+          aria-hidden="true"
+        >
+          <rect x={-relationWidth / 2} y={-12} width={relationWidth} height={24} rx={4} />
+          <circle cx={-relationWidth / 2 + 11} cy="0" r="3.5" fill={relation.provenance.reality.color} />
+          <text x="5" y="1" textAnchor="middle" dominantBaseline="middle">{relationLabel}</text>
+        </g>
+      )}
     </>
   )
 }

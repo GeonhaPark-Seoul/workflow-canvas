@@ -23,6 +23,7 @@ import CanvasTabs from './components/CanvasTabs'
 import AuthPanel from './components/AuthPanel'
 import InvitePopover from './components/InvitePopover'
 import NotesPanel from './components/NotesPanel'
+import EdgeRelationEditor from './components/EdgeRelationEditor'
 import {
   initCanvases, loadCanvasData, saveCanvasData, deleteCanvasData,
   saveCanvasList, saveActiveId, uid,
@@ -61,6 +62,11 @@ import {
 } from './lib/shares'
 import { getMyProfile, loadMySettings, upsertMyEmail, touchLastSeen } from './lib/profiles'
 import { createSystemNodeData } from '../shared/systemOntology.js'
+import {
+  createEdgeRelationData,
+  edgeRelationInfo,
+  normalizeEdgeRelationData,
+} from '../shared/relationOntology.js'
 
 const nodeTypes = { stage: StageNode, memo: MemoNode, group: GroupNode, content: ContentNode, system: SystemNode }
 const edgeTypes = { stub: StubEdge }
@@ -94,17 +100,37 @@ const TYPE_PALETTE = [
 
 // ── Initial canvas data (seed for the very first canvas) ─────────────────────
 // ── Helpers ──────────────────────────────────────────────────────────────────
-// Strip data and force type 'stub' on every saved edge — old 'separable' type
+// Keep only the relation/part fields we understand and force type 'stub' on
+// every saved edge — old 'separable' type
 // (and any other removed/foreign custom type, incl. MCP-created edges with no
 // type) would otherwise cause React Flow to emit unknown-type warnings or fall
 // back to the default bezier look. Keeps style/markerEnd so appearance (color,
 // dash pattern) survives; the stub geometry itself comes from edgeTypes.stub.
 function normalizeEdges(edges) {
-  return (edges ?? []).map(({ data, type, ...e }) => ({ ...e, type: 'stub' }))
+  return (edges ?? []).map(({ data, type, ...e }) => {
+    const safeData = normalizeEdgeRelationData(data)
+    return { ...e, type: 'stub', ...(Object.keys(safeData).length ? { data: safeData } : {}) }
+  })
 }
 
 function maxNodeId(nodes) {
   return Math.max(10, ...(nodes ?? []).map((n) => parseInt(n.id) || 0))
+}
+
+function nodeDisplayName(node) {
+  if (!node) return '알 수 없는 노드'
+  const raw = node.type === 'memo'
+    ? node.data?.header
+    : node.type === 'content'
+      ? node.data?.header
+      : node.data?.label
+  const plain = String(raw ?? '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+  if (plain) return plain
+  if (node.type === 'memo') return '메모'
+  if (node.type === 'content') return '콘텐츠'
+  if (node.type === 'system') return '시스템 실체'
+  if (node.type === 'group') return '그룹'
+  return '단계 노드'
 }
 
 // ── Phase 2 sharing: shared canvases live under a composite localStorage/
@@ -237,11 +263,13 @@ function baseEdgeStyle(e) {
     return { style: { stroke: '#8b94a7', strokeWidth: 2, strokeDasharray: '6,4' }, markerEnd: undefined }
   }
   const isMemo = !!e.style?.strokeDasharray
+  const relation = edgeRelationInfo(e.data, isMemo ? 'references' : 'flows_to')
+  const stroke = relation.explicit ? relation.color : '#4a4a5a'
   return {
     style: isMemo
       ? { stroke: '#f59e0b88', strokeWidth: 2.25, strokeDasharray: '5,4' }
-      : { stroke: '#4a4a5a', strokeWidth: 3 },
-    markerEnd: isMemo ? undefined : { type: MarkerType.ArrowClosed, color: '#4a4a5a' },
+      : { stroke, strokeWidth: 3 },
+    markerEnd: isMemo || !relation.directed ? undefined : { type: MarkerType.ArrowClosed, color: stroke },
   }
 }
 
@@ -252,7 +280,10 @@ function stripNode(n) {
   return { ...rest, data }
 }
 const stripNote = (note) => ({ ...note, data: sanitizeNodeData(note.data) })
-const stripEdge = ({ selected, ...e }) => e
+const stripEdge = ({ selected, data, redacted, ...edge }) => {
+  const safeData = normalizeEdgeRelationData(data)
+  return { ...edge, ...(Object.keys(safeData).length ? { data: safeData } : {}) }
+}
 
 function canvasSnapshot(name, data = {}) {
   return {
@@ -2436,6 +2467,7 @@ export default function App() {
     const newEdge = {
       ...params,
       id: `e-${uid()}`,
+      data: createEdgeRelationData(isMemo ? 'references' : 'flows_to', '', false),
       style: isMemo ? { stroke: '#f59e0b88', strokeWidth: 2.25, strokeDasharray: '5,4' } : { stroke: '#4a4a5a', strokeWidth: 3 },
       markerEnd: isMemo ? undefined : { type: MarkerType.ArrowClosed, color: '#4a4a5a' },
     }
@@ -2652,6 +2684,15 @@ export default function App() {
   const onEdgeContextMenu = useCallback((e, edge) => {
     e.preventDefault()
     e.stopPropagation()
+    if (edge.redacted) return
+    setContextMenu({ x: e.clientX, y: e.clientY, edgeId: edge.id })
+    setRenamingTypeIdx(null)
+  }, [])
+
+  const onEdgeDoubleClick = useCallback((e, edge) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (edge.redacted) return
     setContextMenu({ x: e.clientX, y: e.clientY, edgeId: edge.id })
     setRenamingTypeIdx(null)
   }, [])
@@ -2720,6 +2761,19 @@ export default function App() {
     if (perm.role === 'invitee' && edge && (!isNodeEditable(edge.source) || !isNodeEditable(edge.target))) { closeContext(); return }
     setEdges((eds) => eds.filter((e) => e.id !== contextMenu.edgeId))
     closeContext()
+  }
+
+  const handleContextUpdateEdgeRelation = (patch) => {
+    if (!contextMenu?.edgeId || !ctxEdgeEditable) return
+    setEdges((items) => items.map((edge) => {
+      if (edge.id !== contextMenu.edgeId || isPartEdge(edge)) return edge
+      const data = normalizeEdgeRelationData({
+        ...(edge.data ?? {}),
+        ...patch,
+        relationExplicit: patch.relationExplicit ?? true,
+      }, patch.relationType ?? edge.data?.relationType ?? 'flows_to')
+      return { ...edge, data }
+    }))
   }
 
   const handleContextGroupSelection = () => {
@@ -2897,6 +2951,7 @@ export default function App() {
       }
     }
     const isMemo = !!e.style?.strokeDasharray
+    const relation = edgeRelationInfo(e.data, isMemo ? 'references' : 'flows_to')
     const color = isMemo ? '#f59e0b' : '#60a5fa'
     return {
       ...e,
@@ -2907,7 +2962,7 @@ export default function App() {
       reconnectable: true,
       zIndex: 1001,
       style: { ...baseEdgeStyle(e).style, stroke: color, strokeWidth: isMemo ? 3.5 : 4.5 },
-      markerEnd: isMemo ? undefined : { type: MarkerType.ArrowClosed, color },
+      markerEnd: isMemo || !relation.directed ? undefined : { type: MarkerType.ArrowClosed, color },
     }
   })
 
@@ -2924,13 +2979,24 @@ export default function App() {
   const [menuPos, setMenuPos] = useState({ left: 0, top: 0 })
   useLayoutEffect(() => {
     if (!contextMenu || !menuRef.current) return
-    const { width, height } = menuRef.current.getBoundingClientRect()
-    const pad = 8
-    let left = contextMenu.x
-    let top = contextMenu.y
-    if (left + width > window.innerWidth - pad) left = Math.max(pad, contextMenu.x - width)
-    if (top + height > window.innerHeight - pad) top = Math.max(pad, contextMenu.y - height)
-    setMenuPos({ left, top })
+    const positionMenu = () => {
+      if (!menuRef.current) return
+      const { width, height } = menuRef.current.getBoundingClientRect()
+      const pad = 8
+      let left = contextMenu.x
+      let top = contextMenu.y
+      if (left + width > window.innerWidth - pad) left = Math.max(pad, contextMenu.x - width)
+      if (top + height > window.innerHeight - pad) top = Math.max(pad, contextMenu.y - height)
+      setMenuPos((current) => (current.left === left && current.top === top ? current : { left, top }))
+    }
+    positionMenu()
+    const observer = typeof ResizeObserver === 'function' ? new ResizeObserver(positionMenu) : null
+    observer?.observe(menuRef.current)
+    window.addEventListener('resize', positionMenu)
+    return () => {
+      observer?.disconnect()
+      window.removeEventListener('resize', positionMenu)
+    }
   }, [contextMenu])
 
   // Resolve which nodes the node-context-menu acts on, and whether it's a
@@ -2943,9 +3009,12 @@ export default function App() {
   // set; a read-only share (canEdit === false) never gets full edit.
   const ctxFullEdit = perm.role === 'owner' || (perm.scope === 'canvas' && canEditCanvas)
   const ctxCanDelete = ctxFullEdit || ctxIds.every(isNodeEditable)
-  const ctxEdgeEditable = contextMenu?.edgeId
-    ? (() => { const e = edges.find((x) => x.id === contextMenu.edgeId); return ctxFullEdit || (e && isNodeEditable(e.source) && isNodeEditable(e.target)) })()
+  const ctxEdge = contextMenu?.edgeId ? edges.find((edge) => edge.id === contextMenu.edgeId) : null
+  const ctxEdgeEditable = ctxEdge
+    ? ctxFullEdit || (isNodeEditable(ctxEdge.source) && isNodeEditable(ctxEdge.target))
     : false
+  const ctxEdgeSourceLabel = nodeDisplayName(nodes.find((node) => node.id === ctxEdge?.source))
+  const ctxEdgeTargetLabel = nodeDisplayName(nodes.find((node) => node.id === ctxEdge?.target))
 
   return (
     <div
@@ -3258,6 +3327,7 @@ export default function App() {
         onPaneContextMenu={onPaneContextMenu}
         onNodeContextMenu={onNodeContextMenu}
         onEdgeContextMenu={onEdgeContextMenu}
+        onEdgeDoubleClick={onEdgeDoubleClick}
         onPaneClick={() => {
           setEdges((eds) => eds.some((e) => e.selected) ? eds.map((e) => ({ ...e, selected: false })) : eds)
         }}
@@ -3388,7 +3458,9 @@ export default function App() {
             borderRadius: 10,
             padding: '6px',
             boxShadow: '0 8px 32px #000c',
-            minWidth: 200,
+            minWidth: contextMenu.edgeId ? 320 : 200,
+            maxHeight: 'calc(100vh - 16px)',
+            overflowY: 'auto',
           }}
         >
           {/* Pane: add nodes (group/node-scope invitees, and read-only shares,
@@ -3414,7 +3486,16 @@ export default function App() {
             </>
           )}
 
-          {/* Edge: delete */}
+          {/* Edge: semantic relation + delete. Part sockets keep their fixed link meaning. */}
+          {ctxEdge && !ctxEdge.redacted && !isPartEdge(ctxEdge) && (
+            <EdgeRelationEditor
+              edge={ctxEdge}
+              sourceLabel={ctxEdgeSourceLabel}
+              targetLabel={ctxEdgeTargetLabel}
+              readOnly={!ctxEdgeEditable}
+              onChange={handleContextUpdateEdgeRelation}
+            />
+          )}
           {contextMenu.edgeId && ctxEdgeEditable && (
             <ContextItem icon="🗑" label="연결선 삭제" color="#ef4444" onClick={handleContextDeleteEdge} />
           )}

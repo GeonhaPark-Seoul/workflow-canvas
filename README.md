@@ -22,14 +22,16 @@ Supabase 데이터베이스를 기반으로 동작합니다.
 | 도구 | 설명 |
 |---|---|
 | `get_canvases` | 캔버스 목록 (id, 이름, 노드/연결선 개수) |
-| `get_canvas` | 특정 캔버스의 노드/연결선 데이터 (단계 종류·크기·dimmed·연결 방향 포함) |
+| `get_canvas` | 특정 캔버스의 노드/연결선 데이터 (시스템 실체·관계 의미·근거·단계 종류 포함) |
 | **`create_graph`** | **노드+연결선 그래프 전체를 한 번에 생성 (자동 레이아웃 지원) — 대량 작업의 기본 도구** |
 | `create_node` | 노드 1개 추가 (2개 이상은 `create_graph` 사용) |
 | `update_node` / `update_nodes` | 노드 1개 / 여러 개 수정 (제공한 필드만, `dimmed` 포함) |
 | `delete_node` / `delete_nodes` | 노드 1개 / 여러 개 삭제 (연결선도 함께) |
-| `create_edge` | 연결선 추가 (중복 연결은 거부) |
+| `create_edge` | 타입과 근거가 있는 연결선 추가 (같은 방향·같은 관계 중복은 거부) |
+| `update_edge` / `update_edges` | 관계 종류·라벨·출처·작성자 신뢰도·근거 수정 |
 | `delete_edge` | 연결선 삭제 |
 | `create_canvas` | 새 캔버스 생성 |
+| `create_workflow_system_map` | 제품 소유자 전용 내부 시스템 지도 생성 (환경변수로 허용 사용자 제한) |
 | `rename_canvas` | 캔버스 이름 변경 (탭에 반영) |
 | `delete_canvas` | 캔버스 삭제 (마지막 1개는 불가) |
 | `clear_canvas` | 캔버스 전체 초기화 |
@@ -94,6 +96,7 @@ Vercel 프로젝트 → Settings → Environment Variables에 추가:
 |---|---|---|
 | `SUPABASE_SERVICE_ROLE_KEY` | ✅ | Supabase Dashboard → Settings → API의 service_role 키 (서버에서만 사용, 절대 노출 금지) |
 | `SUPABASE_URL` | 선택 | 기본값은 앱의 Supabase 프로젝트 URL |
+| `WORKFLOW_CANVAS_OWNER_USER_ID` | 선택 | 내부 `create_workflow_system_map` 도구를 허용할 제품 소유자의 Supabase Auth 사용자 UUID. 미설정 시 도구는 비활성화됨 |
 
 ### 4) 배포
 

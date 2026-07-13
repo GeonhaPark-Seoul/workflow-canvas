@@ -2,7 +2,15 @@
 // Run: node scripts/test-mcp-logic.mjs
 import assert from 'node:assert/strict'
 import { layoutGraph, findNonOverlapping, validateGraphInput, overlaps, nodeRect, radialLevels, segmentIntersectsRect, avoidEdgeCrossings, edgeAnchors, SIZE } from '../mcp/layout.js'
-import { checkRadialLevelMixing, editableNodeIdSet, assertRegionEdit, toExternalCanvasNode } from '../mcp/store.js'
+import {
+  applyEdgeRelationPatch,
+  canCreateWorkflowSystemMap,
+  checkRadialLevelMixing,
+  editableNodeIdSet,
+  assertRegionEdit,
+  toExternalCanvasEdge,
+  toExternalCanvasNode,
+} from '../mcp/store.js'
 import { sanitizeHtml, sanitizeTextFields } from '../mcp/sanitize.js'
 import { applySharedCanvasUpdate, effectiveShareGrant, pickBestShareAccess, redactCanvas } from '../mcp/shareAccess.js'
 import { sanitizeExternalUrl as sanitizeBrowserUrl, sanitizeHtml as sanitizeBrowserHtml, sanitizeNodeData as sanitizeBrowserNodeData } from '../src/lib/sanitizeHtml.js'
@@ -12,6 +20,17 @@ import { mergeCanvasSnapshots } from '../src/lib/canvasMerge.js'
 import { getStubEdgeGeometry } from '../src/edges/stubEdgeGeometry.js'
 import { chooseOwnCanvasToRestore } from '../src/lib/canvasNavigation.js'
 import { createSystemNodeData, normalizeSystemNodeData, systemNodeReality } from '../shared/systemOntology.js'
+import {
+  createEdgeRelationData,
+  edgeRelationInfo,
+  edgeRelationProvenance,
+  normalizeEdgeRelationData,
+  RELATION_CONFIDENCE_DEFS,
+  RELATION_DEFS,
+  RELATION_FAMILY_DEFS,
+  RELATION_SOURCE_DEFS,
+} from '../shared/relationOntology.js'
+import { createWorkflowCanvasSystemMap } from '../shared/workflowCanvasSystemMap.js'
 
 let passed = 0
 function t(name, fn) {
@@ -35,6 +54,8 @@ t('main 45px handles are corrected from their outside edge to the node border', 
   })
   assert.deepEqual(horizontal.source, { x: 199, y: 100 })
   assert.deepEqual(horizontal.target, { x: 401, y: 100 })
+  assert.equal(horizontal.labelX, 300)
+  assert.equal(horizontal.labelY, 100)
 
   const vertical = getStubEdgeGeometry({
     sourceX: 100, sourceY: 77.5,
@@ -326,6 +347,198 @@ t('browser persistence sanitizer removes runtime proof and active markup', () =>
   })
   assert.equal(Object.hasOwn(result, 'twinRuntime'), false)
   assert.equal(result.purpose, '<b>원본 보관</b>')
+})
+
+console.log('relation ontology')
+
+t('relation ontology ids are unique and every relation belongs to a known family', () => {
+  const ids = RELATION_DEFS.map((relation) => relation.id)
+  const familyIds = new Set(RELATION_FAMILY_DEFS.map((family) => family.id))
+  assert.equal(new Set(ids).size, ids.length)
+  assert.equal(RELATION_DEFS.every((relation) => familyIds.has(relation.family)), true)
+  assert.equal(new Set(RELATION_SOURCE_DEFS.map((item) => item.id)).size, RELATION_SOURCE_DEFS.length)
+  assert.equal(new Set(RELATION_CONFIDENCE_DEFS.map((item) => item.id)).size, RELATION_CONFIDENCE_DEFS.length)
+})
+
+t('legacy edge data stays unlabeled while resolving to the generic flow relation', () => {
+  assert.deepEqual(normalizeEdgeRelationData(undefined), {})
+  const info = edgeRelationInfo(undefined)
+  assert.equal(info.id, 'flows_to')
+  assert.equal(info.explicit, false)
+  assert.equal(info.directed, true)
+})
+
+t('custom relation labels are clamped and unknown runtime fields are dropped', () => {
+  const data = normalizeEdgeRelationData({
+    relationType: 'custom', relationLabel: '  배송\u0000 인계  ', relationExplicit: true,
+    relationRuntime: { verification: 'verified' }, forged: 'drop-me',
+  })
+  assert.deepEqual(data, {
+    relationType: 'custom', relationLabel: '배송 인계', relationExplicit: true,
+    relationSourceKind: 'manual', relationConfidence: 'unknown',
+  })
+})
+
+t('author evidence is documented but never treated as server verification', () => {
+  const data = createEdgeRelationData('reads', '', true, {
+    relationSourceKind: 'code',
+    relationConfidence: 'high',
+    relationEvidence: 'API handler calls the canvas query.',
+    relationEvidenceRef: 'mcp/store.js',
+  })
+  const provenance = edgeRelationProvenance(data)
+  assert.equal(provenance.reality.id, 'evidenced')
+  assert.equal(provenance.confidence.id, 'high')
+  assert.equal(provenance.evidenceRef, 'mcp/store.js')
+})
+
+t('only server-shaped runtime proof verifies a relation and persistence drops it', () => {
+  const forged = {
+    ...createEdgeRelationData('writes'),
+    relationRuntime: {
+      verification: 'verified',
+      evidenceId: 'observation-1',
+      verifiedAt: '2026-07-14T00:00:00.000Z',
+    },
+  }
+  assert.equal(edgeRelationProvenance(forged).reality.id, 'verified')
+  const persisted = normalizeEdgeRelationData(forged)
+  assert.equal(Object.hasOwn(persisted, 'relationRuntime'), false)
+  assert.equal(edgeRelationProvenance(persisted).reality.id, 'declared')
+})
+
+t('MCP row data cannot forge verification but a trusted server overlay can', () => {
+  const edge = {
+    id: 'edge-proof', source: 'api', target: 'db',
+    data: {
+      ...createEdgeRelationData('reads'),
+      relationRuntime: {
+        verification: 'verified', evidenceId: 'forged', verifiedAt: '2026-07-14T00:00:00.000Z',
+      },
+    },
+  }
+  assert.equal(toExternalCanvasEdge(edge).server_verified, false)
+  const trusted = toExternalCanvasEdge(edge, false, {
+    verification: 'verified', evidenceId: 'server-observation', verifiedAt: '2026-07-14T00:00:00.000Z',
+  })
+  assert.equal(trusted.server_verified, true)
+  assert.equal(trusted.relation_reality, 'verified')
+})
+
+t('symmetric relation patch removes the arrow and keeps source/target intact', () => {
+  const edge = {
+    id: 'edge-1', source: 'A', target: 'B',
+    style: { stroke: '#4a4a5a', strokeWidth: 3 },
+    markerEnd: { type: 'arrowclosed', color: '#4a4a5a' },
+  }
+  const updated = applyEdgeRelationPatch(edge, { relationType: 'related_to' })
+  assert.equal(updated.source, 'A')
+  assert.equal(updated.target, 'B')
+  assert.equal(updated.data.relationType, 'related_to')
+  assert.equal(updated.data.relationExplicit, true)
+  assert.equal(updated.markerEnd, undefined)
+})
+
+t('relation meaning remains stored when its canvas label is hidden', () => {
+  const typed = applyEdgeRelationPatch({
+    id: 'edge-2', source: 'A', target: 'B', style: { stroke: '#4a4a5a', strokeWidth: 3 },
+  }, { relationType: 'depends_on' })
+  const hidden = applyEdgeRelationPatch(typed, { showRelationLabel: false })
+  assert.equal(hidden.data.relationType, 'depends_on')
+  assert.equal(hidden.data.relationExplicit, false)
+  assert.equal(toExternalCanvasEdge(hidden).relation_type, 'depends_on')
+  assert.equal(toExternalCanvasEdge(hidden).show_relation_label, false)
+})
+
+t('relation provenance survives semantic edits and can be cleared explicitly', () => {
+  const based = applyEdgeRelationPatch({
+    id: 'edge-3', source: 'A', target: 'B', style: { stroke: '#4a4a5a', strokeWidth: 3 },
+  }, {
+    relationType: 'depends_on', relationSourceKind: 'document', relationConfidence: 'medium',
+    relationEvidence: '운영 절차 4항', relationEvidenceRef: 'docs/runbook.md',
+  })
+  const changed = applyEdgeRelationPatch(based, { relationType: 'requires' })
+  assert.equal(changed.data.relationSourceKind, 'document')
+  assert.equal(changed.data.relationEvidenceRef, 'docs/runbook.md')
+  const cleared = applyEdgeRelationPatch(changed, {
+    relationSourceKind: 'manual', relationConfidence: 'unknown', relationEvidence: '', relationEvidenceRef: '',
+  })
+  assert.equal(Object.hasOwn(cleared.data, 'relationEvidence'), false)
+  assert.equal(edgeRelationProvenance(cleared.data).reality.id, 'declared')
+})
+
+t('MCP edge representation exposes relation meaning and label visibility', () => {
+  const result = toExternalCanvasEdge({
+    id: 'edge-reads', source: 'api', target: 'db',
+    data: createEdgeRelationData('reads'),
+    style: { stroke: '#06b6d4', strokeWidth: 3 },
+  })
+  assert.equal(result.relation_type, 'reads')
+  assert.equal(result.relation_label, '읽음')
+  assert.equal(result.relation_family, 'system')
+  assert.equal(result.directed, true)
+  assert.equal(result.show_relation_label, true)
+})
+
+t('MCP redacted edge representation never exposes relation semantics', () => {
+  const edge = {
+    id: 'secret-edge', source: 'visible', target: 'hidden',
+    data: createEdgeRelationData('custom', '비밀 관계', true, {
+      relationSourceKind: 'document',
+      relationEvidence: '비공개 보안 문서에서 확인',
+      relationEvidenceRef: 'private/security-review.md',
+    }),
+  }
+  const result = toExternalCanvasEdge(edge, true)
+  assert.equal(result.redacted, true)
+  assert.equal(Object.hasOwn(result, 'relation_type'), false)
+  assert.equal(JSON.stringify(result).includes('비밀'), false)
+  assert.equal(JSON.stringify(result).includes('security-review'), false)
+})
+
+console.log('Workflow Canvas self system map')
+
+t('self map creation is disabled without an exact configured owner id', () => {
+  assert.equal(canCreateWorkflowSystemMap('owner-1', undefined), false)
+  assert.equal(canCreateWorkflowSystemMap('owner-1', ''), false)
+  assert.equal(canCreateWorkflowSystemMap('other-user', 'owner-1'), false)
+  assert.equal(canCreateWorkflowSystemMap('owner-1', ' owner-1 '), true)
+})
+
+t('self map is a declared, evidence-backed model with valid topology', () => {
+  const map = createWorkflowCanvasSystemMap()
+  const ids = map.nodes.map((node) => node.id)
+  const idSet = new Set(ids)
+  assert.equal(idSet.size, ids.length)
+  assert.equal(map.views.length, 4)
+  assert.equal(map.nodes.slice(0, 4).every((node) => node.type === 'group'), true)
+  assert.equal(map.nodes.filter((node) => node.type === 'system').every((node) => (
+    systemNodeReality(node.data).id === 'declared' && !node.data.twinRuntime
+  )), true)
+  assert.equal(map.edges.every((item) => idSet.has(item.source) && idSet.has(item.target)), true)
+  assert.equal(map.edges.every((item) => {
+    const info = edgeRelationInfo(item.data)
+    return info.explicit
+      && info.provenance.source.id === 'code'
+      && info.provenance.confidence.id === 'high'
+      && info.provenance.reality.id === 'evidenced'
+  }), true)
+})
+
+t('self map covers the critical runtime, data, security and delivery boundaries', () => {
+  const map = createWorkflowCanvasSystemMap()
+  const labels = new Set(map.nodes.map((node) => node.data?.label))
+  for (const label of [
+    'Workflow Canvas 웹 앱', 'Vercel 프로덕션', 'Workflow Canvas MCP 서버',
+    'Supabase Postgres', 'RLS·DB 함수 정책', 'canvases', 'mcp_tokens',
+    '테스트·보안 검사', 'GitHub 저장소',
+  ]) assert.equal(labels.has(label), true, `missing system map node: ${label}`)
+
+  const relationTypes = new Set(map.edges.map((item) => item.data.relationType))
+  for (const relationType of ['calls', 'reads', 'writes', 'authorizes', 'requires', 'syncs_with', 'triggers']) {
+    assert.equal(relationTypes.has(relationType), true, `missing system map relation: ${relationType}`)
+  }
+  assert.equal(JSON.stringify(map).includes('SUPABASE_SERVICE_ROLE_KEY='), false)
 })
 
 console.log('validateGraphInput')
@@ -1014,7 +1227,15 @@ const sharedRow = {
     { id: 'inside', type: 'memo', parentId: 'frame', position: { x: 10, y: 10 }, data: { header: '허용', text: '볼 수 있음' } },
     { id: 'outside', type: 'memo', position: { x: 500, y: 10 }, data: { header: '비공개', text: '보이면 안 됨' } },
   ],
-  edges: [{ id: 'inside-edge', source: 'inside', target: 'outside' }],
+  edges: [{
+    id: 'inside-edge', source: 'inside', target: 'outside',
+    data: createEdgeRelationData('custom', '민감한 의존 관계', true, {
+      relationSourceKind: 'document',
+      relationConfidence: 'high',
+      relationEvidence: '숨겨진 운영 정보',
+      relationEvidenceRef: 'private/runbook.md',
+    }),
+  }],
   notes: [{ id: 'note-private', type: 'memo', data: { header: '별도 노트', text: '보이면 안 됨' } }],
 }
 
@@ -1023,7 +1244,34 @@ t('restrict_view: server redacts body data outside the invited group', () => {
   const hidden = result.nodes.find((node) => node.id === 'outside')
   assert.deepEqual(hidden.data, { redacted: true })
   assert.equal(JSON.stringify(hidden).includes('비공개'), false)
+  assert.equal(Object.hasOwn(result.edges[0], 'data'), false)
+  assert.equal(result.edges[0].redacted, true)
+  assert.equal(JSON.stringify(result.edges).includes('민감한'), false)
+  assert.equal(JSON.stringify(result.edges).includes('runbook'), false)
   assert.deepEqual(result.notes, [])
+})
+
+t('restrict_view: saving redacted edges preserves the hidden original relation', () => {
+  const redacted = redactCanvas({ row: sharedRow, scope: 'group', targetId: 'frame', canEdit: true, restrictView: true })
+  const result = applySharedCanvasUpdate(
+    { row: sharedRow, scope: 'group', targetId: 'frame', canEdit: true, restrictView: true },
+    redacted.nodes,
+    redacted.edges,
+  )
+  assert.equal(result.edges[0].data.relationType, 'custom')
+  assert.equal(result.edges[0].data.relationLabel, '민감한 의존 관계')
+  assert.equal(result.edges[0].data.relationEvidenceRef, 'private/runbook.md')
+})
+
+t('shared save treats a missing MCP edge type and browser stub type as equivalent', () => {
+  const submittedEdges = sharedRow.edges.map((edge) => ({ ...structuredClone(edge), type: 'stub' }))
+  const result = applySharedCanvasUpdate(
+    { row: sharedRow, scope: 'group', targetId: 'frame', canEdit: true, restrictView: false },
+    sharedRow.nodes,
+    submittedEdges,
+  )
+  assert.equal(result.edges[0].type, 'stub')
+  assert.equal(result.edges[0].data.relationType, 'custom')
 })
 
 t('group invite: server rejects moving a child outside the group', () => {
@@ -1083,6 +1331,16 @@ t('canvas invite: server accepts canvas-level notes, views and stage types', () 
   assert.deepEqual(result.notes, notes)
   assert.deepEqual(result.views, views)
   assert.deepEqual(result.stageTypes, stageTypes)
+})
+
+t('shared save never persists a client-supplied redaction marker', () => {
+  const submittedEdges = sharedRow.edges.map((edge) => ({ ...structuredClone(edge), redacted: true }))
+  const result = applySharedCanvasUpdate(
+    { row: sharedRow, scope: 'canvas', targetId: null, canEdit: true, restrictView: false },
+    sharedRow.nodes,
+    submittedEdges,
+  )
+  assert.equal(Object.hasOwn(result.edges[0], 'redacted'), false)
 })
 
 t('group invite: server never accepts canvas-level metadata changes', () => {

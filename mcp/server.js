@@ -13,10 +13,17 @@ import {
   SYSTEM_KIND_DEFS,
   SYSTEM_SOURCE_DEFS,
 } from '../shared/systemOntology.js'
+import {
+  RELATION_CONFIDENCE_DEFS,
+  RELATION_SOURCE_DEFS,
+  RELATION_TYPE_IDS,
+} from '../shared/relationOntology.js'
 
 const SYSTEM_KIND_IDS = SYSTEM_KIND_DEFS.map(({ id }) => id)
 const SYSTEM_ENVIRONMENT_IDS = SYSTEM_ENVIRONMENT_DEFS.map(({ id }) => id)
 const SYSTEM_SOURCE_IDS = SYSTEM_SOURCE_DEFS.map(({ id }) => id)
+const RELATION_SOURCE_IDS = RELATION_SOURCE_DEFS.map(({ id }) => id)
+const RELATION_CONFIDENCE_IDS = RELATION_CONFIDENCE_DEFS.map(({ id }) => id)
 
 // Reused across create/update schemas. These fields describe a declared system
 // entity; no MCP input can supply the server-owned proof required for LIVE.
@@ -30,6 +37,20 @@ const SYSTEM_NODE_FIELDS = {
   sourceKind: z.enum(SYSTEM_SOURCE_IDS).optional().describe('manual/code/connector/runtime 중 이 정보를 발견한 출처.'),
   provider: z.string().optional().describe('Supabase, Vercel처럼 제공자 또는 플랫폼 이름. 비밀값 입력 금지.'),
   externalRef: z.string().optional().describe('public.canvases 같은 자원 식별자. API 키·토큰·비밀번호 값은 절대 입력하지 말 것.'),
+}
+
+const EDGE_RELATION_FIELDS = {
+  relationType: z.enum(RELATION_TYPE_IDS).optional().describe(
+    'source가 target과 맺는 관계. 예: triggers, assigned_to, depends_on, evidences, reads, writes, calls. 생략하면 일반 흐름.'),
+  relationLabel: z.string().max(40).optional().describe('relationType=custom일 때만 쓰는 사용자 정의 관계 이름.'),
+  showRelationLabel: z.boolean().optional().describe('캔버스 선 중앙에 관계 라벨을 표시할지 여부. 관계를 명시하면 기본 true.'),
+  relationSourceKind: z.enum(RELATION_SOURCE_IDS).optional().describe(
+    '관계를 판단한 출처: manual/document/code/connector/runtime. 이 값만으로 서버 검증 상태가 되지는 않음.'),
+  relationConfidence: z.enum(RELATION_CONFIDENCE_IDS).optional().describe(
+    '작성자의 주관적 신뢰도: unknown/low/medium/high. 서버 검증과 별개.'),
+  relationEvidence: z.string().max(500).optional().describe('관계를 그렇게 판단한 짧은 근거. 비밀값 입력 금지.'),
+  relationEvidenceRef: z.string().max(300).optional().describe(
+    '문서·코드 경로·URL·자원 이름. API 키·토큰·비밀번호 입력 금지.'),
 }
 
 const ok = (v) => ({ content: [{ type: 'text', text: typeof v === 'string' ? v : JSON.stringify(v, null, 2) }] })
@@ -122,7 +143,23 @@ stageTypeIdx는 stage 노드가 속한 계층을 나타내는 index입니다 (ge
 ### 연결선 생성 기준
 흐름·인과·계층·관계가 명확할 때만 연결선을 추가하세요.
 sourceHandle/targetHandle은 생략 가능 — 생략하면 실제 좌표 기반으로 자동 계산됩니다.
-같은 방향의 중복 연결(같은 source→target)은 거부됩니다. 새 노드 여럿과 연결선을 함께 만들 때는 create_graph를 사용하세요.
+관계는 항상 source가 target에 대해 무엇을 하는지 읽습니다. 예: A --reads→ B = A가 B를 읽음.
+- 구조: is_a, part_of, contains, located_at
+- 흐름·변화: precedes, triggers, consumes, produces, transforms_into, moves_to, uses
+- 책임·협업: owned_by, assigned_to, performs, reviews, approves, reports_to, participates_in
+- 조건·의존: depends_on, requires, blocks, enables, constrains
+- 정보·판단: references, evidences, supports, contradicts, derived_from, decides
+- 디지털 시스템: calls, reads, writes, authenticates, authorizes, deploys_to, syncs_with
+목록에 없는 직업 고유 관계만 custom + relationLabel로 표현합니다.
+같은 source→target이라도 관계가 다르면 여러 선을 만들 수 있고, 같은 방향·같은 relationType만 중복으로 거부됩니다.
+새 노드 여럿과 연결선을 함께 만들 때는 create_graph를 사용하세요.
+
+### 관계의 근거와 검증
+- relationSourceKind, relationEvidence, relationEvidenceRef에는 왜 이 관계를 주장하는지 기록합니다.
+- relationConfidence는 작성자의 판단일 뿐 서버 검증이 아닙니다. high를 선택해도 verified가 되지 않습니다.
+- get_canvas의 relation_reality는 declared(주장), evidenced(근거 기록), verified(서버 검증) 중 하나입니다.
+- 현재 MCP 입력으로는 verified를 만들 수 없습니다. 서버가 별도 신뢰 경계에서 evidenceId와 검증 시각을 공급해야만 verified가 됩니다.
+- 코드나 문서를 읽고 만든 관계에는 가능한 한 구체적인 파일·설정 경로를 relationEvidenceRef에 남깁니다. 비밀값은 절대 기록하지 않습니다.
 
 ### 공유 캔버스
 - 초대받은 캔버스도 get_canvases 목록에 나타납니다 (shared:true + permission_scope).
@@ -291,6 +328,7 @@ export function buildServer(getUserId) {
       edges: z.array(z.object({
         source: z.string().describe('tmp_id 또는 기존 노드 id'),
         target: z.string().describe('tmp_id 또는 기존 노드 id'),
+        ...EDGE_RELATION_FIELDS,
         sourceHandle: z.enum(['left', 'right', 'top', 'bottom']).optional().describe('생략 시 자동 계산'),
         targetHandle: z.enum(['left', 'right', 'top', 'bottom']).optional().describe('생략 시 자동 계산'),
       })).max(300).optional(),
@@ -364,22 +402,54 @@ export function buildServer(getUserId) {
 
   server.registerTool('create_edge', {
     description:
-      '두 노드를 연결하는 연결선을 추가합니다. 메모 노드가 포함되면 점선으로 표시됩니다.\n\n' +
+      '두 노드를 의미 있는 관계로 연결합니다. 메모 노드가 포함되면 점선으로 표시됩니다. ' +
+      'relationType은 source가 target에 대해 맺는 관계입니다 (예: API --reads→ DB).\n\n' +
       '흐름·인과·계층·관계가 있는 노드들은 사용자가 따로 요청하지 않아도 능동적으로 연결할 것 ' +
       '(예: 프로세스를 그렸으면 단계 순서대로, 메모를 만들었으면 대상 노드에). ' +
       '단, 관계가 불명확한 노드까지 전부 잇지는 말 것.\n\n' +
       'sourceHandle/targetHandle은 생략해도 된다 — 생략 시 두 노드의 실제 좌표를 보고 가장 자연스러운 ' +
       '면이 자동으로 계산된다. "좌→우는 항상 right/left" 식으로 기계적으로 고정하지 말고, 특정 면을 ' +
       '꼭 지정해야 할 특별한 이유가 있을 때만 명시할 것.\n\n' +
-      '같은 방향의 중복 연결(같은 source→target)은 거부됩니다. 새 노드들과 함께 여러 연결을 만들 때는 create_graph를 쓸 것.',
+      '같은 source→target이라도 reads와 writes처럼 관계가 다르면 각각 만들 수 있습니다. ' +
+      '같은 방향·같은 relationType만 중복으로 거부됩니다. 새 노드들과 함께 여러 연결을 만들 때는 create_graph를 쓸 것.',
     inputSchema: {
       canvas_id: z.string(),
       source: z.string().describe('출발 노드 id'),
       target: z.string().describe('도착 노드 id'),
+      ...EDGE_RELATION_FIELDS,
       sourceHandle: z.enum(['left', 'right', 'top', 'bottom']).optional().describe('생략 시 자동 계산'),
       targetHandle: z.enum(['left', 'right', 'top', 'bottom']).optional().describe('생략 시 자동 계산'),
     },
   }, g(async (userId, a) => ok(await store.createEdge(userId, a.canvas_id, a))))
+
+  server.registerTool('update_edge', {
+    description:
+      '기존 연결선 1개의 관계 의미와 라벨 표시 여부를 수정합니다. ' +
+      'source/target 자체를 바꾸려면 연결선을 삭제하고 다시 생성하세요. 2개 이상은 update_edges를 사용합니다.',
+    inputSchema: {
+      canvas_id: z.string(),
+      edge_id: z.string(),
+      ...EDGE_RELATION_FIELDS,
+    },
+  }, g(async (userId, a) => okh(
+    await store.updateEdge(userId, a.canvas_id, a.edge_id, a),
+    '관계 의미가 저장되었고 브라우저에 몇 초 내 반영됩니다.',
+  )))
+
+  server.registerTool('update_edges', {
+    description:
+      '여러 연결선의 관계 의미를 한 번에 수정합니다. 존재하지 않는 edge_id가 하나라도 있으면 전체가 실패합니다.',
+    inputSchema: {
+      canvas_id: z.string(),
+      patches: z.array(z.object({
+        edge_id: z.string(),
+        ...EDGE_RELATION_FIELDS,
+      })).min(1).max(100),
+    },
+  }, g(async (userId, a) => okh(
+    await store.updateEdges(userId, a.canvas_id, a.patches),
+    '관계 의미가 저장되었고 브라우저에 몇 초 내 반영됩니다.',
+  )))
 
   server.registerTool('delete_edge', {
     description: '연결선을 삭제합니다.',
@@ -390,6 +460,19 @@ export function buildServer(getUserId) {
     description: '새 캔버스를 생성합니다. 새 캔버스는 기본 단계 종류(기획·개발·검토·배포·완료)로 시작합니다.',
     inputSchema: { name: z.string().optional().describe('캔버스 이름 (생략 시 "새 캔버스")') },
   }, g(async (userId, a) => okh(await store.createCanvas(userId, a.name), '이제 create_graph로 내용을 채우세요.')))
+
+  server.registerTool('create_workflow_system_map', {
+    description:
+      '제품 소유자 전용: 현재 코드·SQL 구조를 바탕으로 Workflow Canvas 자체 시스템 지도를 새 캔버스에 만듭니다. ' +
+      '사용자 UI, Vercel/API, Supabase 데이터·보안, 개발·배포 구역과 근거가 기록된 관계를 포함합니다. ' +
+      '서버의 WORKFLOW_CANVAS_OWNER_USER_ID와 요청 사용자가 일치할 때만 실행됩니다.',
+    inputSchema: {
+      name: z.string().max(120).optional().describe('생략 시 "Workflow Canvas 시스템 지도"'),
+    },
+  }, g(async (userId, a) => okh(
+    await store.createWorkflowSystemMap(userId, a.name),
+    '새 캔버스가 생성되었습니다. 브라우저에서 구역별 저장 뷰와 관계 근거를 검토하세요.',
+  )))
 
   server.registerTool('rename_canvas', {
     description: '캔버스 이름을 변경합니다 (브라우저 탭 이름에도 반영됨).',

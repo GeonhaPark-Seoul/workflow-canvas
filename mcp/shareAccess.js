@@ -1,6 +1,7 @@
 // Shared-canvas authorization for server-only callers (MCP and browser API).
 import { createClient } from '@supabase/supabase-js'
 import { sanitizeHtml, sanitizeTextFields } from './sanitize.js'
+import { normalizeEdgeRelationData } from '../shared/relationOntology.js'
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://tuaifwiigkacrflbhjmu.supabase.co'
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -185,13 +186,20 @@ export function redactNode(node, visibleIds) {
   return { ...shape, data: { redacted: true } }
 }
 
+export function redactEdge(edge, visibleIds) {
+  const safe = sanitizeEdge(edge)
+  if (visibleIds === null || (visibleIds.has(edge.source) && visibleIds.has(edge.target))) return safe
+  const { data, ...shape } = safe
+  return { ...shape, redacted: true }
+}
+
 export function redactCanvas(access) {
   const visibleIds = access.restrictView ? editableNodeIdSet(access, access.row.nodes) : null
   return {
     name: access.row.name,
     revision: access.row.updated_at,
     nodes: (access.row.nodes ?? []).map((node) => redactNode(node, visibleIds)),
-    edges: access.row.edges ?? [],
+    edges: (access.row.edges ?? []).map((edge) => redactEdge(edge, visibleIds)),
     notes: access.restrictView ? [] : (access.row.notes ?? []),
     views: access.row.views ?? [],
     stageTypes: access.row.stage_types ?? [],
@@ -204,7 +212,20 @@ export function redactCanvas(access) {
   }
 }
 
-const same = (left, right) => JSON.stringify(left) === JSON.stringify(right)
+function stableValue(value) {
+  if (Array.isArray(value)) return value.map(stableValue)
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.keys(value)
+        .filter((key) => value[key] !== undefined)
+        .sort()
+        .map((key) => [key, stableValue(value[key])]),
+    )
+  }
+  return value
+}
+
+const same = (left, right) => JSON.stringify(stableValue(left)) === JSON.stringify(stableValue(right))
 
 function sanitizeNode(node) {
   const storedData = { ...(node.data ?? {}) }
@@ -214,6 +235,12 @@ function sanitizeNode(node) {
     data.parts = data.parts.map((part) => ({ ...part, text: typeof part.text === 'string' ? sanitizeHtml(part.text) : part.text }))
   }
   return { ...node, data }
+}
+
+function sanitizeEdge(edge) {
+  const { data, type, redacted, ...shape } = edge
+  const safeData = normalizeEdgeRelationData(data)
+  return { ...shape, type: 'stub', ...(Object.keys(safeData).length ? { data: safeData } : {}) }
 }
 
 export function applySharedCanvasUpdate(access, submittedNodes, submittedEdges, metadata = {}) {
@@ -271,11 +298,20 @@ export function applySharedCanvasUpdate(access, submittedNodes, submittedEdges, 
   const mergedNodeById = new Map(mergedNodes.map((node) => [node.id, node]))
   const originalEdgeById = new Map(originalEdges.map((edge) => [edge.id, edge]))
   const submittedEdgeById = new Map(submittedEdges.map((edge) => [edge?.id, edge]))
+  const mergedEdges = []
   for (const edge of originalEdges) {
     const submitted = submittedEdgeById.get(edge.id)
     const edgeEditable = mayEdit(edge.source) && mayEdit(edge.target)
     if (!submitted && !edgeEditable) throw new Error('초대 범위 밖 연결선은 삭제할 수 없습니다.')
-    if (submitted && !edgeEditable && !same(edge, submitted)) throw new Error('초대 범위 밖 연결선은 변경할 수 없습니다.')
+    if (!submitted) continue
+    if (!edgeEditable) {
+      if (!same(redactEdge(edge, visibleIds), redactEdge(submitted, visibleIds))) {
+        throw new Error('초대 범위 밖 연결선은 변경할 수 없습니다.')
+      }
+      mergedEdges.push(edge)
+    } else {
+      mergedEdges.push(submitted)
+    }
   }
   for (const edge of submittedEdges) {
     const source = mergedNodeById.get(edge.source)
@@ -283,12 +319,14 @@ export function applySharedCanvasUpdate(access, submittedNodes, submittedEdges, 
     if (!source || !target) throw new Error('연결선의 양 끝은 존재하는 노드여야 합니다.')
 
     const original = originalEdgeById.get(edge.id)
+    if (original && (!mayEdit(original.source) || !mayEdit(original.target))) continue
     const changed = !original || !same(original, edge)
     if (changed && (!isEditableNode(source) || !isEditableNode(target))) {
       throw new Error('연결선의 양 끝은 모두 초대된 편집 범위 안에 있어야 합니다.')
     }
+    if (!original) mergedEdges.push(edge)
   }
-  const result = { nodes: mergedNodes.map(sanitizeNode), edges: submittedEdges }
+  const result = { nodes: mergedNodes.map(sanitizeNode), edges: mergedEdges.map(sanitizeEdge) }
   if (access.scope === 'canvas') {
     if (metadata.views !== undefined && !Array.isArray(metadata.views)) {
       throw new Error('views는 배열이어야 합니다.')
