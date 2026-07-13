@@ -9,6 +9,9 @@ const LEGACY_KEY = 'workflow-canvas' // pre-multi-canvas single store
 const LEGACY_TYPES_KEY = 'workflow-canvas-types' // pre-per-canvas global stage types
 const OWNER_KEY = 'workflow-canvas-owner-id' // authenticated account owning this local mirror
 const dataKey = (id) => `workflow-canvas-data-${id}`
+export const STORAGE_ERROR_EVENT = 'workflow-canvas-storage-error'
+let lastStorageError = null
+export function getLastStorageError() { return lastStorageError }
 
 export const uid = () => `c-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
 
@@ -16,7 +19,17 @@ function read(key) {
   try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : null } catch { return null }
 }
 function write(key, val) {
-  try { localStorage.setItem(key, JSON.stringify(val)) } catch {}
+  try {
+    localStorage.setItem(key, JSON.stringify(val))
+    return true
+  } catch (error) {
+    lastStorageError = error?.message ?? '브라우저 저장 공간에 기록하지 못했습니다.'
+    console.error('[storage] local cache write:', error)
+    window.dispatchEvent(new CustomEvent(STORAGE_ERROR_EVENT, {
+      detail: { key, message: lastStorageError },
+    }))
+    return false
+  }
 }
 function remove(key) {
   try { localStorage.removeItem(key) } catch {}

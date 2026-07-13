@@ -39,7 +39,11 @@ export async function mySharesFor(userId, canvasId = null) {
 export async function resolveSharedCanvasAccess(userId, ownerId, canvasId) {
   const shares = (await mySharesFor(userId, canvasId)).filter((share) => share.owner_id === ownerId)
   if (!shares.length) throw new Error('이 공유 캔버스에 접근할 권한이 없습니다.')
-  shares.sort((a, b) => SCOPE_RANK[a.scope] - SCOPE_RANK[b.scope] || Number(b.can_edit) - Number(a.can_edit))
+  shares.sort((a, b) => (
+    SCOPE_RANK[a.scope] - SCOPE_RANK[b.scope]
+    || Number(b.can_edit) - Number(a.can_edit)
+    || Number(a.restrict_view) - Number(b.restrict_view)
+  ))
   const share = shares[0]
   const { data: row, error } = await admin().from('canvases').select('*')
     .eq('user_id', ownerId).eq('canvas_id', canvasId).maybeSingle()
@@ -64,6 +68,7 @@ export function redactCanvas(access) {
   const visibleIds = access.restrictView ? editableNodeIdSet(access, access.row.nodes) : null
   return {
     name: access.row.name,
+    revision: access.row.updated_at,
     nodes: (access.row.nodes ?? []).map((node) => redactNode(node, visibleIds)),
     edges: access.row.edges ?? [],
     views: access.row.views ?? [],
@@ -87,9 +92,16 @@ function sanitizeNode(node) {
   return { ...node, data }
 }
 
-export function applySharedCanvasUpdate(access, submittedNodes, submittedEdges) {
+export function applySharedCanvasUpdate(access, submittedNodes, submittedEdges, metadata = {}) {
   if (!access.canEdit) throw new Error('읽기 전용 초대에서는 변경할 수 없습니다.')
   if (!Array.isArray(submittedNodes) || !Array.isArray(submittedEdges)) throw new Error('nodes와 edges는 배열이어야 합니다.')
+
+  const nodeIds = submittedNodes.map((node) => node?.id)
+  if (nodeIds.some((id) => typeof id !== 'string' || !id)) throw new Error('모든 노드에는 id가 필요합니다.')
+  if (new Set(nodeIds).size !== nodeIds.length) throw new Error('중복된 노드 id는 저장할 수 없습니다.')
+  const edgeIds = submittedEdges.map((edge) => edge?.id)
+  if (edgeIds.some((id) => typeof id !== 'string' || !id)) throw new Error('모든 연결선에는 id가 필요합니다.')
+  if (new Set(edgeIds).size !== edgeIds.length) throw new Error('중복된 연결선 id는 저장할 수 없습니다.')
 
   const originalNodes = access.row.nodes ?? []
   const originalEdges = access.row.edges ?? []
@@ -132,6 +144,7 @@ export function applySharedCanvasUpdate(access, submittedNodes, submittedEdges) 
     mergedNodes.push(submitted)
   }
 
+  const mergedNodeById = new Map(mergedNodes.map((node) => [node.id, node]))
   const originalEdgeById = new Map(originalEdges.map((edge) => [edge.id, edge]))
   const submittedEdgeById = new Map(submittedEdges.map((edge) => [edge?.id, edge]))
   for (const edge of originalEdges) {
@@ -141,12 +154,26 @@ export function applySharedCanvasUpdate(access, submittedNodes, submittedEdges) 
     if (submitted && !edgeEditable && !same(edge, submitted)) throw new Error('초대 범위 밖 연결선은 변경할 수 없습니다.')
   }
   for (const edge of submittedEdges) {
-    if (!edge?.id || originalEdgeById.has(edge.id)) continue
-    const source = mergedNodes.find((node) => node.id === edge.source)
-    const target = mergedNodes.find((node) => node.id === edge.target)
-    if (!source || !target || !isEditableNode(source) || !isEditableNode(target)) {
+    const source = mergedNodeById.get(edge.source)
+    const target = mergedNodeById.get(edge.target)
+    if (!source || !target) throw new Error('연결선의 양 끝은 존재하는 노드여야 합니다.')
+
+    const original = originalEdgeById.get(edge.id)
+    const changed = !original || !same(original, edge)
+    if (changed && (!isEditableNode(source) || !isEditableNode(target))) {
       throw new Error('연결선의 양 끝은 모두 초대된 편집 범위 안에 있어야 합니다.')
     }
   }
-  return { nodes: mergedNodes.map(sanitizeNode), edges: submittedEdges }
+  const result = { nodes: mergedNodes.map(sanitizeNode), edges: submittedEdges }
+  if (access.scope === 'canvas') {
+    if (metadata.views !== undefined && !Array.isArray(metadata.views)) {
+      throw new Error('views는 배열이어야 합니다.')
+    }
+    if (metadata.stageTypes !== undefined && !Array.isArray(metadata.stageTypes)) {
+      throw new Error('stageTypes는 배열이어야 합니다.')
+    }
+    result.views = metadata.views ?? access.row.views ?? []
+    result.stageTypes = metadata.stageTypes ?? access.row.stage_types ?? null
+  }
+  return result
 }

@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { CanvasConflictError } from './cloudStorage'
 
 async function request(path, options = {}) {
   const { data: { session } } = await supabase.auth.getSession()
@@ -13,6 +14,7 @@ async function request(path, options = {}) {
     },
   })
   const body = await response.json().catch(() => ({}))
+  if (response.status === 409) throw new CanvasConflictError(body.error)
   if (!response.ok) throw new Error(body.error || '공유 캔버스 요청에 실패했습니다.')
   return body
 }
@@ -25,6 +27,9 @@ export function getSharedCanvas(ownerId, canvasId) {
   return request(`/api/shared-canvas?ownerId=${encodeURIComponent(ownerId)}&canvasId=${encodeURIComponent(canvasId)}`)
 }
 
-export function updateSharedCanvas(ownerId, canvasId, nodes, edges) {
-  return request('/api/shared-canvas', { method: 'PUT', body: JSON.stringify({ ownerId, canvasId, nodes, edges }) })
+export function updateSharedCanvas(ownerId, canvasId, nodes, edges, views, stageTypes, revision) {
+  return request('/api/shared-canvas', {
+    method: 'PUT',
+    body: JSON.stringify({ ownerId, canvasId, nodes, edges, views, stageTypes, revision }),
+  })
 }

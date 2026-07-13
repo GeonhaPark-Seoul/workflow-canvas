@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react'
 import { Handle, Position, NodeResizer, useStore } from '@xyflow/react'
 import EditToolbar from '../components/EditToolbar'
 import ScopedParticipants from '../components/ScopedParticipants'
-import { useTheme } from './useTheme'
 import { sanitizeHtml } from '../lib/sanitizeHtml'
 
 // Bidirectional connection ports: every handle is type="source"; with the
@@ -68,7 +67,7 @@ export default function MemoNode({ data, selected, id }) {
   const shapeOnly = zoomShapeOnly || data.forceShapeOnly
 
   const filled = data.nodeFill !== false
-  const theme = useTheme()
+  const theme = data.theme ?? 'dark'
   // Light theme + fill off ⇒ the node's background is transparent over a light page,
   // so the usual amber/yellow text would go low-contrast — use dark text instead.
   const darkText = theme === 'light' && !filled
@@ -399,10 +398,12 @@ export default function MemoNode({ data, selected, id }) {
       )}
 
       {/* Rich-text toolbar — portalled to body */}
-      <EditToolbar
-        editRef={editing === 'header' ? headerRef : editing === 'text' ? textRef : null}
-        anchorRef={editing === 'header' ? headerContainerRef : editing === 'text' ? textContainerRef : null}
-      />
+      {editing && (
+        <EditToolbar
+          editRef={editing === 'header' ? headerRef : textRef}
+          anchorRef={editing === 'header' ? headerContainerRef : textContainerRef}
+        />
+      )}
     </div>
   )
 }

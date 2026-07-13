@@ -6,6 +6,7 @@
 // maps to a user id via the `mcp_tokens` table; a raw Supabase access token
 // (JWT) is also accepted as a fallback.
 import { createClient } from '@supabase/supabase-js'
+import { createHash } from 'node:crypto'
 import { sanitizeTextFields } from './sanitize.js'
 import {
   SIZE, nodeW, nodeH, nodeRect, overlaps, findNonOverlapping,
@@ -25,6 +26,17 @@ function admin() {
 const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 const newNodeId = () => `n-${uid()}`
 const newEdgeId = () => `e-${uid()}`
+
+function writeConflict() {
+  return new Error(
+    '캔버스가 다른 브라우저나 AI에 의해 먼저 변경되었습니다. ' +
+    'get_canvas로 최신 상태를 다시 읽고 작업을 재시도하세요.')
+}
+
+function nextRevision(previousRevision) {
+  const previous = Date.parse(previousRevision ?? '')
+  return new Date(Math.max(Date.now(), Number.isFinite(previous) ? previous + 1 : 0)).toISOString()
+}
 
 // Teaching validation: reject out-of-range indexes with the fix spelled out,
 // instead of silently clamping (a silent clamp hides the AI's mistake).
@@ -116,7 +128,15 @@ function closestHandles(source, target) {
 export async function resolveUser(token) {
   if (!token) return null
   const db = admin()
-  const { data } = await db.from('mcp_tokens').select('user_id').eq('token', token).maybeSingle()
+  const digest = createHash('sha256').update(token).digest('hex')
+  let { data } = await db.from('mcp_tokens').select('user_id').eq('token', digest).maybeSingle()
+  // Rolling-deploy bridge: old generated secrets were exactly 48 hex chars.
+  // Once supabase-mcp-schema.sql hashes the rows, this branch finds nothing;
+  // a 64-char digest supplied as a bearer secret never enters the fallback.
+  if (!data?.user_id && /^[0-9a-f]{48}$/i.test(token)) {
+    const legacy = await db.from('mcp_tokens').select('user_id').eq('token', token).maybeSingle()
+    data = legacy.data
+  }
   if (data?.user_id) return data.user_id
   const { data: u } = await db.auth.getUser(token)
   return u?.user?.id ?? null
@@ -147,7 +167,12 @@ export async function listCanvases(userId) {
   for (const s of shares) {
     const key = `${s.owner_id}:${s.canvas_id}`
     const prev = best.get(key)
-    if (!prev || SCOPE_RANK[s.scope] < SCOPE_RANK[prev.scope]) best.set(key, s)
+    if (!prev
+        || SCOPE_RANK[s.scope] < SCOPE_RANK[prev.scope]
+        || (s.scope === prev.scope && Number(s.can_edit) > Number(prev.can_edit))
+        || (s.scope === prev.scope && s.can_edit === prev.can_edit && Number(s.restrict_view) < Number(prev.restrict_view))) {
+      best.set(key, s)
+    }
   }
   const shared = []
   for (const s of best.values()) {
@@ -206,7 +231,11 @@ async function resolveCanvasAccess(userId, canvasId) {
 
   const mine = await mySharesFor(userId, canvasId)
   if (mine.length) {
-    mine.sort((a, b) => SCOPE_RANK[a.scope] - SCOPE_RANK[b.scope])
+    mine.sort((a, b) => (
+      SCOPE_RANK[a.scope] - SCOPE_RANK[b.scope]
+      || Number(b.can_edit) - Number(a.can_edit)
+      || Number(a.restrict_view) - Number(b.restrict_view)
+    ))
     const best = mine[0]
     const { data: row, error: e3 } = await db
       .from('canvases').select('*').eq('user_id', best.owner_id).eq('canvas_id', canvasId).maybeSingle()
@@ -299,8 +328,12 @@ export async function createStageType(userId, canvasId, label) {
   const types = rowStageTypes(access.row)
   const palette = TYPE_PALETTE[types.length % TYPE_PALETTE.length]
   const next = [...types, { id: `type-${uid()}`, ...palette, label: label?.trim() || '새 종류' }]
-  const { error } = await admin().from('canvases').update({ stage_types: next }).eq('user_id', access.ownerId).eq('canvas_id', canvasId)
+  const { data, error } = await admin().from('canvases')
+    .update({ stage_types: next, updated_at: nextRevision(access.row.updated_at) })
+    .eq('user_id', access.ownerId).eq('canvas_id', canvasId).eq('updated_at', access.row.updated_at)
+    .select('updated_at').maybeSingle()
   if (error) throw new Error(error.message)
+  if (!data) throw writeConflict()
   return toExternal(next)[next.length - 1]
 }
 
@@ -312,8 +345,12 @@ export async function renameStageType(userId, canvasId, stageTypeIdx, label) {
   if (stageTypeIdx < 0 || stageTypeIdx >= types.length) throw new Error(`단계 종류를 찾을 수 없습니다: ${stageTypeIdx}`)
   if (!label?.trim()) throw new Error('이름은 비어있을 수 없습니다.')
   const next = types.map((t, i) => (i === stageTypeIdx ? { ...t, label: label.trim() } : t))
-  const { error } = await admin().from('canvases').update({ stage_types: next }).eq('user_id', access.ownerId).eq('canvas_id', canvasId)
+  const { data, error } = await admin().from('canvases')
+    .update({ stage_types: next, updated_at: nextRevision(access.row.updated_at) })
+    .eq('user_id', access.ownerId).eq('canvas_id', canvasId).eq('updated_at', access.row.updated_at)
+    .select('updated_at').maybeSingle()
   if (error) throw new Error(error.message)
+  if (!data) throw writeConflict()
   return toExternal(next)[stageTypeIdx]
 }
 
@@ -334,9 +371,67 @@ export async function deleteStageType(userId, canvasId, stageTypeIdx) {
     if (ci > stageTypeIdx) return { ...n, data: { ...n.data, colorIdx: ci - 1 } }
     return n
   })
-  const { error } = await admin().from('canvases').update({ stage_types: next, nodes: reindexed }).eq('user_id', access.ownerId).eq('canvas_id', canvasId)
+  const { data, error } = await admin().from('canvases')
+    .update({ stage_types: next, nodes: reindexed, updated_at: nextRevision(access.row.updated_at) })
+    .eq('user_id', access.ownerId).eq('canvas_id', canvasId).eq('updated_at', access.row.updated_at)
+    .select('updated_at').maybeSingle()
   if (error) throw new Error(error.message)
+  if (!data) throw writeConflict()
   return toExternal(next)
+}
+
+function storedAbsolutePosition(node, byId) {
+  let x = node.position?.x ?? 0
+  let y = node.position?.y ?? 0
+  let current = node
+  const visited = new Set([node.id])
+  while (current.parentId && byId.has(current.parentId) && !visited.has(current.parentId)) {
+    visited.add(current.parentId)
+    current = byId.get(current.parentId)
+    x += current.position?.x ?? 0
+    y += current.position?.y ?? 0
+  }
+  return { x, y }
+}
+
+export function toExternalCanvasNode(node, byId, hidden = false) {
+  const shape = {
+    id: node.id,
+    type: node.type,
+    position: node.position,
+    absolute_position: storedAbsolutePosition(node, byId),
+    width: nodeW(node),
+    height: nodeH(node),
+    dimmed: node.data?.dimmed ?? false,
+    ...(node.parentId ? { parent_id: node.parentId } : {}),
+  }
+  if (hidden) return { ...shape, redacted: true }
+
+  if (node.type === 'memo') {
+    return { ...shape, header: node.data?.header ?? '', text: node.data?.text ?? '' }
+  }
+  if (node.type === 'group') {
+    return { ...shape, label: node.data?.label ?? '' }
+  }
+  if (node.type === 'content') {
+    const src = node.data?.src
+    return {
+      ...shape,
+      kind: node.data?.kind ?? 'database',
+      header: node.data?.header ?? '',
+      ...(node.data?.url ? { url: node.data.url } : {}),
+      ...(node.data?.storagePath ? { stored_image: true } : {}),
+      ...(src && !src.startsWith('data:') ? { image_url: src } : {}),
+      ...(src?.startsWith('data:') ? { embedded_image: true } : {}),
+    }
+  }
+  return {
+    ...shape,
+    label: node.data?.label ?? '',
+    description: node.data?.description ?? '',
+    stageTypeIdx: node.data?.colorIdx ?? 0,
+    parts: node.data?.parts ?? [],
+  }
 }
 
 export async function getCanvas(userId, canvasId) {
@@ -354,22 +449,19 @@ export async function getCanvas(userId, canvasId) {
         restrict_view: !!access.restrictView,
       }
     : undefined
+  const byId = new Map((row.nodes ?? []).map((node) => [node.id, node]))
   return {
     ...(myPermission ? { my_permission: myPermission } : {}),
     canvas_id: row.canvas_id,
     name: row.name,
+    updated_at: row.updated_at,
+    views: row.views ?? [],
     stage_types: toExternal(rowStageTypes(row)),
-    nodes: (row.nodes ?? []).map((n) => {
-      const shape = { id: n.id, type: n.type, position: n.position, width: nodeW(n), height: nodeH(n), dimmed: n.data?.dimmed ?? false }
-      const hidden = access.role === 'invitee' && access.restrictView && editable !== null && !editable.has(n.id)
-      if (hidden) return { ...shape, redacted: true }
-      return {
-        ...shape,
-        ...(n.type === 'memo'
-          ? { header: n.data?.header ?? '', text: n.data?.text ?? '' }
-          : { label: n.data?.label ?? '', description: n.data?.description ?? '', stageTypeIdx: n.data?.colorIdx ?? 0 }),
-      }
-    }),
+    nodes: (row.nodes ?? []).map((node) => toExternalCanvasNode(
+      node,
+      byId,
+      access.role === 'invitee' && access.restrictView && editable !== null && !editable.has(node.id),
+    )),
     edges: (row.edges ?? []).map((e) => ({
       id: e.id, source: e.source, target: e.target,
       ...(e.sourceHandle ? { sourceHandle: e.sourceHandle } : {}),
@@ -378,13 +470,17 @@ export async function getCanvas(userId, canvasId) {
   }
 }
 
-async function saveArrays(userId, canvasId, nodes, edges) {
-  const { error } = await admin()
+async function saveArrays(userId, canvasId, nodes, edges, expectedRevision) {
+  const { data, error } = await admin()
     .from('canvases')
-    .update({ nodes, edges, updated_at: new Date().toISOString() })
+    .update({ nodes, edges, updated_at: nextRevision(expectedRevision) })
     .eq('user_id', userId)
     .eq('canvas_id', canvasId)
+    .eq('updated_at', expectedRevision)
+    .select('updated_at')
+    .maybeSingle()
   if (error) throw new Error(error.message)
+  if (!data) throw writeConflict()
 }
 
 export async function createCanvas(userId, name) {
@@ -399,7 +495,7 @@ export async function createCanvas(userId, name) {
 export async function clearCanvas(userId, canvasId) {
   const access = await resolveCanvasAccess(userId, canvasId)
   assertOwner(access, '캔버스 초기화')
-  await saveArrays(userId, canvasId, [], [])
+  await saveArrays(userId, canvasId, [], [], access.row.updated_at)
 }
 
 async function loadPrefs(userId) {
@@ -424,9 +520,14 @@ async function savePrefs(userId, patch) {
 export async function renameCanvas(userId, canvasId, name) {
   const trimmed = name?.trim()
   if (!trimmed) throw new Error('캔버스 이름은 비어있을 수 없습니다.')
-  assertOwner(await resolveCanvasAccess(userId, canvasId), '캔버스 이름 변경')
-  const { error } = await admin().from('canvases').update({ name: trimmed }).eq('user_id', userId).eq('canvas_id', canvasId)
+  const access = await resolveCanvasAccess(userId, canvasId)
+  assertOwner(access, '캔버스 이름 변경')
+  const { data, error } = await admin().from('canvases')
+    .update({ name: trimmed, updated_at: nextRevision(access.row.updated_at) })
+    .eq('user_id', userId).eq('canvas_id', canvasId).eq('updated_at', access.row.updated_at)
+    .select('updated_at').maybeSingle()
   if (error) throw new Error(error.message)
+  if (!data) throw writeConflict()
   const prefs = await loadPrefs(userId)
   if (prefs?.canvas_order?.some((c) => c.id === canvasId)) {
     await savePrefs(userId, {
@@ -523,7 +624,7 @@ export async function createNode(userId, canvasId, opts) {
     const spot = findNonOverlapping(siblings.map(nodeRect), desired, w, h)
     const node = materializeNode(opts, { x: spot.x, y: spot.y }, rowStageTypes(row))
     node.parentId = access.targetId
-    await saveArrays(access.ownerId, canvasId, [...nodes, node], row.edges ?? [])
+    await saveArrays(access.ownerId, canvasId, [...nodes, node], row.edges ?? [], row.updated_at)
     return spot.shifted ? { ...node, shifted: { from: desired, to: { x: spot.x, y: spot.y } } } : node
   }
 
@@ -549,7 +650,7 @@ export async function createNode(userId, canvasId, opts) {
   }
 
   const node = materializeNode(opts, position, rowStageTypes(row))
-  await saveArrays(access.ownerId, canvasId, [...nodes, node], row.edges ?? [])
+  await saveArrays(access.ownerId, canvasId, [...nodes, node], row.edges ?? [], row.updated_at)
   return shifted ? { ...node, shifted } : node
 }
 
@@ -584,7 +685,7 @@ export async function updateNode(userId, canvasId, nodeId, patch) {
   const idx = nodes.findIndex((n) => n.id === nodeId)
   if (idx < 0) throw new Error(`노드를 찾을 수 없습니다: ${nodeId}`)
   nodes[idx] = applyPatch(nodes[idx], patch, rowStageTypes(row))
-  await saveArrays(access.ownerId, canvasId, nodes, row.edges ?? [])
+  await saveArrays(access.ownerId, canvasId, nodes, row.edges ?? [], row.updated_at)
   return nodes[idx]
 }
 
@@ -607,7 +708,7 @@ export async function updateNodes(userId, canvasId, patches) {
     const i = byId.get(p.node_id)
     nodes[i] = applyPatch(nodes[i], p, types)
   }
-  await saveArrays(access.ownerId, canvasId, nodes, row.edges ?? [])
+  await saveArrays(access.ownerId, canvasId, nodes, row.edges ?? [], row.updated_at)
   return { updated: patches.map((p) => p.node_id), count: patches.length }
 }
 
@@ -618,7 +719,7 @@ export async function deleteNode(userId, canvasId, nodeId) {
   if (!(row.nodes ?? []).some((n) => n.id === nodeId)) throw new Error(`노드를 찾을 수 없습니다: ${nodeId}`)
   const nodes = (row.nodes ?? []).filter((n) => n.id !== nodeId)
   const edges = (row.edges ?? []).filter((e) => e.source !== nodeId && e.target !== nodeId)
-  await saveArrays(access.ownerId, canvasId, nodes, edges)
+  await saveArrays(access.ownerId, canvasId, nodes, edges, row.updated_at)
   return { deleted: nodeId, remaining_nodes: nodes.length }
 }
 
@@ -633,7 +734,7 @@ export async function deleteNodes(userId, canvasId, nodeIds) {
   const foundSet = new Set(found)
   const nodes = (row.nodes ?? []).filter((n) => !foundSet.has(n.id))
   const edges = (row.edges ?? []).filter((e) => !foundSet.has(e.source) && !foundSet.has(e.target))
-  await saveArrays(access.ownerId, canvasId, nodes, edges)
+  await saveArrays(access.ownerId, canvasId, nodes, edges, row.updated_at)
   return {
     deleted: found,
     not_found: nodeIds.filter((id) => !foundSet.has(id)),
@@ -658,7 +759,7 @@ export async function createEdge(userId, canvasId, { source, target, sourceHandl
       '정말 평행선이 필요하면 먼저 delete_edge로 기존 것을 지우세요.')
   }
   const edge = buildEdge({ source, target, sourceHandle, targetHandle }, sNode, tNode)
-  await saveArrays(access.ownerId, canvasId, nodes, [...(row.edges ?? []), edge])
+  await saveArrays(access.ownerId, canvasId, nodes, [...(row.edges ?? []), edge], row.updated_at)
   return edge
 }
 
@@ -902,7 +1003,7 @@ export async function createGraph(userId, canvasId, { nodes: nodeInputs, edges: 
     newEdges.push(buildEdge({ source, target, sourceHandle, targetHandle }, byId.get(source), byId.get(target)))
   }
 
-  await saveArrays(access.ownerId, canvasId, allNodes, [...(row.edges ?? []), ...newEdges])
+  await saveArrays(access.ownerId, canvasId, allNodes, [...(row.edges ?? []), ...newEdges], row.updated_at)
 
   // Radial-only teaching warning: check for per-branch (instead of per-depth) stageTypeIdx usage.
   const warning = preset === 'radial' ? checkRadialLevelMixing(nodeInputs, edgeInputs) : null
@@ -924,6 +1025,6 @@ export async function deleteEdge(userId, canvasId, edgeId) {
   if (!target) throw new Error(`연결선을 찾을 수 없습니다: ${edgeId}`)
   assertRegionEdit(access, row.nodes, { kind: 'edge', source: target.source, target: target.target })
   const edges = (row.edges ?? []).filter((e) => e.id !== edgeId)
-  await saveArrays(access.ownerId, canvasId, row.nodes ?? [], edges)
+  await saveArrays(access.ownerId, canvasId, row.nodes ?? [], edges, row.updated_at)
   return { deleted: edgeId, remaining_edges: edges.length }
 }

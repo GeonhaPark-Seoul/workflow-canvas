@@ -1,12 +1,29 @@
 -- Run this in Supabase Dashboard → SQL Editor (after supabase-schema.sql).
--- Adds personal access tokens used by the MCP server to authenticate a user.
+-- Adds hashed personal access tokens used by the MCP server to authenticate a user.
+
+create extension if not exists pgcrypto;
 
 create table if not exists mcp_tokens (
-  token       text        primary key,
+  token       text        primary key, -- SHA-256 digest; the raw secret is never stored
+  token_prefix text,
+  token_version smallint not null default 2,
   user_id     uuid        references auth.users(id) on delete cascade not null,
   label       text,
   created_at  timestamptz default now()
 );
+
+-- Existing deployments stored the raw token in `token`. A nullable version
+-- column distinguishes those rows on the first re-run, hashes them in place,
+-- and preserves every currently configured connector secret.
+alter table mcp_tokens add column if not exists token_prefix text;
+alter table mcp_tokens add column if not exists token_version smallint;
+update mcp_tokens
+set token_prefix = coalesce(token_prefix, left(token, 6)),
+    token = encode(digest(token, 'sha256'), 'hex'),
+    token_version = 2
+where token_version is null or token_version < 2;
+alter table mcp_tokens alter column token_version set default 2;
+alter table mcp_tokens alter column token_version set not null;
 
 -- RLS on: by default only the service role (the MCP server) can read tokens.
 -- The self-service policies below additionally let a logged-in user manage
@@ -30,9 +47,13 @@ grant all on mcp_tokens to service_role;
 -- 1) Find your user id:
 --      select id, email from auth.users;
 --
--- 2) Insert a token. Use any long random secret as the token value:
---      insert into mcp_tokens (token, user_id, label)
---      values (encode(gen_random_bytes(24), 'hex'), '<YOUR-USER-ID>', 'claude');
+-- 2) Create a raw secret, but store only its digest:
+--      with secret as (select encode(gen_random_bytes(24), 'hex') value)
+--      insert into mcp_tokens (token, token_prefix, token_version, user_id, label)
+--      select encode(digest(value, 'sha256'), 'hex'), left(value, 6), 2,
+--             '<YOUR-USER-ID>', 'claude'
+--      from secret
+--      returning token_prefix;
 --
--- 3) Read it back to copy into your MCP client config:
---      select token from mcp_tokens where user_id = '<YOUR-USER-ID>';
+-- The raw secret cannot be recovered after creation. Prefer the in-app UI,
+-- which shows the connector URL once before discarding the secret.

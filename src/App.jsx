@@ -28,17 +28,25 @@ import {
   loadCanvasList, loadActiveId,
   loadLodThreshold, saveLodThreshold,
   loadCanvasStorageOwner, resetCanvasStorage, saveCanvasStorageOwner,
+  STORAGE_ERROR_EVENT,
+  getLastStorageError,
 } from './storage'
 import { supabase } from './lib/supabase'
 import { sanitizeNodeData } from './lib/sanitizeHtml'
 import {
   saveCanvas as cloudSaveCanvas,
   loadAllCanvases as cloudLoadAllCanvases,
+  loadCanvasRow as cloudLoadCanvasRow,
   deleteCanvas as cloudDeleteCanvas,
   saveUserPrefs as cloudSaveUserPrefs,
   loadUserPrefs as cloudLoadUserPrefs,
+  CanvasConflictError,
 } from './lib/cloudStorage'
 import { getSharedCanvas, listSharedCanvases, updateSharedCanvas } from './lib/sharedCanvasApi'
+import { appendHistorySnapshot, sameCanvasSnapshot } from './lib/canvasSync'
+import { absoluteNodePosition, boundsForNodeIds } from './lib/canvasGeometry'
+import { dataUrlToBlob, uploadCanvasImage } from './lib/imageStorage'
+import { mergeCanvasSnapshots } from './lib/canvasMerge'
 import { joinCanvasPresence } from './lib/presence'
 import {
   claimEmailInvite, claimShareToken, getShareLinkPreview, isShareLinkActive, listPendingEmailInvites, listShares, revokeShareMember,
@@ -104,23 +112,12 @@ function parseSharedId(id) {
   return { ownerId: rest.slice(0, sep), canvasId: rest.slice(sep + 1) }
 }
 
-// Walk a node's parentId chain to get its absolute flow-space position
-// (child nodes carry positions relative to their parent frame).
-function absolutePosition(node, byId) {
-  let x = node.position.x, y = node.position.y, cur = node, guard = 0
-  while (cur.parentId && byId.has(cur.parentId) && guard++ < 20) {
-    const p = byId.get(cur.parentId)
-    x += p.position.x; y += p.position.y; cur = p
-  }
-  return { x, y }
-}
-
 // "연결선 정리": pick the nearest-side handle pair between two nodes, based on
 // their absolute centers (accounts for parentId children — see absolutePosition).
 function closestHandles(sourceNode, targetNode, byId) {
   const dim = (n) => ({ w: n.measured?.width ?? n.width ?? 200, h: n.measured?.height ?? n.height ?? 80 })
-  const sPos = absolutePosition(sourceNode, byId)
-  const tPos = absolutePosition(targetNode, byId)
+  const sPos = absoluteNodePosition(sourceNode, byId)
+  const tPos = absoluteNodePosition(targetNode, byId)
   const sd = dim(sourceNode), td = dim(targetNode)
   const dx = (tPos.x + td.w / 2) - (sPos.x + sd.w / 2)
   const dy = (tPos.y + td.h / 2) - (sPos.y + sd.h / 2)
@@ -199,11 +196,30 @@ function baseEdgeStyle(e) {
 
 // Strip runtime callbacks (and stageTypes) before snapshot / localStorage save
 function stripNode(n) {
-  const { onUpdate, onEditStart, onEditEnd, stageTypes, ...data } = n.data ?? {}
+  const { onUpdate, onEditStart, onEditEnd, stageTypes, imageContext, ...data } = n.data ?? {}
   const { selected, ...rest } = n
   return { ...rest, data }
 }
 const stripEdge = ({ selected, ...e }) => e
+
+function canvasSnapshot(name, data = {}) {
+  return {
+    name: name ?? '캔버스',
+    nodes: data.nodes ?? [],
+    edges: data.edges ?? [],
+    views: data.views ?? [],
+    stageTypes: data.stageTypes ?? null,
+  }
+}
+
+function cloudRowSnapshot(row) {
+  return canvasSnapshot(row.name, {
+    nodes: row.nodes,
+    edges: row.edges,
+    views: row.views,
+    stageTypes: row.stage_types,
+  })
+}
 
 // ── Bootstrap canvases (runs once at module load) ────────────────────────────
 const EMPTY_CANVAS_SEEDS = []
@@ -273,11 +289,17 @@ export default function App() {
   const initializedUserRef = useRef(null)
   const cloudHydratedUserRef = useRef(null)
   const [cloudSyncing, setCloudSyncing] = useState(false)
+  const [storageError, setStorageError] = useState(() => getLastStorageError())
   // Stable ref to always-current state for use inside async callbacks
   const latestRef = useRef({ canvases: initCanvasList, activeCanvasId: initActiveId, stageTypes: [], views: [] })
   const isAnyEditingRef = useRef(false) // mirror for the realtime channel callback
-  const lastPushedCanvasRef = useRef('') // JSON of the last canvas payload saved to cloud
   const lastPushedPrefsRef = useRef('') // JSON of the last prefs payload saved to cloud
+  const legacyImageMigrationsRef = useRef(new Set())
+  const canvasSyncBaseRef = useRef(new Map()) // canvas key -> { revision, snapshot }
+  const dirtyCanvasSnapshotsRef = useRef(new Map()) // canvas key -> queued save entry
+  const conflictedCanvasKeysRef = useRef(new Set())
+  const syncFlushRunningRef = useRef(false)
+  const [syncConflict, setSyncConflict] = useState(null)
 
   // ── Sharing / invite (phase 2) ────────────────────────────────────────────
   const [invite, setInvite] = useState(null) // { scope, targetId, x, y } | null
@@ -329,14 +351,40 @@ export default function App() {
   }, [setNodes, setEdges])
 
   // Keep latestRef and userRef in sync so async callbacks always see fresh state
-  useEffect(() => { latestRef.current = { canvases, activeCanvasId, stageTypes, views } }, [canvases, activeCanvasId, stageTypes, views])
+  useEffect(() => {
+    latestRef.current = { canvases, activeCanvasId, stageTypes, views, sharedCanvases }
+  }, [canvases, activeCanvasId, stageTypes, views, sharedCanvases])
   useEffect(() => { userRef.current = user }, [user])
   useEffect(() => { isAnyEditingRef.current = isAnyEditing }, [isAnyEditing])
+  useEffect(() => {
+    const onStorageError = (event) => setStorageError(event.detail?.message ?? '브라우저 저장 공간에 기록하지 못했습니다.')
+    window.addEventListener(STORAGE_ERROR_EVENT, onStorageError)
+    return () => window.removeEventListener(STORAGE_ERROR_EVENT, onStorageError)
+  }, [])
 
   // ── Auto-save active canvas + history snapshot (debounced) ───────────────
   useEffect(() => {
     if (isRestoring.current) return
     const histSnapshot = { nodes: nodes.map(stripNode), edges: edges.map(stripEdge) }
+    const name = latestRef.current.canvases.find((canvas) => canvas.id === activeCanvasId)?.name
+      ?? latestRef.current.sharedCanvases?.find((canvas) => sharedCanvasId(canvas.ownerId, canvas.canvasId) === activeCanvasId)?.name
+      ?? '캔버스'
+    const queuedSnapshot = canvasSnapshot(name, { ...histSnapshot, views, stageTypes })
+
+    if (userRef.current && cloudHydratedUserRef.current === userRef.current.id) {
+      const shared = parseSharedId(activeCanvasId)
+      const base = canvasSyncBaseRef.current.get(activeCanvasId)?.snapshot
+      if (!base || JSON.stringify(base) !== JSON.stringify(queuedSnapshot)) {
+        dirtyCanvasSnapshotsRef.current.set(activeCanvasId, {
+          key: activeCanvasId,
+          shared: !!shared,
+          ownerId: shared?.ownerId,
+          canvasId: shared?.canvasId ?? activeCanvasId,
+          userId: userRef.current.id,
+          snapshot: queuedSnapshot,
+        })
+      }
+    }
 
     // localStorage snapshot also carries saved views + stage types (undo/redo does not).
     const lsTimer = setTimeout(() => { saveCanvasData(activeCanvasId, { ...histSnapshot, views, stageTypes }) }, 500)
@@ -345,9 +393,8 @@ export default function App() {
       if (isRestoring.current) return
       const last = historyStack.current[historyPointer.current]
       if (last && JSON.stringify(last) === JSON.stringify(histSnapshot)) return
-      historyStack.current = historyStack.current.slice(0, historyPointer.current + 1)
-      historyStack.current.push(histSnapshot)
-      historyPointer.current++
+      historyStack.current = appendHistorySnapshot(historyStack.current, historyPointer.current, histSnapshot)
+      historyPointer.current = historyStack.current.length - 1
     }, 300)
 
     return () => { clearTimeout(lsTimer); clearTimeout(histTimer) }
@@ -355,28 +402,41 @@ export default function App() {
 
   // ── Undo / Redo ──────────────────────────────────────────────────────────
   const undo = useCallback(() => {
+    if (permRef.current.role === 'invitee' && (permRef.current.scope !== 'canvas' || permRef.current.canEdit === false)) return
     if (historyPointer.current <= 0) return
     historyPointer.current--
     const snap = historyStack.current[historyPointer.current]
     isRestoring.current = true
     setNodes(snap.nodes)
     setEdges(snap.edges)
+    saveCanvasData(latestRef.current.activeCanvasId, {
+      ...snap,
+      views: latestRef.current.views,
+      stageTypes: latestRef.current.stageTypes,
+    })
     setTimeout(() => { isRestoring.current = false }, 400)
   }, [setNodes, setEdges])
 
   const redo = useCallback(() => {
+    if (permRef.current.role === 'invitee' && (permRef.current.scope !== 'canvas' || permRef.current.canEdit === false)) return
     if (historyPointer.current >= historyStack.current.length - 1) return
     historyPointer.current++
     const snap = historyStack.current[historyPointer.current]
     isRestoring.current = true
     setNodes(snap.nodes)
     setEdges(snap.edges)
+    saveCanvasData(latestRef.current.activeCanvasId, {
+      ...snap,
+      views: latestRef.current.views,
+      stageTypes: latestRef.current.stageTypes,
+    })
     setTimeout(() => { isRestoring.current = false }, 400)
   }, [setNodes, setEdges])
 
   useEffect(() => {
     const handler = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
+        if (isAnyEditingRef.current || isTypingTarget()) return
         e.preventDefault()
         if (e.shiftKey) redo()
         else undo()
@@ -766,18 +826,37 @@ export default function App() {
         try {
           const { data: row } = await supabase
             .from('canvases')
-            .select('nodes, edges, views, stage_types')
+            .select('name, nodes, edges, views, stage_types, updated_at')
             .eq('user_id', userRef.current.id)
             .eq('canvas_id', id)
             .maybeSingle()
           if (row) {
-            data = { nodes: row.nodes ?? [], edges: row.edges ?? [], views: row.views ?? [], stageTypes: row.stage_types?.length ? row.stage_types : undefined }
-            saveCanvasData(id, data)
+            data = {
+              name: row.name,
+              nodes: row.nodes ?? [],
+              edges: row.edges ?? [],
+              views: row.views ?? [],
+              stageTypes: row.stage_types?.length ? row.stage_types : undefined,
+              revision: row.updated_at,
+            }
+            canvasSyncBaseRef.current.set(id, { revision: row.updated_at, snapshot: cloudRowSnapshot(row) })
+            saveCanvasData(id, {
+              nodes: data.nodes,
+              edges: data.edges,
+              views: data.views,
+              stageTypes: data.stageTypes,
+            })
           }
         } catch (e) {
           console.warn('[cloud] loadCanvas fetch:', e.message)
         }
       }
+    }
+    if (data.revision) {
+      canvasSyncBaseRef.current.set(id, {
+        revision: data.revision,
+        snapshot: canvasSnapshot(data.name ?? latestRef.current.canvases.find((canvas) => canvas.id === id)?.name, data),
+      })
     }
     const nNodes = sortParentsFirst(sanitizeNodes(data.nodes))
     const nEdges = normalizeEdges(data.edges)
@@ -797,8 +876,27 @@ export default function App() {
   }, [setNodes, setEdges])
 
   const persistCurrent = useCallback(() => {
-    saveCanvasData(activeCanvasId, { nodes: nodes.map(stripNode), edges: edges.map(stripEdge), views, stageTypes })
-  }, [activeCanvasId, nodes, edges, views, stageTypes])
+    const data = { nodes: nodes.map(stripNode), edges: edges.map(stripEdge), views, stageTypes }
+    saveCanvasData(activeCanvasId, data)
+    if (user && cloudHydratedUserRef.current === user.id) {
+      const shared = parseSharedId(activeCanvasId)
+      const name = canvases.find((canvas) => canvas.id === activeCanvasId)?.name
+        ?? sharedCanvases.find((canvas) => sharedCanvasId(canvas.ownerId, canvas.canvasId) === activeCanvasId)?.name
+        ?? '캔버스'
+      const snapshot = canvasSnapshot(name, data)
+      const base = canvasSyncBaseRef.current.get(activeCanvasId)?.snapshot
+      if (!base || JSON.stringify(base) !== JSON.stringify(snapshot)) {
+        dirtyCanvasSnapshotsRef.current.set(activeCanvasId, {
+          key: activeCanvasId,
+          shared: !!shared,
+          ownerId: shared?.ownerId,
+          canvasId: shared?.canvasId ?? activeCanvasId,
+          userId: user.id,
+          snapshot,
+        })
+      }
+    }
+  }, [activeCanvasId, nodes, edges, views, stageTypes, user, canvases, sharedCanvases])
 
   // Invited canvases always pass through the server permission gateway. It
   // redacts restricted nodes before the browser sees them.
@@ -811,7 +909,17 @@ export default function App() {
       throw err
     }
     const compositeId = sharedCanvasId(ownerId, canvasId)
-    const data = { nodes: row.nodes ?? [], edges: row.edges ?? [], views: row.views ?? [], stageTypes: row.stageTypes?.length ? row.stageTypes : undefined }
+    const data = {
+      nodes: row.nodes ?? [],
+      edges: row.edges ?? [],
+      views: row.views ?? [],
+      stageTypes: row.stageTypes?.length ? row.stageTypes : undefined,
+    }
+    canvasSyncBaseRef.current.set(compositeId, {
+      revision: row.revision,
+      snapshot: canvasSnapshot(row.name, data),
+      permission: row.permission,
+    })
     const existing = loadCanvasData(compositeId)
     if (latestRef.current.activeCanvasId === compositeId && loadedSharedIdRef.current === compositeId && existing && JSON.stringify(existing) === JSON.stringify(data)) return
     saveCanvasData(compositeId, data)
@@ -902,15 +1010,25 @@ export default function App() {
   const addCanvas = useCallback(() => {
     persistCurrent()
     const id = uid()
+    const name = `캔버스 ${canvases.length + 1}`
     setCanvases((prev) => {
-      const name = `캔버스 ${prev.length + 1}`
       const next = [...prev, { id, name }]
       saveCanvasList(next)
       return next
     })
-    saveCanvasData(id, { nodes: [], edges: [] })
+    const data = { nodes: [], edges: [], views: [], stageTypes: DEFAULT_STAGE_TYPES }
+    saveCanvasData(id, data)
+    if (user && cloudHydratedUserRef.current === user.id) {
+      dirtyCanvasSnapshotsRef.current.set(id, {
+        key: id,
+        shared: false,
+        canvasId: id,
+        userId: user.id,
+        snapshot: canvasSnapshot(name, data),
+      })
+    }
     loadCanvas(id)
-  }, [persistCurrent, loadCanvas])
+  }, [persistCurrent, loadCanvas, canvases.length, user])
 
   const renameCanvas = useCallback((id, name) => {
     setCanvases((prev) => {
@@ -918,7 +1036,19 @@ export default function App() {
       saveCanvasList(next)
       return next
     })
-  }, [])
+    if (user && cloudHydratedUserRef.current === user.id) {
+      const data = id === activeCanvasId
+        ? { nodes: nodes.map(stripNode), edges: edges.map(stripEdge), views, stageTypes }
+        : (loadCanvasData(id) ?? { nodes: [], edges: [], views: [], stageTypes: DEFAULT_STAGE_TYPES })
+      dirtyCanvasSnapshotsRef.current.set(id, {
+        key: id,
+        shared: false,
+        canvasId: id,
+        userId: user.id,
+        snapshot: canvasSnapshot(name, data),
+      })
+    }
+  }, [activeCanvasId, nodes, edges, views, stageTypes, user])
 
   const deleteCanvas = useCallback((id) => {
     setCanvases((prev) => {
@@ -926,6 +1056,9 @@ export default function App() {
       const next = prev.filter((c) => c.id !== id)
       saveCanvasList(next)
       deleteCanvasData(id)
+      dirtyCanvasSnapshotsRef.current.delete(id)
+      canvasSyncBaseRef.current.delete(id)
+      conflictedCanvasKeysRef.current.delete(id)
       if (user) cloudDeleteCanvas(user.id, id)
       if (id === activeCanvasId) loadCanvas(next[0].id)
       return next
@@ -951,7 +1084,11 @@ export default function App() {
       const list = loadCanvasList() ?? []
       for (const c of list) {
         const d = loadCanvasData(c.id) ?? { nodes: [], edges: [] }
-        await cloudSaveCanvas(userId, c.id, c.name, d.nodes ?? [], d.edges ?? [], d.views ?? [], d.stageTypes)
+        const revision = await cloudSaveCanvas(userId, c.id, c.name, d.nodes ?? [], d.edges ?? [], d.views ?? [], d.stageTypes, null)
+        canvasSyncBaseRef.current.set(c.id, {
+          revision,
+          snapshot: canvasSnapshot(c.name, d),
+        })
       }
       await cloudSaveUserPrefs(userId, {
         active_canvas_id: loadActiveId(),
@@ -967,6 +1104,12 @@ export default function App() {
     const prefIds = new Set(prefOrder.map((c) => c.id))
     const missing = rows.filter((r) => !prefIds.has(r.canvas_id)).map((r) => ({ id: r.canvas_id, name: r.name }))
     const canvasList = prefOrder.length ? [...prefOrder, ...missing] : rows.map((r) => ({ id: r.canvas_id, name: r.name }))
+    canvasSyncBaseRef.current = new Map(rows.map((row) => [
+      row.canvas_id,
+      { revision: row.updated_at, snapshot: cloudRowSnapshot(row) },
+    ]))
+    dirtyCanvasSnapshotsRef.current.clear()
+    conflictedCanvasKeysRef.current.clear()
     rows.forEach((r) => saveCanvasData(r.canvas_id, { nodes: r.nodes ?? [], edges: r.edges ?? [], views: r.views ?? [], stageTypes: r.stage_types?.length ? r.stage_types : undefined }))
     saveCanvasList(canvasList)
     const activeId = prefs?.active_canvas_id ?? canvasList[0]?.id
@@ -975,7 +1118,14 @@ export default function App() {
     if (activeId) {
       const activeRow = rows.find((r) => r.canvas_id === activeId)
       const prefetched = activeRow
-        ? { nodes: activeRow.nodes ?? [], edges: activeRow.edges ?? [], views: activeRow.views ?? [], stageTypes: activeRow.stage_types?.length ? activeRow.stage_types : undefined }
+        ? {
+            name: activeRow.name,
+            nodes: activeRow.nodes ?? [],
+            edges: activeRow.edges ?? [],
+            views: activeRow.views ?? [],
+            stageTypes: activeRow.stage_types?.length ? activeRow.stage_types : undefined,
+            revision: activeRow.updated_at,
+          }
         : null
       loadCanvas(activeId, prefetched)
     }
@@ -1194,6 +1344,10 @@ export default function App() {
     }
 
     const afterLogin = async (u) => {
+      canvasSyncBaseRef.current.clear()
+      dirtyCanvasSnapshotsRef.current.clear()
+      conflictedCanvasKeysRef.current.clear()
+      setSyncConflict(null)
       const cachedOwner = loadCanvasStorageOwner()
       if (cachedOwner && cachedOwner !== u.id) resetToGuestCanvas()
       saveCanvasStorageOwner(u.id)
@@ -1267,6 +1421,10 @@ export default function App() {
         setSharedCanvases([])
         setSharedOutCanvasIds(new Set())
         setScopedParticipantMap({})
+        canvasSyncBaseRef.current.clear()
+        dirtyCanvasSnapshotsRef.current.clear()
+        conflictedCanvasKeysRef.current.clear()
+        setSyncConflict(null)
       }
     })
     return () => subscription.unsubscribe()
@@ -1296,11 +1454,13 @@ export default function App() {
 
       const { data: row } = await supabase
         .from('canvases')
-        .select('name, nodes, edges, views, stage_types')
+        .select('name, nodes, edges, views, stage_types, updated_at')
         .eq('user_id', user.id)
         .eq('canvas_id', id)
         .maybeSingle()
       if (!row) return
+      if (dirtyCanvasSnapshotsRef.current.has(id) || conflictedCanvasKeysRef.current.has(id)) return
+      canvasSyncBaseRef.current.set(id, { revision: row.updated_at, snapshot: cloudRowSnapshot(row) })
 
       // Keep the tab list in sync (MCP-created canvas / renamed canvas)
       setCanvases((prev) => {
@@ -1328,8 +1488,7 @@ export default function App() {
       // localStorage mirror is written faster than the echo arrives).
       if (isAnyEditingRef.current) return
       const local = loadCanvasData(id) ?? {}
-      if (JSON.stringify({ n: local.nodes ?? [], e: local.edges ?? [] }) ===
-          JSON.stringify({ n: mirror.nodes, e: mirror.edges })) return
+      if (sameCanvasSnapshot(local, mirror)) return
 
       isRestoring.current = true
       const nEdges = normalizeEdges(mirror.edges)
@@ -1340,7 +1499,7 @@ export default function App() {
       counterRef.current = maxNodeId(mirror.nodes)
       // Push (not reset) history so Ctrl+Z can undo a remote change
       const snap = { nodes: mirror.nodes.map(stripNode), edges: nEdges.map(stripEdge) }
-      historyStack.current = [...historyStack.current.slice(0, historyPointer.current + 1), snap]
+      historyStack.current = appendHistorySnapshot(historyStack.current, historyPointer.current, snap)
       historyPointer.current = historyStack.current.length - 1
       saveCanvasData(id, mirror)
       setTimeout(() => { isRestoring.current = false }, 400)
@@ -1360,7 +1519,8 @@ export default function App() {
     const shared = parseSharedId(activeCanvasId)
     if (!shared) return
     const timer = setInterval(() => {
-      if (!isAnyEditingRef.current) {
+      const key = sharedCanvasId(shared.ownerId, shared.canvasId)
+      if (!isAnyEditingRef.current && !dirtyCanvasSnapshotsRef.current.has(key) && !conflictedCanvasKeysRef.current.has(key)) {
         loadSharedCanvas(shared.ownerId, shared.canvasId)
           .catch((err) => {
             if (!handleSharedAccessLost(shared.ownerId, shared.canvasId, err)) {
@@ -1427,59 +1587,257 @@ export default function App() {
     return next
   }, [scopedParticipantMap, onlineIdSet])
 
-  // ── Cloud auto-save (debounced 1.5 s, only when logged in) ───────────────
-  const cloudSaveTimer = useRef(null)
-  useEffect(() => {
-    if (!user) return
-    clearTimeout(cloudSaveTimer.current)
-    cloudSaveTimer.current = setTimeout(async () => {
-      if (cloudHydratedUserRef.current !== user.id) return
-      const { canvases: cvs, activeCanvasId: aid, stageTypes: types, views: vws } = latestRef.current
-      const snapshot = { nodes: nodes.map(stripNode), edges: edges.map(stripEdge) }
-      const shared = parseSharedId(aid)
+  const applySyncedSnapshot = useCallback((key, snapshot) => {
+    const data = {
+      nodes: snapshot.nodes,
+      edges: snapshot.edges,
+      views: snapshot.views,
+      stageTypes: snapshot.stageTypes,
+    }
+    saveCanvasData(key, data)
+    const shared = parseSharedId(key)
+    if (shared) {
+      setSharedCanvases((prev) => prev.map((canvas) => (
+        canvas.ownerId === shared.ownerId && canvas.canvasId === shared.canvasId
+          ? { ...canvas, name: snapshot.name }
+          : canvas
+      )))
+    } else {
+      setCanvases((prev) => prev.map((canvas) => (canvas.id === key ? { ...canvas, name: snapshot.name } : canvas)))
+    }
+    if (latestRef.current.activeCanvasId !== key) return
 
-      // The server validates the invite scope and read-only flag before saving.
-      if (shared) {
-        if (loadedSharedIdRef.current !== aid) return
-        const payload = JSON.stringify({ aid, nodes: snapshot.nodes, edges: snapshot.edges })
-        if (payload === lastPushedCanvasRef.current) return
-        setCloudSyncing(true)
+    const nextNodes = sortParentsFirst(sanitizeNodes(snapshot.nodes))
+    const nextEdges = normalizeEdges(snapshot.edges)
+    isRestoring.current = true
+    setNodes(nextNodes)
+    setEdges(nextEdges)
+    setViews(snapshot.views ?? [])
+    setStageTypes(snapshot.stageTypes?.length ? snapshot.stageTypes : DEFAULT_STAGE_TYPES)
+    const historySnapshot = { nodes: nextNodes.map(stripNode), edges: nextEdges.map(stripEdge) }
+    historyStack.current = appendHistorySnapshot(historyStack.current, historyPointer.current, historySnapshot)
+    historyPointer.current = historyStack.current.length - 1
+    setTimeout(() => { isRestoring.current = false }, 400)
+  }, [setNodes, setEdges])
+
+  const saveQueuedCanvas = useCallback(async (entry, expectedRevision) => {
+    const snapshot = entry.snapshot
+    if (entry.shared) {
+      const saved = await updateSharedCanvas(
+        entry.ownerId,
+        entry.canvasId,
+        snapshot.nodes,
+        snapshot.edges,
+        snapshot.views,
+        snapshot.stageTypes,
+        expectedRevision,
+      )
+      return {
+        revision: saved.revision,
+        permission: saved.permission,
+        snapshot: canvasSnapshot(saved.name, {
+          nodes: saved.nodes,
+          edges: saved.edges,
+          views: saved.views,
+          stageTypes: saved.stageTypes,
+        }),
+      }
+    }
+    const revision = await cloudSaveCanvas(
+      entry.userId,
+      entry.canvasId,
+      snapshot.name,
+      snapshot.nodes,
+      snapshot.edges,
+      snapshot.views,
+      snapshot.stageTypes,
+      expectedRevision,
+    )
+    return { revision, snapshot }
+  }, [])
+
+  const fetchRemoteCanvas = useCallback(async (entry) => {
+    if (entry.shared) {
+      const row = await getSharedCanvas(entry.ownerId, entry.canvasId)
+      return {
+        revision: row.revision,
+        permission: row.permission,
+        snapshot: canvasSnapshot(row.name, {
+          nodes: row.nodes,
+          edges: row.edges,
+          views: row.views,
+          stageTypes: row.stageTypes,
+        }),
+      }
+    }
+    const row = await cloudLoadCanvasRow(entry.userId, entry.canvasId)
+    return row ? { revision: row.updated_at, snapshot: cloudRowSnapshot(row) } : null
+  }, [])
+
+  const finishQueuedSave = useCallback((entry, saved, shouldApply = false) => {
+    canvasSyncBaseRef.current.set(entry.key, saved)
+    conflictedCanvasKeysRef.current.delete(entry.key)
+    const stillCurrent = dirtyCanvasSnapshotsRef.current.get(entry.key) === entry
+    if (stillCurrent) dirtyCanvasSnapshotsRef.current.delete(entry.key)
+    if (shouldApply && stillCurrent) applySyncedSnapshot(entry.key, saved.snapshot)
+  }, [applySyncedSnapshot])
+
+  const flushDirtyCanvases = useCallback(async () => {
+    const currentUser = userRef.current
+    if (!currentUser || cloudHydratedUserRef.current !== currentUser.id || syncFlushRunningRef.current
+        || conflictedCanvasKeysRef.current.size) return
+    syncFlushRunningRef.current = true
+    setCloudSyncing(true)
+    try {
+      for (const initialEntry of [...dirtyCanvasSnapshotsRef.current.values()]) {
+        if (conflictedCanvasKeysRef.current.has(initialEntry.key)) continue
+        const base = canvasSyncBaseRef.current.get(initialEntry.key)
+        if (initialEntry.shared && !base?.revision) continue
         try {
-          await updateSharedCanvas(shared.ownerId, shared.canvasId, snapshot.nodes, snapshot.edges)
-          lastPushedCanvasRef.current = payload
-        } catch (err) {
-          console.error('[cloud] shared autosave:', err.message)
+          const saved = await saveQueuedCanvas(initialEntry, base?.revision ?? null)
+          const changedByServer = JSON.stringify(saved.snapshot) !== JSON.stringify(initialEntry.snapshot)
+          finishQueuedSave(initialEntry, saved, changedByServer)
+        } catch (error) {
+          if (!(error instanceof CanvasConflictError)) {
+            if (initialEntry.shared) {
+              try {
+                const refreshed = await fetchRemoteCanvas(initialEntry)
+                if (refreshed.permission?.canEdit === false) {
+                  dirtyCanvasSnapshotsRef.current.delete(initialEntry.key)
+                  canvasSyncBaseRef.current.set(initialEntry.key, refreshed)
+                  applySyncedSnapshot(initialEntry.key, refreshed.snapshot)
+                  setShareLinkError('이 공유 캔버스가 읽기 전용으로 변경되어 저장되지 않은 편집을 반영하지 않았습니다.')
+                }
+              } catch (accessError) {
+                if (handleSharedAccessLost(initialEntry.ownerId, initialEntry.canvasId, accessError)) {
+                  dirtyCanvasSnapshotsRef.current.delete(initialEntry.key)
+                }
+              }
+            }
+            console.error('[cloud] queued autosave:', error.message)
+            continue
+          }
+
+          const remote = await fetchRemoteCanvas(initialEntry)
+          if (!remote) {
+            console.error('[cloud] canvas was deleted before it could be saved:', initialEntry.canvasId)
+            continue
+          }
+          const latestEntry = dirtyCanvasSnapshotsRef.current.get(initialEntry.key) ?? initialEntry
+          const mergeBase = base?.snapshot ?? canvasSnapshot(latestEntry.snapshot.name)
+          const result = mergeCanvasSnapshots(mergeBase, latestEntry.snapshot, remote.snapshot)
+
+          if (latestEntry.shared) {
+            result.merged.name = remote.snapshot.name
+            if (remote.permission?.scope !== 'canvas') {
+              result.merged.views = remote.snapshot.views
+              result.merged.stageTypes = remote.snapshot.stageTypes
+            }
+          }
+
+          if (!result.conflicts.length) {
+            const mergedEntry = { ...latestEntry, snapshot: result.merged }
+            dirtyCanvasSnapshotsRef.current.set(mergedEntry.key, mergedEntry)
+            const saved = await saveQueuedCanvas(mergedEntry, remote.revision)
+            finishQueuedSave(mergedEntry, saved, true)
+            continue
+          }
+
+          conflictedCanvasKeysRef.current.add(latestEntry.key)
+          setSyncConflict({
+            entry: latestEntry,
+            remote,
+            proposed: result.merged,
+            conflicts: result.conflicts,
+          })
+          break
         }
-        setCloudSyncing(false)
+      }
+
+      const { canvases: cvs, activeCanvasId: aid } = latestRef.current
+      const prefsPayload = JSON.stringify({ aid, cvs })
+      if (prefsPayload !== lastPushedPrefsRef.current) {
+        await cloudSaveUserPrefs(currentUser.id, { active_canvas_id: aid, canvas_order: cvs })
+        lastPushedPrefsRef.current = prefsPayload
+      }
+    } catch (error) {
+      console.error('[cloud] flush queue:', error.message)
+    } finally {
+      syncFlushRunningRef.current = false
+      setCloudSyncing(false)
+    }
+  }, [applySyncedSnapshot, fetchRemoteCanvas, finishQueuedSave, handleSharedAccessLost, saveQueuedCanvas])
+
+  // Debounce normal edits, then keep a slow retry heartbeat for transient
+  // network failures. The queue retains canvases switched away from before the
+  // debounce elapsed, so quick tab changes cannot strand unsaved work.
+  useEffect(() => {
+    if (!user) return undefined
+    const timer = setTimeout(flushDirtyCanvases, 1500)
+    return () => clearTimeout(timer)
+  }, [user, nodes, edges, stageTypes, canvases, activeCanvasId, views, flushDirtyCanvases])
+
+  useEffect(() => {
+    if (!user) return undefined
+    const timer = setInterval(flushDirtyCanvases, 10000)
+    return () => clearInterval(timer)
+  }, [user, flushDirtyCanvases])
+
+  const resolveSyncConflict = useCallback(async (keepLocal) => {
+    if (!syncConflict || syncConflict.busy) return
+    const { entry, remote, proposed } = syncConflict
+    setSyncConflict((current) => ({ ...current, busy: true, error: null }))
+    try {
+      if (!keepLocal) {
+        const latestRemote = await fetchRemoteCanvas(entry)
+        if (!latestRemote) throw new Error('캔버스가 삭제되었습니다.')
+        dirtyCanvasSnapshotsRef.current.delete(entry.key)
+        conflictedCanvasKeysRef.current.delete(entry.key)
+        canvasSyncBaseRef.current.set(entry.key, latestRemote)
+        applySyncedSnapshot(entry.key, latestRemote.snapshot)
+        setSyncConflict(null)
         return
       }
 
-      const name = cvs.find((c) => c.id === aid)?.name ?? '캔버스'
-      // Dirty-check: skip writes whose payload didn't change since the last
-      // push. An idle browser must not keep rewriting the row — that would
-      // clobber concurrent MCP(AI) writes with stale local state.
-      const canvasPayload = JSON.stringify({ aid, name, nodes: snapshot.nodes, edges: snapshot.edges, vws, types })
-      const prefsPayload = JSON.stringify({ aid, cvs })
-      const jobs = []
-      if (canvasPayload !== lastPushedCanvasRef.current) {
-        jobs.push(cloudSaveCanvas(user.id, aid, name, snapshot.nodes, snapshot.edges, vws, types)
-          .then(() => { lastPushedCanvasRef.current = canvasPayload }))
+      const proposedEntry = { ...entry, snapshot: proposed }
+      dirtyCanvasSnapshotsRef.current.set(entry.key, proposedEntry)
+      const saved = await saveQueuedCanvas(proposedEntry, remote.revision)
+      finishQueuedSave(proposedEntry, saved, true)
+      setSyncConflict(null)
+    } catch (error) {
+      if (error instanceof CanvasConflictError) {
+        try {
+          const newest = await fetchRemoteCanvas(entry)
+          const latestEntry = dirtyCanvasSnapshotsRef.current.get(entry.key) ?? entry
+          const base = canvasSyncBaseRef.current.get(entry.key)?.snapshot ?? canvasSnapshot(latestEntry.snapshot.name)
+          const result = mergeCanvasSnapshots(base, latestEntry.snapshot, newest.snapshot)
+          if (latestEntry.shared) {
+            result.merged.name = newest.snapshot.name
+            if (newest.permission?.scope !== 'canvas') {
+              result.merged.views = newest.snapshot.views
+              result.merged.stageTypes = newest.snapshot.stageTypes
+            }
+          }
+          setSyncConflict({
+            entry: latestEntry,
+            remote: newest,
+            proposed: result.merged,
+            conflicts: result.conflicts,
+            busy: false,
+            error: '선택하는 동안 다른 변경이 또 저장되어 최신 상태로 비교를 갱신했습니다.',
+          })
+          return
+        } catch (refreshError) {
+          error = refreshError
+        }
       }
-      if (prefsPayload !== lastPushedPrefsRef.current) {
-        jobs.push(cloudSaveUserPrefs(user.id, { active_canvas_id: aid, canvas_order: cvs })
-          .then(() => { lastPushedPrefsRef.current = prefsPayload }))
-      }
-      if (!jobs.length) return
-      setCloudSyncing(true)
-      try {
-        await Promise.all(jobs)
-      } catch (err) {
-        console.error('[cloud] autosave:', err.message)
-      }
-      setCloudSyncing(false)
-    }, 1500)
-    return () => clearTimeout(cloudSaveTimer.current)
-  }, [user, nodes, edges, stageTypes, canvases, activeCanvasId, views])
+      setSyncConflict((current) => current ? {
+        ...current,
+        busy: false,
+        error: error.message,
+      } : current)
+    }
+  }, [applySyncedSnapshot, fetchRemoteCanvas, finishQueuedSave, saveQueuedCanvas, syncConflict])
 
   // Persist the active canvas id promptly (the 1.5 s content autosave is
   // debounced and skipped on shared canvases, so a quick refresh could restore
@@ -1506,9 +1864,20 @@ export default function App() {
     // Fail closed while an invite list is loading or an invite was revoked.
     if (!matches.length) return { role: 'invitee', scope: 'node', targetId: null, restrictView: true, canEdit: false }
     const priority = { canvas: 0, group: 1, node: 2 }
-    const best = [...matches].sort((a, b) => priority[a.scope] - priority[b.scope])[0]
+    const best = [...matches].sort((a, b) => (
+      priority[a.scope] - priority[b.scope]
+      || Number(b.canEdit) - Number(a.canEdit)
+      || Number(a.restrictView) - Number(b.restrictView)
+    ))[0]
     return { role: 'invitee', scope: best.scope, targetId: best.targetId, restrictView: best.restrictView, canEdit: best.canEdit !== false }
   }, [activeCanvasId, sharedCanvases])
+  const imageContext = useMemo(() => {
+    if (!user) return null
+    const shared = parseSharedId(activeCanvasId)
+    return shared
+      ? { ownerId: shared.ownerId, canvasId: shared.canvasId }
+      : { ownerId: user.id, canvasId: activeCanvasId }
+  }, [activeCanvasId, user])
 
   // Kept fresh every render so the touch long-press gesture handler (bound
   // once, high up in the file, well before `perm` exists) can read the
@@ -1580,7 +1949,7 @@ export default function App() {
     const byId = new Map(nodes.map((n) => [n.id, n]))
     const target = byId.get(perm.targetId)
     if (!target) return null
-    const { x, y } = absolutePosition(target, byId)
+    const { x, y } = absoluteNodePosition(target, byId)
     const w = target.measured?.width ?? target.width ?? 200
     const h = target.measured?.height ?? target.height ?? 80
     const MARGIN = 200
@@ -1609,6 +1978,34 @@ export default function App() {
   const updateNodeData = useCallback((id, patch) => {
     setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: sanitizeNodeData({ ...n.data, ...patch }) } : n))
   }, [setNodes])
+
+  // Existing photo nodes may still contain a large data URL from older builds.
+  // Move one at a time when the owner opens that canvas; a failed migration
+  // leaves the original image untouched and will be retried on a later load.
+  useEffect(() => {
+    if (!user || perm.role !== 'owner' || cloudHydratedUserRef.current !== user.id) return
+    const legacy = nodes.find((node) => (
+      node.type === 'content'
+      && node.data?.kind === 'photo'
+      && !node.data?.storagePath
+      && node.data?.src?.startsWith('data:image/')
+      && !legacyImageMigrationsRef.current.has(`${activeCanvasId}:${node.id}`)
+    ))
+    if (!legacy) return
+
+    const migrationKey = `${activeCanvasId}:${legacy.id}`
+    legacyImageMigrationsRef.current.add(migrationKey)
+    uploadCanvasImage({
+      ownerId: user.id,
+      canvasId: activeCanvasId,
+      nodeId: legacy.id,
+      blob: dataUrlToBlob(legacy.data.src),
+    }).then(({ storagePath }) => {
+      updateNodeData(legacy.id, { storagePath, src: null })
+    }).catch((error) => {
+      console.warn('[images] legacy migration:', error.message)
+    })
+  }, [activeCanvasId, nodes, perm.role, updateNodeData, user])
 
   // ── Stage type management ─────────────────────────────────────────────────
   // Apply a stage type to one or many nodes (memo nodes are left untouched).
@@ -1757,7 +2154,7 @@ export default function App() {
       if (stripped.parentId && !toCopy.has(stripped.parentId)) {
         // Parent frame isn't part of the copy — fall back to absolute position.
         const { parentId, ...rest } = stripped
-        return { ...rest, position: absolutePosition(n, byId) }
+        return { ...rest, position: absoluteNodePosition(n, byId) }
       }
       return stripped
     })
@@ -1935,7 +2332,7 @@ export default function App() {
     }
 
     const dd = dim(dragged)
-    const dPos = absolutePosition(dragged, byId)
+    const dPos = absoluteNodePosition(dragged, byId)
     const dXs = [dPos.x, dPos.x + dd.w / 2, dPos.x + dd.w] // left, centerX, right
     const dYs = [dPos.y, dPos.y + dd.h / 2, dPos.y + dd.h] // top, centerY, bottom
 
@@ -1944,7 +2341,7 @@ export default function App() {
     for (const n of nodes) {
       if (n.id === dragged.id) continue
       const nd = dim(n)
-      const nPos = absolutePosition(n, byId)
+      const nPos = absoluteNodePosition(n, byId)
       if (!xSnap) xSnap = findAxisSnap(dXs, [nPos.x, nPos.x + nd.w / 2, nPos.x + nd.w])
       if (!ySnap) ySnap = findAxisSnap(dYs, [nPos.y, nPos.y + nd.h / 2, nPos.y + nd.h])
       if (xSnap && ySnap) break
@@ -1991,7 +2388,7 @@ export default function App() {
     if (!dragged) return null
     const dim = (n) => ({ w: n.measured?.width ?? n.width ?? 0, h: n.measured?.height ?? n.height ?? 0 })
 
-    const oldAbs = absolutePosition(dragged, byId)
+    const oldAbs = absoluteNodePosition(dragged, byId)
     const oldDim = dim(dragged)
     const parentAbsX = oldAbs.x - dragged.position.x
     const parentAbsY = oldAbs.y - dragged.position.y
@@ -2003,7 +2400,7 @@ export default function App() {
     for (const n of nodes) {
       if (n.id === nodeId) continue
       const nd = dim(n)
-      const nPos = absolutePosition(n, byId)
+      const nPos = absoluteNodePosition(n, byId)
       if (!xSnap && Math.abs(movingX.value - nPos.x) <= ALIGN_SNAP) xSnap = { value: nPos.x }
       if (!xSnap && Math.abs(movingX.value - (nPos.x + nd.w)) <= ALIGN_SNAP) xSnap = { value: nPos.x + nd.w }
       if (!ySnap && Math.abs(movingY.value - nPos.y) <= ALIGN_SNAP) ySnap = { value: nPos.y }
@@ -2227,18 +2624,7 @@ export default function App() {
   // ── Saved views ───────────────────────────────────────────────────────────
   // Compute the bounding box (in flow coords) of the given node ids.
   const boundsOf = useCallback((ids) => {
-    const sel = nodes.filter((n) => ids.includes(n.id))
-    if (!sel.length) return null
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
-    sel.forEach((n) => {
-      const w = n.measured?.width ?? n.width ?? 0
-      const h = n.measured?.height ?? n.height ?? 0
-      minX = Math.min(minX, n.position.x)
-      minY = Math.min(minY, n.position.y)
-      maxX = Math.max(maxX, n.position.x + w)
-      maxY = Math.max(maxY, n.position.y + h)
-    })
-    return { x: minX, y: minY, width: maxX - minX, height: maxY - minY }
+    return boundsForNodeIds(nodes, ids)
   }, [nodes])
 
   // ── Groups (Obsidian-style frames) ────────────────────────────────────────
@@ -2259,17 +2645,21 @@ export default function App() {
       width: gw, height: gh, zIndex: -1, data: { label: '새 그룹' },
     }
     const idSet = new Set(ids)
+    const byId = new Map(nodes.map((node) => [node.id, node]))
     setNodes((nds) => {
       // Parent nodes must precede their children in the array (React Flow requirement).
       const others = nds.filter((n) => !idSet.has(n.id))
-      const children = nds.filter((n) => idSet.has(n.id)).map((n) => ({
-        ...n,
-        parentId: groupId,
-        position: { x: n.position.x - gx, y: n.position.y - gy },
-      }))
+      const children = nds.filter((n) => idSet.has(n.id)).map((n) => {
+        const absolute = absoluteNodePosition(n, byId)
+        return {
+          ...n,
+          parentId: groupId,
+          position: { x: absolute.x - gx, y: absolute.y - gy },
+        }
+      })
       return [...others, groupNode, ...children]
     })
-  }, [boundsOf, setNodes])
+  }, [boundsOf, nodes, setNodes])
 
   // Remove a group frame, converting its children back to absolute positions
   // and dropping their parentId. Used by both "그룹 해제" and "그룹 삭제".
@@ -2516,6 +2906,65 @@ export default function App() {
         </div>
       )}
 
+      {syncConflict && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 1250,
+          background: '#000000aa', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }} onClick={(event) => event.stopPropagation()}>
+          <div style={{
+            background: '#1a1a22', border: '1px solid #f59e0b66', borderRadius: 8,
+            padding: '24px 28px', width: 'min(390px, calc(100vw - 24px))', boxSizing: 'border-box',
+            boxShadow: '0 12px 48px #000d',
+          }}>
+            <div style={{ color: '#f0f0f0', fontSize: 15, fontWeight: 700, marginBottom: 9 }}>
+              동시 편집 충돌
+            </div>
+            <div style={{ color: '#aaa', fontSize: 12, lineHeight: 1.65, marginBottom: 16 }}>
+              같은 항목을 다른 브라우저나 AI도 수정했습니다. 서로 다른 항목의 변경은 이미 합쳤고,
+              겹친 {syncConflict.conflicts.length}개 변경만 선택이 필요합니다.
+            </div>
+            {syncConflict.error && (
+              <div style={{ color: '#fca5a5', fontSize: 11, lineHeight: 1.5, marginBottom: 12 }}>
+                {syncConflict.error}
+              </div>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, flexWrap: 'wrap' }}>
+              <button type="button" disabled={syncConflict.busy} onClick={() => resolveSyncConflict(false)} style={{
+                background: 'transparent', border: '1px solid #ffffff2a', borderRadius: 6,
+                color: '#ccc', fontSize: 12, fontWeight: 600, padding: '8px 12px',
+                cursor: syncConflict.busy ? 'default' : 'pointer', opacity: syncConflict.busy ? 0.55 : 1,
+              }}>
+                서버 최신 내용 사용
+              </button>
+              <button type="button" disabled={syncConflict.busy} onClick={() => resolveSyncConflict(true)} style={{
+                background: '#f59e0b', border: 'none', borderRadius: 6,
+                color: '#17120a', fontSize: 12, fontWeight: 700, padding: '8px 12px',
+                cursor: syncConflict.busy ? 'default' : 'pointer', opacity: syncConflict.busy ? 0.55 : 1,
+              }}>
+                내 변경 우선 병합
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {storageError && (
+        <div style={{
+          position: 'fixed', left: '50%', bottom: 18, transform: 'translateX(-50%)', zIndex: 1300,
+          width: 'min(460px, calc(100vw - 24px))', boxSizing: 'border-box',
+          background: '#291719', border: '1px solid #ef444466', borderRadius: 8,
+          color: '#fecaca', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 10,
+          boxShadow: '0 8px 28px #000a', fontSize: 11, lineHeight: 1.5,
+        }}>
+          <span style={{ flex: 1 }}>
+            브라우저 로컬 저장에 실패했습니다. 로그인 상태라면 클라우드 동기화 여부를 확인해 주세요. {storageError}
+          </span>
+          <button type="button" title="닫기" onClick={() => setStorageError(null)} style={{
+            background: 'transparent', border: 'none', color: '#fecaca', cursor: 'pointer', fontSize: 14, padding: 4,
+          }}>✕</button>
+        </div>
+      )}
+
       {emailInviteNotices[0] && (() => {
         const incoming = emailInviteNotices[0]
         const scopeLabel = { canvas: '캔버스', group: '그룹', node: '노드' }[incoming.scope] ?? '캔버스'
@@ -2608,6 +3057,7 @@ export default function App() {
               lodThreshold: settings.lodThreshold,
               nodeFill: settings.nodeFill,
               theme: settings.theme,
+              imageContext,
               readOnly: viewOnly || (restrictedScope && !editable),
               forceShapeOnly: forceShapeOnlySet?.has(n.id) ?? false,
               canInvite: isOwner,
@@ -2689,18 +3139,25 @@ export default function App() {
           borderRadius: '10px 0 0 10px', padding: 5,
         }}
       >
-        {[['stage', '단계'], ['memo', '메모'], ['content', '컨텐츠']].map(([t, label]) => (
+        {[
+          ['stage', '단계 노트', '◇'],
+          ['memo', '메모 노트', '≡'],
+          ['content', '콘텐츠 노트', '▣'],
+        ].map(([t, label, icon]) => (
           <button
             key={t}
+            type="button"
+            title={label}
+            aria-label={label}
             onClick={() => openNotesPanel(t)}
             style={{
               background: notesPanel?.type === t ? '#3b82f633' : 'transparent',
               border: 'none', borderRadius: 6, color: notesPanel?.type === t ? '#8ab4ff' : '#ccc',
-              fontSize: 12, fontWeight: 600, padding: '8px 6px', cursor: 'pointer',
-              writingMode: 'vertical-rl', letterSpacing: 1, fontFamily: 'inherit',
+              width: 32, height: 32, fontSize: 16, fontWeight: 600, padding: 0, cursor: 'pointer',
+              display: 'grid', placeItems: 'center', fontFamily: 'inherit',
             }}
           >
-            {label}
+            {icon}
           </button>
         ))}
       </div>

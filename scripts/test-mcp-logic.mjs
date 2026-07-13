@@ -2,10 +2,13 @@
 // Run: node scripts/test-mcp-logic.mjs
 import assert from 'node:assert/strict'
 import { layoutGraph, findNonOverlapping, validateGraphInput, overlaps, nodeRect, radialLevels, segmentIntersectsRect, avoidEdgeCrossings, edgeAnchors, SIZE } from '../mcp/layout.js'
-import { checkRadialLevelMixing, editableNodeIdSet, assertRegionEdit } from '../mcp/store.js'
+import { checkRadialLevelMixing, editableNodeIdSet, assertRegionEdit, toExternalCanvasNode } from '../mcp/store.js'
 import { sanitizeHtml } from '../mcp/sanitize.js'
 import { applySharedCanvasUpdate, redactCanvas } from '../mcp/shareAccess.js'
-import { sanitizeHtml as sanitizeBrowserHtml } from '../src/lib/sanitizeHtml.js'
+import { sanitizeExternalUrl as sanitizeBrowserUrl, sanitizeHtml as sanitizeBrowserHtml } from '../src/lib/sanitizeHtml.js'
+import { appendHistorySnapshot, sameCanvasSnapshot } from '../src/lib/canvasSync.js'
+import { absoluteNodePosition, boundsForNodeIds } from '../src/lib/canvasGeometry.js'
+import { mergeCanvasSnapshots } from '../src/lib/canvasMerge.js'
 
 let passed = 0
 function t(name, fn) {
@@ -202,6 +205,11 @@ t('nodeRect uses width/height with type defaults', () => {
   assert.deepEqual(nodeRect({ type: 'stage', position: { x: 0, y: 0 }, width: 300, height: 150 }), { x: 0, y: 0, w: 300, h: 150 })
 })
 
+t('nodeRect uses frontend defaults for content and group nodes', () => {
+  assert.deepEqual(nodeRect({ type: 'content', position: { x: 1, y: 2 } }), { x: 1, y: 2, w: 220, h: 140 })
+  assert.deepEqual(nodeRect({ type: 'group', position: { x: 3, y: 4 } }), { x: 3, y: 4, w: 320, h: 220 })
+})
+
 console.log('validateGraphInput')
 
 const types5 = [0, 1, 2, 3, 4].map((i) => ({ label: `t${i}` }))
@@ -334,6 +342,113 @@ t('browser sanitizer blocks stored-XSS markup while preserving safe formatting',
   assert.equal(out.includes('onerror'), false)
   assert.equal(out.includes('javascript:'), false)
   assert.equal(out.includes('<b>ok</b>'), true)
+})
+
+t('browser URL sanitizer allows http(s) and rejects active protocols', () => {
+  assert.equal(sanitizeBrowserUrl('javascript:alert(1)'), '')
+  assert.equal(sanitizeBrowserUrl('data:text/html,boom'), '')
+  assert.equal(sanitizeBrowserUrl('https://example.com/a'), 'https://example.com/a')
+})
+
+console.log('canvas realtime snapshot comparison')
+
+t('detects a stage-type-only remote change', () => {
+  const base = { nodes: [], edges: [], views: [], stageTypes: [{ id: 'a', label: '기획' }] }
+  const changed = { ...base, stageTypes: [{ id: 'a', label: '계획' }] }
+  assert.equal(sameCanvasSnapshot(base, changed), false)
+})
+
+t('detects a saved-view-only remote change', () => {
+  const base = { nodes: [], edges: [], views: [], stageTypes: null }
+  const changed = { ...base, views: [{ id: 'v1', name: '검토' }] }
+  assert.equal(sameCanvasSnapshot(base, changed), false)
+})
+
+t('treats equivalent realtime snapshots as unchanged', () => {
+  const snapshot = { nodes: [{ id: 'a' }], edges: [], views: [], stageTypes: null }
+  assert.equal(sameCanvasSnapshot(snapshot, structuredClone(snapshot)), true)
+})
+
+t('caps canvas history while keeping the newest snapshots', () => {
+  let stack = []
+  let pointer = -1
+  for (let i = 0; i < 120; i++) {
+    stack = appendHistorySnapshot(stack, pointer, { id: i }, 100)
+    pointer = stack.length - 1
+  }
+  assert.equal(stack.length, 100)
+  assert.equal(stack[0].id, 20)
+  assert.equal(stack.at(-1).id, 119)
+})
+
+t('drops redo history when a new edit follows undo', () => {
+  const stack = [{ id: 1 }, { id: 2 }, { id: 3 }]
+  assert.deepEqual(appendHistorySnapshot(stack, 0, { id: 4 }), [{ id: 1 }, { id: 4 }])
+})
+
+console.log('group-aware canvas geometry')
+
+t('converts a group child position to absolute flow coordinates', () => {
+  const nodes = [
+    { id: 'group', position: { x: 500, y: 300 } },
+    { id: 'child', parentId: 'group', position: { x: 40, y: 60 } },
+  ]
+  assert.deepEqual(absoluteNodePosition(nodes[1], new Map(nodes.map((node) => [node.id, node]))), { x: 540, y: 360 })
+})
+
+t('saved-view bounds use absolute positions for group children', () => {
+  const nodes = [
+    { id: 'group', position: { x: 500, y: 300 }, width: 400, height: 300 },
+    { id: 'child', parentId: 'group', position: { x: 40, y: 60 }, width: 200, height: 80 },
+  ]
+  assert.deepEqual(boundsForNodeIds(nodes, ['child']), { x: 540, y: 360, width: 200, height: 80 })
+})
+
+console.log('three-way canvas merge')
+
+t('preserves edits made to different nodes', () => {
+  const base = { name: 'A', nodes: [{ id: 'a', data: { text: 'old' } }, { id: 'b', data: { text: 'old' } }], edges: [], views: [], stageTypes: null }
+  const local = structuredClone(base)
+  const remote = structuredClone(base)
+  local.nodes[0].data.text = 'local'
+  remote.nodes[1].data.text = 'remote'
+  const result = mergeCanvasSnapshots(base, local, remote)
+  assert.deepEqual(result.conflicts, [])
+  assert.equal(result.merged.nodes.find((node) => node.id === 'a').data.text, 'local')
+  assert.equal(result.merged.nodes.find((node) => node.id === 'b').data.text, 'remote')
+})
+
+t('merges different fields on the same node', () => {
+  const base = { name: 'A', nodes: [{ id: 'a', position: { x: 0, y: 0 }, data: { text: 'old' } }], edges: [], views: [], stageTypes: null }
+  const local = structuredClone(base)
+  const remote = structuredClone(base)
+  local.nodes[0].data.text = 'local'
+  remote.nodes[0].position.x = 100
+  const result = mergeCanvasSnapshots(base, local, remote)
+  assert.deepEqual(result.conflicts, [])
+  assert.equal(result.merged.nodes[0].data.text, 'local')
+  assert.equal(result.merged.nodes[0].position.x, 100)
+})
+
+t('reports a true same-field conflict and keeps local as the proposed result', () => {
+  const base = { name: 'A', nodes: [{ id: 'a', data: { text: 'old' } }], edges: [], views: [], stageTypes: null }
+  const local = structuredClone(base)
+  const remote = structuredClone(base)
+  local.nodes[0].data.text = 'mine'
+  remote.nodes[0].data.text = 'theirs'
+  const result = mergeCanvasSnapshots(base, local, remote)
+  assert.deepEqual(result.conflicts, ['nodes.a.data.text'])
+  assert.equal(result.merged.nodes[0].data.text, 'mine')
+})
+
+t('reports delete-versus-edit as a conflict', () => {
+  const base = { name: 'A', nodes: [{ id: 'a', data: { text: 'old' } }], edges: [], views: [], stageTypes: null }
+  const local = { ...base, nodes: [] }
+  const remote = structuredClone(base)
+  remote.nodes[0].data.text = 'changed'
+  const result = mergeCanvasSnapshots(base, local, remote)
+  assert.deepEqual(result.conflicts, ['nodes.a'])
+  assert.equal(result.merged.nodes.length, 0)
 })
 
 console.log('segmentIntersectsRect')
@@ -774,10 +889,94 @@ t('group invite: server rejects moving a child outside the group', () => {
   ), /그룹 밖/)
 })
 
+t('group invite: server rejects rewiring an inside edge to an outside node', () => {
+  const row = structuredClone(sharedRow)
+  row.edges = [{ id: 'inside-edge', source: 'inside', target: 'inside' }]
+  const submittedEdges = [{ id: 'inside-edge', source: 'inside', target: 'outside' }]
+  assert.throws(() => applySharedCanvasUpdate(
+    { row, scope: 'group', targetId: 'frame', canEdit: true, restrictView: false }, row.nodes, submittedEdges,
+  ), /편집 범위 안/)
+})
+
+t('shared save: server rejects duplicate node ids', () => {
+  const submitted = [...structuredClone(sharedRow.nodes), structuredClone(sharedRow.nodes[1])]
+  assert.throws(() => applySharedCanvasUpdate(
+    { row: sharedRow, scope: 'canvas', targetId: null, canEdit: true, restrictView: false }, submitted, sharedRow.edges,
+  ), /중복된 노드 id/)
+})
+
+t('shared save: server rejects dangling edges', () => {
+  const submittedEdges = [{ id: 'dangling', source: 'inside', target: 'missing' }]
+  assert.throws(() => applySharedCanvasUpdate(
+    { row: sharedRow, scope: 'canvas', targetId: null, canEdit: true, restrictView: false }, sharedRow.nodes, submittedEdges,
+  ), /존재하는 노드/)
+})
+
+t('shared save: server strips active protocols from browser content URLs', () => {
+  const row = {
+    nodes: [{ id: 'browser', type: 'content', position: { x: 0, y: 0 }, data: { kind: 'browser', url: '' } }],
+    edges: [],
+  }
+  const submitted = structuredClone(row.nodes)
+  submitted[0].data.url = 'javascript:alert(1)'
+  const result = applySharedCanvasUpdate(
+    { row, scope: 'canvas', targetId: null, canEdit: true, restrictView: false }, submitted, [],
+  )
+  assert.equal(result.nodes[0].data.url, '')
+})
+
+t('canvas invite: server accepts canvas-level views and stage types', () => {
+  const views = [{ id: 'view-1', name: '검토', bounds: { x: 0, y: 0, width: 800, height: 600 } }]
+  const stageTypes = [{ id: 'plan', label: '계획', bg: '#111', border: '#222' }]
+  const result = applySharedCanvasUpdate(
+    { row: sharedRow, scope: 'canvas', targetId: null, canEdit: true, restrictView: false },
+    sharedRow.nodes,
+    sharedRow.edges,
+    { views, stageTypes },
+  )
+  assert.deepEqual(result.views, views)
+  assert.deepEqual(result.stageTypes, stageTypes)
+})
+
+t('group invite: server never accepts canvas-level metadata changes', () => {
+  const result = applySharedCanvasUpdate(
+    { row: sharedRow, scope: 'group', targetId: 'frame', canEdit: true, restrictView: false },
+    sharedRow.nodes,
+    sharedRow.edges,
+    { views: [{ id: 'forged' }], stageTypes: [{ id: 'forged' }] },
+  )
+  assert.equal(Object.hasOwn(result, 'views'), false)
+  assert.equal(Object.hasOwn(result, 'stageTypes'), false)
+})
+
 t('read-only invite: server rejects every save attempt', () => {
   assert.throws(() => applySharedCanvasUpdate(
     { row: sharedRow, scope: 'canvas', targetId: null, canEdit: false, restrictView: false }, sharedRow.nodes, sharedRow.edges,
   ), /읽기 전용/)
+})
+
+console.log('MCP canvas node representation')
+
+t('get_canvas representation includes group parent and absolute coordinates', () => {
+  const group = { id: 'group', type: 'group', position: { x: 500, y: 300 }, width: 400, height: 300, data: { label: '팀' } }
+  const child = {
+    id: 'content', type: 'content', parentId: 'group', position: { x: 40, y: 60 },
+    data: { kind: 'browser', header: '문서', url: 'https://example.com' },
+  }
+  const byId = new Map([[group.id, group], [child.id, child]])
+  const result = toExternalCanvasNode(child, byId)
+  assert.equal(result.parent_id, 'group')
+  assert.deepEqual(result.absolute_position, { x: 540, y: 360 })
+  assert.equal(result.kind, 'browser')
+  assert.equal(result.url, 'https://example.com')
+})
+
+t('get_canvas representation does not return legacy embedded image bytes', () => {
+  const photo = { id: 'photo', type: 'content', position: { x: 0, y: 0 }, data: { kind: 'photo', src: 'data:image/jpeg;base64,AAAA' } }
+  const result = toExternalCanvasNode(photo, new Map([[photo.id, photo]]))
+  assert.equal(result.embedded_image, true)
+  assert.equal(Object.hasOwn(result, 'image_url'), false)
+  assert.equal(JSON.stringify(result).includes('AAAA'), false)
 })
 }
 

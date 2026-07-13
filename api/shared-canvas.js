@@ -7,6 +7,17 @@ function send(res, status, body) {
   res.status(status).json(body)
 }
 
+function conflict() {
+  const error = new Error('다른 곳에서 캔버스가 먼저 변경되었습니다.')
+  error.code = 'CANVAS_CONFLICT'
+  return error
+}
+
+function nextRevision(previousRevision) {
+  const previous = Date.parse(previousRevision)
+  return new Date(Math.max(Date.now(), Number.isFinite(previous) ? previous + 1 : 0)).toISOString()
+}
+
 async function currentUser(req) {
   const token = req.headers.authorization?.replace(/^Bearer\s+/i, '')
   return resolveBrowserUser(token)
@@ -20,14 +31,7 @@ export default async function handler(req, res) {
 
     if (req.method === 'GET' && req.query.mode === 'list') {
       const shares = await mySharesFor(user.id)
-      const best = new Map()
-      for (const share of shares) {
-        const key = `${share.owner_id}:${share.canvas_id}`
-        const previous = best.get(key)
-        const rank = { canvas: 0, group: 1, node: 2 }
-        if (!previous || rank[share.scope] < rank[previous.scope]) best.set(key, share)
-      }
-      const canvases = await Promise.all([...best.values()].map(async (share) => {
+      const canvases = await Promise.all(shares.map(async (share) => {
         const { data } = await admin().from('canvases').select('name')
           .eq('user_id', share.owner_id).eq('canvas_id', share.canvas_id).maybeSingle()
         return data ? {
@@ -46,15 +50,33 @@ export default async function handler(req, res) {
 
     if (req.method === 'GET') return send(res, 200, redactCanvas(access))
     if (req.method === 'PUT') {
-      const { nodes, edges } = applySharedCanvasUpdate(access, input.nodes, input.edges)
-      const { error } = await admin().from('canvases').update({ nodes, edges, updated_at: new Date().toISOString() })
-        .eq('user_id', ownerId).eq('canvas_id', canvasId)
+      if (typeof input.revision !== 'string' || input.revision !== access.row.updated_at) throw conflict()
+      const update = applySharedCanvasUpdate(access, input.nodes, input.edges, {
+        views: input.views,
+        stageTypes: input.stageTypes,
+      })
+      const patch = { nodes: update.nodes, edges: update.edges, updated_at: nextRevision(input.revision) }
+      if (access.scope === 'canvas') {
+        patch.views = update.views
+        patch.stage_types = update.stageTypes
+      }
+      const { data, error } = await admin().from('canvases').update(patch)
+        .eq('user_id', ownerId).eq('canvas_id', canvasId).eq('updated_at', input.revision)
+        .select('updated_at').maybeSingle()
       if (error) throw new Error(error.message)
-      return send(res, 200, { ok: true })
+      if (!data) throw conflict()
+      const saved = redactCanvas({
+        ...access,
+        row: { ...access.row, ...patch, updated_at: data.updated_at },
+      })
+      return send(res, 200, { ok: true, ...saved })
     }
     return send(res, 405, { error: '지원하지 않는 요청입니다.' })
   } catch (error) {
     const message = error instanceof Error ? error.message : '공유 캔버스 요청에 실패했습니다.'
-    return send(res, message.includes('권한') || message.includes('읽기 전용') || message.includes('범위') ? 403 : 500, { error: message })
+    const status = error?.code === 'CANVAS_CONFLICT'
+      ? 409
+      : message.includes('권한') || message.includes('읽기 전용') || message.includes('범위') ? 403 : 500
+    return send(res, status, { error: message })
   }
 }

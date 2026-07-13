@@ -114,13 +114,13 @@ export default function AuthPanel({
     if (tokenOwnerIdRef.current === ownerId) setTokenCreating(false)
   }
 
-  const handleDeleteToken = async (token) => {
+  const handleDeleteToken = async (tokenId) => {
     if (!window.confirm('이 토큰을 삭제할까요? 이 토큰을 사용하는 AI 연결이 즉시 끊어집니다.')) return
     const ownerId = user?.id
     if (!ownerId) return
     try {
-      await deleteToken(token)
-      if (tokenOwnerIdRef.current === ownerId) setTokens((prev) => (prev ?? []).filter((t) => t.token !== token))
+      await deleteToken(tokenId)
+      if (tokenOwnerIdRef.current === ownerId) setTokens((prev) => (prev ?? []).filter((t) => t.tokenId !== tokenId))
     } catch (err) {
       if (tokenOwnerIdRef.current === ownerId) setTokensError(err.message)
     }
@@ -374,7 +374,7 @@ export default function AuthPanel({
               {!tokensLoading && currentTokens && currentTokens.length > 0 && (
                 <div style={{ marginBottom: 10 }}>
                   {currentTokens.map((t) => (
-                    <div key={t.token} style={{
+                    <div key={t.tokenId} style={{
                       background: '#12121a', border: '1px solid #ffffff18', borderRadius: 6,
                       padding: '8px 10px', marginBottom: 6,
                     }}>
@@ -383,13 +383,16 @@ export default function AuthPanel({
                         <span style={{ color: '#555', fontSize: 10 }}>{formatDate(t.created_at)}</span>
                       </div>
                       <div style={{ color: '#777', fontSize: 11, fontFamily: 'monospace', marginBottom: 6 }}>
-                        {t.token.slice(0, 6)}…
+                        {t.prefix}…
                       </div>
                       <div style={{ display: 'flex', gap: 6 }}>
-                        <button onClick={() => handleCopyToken(t.token)} style={smallBtn()}>
-                          {copiedToken === t.token ? '복사됨!' : '복사'}
-                        </button>
-                        <button onClick={() => handleDeleteToken(t.token)} style={smallBtn('#ef4444')}>삭제</button>
+                        {t.secret && (
+                          <button onClick={() => handleCopyToken(t.secret)} style={smallBtn()}>
+                            {copiedToken === t.secret ? '복사됨!' : '연결 URL 복사'}
+                          </button>
+                        )}
+                        {!t.secret && <span style={{ color: '#666', fontSize: 10, alignSelf: 'center' }}>다시 복사할 수 없음</span>}
+                        <button onClick={() => handleDeleteToken(t.tokenId)} style={smallBtn('#ef4444')}>삭제</button>
                       </div>
                     </div>
                   ))}

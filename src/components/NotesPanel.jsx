@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { sanitizeHtml } from '../lib/sanitizeHtml'
+import { sanitizeExternalUrl, sanitizeHtml } from '../lib/sanitizeHtml'
+import CanvasImage from './CanvasImage'
 
 // ── Notes-app-style right-docked panel ───────────────────────────────────────
 // LIST column (node titles, tree for stage / flat for memo & content) +
@@ -213,7 +214,8 @@ function SubNoteRow({ id, depth, byId, outMap, expanded, onToggle, onFocusNode, 
 function NotePage({ node, byId, outMap, isEditable, onUpdateNode, onFocusNode, onOpen, onBack }) {
   const titleSaveTimer = useRef(null)
   const bodySaveTimer = useRef(null)
-  useEffect(() => () => { clearTimeout(titleSaveTimer.current); clearTimeout(bodySaveTimer.current) }, [])
+  const pendingTitle = useRef(null)
+  const pendingBody = useRef(null)
 
   const [subExpanded, setSubExpanded] = useState(() => new Set())
   const toggleSub = useCallback((id) => {
@@ -227,14 +229,39 @@ function NotePage({ node, byId, outMap, isEditable, onUpdateNode, onFocusNode, o
   const titleField = node.type === 'stage' ? 'label' : 'header'
   const bodyField = node.type === 'stage' ? 'description' : node.type === 'memo' ? 'text' : null
 
-  const scheduleTitleSave = (value) => {
+  const flushPending = useCallback(() => {
     clearTimeout(titleSaveTimer.current)
-    titleSaveTimer.current = setTimeout(() => onUpdateNode(node.id, { [titleField]: value }), 400)
+    clearTimeout(bodySaveTimer.current)
+    if (pendingTitle.current !== null) {
+      onUpdateNode(node.id, { [titleField]: pendingTitle.current })
+      pendingTitle.current = null
+    }
+    if (bodyField && pendingBody.current !== null) {
+      onUpdateNode(node.id, { [bodyField]: pendingBody.current })
+      pendingBody.current = null
+    }
+  }, [bodyField, node.id, onUpdateNode, titleField])
+
+  useEffect(() => () => flushPending(), [flushPending])
+
+  const scheduleTitleSave = (value) => {
+    pendingTitle.current = value
+    clearTimeout(titleSaveTimer.current)
+    titleSaveTimer.current = setTimeout(() => {
+      if (pendingTitle.current === null) return
+      onUpdateNode(node.id, { [titleField]: pendingTitle.current })
+      pendingTitle.current = null
+    }, 400)
   }
   const scheduleBodySave = (html) => {
     if (!bodyField) return
+    pendingBody.current = html
     clearTimeout(bodySaveTimer.current)
-    bodySaveTimer.current = setTimeout(() => onUpdateNode(node.id, { [bodyField]: html }), 400)
+    bodySaveTimer.current = setTimeout(() => {
+      if (pendingBody.current === null) return
+      onUpdateNode(node.id, { [bodyField]: pendingBody.current })
+      pendingBody.current = null
+    }, 400)
   }
 
   const kids = outMap.get(node.id) ?? []
@@ -292,8 +319,8 @@ function NotePage({ node, byId, outMap, isEditable, onUpdateNode, onFocusNode, o
 
         {node.type === 'content' && node.data?.kind === 'photo' && (
           <div style={{ background: '#12121a', border: '1px solid #ffffff18', borderRadius: 6, padding: 12, textAlign: 'center' }}>
-            {node.data?.src ? (
-              <img src={node.data.src} alt="" style={{ maxWidth: '100%', borderRadius: 6 }} />
+            {node.data?.storagePath || node.data?.src ? (
+              <CanvasImage storagePath={node.data.storagePath} legacySrc={node.data.src} style={{ maxWidth: '100%', borderRadius: 6 }} />
             ) : (
               <div style={{ color: '#666', fontSize: 12, padding: '40px 0' }}>사진이 없습니다</div>
             )}
@@ -302,16 +329,16 @@ function NotePage({ node, byId, outMap, isEditable, onUpdateNode, onFocusNode, o
 
         {node.type === 'content' && node.data?.kind === 'browser' && (
           <div style={{ background: '#12121a', border: '1px solid #ffffff18', borderRadius: 6, overflow: 'hidden' }}>
-            {node.data?.url ? (
+            {sanitizeExternalUrl(node.data?.url) ? (
               <>
                 <a
-                  href={node.data.url} target="_blank" rel="noreferrer"
+                  href={sanitizeExternalUrl(node.data.url)} target="_blank" rel="noreferrer"
                   style={{ display: 'block', padding: '8px 10px', color: '#60a5fa', fontSize: 12, borderBottom: '1px solid #ffffff18', wordBreak: 'break-all' }}
                 >
-                  {node.data.url}
+                  {sanitizeExternalUrl(node.data.url)}
                 </a>
                 <iframe
-                  src={node.data.url}
+                  src={sanitizeExternalUrl(node.data.url)}
                   title="브라우저창"
                   sandbox="allow-scripts allow-same-origin allow-forms"
                   style={{ width: '100%', height: 420, border: 'none', display: 'block' }}

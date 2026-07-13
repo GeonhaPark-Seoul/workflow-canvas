@@ -140,6 +140,10 @@ as $$
 declare
   found_share canvas_shares%rowtype;
 begin
+  if auth.uid() is null then
+    raise exception 'authentication required';
+  end if;
+
   select * into found_share from canvas_shares cs where cs.link_token = token and cs.invitation_active;
   if not found then
     raise exception 'invalid share link';
@@ -158,7 +162,7 @@ begin
 end;
 $$;
 
-revoke execute on function claim_share(text) from anon;
+revoke execute on function claim_share(text) from PUBLIC, anon;
 grant execute on function claim_share(text) to authenticated;
 
 -- Claim all pending email invites addressed to the current user's email:
@@ -171,6 +175,10 @@ security definer
 set search_path = public
 as $$
 begin
+  if auth.uid() is null or auth.email() is null then
+    raise exception 'authentication required';
+  end if;
+
   return query
     with claimed as (
       insert into share_members (share_id, user_id)
@@ -185,7 +193,7 @@ begin
 end;
 $$;
 
-revoke execute on function claim_email_invites() from anon;
+revoke execute on function claim_email_invites() from PUBLIC, anon;
 grant execute on function claim_email_invites() to authenticated;
 
 create or replace function list_pending_email_invites()
@@ -193,16 +201,22 @@ returns table (id uuid, owner_id uuid, canvas_id text, scope text, target_id tex
 language sql security definer stable set search_path = public as $$
   select s.id, s.owner_id, s.canvas_id, s.scope, s.target_id, s.restrict_view, c.name
   from canvas_shares s join canvases c on c.user_id = s.owner_id and c.canvas_id = s.canvas_id
-  where s.invitation_active and lower(s.invitee_email) = lower(auth.email())
+  where auth.uid() is not null and auth.email() is not null
+    and s.invitation_active and lower(s.invitee_email) = lower(auth.email())
     and not exists (select 1 from share_members m where m.share_id = s.id and m.user_id = auth.uid())
     and not exists (select 1 from share_revocations r where r.share_id = s.id and r.user_id = auth.uid());
 $$;
+revoke execute on function list_pending_email_invites() from PUBLIC, anon;
 grant execute on function list_pending_email_invites() to authenticated;
 
 create or replace function claim_email_invite(p_share_id uuid)
 returns canvas_shares language plpgsql security definer set search_path = public as $$
 declare found_share canvas_shares%rowtype;
 begin
+  if auth.uid() is null or auth.email() is null then
+    raise exception 'authentication required';
+  end if;
+
   select * into found_share from canvas_shares where id = p_share_id and invitation_active and lower(invitee_email) = lower(auth.email());
   if not found or exists (select 1 from share_revocations r where r.share_id = p_share_id and r.user_id = auth.uid()) then
     raise exception 'invalid email invitation';
@@ -211,6 +225,7 @@ begin
   return found_share;
 end;
 $$;
+revoke execute on function claim_email_invite(uuid) from PUBLIC, anon;
 grant execute on function claim_email_invite(uuid) to authenticated;
 
 -- Used before opening a #share= link so deleted links receive a clear message.
@@ -227,7 +242,7 @@ returns boolean language sql security definer stable set search_path = public as
       )
   );
 $$;
-revoke execute on function share_link_is_active(text) from anon;
+revoke execute on function share_link_is_active(text) from PUBLIC;
 grant execute on function share_link_is_active(text) to anon, authenticated;
 
 create or replace function share_link_preview(token text)
@@ -241,6 +256,7 @@ language sql security definer stable set search_path = public as $$
       where r.share_id = s.id and r.user_id = auth.uid()
     );
 $$;
+revoke execute on function share_link_preview(text) from PUBLIC;
 grant execute on function share_link_preview(text) to anon, authenticated;
 
 -- Removing an invitation stops new joins but preserves accepted members.
@@ -259,7 +275,7 @@ begin
   end if;
 end;
 $$;
-revoke execute on function disable_share_invitation(uuid) from anon;
+revoke execute on function disable_share_invitation(uuid) from PUBLIC, anon;
 grant execute on function disable_share_invitation(uuid) to authenticated;
 
 -- A canvas-level kick revokes every existing invitation path for that user.
@@ -317,7 +333,7 @@ begin
   return removed_count;
 end;
 $$;
-revoke execute on function revoke_canvas_member(text, uuid) from anon;
+revoke execute on function revoke_canvas_member(text, uuid) from PUBLIC, anon;
 grant execute on function revoke_canvas_member(text, uuid) to authenticated;
 
 -- Leaving is canvas-wide too. Every currently issued path is revoked, so an
@@ -369,7 +385,7 @@ begin
   return removed_count;
 end;
 $$;
-revoke execute on function leave_shared_canvas(uuid, text) from anon;
+revoke execute on function leave_shared_canvas(uuid, text) from PUBLIC, anon;
 grant execute on function leave_shared_canvas(uuid, text) to authenticated;
 
 -- Owners can revoke a participant; a participant can revoke their own access.
@@ -415,7 +431,7 @@ begin
   end if;
 end;
 $$;
-revoke execute on function revoke_share_member(uuid, uuid) from anon;
+revoke execute on function revoke_share_member(uuid, uuid) from PUBLIC, anon;
 grant execute on function revoke_share_member(uuid, uuid) to authenticated;
 
 -- ── Table grants ─────────────────────────────────────────────────────────────
@@ -486,6 +502,9 @@ create or replace function can_access_canvas(p_owner uuid, p_canvas text, p_user
   );
 $$;
 
+revoke execute on function is_share_member(uuid, uuid) from PUBLIC, anon;
+revoke execute on function owns_share(uuid, uuid) from PUBLIC, anon;
+revoke execute on function can_access_canvas(uuid, text, uuid, text) from PUBLIC, anon;
 grant execute on function is_share_member(uuid, uuid) to authenticated;
 grant execute on function owns_share(uuid, uuid) to authenticated;
 grant execute on function can_access_canvas(uuid, text, uuid, text) to authenticated;
@@ -526,3 +545,7 @@ create policy "invitee updates shared canvases" on canvases
 -- service role only after that check. Run this after deploying that endpoint.
 drop policy if exists "invitee selects shared canvases" on canvases;
 drop policy if exists "invitee updates shared canvases" on canvases;
+
+-- The Phase 6 API gateway replaced this parameterized helper. Dropping it also
+-- prevents authenticated callers from probing access with someone else's email.
+drop function if exists can_access_canvas(uuid, text, uuid, text);

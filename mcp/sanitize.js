@@ -74,11 +74,22 @@ export function sanitizeHtml(html) {
   return s
 }
 
+export function sanitizeExternalUrl(value) {
+  if (typeof value !== 'string' || !value.trim()) return ''
+  try {
+    const parsed = new URL(value.trim())
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed.href : ''
+  } catch {
+    return ''
+  }
+}
+
 // Sanitize the HTML-bearing text fields of a node input/patch object, in place-ish.
 export function sanitizeTextFields(obj) {
   if (!obj || typeof obj !== 'object') return obj
   for (const key of ['label', 'description', 'header', 'text']) {
     if (typeof obj[key] === 'string') obj[key] = sanitizeHtml(obj[key])
   }
+  if (typeof obj.url === 'string') obj.url = sanitizeExternalUrl(obj.url)
   return obj
 }

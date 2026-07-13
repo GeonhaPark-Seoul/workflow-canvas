@@ -30,6 +30,7 @@ create or replace function can_view_profile(p_viewer uuid, p_target uuid)
   );
 $$;
 
+revoke execute on function can_view_profile(uuid, uuid) from PUBLIC, anon;
 grant execute on function can_view_profile(uuid, uuid) to authenticated;
 drop policy if exists "profiles readable by signed-in users" on profiles;
 drop policy if exists "profiles readable by canvas participants" on profiles;

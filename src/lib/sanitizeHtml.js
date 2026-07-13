@@ -51,12 +51,23 @@ export function sanitizeHtml(html) {
   return result
 }
 
+export function sanitizeExternalUrl(value) {
+  if (typeof value !== 'string' || !value.trim()) return ''
+  try {
+    const parsed = new URL(value.trim())
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed.href : ''
+  } catch {
+    return ''
+  }
+}
+
 export function sanitizeNodeData(data) {
   if (!data || typeof data !== 'object') return data
   const next = { ...data }
   for (const key of ['label', 'description', 'header', 'text']) {
     if (typeof next[key] === 'string') next[key] = sanitizeHtml(next[key])
   }
+  if (typeof next.url === 'string') next.url = sanitizeExternalUrl(next.url)
   if (Array.isArray(next.parts)) {
     next.parts = next.parts.map((part) => ({ ...part, text: typeof part.text === 'string' ? sanitizeHtml(part.text) : part.text }))
   }

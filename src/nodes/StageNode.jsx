@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react'
 import { Handle, Position, NodeResizer, useStore } from '@xyflow/react'
 import EditToolbar from '../components/EditToolbar'
 import ScopedParticipants from '../components/ScopedParticipants'
-import { useTheme } from './useTheme'
 import { sanitizeHtml } from '../lib/sanitizeHtml'
 
 const DEFAULT_TYPES = [
@@ -85,7 +84,7 @@ export default function StageNode({ data, selected, id }) {
   const shapeOnly = zoomShapeOnly || data.forceShapeOnly
 
   const filled = data.nodeFill !== false
-  const theme = useTheme()
+  const theme = data.theme ?? 'dark'
   // Light theme + fill off ⇒ the node's background is transparent over a light page,
   // so text drawn in the usual light-on-dark colors would go invisible — use dark text instead.
   const darkText = theme === 'light' && !filled
@@ -605,10 +604,12 @@ export default function StageNode({ data, selected, id }) {
       )}
 
       {/* Rich-text toolbar — portalled to body */}
-      <EditToolbar
-        editRef={editing === 'title' ? titleRef : editing === 'desc' ? descRef : null}
-        anchorRef={editing === 'title' ? titleContainerRef : editing === 'desc' ? descContainerRef : null}
-      />
+      {editing && (
+        <EditToolbar
+          editRef={editing === 'title' ? titleRef : descRef}
+          anchorRef={editing === 'title' ? titleContainerRef : descContainerRef}
+        />
+      )}
     </div>
   )
 }

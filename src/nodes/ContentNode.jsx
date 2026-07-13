@@ -2,8 +2,9 @@ import { useState, useRef, useEffect } from 'react'
 import { Handle, Position, NodeResizer, useStore } from '@xyflow/react'
 import EditToolbar from '../components/EditToolbar'
 import ScopedParticipants from '../components/ScopedParticipants'
-import { useTheme } from './useTheme'
-import { sanitizeHtml } from '../lib/sanitizeHtml'
+import CanvasImage from '../components/CanvasImage'
+import { sanitizeExternalUrl, sanitizeHtml } from '../lib/sanitizeHtml'
+import { uploadCanvasImage } from '../lib/imageStorage'
 
 // Bidirectional connection ports: every handle is type="source"; with the
 // canvas in connectionMode="loose", a source handle can also receive a
@@ -25,7 +26,7 @@ const KIND_LABEL = {
   browser: '🌐 브라우저',
 }
 
-// Downscale an image file to a data URL (max dimension 1200px, JPEG quality 0.85).
+// Downscale an image file to a JPEG Blob (max dimension 1200px, quality 0.85).
 function downscaleImage(file, maxSize = 1200, quality = 0.85) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -42,7 +43,10 @@ function downscaleImage(file, maxSize = 1200, quality = 0.85) {
         canvas.width = width
         canvas.height = height
         canvas.getContext('2d').drawImage(img, 0, 0, width, height)
-        resolve(canvas.toDataURL('image/jpeg', quality))
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob)
+          else reject(new Error('사진 변환에 실패했습니다.'))
+        }, 'image/jpeg', quality)
       }
       img.onerror = reject
       img.src = reader.result
@@ -93,7 +97,7 @@ export default function ContentNode({ data, selected, id }) {
   const shapeOnly = zoomShapeOnly || data.forceShapeOnly
 
   const filled = data.nodeFill !== false
-  const theme = useTheme()
+  const theme = data.theme ?? 'dark'
   // Light theme + fill off ⇒ the node's background is transparent over a light page,
   // so the usual light-on-dark text would go invisible — use dark text instead.
   const darkText = theme === 'light' && !filled
@@ -109,6 +113,9 @@ export default function ContentNode({ data, selected, id }) {
   const caretPosRef = useRef(null)
   const fileInputRef = useRef(null)
   const [urlDraft, setUrlDraft] = useState(data.url ?? '')
+  const [imageBusy, setImageBusy] = useState(false)
+  const [imageError, setImageError] = useState(null)
+  const [urlError, setUrlError] = useState(null)
 
   // Click-to-edit cycle: click 1 selects (React Flow default), click 2 (while already
   // selected) starts editing. React Flow selects on mousedown, so the first click's
@@ -189,21 +196,37 @@ export default function ContentNode({ data, selected, id }) {
     const file = e.target.files?.[0]
     if (!file) return
     try {
-      const src = await downscaleImage(file)
-      data.onUpdate?.({ src })
+      const { ownerId, canvasId } = data.imageContext ?? {}
+      if (!ownerId || !canvasId) throw new Error('사진을 저장하려면 먼저 로그인해야 합니다.')
+      setImageBusy(true)
+      setImageError(null)
+      const blob = await downscaleImage(file)
+      const { storagePath } = await uploadCanvasImage({
+        ownerId,
+        canvasId,
+        nodeId: id,
+        blob,
+        previousPath: data.storagePath,
+      })
+      data.onUpdate?.({ storagePath, src: null })
+    } catch (error) {
+      setImageError(error.message)
     } finally {
+      setImageBusy(false)
       e.target.value = ''
     }
   }
 
   const commitUrl = () => {
     if (data.readOnly) return
-    const url = urlDraft.trim()
+    const url = sanitizeExternalUrl(urlDraft)
+    setUrlError(urlDraft.trim() && !url ? 'http:// 또는 https:// 주소만 사용할 수 있습니다.' : null)
     if (url !== (data.url ?? '')) data.onUpdate?.({ url })
   }
 
   const headerValue = data.header ?? ''
   const kindLabel = KIND_LABEL[data.kind] ?? '콘텐츠'
+  const safeUrl = sanitizeExternalUrl(data.url)
 
   const headerFontSize = abstract ? Math.round(13 * 1.15) : 13
   const circleSize = abstract ? Math.round(14 * 1.9) : 14
@@ -327,10 +350,10 @@ export default function ContentNode({ data, selected, id }) {
         <div style={{ flex: 1, padding: '8px 10px', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
           {data.kind === 'photo' && (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, gap: 6 }}>
-              {data.src ? (
+              {data.storagePath || data.src ? (
                 <>
                   <div className="nowheel" style={{ flex: 1, minHeight: 0, overflowY: 'auto', overscrollBehavior: 'contain', display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}>
-                    <img src={data.src} alt="" style={{ maxWidth: '100%', borderRadius: 8 }} />
+                    <CanvasImage storagePath={data.storagePath} legacySrc={data.src} style={{ maxWidth: '100%', borderRadius: 8 }} />
                   </div>
                   {selected && !data.readOnly && (
                     <button
@@ -342,7 +365,7 @@ export default function ContentNode({ data, selected, id }) {
                         color: '#d3d8e4', fontSize: 11, borderRadius: 6, padding: '4px 10px', cursor: 'pointer',
                       }}
                     >
-                      사진 교체
+                      {imageBusy ? '저장 중...' : '사진 교체'}
                     </button>
                   )}
                 </>
@@ -357,7 +380,7 @@ export default function ContentNode({ data, selected, id }) {
                       color: '#d3d8e4', fontSize: 12, borderRadius: 6, padding: '6px 14px', cursor: 'pointer',
                     }}
                   >
-                    사진 선택
+                    {imageBusy ? '저장 중...' : '사진 선택'}
                   </button>
                 </div>
               )}
@@ -368,6 +391,7 @@ export default function ContentNode({ data, selected, id }) {
                 onChange={onFileChange}
                 style={{ display: 'none' }}
               />
+              {imageError && <div style={{ color: '#ef4444', fontSize: 10, lineHeight: 1.4 }}>{imageError}</div>}
             </div>
           )}
 
@@ -389,10 +413,11 @@ export default function ContentNode({ data, selected, id }) {
               <div style={{ flexShrink: 0, fontSize: 9, color: '#aeb6c6' }}>
                 사이트에 따라 임베드가 차단될 수 있습니다
               </div>
-              {data.url && (
+              {urlError && <div style={{ color: '#ef4444', fontSize: 10, lineHeight: 1.4 }}>{urlError}</div>}
+              {safeUrl && (
                 <div className="nodrag nowheel" style={{ flex: 1, minHeight: 0 }}>
                   <iframe
-                    src={data.url}
+                    src={safeUrl}
                     title="browser-content"
                     sandbox="allow-scripts allow-same-origin allow-forms"
                     style={{ width: '100%', height: '100%', border: 'none', borderRadius: 8, background: '#fff' }}
@@ -412,10 +437,7 @@ export default function ContentNode({ data, selected, id }) {
       )}
 
       {/* Rich-text toolbar — portalled to body */}
-      <EditToolbar
-        editRef={editing === 'header' ? headerRef : null}
-        anchorRef={editing === 'header' ? headerContainerRef : null}
-      />
+      {editing === 'header' && <EditToolbar editRef={headerRef} anchorRef={headerContainerRef} />}
     </div>
   )
 }
