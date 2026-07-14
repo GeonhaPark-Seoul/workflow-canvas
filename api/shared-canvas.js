@@ -29,6 +29,11 @@ export default async function handler(req, res) {
     const user = await currentUser(req)
     if (!user) return send(res, 401, { error: '로그인이 필요합니다.' })
 
+    if (req.method === 'GET' && req.query.mode === 'health') {
+      res.status(204).end()
+      return
+    }
+
     if (req.method === 'GET' && req.query.mode === 'list') {
       const shares = await mySharesFor(user.id)
       const canvases = await Promise.all(shares.map(async (share) => {

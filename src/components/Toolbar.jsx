@@ -5,6 +5,7 @@ export default function Toolbar({
   onAddStage, onAddMemo, onClearAll, onUndo, mobile,
   views = [], currentViewId, onSelectView, onRenameView, onDeleteView,
   onPaletteAdd = () => {},
+  systemRuntime = null,
 }) {
   const viewProps = { views, currentViewId, onSelectView, onRenameView, onDeleteView, mobile }
   const [paletteOpen, setPaletteOpen] = useState(false)
@@ -38,6 +39,7 @@ export default function Toolbar({
         </div>
         <ViewSelector {...viewProps} />
         <MobileBtn onClick={onUndo} color="#06b6d4" icon="↩︎" label="되돌리기" />
+        {systemRuntime && <RuntimeButton runtime={systemRuntime} mobile />}
       </div>
     )
   }
@@ -67,6 +69,12 @@ export default function Toolbar({
       <div style={{ width: 1, background: '#ffffff18', margin: '0 4px' }} />
       <ViewSelector {...viewProps} />
       <ToolBtn onClick={onUndo} color="#06b6d4" icon="↩︎" label="되돌리기" />
+      {systemRuntime && (
+        <>
+          <div style={{ width: 1, background: '#ffffff18', margin: '0 4px' }} />
+          <RuntimeButton runtime={systemRuntime} />
+        </>
+      )}
     </div>
   )
 }
@@ -331,6 +339,44 @@ function MobileBtn({ onClick, color, icon, label }) {
     >
       <span style={{ fontSize: 22 }}>{icon}</span>
       <span style={{ fontSize: 10, fontWeight: 600, color: '#aaa' }}>{label}</span>
+    </button>
+  )
+}
+
+function RuntimeButton({ runtime, mobile = false }) {
+  const title = [runtime.title, runtime.error].filter(Boolean).join(' · ')
+  return (
+    <button
+      type="button"
+      className="main-hover-control system-runtime-all-check"
+      title={title}
+      aria-label="전체 운영 상태 확인"
+      disabled={runtime.disabled || runtime.checking}
+      onClick={runtime.onCheck}
+      style={{
+        minWidth: mobile ? 56 : 68,
+        minHeight: mobile ? 42 : 32,
+        display: 'flex',
+        flexDirection: mobile ? 'column' : 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: mobile ? 3 : 6,
+        boxSizing: 'border-box',
+        border: mobile ? 'none' : `1px solid ${runtime.color}66`,
+        borderRadius: mobile ? 0 : 8,
+        background: 'transparent',
+        color: runtime.color,
+        padding: mobile ? '4px 8px' : '5px 9px',
+        cursor: runtime.disabled || runtime.checking ? 'default' : 'pointer',
+        opacity: runtime.disabled ? 0.45 : 1,
+        fontFamily: 'inherit',
+      }}
+    >
+      <span className={runtime.checking ? 'is-spinning' : ''} style={{ fontSize: mobile ? 20 : 15, lineHeight: 1 }}>↻</span>
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: mobile ? 10 : 11, fontWeight: 700 }}>
+        <span style={{ width: 6, height: 6, borderRadius: '50%', background: runtime.color }} />
+        {runtime.label}
+      </span>
     </button>
   )
 }

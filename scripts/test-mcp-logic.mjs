@@ -16,9 +16,12 @@ import { sanitizeHtml, sanitizeTextFields } from '../mcp/sanitize.js'
 import { applySharedCanvasUpdate, effectiveShareGrant, pickBestShareAccess, redactCanvas } from '../mcp/shareAccess.js'
 import {
   claimSystemRuntimeCheck,
+  loadLatestSystemRuntimeObservations,
+  persistSystemRuntimeObservation,
   readWorkflowSystemOperations,
   requireSystemRuntimeOperator,
   resolveSystemRuntimeTarget,
+  resolveSystemRuntimeTargets,
   runSystemRuntimeCapability,
   WORKFLOW_SYSTEM_OPERATIONS_RPC,
 } from '../mcp/systemRuntime.js'
@@ -83,10 +86,16 @@ import {
   WORKFLOW_SYSTEM_TWIN_SOURCE_ID,
 } from '../shared/workflowSystemTwinAdapter.js'
 import {
+  SYSTEM_CAPABILITY_OPERATION_DEFS,
+  normalizeSystemRuntimeBatchRequest,
+  normalizeSystemRuntimeCanvasRequest,
+  normalizeSystemRuntimeRecords,
   normalizeSystemRuntimeRequest,
   normalizeSystemRuntimeResult,
+  systemCapabilityOperationDefinition,
   systemPartRuntimeReality,
   systemRuntimeCapabilityForPart,
+  systemRuntimePathEdgeIds,
 } from '../shared/systemRuntime.js'
 import { buildDiscoveryManifest } from './system-discovery.mjs'
 
@@ -519,6 +528,30 @@ t('runtime requests accept identifiers only and reject URLs or credential materi
       canvasId: 'canvas-1', nodeId: 'map-web-app', partId: 'supabase-anon-ref', ...forged,
     }), /허용되지 않은 항목/)
   }
+  assert.deepEqual(normalizeSystemRuntimeCanvasRequest({ canvasId: 'canvas-1' }), { canvasId: 'canvas-1' })
+  assert.deepEqual(normalizeSystemRuntimeBatchRequest({ canvasId: 'canvas-1', action: 'check_all' }), {
+    canvasId: 'canvas-1', action: 'check_all',
+  })
+  assert.throws(
+    () => normalizeSystemRuntimeCanvasRequest({ canvasId: 'canvas-1', token: 'forbidden' }),
+    /허용되지 않은 항목/,
+  )
+  assert.throws(
+    () => normalizeSystemRuntimeBatchRequest({ canvasId: 'canvas-1', action: 'delete_all' }),
+    /허용되지 않은 항목/,
+  )
+})
+
+t('capability operations distinguish observation, mutation, approval, automation and recovery risk', () => {
+  assert.deepEqual(
+    SYSTEM_CAPABILITY_OPERATION_DEFS.map((definition) => definition.id),
+    ['observe', 'read', 'validate', 'subscribe', 'execute', 'create', 'update', 'delete', 'approve', 'automate', 'restore'],
+  )
+  assert.equal(systemCapabilityOperationDefinition('observe').sideEffect, 'none')
+  assert.equal(systemCapabilityOperationDefinition('delete').sideEffect, 'destructive')
+  assert.equal(systemCapabilityOperationDefinition('delete').risk, 'critical')
+  assert.equal(systemCapabilityOperationDefinition('automate').sideEffect, 'recurring')
+  assert.equal(systemCapabilityOperationDefinition('unknown'), null)
 })
 
 t('only the exact persisted digital-twin part receives the registered capability', () => {
@@ -574,6 +607,21 @@ t('runtime target resolution requires the owner and the server-saved allowlisted
     nodeId: 'map-web-app',
     partId: 'supabase-anon-ref',
   }), /허용된 시스템 작업/)
+
+  const targets = resolveSystemRuntimeTargets({
+    canvas: runtimeCanvas,
+    actorUserId: 'owner-1',
+    ownerUserId: 'owner-1',
+  })
+  assert.deepEqual(targets.map((item) => item.capability.id), [
+    'workflow.supabase.user-canvases.read',
+    'workflow.supabase.canvas-service.operations',
+  ])
+  assert.throws(() => resolveSystemRuntimeTargets({
+    canvas: runtimeCanvas,
+    actorUserId: 'invitee-1',
+    ownerUserId: 'owner-1',
+  }), /운영자만/)
 })
 
 t('system runtime operator authority is separate from ordinary canvas ownership', () => {
@@ -622,9 +670,11 @@ t('runtime results clamp public fields and map only server-known capabilities', 
   assert.equal(result.authorization, 'system_operator')
   assert.equal(result.dataScope, 'operator_canary')
   assert.equal(Object.hasOwn(result, 'secret'), false)
-  assert.equal(systemPartRuntimeReality(result).id, 'healthy')
+  const checkedAt = Date.parse(result.checkedAt)
+  assert.equal(systemPartRuntimeReality(result, checkedAt + 1_000).id, 'healthy')
+  assert.equal(systemPartRuntimeReality(result, checkedAt + 15 * 60 * 1000 + 1).id, 'stale')
   assert.equal(systemPartRuntimeReality({ status: 'checking' }).id, 'checking')
-  assert.equal(systemPartRuntimeReality(null).id, 'declared')
+  assert.equal(systemPartRuntimeReality(null).id, 'unknown')
   assert.throws(() => normalizeSystemRuntimeResult({
     ...result, capabilityId: 'attacker.arbitrary-request',
   }), /등록되지 않은/)
@@ -666,6 +716,72 @@ t('application metric groups preserve aggregate counts only and discard user or 
   assert.equal(systemPartRuntimeReality(result).label, '운영 조회')
 })
 
+t('generic observations keep typed scalar metadata only and block literal credentials', () => {
+  const result = normalizeSystemRuntimeResult({
+    capabilityId: 'workflow.vercel.deployment.runtime',
+    status: 'healthy',
+    verification: 'verified',
+    resourceId: 'workflow-vercel:production-runtime',
+    checkedAt: '2026-07-15T00:00:00.000Z',
+    latencyMs: 4,
+    summary: '배포 함수가 실행 중입니다.',
+    collectionLabel: '배포 관측',
+    observations: Array.from({ length: 70 }, (_, index) => ({
+      id: `observation-${index}`,
+      category: index === 0 ? 'deployment' : 'runtime',
+      label: index === 0 ? '실행 리전' : `관측값 ${index}`,
+      valueType: index === 0 ? 'text' : 'number',
+      value: index === 0 ? 'icn1' : index,
+      sensitivity: 'internal',
+      sourceKind: 'runtime',
+      verification: 'verified',
+      availability: 'available',
+      evidenceRef: index === 0 ? 'VERCEL_REGION' : '',
+      ownerEmail: 'private@example.com',
+      rowBody: { private: true },
+    })),
+  })
+  assert.equal(result.operation, 'observe')
+  assert.equal(result.sideEffect, 'none')
+  assert.equal(result.risk, 'none')
+  assert.equal(result.observations.length, 64)
+  assert.equal(result.totalCount, 64)
+  assert.equal(result.truncated, true)
+  assert.equal(result.observations[0].value, 'icn1')
+  assert.equal(Object.hasOwn(result.observations[0], 'ownerEmail'), false)
+  assert.equal(Object.hasOwn(result.observations[0], 'rowBody'), false)
+  assert.deepEqual(systemRuntimePathEdgeIds('workflow.api.shared-canvas.health'), ['map-edge-vercel-shared'])
+  assert.deepEqual(systemRuntimePathEdgeIds('unknown'), [])
+
+  const token = `eyJ${'a'.repeat(20)}.${'b'.repeat(12)}.${'c'.repeat(12)}`
+  assert.throws(() => normalizeSystemRuntimeResult({
+    ...result,
+    observations: [{ id: 'token', label: 'token', valueType: 'text', value: token }],
+  }), (error) => error.code === 'SECRET_VALUE_BLOCKED')
+  assert.throws(() => normalizeSystemRuntimeResult({ ...result, summary: token }), (error) => (
+    error.code === 'SECRET_VALUE_BLOCKED'
+  ))
+})
+
+t('runtime record lists accept one latest result per persisted node and part key', () => {
+  const result = normalizeSystemRuntimeResult({
+    capabilityId: 'workflow.supabase.user-canvases.read',
+    status: 'healthy',
+    verification: 'verified',
+    resourceId: 'workflow-supabase:canvases-user-read',
+    checkedAt: '2026-07-15T00:00:00.000Z',
+    latencyMs: 3,
+    summary: '정상',
+  })
+  const records = normalizeSystemRuntimeRecords([
+    { nodeId: 'map-web-app', partId: 'supabase-anon-ref', result, privateRow: true },
+    { nodeId: 'map-web-app', partId: 'supabase-anon-ref', result: { ...result, status: 'failed' } },
+  ])
+  assert.equal(records.length, 1)
+  assert.equal(records[0].result.status, 'healthy')
+  assert.equal(Object.hasOwn(records[0], 'privateRow'), false)
+})
+
 await ta('the Supabase adapter uses a fixed HEAD/RLS request and returns no secrets or row body', async () => {
   const calls = []
   const times = [1_000, 1_025]
@@ -702,6 +818,73 @@ await ta('the Supabase adapter uses a fixed HEAD/RLS request and returns no secr
   assert.equal(result.latencyMs, 25)
   assert.equal(JSON.stringify(result).includes(accessToken), false)
   assert.equal(JSON.stringify(result).includes(anonKey), false)
+})
+
+await ta('deployment, API route, MCP route and Auth runners expose only fixed operational evidence', async () => {
+  const deployment = await runSystemRuntimeCapability({
+    capabilityId: 'workflow.vercel.deployment.runtime',
+    actorUserId: 'owner-1',
+    deploymentContext: {
+      isVercel: true,
+      environment: 'production',
+      region: 'icn1',
+      commitSha: '1234567890abcdef1234567890abcdef',
+      host: 'workflow.example.com',
+    },
+    now: () => Date.parse('2026-07-15T00:00:00.000Z'),
+  })
+  assert.equal(deployment.status, 'healthy')
+  assert.equal(deployment.observations.find((item) => item.id === 'commit').value, '1234567890ab')
+  assert.equal(deployment.observations.find((item) => item.id === 'host').value, 'workflow.example.com')
+
+  const routeCalls = []
+  const routeNow = (() => {
+    const values = [1_000, 1_001, 1_016, 2_000, 2_001, 2_018]
+    return () => values.shift()
+  })()
+  const sharedRoute = await runSystemRuntimeCapability({
+    capabilityId: 'workflow.api.shared-canvas.health',
+    actorUserId: 'owner-1',
+    accessToken: 'private-browser-token',
+    runtimeBaseUrl: 'https://workflow.example.com',
+    now: routeNow,
+    fetchImpl: async (url, options) => {
+      routeCalls.push({ url: String(url), options })
+      return { status: 204, headers: { get: () => '' } }
+    },
+  })
+  assert.equal(sharedRoute.status, 'healthy')
+  assert.equal(routeCalls[0].url, 'https://workflow.example.com/api/shared-canvas?mode=health')
+  assert.equal(routeCalls[0].options.headers.Authorization, 'Bearer private-browser-token')
+  assert.equal(JSON.stringify(sharedRoute).includes('private-browser-token'), false)
+
+  const mcpRoute = await runSystemRuntimeCapability({
+    capabilityId: 'workflow.api.mcp.route',
+    actorUserId: 'owner-1',
+    runtimeBaseUrl: 'https://workflow.example.com',
+    now: routeNow,
+    fetchImpl: async (url, options) => {
+      routeCalls.push({ url: String(url), options })
+      return { status: 405, headers: { get: (name) => name.toLowerCase() === 'allow' ? 'POST' : '' } }
+    },
+  })
+  assert.equal(mcpRoute.status, 'degraded')
+  assert.equal(mcpRoute.verification, 'partial')
+  assert.equal(routeCalls[1].url, 'https://workflow.example.com/api/mcp')
+
+  let verifiedToken = ''
+  const authNow = (() => { const values = [3_000, 3_011]; return () => values.shift() })()
+  const auth = await runSystemRuntimeCapability({
+    capabilityId: 'workflow.supabase.auth.session',
+    actorUserId: 'owner-1',
+    accessToken: 'private-auth-token',
+    verifyAccessToken: async (token) => { verifiedToken = token; return { id: 'owner-1', email: 'private@example.com' } },
+    now: authNow,
+  })
+  assert.equal(verifiedToken, 'private-auth-token')
+  assert.equal(auth.status, 'healthy')
+  assert.equal(JSON.stringify(auth).includes('private-auth-token'), false)
+  assert.equal(JSON.stringify(auth).includes('private@example.com'), false)
 })
 
 await ta('the application operations adapter calls only the fixed service-role aggregate RPC', async () => {
@@ -754,6 +937,122 @@ await ta('the application operations adapter calls only the fixed service-role a
   assert.equal(result.items[1].metrics.find((metric) => metric.id === 'accounts-24h').value, 4)
   assert.equal(result.items[2].metrics[0].value, 0)
   assert.equal(JSON.stringify(result).includes(privateUserId), false)
+})
+
+await ta('runtime observations persist append-only and latest reads ignore stale or mismatched rows', async () => {
+  const target = resolveSystemRuntimeTarget({
+    canvas: runtimeCanvas,
+    actorUserId: 'owner-1',
+    ownerUserId: 'owner-1',
+    nodeId: 'map-web-app',
+    partId: 'supabase-anon-ref',
+  })
+  const result = normalizeSystemRuntimeResult({
+    capabilityId: target.capability.id,
+    status: 'healthy',
+    verification: 'verified',
+    resourceId: 'workflow-supabase:canvases-user-read',
+    checkedAt: '2026-07-15T01:00:00.000Z',
+    latencyMs: 8,
+    summary: 'RLS 경로 정상',
+  })
+  const inserts = []
+  const cleanup = []
+  const writeDb = {
+    from(table) {
+      assert.equal(table, 'system_runtime_observations')
+      return {
+        insert(row) {
+          inserts.push(row)
+          return Promise.resolve({ error: null })
+        },
+        delete() {
+          const query = {
+            eq(field, value) { cleanup.push(['eq', field, value]); return query },
+            lt(field, value) { cleanup.push(['lt', field, value]); return Promise.resolve({ error: null }) },
+          }
+          return query
+        },
+      }
+    },
+  }
+  const written = await persistSystemRuntimeObservation(writeDb, { canvasId: 'canvas-1', target, result })
+  assert.deepEqual(written, { available: true, persisted: true })
+  assert.equal(inserts.length, 1)
+  assert.equal(inserts[0].canvas_id, 'canvas-1')
+  assert.equal(inserts[0].node_id, 'map-web-app')
+  assert.equal(inserts[0].result.status, 'healthy')
+  assert.equal(cleanup.some(([operation, field]) => operation === 'lt' && field === 'observed_at'), true)
+
+  const deniedWriteDb = {
+    from() {
+      return { insert: () => Promise.resolve({ error: { code: '42501' } }) }
+    },
+  }
+  const deniedWrite = await persistSystemRuntimeObservation(deniedWriteDb, { canvasId: 'canvas-1', target, result })
+  assert.deepEqual(deniedWrite, {
+    available: true,
+    persisted: false,
+    errorCode: 'OBSERVATION_WRITE_FAILED',
+  })
+
+  const oldResult = { ...result, checkedAt: '2026-07-15T00:00:00.000Z', status: 'failed', verification: 'failed' }
+  const storedRows = [
+    {
+      node_id: 'map-web-app', part_id: 'supabase-anon-ref',
+      capability_id: target.capability.id, result, observed_at: result.checkedAt,
+    },
+    {
+      node_id: 'map-web-app', part_id: 'supabase-anon-ref',
+      capability_id: target.capability.id, result: oldResult, observed_at: oldResult.checkedAt,
+    },
+    {
+      node_id: 'map-canvases-table', part_id: 'map-part-own-canvas-summary',
+      capability_id: 'workflow.supabase.user-canvases.read', result, observed_at: result.checkedAt,
+    },
+    {
+      node_id: 'unregistered-node', part_id: 'unknown-part',
+      capability_id: target.capability.id, result, observed_at: result.checkedAt,
+    },
+  ]
+  const readDb = {
+    from(table) {
+      assert.equal(table, 'system_runtime_observations')
+      const query = {
+        select() { return query },
+        eq() { return query },
+        order() { return query },
+        limit() { return Promise.resolve({ data: storedRows, error: null }) },
+      }
+      return query
+    },
+  }
+  const latest = await loadLatestSystemRuntimeObservations(readDb, {
+    canvasId: 'canvas-1',
+    canvas: runtimeCanvas,
+    actorUserId: 'owner-1',
+    ownerUserId: 'owner-1',
+  })
+  assert.equal(latest.available, true)
+  assert.equal(latest.results.length, 1)
+  assert.equal(latest.results[0].result.checkedAt, result.checkedAt)
+
+  const unavailableDb = {
+    from() {
+      const query = {
+        select() { return query },
+        eq() { return query },
+        order() { return query },
+        limit() { return Promise.resolve({ data: null, error: { code: '42P01' } }) },
+      }
+      return query
+    },
+  }
+  const unavailable = await loadLatestSystemRuntimeObservations(unavailableDb, {
+    canvasId: 'canvas-1', canvas: runtimeCanvas, actorUserId: 'owner-1', ownerUserId: 'owner-1',
+  })
+  assert.equal(unavailable.available, false)
+  assert.equal(unavailable.errorCode, 'OBSERVATION_STORE_UNAVAILABLE')
 })
 
 await ta('upstream rejection, network errors and timeouts expose safe summaries only', async () => {
@@ -1005,6 +1304,17 @@ t('self map covers the critical runtime, data, security and delivery boundaries'
     assert.equal(relationTypes.has(relationType), true, `missing system map relation: ${relationType}`)
   }
   assert.equal(JSON.stringify(map).includes('SUPABASE_SERVICE_ROLE_KEY='), false)
+  assert.deepEqual(
+    resolveSystemRuntimeTargets({ canvas: map, actorUserId: 'owner-1', ownerUserId: 'owner-1' })
+      .map((target) => target.capability.id),
+    [
+      'workflow.vercel.deployment.runtime',
+      'workflow.api.shared-canvas.health',
+      'workflow.api.mcp.route',
+      'workflow.supabase.auth.session',
+      'workflow.supabase.canvas-service.operations',
+    ],
+  )
 })
 
 console.log('read-only system discovery')
@@ -1037,6 +1347,19 @@ t('discovery records credential names but excludes literal values from output an
   assert.equal(first.id, second.id)
 })
 
+t('discovery accepts SQL declarations only from SQL files and ignores test-source lookalikes', () => {
+  const manifest = buildDiscoveryManifest(new Map([
+    ['scripts/fake-test.mjs', `assert.match(sql, /create table if not exists public.fake_table/i)`],
+    ['src/fake.js', `client.from('real_table').select('*')`],
+    ['supabase-real.sql', 'create table if not exists public.real_table (id bigint);'],
+  ]))
+  assert.equal(Object.hasOwn(manifest.resources, 'db-table:fake_table'), false)
+  assert.equal(Object.hasOwn(manifest.resources, 'db-table:public'), false)
+  assert.ok(manifest.resources['db-table:real_table'])
+  assert.deepEqual(manifest.resources['db-table:real_table'].details.definitions, ['supabase-real.sql'])
+  assert.deepEqual(manifest.resources['db-table:real_table'].details.references, ['src/fake.js', 'supabase-real.sql'])
+})
+
 t('generated discovery manifest covers current API, DB, storage, realtime and MCP surfaces', () => {
   const resources = WORKFLOW_SYSTEM_DISCOVERY.current.resources
   for (const key of [
@@ -1044,18 +1367,24 @@ t('generated discovery manifest covers current API, DB, storage, realtime and MC
     'api:/api/shared-canvas',
     'db-table:canvases',
     'db-table:share_revocations',
+    'db-table:system_runtime_observations',
     'storage-bucket:canvas-images',
     'realtime-table:canvases',
     'credential-reference:SUPABASE_ANON_KEY',
     'runtime-capability:workflow.supabase.canvas-service.operations',
   ]) assert.ok(resources[key], `missing discovery resource: ${key}`)
+  assert.equal(Object.hasOwn(resources, 'db-table:public'), false)
   assert.deepEqual(
     resources['runtime-capability:workflow.supabase.canvas-service.operations'].details,
     {
       authorization: 'system_operator',
       dataScope: 'application_aggregate',
+      freshnessMs: 900000,
       operation: 'read',
+      pathEdgeIds: [],
       resultKind: 'metric_groups',
+      risk: 'low',
+      sideEffect: 'none',
       targetNodeId: 'map-canvases-table',
     },
   )
@@ -1713,6 +2042,10 @@ t('different resource proposals merge without duplicate nodes across two canvas 
 
   assert.deepEqual(conflicts, [])
   assert.deepEqual(new Set(bindings), new Set([
+    'runtime-capability:workflow.vercel.deployment.runtime',
+    'runtime-capability:workflow.api.shared-canvas.health',
+    'runtime-capability:workflow.api.mcp.route',
+    'runtime-capability:workflow.supabase.auth.session',
     'runtime-capability:workflow.supabase.canvas-service.operations',
     'credential-reference:SUPABASE_ANON_KEY',
     'db-table:share_revocations',

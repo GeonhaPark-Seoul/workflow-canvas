@@ -27,6 +27,7 @@ export default function StubEdge({
   const relationLabel = relation.label.length > 16 ? `${relation.label.slice(0, 15)}…` : relation.label
   const relationWidth = Math.max(58, Math.min(162, relationLabel.length * 11 + 32))
   const showRelation = relation.explicit && !partLink
+  const runtime = data?.systemRuntime
 
   return (
     <>
@@ -77,6 +78,19 @@ export default function StubEdge({
           <rect x={-relationWidth / 2} y={-12} width={relationWidth} height={24} rx={4} />
           <circle cx={-relationWidth / 2 + 11} cy="0" r="3.5" fill={relation.provenance.reality.color} />
           <text x="5" y="1" textAnchor="middle" dominantBaseline="middle">{relationLabel}</text>
+        </g>
+      )}
+      {runtime && (
+        <g
+          className={`system-runtime-edge-indicator is-${runtime.status}`}
+          transform={`translate(${labelX} ${labelY - (showRelation ? 19 : 0)})`}
+          style={{ '--runtime-edge-color': runtime.color }}
+          pointerEvents="none"
+          aria-hidden="true"
+        >
+          <circle r="6" className="system-runtime-edge-indicator-ring" />
+          <circle r="3" className="system-runtime-edge-indicator-dot" />
+          <title>{[runtime.label, runtime.summary].filter(Boolean).join(' · ')}</title>
         </g>
       )}
     </>

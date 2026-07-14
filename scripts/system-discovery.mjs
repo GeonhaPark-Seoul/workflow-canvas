@@ -107,10 +107,14 @@ export function buildDiscoveryManifest(filesInput) {
       {
         id: capability.id,
         operation: capability.operation,
+        sideEffect: capability.sideEffect,
+        risk: capability.risk,
         resultKind: capability.resultKind,
         authorization: capability.authorization,
         dataScope: capability.dataScope,
         targetNodeId: capability.targetNodeId,
+        pathEdgeIds: capability.pathEdgeIds,
+        freshnessMs: capability.freshnessMs,
         partKinds: capability.partKinds,
         partRefs: capability.partRefs,
         implementation: sourceRefs.map((ref) => [ref, fileFingerprints[ref]]),
@@ -119,8 +123,12 @@ export function buildDiscoveryManifest(filesInput) {
         authorization: capability.authorization,
         dataScope: capability.dataScope,
         operation: capability.operation,
+        sideEffect: capability.sideEffect,
+        risk: capability.risk,
         resultKind: capability.resultKind,
         targetNodeId: capability.targetNodeId,
+        pathEdgeIds: capability.pathEdgeIds,
+        freshnessMs: capability.freshnessMs,
       },
     )
   }
@@ -186,32 +194,37 @@ export function buildDiscoveryManifest(filesInput) {
   }
 
   for (const [relativePath, content] of fileEntries(files)) {
-    for (const table of matches(content, /create\s+table\s+if\s+not\s+exists\s+(?:public\.)?([a-zA-Z_][\w]*)/gi)) {
-      addTableSource(table, relativePath, 'definition')
+    const sqlSource = /\.sql$/i.test(relativePath)
+    if (sqlSource) {
+      for (const table of matches(content, /create\s+table\s+if\s+not\s+exists\s+(?:public\.)?([a-zA-Z_][\w]*)/gi)) {
+        addTableSource(table, relativePath, 'definition')
+      }
     }
     for (const table of matches(content, /\.from\(\s*['"]([a-zA-Z_][\w]*)['"]\s*\)/g)) {
       addTableSource(table, relativePath, 'reference')
     }
-    for (const policy of matches(
-      content,
-      /create\s+policy\s+"([^"]+)"\s+on\s+(?:public\.)?([a-zA-Z_][\w]*)/gi,
-      (match) => ({ name: match[1], table: match[2], sourceRef: relativePath }),
-    )) policies.push(policy)
-    for (const fn of matches(
-      content,
-      /create\s+or\s+replace\s+function\s+(?:public\.)?([a-zA-Z_][\w]*)\s*\(/gi,
-      (match) => ({ name: match[1], sourceRef: relativePath }),
-    )) dbFunctions.push(fn)
-    for (const bucket of matches(
-      content,
-      /insert\s+into\s+storage\.buckets[\s\S]{0,500}?values\s*\(\s*'([^']+)'/gi,
-      (match) => ({ name: match[1], sourceRef: relativePath }),
-    )) storageBuckets.push(bucket)
-    for (const table of matches(
-      content,
-      /alter\s+publication\s+supabase_realtime\s+add\s+table\s+(?:public\.)?([a-zA-Z_][\w]*)/gi,
-      (match) => ({ name: match[1], sourceRef: relativePath }),
-    )) realtimeTables.push(table)
+    if (sqlSource) {
+      for (const policy of matches(
+        content,
+        /create\s+policy\s+"([^"]+)"\s+on\s+(?:public\.)?([a-zA-Z_][\w]*)/gi,
+        (match) => ({ name: match[1], table: match[2], sourceRef: relativePath }),
+      )) policies.push(policy)
+      for (const fn of matches(
+        content,
+        /create\s+or\s+replace\s+function\s+(?:public\.)?([a-zA-Z_][\w]*)\s*\(/gi,
+        (match) => ({ name: match[1], sourceRef: relativePath }),
+      )) dbFunctions.push(fn)
+      for (const bucket of matches(
+        content,
+        /insert\s+into\s+storage\.buckets[\s\S]{0,500}?values\s*\(\s*'([^']+)'/gi,
+        (match) => ({ name: match[1], sourceRef: relativePath }),
+      )) storageBuckets.push(bucket)
+      for (const table of matches(
+        content,
+        /alter\s+publication\s+supabase_realtime\s+add\s+table\s+(?:public\.)?([a-zA-Z_][\w]*)/gi,
+        (match) => ({ name: match[1], sourceRef: relativePath }),
+      )) realtimeTables.push(table)
+    }
 
     const envNames = [
       ...matches(content, /process\.env\.([A-Z][A-Z0-9_]*)/g),

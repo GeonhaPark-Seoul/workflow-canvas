@@ -93,6 +93,46 @@ html, body, #root {
 .react-flow__edge.wfc-edge.selected .wfc-edge-arrow-halo {
   opacity: 0.24;
 }
+.react-flow__edge.wfc-edge.system-runtime-edge.is-runtime-healthy:not(:hover):not(.selected) .react-flow__edge-path {
+  stroke: #22c55e !important;
+}
+.react-flow__edge.wfc-edge.system-runtime-edge.is-runtime-healthy:not(:hover):not(.selected) .wfc-edge-arrow {
+  stroke: #22c55e !important;
+  fill: #22c55e;
+}
+.react-flow__edge.wfc-edge.system-runtime-edge.is-runtime-degraded:not(:hover):not(.selected) .react-flow__edge-path,
+.react-flow__edge.wfc-edge.system-runtime-edge.is-runtime-stale:not(:hover):not(.selected) .react-flow__edge-path {
+  stroke: #eab308 !important;
+}
+.react-flow__edge.wfc-edge.system-runtime-edge.is-runtime-degraded:not(:hover):not(.selected) .wfc-edge-arrow,
+.react-flow__edge.wfc-edge.system-runtime-edge.is-runtime-stale:not(:hover):not(.selected) .wfc-edge-arrow {
+  stroke: #eab308 !important;
+  fill: #eab308;
+}
+.react-flow__edge.wfc-edge.system-runtime-edge.is-runtime-failed:not(:hover):not(.selected) .react-flow__edge-path {
+  stroke: #ef4444 !important;
+}
+.react-flow__edge.wfc-edge.system-runtime-edge.is-runtime-failed:not(:hover):not(.selected) .wfc-edge-arrow {
+  stroke: #ef4444 !important;
+  fill: #ef4444;
+}
+.react-flow__edge.wfc-edge.system-runtime-edge.is-runtime-checking:not(:hover):not(.selected) .react-flow__edge-path {
+  stroke: #60a5fa !important;
+}
+.react-flow__edge.wfc-edge.system-runtime-edge.is-runtime-checking:not(:hover):not(.selected) .wfc-edge-arrow {
+  stroke: #60a5fa !important;
+  fill: #60a5fa;
+}
+.system-runtime-edge-indicator-ring {
+  fill: var(--runtime-edge-color);
+  opacity: 0.18;
+}
+.system-runtime-edge-indicator-dot {
+  fill: var(--runtime-edge-color);
+}
+.system-runtime-edge-indicator.is-checking {
+  animation: system-runtime-pulse 1s ease-in-out infinite;
+}
 .wfc-relation-label rect {
   fill: #181820;
   stroke: var(--relation-color);
@@ -198,6 +238,9 @@ body[data-theme='light'] .react-flow__edge.wfc-edge.selected .wfc-relation-label
 .system-part-chip.is-runtime-declared { border-color: #f59e0b; }
 .system-part-chip.is-runtime-checking { border-color: #60a5fa; }
 .system-part-chip.is-runtime-healthy { border-color: #22c55e; }
+.system-part-chip.is-runtime-degraded { border-color: #eab308; }
+.system-part-chip.is-runtime-stale { border-color: #f59e0b; }
+.system-part-chip.is-runtime-unknown { border-color: #94a3b8; }
 .system-part-chip.is-runtime-failed { border-color: #ef4444; }
 .system-part-runtime-dot {
   width: 6px;
@@ -320,6 +363,9 @@ body[data-theme='light'] .react-flow__edge.wfc-edge.selected .wfc-relation-label
   font-size: 9px;
 }
 .system-part-runtime.is-healthy { border-color: #166534; }
+.system-part-runtime.is-degraded,
+.system-part-runtime.is-stale { border-color: #a16207; }
+.system-part-runtime.is-unknown { border-color: #475569; }
 .system-part-runtime.is-failed { border-color: #991b1b; }
 .system-part-runtime.is-checking { border-color: #1d4ed8; }
 .system-part-runtime strong {
@@ -367,6 +413,13 @@ body[data-theme='light'] .react-flow__edge.wfc-edge.selected .wfc-relation-label
 }
 @keyframes system-runtime-spin {
   to { transform: rotate(360deg); }
+}
+.system-runtime-all-check:not(:disabled):hover {
+  background: #ffffff0c !important;
+  border-color: currentColor !important;
+}
+.system-runtime-all-check .is-spinning {
+  animation: system-runtime-spin 0.9s linear infinite;
 }
 .system-runtime-data {
   margin-top: 7px;
@@ -557,6 +610,25 @@ body[data-theme='light'] .react-flow__node:hover .canvas-group-frame {
   border-style: solid;
   border-color: #22c55e99;
   opacity: 1;
+}
+.system-node-card[data-reality='failed']::after {
+  border-style: solid;
+  border-color: #ef444499;
+  opacity: 1;
+}
+.system-node-card[data-reality='degraded']::after,
+.system-node-card[data-reality='stale']::after {
+  border-style: solid;
+  border-color: #eab30899;
+  opacity: 1;
+}
+.system-node-card[data-reality='checking']::after {
+  border-style: solid;
+  border-color: #60a5fa99;
+  opacity: 1;
+}
+.system-node-card[data-reality='unknown']::after {
+  border-color: #94a3b866;
 }
 
 .node-open-notes {

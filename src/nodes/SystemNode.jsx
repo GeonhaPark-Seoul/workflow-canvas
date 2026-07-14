@@ -57,6 +57,13 @@ function runtimeTitle(runtime, reality) {
   return details.join(' · ')
 }
 
+function runtimeObservationValue(item) {
+  if (item.valueType === 'boolean') return item.value ? '예' : '아니오'
+  if (item.valueType === 'duration_ms') return `${item.value}ms`
+  if (item.valueType === 'timestamp') return runtimeUpdatedAtLabel(item.value)
+  return `${item.value}${item.unit ? ` ${item.unit}` : ''}`
+}
+
 function blankSystemPart() {
   return {
     id: newPartId(),
@@ -208,9 +215,16 @@ export default function SystemNode({ data, selected, id }) {
     && Array.isArray(partDraftRuntime.items)
     ? partDraftRuntime.items
     : null
+  const partDraftRuntimeObservations = ['healthy', 'degraded'].includes(partDraftRuntime?.status)
+    && partDraftRuntime?.resultKind === 'observations'
+    && Array.isArray(partDraftRuntime.observations)
+    ? partDraftRuntime.observations
+    : null
   const runtimeActionLabel = partDraftRuntimeCapability?.operation === 'read'
     ? '데이터 새로 조회'
-    : '연결 상태 확인'
+    : ['observe', 'validate'].includes(partDraftRuntimeCapability?.operation)
+      ? '운영 상태 확인'
+      : '시스템 작업 실행'
 
   return (
     <div
@@ -520,19 +534,23 @@ export default function SystemNode({ data, selected, id }) {
                     ↻
                   </button>
                 </div>
-                {partDraftRuntimeItems && (
+                {(partDraftRuntimeItems || partDraftRuntimeObservations) && (
                   <div
                     className="system-runtime-data"
                     aria-label={partDraftRuntime.collectionLabel || partDraftRuntimeCapability.label}
                   >
                     <div className="system-runtime-data-heading">
                       <strong>
-                        {partDraftRuntime.collectionLabel || '항목'} {partDraftRuntime.totalCount ?? partDraftRuntimeItems.length}
+                        {partDraftRuntime.collectionLabel || '항목'}{' '}
+                        {partDraftRuntime.totalCount ?? partDraftRuntimeItems?.length ?? partDraftRuntimeObservations?.length ?? 0}
                       </strong>
-                      {partDraftRuntime.truncated && <span>최근 {partDraftRuntimeItems.length}개</span>}
-                    </div>
-                    <div className="system-runtime-data-list">
-                      {partDraftRuntimeItems.length ? partDraftRuntimeItems.map((item) => (
+                        {partDraftRuntime.truncated && (
+                          <span>표시 {partDraftRuntimeItems?.length ?? partDraftRuntimeObservations?.length ?? 0}개</span>
+                        )}
+                      </div>
+                    {partDraftRuntimeItems && (
+                      <div className="system-runtime-data-list">
+                        {partDraftRuntimeItems.length ? partDraftRuntimeItems.map((item) => (
                         <div className="system-runtime-data-row" key={item.id}>
                           <div className="system-runtime-data-title">
                             <strong title={item.title}>{item.title}</strong>
@@ -548,8 +566,27 @@ export default function SystemNode({ data, selected, id }) {
                         <div className="system-runtime-data-empty">
                           조회된 {partDraftRuntime.collectionLabel || '항목'} 없음
                         </div>
-                      )}
-                    </div>
+                        )}
+                      </div>
+                    )}
+                    {partDraftRuntimeObservations && (
+                      <div className="system-runtime-data-list">
+                        {partDraftRuntimeObservations.length ? partDraftRuntimeObservations.map((item) => (
+                          <div className="system-runtime-data-row" key={item.id}>
+                            <div className="system-runtime-data-title">
+                              <strong title={item.label}>{item.label}</strong>
+                              <time dateTime={item.observedAt}>{runtimeUpdatedAtLabel(item.observedAt)}</time>
+                            </div>
+                            <div className="system-runtime-data-counts">
+                              <span><b>{runtimeObservationValue(item)}</b></span>
+                              <code title={`${item.verification} · ${item.availability}`}>{item.category}</code>
+                            </div>
+                          </div>
+                        )) : (
+                          <div className="system-runtime-data-empty">관측된 항목 없음</div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
               </>

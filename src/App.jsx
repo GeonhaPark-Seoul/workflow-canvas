@@ -36,7 +36,11 @@ import {
 } from './storage'
 import { supabase } from './lib/supabase'
 import { sanitizeNodeData } from './lib/sanitizeHtml'
-import { checkSystemPartRuntime } from './lib/systemRuntimeApi.js'
+import {
+  checkAllSystemRuntime,
+  checkSystemPartRuntime,
+  loadLatestSystemRuntime,
+} from './lib/systemRuntimeApi.js'
 import {
   saveCanvas as cloudSaveCanvas,
   loadAllCanvases as cloudLoadAllCanvases,
@@ -66,7 +70,12 @@ import {
 import { getMyProfile, loadMySettings, upsertMyEmail, touchLastSeen } from './lib/profiles'
 import { createSystemNodeData } from '../shared/systemOntology.js'
 import { detachSystemPartBindings, normalizeSystemParts } from '../shared/systemPartOntology.js'
-import { failedSystemRuntimeResult, systemRuntimeCapabilityForPart } from '../shared/systemRuntime.js'
+import {
+  failedSystemRuntimeResult,
+  systemPartRuntimeReality,
+  systemRuntimeCapabilityForPart,
+  systemRuntimePathEdgeIds,
+} from '../shared/systemRuntime.js'
 import {
   clearDigitalTwinReviewDecision,
   partitionDigitalTwinReviewItems,
@@ -163,6 +172,109 @@ function parseSharedId(id) {
   const sep = rest.indexOf(':')
   if (sep === -1) return null
   return { ownerId: rest.slice(0, sep), canvasId: rest.slice(sep + 1) }
+}
+
+function systemRuntimeTargetsForNodes(nodes) {
+  const targets = []
+  for (const node of nodes ?? []) {
+    if (node?.type !== 'system') continue
+    for (const part of normalizeSystemParts(node.data?.systemParts)) {
+      const capability = systemRuntimeCapabilityForPart(part, node.id)
+      if (capability) targets.push({ nodeId: node.id, partId: part.id, capability })
+    }
+  }
+  return targets
+}
+
+function systemRuntimeMapFromRecords(records) {
+  const byNode = {}
+  for (const record of records ?? []) {
+    byNode[record.nodeId] = { ...(byNode[record.nodeId] ?? {}), [record.partId]: record.result }
+  }
+  return byNode
+}
+
+function systemRuntimePersistenceError(response, expectedCount) {
+  if (response.persistenceAvailable === false) return '운영 관측 저장소 SQL이 아직 적용되지 않았습니다.'
+  if (response.persistenceErrorCode === 'OBSERVATION_READ_FAILED') return '최근 운영 관측 기록을 불러오지 못했습니다.'
+  const persisted = typeof expectedCount === 'number'
+    ? response.persistedCount === expectedCount
+    : response.persisted === true
+  return persisted ? '' : '운영 상태는 확인했지만 관측 기록을 저장하지 못했습니다.'
+}
+
+const RUNTIME_STATE_PRIORITY = {
+  checking: 6,
+  failed: 5,
+  degraded: 4,
+  stale: 3,
+  unknown: 2,
+  healthy: 1,
+}
+
+function aggregateSystemNodeRuntime(node, runtimeByPart, now = Date.now()) {
+  const targets = systemRuntimeTargetsForNodes([node])
+  if (!targets.length) return undefined
+  const states = targets.map((target) => ({
+    target,
+    result: runtimeByPart?.[target.partId],
+    reality: systemPartRuntimeReality(runtimeByPart?.[target.partId], now),
+  }))
+  const worst = states.reduce((current, candidate) => (
+    !current || RUNTIME_STATE_PRIORITY[candidate.reality.id] > RUNTIME_STATE_PRIORITY[current.reality.id]
+      ? candidate
+      : current
+  ), null)
+  const checkedTimes = states.map(({ result }) => Date.parse(result?.checkedAt ?? '')).filter(Number.isFinite)
+  return {
+    status: worst?.reality.id ?? 'unknown',
+    verification: states.every(({ reality }) => reality.id === 'healthy') ? 'verified' : 'partial',
+    resourceId: `system-node:${node.id}`,
+    verifiedAt: checkedTimes.length ? new Date(Math.max(...checkedTimes)).toISOString() : new Date(0).toISOString(),
+  }
+}
+
+function systemRuntimeDashboardSummary(targets, runtimeByNode, checking, now = Date.now()) {
+  if (!targets.length) return null
+  const counts = { healthy: 0, degraded: 0, stale: 0, failed: 0, unknown: 0, checking: 0 }
+  for (const target of targets) {
+    const state = systemPartRuntimeReality(runtimeByNode[target.nodeId]?.[target.partId], now)
+    counts[state.id] = (counts[state.id] ?? 0) + 1
+  }
+  const status = checking || counts.checking
+    ? 'checking'
+    : counts.failed
+      ? 'failed'
+      : counts.degraded || counts.stale
+        ? 'degraded'
+        : counts.unknown
+          ? 'unknown'
+          : 'healthy'
+  const color = {
+    healthy: '#22c55e', degraded: '#eab308', failed: '#ef4444', unknown: '#94a3b8', checking: '#60a5fa',
+  }[status]
+  return {
+    status,
+    color,
+    label: `${counts.healthy}/${targets.length}`,
+    title: `전체 운영 상태 확인 · 정상 ${counts.healthy} · 부분/오래됨 ${counts.degraded + counts.stale} · 오류 ${counts.failed} · 미확인 ${counts.unknown}`,
+    counts,
+  }
+}
+
+function systemRuntimeByEdge(targets, runtimeByNode, now = Date.now()) {
+  const byEdge = new Map()
+  for (const target of targets) {
+    const result = runtimeByNode[target.nodeId]?.[target.partId]
+    const reality = systemPartRuntimeReality(result, now)
+    for (const edgeId of systemRuntimePathEdgeIds(target.capability.id)) {
+      const current = byEdge.get(edgeId)
+      if (!current || RUNTIME_STATE_PRIORITY[reality.id] > RUNTIME_STATE_PRIORITY[current.reality.id]) {
+        byEdge.set(edgeId, { reality, result, capability: target.capability })
+      }
+    }
+  }
+  return byEdge
 }
 
 function participantKey(person) {
@@ -364,6 +476,13 @@ export default function App() {
   const [twinProposalPreview, setTwinProposalPreview] = useState(null) // { itemId, itemFingerprint } | null
   const [twinProposalStatus, setTwinProposalStatus] = useState(null) // { type, message } | null
   const [systemPartRuntimeByNode, setSystemPartRuntimeByNode] = useState({})
+  const [systemRuntimeDashboard, setSystemRuntimeDashboard] = useState({
+    loading: false,
+    checking: false,
+    persistenceAvailable: true,
+    error: '',
+  })
+  const [systemRuntimeNow, setSystemRuntimeNow] = useState(Date.now)
   const [notesSelectedId, setNotesSelectedId] = useState(null)
   const [notesSide, setNotesSide] = useState('right')
   const [renameValue, setRenameValue] = useState('')
@@ -406,7 +525,62 @@ export default function App() {
   // ── Auth + cloud sync ─────────────────────────────────────────────────────
   const [user, setUser] = useState(null)
   const userRef = useRef(null)
-  useEffect(() => { setSystemPartRuntimeByNode({}) }, [activeCanvasId, user?.id])
+  const systemRuntimeTargets = useMemo(() => systemRuntimeTargetsForNodes(nodes), [nodes])
+  const systemRuntimeTargetSignature = systemRuntimeTargets
+    .map((target) => `${target.nodeId}:${target.partId}:${target.capability.id}`)
+    .sort()
+    .join('|')
+  const systemRuntimeSummary = useMemo(
+    () => systemRuntimeDashboardSummary(
+      systemRuntimeTargets,
+      systemPartRuntimeByNode,
+      systemRuntimeDashboard.checking,
+      systemRuntimeNow,
+    ),
+    [systemRuntimeTargets, systemPartRuntimeByNode, systemRuntimeDashboard.checking, systemRuntimeNow],
+  )
+  const runtimeByEdge = useMemo(
+    () => systemRuntimeByEdge(systemRuntimeTargets, systemPartRuntimeByNode, systemRuntimeNow),
+    [systemRuntimeTargets, systemPartRuntimeByNode, systemRuntimeNow],
+  )
+
+  useEffect(() => {
+    if (!systemRuntimeTargetSignature) return undefined
+    setSystemRuntimeNow(Date.now())
+    const timer = window.setInterval(() => setSystemRuntimeNow(Date.now()), 60_000)
+    return () => window.clearInterval(timer)
+  }, [systemRuntimeTargetSignature])
+
+  useEffect(() => {
+    let cancelled = false
+    setSystemPartRuntimeByNode({})
+    setSystemRuntimeDashboard({ loading: false, checking: false, persistenceAvailable: true, error: '' })
+    if (!user?.id || parseSharedId(activeCanvasId) || !systemRuntimeTargetSignature) return undefined
+    setSystemRuntimeDashboard((current) => ({ ...current, loading: true }))
+    loadLatestSystemRuntime({ canvasId: activeCanvasId })
+      .then((response) => {
+        if (cancelled) return
+        setSystemPartRuntimeByNode(systemRuntimeMapFromRecords(response.results))
+        setSystemRuntimeDashboard({
+          loading: false,
+          checking: false,
+          persistenceAvailable: response.persistenceAvailable,
+          error: response.persistenceErrorCode
+            ? systemRuntimePersistenceError(response)
+            : response.persistenceAvailable ? '' : '운영 관측 저장소 SQL이 아직 적용되지 않았습니다.',
+        })
+      })
+      .catch((error) => {
+        if (cancelled) return
+        setSystemRuntimeDashboard({
+          loading: false,
+          checking: false,
+          persistenceAvailable: true,
+          error: error?.message || '최근 운영 관측을 불러오지 못했습니다.',
+        })
+      })
+    return () => { cancelled = true }
+  }, [activeCanvasId, systemRuntimeTargetSignature, user?.id])
   // Tracks which user id has already run the full afterLogin() sequence, so a
   // tab-refocus re-emitting SIGNED_IN for the SAME user (supabase-js token
   // revalidation) doesn't re-run loadFromCloud() and yank the viewer back to
@@ -2405,11 +2579,16 @@ export default function App() {
       },
     }))
     try {
-      const result = await checkSystemPartRuntime({ canvasId, nodeId, partId })
+      const response = await checkSystemPartRuntime({ canvasId, nodeId, partId })
       if (latestRef.current.activeCanvasId !== canvasId) return
       setSystemPartRuntimeByNode((current) => ({
         ...current,
-        [nodeId]: { ...(current[nodeId] ?? {}), [partId]: result },
+        [nodeId]: { ...(current[nodeId] ?? {}), [partId]: response.result },
+      }))
+      setSystemRuntimeDashboard((current) => ({
+        ...current,
+        persistenceAvailable: response.persistenceAvailable,
+        error: systemRuntimePersistenceError(response),
       }))
     } catch (error) {
       if (latestRef.current.activeCanvasId !== canvasId) return
@@ -2424,6 +2603,42 @@ export default function App() {
       }))
     }
   }, [])
+
+  const runAllSystemRuntimeChecks = useCallback(async () => {
+    const canvasId = latestRef.current.activeCanvasId
+    if (!userRef.current || parseSharedId(canvasId) || !systemRuntimeTargets.length) return
+    const previous = systemPartRuntimeByNode
+    setSystemRuntimeDashboard((current) => ({ ...current, checking: true, error: '' }))
+    setSystemPartRuntimeByNode((current) => {
+      const next = { ...current }
+      for (const target of systemRuntimeTargets) {
+        next[target.nodeId] = {
+          ...(next[target.nodeId] ?? {}),
+          [target.partId]: { status: 'checking', capabilityId: target.capability.id },
+        }
+      }
+      return next
+    })
+    try {
+      const response = await checkAllSystemRuntime({ canvasId })
+      if (latestRef.current.activeCanvasId !== canvasId) return
+      setSystemPartRuntimeByNode(systemRuntimeMapFromRecords(response.results))
+      setSystemRuntimeDashboard({
+        loading: false,
+        checking: false,
+        persistenceAvailable: response.persistenceAvailable,
+        error: systemRuntimePersistenceError(response, systemRuntimeTargets.length),
+      })
+    } catch (error) {
+      if (latestRef.current.activeCanvasId !== canvasId) return
+      setSystemPartRuntimeByNode(previous)
+      setSystemRuntimeDashboard((current) => ({
+        ...current,
+        checking: false,
+        error: error?.message || '전체 운영 상태를 확인하지 못했습니다.',
+      }))
+    }
+  }, [systemPartRuntimeByNode, systemRuntimeTargets])
 
   const updateNoteData = useCallback((id, patch) => {
     if (!canEditNotes) return
@@ -3329,12 +3544,27 @@ export default function App() {
     // canvas-scope invitees via editableSet === null.)
     const deletable = isNodeEditable(e.source) && isNodeEditable(e.target)
     const type = 'stub'
+    const runtimeEdge = runtimeByEdge.get(e.id)
+    const runtimeClass = runtimeEdge ? ` system-runtime-edge is-runtime-${runtimeEdge.reality.id}` : ''
+    const runtimeData = runtimeEdge
+      ? {
+          ...(e.data ?? {}),
+          systemRuntime: {
+            status: runtimeEdge.reality.id,
+            label: runtimeEdge.reality.label,
+            color: runtimeEdge.reality.color,
+            summary: runtimeEdge.result?.summary || runtimeEdge.capability.label,
+            checkedAt: runtimeEdge.result?.checkedAt,
+          },
+        }
+      : e.data
     // Stable hook class so CSS can target `.wfc-edge:hover` for the hover glow.
-    const className = `wfc-edge${e.className ? ` ${e.className}` : ''}`
-    if (!e.selected) return { ...e, ...baseEdgeStyle(e), deletable, type, className }
+    const className = `wfc-edge${e.className ? ` ${e.className}` : ''}${runtimeClass}`
+    if (!e.selected) return { ...e, ...baseEdgeStyle(e), data: runtimeData, deletable, type, className }
     if (isPartEdge(e)) {
       return {
         ...e,
+        data: runtimeData,
         deletable,
         type,
         className,
@@ -3349,6 +3579,7 @@ export default function App() {
     const color = isMemo ? '#f59e0b' : '#60a5fa'
     return {
       ...e,
+      data: runtimeData,
       deletable,
       type,
       className,
@@ -3483,6 +3714,13 @@ export default function App() {
         onRenameView={renameView}
         onDeleteView={deleteView}
         onPaletteAdd={onPaletteAdd}
+        systemRuntime={systemRuntimeSummary ? {
+          ...systemRuntimeSummary,
+          checking: systemRuntimeDashboard.checking || systemRuntimeDashboard.loading,
+          disabled: !user || !!parseSharedId(activeCanvasId),
+          error: systemRuntimeDashboard.error,
+          onCheck: runAllSystemRuntimeChecks,
+        } : null}
       />
 
       <AuthPanel
@@ -3769,6 +4007,9 @@ export default function App() {
               onToggleViewRestriction: isOwner ? onToggleMemberViewRestriction : undefined,
               scopedParticipants: nodeScopedParticipants,
               systemPartRuntime: systemPartRuntimeByNode[n.id] ?? {},
+              twinRuntime: n.type === 'system'
+                ? aggregateSystemNodeRuntime(n, systemPartRuntimeByNode[n.id] ?? {}, systemRuntimeNow)
+                : undefined,
               canRunSystemChecks: isOwner && !!user,
               onCheckSystemPart: isOwner ? runSystemPartRuntimeCheck : undefined,
               onUpdate: (patch) => updateNodeData(n.id, patch),

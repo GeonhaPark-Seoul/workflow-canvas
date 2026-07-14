@@ -9,24 +9,65 @@ const GROUPS = Object.freeze([
   { id: 'map-group-development', label: '개발·검증·배포층', x: 0, y: 650, width: 2020, height: 510 },
 ])
 
-const CANVAS_SERVICE_OPERATIONS_PART = Object.freeze({
+function runtimePart({ id, kind, label, ref, evidenceRef }) {
+  const entityKey = `runtime-capability:${ref}`
+  return Object.freeze({
+    id,
+    kind,
+    label,
+    ref,
+    exposure: 'internal',
+    sourceKind: 'code',
+    evidenceRef,
+    digitalTwinBinding: {
+      schemaVersion: 1,
+      sourceId: 'workflow-canvas:self-system',
+      entityKey,
+      observedFingerprint: WORKFLOW_SYSTEM_DISCOVERY.current.resources[entityKey]?.fingerprint ?? '',
+      observedSnapshotId: WORKFLOW_SYSTEM_DISCOVERY.current.id,
+    },
+  })
+}
+
+const VERCEL_RUNTIME_PART = runtimePart({
+  id: 'map-part-vercel-runtime',
+  kind: 'output',
+  label: '프로덕션 운영 상태',
+  ref: 'workflow.vercel.deployment.runtime',
+  evidenceRef: 'api/system-runtime.js, mcp/systemRuntime.js, vercel.json',
+})
+
+const SHARED_API_RUNTIME_PART = runtimePart({
+  id: 'map-part-shared-api-health',
+  kind: 'connection',
+  label: '공유 API 상태',
+  ref: 'workflow.api.shared-canvas.health',
+  evidenceRef: 'api/shared-canvas.js, api/system-runtime.js, mcp/systemRuntime.js',
+})
+
+const MCP_RUNTIME_PART = runtimePart({
+  id: 'map-part-mcp-route',
+  kind: 'connection',
+  label: 'MCP 배포 경로',
+  ref: 'workflow.api.mcp.route',
+  evidenceRef: 'api/mcp.js, mcp/server.js, api/system-runtime.js',
+})
+
+const AUTH_RUNTIME_PART = runtimePart({
+  id: 'map-part-auth-session',
+  kind: 'connection',
+  label: 'Auth 세션 검증',
+  ref: 'workflow.supabase.auth.session',
+  evidenceRef: 'mcp/shareAccess.js, api/system-runtime.js, mcp/systemRuntime.js',
+})
+
+const CANVAS_SERVICE_OPERATIONS_PART = runtimePart({
   // Keep the original id so an already deployed map can replace this exact part safely.
   id: 'map-part-own-canvas-summary',
   kind: 'output',
   label: '캔버스 서비스 운영 현황',
   ref: 'workflow.supabase.canvas-service.operations',
-  exposure: 'internal',
-  sourceKind: 'code',
   evidenceRef: 'mcp/systemRuntime.js, supabase-runtime-read.sql',
-  digitalTwinBinding: {
-    schemaVersion: 1,
-    sourceId: 'workflow-canvas:self-system',
-    entityKey: 'runtime-capability:workflow.supabase.canvas-service.operations',
-    observedFingerprint: WORKFLOW_SYSTEM_DISCOVERY.current.resources[
-      'runtime-capability:workflow.supabase.canvas-service.operations'
-    ]?.fingerprint ?? '',
-    observedSnapshotId: WORKFLOW_SYSTEM_DISCOVERY.current.id,
-  },
 })
 
 function groupNode(group) {
@@ -154,6 +195,7 @@ function mapNodes() {
       evidence: 'Vercel 라우팅과 API 엔트리',
       provider: 'Vercel',
       externalRef: 'vercel.json',
+      systemParts: [VERCEL_RUNTIME_PART],
     }),
     systemNode('map-shared-api', 'map-group-runtime', 350, 65, 'api', '공유 캔버스 API', {
       purpose: '공유 참여자의 읽기·저장을 서버에서 다시 검증한다.',
@@ -162,6 +204,7 @@ function mapNodes() {
       evidence: '공유 API와 서버 권한 게이트웨이',
       provider: 'Vercel Function',
       externalRef: '/api/shared-canvas',
+      systemParts: [SHARED_API_RUNTIME_PART],
     }),
     systemNode('map-mcp-api', 'map-group-runtime', 350, 315, 'mcp', 'Workflow Canvas MCP 서버', {
       purpose: 'AI가 캔버스를 구조적으로 읽고 안전한 도구로 수정하게 한다.',
@@ -170,6 +213,7 @@ function mapNodes() {
       evidence: 'MCP 서버와 Supabase 저장 계층',
       provider: 'Vercel Function + MCP SDK',
       externalRef: '/api/mcp',
+      systemParts: [MCP_RUNTIME_PART],
     }),
     systemNode('map-permission-gateway', 'map-group-runtime', 665, 190, 'policy', '서버 권한 게이트웨이', {
       purpose: '초대 범위 밖의 읽기·쓰기를 서버에서 차단한다.',
@@ -187,6 +231,7 @@ function mapNodes() {
       evidence: 'Supabase 클라이언트 인증 사용',
       provider: 'Supabase',
       externalRef: 'auth.users',
+      systemParts: [AUTH_RUNTIME_PART],
     }),
     systemNode('map-postgres', 'map-group-data', 350, 75, 'database', 'Supabase Postgres', {
       purpose: '캔버스와 사용자·공유 메타데이터의 단일 저장소가 된다.',

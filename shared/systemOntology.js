@@ -99,12 +99,17 @@ export function createSystemNodeData(systemKind = 'service') {
 export function systemNodeReality(data = {}) {
   const runtime = data.twinRuntime
   const verifiedAt = Date.parse(runtime?.verifiedAt ?? '')
-  const isTwin = runtime?.verification === 'verified'
-    && typeof runtime?.resourceId === 'string'
+  const serverRuntime = typeof runtime?.resourceId === 'string'
     && runtime.resourceId.length > 0
     && Number.isFinite(verifiedAt)
-
-  return isTwin
+  if (!serverRuntime) return { id: 'declared', label: '설계', color: '#f59e0b' }
+  const status = runtime.status ?? (runtime.verification === 'verified' ? 'healthy' : 'unknown')
+  if (status === 'checking') return { id: 'checking', label: '확인 중', color: '#60a5fa' }
+  if (status === 'failed') return { id: 'failed', label: '오류', color: '#ef4444' }
+  if (status === 'stale') return { id: 'stale', label: '오래됨', color: '#f59e0b' }
+  if (status === 'degraded') return { id: 'degraded', label: '부분 확인', color: '#eab308' }
+  if (status === 'unknown') return { id: 'unknown', label: '미확인', color: '#94a3b8' }
+  return status === 'healthy' && runtime.verification === 'verified'
     ? { id: 'twin', label: 'LIVE', color: '#22c55e' }
-    : { id: 'declared', label: '설계', color: '#f59e0b' }
+    : { id: 'unknown', label: '미확인', color: '#94a3b8' }
 }

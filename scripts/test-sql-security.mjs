@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 
 const read = (name) => readFile(new URL(`../${name}`, import.meta.url), 'utf8')
-const [shares, profiles, profilePrivacy, images, tokens, notes, relationGuard, runtimeRead] = await Promise.all([
+const [shares, profiles, profilePrivacy, images, tokens, notes, relationGuard, runtimeRead, runtimeObservations] = await Promise.all([
   read('supabase-shares.sql'),
   read('supabase-profiles.sql'),
   read('supabase-profile-privacy.sql'),
@@ -11,6 +11,7 @@ const [shares, profiles, profilePrivacy, images, tokens, notes, relationGuard, r
   read('supabase-canvas-notes.sql'),
   read('supabase-relation-metadata-guard.sql'),
   read('supabase-runtime-read.sql'),
+  read('supabase-runtime-observations.sql'),
 ])
 
 const restrictedFunctions = [
@@ -94,5 +95,13 @@ assert.match(
   /grant execute on function public\.get_workflow_system_operational_snapshot\(\) to service_role;/i,
 )
 assert.match(runtimeRead, /notify pgrst, 'reload schema';/i, 'runtime RPC must refresh the PostgREST schema cache')
+
+assert.match(runtimeObservations, /create table if not exists public\.system_runtime_observations/i)
+assert.match(runtimeObservations, /alter table public\.system_runtime_observations enable row level security;/i)
+assert.match(runtimeObservations, /revoke all on table public\.system_runtime_observations from PUBLIC, anon, authenticated;/i)
+assert.match(runtimeObservations, /grant select, insert, delete on table public\.system_runtime_observations to service_role;/i)
+assert.doesNotMatch(runtimeObservations, /grant [^;]*update[^;]*system_runtime_observations/i, 'runtime evidence must stay append-only')
+assert.doesNotMatch(runtimeObservations, /grant [^;]*system_runtime_observations to (?:anon|authenticated)/i)
+assert.match(runtimeObservations, /octet_length\(result::text\) <= 100000/i, 'runtime evidence payloads must remain bounded')
 
 console.log('SQL security checks passed')
