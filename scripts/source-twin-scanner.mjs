@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 import { parse } from '@babel/parser'
 import { SOURCE_TWIN_SCHEMA_VERSION, SOURCE_TWIN_SOURCE_ID } from '../shared/sourceTwin.js'
@@ -313,10 +313,20 @@ function repositoryUrl(raw) {
 
 export function readSourceRepositoryMetadata(root) {
   let remote = ''
-  try { remote = execFileSync('git', ['config', '--get', 'remote.origin.url'], { cwd: root, encoding: 'utf8' }) } catch {}
+  try {
+    remote = execFileSync('git', ['config', '--get', 'remote.origin.url'], {
+      cwd: root,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    })
+  } catch {}
   let defaultBranch = 'main'
   try {
-    const ref = execFileSync('git', ['symbolic-ref', '--short', 'refs/remotes/origin/HEAD'], { cwd: root, encoding: 'utf8' }).trim()
+    const ref = execFileSync('git', ['symbolic-ref', '--short', 'refs/remotes/origin/HEAD'], {
+      cwd: root,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim()
     defaultBranch = ref.replace(/^origin\//, '') || 'main'
   } catch {}
   let resolvedRepositoryUrl = repositoryUrl(remote)
@@ -607,10 +617,49 @@ function nulSeparated(output) {
   return output.split('\0').filter(Boolean)
 }
 
+const FALLBACK_EXCLUDED_DIRECTORIES = new Set([
+  '.git', '.vercel', 'Codex', 'coverage', 'dist', 'node_modules',
+])
+
+function filesystemSourceTwinPaths(root) {
+  const paths = []
+  const visit = (absoluteDirectory, relativeDirectory = '') => {
+    const entries = readdirSync(absoluteDirectory, { withFileTypes: true })
+      .sort((left, right) => left.name.localeCompare(right.name))
+    for (const entry of entries) {
+      if (entry.isSymbolicLink()) continue
+      const relativePath = relativeDirectory
+        ? `${relativeDirectory}/${entry.name}`
+        : entry.name
+      if (entry.isDirectory()) {
+        if (!FALLBACK_EXCLUDED_DIRECTORIES.has(entry.name)) {
+          visit(path.join(absoluteDirectory, entry.name), relativePath)
+        }
+      } else if (entry.isFile() && shouldInspect(relativePath)) {
+        paths.push(relativePath)
+      }
+    }
+  }
+  visit(root)
+  return paths.sort()
+}
+
+export function sourceTwinFilePaths(root) {
+  try {
+    const output = execFileSync(
+      'git',
+      ['ls-files', '--cached', '--others', '--exclude-standard', '-z'],
+      { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] },
+    )
+    return nulSeparated(output).filter(shouldInspect).sort()
+  } catch {
+    return filesystemSourceTwinPaths(root)
+  }
+}
+
 export function readSourceTwinWorkingTree(root) {
-  const output = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '-z'], { cwd: root, encoding: 'utf8' })
   const files = new Map()
-  for (const relativePath of nulSeparated(output).filter(shouldInspect).sort()) {
+  for (const relativePath of sourceTwinFilePaths(root)) {
     files.set(relativePath, readFileSync(path.join(root, relativePath), 'utf8'))
   }
   return files

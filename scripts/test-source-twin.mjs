@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict'
 import { createHmac } from 'node:crypto'
+import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
 import {
   buildSourceTwinManifest,
+  readSourceTwinWorkingTree,
   serializeSourceTwinManifest,
   parseGeneratedSourceTwin,
 } from './source-twin-scanner.mjs'
@@ -165,5 +169,20 @@ assert.deepEqual(compact.changedPaths, ['api/example.js', 'src/new.js'])
 assert.doesNotMatch(JSON.stringify(compact), /not-stored@example\.com|"private"/)
 assert.doesNotMatch(JSON.stringify(compact), /Update API/)
 assert.equal(sourceTwinRepositoryName(manifest), 'example/workflow-canvas')
+
+const noGitRoot = await mkdtemp(path.join(tmpdir(), 'source-twin-no-git-'))
+try {
+  await mkdir(path.join(noGitRoot, 'src'), { recursive: true })
+  await mkdir(path.join(noGitRoot, 'node_modules', 'ignored'), { recursive: true })
+  await mkdir(path.join(noGitRoot, 'dist'), { recursive: true })
+  await writeFile(path.join(noGitRoot, 'package.json'), '{"name":"no-git"}\n')
+  await writeFile(path.join(noGitRoot, 'src', 'app.js'), 'export const app = () => true\n')
+  await writeFile(path.join(noGitRoot, 'node_modules', 'ignored', 'secret.js'), 'doNotScan()\n')
+  await writeFile(path.join(noGitRoot, 'dist', 'bundle.js'), 'doNotScan()\n')
+  const noGitFiles = readSourceTwinWorkingTree(noGitRoot)
+  assert.deepEqual([...noGitFiles.keys()], ['package.json', 'src/app.js'])
+} finally {
+  await rm(noGitRoot, { recursive: true, force: true })
+}
 
 console.log('Source twin checks passed')

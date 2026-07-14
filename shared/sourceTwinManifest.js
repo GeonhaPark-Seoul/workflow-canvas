@@ -2,7 +2,7 @@
 export const SOURCE_TWIN_MANIFEST = Object.freeze(
 {
   "schemaVersion": 1,
-  "id": "source-twin-v1-62bad3e10ac1",
+  "id": "source-twin-v1-d7e4958cfd2b",
   "source": {
     "id": "workflow-canvas:self-source",
     "label": "Workflow Canvas 소스 코드",
@@ -710,6 +710,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "name": "node:fs/promises",
       "layer": "code",
       "summary": "node:fs/promises 외부 모듈 참조입니다.",
+      "tags": [
+        "dependency"
+      ]
+    },
+    {
+      "id": "dependency:node:os",
+      "kind": "dependency",
+      "label": "node:os",
+      "fingerprint": "7b090f0f70c7ae1b18f3",
+      "name": "node:os",
+      "layer": "code",
+      "summary": "node:os 외부 모듈 참조입니다.",
       "tags": [
         "dependency"
       ]
@@ -1634,13 +1646,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:scripts/source-twin-scanner.mjs",
       "kind": "file",
       "label": "scripts/source-twin-scanner.mjs",
-      "fingerprint": "076a62f8736cc1447807",
+      "fingerprint": "e178c8c2edd4ee2b1de3",
       "path": "scripts/source-twin-scanner.mjs",
       "layer": "documentation",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 636,
-      "summary": "문서에서 함수 35개 정의 · 모듈 6개 연결을 담당합니다.",
+      "lineEnd": 685,
+      "summary": "문서에서 함수 38개 정의 · 모듈 6개 연결을 담당합니다.",
       "tags": [
         "documentation"
       ],
@@ -1651,7 +1663,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
           "readSourceRepositoryMetadata",
           "readSourceTwinWorkingTree",
           "serializeSourceTwinManifest",
-          "SOURCE_TWIN_MANIFEST_PATH"
+          "SOURCE_TWIN_MANIFEST_PATH",
+          "sourceTwinFilePaths"
         ],
         "apiRoutes": [],
         "dbTables": [],
@@ -1721,13 +1734,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:scripts/test-source-twin.mjs",
       "kind": "file",
       "label": "scripts/test-source-twin.mjs",
-      "fingerprint": "853a6b73a05ceb290bd8",
+      "fingerprint": "4275435c6be67d6ba092",
       "path": "scripts/test-source-twin.mjs",
       "layer": "test",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 170,
-      "summary": "검증에서 {\"zen\":\"source twin\"} 데이터 접근 · 모듈 6개 연결을 담당합니다.",
+      "lineEnd": 189,
+      "summary": "검증에서 {\"zen\":\"source twin\"} 데이터 접근 · 모듈 9개 연결을 담당합니다.",
       "tags": [
         "{\"zen\":\"source twin\"}",
         "test"
@@ -8463,8 +8476,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 371,
-      "lineEnd": 377,
+      "lineStart": 381,
+      "lineEnd": 387,
       "summary": "entity을(를) 추가하는 함수입니다.",
       "tags": [
         "arrow",
@@ -8507,8 +8520,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 378,
-      "lineEnd": 378,
+      "lineStart": 388,
+      "lineEnd": 388,
       "summary": "relation을(를) 추가하는 함수입니다.",
       "tags": [
         "arrow",
@@ -8529,8 +8542,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 333,
-      "lineEnd": 604,
+      "lineStart": 343,
+      "lineEnd": 614,
       "summary": "source twin manifest을(를) 구성하는 함수입니다.",
       "tags": [
         "documentation",
@@ -8577,6 +8590,28 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "lineStart": 109,
       "lineEnd": 119,
       "summary": "file summary을(를) 처리하는 함수입니다.",
+      "tags": [
+        "documentation",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:scripts/source-twin-scanner.mjs:filesystemSourceTwinPaths",
+      "kind": "function",
+      "label": "filesystemSourceTwinPaths",
+      "fingerprint": "6674f4bcb47b70733a00",
+      "name": "filesystemSourceTwinPaths",
+      "path": "scripts/source-twin-scanner.mjs",
+      "parentId": "file:scripts/source-twin-scanner.mjs",
+      "layer": "documentation",
+      "lineStart": 624,
+      "lineEnd": 645,
+      "summary": "filesystem source twin paths을(를) 처리하는 함수입니다.",
       "tags": [
         "documentation",
         "function"
@@ -8838,8 +8873,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 606,
-      "lineEnd": 608,
+      "lineStart": 616,
+      "lineEnd": 618,
       "summary": "nul separated을(를) 처리하는 함수입니다.",
       "tags": [
         "documentation",
@@ -8860,8 +8895,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 619,
-      "lineEnd": 625,
+      "lineStart": 668,
+      "lineEnd": 674,
       "summary": "generated source twin을(를) 해석하는 함수입니다.",
       "tags": [
         "documentation",
@@ -8927,8 +8962,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 533,
-      "lineEnd": 533,
+      "lineStart": 543,
+      "lineEnd": 543,
       "summary": "perspective을(를) 처리하는 함수입니다.",
       "tags": [
         "arrow",
@@ -8944,13 +8979,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:scripts/source-twin-scanner.mjs:readSourceRepositoryMetadata",
       "kind": "function",
       "label": "readSourceRepositoryMetadata",
-      "fingerprint": "483c6c9be88874642410",
+      "fingerprint": "3ef24e23836596d02c40",
       "name": "readSourceRepositoryMetadata",
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
       "lineStart": 314,
-      "lineEnd": 331,
+      "lineEnd": 341,
       "summary": "source repository metadata을(를) 읽기하는 함수입니다.",
       "tags": [
         "documentation",
@@ -8967,13 +9002,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:scripts/source-twin-scanner.mjs:readSourceTwinWorkingTree",
       "kind": "function",
       "label": "readSourceTwinWorkingTree",
-      "fingerprint": "f16b94ac2794ca49aa9f",
+      "fingerprint": "896d5051f5eca4dbc362",
       "name": "readSourceTwinWorkingTree",
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 610,
-      "lineEnd": 617,
+      "lineStart": 660,
+      "lineEnd": 666,
       "summary": "source twin working tree을(를) 읽기하는 함수입니다.",
       "tags": [
         "documentation",
@@ -9105,8 +9140,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 627,
-      "lineEnd": 635,
+      "lineStart": 676,
+      "lineEnd": 684,
       "summary": "source twin manifest을(를) 직렬화하는 함수입니다.",
       "tags": [
         "documentation",
@@ -9138,6 +9173,29 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "details": {
         "functionKind": "function",
         "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:scripts/source-twin-scanner.mjs:sourceTwinFilePaths",
+      "kind": "function",
+      "label": "sourceTwinFilePaths",
+      "fingerprint": "0841b0e16ad5026e397b",
+      "name": "sourceTwinFilePaths",
+      "path": "scripts/source-twin-scanner.mjs",
+      "parentId": "file:scripts/source-twin-scanner.mjs",
+      "layer": "documentation",
+      "lineStart": 647,
+      "lineEnd": 658,
+      "summary": "source twin file paths을(를) 처리하는 함수입니다.",
+      "tags": [
+        "documentation",
+        "exported",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
         "async": false
       }
     },
@@ -9218,6 +9276,28 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "documentation",
       "lineStart": 184,
       "lineEnd": 247,
+      "summary": "visit을(를) 처리하는 함수입니다.",
+      "tags": [
+        "arrow",
+        "documentation"
+      ],
+      "details": {
+        "functionKind": "arrow",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:scripts/source-twin-scanner.mjs:visit#2",
+      "kind": "function",
+      "label": "visit",
+      "fingerprint": "4007b775f5999a954e01",
+      "name": "visit",
+      "path": "scripts/source-twin-scanner.mjs",
+      "parentId": "file:scripts/source-twin-scanner.mjs",
+      "layer": "documentation",
+      "lineStart": 626,
+      "lineEnd": 642,
       "summary": "visit을(를) 처리하는 함수입니다.",
       "tags": [
         "arrow",
@@ -24830,6 +24910,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/nodes/SystemNode.jsx:startDimPress"
     },
     {
+      "id": "relation:1d69d5ed5c2fcae9",
+      "type": "imports",
+      "source": "file:scripts/test-source-twin.mjs",
+      "target": "dependency:node:path",
+      "names": [
+        "default"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:1da5e76f20679213",
       "type": "contains",
       "source": "file:src/nodes/MemoNode.jsx",
@@ -25718,16 +25808,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/shareAccess.js",
       "target": "function:mcp/shareAccess.js:sanitizeEdge"
-    },
-    {
-      "id": "relation:36b49a54d0b5f8c5",
-      "type": "imports",
-      "source": "file:scripts/source-twin-scanner.mjs",
-      "target": "dependency:node:fs",
-      "names": [
-        "readFileSync"
-      ],
-      "dynamic": false
     },
     {
       "id": "relation:36b4fdd08295f598",
@@ -26767,6 +26847,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:scripts/source-twin-scanner.mjs:nulSeparated"
     },
     {
+      "id": "relation:5421c9524373651b",
+      "type": "imports",
+      "source": "file:scripts/test-source-twin.mjs",
+      "target": "dependency:node:os",
+      "names": [
+        "tmpdir"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:543e201035e71ec4",
       "type": "calls-db-function",
       "source": "file:mcp/store.js",
@@ -26851,6 +26941,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "WORKFLOW_SYSTEM_OPERATIONS_RPC"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:5748fe4c0215c489",
+      "type": "contains",
+      "source": "file:scripts/source-twin-scanner.mjs",
+      "target": "function:scripts/source-twin-scanner.mjs:visit#2"
     },
     {
       "id": "relation:57584b8acc04835c",
@@ -27379,6 +27475,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/systemOntology.js:systemNodeReality"
     },
     {
+      "id": "relation:62cb367166a860de",
+      "type": "imports",
+      "source": "file:scripts/test-source-twin.mjs",
+      "target": "file:scripts/source-twin-scanner.mjs",
+      "names": [
+        "buildSourceTwinManifest",
+        "parseGeneratedSourceTwin",
+        "readSourceTwinWorkingTree",
+        "serializeSourceTwinManifest"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:6317b34798316558",
       "type": "contains",
       "source": "file:src/App.jsx",
@@ -27874,6 +27983,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/systemRuntime.js",
       "target": "function:shared/systemRuntime.js:plainObject"
+    },
+    {
+      "id": "relation:7169661e6616eeda",
+      "type": "imports",
+      "source": "file:scripts/source-twin-scanner.mjs",
+      "target": "dependency:node:fs",
+      "names": [
+        "readdirSync",
+        "readFileSync"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:71d93518c0f7d8d7",
@@ -31021,6 +31141,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/lib/shareLaunchCoordinator.js:claimShareLaunchFallback"
     },
     {
+      "id": "relation:c7a7af9c137a5051",
+      "type": "contains",
+      "source": "file:scripts/source-twin-scanner.mjs",
+      "target": "function:scripts/source-twin-scanner.mjs:filesystemSourceTwinPaths"
+    },
+    {
       "id": "relation:c7ad0ea453daf21c",
       "type": "contains",
       "source": "file:src/lib/canvasSync.js",
@@ -31285,6 +31411,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/App.jsx",
       "target": "function:src/App.jsx:handleContextAddMemo"
+    },
+    {
+      "id": "relation:cde496c653162203",
+      "type": "imports",
+      "source": "file:scripts/test-source-twin.mjs",
+      "target": "dependency:node:fs/promises",
+      "names": [
+        "mkdir",
+        "mkdtemp",
+        "rm",
+        "writeFile"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:ce496ca2763c2ed9",
@@ -31569,18 +31708,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/store.js",
       "target": "function:mcp/store.js:applyEdgeRelationPatch"
-    },
-    {
-      "id": "relation:d752f4278652abf5",
-      "type": "imports",
-      "source": "file:scripts/test-source-twin.mjs",
-      "target": "file:scripts/source-twin-scanner.mjs",
-      "names": [
-        "buildSourceTwinManifest",
-        "parseGeneratedSourceTwin",
-        "serializeSourceTwinManifest"
-      ],
-      "dynamic": false
     },
     {
       "id": "relation:d77aa71a47a189d0",
@@ -32771,6 +32898,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/relationOntology.js:relationConfidenceDefinition"
     },
     {
+      "id": "relation:fb227e398690f82f",
+      "type": "contains",
+      "source": "file:scripts/source-twin-scanner.mjs",
+      "target": "function:scripts/source-twin-scanner.mjs:sourceTwinFilePaths"
+    },
+    {
       "id": "relation:fbd491e9db5acb39",
       "type": "contains",
       "source": "file:shared/digitalTwinReview.js",
@@ -33154,6 +33287,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:scripts/source-twin-scanner.mjs:buildSourceTwinManifest",
       "function:scripts/source-twin-scanner.mjs:entity",
       "function:scripts/source-twin-scanner.mjs:fileSummary",
+      "function:scripts/source-twin-scanner.mjs:filesystemSourceTwinPaths",
       "function:scripts/source-twin-scanner.mjs:functionSummary",
       "function:scripts/source-twin-scanner.mjs:hash",
       "function:scripts/source-twin-scanner.mjs:identifierWords",
@@ -33179,10 +33313,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:scripts/source-twin-scanner.mjs:semanticHash",
       "function:scripts/source-twin-scanner.mjs:serializeSourceTwinManifest",
       "function:scripts/source-twin-scanner.mjs:shouldInspect",
+      "function:scripts/source-twin-scanner.mjs:sourceTwinFilePaths",
       "function:scripts/source-twin-scanner.mjs:stable",
       "function:scripts/source-twin-scanner.mjs:stringArgument",
       "function:scripts/source-twin-scanner.mjs:unique",
       "function:scripts/source-twin-scanner.mjs:visit",
+      "function:scripts/source-twin-scanner.mjs:visit#2",
       "function:scripts/system-discovery.mjs:addTableSource",
       "function:scripts/system-discovery.mjs:buildDiscoveryManifest",
       "function:scripts/system-discovery.mjs:contentForFingerprint",
@@ -33828,6 +33964,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dependency:node:crypto",
       "dependency:node:fs",
       "dependency:node:fs/promises",
+      "dependency:node:os",
       "dependency:node:path",
       "dependency:node:url",
       "dependency:react",
@@ -34134,6 +34271,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:scripts/source-twin-scanner.mjs:buildSourceTwinManifest",
       "function:scripts/source-twin-scanner.mjs:entity",
       "function:scripts/source-twin-scanner.mjs:fileSummary",
+      "function:scripts/source-twin-scanner.mjs:filesystemSourceTwinPaths",
       "function:scripts/source-twin-scanner.mjs:functionSummary",
       "function:scripts/source-twin-scanner.mjs:hash",
       "function:scripts/source-twin-scanner.mjs:identifierWords",
@@ -34159,10 +34297,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:scripts/source-twin-scanner.mjs:semanticHash",
       "function:scripts/source-twin-scanner.mjs:serializeSourceTwinManifest",
       "function:scripts/source-twin-scanner.mjs:shouldInspect",
+      "function:scripts/source-twin-scanner.mjs:sourceTwinFilePaths",
       "function:scripts/source-twin-scanner.mjs:stable",
       "function:scripts/source-twin-scanner.mjs:stringArgument",
       "function:scripts/source-twin-scanner.mjs:unique",
       "function:scripts/source-twin-scanner.mjs:visit",
+      "function:scripts/source-twin-scanner.mjs:visit#2",
       "function:scripts/system-discovery.mjs:addTableSource",
       "function:scripts/system-discovery.mjs:buildDiscoveryManifest",
       "function:scripts/system-discovery.mjs:contentForFingerprint",
@@ -34943,16 +35083,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
     ]
   },
   "fingerprints": {
-    "code": "99acf54c87356a485210",
-    "database": "aa1fa70109083d909aa7",
+    "code": "7a37f0934751cae116fc",
+    "database": "10c8e63d86a8c2eed5da",
     "security": "c9e24c47086a9a1f8acd",
     "deployment": "0f39fd2b34c84d6f79fa"
   },
   "summary": {
-    "entities": 1058,
+    "entities": 1062,
     "files": 99,
-    "functions": 855,
-    "imports": 268,
+    "functions": 858,
+    "imports": 271,
     "apiRoutes": 5,
     "dbTables": 12,
     "dbFunctions": 21,
@@ -35021,6 +35161,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dependency:node:crypto",
       "dependency:node:fs",
       "dependency:node:fs/promises",
+      "dependency:node:os",
       "dependency:node:path",
       "dependency:node:url",
       "dependency:react",
@@ -35339,6 +35480,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:scripts/source-twin-scanner.mjs:buildSourceTwinManifest",
       "function:scripts/source-twin-scanner.mjs:entity",
       "function:scripts/source-twin-scanner.mjs:fileSummary",
+      "function:scripts/source-twin-scanner.mjs:filesystemSourceTwinPaths",
       "function:scripts/source-twin-scanner.mjs:functionSummary",
       "function:scripts/source-twin-scanner.mjs:hash",
       "function:scripts/source-twin-scanner.mjs:identifierWords",
@@ -35364,10 +35506,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:scripts/source-twin-scanner.mjs:semanticHash",
       "function:scripts/source-twin-scanner.mjs:serializeSourceTwinManifest",
       "function:scripts/source-twin-scanner.mjs:shouldInspect",
+      "function:scripts/source-twin-scanner.mjs:sourceTwinFilePaths",
       "function:scripts/source-twin-scanner.mjs:stable",
       "function:scripts/source-twin-scanner.mjs:stringArgument",
       "function:scripts/source-twin-scanner.mjs:unique",
       "function:scripts/source-twin-scanner.mjs:visit",
+      "function:scripts/source-twin-scanner.mjs:visit#2",
       "function:scripts/system-discovery.mjs:addTableSource",
       "function:scripts/system-discovery.mjs:buildDiscoveryManifest",
       "function:scripts/system-discovery.mjs:contentForFingerprint",
@@ -36130,7 +36274,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "vite.config.js"
     ],
     "summary": {
-      "added": 1058,
+      "added": 1062,
       "changed": 0,
       "removed": 0,
       "paths": 99
