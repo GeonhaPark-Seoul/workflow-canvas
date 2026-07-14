@@ -2,7 +2,7 @@
 export const SOURCE_TWIN_MANIFEST = Object.freeze(
 {
   "schemaVersion": 1,
-  "id": "source-twin-v1-d7e4958cfd2b",
+  "id": "source-twin-v1-cc3337fc02de",
   "source": {
     "id": "workflow-canvas:self-source",
     "label": "Workflow Canvas 소스 코드",
@@ -367,19 +367,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ]
     },
     {
-      "id": "db-table:{\"zen\":\"source twin\"}",
-      "kind": "db-table",
-      "label": "{\"zen\":\"source twin\"}",
-      "fingerprint": "719e4675772374c7d9e2",
-      "name": "{\"zen\":\"source twin\"}",
-      "layer": "database",
-      "summary": "{\"zen\":\"source twin\"} 테이블의 선언 또는 접근 지점입니다.",
-      "tags": [
-        "database",
-        "table"
-      ]
-    },
-    {
       "id": "db-table:canvas_shares",
       "kind": "db-table",
       "label": "canvas_shares",
@@ -517,6 +504,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "name": "user_prefs",
       "layer": "database",
       "summary": "user_prefs 테이블의 선언 또는 접근 지점입니다.",
+      "tags": [
+        "database",
+        "table"
+      ]
+    },
+    {
+      "id": "db-table:{\"zen\":\"source twin\"}",
+      "kind": "db-table",
+      "label": "{\"zen\":\"source twin\"}",
+      "fingerprint": "719e4675772374c7d9e2",
+      "name": "{\"zen\":\"source twin\"}",
+      "layer": "database",
+      "summary": "{\"zen\":\"source twin\"} 테이블의 선언 또는 접근 지점입니다.",
       "tags": [
         "database",
         "table"
@@ -826,7 +826,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "deployment:vercel-web",
       "kind": "deployment",
       "label": "Vercel 웹 배포",
-      "fingerprint": "e885fd195fb059d79558",
+      "fingerprint": "aa59f15130a96af9fca9",
       "layer": "deployment",
       "summary": "Vite 빌드 결과를 Vercel에 배포하는 경로입니다.",
       "tags": [
@@ -1012,6 +1012,30 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "file:README.md",
+      "kind": "file",
+      "label": "README.md",
+      "fingerprint": "8aac6e6ccc7282f55f00",
+      "path": "README.md",
+      "layer": "documentation",
+      "language": "markdown",
+      "lineStart": 1,
+      "lineEnd": 272,
+      "summary": "문서에서 구조와 설정 제공을 담당합니다.",
+      "tags": [
+        "documentation"
+      ],
+      "details": {
+        "exports": [],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "parseStatus": "parsed"
+      }
+    },
+    {
       "id": "file:api/mcp.js",
       "kind": "file",
       "label": "api/mcp.js",
@@ -1085,8 +1109,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "summary": "웹 API에서 /api/source-twin-webhook 요청 처리 · 함수 7개 정의 · 모듈 4개 연결을 담당합니다.",
       "tags": [
         "/api/source-twin-webhook",
-        "api",
-        "WORKFLOW_CANVAS_GITHUB_WEBHOOK_SECRET"
+        "WORKFLOW_CANVAS_GITHUB_WEBHOOK_SECRET",
+        "api"
       ],
       "details": {
         "exports": [
@@ -1121,8 +1145,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "summary": "웹 API에서 /api/source-twin 요청 처리 · 함수 3개 정의 · 모듈 2개 연결을 담당합니다.",
       "tags": [
         "/api/source-twin",
-        "api",
-        "WORKFLOW_CANVAS_OWNER_USER_ID"
+        "WORKFLOW_CANVAS_OWNER_USER_ID",
+        "api"
       ],
       "details": {
         "exports": [
@@ -1153,8 +1177,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "summary": "웹 API에서 /api/system-runtime 요청 처리 · canvases 데이터 접근 · 함수 9개 정의 · 모듈 5개 연결을 담당합니다.",
       "tags": [
         "/api/system-runtime",
-        "api",
-        "canvases",
         "NODE_ENV",
         "VERCEL",
         "VERCEL_ENV",
@@ -1162,7 +1184,9 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "VERCEL_PROJECT_PRODUCTION_URL",
         "VERCEL_REGION",
         "VERCEL_URL",
-        "WORKFLOW_CANVAS_OWNER_USER_ID"
+        "WORKFLOW_CANVAS_OWNER_USER_ID",
+        "api",
+        "canvases"
       ],
       "details": {
         "exports": [
@@ -1236,6 +1260,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "exports": [
+          "SIZE",
           "avoidEdgeCrossings",
           "edgeAnchors",
           "findNonOverlapping",
@@ -1247,7 +1272,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
           "overlaps",
           "radialLevels",
           "segmentIntersectsRect",
-          "SIZE",
           "validateGraphInput"
         ],
         "apiRoutes": [],
@@ -1325,13 +1349,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "lineEnd": 380,
       "summary": "AI 연결 서버에서 canvas_shares, canvases, profiles, share_members 데이터 접근 · 함수 21개 정의 · 모듈 6개 연결을 담당합니다.",
       "tags": [
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "SUPABASE_URL",
         "canvas_shares",
         "canvases",
         "mcp",
         "profiles",
-        "share_members",
-        "SUPABASE_SERVICE_ROLE_KEY",
-        "SUPABASE_URL"
+        "share_members"
       ],
       "details": {
         "exports": [
@@ -1383,6 +1407,9 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "exports": [
+          "SOURCE_TWIN_EVENT_TABLE",
+          "SOURCE_TWIN_SNAPSHOT_TABLE",
+          "SourceTwinError",
           "captureSourceTwinSnapshot",
           "compareStoredSourceTwinSnapshots",
           "currentSourceTwinState",
@@ -1390,10 +1417,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
           "listSourceTwinSnapshots",
           "recordSourceTwinPushEvent",
           "requireSourceTwinOwner",
-          "SOURCE_TWIN_EVENT_TABLE",
-          "SOURCE_TWIN_SNAPSHOT_TABLE",
-          "sourceTwinDeploymentContext",
-          "SourceTwinError"
+          "sourceTwinDeploymentContext"
         ],
         "apiRoutes": [],
         "dbTables": [
@@ -1417,15 +1441,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "lineEnd": 1585,
       "summary": "AI 연결 서버에서 canvas_shares, canvases, mcp_tokens, share_members 데이터 접근 · canvas_relation_metadata_guard_ready DB 함수 호출 · 함수 65개 정의 · 모듈 12개 연결을 담당합니다.",
       "tags": [
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "SUPABASE_URL",
+        "WORKFLOW_CANVAS_OWNER_USER_ID",
         "canvas_shares",
         "canvases",
         "mcp",
         "mcp_tokens",
         "share_members",
-        "SUPABASE_SERVICE_ROLE_KEY",
-        "SUPABASE_URL",
-        "user_prefs",
-        "WORKFLOW_CANVAS_OWNER_USER_ID"
+        "user_prefs"
       ],
       "details": {
         "exports": [
@@ -1502,6 +1526,9 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "exports": [
+          "SYSTEM_RUNTIME_OBSERVATION_TABLE",
+          "SystemRuntimeCheckError",
+          "WORKFLOW_SYSTEM_OPERATIONS_RPC",
           "claimSystemRuntimeCheck",
           "loadLatestSystemRuntimeObservations",
           "persistSystemRuntimeObservation",
@@ -1509,10 +1536,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
           "requireSystemRuntimeOperator",
           "resolveSystemRuntimeTarget",
           "resolveSystemRuntimeTargets",
-          "runSystemRuntimeCapability",
-          "SYSTEM_RUNTIME_OBSERVATION_TABLE",
-          "SystemRuntimeCheckError",
-          "WORKFLOW_SYSTEM_OPERATIONS_RPC"
+          "runSystemRuntimeCapability"
         ],
         "apiRoutes": [],
         "dbTables": [],
@@ -1526,39 +1550,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:package.json",
       "kind": "file",
       "label": "package.json",
-      "fingerprint": "6aa0a9cdcaa93450dbfc",
+      "fingerprint": "f511feb1ceb16b4bd52e",
       "path": "package.json",
       "layer": "deployment",
       "language": "json",
       "lineStart": 1,
-      "lineEnd": 39,
+      "lineEnd": 40,
       "summary": "빌드·배포 설정에서 구조와 설정 제공을 담당합니다.",
       "tags": [
         "deployment"
-      ],
-      "details": {
-        "exports": [],
-        "apiRoutes": [],
-        "dbTables": [],
-        "dbFunctions": [],
-        "environmentVariables": [],
-        "securitySignals": [],
-        "parseStatus": "parsed"
-      }
-    },
-    {
-      "id": "file:README.md",
-      "kind": "file",
-      "label": "README.md",
-      "fingerprint": "8aac6e6ccc7282f55f00",
-      "path": "README.md",
-      "layer": "documentation",
-      "language": "markdown",
-      "lineStart": 1,
-      "lineEnd": 272,
-      "summary": "문서에서 구조와 설정 제공을 담당합니다.",
-      "tags": [
-        "documentation"
       ],
       "details": {
         "exports": [],
@@ -1598,13 +1598,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:scripts/generate-source-twin.mjs",
       "kind": "file",
       "label": "scripts/generate-source-twin.mjs",
-      "fingerprint": "a93d26659e144c25e837",
+      "fingerprint": "099c5c3a368e921adf55",
       "path": "scripts/generate-source-twin.mjs",
       "layer": "documentation",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 52,
-      "summary": "문서에서 모듈 5개 연결을 담당합니다.",
+      "lineEnd": 96,
+      "summary": "문서에서 함수 2개 정의 · 모듈 5개 연결을 담당합니다.",
       "tags": [
         "documentation"
       ],
@@ -1646,24 +1646,25 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:scripts/source-twin-scanner.mjs",
       "kind": "file",
       "label": "scripts/source-twin-scanner.mjs",
-      "fingerprint": "e178c8c2edd4ee2b1de3",
+      "fingerprint": "43b605dc56b3d9e2cded",
       "path": "scripts/source-twin-scanner.mjs",
       "layer": "documentation",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 685,
-      "summary": "문서에서 함수 38개 정의 · 모듈 6개 연결을 담당합니다.",
+      "lineEnd": 691,
+      "summary": "문서에서 함수 39개 정의 · 모듈 6개 연결을 담당합니다.",
       "tags": [
         "documentation"
       ],
       "details": {
         "exports": [
+          "SOURCE_TWIN_MANIFEST_PATH",
           "buildSourceTwinManifest",
+          "compareSourceTwinText",
           "parseGeneratedSourceTwin",
           "readSourceRepositoryMetadata",
           "readSourceTwinWorkingTree",
           "serializeSourceTwinManifest",
-          "SOURCE_TWIN_MANIFEST_PATH",
           "sourceTwinFilePaths"
         ],
         "apiRoutes": [],
@@ -1690,8 +1691,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "exports": [
-          "buildDiscoveryManifest",
           "DISCOVERY_MANIFEST_PATH",
+          "buildDiscoveryManifest",
           "fingerprint",
           "parseGeneratedManifest",
           "readGitTree",
@@ -1734,16 +1735,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:scripts/test-source-twin.mjs",
       "kind": "file",
       "label": "scripts/test-source-twin.mjs",
-      "fingerprint": "4275435c6be67d6ba092",
+      "fingerprint": "fefd6e8df741e8c3d9c0",
       "path": "scripts/test-source-twin.mjs",
       "layer": "test",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 189,
+      "lineEnd": 195,
       "summary": "검증에서 {\"zen\":\"source twin\"} 데이터 접근 · 모듈 9개 연결을 담당합니다.",
       "tags": [
-        "{\"zen\":\"source twin\"}",
-        "test"
+        "test",
+        "{\"zen\":\"source twin\"}"
       ],
       "details": {
         "exports": [],
@@ -1797,11 +1798,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "exports": [
+          "DIGITAL_TWIN_PROPOSAL_SCHEMA_VERSION",
+          "DigitalTwinProposalError",
           "applyDigitalTwinGraphProposal",
           "createDigitalTwinGraphProposal",
-          "DIGITAL_TWIN_PROPOSAL_SCHEMA_VERSION",
           "digitalTwinProposalAutoFitKey",
-          "DigitalTwinProposalError",
           "digitalTwinProposalMatchesItem",
           "filterDigitalTwinProposalNodeChanges",
           "planDigitalTwinGraphProposal",
@@ -1831,9 +1832,9 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "exports": [
+          "DIGITAL_TWIN_REVIEW_SCHEMA_VERSION",
           "clearDigitalTwinReviewDecision",
           "createDigitalTwinReviewItem",
-          "DIGITAL_TWIN_REVIEW_SCHEMA_VERSION",
           "digitalTwinReviewDecision",
           "digitalTwinReviewFingerprint",
           "normalizeDigitalTwinReviewState",
@@ -1864,9 +1865,9 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "exports": [
-          "assertPrivacyReleaseGate",
           "CANVAS_ENCRYPTION_TRANSITION",
-          "CANVAS_PRIVACY_CAPABILITIES"
+          "CANVAS_PRIVACY_CAPABILITIES",
+          "assertPrivacyReleaseGate"
         ],
         "apiRoutes": [],
         "dbTables": [],
@@ -1892,16 +1893,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "exports": [
-          "createEdgeRelationData",
-          "edgeRelationInfo",
-          "edgeRelationProvenance",
-          "normalizeEdgeRelationData",
-          "normalizeRelationPlainText",
           "RELATION_CONFIDENCE_DEFS",
           "RELATION_DEFS",
           "RELATION_FAMILY_DEFS",
           "RELATION_SOURCE_DEFS",
           "RELATION_TYPE_IDS",
+          "createEdgeRelationData",
+          "edgeRelationInfo",
+          "edgeRelationProvenance",
+          "normalizeEdgeRelationData",
+          "normalizeRelationPlainText",
           "relationConfidenceDefinition",
           "relationDefinition",
           "relationFamilyDefinition",
@@ -1965,11 +1966,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "exports": [
-          "compareSourceTwinSnapshots",
-          "createSourceTwinSnapshot",
           "SOURCE_TWIN_PERSPECTIVES",
           "SOURCE_TWIN_SCHEMA_VERSION",
           "SOURCE_TWIN_SOURCE_ID",
+          "compareSourceTwinSnapshots",
+          "createSourceTwinSnapshot",
           "sourceTwinCodeUrl",
           "sourceTwinEntities",
           "sourceTwinEntityMap",
@@ -2032,13 +2033,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "exports": [
-          "createSystemNodeData",
-          "normalizeSystemNodeData",
-          "normalizeSystemPlainText",
           "SYSTEM_ENVIRONMENT_DEFS",
           "SYSTEM_KIND_DEFS",
           "SYSTEM_ONTOLOGY_TEXT_FIELDS",
           "SYSTEM_SOURCE_DEFS",
+          "createSystemNodeData",
+          "normalizeSystemNodeData",
+          "normalizeSystemPlainText",
           "systemKindDefinition",
           "systemNodeReality"
         ],
@@ -2066,12 +2067,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "exports": [
-          "detachSystemPartBindings",
-          "normalizeSystemPart",
-          "normalizeSystemParts",
           "SYSTEM_PART_EXPOSURE_DEFS",
           "SYSTEM_PART_KIND_DEFS",
           "SYSTEM_PART_SOURCE_DEFS",
+          "detachSystemPartBindings",
+          "normalizeSystemPart",
+          "normalizeSystemParts",
           "systemPartContainsSecretLiteral",
           "systemPartKindDefinition",
           "validateSystemPartInput"
@@ -2100,23 +2101,23 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "exports": [
+          "SYSTEM_CAPABILITY_OPERATION_DEFS",
+          "SYSTEM_RUNTIME_CAPABILITY_DEFS",
+          "SYSTEM_RUNTIME_MAX_METRIC_GROUPS",
+          "SYSTEM_RUNTIME_MAX_OBSERVATIONS",
+          "SYSTEM_RUNTIME_SCHEMA_VERSION",
+          "SystemRuntimeContractError",
           "failedSystemRuntimeResult",
           "normalizeSystemRuntimeBatchRequest",
           "normalizeSystemRuntimeCanvasRequest",
           "normalizeSystemRuntimeRecords",
           "normalizeSystemRuntimeRequest",
           "normalizeSystemRuntimeResult",
-          "SYSTEM_CAPABILITY_OPERATION_DEFS",
-          "SYSTEM_RUNTIME_CAPABILITY_DEFS",
-          "SYSTEM_RUNTIME_MAX_METRIC_GROUPS",
-          "SYSTEM_RUNTIME_MAX_OBSERVATIONS",
-          "SYSTEM_RUNTIME_SCHEMA_VERSION",
           "systemCapabilityOperationDefinition",
           "systemPartRuntimeReality",
           "systemRuntimeCapabilityDefinition",
           "systemRuntimeCapabilityForPart",
           "systemRuntimeCatalogForResult",
-          "SystemRuntimeContractError",
           "systemRuntimePathEdgeIds"
         ],
         "apiRoutes": [],
@@ -2169,11 +2170,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "exports": [
-          "inspectWorkflowSystemMap",
           "LEGACY_SYSTEM_MAP_BASELINE_ID",
-          "selectWorkflowSystemMapBaseline",
           "WORKFLOW_SYSTEM_DISCOVERY_SOURCE_ID",
-          "WORKFLOW_SYSTEM_MAP_NODE_BINDINGS"
+          "WORKFLOW_SYSTEM_MAP_NODE_BINDINGS",
+          "inspectWorkflowSystemMap",
+          "selectWorkflowSystemMapBaseline"
         ],
         "apiRoutes": [],
         "dbTables": [],
@@ -2199,12 +2200,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "exports": [
+          "WORKFLOW_RELATION_METADATA_FIELDS",
+          "WORKFLOW_RELATION_REPAIR_CONFIRMATION",
           "compareWorkflowSystemMapRelation",
           "hasWorkflowRelationMetadata",
           "planWorkflowSystemMapRelationRepair",
-          "restoreMissingWorkflowSystemMapRelations",
-          "WORKFLOW_RELATION_METADATA_FIELDS",
-          "WORKFLOW_RELATION_REPAIR_CONFIRMATION"
+          "restoreMissingWorkflowSystemMapRelations"
         ],
         "apiRoutes": [],
         "dbTables": [],
@@ -2230,8 +2231,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "exports": [
-          "inspectWorkflowSystemTwin",
           "WORKFLOW_SYSTEM_TWIN_SOURCE_ID",
+          "inspectWorkflowSystemTwin",
           "workflowSystemTwinAdapter"
         ],
         "apiRoutes": [],
@@ -2849,8 +2850,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "details": {
         "exports": [
           "CanvasSchemaGuardError",
-          "canvasWriteError",
-          "RELATION_METADATA_GUARD_MARKER"
+          "RELATION_METADATA_GUARD_MARKER",
+          "canvasWriteError"
         ],
         "apiRoutes": [],
         "dbTables": [],
@@ -3103,6 +3104,34 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "file:src/lib/shareLaunchCoordinator.js",
+      "kind": "file",
+      "label": "src/lib/shareLaunchCoordinator.js",
+      "fingerprint": "a9118d4ce77f8e9169dc",
+      "path": "src/lib/shareLaunchCoordinator.js",
+      "layer": "frontend",
+      "language": "javascript",
+      "lineStart": 1,
+      "lineEnd": 66,
+      "summary": "사용자 화면에서 함수 6개 정의을 담당합니다.",
+      "tags": [
+        "frontend"
+      ],
+      "details": {
+        "exports": [
+          "claimShareLaunch",
+          "claimShareLaunchFallback",
+          "shareTokenFingerprint"
+        ],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "parseStatus": "parsed"
+      }
+    },
+    {
       "id": "file:src/lib/sharedCanvasApi.js",
       "kind": "file",
       "label": "src/lib/sharedCanvasApi.js",
@@ -3123,34 +3152,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
           "listSharedCanvases",
           "setMemberViewRestriction",
           "updateSharedCanvas"
-        ],
-        "apiRoutes": [],
-        "dbTables": [],
-        "dbFunctions": [],
-        "environmentVariables": [],
-        "securitySignals": [],
-        "parseStatus": "parsed"
-      }
-    },
-    {
-      "id": "file:src/lib/shareLaunchCoordinator.js",
-      "kind": "file",
-      "label": "src/lib/shareLaunchCoordinator.js",
-      "fingerprint": "a9118d4ce77f8e9169dc",
-      "path": "src/lib/shareLaunchCoordinator.js",
-      "layer": "frontend",
-      "language": "javascript",
-      "lineStart": 1,
-      "lineEnd": 66,
-      "summary": "사용자 화면에서 함수 6개 정의을 담당합니다.",
-      "tags": [
-        "frontend"
-      ],
-      "details": {
-        "exports": [
-          "claimShareLaunch",
-          "claimShareLaunchFallback",
-          "shareTokenFingerprint"
         ],
         "apiRoutes": [],
         "dbTables": [],
@@ -3259,9 +3260,9 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "exports": [
-          "supabase",
           "SUPABASE_ANON_KEY",
-          "SUPABASE_URL"
+          "SUPABASE_URL",
+          "supabase"
         ],
         "apiRoutes": [],
         "dbTables": [],
@@ -3287,10 +3288,10 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "exports": [
+          "SystemRuntimeApiError",
           "checkAllSystemRuntime",
           "checkSystemPartRuntime",
-          "loadLatestSystemRuntime",
-          "SystemRuntimeApiError"
+          "loadLatestSystemRuntime"
         ],
         "apiRoutes": [],
         "dbTables": [],
@@ -3514,6 +3515,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "exports": [
+          "STORAGE_ERROR_EVENT",
           "clearCanvasStorage",
           "deleteCanvasData",
           "getLastStorageError",
@@ -3529,7 +3531,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
           "saveCanvasList",
           "saveCanvasStorageOwner",
           "saveLodThreshold",
-          "STORAGE_ERROR_EVENT",
           "uid"
         ],
         "apiRoutes": [],
@@ -6077,6 +6078,28 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:mcp/sourceTwinStore.js:SourceTwinError.constructor",
+      "kind": "function",
+      "label": "SourceTwinError.constructor",
+      "fingerprint": "633fb0dffb44ad6524ad",
+      "name": "SourceTwinError.constructor",
+      "path": "mcp/sourceTwinStore.js",
+      "parentId": "file:mcp/sourceTwinStore.js",
+      "layer": "mcp",
+      "lineStart": 17,
+      "lineEnd": 22,
+      "summary": "source twin error constructor을(를) 처리하는 함수입니다.",
+      "tags": [
+        "class-method",
+        "mcp"
+      ],
+      "details": {
+        "functionKind": "class-method",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
       "id": "function:mcp/sourceTwinStore.js:captureSourceTwinSnapshot",
       "kind": "function",
       "label": "captureSourceTwinSnapshot",
@@ -6420,28 +6443,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "details": {
         "functionKind": "function",
         "exported": true,
-        "async": false
-      }
-    },
-    {
-      "id": "function:mcp/sourceTwinStore.js:SourceTwinError.constructor",
-      "kind": "function",
-      "label": "SourceTwinError.constructor",
-      "fingerprint": "633fb0dffb44ad6524ad",
-      "name": "SourceTwinError.constructor",
-      "path": "mcp/sourceTwinStore.js",
-      "parentId": "file:mcp/sourceTwinStore.js",
-      "layer": "mcp",
-      "lineStart": 17,
-      "lineEnd": 22,
-      "summary": "source twin error constructor을(를) 처리하는 함수입니다.",
-      "tags": [
-        "class-method",
-        "mcp"
-      ],
-      "details": {
-        "functionKind": "class-method",
-        "exported": false,
         "async": false
       }
     },
@@ -7968,6 +7969,28 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:mcp/systemRuntime.js:SystemRuntimeCheckError.constructor",
+      "kind": "function",
+      "label": "SystemRuntimeCheckError.constructor",
+      "fingerprint": "ba5dd1302495ec7c9555",
+      "name": "SystemRuntimeCheckError.constructor",
+      "path": "mcp/systemRuntime.js",
+      "parentId": "file:mcp/systemRuntime.js",
+      "layer": "mcp",
+      "lineStart": 16,
+      "lineEnd": 21,
+      "summary": "system runtime check error constructor을(를) 처리하는 함수입니다.",
+      "tags": [
+        "class-method",
+        "mcp"
+      ],
+      "details": {
+        "functionKind": "class-method",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
       "id": "function:mcp/systemRuntime.js:claimSystemRuntimeCheck",
       "kind": "function",
       "label": "claimSystemRuntimeCheck",
@@ -8358,28 +8381,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
-      "id": "function:mcp/systemRuntime.js:runtimeResourceId",
-      "kind": "function",
-      "label": "runtimeResourceId",
-      "fingerprint": "3bb6b597aea6144ad3d4",
-      "name": "runtimeResourceId",
-      "path": "mcp/systemRuntime.js",
-      "parentId": "file:mcp/systemRuntime.js",
-      "layer": "mcp",
-      "lineStart": 85,
-      "lineEnd": 94,
-      "summary": "runtime resource id을(를) 처리하는 함수입니다.",
-      "tags": [
-        "function",
-        "mcp"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
       "id": "function:mcp/systemRuntime.js:runVercelDeploymentCheck",
       "kind": "function",
       "label": "runVercelDeploymentCheck",
@@ -8391,6 +8392,28 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "lineStart": 283,
       "lineEnd": 322,
       "summary": "run vercel deployment check을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "mcp"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:mcp/systemRuntime.js:runtimeResourceId",
+      "kind": "function",
+      "label": "runtimeResourceId",
+      "fingerprint": "3bb6b597aea6144ad3d4",
+      "name": "runtimeResourceId",
+      "path": "mcp/systemRuntime.js",
+      "parentId": "file:mcp/systemRuntime.js",
+      "layer": "mcp",
+      "lineStart": 85,
+      "lineEnd": 94,
+      "summary": "runtime resource id을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
         "mcp"
@@ -8424,28 +8447,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
-      "id": "function:mcp/systemRuntime.js:SystemRuntimeCheckError.constructor",
-      "kind": "function",
-      "label": "SystemRuntimeCheckError.constructor",
-      "fingerprint": "ba5dd1302495ec7c9555",
-      "name": "SystemRuntimeCheckError.constructor",
-      "path": "mcp/systemRuntime.js",
-      "parentId": "file:mcp/systemRuntime.js",
-      "layer": "mcp",
-      "lineStart": 16,
-      "lineEnd": 21,
-      "summary": "system runtime check error constructor을(를) 처리하는 함수입니다.",
-      "tags": [
-        "class-method",
-        "mcp"
-      ],
-      "details": {
-        "functionKind": "class-method",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
       "id": "function:mcp/systemRuntime.js:unknownResult",
       "kind": "function",
       "label": "unknownResult",
@@ -8468,6 +8469,50 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:scripts/generate-source-twin.mjs:diagnosticValue",
+      "kind": "function",
+      "label": "diagnosticValue",
+      "fingerprint": "a8adef429301f771a612",
+      "name": "diagnosticValue",
+      "path": "scripts/generate-source-twin.mjs",
+      "parentId": "file:scripts/generate-source-twin.mjs",
+      "layer": "documentation",
+      "lineStart": 39,
+      "lineEnd": 43,
+      "summary": "diagnostic value을(를) 처리하는 함수입니다.",
+      "tags": [
+        "documentation",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:scripts/generate-source-twin.mjs:firstDifference",
+      "kind": "function",
+      "label": "firstDifference",
+      "fingerprint": "3ff0a72187979f10f833",
+      "name": "firstDifference",
+      "path": "scripts/generate-source-twin.mjs",
+      "parentId": "file:scripts/generate-source-twin.mjs",
+      "layer": "documentation",
+      "lineStart": 15,
+      "lineEnd": 37,
+      "summary": "first difference을(를) 처리하는 함수입니다.",
+      "tags": [
+        "documentation",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
       "id": "function:scripts/source-twin-scanner.mjs:addEntity",
       "kind": "function",
       "label": "addEntity",
@@ -8476,8 +8521,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 381,
-      "lineEnd": 387,
+      "lineStart": 387,
+      "lineEnd": 393,
       "summary": "entity을(를) 추가하는 함수입니다.",
       "tags": [
         "arrow",
@@ -8498,8 +8543,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 166,
-      "lineEnd": 182,
+      "lineStart": 172,
+      "lineEnd": 188,
       "summary": "function을(를) 추가하는 함수입니다.",
       "tags": [
         "arrow",
@@ -8520,8 +8565,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 388,
-      "lineEnd": 388,
+      "lineStart": 394,
+      "lineEnd": 394,
       "summary": "relation을(를) 추가하는 함수입니다.",
       "tags": [
         "arrow",
@@ -8537,14 +8582,37 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:scripts/source-twin-scanner.mjs:buildSourceTwinManifest",
       "kind": "function",
       "label": "buildSourceTwinManifest",
-      "fingerprint": "4309b3bd93082db3ca6e",
+      "fingerprint": "0f6e8e87b23d29c06392",
       "name": "buildSourceTwinManifest",
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 343,
-      "lineEnd": 614,
+      "lineStart": 349,
+      "lineEnd": 620,
       "summary": "source twin manifest을(를) 구성하는 함수입니다.",
+      "tags": [
+        "documentation",
+        "exported",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:scripts/source-twin-scanner.mjs:compareSourceTwinText",
+      "kind": "function",
+      "label": "compareSourceTwinText",
+      "fingerprint": "3fb255102f2ea46c230f",
+      "name": "compareSourceTwinText",
+      "path": "scripts/source-twin-scanner.mjs",
+      "parentId": "file:scripts/source-twin-scanner.mjs",
+      "layer": "documentation",
+      "lineStart": 47,
+      "lineEnd": 51,
+      "summary": "source twin text을(를) 비교하는 함수입니다.",
       "tags": [
         "documentation",
         "exported",
@@ -8565,8 +8633,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 294,
-      "lineEnd": 296,
+      "lineStart": 300,
+      "lineEnd": 302,
       "summary": "entity을(를) 처리하는 함수입니다.",
       "tags": [
         "documentation",
@@ -8587,8 +8655,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 109,
-      "lineEnd": 119,
+      "lineStart": 115,
+      "lineEnd": 125,
       "summary": "file summary을(를) 처리하는 함수입니다.",
       "tags": [
         "documentation",
@@ -8604,13 +8672,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:scripts/source-twin-scanner.mjs:filesystemSourceTwinPaths",
       "kind": "function",
       "label": "filesystemSourceTwinPaths",
-      "fingerprint": "6674f4bcb47b70733a00",
+      "fingerprint": "b76592502d038e02922a",
       "name": "filesystemSourceTwinPaths",
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 624,
-      "lineEnd": 645,
+      "lineStart": 630,
+      "lineEnd": 651,
       "summary": "filesystem source twin paths을(를) 처리하는 함수입니다.",
       "tags": [
         "documentation",
@@ -8631,8 +8699,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 103,
-      "lineEnd": 107,
+      "lineStart": 109,
+      "lineEnd": 113,
       "summary": "function summary을(를) 처리하는 함수입니다.",
       "tags": [
         "documentation",
@@ -8675,8 +8743,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 82,
-      "lineEnd": 90,
+      "lineStart": 88,
+      "lineEnd": 96,
       "summary": "identifier words을(를) 처리하는 함수입니다.",
       "tags": [
         "documentation",
@@ -8697,8 +8765,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 139,
-      "lineEnd": 145,
+      "lineStart": 145,
+      "lineEnd": 151,
       "summary": "imported names을(를) 처리하는 함수입니다.",
       "tags": [
         "documentation",
@@ -8719,8 +8787,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 92,
-      "lineEnd": 101,
+      "lineStart": 98,
+      "lineEnd": 107,
       "summary": "korean action을(를) 처리하는 함수입니다.",
       "tags": [
         "documentation",
@@ -8741,8 +8809,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 74,
-      "lineEnd": 80,
+      "lineStart": 80,
+      "lineEnd": 86,
       "summary": "language for file을(를) 처리하는 함수입니다.",
       "tags": [
         "documentation",
@@ -8763,8 +8831,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 63,
-      "lineEnd": 72,
+      "lineStart": 69,
+      "lineEnd": 78,
       "summary": "layer for file을(를) 처리하는 함수입니다.",
       "tags": [
         "documentation",
@@ -8785,8 +8853,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 263,
-      "lineEnd": 265,
+      "lineStart": 269,
+      "lineEnd": 271,
       "summary": "line for을(를) 처리하는 함수입니다.",
       "tags": [
         "documentation",
@@ -8807,8 +8875,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 133,
-      "lineEnd": 137,
+      "lineStart": 139,
+      "lineEnd": 143,
       "summary": "member property을(를) 처리하는 함수입니다.",
       "tags": [
         "documentation",
@@ -8829,8 +8897,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 121,
-      "lineEnd": 127,
+      "lineStart": 127,
+      "lineEnd": 133,
       "summary": "node name을(를) 처리하는 함수입니다.",
       "tags": [
         "documentation",
@@ -8873,8 +8941,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 616,
-      "lineEnd": 618,
+      "lineStart": 622,
+      "lineEnd": 624,
       "summary": "nul separated을(를) 처리하는 함수입니다.",
       "tags": [
         "documentation",
@@ -8895,8 +8963,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 668,
-      "lineEnd": 674,
+      "lineStart": 674,
+      "lineEnd": 680,
       "summary": "generated source twin을(를) 해석하는 함수입니다.",
       "tags": [
         "documentation",
@@ -8913,13 +8981,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:scripts/source-twin-scanner.mjs:parseJavaScript",
       "kind": "function",
       "label": "parseJavaScript",
-      "fingerprint": "e6122ac935424ba8f1bb",
+      "fingerprint": "9922045e49a6a3c24a69",
       "name": "parseJavaScript",
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 147,
-      "lineEnd": 261,
+      "lineStart": 153,
+      "lineEnd": 267,
       "summary": "java script을(를) 해석하는 함수입니다.",
       "tags": [
         "documentation",
@@ -8940,8 +9008,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 267,
-      "lineEnd": 283,
+      "lineStart": 273,
+      "lineEnd": 289,
       "summary": "sql을(를) 해석하는 함수입니다.",
       "tags": [
         "documentation",
@@ -8962,8 +9030,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 543,
-      "lineEnd": 543,
+      "lineStart": 549,
+      "lineEnd": 549,
       "summary": "perspective을(를) 처리하는 함수입니다.",
       "tags": [
         "arrow",
@@ -8984,8 +9052,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 314,
-      "lineEnd": 341,
+      "lineStart": 320,
+      "lineEnd": 347,
       "summary": "source repository metadata을(를) 읽기하는 함수입니다.",
       "tags": [
         "documentation",
@@ -9007,8 +9075,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 660,
-      "lineEnd": 666,
+      "lineStart": 666,
+      "lineEnd": 672,
       "summary": "source twin working tree을(를) 읽기하는 함수입니다.",
       "tags": [
         "documentation",
@@ -9052,8 +9120,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 298,
-      "lineEnd": 300,
+      "lineStart": 304,
+      "lineEnd": 306,
       "summary": "relation을(를) 처리하는 함수입니다.",
       "tags": [
         "documentation",
@@ -9074,8 +9142,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 302,
-      "lineEnd": 312,
+      "lineStart": 308,
+      "lineEnd": 318,
       "summary": "repository url을(를) 처리하는 함수입니다.",
       "tags": [
         "documentation",
@@ -9096,8 +9164,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 285,
-      "lineEnd": 292,
+      "lineStart": 291,
+      "lineEnd": 298,
       "summary": "local import을(를) 확인하는 함수입니다.",
       "tags": [
         "documentation",
@@ -9118,8 +9186,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 55,
-      "lineEnd": 57,
+      "lineStart": 61,
+      "lineEnd": 63,
       "summary": "semantic hash을(를) 처리하는 함수입니다.",
       "tags": [
         "documentation",
@@ -9140,8 +9208,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 676,
-      "lineEnd": 684,
+      "lineStart": 682,
+      "lineEnd": 690,
       "summary": "source twin manifest을(를) 직렬화하는 함수입니다.",
       "tags": [
         "documentation",
@@ -9180,13 +9248,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:scripts/source-twin-scanner.mjs:sourceTwinFilePaths",
       "kind": "function",
       "label": "sourceTwinFilePaths",
-      "fingerprint": "0841b0e16ad5026e397b",
+      "fingerprint": "7661376a472058d4572b",
       "name": "sourceTwinFilePaths",
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 647,
-      "lineEnd": 658,
+      "lineStart": 653,
+      "lineEnd": 664,
       "summary": "source twin file paths을(를) 처리하는 함수입니다.",
       "tags": [
         "documentation",
@@ -9203,13 +9271,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:scripts/source-twin-scanner.mjs:stable",
       "kind": "function",
       "label": "stable",
-      "fingerprint": "af2bd3ceb8f936103b82",
+      "fingerprint": "5175c08737e3c753be59",
       "name": "stable",
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 47,
-      "lineEnd": 53,
+      "lineStart": 53,
+      "lineEnd": 59,
       "summary": "stable을(를) 처리하는 함수입니다.",
       "tags": [
         "documentation",
@@ -9230,8 +9298,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 129,
-      "lineEnd": 131,
+      "lineStart": 135,
+      "lineEnd": 137,
       "summary": "string argument을(를) 처리하는 함수입니다.",
       "tags": [
         "documentation",
@@ -9247,13 +9315,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:scripts/source-twin-scanner.mjs:unique",
       "kind": "function",
       "label": "unique",
-      "fingerprint": "1405364e015657d6c172",
+      "fingerprint": "8e0dbcde3f3dab743788",
       "name": "unique",
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 59,
-      "lineEnd": 61,
+      "lineStart": 65,
+      "lineEnd": 67,
       "summary": "unique을(를) 처리하는 함수입니다.",
       "tags": [
         "documentation",
@@ -9274,8 +9342,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 184,
-      "lineEnd": 247,
+      "lineStart": 190,
+      "lineEnd": 253,
       "summary": "visit을(를) 처리하는 함수입니다.",
       "tags": [
         "arrow",
@@ -9291,13 +9359,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:scripts/source-twin-scanner.mjs:visit#2",
       "kind": "function",
       "label": "visit",
-      "fingerprint": "4007b775f5999a954e01",
+      "fingerprint": "b2b8e7df2113aa602a77",
       "name": "visit",
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 626,
-      "lineEnd": 642,
+      "lineStart": 632,
+      "lineEnd": 648,
       "summary": "visit을(를) 처리하는 함수입니다.",
       "tags": [
         "arrow",
@@ -10417,6 +10485,28 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:shared/digitalTwinProposal.js:DigitalTwinProposalError.constructor",
+      "kind": "function",
+      "label": "DigitalTwinProposalError.constructor",
+      "fingerprint": "cbb4a161cfcbfc707cfd",
+      "name": "DigitalTwinProposalError.constructor",
+      "path": "shared/digitalTwinProposal.js",
+      "parentId": "file:shared/digitalTwinProposal.js",
+      "layer": "shared",
+      "lineStart": 10,
+      "lineEnd": 14,
+      "summary": "digital twin proposal error constructor을(를) 처리하는 함수입니다.",
+      "tags": [
+        "class-method",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "class-method",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
       "id": "function:shared/digitalTwinProposal.js:applyDigitalTwinGraphProposal",
       "kind": "function",
       "label": "applyDigitalTwinGraphProposal",
@@ -10482,28 +10572,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "details": {
         "functionKind": "function",
         "exported": true,
-        "async": false
-      }
-    },
-    {
-      "id": "function:shared/digitalTwinProposal.js:DigitalTwinProposalError.constructor",
-      "kind": "function",
-      "label": "DigitalTwinProposalError.constructor",
-      "fingerprint": "cbb4a161cfcbfc707cfd",
-      "name": "DigitalTwinProposalError.constructor",
-      "path": "shared/digitalTwinProposal.js",
-      "parentId": "file:shared/digitalTwinProposal.js",
-      "layer": "shared",
-      "lineStart": 10,
-      "lineEnd": 14,
-      "summary": "digital twin proposal error constructor을(를) 처리하는 함수입니다.",
-      "tags": [
-        "class-method",
-        "shared"
-      ],
-      "details": {
-        "functionKind": "class-method",
-        "exported": false,
         "async": false
       }
     },
@@ -12160,28 +12228,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
-      "id": "function:shared/systemPartOntology.js:normalizedId",
-      "kind": "function",
-      "label": "normalizedId",
-      "fingerprint": "d4a4b98c6b5aa73d02be",
-      "name": "normalizedId",
-      "path": "shared/systemPartOntology.js",
-      "parentId": "file:shared/systemPartOntology.js",
-      "layer": "shared",
-      "lineStart": 48,
-      "lineEnd": 51,
-      "summary": "normalized id을(를) 처리하는 함수입니다.",
-      "tags": [
-        "function",
-        "shared"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
       "id": "function:shared/systemPartOntology.js:normalizeDigitalTwinBinding",
       "kind": "function",
       "label": "normalizeDigitalTwinBinding",
@@ -12246,6 +12292,28 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "details": {
         "functionKind": "function",
         "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/systemPartOntology.js:normalizedId",
+      "kind": "function",
+      "label": "normalizedId",
+      "fingerprint": "d4a4b98c6b5aa73d02be",
+      "name": "normalizedId",
+      "path": "shared/systemPartOntology.js",
+      "parentId": "file:shared/systemPartOntology.js",
+      "layer": "shared",
+      "lineStart": 48,
+      "lineEnd": 51,
+      "summary": "normalized id을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
         "async": false
       }
     },
@@ -12359,6 +12427,28 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "details": {
         "functionKind": "function",
         "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/systemRuntime.js:SystemRuntimeContractError.constructor",
+      "kind": "function",
+      "label": "SystemRuntimeContractError.constructor",
+      "fingerprint": "76b6277f896e528311bc",
+      "name": "SystemRuntimeContractError.constructor",
+      "path": "shared/systemRuntime.js",
+      "parentId": "file:shared/systemRuntime.js",
+      "layer": "shared",
+      "lineStart": 214,
+      "lineEnd": 218,
+      "summary": "system runtime contract error constructor을(를) 처리하는 함수입니다.",
+      "tags": [
+        "class-method",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "class-method",
+        "exported": false,
         "async": false
       }
     },
@@ -12518,28 +12608,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
-      "id": "function:shared/systemRuntime.js:normalizedObservationValue",
-      "kind": "function",
-      "label": "normalizedObservationValue",
-      "fingerprint": "799d2c4e16f3892f0b44",
-      "name": "normalizedObservationValue",
-      "path": "shared/systemRuntime.js",
-      "parentId": "file:shared/systemRuntime.js",
-      "layer": "shared",
-      "lineStart": 294,
-      "lineEnd": 310,
-      "summary": "normalized observation value을(를) 처리하는 함수입니다.",
-      "tags": [
-        "function",
-        "shared"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
       "id": "function:shared/systemRuntime.js:normalizeObservationCatalog",
       "kind": "function",
       "label": "normalizeObservationCatalog",
@@ -12673,6 +12741,28 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "details": {
         "functionKind": "function",
         "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/systemRuntime.js:normalizedObservationValue",
+      "kind": "function",
+      "label": "normalizedObservationValue",
+      "fingerprint": "799d2c4e16f3892f0b44",
+      "name": "normalizedObservationValue",
+      "path": "shared/systemRuntime.js",
+      "parentId": "file:shared/systemRuntime.js",
+      "layer": "shared",
+      "lineStart": 294,
+      "lineEnd": 310,
+      "summary": "normalized observation value을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
         "async": false
       }
     },
@@ -12854,28 +12944,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "details": {
         "functionKind": "function",
         "exported": true,
-        "async": false
-      }
-    },
-    {
-      "id": "function:shared/systemRuntime.js:SystemRuntimeContractError.constructor",
-      "kind": "function",
-      "label": "SystemRuntimeContractError.constructor",
-      "fingerprint": "76b6277f896e528311bc",
-      "name": "SystemRuntimeContractError.constructor",
-      "path": "shared/systemRuntime.js",
-      "parentId": "file:shared/systemRuntime.js",
-      "layer": "shared",
-      "lineStart": 214,
-      "lineEnd": 218,
-      "summary": "system runtime contract error constructor을(를) 처리하는 함수입니다.",
-      "tags": [
-        "class-method",
-        "shared"
-      ],
-      "details": {
-        "functionKind": "class-method",
-        "exported": false,
         "async": false
       }
     },
@@ -13879,6 +13947,95 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:src/App.jsx:App",
+      "kind": "function",
+      "label": "App",
+      "fingerprint": "a061829c9ed101c5b7a5",
+      "name": "App",
+      "path": "src/App.jsx",
+      "parentId": "file:src/App.jsx",
+      "layer": "frontend",
+      "lineStart": 474,
+      "lineEnd": 4569,
+      "summary": "app을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/App.jsx:ContextItem",
+      "kind": "function",
+      "label": "ContextItem",
+      "fingerprint": "fdeb31b728e83fc3238e",
+      "name": "ContextItem",
+      "path": "src/App.jsx",
+      "parentId": "file:src/App.jsx",
+      "layer": "frontend",
+      "lineStart": 4572,
+      "lineEnd": 4589,
+      "summary": "context item을(를) 처리하는 함수입니다.",
+      "tags": [
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/App.jsx:IconBtn",
+      "kind": "function",
+      "label": "IconBtn",
+      "fingerprint": "2e991772b227d303be7d",
+      "name": "IconBtn",
+      "path": "src/App.jsx",
+      "parentId": "file:src/App.jsx",
+      "layer": "frontend",
+      "lineStart": 4610,
+      "lineEnd": 4626,
+      "summary": "icon btn을(를) 처리하는 함수입니다.",
+      "tags": [
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/App.jsx:TypeItem",
+      "kind": "function",
+      "label": "TypeItem",
+      "fingerprint": "68abc0d7712f461ab54e",
+      "name": "TypeItem",
+      "path": "src/App.jsx",
+      "parentId": "file:src/App.jsx",
+      "layer": "frontend",
+      "lineStart": 4591,
+      "lineEnd": 4608,
+      "summary": "type item을(를) 처리하는 함수입니다.",
+      "tags": [
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
       "id": "function:src/App.jsx:absPos",
       "kind": "function",
       "label": "absPos",
@@ -13942,29 +14099,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "details": {
         "functionKind": "function",
         "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/App.jsx:App",
-      "kind": "function",
-      "label": "App",
-      "fingerprint": "a061829c9ed101c5b7a5",
-      "name": "App",
-      "path": "src/App.jsx",
-      "parentId": "file:src/App.jsx",
-      "layer": "frontend",
-      "lineStart": 474,
-      "lineEnd": 4569,
-      "summary": "app을(를) 처리하는 함수입니다.",
-      "tags": [
-        "exported",
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": true,
         "async": false
       }
     },
@@ -14162,28 +14296,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "functionKind": "arrow",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/App.jsx:ContextItem",
-      "kind": "function",
-      "label": "ContextItem",
-      "fingerprint": "fdeb31b728e83fc3238e",
-      "name": "ContextItem",
-      "path": "src/App.jsx",
-      "parentId": "file:src/App.jsx",
-      "layer": "frontend",
-      "lineStart": 4572,
-      "lineEnd": 4589,
-      "summary": "context item을(를) 처리하는 함수입니다.",
-      "tags": [
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
         "exported": false,
         "async": false
       }
@@ -14696,28 +14808,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
-      "id": "function:src/App.jsx:IconBtn",
-      "kind": "function",
-      "label": "IconBtn",
-      "fingerprint": "2e991772b227d303be7d",
-      "name": "IconBtn",
-      "path": "src/App.jsx",
-      "parentId": "file:src/App.jsx",
-      "layer": "frontend",
-      "lineStart": 4610,
-      "lineEnd": 4626,
-      "summary": "icon btn을(를) 처리하는 함수입니다.",
-      "tags": [
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
       "id": "function:src/App.jsx:isPartEdge",
       "kind": "function",
       "label": "isPartEdge",
@@ -15224,28 +15314,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
-      "id": "function:src/App.jsx:participantKey",
-      "kind": "function",
-      "label": "participantKey",
-      "fingerprint": "c8aa9b0f25cec8e68b39",
-      "name": "participantKey",
-      "path": "src/App.jsx",
-      "parentId": "file:src/App.jsx",
-      "layer": "frontend",
-      "lineStart": 291,
-      "lineEnd": 293,
-      "summary": "participant key을(를) 처리하는 함수입니다.",
-      "tags": [
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
       "id": "function:src/App.jsx:partIdFromHandle",
       "kind": "function",
       "label": "partIdFromHandle",
@@ -15257,6 +15325,28 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "lineStart": 399,
       "lineEnd": 402,
       "summary": "part id from handle을(를) 처리하는 함수입니다.",
+      "tags": [
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/App.jsx:participantKey",
+      "kind": "function",
+      "label": "participantKey",
+      "fingerprint": "c8aa9b0f25cec8e68b39",
+      "name": "participantKey",
+      "path": "src/App.jsx",
+      "parentId": "file:src/App.jsx",
+      "layer": "frontend",
+      "lineStart": 291,
+      "lineEnd": 293,
+      "summary": "participant key을(를) 처리하는 함수입니다.",
       "tags": [
         "frontend",
         "function"
@@ -15631,28 +15721,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "lineStart": 188,
       "lineEnd": 198,
       "summary": "system runtime targets for nodes을(를) 처리하는 함수입니다.",
-      "tags": [
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/App.jsx:TypeItem",
-      "kind": "function",
-      "label": "TypeItem",
-      "fingerprint": "68abc0d7712f461ab54e",
-      "name": "TypeItem",
-      "path": "src/App.jsx",
-      "parentId": "file:src/App.jsx",
-      "layer": "frontend",
-      "lineStart": 4591,
-      "lineEnd": 4608,
-      "summary": "type item을(를) 처리하는 함수입니다.",
       "tags": [
         "frontend",
         "function"
@@ -16181,28 +16249,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
-      "id": "function:src/components/CanvasTabs.jsx:avatarOf",
-      "kind": "function",
-      "label": "avatarOf",
-      "fingerprint": "2dbc3eb452ebf70b35c5",
-      "name": "avatarOf",
-      "path": "src/components/CanvasTabs.jsx",
-      "parentId": "file:src/components/CanvasTabs.jsx",
-      "layer": "frontend",
-      "lineStart": 119,
-      "lineEnd": 133,
-      "summary": "avatar of을(를) 처리하는 함수입니다.",
-      "tags": [
-        "arrow",
-        "frontend"
-      ],
-      "details": {
-        "functionKind": "arrow",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
       "id": "function:src/components/CanvasTabs.jsx:CanvasTabs",
       "kind": "function",
       "label": "CanvasTabs",
@@ -16222,6 +16268,28 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "details": {
         "functionKind": "function",
         "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/components/CanvasTabs.jsx:avatarOf",
+      "kind": "function",
+      "label": "avatarOf",
+      "fingerprint": "2dbc3eb452ebf70b35c5",
+      "name": "avatarOf",
+      "path": "src/components/CanvasTabs.jsx",
+      "parentId": "file:src/components/CanvasTabs.jsx",
+      "layer": "frontend",
+      "lineStart": 119,
+      "lineEnd": 133,
+      "summary": "avatar of을(를) 처리하는 함수입니다.",
+      "tags": [
+        "arrow",
+        "frontend"
+      ],
+      "details": {
+        "functionKind": "arrow",
+        "exported": false,
         "async": false
       }
     },
@@ -16579,6 +16647,28 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:src/components/DigitalTwinReviewPanel.jsx:ReviewRow",
+      "kind": "function",
+      "label": "ReviewRow",
+      "fingerprint": "e3200594a6e19d8e1867",
+      "name": "ReviewRow",
+      "path": "src/components/DigitalTwinReviewPanel.jsx",
+      "parentId": "file:src/components/DigitalTwinReviewPanel.jsx",
+      "layer": "frontend",
+      "lineStart": 46,
+      "lineEnd": 156,
+      "summary": "review row을(를) 처리하는 함수입니다.",
+      "tags": [
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
       "id": "function:src/components/DigitalTwinReviewPanel.jsx:onMove",
       "kind": "function",
       "label": "onMove",
@@ -16623,24 +16713,25 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
-      "id": "function:src/components/DigitalTwinReviewPanel.jsx:ReviewRow",
+      "id": "function:src/components/EdgeRelationEditor.jsx:EdgeRelationEditor",
       "kind": "function",
-      "label": "ReviewRow",
-      "fingerprint": "e3200594a6e19d8e1867",
-      "name": "ReviewRow",
-      "path": "src/components/DigitalTwinReviewPanel.jsx",
-      "parentId": "file:src/components/DigitalTwinReviewPanel.jsx",
+      "label": "EdgeRelationEditor",
+      "fingerprint": "f28582ea4829ccae28e7",
+      "name": "EdgeRelationEditor",
+      "path": "src/components/EdgeRelationEditor.jsx",
+      "parentId": "file:src/components/EdgeRelationEditor.jsx",
       "layer": "frontend",
-      "lineStart": 46,
-      "lineEnd": 156,
-      "summary": "review row을(를) 처리하는 함수입니다.",
+      "lineStart": 23,
+      "lineEnd": 177,
+      "summary": "edge relation editor을(를) 처리하는 함수입니다.",
       "tags": [
+        "exported",
         "frontend",
         "function"
       ],
       "details": {
         "functionKind": "function",
-        "exported": false,
+        "exported": true,
         "async": false
       }
     },
@@ -16689,29 +16780,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
-      "id": "function:src/components/EdgeRelationEditor.jsx:EdgeRelationEditor",
-      "kind": "function",
-      "label": "EdgeRelationEditor",
-      "fingerprint": "f28582ea4829ccae28e7",
-      "name": "EdgeRelationEditor",
-      "path": "src/components/EdgeRelationEditor.jsx",
-      "parentId": "file:src/components/EdgeRelationEditor.jsx",
-      "layer": "frontend",
-      "lineStart": 23,
-      "lineEnd": 177,
-      "summary": "edge relation editor을(를) 처리하는 함수입니다.",
-      "tags": [
-        "exported",
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": true,
-        "async": false
-      }
-    },
-    {
       "id": "function:src/components/EdgeRelationEditor.jsx:selectRelation",
       "kind": "function",
       "label": "selectRelation",
@@ -16756,50 +16824,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
-      "id": "function:src/components/EditToolbar.jsx:apply",
-      "kind": "function",
-      "label": "apply",
-      "fingerprint": "ca2135496d998835bb7b",
-      "name": "apply",
-      "path": "src/components/EditToolbar.jsx",
-      "parentId": "file:src/components/EditToolbar.jsx",
-      "layer": "frontend",
-      "lineStart": 177,
-      "lineEnd": 181,
-      "summary": "apply을(를) 적용하는 함수입니다.",
-      "tags": [
-        "arrow",
-        "frontend"
-      ],
-      "details": {
-        "functionKind": "arrow",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/components/EditToolbar.jsx:applyColor",
-      "kind": "function",
-      "label": "applyColor",
-      "fingerprint": "981850f5e94b328ab480",
-      "name": "applyColor",
-      "path": "src/components/EditToolbar.jsx",
-      "parentId": "file:src/components/EditToolbar.jsx",
-      "layer": "frontend",
-      "lineStart": 224,
-      "lineEnd": 229,
-      "summary": "color을(를) 적용하는 함수입니다.",
-      "tags": [
-        "arrow",
-        "frontend"
-      ],
-      "details": {
-        "functionKind": "arrow",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
       "id": "function:src/components/EditToolbar.jsx:BlockDropdown",
       "kind": "function",
       "label": "BlockDropdown",
@@ -16811,50 +16835,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "lineStart": 105,
       "lineEnd": 154,
       "summary": "block dropdown을(를) 처리하는 함수입니다.",
-      "tags": [
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/components/EditToolbar.jsx:btn",
-      "kind": "function",
-      "label": "btn",
-      "fingerprint": "378386ba38203d33e975",
-      "name": "btn",
-      "path": "src/components/EditToolbar.jsx",
-      "parentId": "file:src/components/EditToolbar.jsx",
-      "layer": "frontend",
-      "lineStart": 273,
-      "lineEnd": 282,
-      "summary": "btn을(를) 처리하는 함수입니다.",
-      "tags": [
-        "arrow",
-        "frontend"
-      ],
-      "details": {
-        "functionKind": "arrow",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/components/EditToolbar.jsx:btnStyle",
-      "kind": "function",
-      "label": "btnStyle",
-      "fingerprint": "9d6054b049f3c7e69b33",
-      "name": "btnStyle",
-      "path": "src/components/EditToolbar.jsx",
-      "parentId": "file:src/components/EditToolbar.jsx",
-      "layer": "frontend",
-      "lineStart": 42,
-      "lineEnd": 58,
-      "summary": "btn style을(를) 처리하는 함수입니다.",
       "tags": [
         "frontend",
         "function"
@@ -16899,28 +16879,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "lineStart": 60,
       "lineEnd": 62,
       "summary": "divider을(를) 처리하는 함수입니다.",
-      "tags": [
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/components/EditToolbar.jsx:downscaleAndInsert",
-      "kind": "function",
-      "label": "downscaleAndInsert",
-      "fingerprint": "27d1150d31f4145cc584",
-      "name": "downscaleAndInsert",
-      "path": "src/components/EditToolbar.jsx",
-      "parentId": "file:src/components/EditToolbar.jsx",
-      "layer": "frontend",
-      "lineStart": 16,
-      "lineEnd": 38,
-      "summary": "downscale and insert을(를) 처리하는 함수입니다.",
       "tags": [
         "frontend",
         "function"
@@ -17010,6 +16968,116 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "lineStart": 163,
       "lineEnd": 206,
       "summary": "font size dropdown을(를) 처리하는 함수입니다.",
+      "tags": [
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/components/EditToolbar.jsx:apply",
+      "kind": "function",
+      "label": "apply",
+      "fingerprint": "ca2135496d998835bb7b",
+      "name": "apply",
+      "path": "src/components/EditToolbar.jsx",
+      "parentId": "file:src/components/EditToolbar.jsx",
+      "layer": "frontend",
+      "lineStart": 177,
+      "lineEnd": 181,
+      "summary": "apply을(를) 적용하는 함수입니다.",
+      "tags": [
+        "arrow",
+        "frontend"
+      ],
+      "details": {
+        "functionKind": "arrow",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/components/EditToolbar.jsx:applyColor",
+      "kind": "function",
+      "label": "applyColor",
+      "fingerprint": "981850f5e94b328ab480",
+      "name": "applyColor",
+      "path": "src/components/EditToolbar.jsx",
+      "parentId": "file:src/components/EditToolbar.jsx",
+      "layer": "frontend",
+      "lineStart": 224,
+      "lineEnd": 229,
+      "summary": "color을(를) 적용하는 함수입니다.",
+      "tags": [
+        "arrow",
+        "frontend"
+      ],
+      "details": {
+        "functionKind": "arrow",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/components/EditToolbar.jsx:btn",
+      "kind": "function",
+      "label": "btn",
+      "fingerprint": "378386ba38203d33e975",
+      "name": "btn",
+      "path": "src/components/EditToolbar.jsx",
+      "parentId": "file:src/components/EditToolbar.jsx",
+      "layer": "frontend",
+      "lineStart": 273,
+      "lineEnd": 282,
+      "summary": "btn을(를) 처리하는 함수입니다.",
+      "tags": [
+        "arrow",
+        "frontend"
+      ],
+      "details": {
+        "functionKind": "arrow",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/components/EditToolbar.jsx:btnStyle",
+      "kind": "function",
+      "label": "btnStyle",
+      "fingerprint": "9d6054b049f3c7e69b33",
+      "name": "btnStyle",
+      "path": "src/components/EditToolbar.jsx",
+      "parentId": "file:src/components/EditToolbar.jsx",
+      "layer": "frontend",
+      "lineStart": 42,
+      "lineEnd": 58,
+      "summary": "btn style을(를) 처리하는 함수입니다.",
+      "tags": [
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/components/EditToolbar.jsx:downscaleAndInsert",
+      "kind": "function",
+      "label": "downscaleAndInsert",
+      "fingerprint": "27d1150d31f4145cc584",
+      "name": "downscaleAndInsert",
+      "path": "src/components/EditToolbar.jsx",
+      "parentId": "file:src/components/EditToolbar.jsx",
+      "layer": "frontend",
+      "lineStart": 16,
+      "lineEnd": 38,
+      "summary": "downscale and insert을(를) 처리하는 함수입니다.",
       "tags": [
         "frontend",
         "function"
@@ -17197,6 +17265,29 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:src/components/InvitePopover.jsx:InvitePopover",
+      "kind": "function",
+      "label": "InvitePopover",
+      "fingerprint": "266823650cf87471db22",
+      "name": "InvitePopover",
+      "path": "src/components/InvitePopover.jsx",
+      "parentId": "file:src/components/InvitePopover.jsx",
+      "layer": "frontend",
+      "lineStart": 14,
+      "lineEnd": 274,
+      "summary": "invite popover을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
       "id": "function:src/components/InvitePopover.jsx:handleCopy",
       "kind": "function",
       "label": "handleCopy",
@@ -17288,17 +17379,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
-      "id": "function:src/components/InvitePopover.jsx:InvitePopover",
+      "id": "function:src/components/NodePalette.jsx:NodePalette",
       "kind": "function",
-      "label": "InvitePopover",
-      "fingerprint": "266823650cf87471db22",
-      "name": "InvitePopover",
-      "path": "src/components/InvitePopover.jsx",
-      "parentId": "file:src/components/InvitePopover.jsx",
+      "label": "NodePalette",
+      "fingerprint": "dd8939462edaa70dd7ed",
+      "name": "NodePalette",
+      "path": "src/components/NodePalette.jsx",
+      "parentId": "file:src/components/NodePalette.jsx",
       "layer": "frontend",
-      "lineStart": 14,
-      "lineEnd": 274,
-      "summary": "invite popover을(를) 처리하는 함수입니다.",
+      "lineStart": 21,
+      "lineEnd": 104,
+      "summary": "node palette을(를) 처리하는 함수입니다.",
       "tags": [
         "exported",
         "frontend",
@@ -17329,29 +17420,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "details": {
         "functionKind": "arrow",
         "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/components/NodePalette.jsx:NodePalette",
-      "kind": "function",
-      "label": "NodePalette",
-      "fingerprint": "dd8939462edaa70dd7ed",
-      "name": "NodePalette",
-      "path": "src/components/NodePalette.jsx",
-      "parentId": "file:src/components/NodePalette.jsx",
-      "layer": "frontend",
-      "lineStart": 21,
-      "lineEnd": 104,
-      "summary": "node palette을(를) 처리하는 함수입니다.",
-      "tags": [
-        "exported",
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": true,
         "async": false
       }
     },
@@ -17417,6 +17485,139 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "functionKind": "arrow",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/components/NotesPanel.jsx:IconBtn",
+      "kind": "function",
+      "label": "IconBtn",
+      "fingerprint": "ab7d3104c3e180a601eb",
+      "name": "IconBtn",
+      "path": "src/components/NotesPanel.jsx",
+      "parentId": "file:src/components/NotesPanel.jsx",
+      "layer": "frontend",
+      "lineStart": 64,
+      "lineEnd": 80,
+      "summary": "icon btn을(를) 처리하는 함수입니다.",
+      "tags": [
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/components/NotesPanel.jsx:ListRow",
+      "kind": "function",
+      "label": "ListRow",
+      "fingerprint": "130085f9b70714604529",
+      "name": "ListRow",
+      "path": "src/components/NotesPanel.jsx",
+      "parentId": "file:src/components/NotesPanel.jsx",
+      "layer": "frontend",
+      "lineStart": 82,
+      "lineEnd": 133,
+      "summary": "row을(를) 목록 조회하는 함수입니다.",
+      "tags": [
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/components/NotesPanel.jsx:NotePage",
+      "kind": "function",
+      "label": "NotePage",
+      "fingerprint": "96e750adba1cf43de23b",
+      "name": "NotePage",
+      "path": "src/components/NotesPanel.jsx",
+      "parentId": "file:src/components/NotesPanel.jsx",
+      "layer": "frontend",
+      "lineStart": 249,
+      "lineEnd": 565,
+      "summary": "note page을(를) 처리하는 함수입니다.",
+      "tags": [
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/components/NotesPanel.jsx:NotesPanel",
+      "kind": "function",
+      "label": "NotesPanel",
+      "fingerprint": "e97cdc36b9b58bd5f2da",
+      "name": "NotesPanel",
+      "path": "src/components/NotesPanel.jsx",
+      "parentId": "file:src/components/NotesPanel.jsx",
+      "layer": "frontend",
+      "lineStart": 568,
+      "lineEnd": 854,
+      "summary": "notes panel을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/components/NotesPanel.jsx:StageTreeRow",
+      "kind": "function",
+      "label": "StageTreeRow",
+      "fingerprint": "760212cdea9ebe03fdf0",
+      "name": "StageTreeRow",
+      "path": "src/components/NotesPanel.jsx",
+      "parentId": "file:src/components/NotesPanel.jsx",
+      "layer": "frontend",
+      "lineStart": 137,
+      "lineEnd": 195,
+      "summary": "stage tree row을(를) 처리하는 함수입니다.",
+      "tags": [
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/components/NotesPanel.jsx:SubNoteRow",
+      "kind": "function",
+      "label": "SubNoteRow",
+      "fingerprint": "c3060367d2eb530372f6",
+      "name": "SubNoteRow",
+      "path": "src/components/NotesPanel.jsx",
+      "parentId": "file:src/components/NotesPanel.jsx",
+      "layer": "frontend",
+      "lineStart": 198,
+      "lineEnd": 244,
+      "summary": "sub note row을(를) 처리하는 함수입니다.",
+      "tags": [
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
         "exported": false,
         "async": false
       }
@@ -17576,28 +17777,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
-      "id": "function:src/components/NotesPanel.jsx:IconBtn",
-      "kind": "function",
-      "label": "IconBtn",
-      "fingerprint": "ab7d3104c3e180a601eb",
-      "name": "IconBtn",
-      "path": "src/components/NotesPanel.jsx",
-      "parentId": "file:src/components/NotesPanel.jsx",
-      "layer": "frontend",
-      "lineStart": 64,
-      "lineEnd": 80,
-      "summary": "icon btn을(를) 처리하는 함수입니다.",
-      "tags": [
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
       "id": "function:src/components/NotesPanel.jsx:isPartEdge",
       "kind": "function",
       "label": "isPartEdge",
@@ -17609,28 +17788,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "lineStart": 59,
       "lineEnd": 61,
       "summary": "is part edge을(를) 처리하는 함수입니다.",
-      "tags": [
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/components/NotesPanel.jsx:ListRow",
-      "kind": "function",
-      "label": "ListRow",
-      "fingerprint": "130085f9b70714604529",
-      "name": "ListRow",
-      "path": "src/components/NotesPanel.jsx",
-      "parentId": "file:src/components/NotesPanel.jsx",
-      "layer": "frontend",
-      "lineStart": 82,
-      "lineEnd": 133,
-      "summary": "row을(를) 목록 조회하는 함수입니다.",
       "tags": [
         "frontend",
         "function"
@@ -17682,51 +17839,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "details": {
         "functionKind": "function",
         "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/components/NotesPanel.jsx:NotePage",
-      "kind": "function",
-      "label": "NotePage",
-      "fingerprint": "96e750adba1cf43de23b",
-      "name": "NotePage",
-      "path": "src/components/NotesPanel.jsx",
-      "parentId": "file:src/components/NotesPanel.jsx",
-      "layer": "frontend",
-      "lineStart": 249,
-      "lineEnd": 565,
-      "summary": "note page을(를) 처리하는 함수입니다.",
-      "tags": [
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/components/NotesPanel.jsx:NotesPanel",
-      "kind": "function",
-      "label": "NotesPanel",
-      "fingerprint": "e97cdc36b9b58bd5f2da",
-      "name": "NotesPanel",
-      "path": "src/components/NotesPanel.jsx",
-      "parentId": "file:src/components/NotesPanel.jsx",
-      "layer": "frontend",
-      "lineStart": 568,
-      "lineEnd": 854,
-      "summary": "notes panel을(를) 처리하는 함수입니다.",
-      "tags": [
-        "exported",
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": true,
         "async": false
       }
     },
@@ -17841,28 +17953,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
-      "id": "function:src/components/NotesPanel.jsx:StageTreeRow",
-      "kind": "function",
-      "label": "StageTreeRow",
-      "fingerprint": "760212cdea9ebe03fdf0",
-      "name": "StageTreeRow",
-      "path": "src/components/NotesPanel.jsx",
-      "parentId": "file:src/components/NotesPanel.jsx",
-      "layer": "frontend",
-      "lineStart": 137,
-      "lineEnd": 195,
-      "summary": "stage tree row을(를) 처리하는 함수입니다.",
-      "tags": [
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
       "id": "function:src/components/NotesPanel.jsx:stripHtml",
       "kind": "function",
       "label": "stripHtml",
@@ -17874,28 +17964,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "lineStart": 22,
       "lineEnd": 27,
       "summary": "strip html을(를) 처리하는 함수입니다.",
-      "tags": [
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/components/NotesPanel.jsx:SubNoteRow",
-      "kind": "function",
-      "label": "SubNoteRow",
-      "fingerprint": "c3060367d2eb530372f6",
-      "name": "SubNoteRow",
-      "path": "src/components/NotesPanel.jsx",
-      "parentId": "file:src/components/NotesPanel.jsx",
-      "layer": "frontend",
-      "lineStart": 198,
-      "lineEnd": 244,
-      "summary": "sub note row을(를) 처리하는 함수입니다.",
       "tags": [
         "frontend",
         "function"
@@ -17964,6 +18032,29 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "lineStart": 3,
       "lineEnd": 41,
       "summary": "participant avatar을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/components/ScopedParticipants.jsx:ScopedParticipants",
+      "kind": "function",
+      "label": "ScopedParticipants",
+      "fingerprint": "6b728132cb475939e1a7",
+      "name": "ScopedParticipants",
+      "path": "src/components/ScopedParticipants.jsx",
+      "parentId": "file:src/components/ScopedParticipants.jsx",
+      "layer": "frontend",
+      "lineStart": 19,
+      "lineEnd": 178,
+      "summary": "scoped participants을(를) 처리하는 함수입니다.",
       "tags": [
         "exported",
         "frontend",
@@ -18060,29 +18151,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "details": {
         "functionKind": "function",
         "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/components/ScopedParticipants.jsx:ScopedParticipants",
-      "kind": "function",
-      "label": "ScopedParticipants",
-      "fingerprint": "6b728132cb475939e1a7",
-      "name": "ScopedParticipants",
-      "path": "src/components/ScopedParticipants.jsx",
-      "parentId": "file:src/components/ScopedParticipants.jsx",
-      "layer": "frontend",
-      "lineStart": 19,
-      "lineEnd": 178,
-      "summary": "scoped participants을(를) 처리하는 함수입니다.",
-      "tags": [
-        "exported",
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": true,
         "async": false
       }
     },
@@ -18219,50 +18287,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
-      "id": "function:src/components/SourceTwinPanel.jsx:onMove",
-      "kind": "function",
-      "label": "onMove",
-      "fingerprint": "b371b803d2428e861e0b",
-      "name": "onMove",
-      "path": "src/components/SourceTwinPanel.jsx",
-      "parentId": "file:src/components/SourceTwinPanel.jsx",
-      "layer": "frontend",
-      "lineStart": 348,
-      "lineEnd": 353,
-      "summary": "on move을(를) 처리하는 함수입니다.",
-      "tags": [
-        "arrow",
-        "frontend"
-      ],
-      "details": {
-        "functionKind": "arrow",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/components/SourceTwinPanel.jsx:onUp",
-      "kind": "function",
-      "label": "onUp",
-      "fingerprint": "fdadcfd6002a41a1b58b",
-      "name": "onUp",
-      "path": "src/components/SourceTwinPanel.jsx",
-      "parentId": "file:src/components/SourceTwinPanel.jsx",
-      "layer": "frontend",
-      "lineStart": 354,
-      "lineEnd": 358,
-      "summary": "on up을(를) 처리하는 함수입니다.",
-      "tags": [
-        "arrow",
-        "frontend"
-      ],
-      "details": {
-        "functionKind": "arrow",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
       "id": "function:src/components/SourceTwinPanel.jsx:SourceTwinPanel",
       "kind": "function",
       "label": "SourceTwinPanel",
@@ -18308,6 +18332,50 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:src/components/SourceTwinPanel.jsx:onMove",
+      "kind": "function",
+      "label": "onMove",
+      "fingerprint": "b371b803d2428e861e0b",
+      "name": "onMove",
+      "path": "src/components/SourceTwinPanel.jsx",
+      "parentId": "file:src/components/SourceTwinPanel.jsx",
+      "layer": "frontend",
+      "lineStart": 348,
+      "lineEnd": 353,
+      "summary": "on move을(를) 처리하는 함수입니다.",
+      "tags": [
+        "arrow",
+        "frontend"
+      ],
+      "details": {
+        "functionKind": "arrow",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/components/SourceTwinPanel.jsx:onUp",
+      "kind": "function",
+      "label": "onUp",
+      "fingerprint": "fdadcfd6002a41a1b58b",
+      "name": "onUp",
+      "path": "src/components/SourceTwinPanel.jsx",
+      "parentId": "file:src/components/SourceTwinPanel.jsx",
+      "layer": "frontend",
+      "lineStart": 354,
+      "lineEnd": 358,
+      "summary": "on up을(를) 처리하는 함수입니다.",
+      "tags": [
+        "arrow",
+        "frontend"
+      ],
+      "details": {
+        "functionKind": "arrow",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
       "id": "function:src/components/SourceTwinPanel.jsx:toggle",
       "kind": "function",
       "label": "toggle",
@@ -18326,6 +18394,29 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "details": {
         "functionKind": "arrow",
         "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/components/SystemObservationCatalog.jsx:SystemObservationCatalog",
+      "kind": "function",
+      "label": "SystemObservationCatalog",
+      "fingerprint": "bc4d6b2b88a2b2c94d6f",
+      "name": "SystemObservationCatalog",
+      "path": "src/components/SystemObservationCatalog.jsx",
+      "parentId": "file:src/components/SystemObservationCatalog.jsx",
+      "layer": "frontend",
+      "lineStart": 42,
+      "lineEnd": 118,
+      "summary": "system observation catalog을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
         "async": false
       }
     },
@@ -18352,17 +18443,105 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
-      "id": "function:src/components/SystemObservationCatalog.jsx:SystemObservationCatalog",
+      "id": "function:src/components/Toolbar.jsx:MobileBtn",
       "kind": "function",
-      "label": "SystemObservationCatalog",
-      "fingerprint": "bc4d6b2b88a2b2c94d6f",
-      "name": "SystemObservationCatalog",
-      "path": "src/components/SystemObservationCatalog.jsx",
-      "parentId": "file:src/components/SystemObservationCatalog.jsx",
+      "label": "MobileBtn",
+      "fingerprint": "8c001e268805606d6d0a",
+      "name": "MobileBtn",
+      "path": "src/components/Toolbar.jsx",
+      "parentId": "file:src/components/Toolbar.jsx",
       "layer": "frontend",
-      "lineStart": 42,
-      "lineEnd": 118,
-      "summary": "system observation catalog을(를) 처리하는 함수입니다.",
+      "lineStart": 321,
+      "lineEnd": 344,
+      "summary": "mobile btn을(를) 처리하는 함수입니다.",
+      "tags": [
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/components/Toolbar.jsx:RuntimeButton",
+      "kind": "function",
+      "label": "RuntimeButton",
+      "fingerprint": "9572cc6041c4af1354b0",
+      "name": "RuntimeButton",
+      "path": "src/components/Toolbar.jsx",
+      "parentId": "file:src/components/Toolbar.jsx",
+      "layer": "frontend",
+      "lineStart": 346,
+      "lineEnd": 382,
+      "summary": "runtime button을(를) 처리하는 함수입니다.",
+      "tags": [
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/components/Toolbar.jsx:SmallIcon",
+      "kind": "function",
+      "label": "SmallIcon",
+      "fingerprint": "6838d981f1ac343e0fb9",
+      "name": "SmallIcon",
+      "path": "src/components/Toolbar.jsx",
+      "parentId": "file:src/components/Toolbar.jsx",
+      "layer": "frontend",
+      "lineStart": 266,
+      "lineEnd": 282,
+      "summary": "small icon을(를) 처리하는 함수입니다.",
+      "tags": [
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/components/Toolbar.jsx:ToolBtn",
+      "kind": "function",
+      "label": "ToolBtn",
+      "fingerprint": "985657cddccfa02c2b24",
+      "name": "ToolBtn",
+      "path": "src/components/Toolbar.jsx",
+      "parentId": "file:src/components/Toolbar.jsx",
+      "layer": "frontend",
+      "lineStart": 284,
+      "lineEnd": 319,
+      "summary": "tool btn을(를) 처리하는 함수입니다.",
+      "tags": [
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/components/Toolbar.jsx:Toolbar",
+      "kind": "function",
+      "label": "Toolbar",
+      "fingerprint": "794a5281c76a0fc3960d",
+      "name": "Toolbar",
+      "path": "src/components/Toolbar.jsx",
+      "parentId": "file:src/components/Toolbar.jsx",
+      "layer": "frontend",
+      "lineStart": 4,
+      "lineEnd": 80,
+      "summary": "toolbar을(를) 처리하는 함수입니다.",
       "tags": [
         "exported",
         "frontend",
@@ -18371,6 +18550,28 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "details": {
         "functionKind": "function",
         "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/components/Toolbar.jsx:ViewSelector",
+      "kind": "function",
+      "label": "ViewSelector",
+      "fingerprint": "1d85c027b8a3de535a01",
+      "name": "ViewSelector",
+      "path": "src/components/Toolbar.jsx",
+      "parentId": "file:src/components/Toolbar.jsx",
+      "layer": "frontend",
+      "lineStart": 85,
+      "lineEnd": 255,
+      "summary": "view selector을(를) 처리하는 함수입니다.",
+      "tags": [
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
         "async": false
       }
     },
@@ -18441,28 +18642,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
-      "id": "function:src/components/Toolbar.jsx:MobileBtn",
-      "kind": "function",
-      "label": "MobileBtn",
-      "fingerprint": "8c001e268805606d6d0a",
-      "name": "MobileBtn",
-      "path": "src/components/Toolbar.jsx",
-      "parentId": "file:src/components/Toolbar.jsx",
-      "layer": "frontend",
-      "lineStart": 321,
-      "lineEnd": 344,
-      "summary": "mobile btn을(를) 처리하는 함수입니다.",
-      "tags": [
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
       "id": "function:src/components/Toolbar.jsx:onDoc",
       "kind": "function",
       "label": "onDoc",
@@ -18518,117 +18697,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "lineStart": 257,
       "lineEnd": 264,
       "summary": "row btn을(를) 처리하는 함수입니다.",
-      "tags": [
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/components/Toolbar.jsx:RuntimeButton",
-      "kind": "function",
-      "label": "RuntimeButton",
-      "fingerprint": "9572cc6041c4af1354b0",
-      "name": "RuntimeButton",
-      "path": "src/components/Toolbar.jsx",
-      "parentId": "file:src/components/Toolbar.jsx",
-      "layer": "frontend",
-      "lineStart": 346,
-      "lineEnd": 382,
-      "summary": "runtime button을(를) 처리하는 함수입니다.",
-      "tags": [
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/components/Toolbar.jsx:SmallIcon",
-      "kind": "function",
-      "label": "SmallIcon",
-      "fingerprint": "6838d981f1ac343e0fb9",
-      "name": "SmallIcon",
-      "path": "src/components/Toolbar.jsx",
-      "parentId": "file:src/components/Toolbar.jsx",
-      "layer": "frontend",
-      "lineStart": 266,
-      "lineEnd": 282,
-      "summary": "small icon을(를) 처리하는 함수입니다.",
-      "tags": [
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/components/Toolbar.jsx:Toolbar",
-      "kind": "function",
-      "label": "Toolbar",
-      "fingerprint": "794a5281c76a0fc3960d",
-      "name": "Toolbar",
-      "path": "src/components/Toolbar.jsx",
-      "parentId": "file:src/components/Toolbar.jsx",
-      "layer": "frontend",
-      "lineStart": 4,
-      "lineEnd": 80,
-      "summary": "toolbar을(를) 처리하는 함수입니다.",
-      "tags": [
-        "exported",
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": true,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/components/Toolbar.jsx:ToolBtn",
-      "kind": "function",
-      "label": "ToolBtn",
-      "fingerprint": "985657cddccfa02c2b24",
-      "name": "ToolBtn",
-      "path": "src/components/Toolbar.jsx",
-      "parentId": "file:src/components/Toolbar.jsx",
-      "layer": "frontend",
-      "lineStart": 284,
-      "lineEnd": 319,
-      "summary": "tool btn을(를) 처리하는 함수입니다.",
-      "tags": [
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/components/Toolbar.jsx:ViewSelector",
-      "kind": "function",
-      "label": "ViewSelector",
-      "fingerprint": "1d85c027b8a3de535a01",
-      "name": "ViewSelector",
-      "path": "src/components/Toolbar.jsx",
-      "parentId": "file:src/components/Toolbar.jsx",
-      "layer": "frontend",
-      "lineStart": 85,
-      "lineEnd": 255,
-      "summary": "view selector을(를) 처리하는 함수입니다.",
       "tags": [
         "frontend",
         "function"
@@ -20042,6 +20110,142 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:src/lib/shareLaunchCoordinator.js:claimShareLaunch",
+      "kind": "function",
+      "label": "claimShareLaunch",
+      "fingerprint": "cb254c1985b363943864",
+      "name": "claimShareLaunch",
+      "path": "src/lib/shareLaunchCoordinator.js",
+      "parentId": "file:src/lib/shareLaunchCoordinator.js",
+      "layer": "frontend",
+      "lineStart": 44,
+      "lineEnd": 65,
+      "summary": "claim share launch을(를) 처리하는 비동기 함수입니다.",
+      "tags": [
+        "async",
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": true
+      }
+    },
+    {
+      "id": "function:src/lib/shareLaunchCoordinator.js:claimShareLaunchFallback",
+      "kind": "function",
+      "label": "claimShareLaunchFallback",
+      "fingerprint": "e3834d913e59d32a6fc2",
+      "name": "claimShareLaunchFallback",
+      "path": "src/lib/shareLaunchCoordinator.js",
+      "parentId": "file:src/lib/shareLaunchCoordinator.js",
+      "layer": "frontend",
+      "lineStart": 15,
+      "lineEnd": 42,
+      "summary": "claim share launch fallback을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/lib/shareLaunchCoordinator.js:claimShareLaunchFallback.release",
+      "kind": "function",
+      "label": "claimShareLaunchFallback.release",
+      "fingerprint": "5822f60c7a97875eea6d",
+      "name": "claimShareLaunchFallback.release",
+      "path": "src/lib/shareLaunchCoordinator.js",
+      "parentId": "file:src/lib/shareLaunchCoordinator.js",
+      "layer": "frontend",
+      "lineStart": 21,
+      "lineEnd": 21,
+      "summary": "claim share launch fallback release을(를) 처리하는 함수입니다.",
+      "tags": [
+        "frontend",
+        "method"
+      ],
+      "details": {
+        "functionKind": "method",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/lib/shareLaunchCoordinator.js:claimShareLaunchFallback.release#2",
+      "kind": "function",
+      "label": "claimShareLaunchFallback.release",
+      "fingerprint": "dc4291920683e9910129",
+      "name": "claimShareLaunchFallback.release",
+      "path": "src/lib/shareLaunchCoordinator.js",
+      "parentId": "file:src/lib/shareLaunchCoordinator.js",
+      "layer": "frontend",
+      "lineStart": 30,
+      "lineEnd": 37,
+      "summary": "claim share launch fallback release을(를) 처리하는 함수입니다.",
+      "tags": [
+        "frontend",
+        "method"
+      ],
+      "details": {
+        "functionKind": "method",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/lib/shareLaunchCoordinator.js:claimShareLaunchFallback.release#3",
+      "kind": "function",
+      "label": "claimShareLaunchFallback.release",
+      "fingerprint": "5822f60c7a97875eea6d",
+      "name": "claimShareLaunchFallback.release",
+      "path": "src/lib/shareLaunchCoordinator.js",
+      "parentId": "file:src/lib/shareLaunchCoordinator.js",
+      "layer": "frontend",
+      "lineStart": 40,
+      "lineEnd": 40,
+      "summary": "claim share launch fallback release을(를) 처리하는 함수입니다.",
+      "tags": [
+        "frontend",
+        "method"
+      ],
+      "details": {
+        "functionKind": "method",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/lib/shareLaunchCoordinator.js:shareTokenFingerprint",
+      "kind": "function",
+      "label": "shareTokenFingerprint",
+      "fingerprint": "47883fc6dc0dd80abd13",
+      "name": "shareTokenFingerprint",
+      "path": "src/lib/shareLaunchCoordinator.js",
+      "parentId": "file:src/lib/shareLaunchCoordinator.js",
+      "layer": "frontend",
+      "lineStart": 4,
+      "lineEnd": 13,
+      "summary": "share token fingerprint을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
       "id": "function:src/lib/sharedCanvasApi.js:getSharedCanvas",
       "kind": "function",
       "label": "getSharedCanvas",
@@ -20168,142 +20372,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "lineStart": 37,
       "lineEnd": 42,
       "summary": "shared canvas을(를) 수정하는 함수입니다.",
-      "tags": [
-        "exported",
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": true,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/lib/shareLaunchCoordinator.js:claimShareLaunch",
-      "kind": "function",
-      "label": "claimShareLaunch",
-      "fingerprint": "cb254c1985b363943864",
-      "name": "claimShareLaunch",
-      "path": "src/lib/shareLaunchCoordinator.js",
-      "parentId": "file:src/lib/shareLaunchCoordinator.js",
-      "layer": "frontend",
-      "lineStart": 44,
-      "lineEnd": 65,
-      "summary": "claim share launch을(를) 처리하는 비동기 함수입니다.",
-      "tags": [
-        "async",
-        "exported",
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": true,
-        "async": true
-      }
-    },
-    {
-      "id": "function:src/lib/shareLaunchCoordinator.js:claimShareLaunchFallback",
-      "kind": "function",
-      "label": "claimShareLaunchFallback",
-      "fingerprint": "e3834d913e59d32a6fc2",
-      "name": "claimShareLaunchFallback",
-      "path": "src/lib/shareLaunchCoordinator.js",
-      "parentId": "file:src/lib/shareLaunchCoordinator.js",
-      "layer": "frontend",
-      "lineStart": 15,
-      "lineEnd": 42,
-      "summary": "claim share launch fallback을(를) 처리하는 함수입니다.",
-      "tags": [
-        "exported",
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": true,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/lib/shareLaunchCoordinator.js:claimShareLaunchFallback.release",
-      "kind": "function",
-      "label": "claimShareLaunchFallback.release",
-      "fingerprint": "5822f60c7a97875eea6d",
-      "name": "claimShareLaunchFallback.release",
-      "path": "src/lib/shareLaunchCoordinator.js",
-      "parentId": "file:src/lib/shareLaunchCoordinator.js",
-      "layer": "frontend",
-      "lineStart": 21,
-      "lineEnd": 21,
-      "summary": "claim share launch fallback release을(를) 처리하는 함수입니다.",
-      "tags": [
-        "frontend",
-        "method"
-      ],
-      "details": {
-        "functionKind": "method",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/lib/shareLaunchCoordinator.js:claimShareLaunchFallback.release#2",
-      "kind": "function",
-      "label": "claimShareLaunchFallback.release",
-      "fingerprint": "dc4291920683e9910129",
-      "name": "claimShareLaunchFallback.release",
-      "path": "src/lib/shareLaunchCoordinator.js",
-      "parentId": "file:src/lib/shareLaunchCoordinator.js",
-      "layer": "frontend",
-      "lineStart": 30,
-      "lineEnd": 37,
-      "summary": "claim share launch fallback release을(를) 처리하는 함수입니다.",
-      "tags": [
-        "frontend",
-        "method"
-      ],
-      "details": {
-        "functionKind": "method",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/lib/shareLaunchCoordinator.js:claimShareLaunchFallback.release#3",
-      "kind": "function",
-      "label": "claimShareLaunchFallback.release",
-      "fingerprint": "5822f60c7a97875eea6d",
-      "name": "claimShareLaunchFallback.release",
-      "path": "src/lib/shareLaunchCoordinator.js",
-      "parentId": "file:src/lib/shareLaunchCoordinator.js",
-      "layer": "frontend",
-      "lineStart": 40,
-      "lineEnd": 40,
-      "summary": "claim share launch fallback release을(를) 처리하는 함수입니다.",
-      "tags": [
-        "frontend",
-        "method"
-      ],
-      "details": {
-        "functionKind": "method",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/lib/shareLaunchCoordinator.js:shareTokenFingerprint",
-      "kind": "function",
-      "label": "shareTokenFingerprint",
-      "fingerprint": "47883fc6dc0dd80abd13",
-      "name": "shareTokenFingerprint",
-      "path": "src/lib/shareLaunchCoordinator.js",
-      "parentId": "file:src/lib/shareLaunchCoordinator.js",
-      "layer": "frontend",
-      "lineStart": 4,
-      "lineEnd": 13,
-      "summary": "share token fingerprint을(를) 처리하는 함수입니다.",
       "tags": [
         "exported",
         "frontend",
@@ -20790,6 +20858,28 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:src/lib/systemRuntimeApi.js:SystemRuntimeApiError.constructor",
+      "kind": "function",
+      "label": "SystemRuntimeApiError.constructor",
+      "fingerprint": "9be0d6b1d5864aa1f0df",
+      "name": "SystemRuntimeApiError.constructor",
+      "path": "src/lib/systemRuntimeApi.js",
+      "parentId": "file:src/lib/systemRuntimeApi.js",
+      "layer": "frontend",
+      "lineStart": 5,
+      "lineEnd": 9,
+      "summary": "system runtime api error constructor을(를) 처리하는 함수입니다.",
+      "tags": [
+        "class-method",
+        "frontend"
+      ],
+      "details": {
+        "functionKind": "class-method",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
       "id": "function:src/lib/systemRuntimeApi.js:accessToken",
       "kind": "function",
       "label": "accessToken",
@@ -20908,28 +20998,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
-      "id": "function:src/lib/systemRuntimeApi.js:SystemRuntimeApiError.constructor",
-      "kind": "function",
-      "label": "SystemRuntimeApiError.constructor",
-      "fingerprint": "9be0d6b1d5864aa1f0df",
-      "name": "SystemRuntimeApiError.constructor",
-      "path": "src/lib/systemRuntimeApi.js",
-      "parentId": "file:src/lib/systemRuntimeApi.js",
-      "layer": "frontend",
-      "lineStart": 5,
-      "lineEnd": 9,
-      "summary": "system runtime api error constructor을(를) 처리하는 함수입니다.",
-      "tags": [
-        "class-method",
-        "frontend"
-      ],
-      "details": {
-        "functionKind": "class-method",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
       "id": "function:src/lib/wheelRouting.js:axisCanScroll",
       "kind": "function",
       "label": "axisCanScroll",
@@ -21041,6 +21109,29 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:src/nodes/ContentNode.jsx:ContentNode",
+      "kind": "function",
+      "label": "ContentNode",
+      "fingerprint": "dd58f90589141ab1d785",
+      "name": "ContentNode",
+      "path": "src/nodes/ContentNode.jsx",
+      "parentId": "file:src/nodes/ContentNode.jsx",
+      "layer": "frontend",
+      "lineStart": 92,
+      "lineEnd": 447,
+      "summary": "content node을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
       "id": "function:src/nodes/ContentNode.jsx:caretAtEnd",
       "kind": "function",
       "label": "caretAtEnd",
@@ -21081,29 +21172,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "details": {
         "functionKind": "arrow",
         "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/nodes/ContentNode.jsx:ContentNode",
-      "kind": "function",
-      "label": "ContentNode",
-      "fingerprint": "dd58f90589141ab1d785",
-      "name": "ContentNode",
-      "path": "src/nodes/ContentNode.jsx",
-      "parentId": "file:src/nodes/ContentNode.jsx",
-      "layer": "frontend",
-      "lineStart": 92,
-      "lineEnd": 447,
-      "summary": "content node을(를) 처리하는 함수입니다.",
-      "tags": [
-        "exported",
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": true,
         "async": false
       }
     },
@@ -21439,6 +21507,29 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:src/nodes/GroupNode.jsx:GroupNode",
+      "kind": "function",
+      "label": "GroupNode",
+      "fingerprint": "d2b2560b170ecd5f74b1",
+      "name": "GroupNode",
+      "path": "src/nodes/GroupNode.jsx",
+      "parentId": "file:src/nodes/GroupNode.jsx",
+      "layer": "frontend",
+      "lineStart": 12,
+      "lineEnd": 182,
+      "summary": "group node을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
       "id": "function:src/nodes/GroupNode.jsx:clamp",
       "kind": "function",
       "label": "clamp",
@@ -21479,29 +21570,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "details": {
         "functionKind": "arrow",
         "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/nodes/GroupNode.jsx:GroupNode",
-      "kind": "function",
-      "label": "GroupNode",
-      "fingerprint": "d2b2560b170ecd5f74b1",
-      "name": "GroupNode",
-      "path": "src/nodes/GroupNode.jsx",
-      "parentId": "file:src/nodes/GroupNode.jsx",
-      "layer": "frontend",
-      "lineStart": 12,
-      "lineEnd": 182,
-      "summary": "group node을(를) 처리하는 함수입니다.",
-      "tags": [
-        "exported",
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": true,
         "async": false
       }
     },
@@ -21634,6 +21702,29 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "details": {
         "functionKind": "arrow",
         "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/nodes/MemoNode.jsx:MemoNode",
+      "kind": "function",
+      "label": "MemoNode",
+      "fingerprint": "e559b112fd1e49f160be",
+      "name": "MemoNode",
+      "path": "src/nodes/MemoNode.jsx",
+      "parentId": "file:src/nodes/MemoNode.jsx",
+      "layer": "frontend",
+      "lineStart": 62,
+      "lineEnd": 413,
+      "summary": "memo node을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
         "async": false
       }
     },
@@ -21810,29 +21901,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "details": {
         "functionKind": "arrow",
         "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/nodes/MemoNode.jsx:MemoNode",
-      "kind": "function",
-      "label": "MemoNode",
-      "fingerprint": "e559b112fd1e49f160be",
-      "name": "MemoNode",
-      "path": "src/nodes/MemoNode.jsx",
-      "parentId": "file:src/nodes/MemoNode.jsx",
-      "layer": "frontend",
-      "lineStart": 62,
-      "lineEnd": 413,
-      "summary": "memo node을(를) 처리하는 함수입니다.",
-      "tags": [
-        "exported",
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": true,
         "async": false
       }
     },
@@ -22035,6 +22103,51 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:src/nodes/StageNode.jsx:HANDLE_STYLE",
+      "kind": "function",
+      "label": "HANDLE_STYLE",
+      "fingerprint": "9bdf46c24eac214eb969",
+      "name": "HANDLE_STYLE",
+      "path": "src/nodes/StageNode.jsx",
+      "parentId": "file:src/nodes/StageNode.jsx",
+      "layer": "frontend",
+      "lineStart": 18,
+      "lineEnd": 21,
+      "summary": "handle style을(를) 처리하는 함수입니다.",
+      "tags": [
+        "arrow",
+        "frontend"
+      ],
+      "details": {
+        "functionKind": "arrow",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/nodes/StageNode.jsx:StageNode",
+      "kind": "function",
+      "label": "StageNode",
+      "fingerprint": "75d3b7bcda737142140e",
+      "name": "StageNode",
+      "path": "src/nodes/StageNode.jsx",
+      "parentId": "file:src/nodes/StageNode.jsx",
+      "layer": "frontend",
+      "lineStart": 69,
+      "lineEnd": 497,
+      "summary": "stage node을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
       "id": "function:src/nodes/StageNode.jsx:caretAtEnd",
       "kind": "function",
       "label": "caretAtEnd",
@@ -22068,28 +22181,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "lineStart": 201,
       "lineEnd": 207,
       "summary": "cycle color을(를) 처리하는 함수입니다.",
-      "tags": [
-        "arrow",
-        "frontend"
-      ],
-      "details": {
-        "functionKind": "arrow",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/nodes/StageNode.jsx:HANDLE_STYLE",
-      "kind": "function",
-      "label": "HANDLE_STYLE",
-      "fingerprint": "9bdf46c24eac214eb969",
-      "name": "HANDLE_STYLE",
-      "path": "src/nodes/StageNode.jsx",
-      "parentId": "file:src/nodes/StageNode.jsx",
-      "layer": "frontend",
-      "lineStart": 18,
-      "lineEnd": 21,
-      "summary": "handle style을(를) 처리하는 함수입니다.",
       "tags": [
         "arrow",
         "frontend"
@@ -22365,29 +22456,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
-      "id": "function:src/nodes/StageNode.jsx:StageNode",
-      "kind": "function",
-      "label": "StageNode",
-      "fingerprint": "75d3b7bcda737142140e",
-      "name": "StageNode",
-      "path": "src/nodes/StageNode.jsx",
-      "parentId": "file:src/nodes/StageNode.jsx",
-      "layer": "frontend",
-      "lineStart": 69,
-      "lineEnd": 497,
-      "summary": "stage node을(를) 처리하는 함수입니다.",
-      "tags": [
-        "exported",
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": true,
-        "async": false
-      }
-    },
-    {
       "id": "function:src/nodes/StageNode.jsx:startEdit",
       "kind": "function",
       "label": "startEdit",
@@ -22472,6 +22540,29 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "details": {
         "functionKind": "function",
         "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/nodes/SystemNode.jsx:SystemNode",
+      "kind": "function",
+      "label": "SystemNode",
+      "fingerprint": "6c6cc9c01735ac370fd1",
+      "name": "SystemNode",
+      "path": "src/nodes/SystemNode.jsx",
+      "parentId": "file:src/nodes/SystemNode.jsx",
+      "layer": "frontend",
+      "lineStart": 81,
+      "lineEnd": 623,
+      "summary": "system node을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
         "async": false
       }
     },
@@ -22846,29 +22937,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "details": {
         "functionKind": "arrow",
         "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/nodes/SystemNode.jsx:SystemNode",
-      "kind": "function",
-      "label": "SystemNode",
-      "fingerprint": "6c6cc9c01735ac370fd1",
-      "name": "SystemNode",
-      "path": "src/nodes/SystemNode.jsx",
-      "parentId": "file:src/nodes/SystemNode.jsx",
-      "layer": "frontend",
-      "lineStart": 81,
-      "lineEnd": 623,
-      "summary": "system node을(를) 처리하는 함수입니다.",
-      "tags": [
-        "exported",
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": true,
         "async": false
       }
     },
@@ -23354,7 +23422,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "npm-script:build",
       "kind": "npm-script",
       "label": "npm run build",
-      "fingerprint": "c98db7b7174ce8c2ca81",
+      "fingerprint": "eeab623ab611548dd6eb",
       "name": "build",
       "path": "package.json",
       "parentId": "file:package.json",
@@ -23451,6 +23519,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "tags": [
         "npm",
         "test"
+      ]
+    },
+    {
+      "id": "npm-script:source-twin:prepare",
+      "kind": "npm-script",
+      "label": "npm run source-twin:prepare",
+      "fingerprint": "3b20b443daf08011163a",
+      "name": "source-twin:prepare",
+      "path": "package.json",
+      "parentId": "file:package.json",
+      "layer": "code",
+      "summary": "source-twin:prepare 작업을 실행하는 프로젝트 명령입니다.",
+      "tags": [
+        "npm"
       ]
     },
     {
@@ -24070,19 +24152,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "env:NODE_ENV"
     },
     {
-      "id": "relation:055a77f0ba590834",
-      "type": "imports",
-      "source": "file:api/system-runtime.js",
-      "target": "file:shared/systemRuntime.js",
-      "names": [
-        "normalizeSystemRuntimeBatchRequest",
-        "normalizeSystemRuntimeCanvasRequest",
-        "normalizeSystemRuntimeRequest",
-        "SystemRuntimeContractError"
-      ],
-      "dynamic": false
-    },
-    {
       "id": "relation:0594b5601c52d593",
       "type": "contains",
       "source": "file:src/App.jsx",
@@ -24192,17 +24261,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/components/Toolbar.jsx:onDoc"
     },
     {
-      "id": "relation:08460244f5ef192f",
-      "type": "imports",
-      "source": "file:mcp/sanitize.js",
-      "target": "file:shared/systemOntology.js",
-      "names": [
-        "normalizeSystemNodeData",
-        "SYSTEM_ONTOLOGY_TEXT_FIELDS"
-      ],
-      "dynamic": false
-    },
-    {
       "id": "relation:0854509f93c28ec1",
       "type": "contains",
       "source": "file:shared/sharePermissions.js",
@@ -24258,18 +24316,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
-      "id": "relation:099b86c74b73afa3",
-      "type": "imports",
-      "source": "file:scripts/test-mcp-logic.mjs",
-      "target": "file:src/lib/canvasSchemaGuard.js",
-      "names": [
-        "CanvasSchemaGuardError",
-        "canvasWriteError",
-        "RELATION_METADATA_GUARD_MARKER"
-      ],
-      "dynamic": false
-    },
-    {
       "id": "relation:09a80ed0035645eb",
       "type": "imports",
       "source": "file:src/App.jsx",
@@ -24308,18 +24354,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/lib/canvasMerge.js:same"
     },
     {
-      "id": "relation:0bb1d87c7656eb3a",
-      "type": "imports",
-      "source": "file:scripts/test-mcp-logic.mjs",
-      "target": "file:shared/privacyCapabilities.js",
-      "names": [
-        "assertPrivacyReleaseGate",
-        "CANVAS_ENCRYPTION_TRANSITION",
-        "CANVAS_PRIVACY_CAPABILITIES"
-      ],
-      "dynamic": false
-    },
-    {
       "id": "relation:0c41fcd372ac8263",
       "type": "contains",
       "source": "file:src/App.jsx",
@@ -24330,6 +24364,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/workflowSystemTwinAdapter.js",
       "target": "function:shared/workflowSystemTwinAdapter.js:credentialPartProposal"
+    },
+    {
+      "id": "relation:0cf86bd10bd38920",
+      "type": "imports",
+      "source": "file:mcp/sourceTwinStore.js",
+      "target": "file:shared/sourceTwin.js",
+      "names": [
+        "SOURCE_TWIN_SOURCE_ID",
+        "compareSourceTwinSnapshots",
+        "createSourceTwinSnapshot",
+        "sourceTwinEntities"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:0cfb04ded3ad91ab",
@@ -24549,6 +24596,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/lib/canvasMerge.js",
       "target": "function:src/lib/canvasMerge.js:mergeValue"
+    },
+    {
+      "id": "relation:12891c74d32ce5b1",
+      "type": "contains",
+      "source": "file:scripts/generate-source-twin.mjs",
+      "target": "function:scripts/generate-source-twin.mjs:diagnosticValue"
     },
     {
       "id": "relation:128d46810987e002",
@@ -24834,6 +24887,24 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:1b1faf84344909fb",
+      "type": "imports",
+      "source": "file:api/system-runtime.js",
+      "target": "file:mcp/systemRuntime.js",
+      "names": [
+        "SystemRuntimeCheckError",
+        "claimSystemRuntimeCheck",
+        "loadLatestSystemRuntimeObservations",
+        "persistSystemRuntimeObservation",
+        "readWorkflowSystemOperations",
+        "requireSystemRuntimeOperator",
+        "resolveSystemRuntimeTarget",
+        "resolveSystemRuntimeTargets",
+        "runSystemRuntimeCapability"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:1b2269cc97e2c85b",
       "type": "contains",
       "source": "file:shared/systemRuntime.js",
@@ -24846,21 +24917,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "dependency:../shared/sourceTwinManifest.js",
       "names": [
         "SOURCE_TWIN_MANIFEST"
-      ],
-      "dynamic": false
-    },
-    {
-      "id": "relation:1b909f71b5eeee5e",
-      "type": "imports",
-      "source": "file:api/source-twin.js",
-      "target": "file:mcp/sourceTwinStore.js",
-      "names": [
-        "captureSourceTwinSnapshot",
-        "compareStoredSourceTwinSnapshots",
-        "currentSourceTwinState",
-        "listSourceTwinSnapshots",
-        "requireSourceTwinOwner",
-        "SourceTwinError"
       ],
       "dynamic": false
     },
@@ -24916,6 +24972,23 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "dependency:node:path",
       "names": [
         "default"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "relation:1d794cdaa717c57b",
+      "type": "imports",
+      "source": "file:scripts/test-mcp-logic.mjs",
+      "target": "file:shared/relationOntology.js",
+      "names": [
+        "RELATION_CONFIDENCE_DEFS",
+        "RELATION_DEFS",
+        "RELATION_FAMILY_DEFS",
+        "RELATION_SOURCE_DEFS",
+        "createEdgeRelationData",
+        "edgeRelationInfo",
+        "edgeRelationProvenance",
+        "normalizeEdgeRelationData"
       ],
       "dynamic": false
     },
@@ -25175,6 +25248,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "npm-script:discover:check"
     },
     {
+      "id": "relation:24f9fffeaf2e0664",
+      "type": "imports",
+      "source": "file:scripts/source-twin-scanner.mjs",
+      "target": "dependency:node:fs",
+      "names": [
+        "readFileSync",
+        "readdirSync"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:2503907c037069e8",
       "type": "contains",
       "source": "file:shared/workflowSystemDiscovery.js",
@@ -25207,35 +25291,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:scripts/source-twin-scanner.mjs",
       "target": "function:scripts/source-twin-scanner.mjs:readSourceRepositoryMetadata"
-    },
-    {
-      "id": "relation:25c187c2fe1ff440",
-      "type": "imports",
-      "source": "file:src/nodes/SystemNode.jsx",
-      "target": "file:shared/systemPartOntology.js",
-      "names": [
-        "normalizeSystemPart",
-        "normalizeSystemParts",
-        "SYSTEM_PART_EXPOSURE_DEFS",
-        "SYSTEM_PART_KIND_DEFS",
-        "systemPartKindDefinition",
-        "validateSystemPartInput"
-      ],
-      "dynamic": false
-    },
-    {
-      "id": "relation:25d312957f7eda0c",
-      "type": "imports",
-      "source": "file:src/components/EdgeRelationEditor.jsx",
-      "target": "file:shared/relationOntology.js",
-      "names": [
-        "edgeRelationInfo",
-        "RELATION_CONFIDENCE_DEFS",
-        "RELATION_DEFS",
-        "RELATION_FAMILY_DEFS",
-        "RELATION_SOURCE_DEFS"
-      ],
-      "dynamic": false
     },
     {
       "id": "relation:25d9e92c8eb3f79a",
@@ -25371,17 +25426,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:api/source-twin.js",
       "target": "function:api/source-twin.js:send"
-    },
-    {
-      "id": "relation:2995fa1e9512e125",
-      "type": "imports",
-      "source": "file:scripts/test-mcp-logic.mjs",
-      "target": "file:shared/workflowSystemTwinAdapter.js",
-      "names": [
-        "inspectWorkflowSystemTwin",
-        "WORKFLOW_SYSTEM_TWIN_SOURCE_ID"
-      ],
-      "dynamic": false
     },
     {
       "id": "relation:2a4e134d63a80d58",
@@ -25583,31 +25627,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/shareAccess.js",
       "target": "function:mcp/shareAccess.js:effectiveShareGrant"
-    },
-    {
-      "id": "relation:2fe7c66a088c9c7b",
-      "type": "imports",
-      "source": "file:src/App.jsx",
-      "target": "file:src/storage.js",
-      "names": [
-        "deleteCanvasData",
-        "getLastStorageError",
-        "initCanvases",
-        "loadActiveId",
-        "loadCanvasData",
-        "loadCanvasList",
-        "loadCanvasStorageOwner",
-        "loadLodThreshold",
-        "resetCanvasStorage",
-        "saveActiveId",
-        "saveCanvasData",
-        "saveCanvasList",
-        "saveCanvasStorageOwner",
-        "saveLodThreshold",
-        "STORAGE_ERROR_EVENT",
-        "uid"
-      ],
-      "dynamic": false
     },
     {
       "id": "relation:300b243210b9aeae",
@@ -25865,17 +25884,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/layout.js:overlaps"
     },
     {
-      "id": "relation:3786431e20186f25",
-      "type": "imports",
-      "source": "file:scripts/check-privacy-release.mjs",
-      "target": "file:shared/privacyCapabilities.js",
-      "names": [
-        "assertPrivacyReleaseGate",
-        "CANVAS_PRIVACY_CAPABILITIES"
-      ],
-      "dynamic": false
-    },
-    {
       "id": "relation:37a8002ee6d68b6a",
       "type": "contains",
       "source": "file:src/components/AuthPanel.jsx",
@@ -26063,6 +26071,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/components/Toolbar.jsx:SmallIcon"
     },
     {
+      "id": "relation:3fa0efab265e53ee",
+      "type": "imports",
+      "source": "file:scripts/test-source-twin.mjs",
+      "target": "file:scripts/source-twin-scanner.mjs",
+      "names": [
+        "buildSourceTwinManifest",
+        "compareSourceTwinText",
+        "parseGeneratedSourceTwin",
+        "readSourceTwinWorkingTree",
+        "serializeSourceTwinManifest"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:3fba8489af42322c",
       "type": "imports",
       "source": "file:src/App.jsx",
@@ -26204,6 +26226,31 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/layout.js:segmentIntersectsRect"
     },
     {
+      "id": "relation:426dabc2c7e871f5",
+      "type": "imports",
+      "source": "file:src/App.jsx",
+      "target": "file:src/storage.js",
+      "names": [
+        "STORAGE_ERROR_EVENT",
+        "deleteCanvasData",
+        "getLastStorageError",
+        "initCanvases",
+        "loadActiveId",
+        "loadCanvasData",
+        "loadCanvasList",
+        "loadCanvasStorageOwner",
+        "loadLodThreshold",
+        "resetCanvasStorage",
+        "saveActiveId",
+        "saveCanvasData",
+        "saveCanvasList",
+        "saveCanvasStorageOwner",
+        "saveLodThreshold",
+        "uid"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:4276a410494002ea",
       "type": "contains",
       "source": "file:src/demoCanvases.js",
@@ -26232,21 +26279,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:scripts/source-twin-scanner.mjs",
       "target": "function:scripts/source-twin-scanner.mjs:parseGeneratedSourceTwin"
-    },
-    {
-      "id": "relation:43092d247939e25b",
-      "type": "imports",
-      "source": "file:scripts/generate-source-twin.mjs",
-      "target": "file:scripts/source-twin-scanner.mjs",
-      "names": [
-        "buildSourceTwinManifest",
-        "parseGeneratedSourceTwin",
-        "readSourceRepositoryMetadata",
-        "readSourceTwinWorkingTree",
-        "serializeSourceTwinManifest",
-        "SOURCE_TWIN_MANIFEST_PATH"
-      ],
-      "dynamic": false
     },
     {
       "id": "relation:43470b8c7dac9625",
@@ -26519,6 +26551,26 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/storage.js",
       "target": "function:src/storage.js:loadCanvasStorageOwner"
+    },
+    {
+      "id": "relation:4a9764c5e490a280",
+      "type": "imports",
+      "source": "file:scripts/test-mcp-logic.mjs",
+      "target": "file:shared/systemRuntime.js",
+      "names": [
+        "SYSTEM_CAPABILITY_OPERATION_DEFS",
+        "normalizeSystemRuntimeBatchRequest",
+        "normalizeSystemRuntimeCanvasRequest",
+        "normalizeSystemRuntimeRecords",
+        "normalizeSystemRuntimeRequest",
+        "normalizeSystemRuntimeResult",
+        "systemCapabilityOperationDefinition",
+        "systemPartRuntimeReality",
+        "systemRuntimeCapabilityForPart",
+        "systemRuntimeCatalogForResult",
+        "systemRuntimePathEdgeIds"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:4adf87bb44d060c1",
@@ -26795,6 +26847,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:5170a29d45c005a3",
+      "type": "imports",
+      "source": "file:api/system-runtime.js",
+      "target": "file:shared/systemRuntime.js",
+      "names": [
+        "SystemRuntimeContractError",
+        "normalizeSystemRuntimeBatchRequest",
+        "normalizeSystemRuntimeCanvasRequest",
+        "normalizeSystemRuntimeRequest"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:51aabf2d0a02c6cf",
       "type": "contains",
       "source": "file:mcp/systemRuntime.js",
@@ -26925,28 +26990,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/components/EditToolbar.jsx:DropPanel"
     },
     {
-      "id": "relation:57421856acd2fe6e",
-      "type": "imports",
-      "source": "file:scripts/test-mcp-logic.mjs",
-      "target": "file:mcp/systemRuntime.js",
-      "names": [
-        "claimSystemRuntimeCheck",
-        "loadLatestSystemRuntimeObservations",
-        "persistSystemRuntimeObservation",
-        "readWorkflowSystemOperations",
-        "requireSystemRuntimeOperator",
-        "resolveSystemRuntimeTarget",
-        "resolveSystemRuntimeTargets",
-        "runSystemRuntimeCapability",
-        "WORKFLOW_SYSTEM_OPERATIONS_RPC"
-      ],
-      "dynamic": false
-    },
-    {
       "id": "relation:5748fe4c0215c489",
       "type": "contains",
       "source": "file:scripts/source-twin-scanner.mjs",
       "target": "function:scripts/source-twin-scanner.mjs:visit#2"
+    },
+    {
+      "id": "relation:57491c7bd553713e",
+      "type": "contains",
+      "source": "file:package.json",
+      "target": "npm-script:source-twin:prepare"
     },
     {
       "id": "relation:57584b8acc04835c",
@@ -27475,19 +27528,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/systemOntology.js:systemNodeReality"
     },
     {
-      "id": "relation:62cb367166a860de",
-      "type": "imports",
-      "source": "file:scripts/test-source-twin.mjs",
-      "target": "file:scripts/source-twin-scanner.mjs",
-      "names": [
-        "buildSourceTwinManifest",
-        "parseGeneratedSourceTwin",
-        "readSourceTwinWorkingTree",
-        "serializeSourceTwinManifest"
-      ],
-      "dynamic": false
-    },
-    {
       "id": "relation:6317b34798316558",
       "type": "contains",
       "source": "file:src/App.jsx",
@@ -27595,17 +27635,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "names": [
         "sanitizeExternalUrl",
         "sanitizeHtml"
-      ],
-      "dynamic": false
-    },
-    {
-      "id": "relation:66ff66b19cb4d7da",
-      "type": "imports",
-      "source": "file:api/source-twin-webhook.js",
-      "target": "file:mcp/sourceTwinStore.js",
-      "names": [
-        "recordSourceTwinPushEvent",
-        "SourceTwinError"
       ],
       "dynamic": false
     },
@@ -27807,18 +27836,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/components/NotesPanel.jsx:stripHtml"
     },
     {
-      "id": "relation:6d91e505da938194",
-      "type": "imports",
-      "source": "file:mcp/store.js",
-      "target": "file:shared/workflowSystemMapRepair.js",
-      "names": [
-        "planWorkflowSystemMapRelationRepair",
-        "restoreMissingWorkflowSystemMapRelations",
-        "WORKFLOW_RELATION_REPAIR_CONFIRMATION"
-      ],
-      "dynamic": false
-    },
-    {
       "id": "relation:6dbf1fb39f817461",
       "type": "defines-policy",
       "source": "file:supabase-schema.sql",
@@ -27917,14 +27934,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
-      "id": "relation:6f64467282ca77a0",
+      "id": "relation:6f50caed138ae7bd",
       "type": "imports",
-      "source": "file:scripts/test-mcp-logic.mjs",
-      "target": "file:shared/workflowSystemMapRepair.js",
+      "source": "file:scripts/generate-system-discovery.mjs",
+      "target": "file:scripts/system-discovery.mjs",
       "names": [
-        "planWorkflowSystemMapRelationRepair",
-        "restoreMissingWorkflowSystemMapRelations",
-        "WORKFLOW_RELATION_REPAIR_CONFIRMATION"
+        "DISCOVERY_MANIFEST_PATH",
+        "buildDiscoveryManifest",
+        "parseGeneratedManifest",
+        "readGitTree",
+        "readWorkingTree",
+        "serializeGeneratedManifest"
       ],
       "dynamic": false
     },
@@ -27985,17 +28005,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/systemRuntime.js:plainObject"
     },
     {
-      "id": "relation:7169661e6616eeda",
-      "type": "imports",
-      "source": "file:scripts/source-twin-scanner.mjs",
-      "target": "dependency:node:fs",
-      "names": [
-        "readdirSync",
-        "readFileSync"
-      ],
-      "dynamic": false
-    },
-    {
       "id": "relation:71d93518c0f7d8d7",
       "type": "imports",
       "source": "file:mcp/shareAccess.js",
@@ -28030,6 +28039,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "file:src/lib/imageStorage.js",
       "names": [
         "getCanvasImageUrl"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "relation:72730451a8f7be75",
+      "type": "imports",
+      "source": "file:scripts/test-mcp-logic.mjs",
+      "target": "file:shared/workflowSystemDiscovery.js",
+      "names": [
+        "LEGACY_SYSTEM_MAP_BASELINE_ID",
+        "inspectWorkflowSystemMap",
+        "selectWorkflowSystemMapBaseline"
       ],
       "dynamic": false
     },
@@ -28267,24 +28288,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
-      "id": "relation:778e5d71796c380e",
-      "type": "imports",
-      "source": "file:api/system-runtime.js",
-      "target": "file:mcp/systemRuntime.js",
-      "names": [
-        "claimSystemRuntimeCheck",
-        "loadLatestSystemRuntimeObservations",
-        "persistSystemRuntimeObservation",
-        "readWorkflowSystemOperations",
-        "requireSystemRuntimeOperator",
-        "resolveSystemRuntimeTarget",
-        "resolveSystemRuntimeTargets",
-        "runSystemRuntimeCapability",
-        "SystemRuntimeCheckError"
-      ],
-      "dynamic": false
-    },
-    {
       "id": "relation:77e3f8f322d4468b",
       "type": "imports",
       "source": "file:src/components/AuthPanel.jsx",
@@ -28404,25 +28407,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/App.jsx",
       "target": "function:src/App.jsx:onMove"
-    },
-    {
-      "id": "relation:7aaebbb545a96d45",
-      "type": "imports",
-      "source": "file:mcp/store.js",
-      "target": "file:mcp/layout.js",
-      "names": [
-        "findNonOverlapping",
-        "isStructuralNode",
-        "layoutGraph",
-        "nodeH",
-        "nodeRect",
-        "nodeW",
-        "overlaps",
-        "radialLevels",
-        "SIZE",
-        "validateGraphInput"
-      ],
-      "dynamic": false
     },
     {
       "id": "relation:7ad5a24fdb8f6887",
@@ -28877,6 +28861,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:8583fd06a6d7f042",
+      "type": "imports",
+      "source": "file:src/nodes/SystemNode.jsx",
+      "target": "file:shared/systemPartOntology.js",
+      "names": [
+        "SYSTEM_PART_EXPOSURE_DEFS",
+        "SYSTEM_PART_KIND_DEFS",
+        "normalizeSystemPart",
+        "normalizeSystemParts",
+        "systemPartKindDefinition",
+        "validateSystemPartInput"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:85cc2691c6514770",
       "type": "imports",
       "source": "file:src/components/SourceTwinPanel.jsx",
@@ -28935,6 +28934,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:package.json",
       "target": "npm-script:build"
+    },
+    {
+      "id": "relation:882b5dc55cf1dccd",
+      "type": "imports",
+      "source": "file:api/source-twin-webhook.js",
+      "target": "file:mcp/sourceTwinStore.js",
+      "names": [
+        "SourceTwinError",
+        "recordSourceTwinPushEvent"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:888dac1ba1a0cdcb",
@@ -29283,18 +29293,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/systemPartOntology.js:systemPartContainsSecretLiteral"
     },
     {
-      "id": "relation:9151128ff27106b7",
-      "type": "imports",
-      "source": "file:scripts/test-mcp-logic.mjs",
-      "target": "file:shared/workflowSystemDiscovery.js",
-      "names": [
-        "inspectWorkflowSystemMap",
-        "LEGACY_SYSTEM_MAP_BASELINE_ID",
-        "selectWorkflowSystemMapBaseline"
-      ],
-      "dynamic": false
-    },
-    {
       "id": "relation:918f43c7b17b55d4",
       "type": "contains",
       "source": "file:shared/digitalTwinReview.js",
@@ -29307,17 +29305,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "dependency:node:crypto",
       "names": [
         "createHash"
-      ],
-      "dynamic": false
-    },
-    {
-      "id": "relation:91c386dbf3fc117a",
-      "type": "imports",
-      "source": "file:shared/workflowSystemTwinAdapter.js",
-      "target": "file:shared/workflowSystemDiscovery.js",
-      "names": [
-        "inspectWorkflowSystemMap",
-        "WORKFLOW_SYSTEM_DISCOVERY_SOURCE_ID"
       ],
       "dynamic": false
     },
@@ -29434,27 +29421,41 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/components/AuthPanel.jsx:handleLogout"
     },
     {
-      "id": "relation:9691d177d3b6a315",
-      "type": "imports",
-      "source": "file:scripts/test-mcp-logic.mjs",
-      "target": "file:shared/relationOntology.js",
-      "names": [
-        "createEdgeRelationData",
-        "edgeRelationInfo",
-        "edgeRelationProvenance",
-        "normalizeEdgeRelationData",
-        "RELATION_CONFIDENCE_DEFS",
-        "RELATION_DEFS",
-        "RELATION_FAMILY_DEFS",
-        "RELATION_SOURCE_DEFS"
-      ],
-      "dynamic": false
-    },
-    {
       "id": "relation:96dee646124d8780",
       "type": "contains",
       "source": "file:scripts/system-discovery.mjs",
       "target": "function:scripts/system-discovery.mjs:readGitTree"
+    },
+    {
+      "id": "relation:96f3d8cb230f6aa7",
+      "type": "imports",
+      "source": "file:api/source-twin.js",
+      "target": "file:mcp/sourceTwinStore.js",
+      "names": [
+        "SourceTwinError",
+        "captureSourceTwinSnapshot",
+        "compareStoredSourceTwinSnapshots",
+        "currentSourceTwinState",
+        "listSourceTwinSnapshots",
+        "requireSourceTwinOwner"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "relation:97213b6986c831eb",
+      "type": "imports",
+      "source": "file:scripts/generate-source-twin.mjs",
+      "target": "file:scripts/source-twin-scanner.mjs",
+      "names": [
+        "SOURCE_TWIN_MANIFEST_PATH",
+        "buildSourceTwinManifest",
+        "compareSourceTwinText",
+        "parseGeneratedSourceTwin",
+        "readSourceRepositoryMetadata",
+        "readSourceTwinWorkingTree",
+        "serializeSourceTwinManifest"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:9744d1b3f2c9eaf3",
@@ -29884,6 +29885,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/systemRuntime.js:requiredId"
     },
     {
+      "id": "relation:a1bc147a0595cc18",
+      "type": "imports",
+      "source": "file:shared/workflowSystemTwinAdapter.js",
+      "target": "file:shared/workflowSystemDiscovery.js",
+      "names": [
+        "WORKFLOW_SYSTEM_DISCOVERY_SOURCE_ID",
+        "inspectWorkflowSystemMap"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:a1d7dfdfa4e3648e",
       "type": "contains",
       "source": "file:mcp/shareAccess.js",
@@ -30076,49 +30088,10 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/shareAccess.js:compareShareAccess"
     },
     {
-      "id": "relation:a6a818234064b82c",
-      "type": "imports",
-      "source": "file:scripts/test-mcp-logic.mjs",
-      "target": "file:shared/systemRuntime.js",
-      "names": [
-        "normalizeSystemRuntimeBatchRequest",
-        "normalizeSystemRuntimeCanvasRequest",
-        "normalizeSystemRuntimeRecords",
-        "normalizeSystemRuntimeRequest",
-        "normalizeSystemRuntimeResult",
-        "SYSTEM_CAPABILITY_OPERATION_DEFS",
-        "systemCapabilityOperationDefinition",
-        "systemPartRuntimeReality",
-        "systemRuntimeCapabilityForPart",
-        "systemRuntimeCatalogForResult",
-        "systemRuntimePathEdgeIds"
-      ],
-      "dynamic": false
-    },
-    {
       "id": "relation:a6cbdae9dc260814",
       "type": "contains",
       "source": "file:scripts/test-mcp-logic.mjs",
       "target": "function:scripts/test-mcp-logic.mjs:paddedRect"
-    },
-    {
-      "id": "relation:a6eade7263f0a7ba",
-      "type": "imports",
-      "source": "file:scripts/test-mcp-logic.mjs",
-      "target": "file:mcp/layout.js",
-      "names": [
-        "avoidEdgeCrossings",
-        "edgeAnchors",
-        "findNonOverlapping",
-        "layoutGraph",
-        "nodeRect",
-        "overlaps",
-        "radialLevels",
-        "segmentIntersectsRect",
-        "SIZE",
-        "validateGraphInput"
-      ],
-      "dynamic": false
     },
     {
       "id": "relation:a71b77d37d6766f5",
@@ -30359,6 +30332,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:ae777f0c48adc69a",
+      "type": "contains",
+      "source": "file:scripts/source-twin-scanner.mjs",
+      "target": "function:scripts/source-twin-scanner.mjs:compareSourceTwinText"
+    },
+    {
       "id": "relation:ae9ea4ed229ec123",
       "type": "contains",
       "source": "file:src/nodes/ContentNode.jsx",
@@ -30442,6 +30421,24 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/workflowSystemDiscovery.js",
       "target": "function:shared/workflowSystemDiscovery.js:nodeLabel"
+    },
+    {
+      "id": "relation:b19966652c1d008c",
+      "type": "imports",
+      "source": "file:scripts/test-mcp-logic.mjs",
+      "target": "file:mcp/systemRuntime.js",
+      "names": [
+        "WORKFLOW_SYSTEM_OPERATIONS_RPC",
+        "claimSystemRuntimeCheck",
+        "loadLatestSystemRuntimeObservations",
+        "persistSystemRuntimeObservation",
+        "readWorkflowSystemOperations",
+        "requireSystemRuntimeOperator",
+        "resolveSystemRuntimeTarget",
+        "resolveSystemRuntimeTargets",
+        "runSystemRuntimeCapability"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:b1cb0a6b0a999613",
@@ -30649,19 +30646,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/lib/imageStorage.js:getCanvasImageUrl"
     },
     {
-      "id": "relation:b8da0f5277affa64",
-      "type": "imports",
-      "source": "file:mcp/systemRuntime.js",
-      "target": "file:shared/systemRuntime.js",
-      "names": [
-        "normalizeSystemRuntimeResult",
-        "SYSTEM_RUNTIME_CAPABILITY_DEFS",
-        "systemRuntimeCapabilityDefinition",
-        "systemRuntimeCapabilityForPart"
-      ],
-      "dynamic": false
-    },
-    {
       "id": "relation:b935ea8779545051",
       "type": "contains",
       "source": "file:mcp/sourceTwinStore.js",
@@ -30702,6 +30686,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/lib/systemRuntimeApi.js",
       "target": "function:src/lib/systemRuntimeApi.js:loadLatestSystemRuntime"
+    },
+    {
+      "id": "relation:ba5ede7e0c3d12a7",
+      "type": "imports",
+      "source": "file:scripts/test-mcp-logic.mjs",
+      "target": "file:src/lib/canvasSchemaGuard.js",
+      "names": [
+        "CanvasSchemaGuardError",
+        "RELATION_METADATA_GUARD_MARKER",
+        "canvasWriteError"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:ba840b4dfd1085e0",
@@ -30803,6 +30799,25 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "db-function:revoke_share_member"
     },
     {
+      "id": "relation:bd4751794c7055e1",
+      "type": "imports",
+      "source": "file:scripts/test-mcp-logic.mjs",
+      "target": "file:mcp/layout.js",
+      "names": [
+        "SIZE",
+        "avoidEdgeCrossings",
+        "edgeAnchors",
+        "findNonOverlapping",
+        "layoutGraph",
+        "nodeRect",
+        "overlaps",
+        "radialLevels",
+        "segmentIntersectsRect",
+        "validateGraphInput"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:bdad6b0203e03001",
       "type": "contains",
       "source": "file:src/storage.js",
@@ -30844,6 +30859,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:bee591343ed7fe91",
+      "type": "imports",
+      "source": "file:scripts/test-mcp-logic.mjs",
+      "target": "file:shared/privacyCapabilities.js",
+      "names": [
+        "CANVAS_ENCRYPTION_TRANSITION",
+        "CANVAS_PRIVACY_CAPABILITIES",
+        "assertPrivacyReleaseGate"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:bfb98fdc5ccbb55a",
       "type": "contains",
       "source": "file:mcp/store.js",
@@ -30874,17 +30901,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "file:shared/sourceTwin.js",
       "names": [
         "SOURCE_TWIN_PERSPECTIVES"
-      ],
-      "dynamic": false
-    },
-    {
-      "id": "relation:c0c25c18792d7acd",
-      "type": "imports",
-      "source": "file:src/lib/sanitizeHtml.js",
-      "target": "file:shared/systemOntology.js",
-      "names": [
-        "normalizeSystemNodeData",
-        "SYSTEM_ONTOLOGY_TEXT_FIELDS"
       ],
       "dynamic": false
     },
@@ -30995,6 +31011,25 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/lib/imageStorage.js:safeSegment"
     },
     {
+      "id": "relation:c344ea18189b54ea",
+      "type": "imports",
+      "source": "file:mcp/store.js",
+      "target": "file:mcp/layout.js",
+      "names": [
+        "SIZE",
+        "findNonOverlapping",
+        "isStructuralNode",
+        "layoutGraph",
+        "nodeH",
+        "nodeRect",
+        "nodeW",
+        "overlaps",
+        "radialLevels",
+        "validateGraphInput"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:c37dd5a5364efb39",
       "type": "contains",
       "source": "file:shared/digitalTwinProposal.js",
@@ -31072,6 +31107,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/workflowSystemTwinAdapter.js",
       "target": "function:shared/workflowSystemTwinAdapter.js:overlapsWithMargin"
+    },
+    {
+      "id": "relation:c5c5b39da4ec02aa",
+      "type": "imports",
+      "source": "file:src/components/EdgeRelationEditor.jsx",
+      "target": "file:shared/relationOntology.js",
+      "names": [
+        "RELATION_CONFIDENCE_DEFS",
+        "RELATION_DEFS",
+        "RELATION_FAMILY_DEFS",
+        "RELATION_SOURCE_DEFS",
+        "edgeRelationInfo"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:c5d71937c7e270c9",
@@ -31262,6 +31311,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/App.jsx:maxNodeId"
     },
     {
+      "id": "relation:ca406fda6070b6bb",
+      "type": "contains",
+      "source": "file:scripts/generate-source-twin.mjs",
+      "target": "function:scripts/generate-source-twin.mjs:firstDifference"
+    },
+    {
       "id": "relation:ca502440245ced56",
       "type": "imports",
       "source": "file:shared/workflowCanvasSystemMap.js",
@@ -31407,6 +31462,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "db-function:claim_email_invite"
     },
     {
+      "id": "relation:cdd056ff4ee4994e",
+      "type": "imports",
+      "source": "file:scripts/test-mcp-logic.mjs",
+      "target": "file:shared/workflowSystemMapRepair.js",
+      "names": [
+        "WORKFLOW_RELATION_REPAIR_CONFIRMATION",
+        "planWorkflowSystemMapRelationRepair",
+        "restoreMissingWorkflowSystemMapRelations"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:cdd54472b33b138b",
       "type": "contains",
       "source": "file:src/App.jsx",
@@ -31507,6 +31574,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:d1dbd5cb1caefc02",
+      "type": "imports",
+      "source": "file:scripts/test-mcp-logic.mjs",
+      "target": "file:shared/workflowSystemTwinAdapter.js",
+      "names": [
+        "WORKFLOW_SYSTEM_TWIN_SOURCE_ID",
+        "inspectWorkflowSystemTwin"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:d1e1d5ab54ed1447",
       "type": "contains",
       "source": "file:api/shared-canvas.js",
@@ -31517,6 +31595,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/components/SourceTwinPanel.jsx",
       "target": "function:src/components/SourceTwinPanel.jsx:EntityRow"
+    },
+    {
+      "id": "relation:d2931d080a16b877",
+      "type": "imports",
+      "source": "file:mcp/systemRuntime.js",
+      "target": "file:shared/systemRuntime.js",
+      "names": [
+        "SYSTEM_RUNTIME_CAPABILITY_DEFS",
+        "normalizeSystemRuntimeResult",
+        "systemRuntimeCapabilityDefinition",
+        "systemRuntimeCapabilityForPart"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:d29ff9ee7b2116a3",
@@ -31593,21 +31684,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/components/NotesPanel.jsx",
       "target": "function:src/components/NotesPanel.jsx:commit"
-    },
-    {
-      "id": "relation:d4ecfdf862536007",
-      "type": "imports",
-      "source": "file:scripts/generate-system-discovery.mjs",
-      "target": "file:scripts/system-discovery.mjs",
-      "names": [
-        "buildDiscoveryManifest",
-        "DISCOVERY_MANIFEST_PATH",
-        "parseGeneratedManifest",
-        "readGitTree",
-        "readWorkingTree",
-        "serializeGeneratedManifest"
-      ],
-      "dynamic": false
     },
     {
       "id": "relation:d4fe5cfb68c7060f",
@@ -31781,6 +31857,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:scripts/system-discovery.mjs",
       "target": "function:scripts/system-discovery.mjs:stableValue"
+    },
+    {
+      "id": "relation:da4378a1b32546ca",
+      "type": "imports",
+      "source": "file:mcp/store.js",
+      "target": "file:shared/workflowSystemMapRepair.js",
+      "names": [
+        "WORKFLOW_RELATION_REPAIR_CONFIRMATION",
+        "planWorkflowSystemMapRelationRepair",
+        "restoreMissingWorkflowSystemMapRelations"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:dac9ccfc3e6558a8",
@@ -32141,12 +32229,34 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/systemRuntime.js:SystemRuntimeContractError.constructor"
     },
     {
+      "id": "relation:e4411817ff706856",
+      "type": "imports",
+      "source": "file:src/lib/sanitizeHtml.js",
+      "target": "file:shared/systemOntology.js",
+      "names": [
+        "SYSTEM_ONTOLOGY_TEXT_FIELDS",
+        "normalizeSystemNodeData"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:e45598b97efcffab",
       "type": "imports",
       "source": "file:src/nodes/StageNode.jsx",
       "target": "file:src/components/ScopedParticipants.jsx",
       "names": [
         "default"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "relation:e4650be64ab11190",
+      "type": "imports",
+      "source": "file:mcp/sanitize.js",
+      "target": "file:shared/systemOntology.js",
+      "names": [
+        "SYSTEM_ONTOLOGY_TEXT_FIELDS",
+        "normalizeSystemNodeData"
       ],
       "dynamic": false
     },
@@ -32167,19 +32277,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "defines-policy",
       "source": "file:supabase-shares.sql",
       "target": "rls-policy:canvas_shares:owner manages own shares"
-    },
-    {
-      "id": "relation:e57900b6d06d8ccb",
-      "type": "imports",
-      "source": "file:mcp/sourceTwinStore.js",
-      "target": "file:shared/sourceTwin.js",
-      "names": [
-        "compareSourceTwinSnapshots",
-        "createSourceTwinSnapshot",
-        "SOURCE_TWIN_SOURCE_ID",
-        "sourceTwinEntities"
-      ],
-      "dynamic": false
     },
     {
       "id": "relation:e5c73175a2c8f78d",
@@ -33003,6 +33100,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "db-function:share_link_is_active"
     },
     {
+      "id": "relation:ff3b6161a1093cbf",
+      "type": "imports",
+      "source": "file:scripts/check-privacy-release.mjs",
+      "target": "file:shared/privacyCapabilities.js",
+      "names": [
+        "CANVAS_PRIVACY_CAPABILITIES",
+        "assertPrivacyReleaseGate"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:ffd9cf3d8d8d3fdc",
       "type": "contains",
       "source": "file:src/components/InvitePopover.jsx",
@@ -33074,8 +33182,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:src/lib/presence.js",
       "file:src/lib/profiles.js",
       "file:src/lib/sanitizeHtml.js",
-      "file:src/lib/sharedCanvasApi.js",
       "file:src/lib/shareLaunchCoordinator.js",
+      "file:src/lib/sharedCanvasApi.js",
       "file:src/lib/shares.js",
       "file:src/lib/sourceTwinApi.js",
       "file:src/lib/supabase.js",
@@ -33177,6 +33285,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:mcp/shareAccess.js:sanitizeNode",
       "function:mcp/shareAccess.js:setCanvasMemberViewRestriction",
       "function:mcp/shareAccess.js:stableValue",
+      "function:mcp/sourceTwinStore.js:SourceTwinError.constructor",
       "function:mcp/sourceTwinStore.js:captureSourceTwinSnapshot",
       "function:mcp/sourceTwinStore.js:compareStoredSourceTwinSnapshots",
       "function:mcp/sourceTwinStore.js:currentSourceTwinState",
@@ -33192,7 +33301,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:mcp/sourceTwinStore.js:snapshotRow",
       "function:mcp/sourceTwinStore.js:snapshotSummary",
       "function:mcp/sourceTwinStore.js:sourceTwinDeploymentContext",
-      "function:mcp/sourceTwinStore.js:SourceTwinError.constructor",
       "function:mcp/sourceTwinStore.js:unavailable",
       "function:mcp/store.js:admin",
       "function:mcp/store.js:applyEdgeRelationPatch",
@@ -33259,6 +33367,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:mcp/store.js:updateNodes",
       "function:mcp/store.js:workflowSystemMapRelationRepairPlanId",
       "function:mcp/store.js:writeConflict",
+      "function:mcp/systemRuntime.js:SystemRuntimeCheckError.constructor",
       "function:mcp/systemRuntime.js:claimSystemRuntimeCheck",
       "function:mcp/systemRuntime.js:count",
       "function:mcp/systemRuntime.js:fixedRuntimeEndpoint",
@@ -33276,15 +33385,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:mcp/systemRuntime.js:runSupabaseAuthSessionCheck",
       "function:mcp/systemRuntime.js:runSupabaseHealthCheck",
       "function:mcp/systemRuntime.js:runSystemRuntimeCapability",
-      "function:mcp/systemRuntime.js:runtimeResourceId",
       "function:mcp/systemRuntime.js:runVercelDeploymentCheck",
+      "function:mcp/systemRuntime.js:runtimeResourceId",
       "function:mcp/systemRuntime.js:safeFailure",
-      "function:mcp/systemRuntime.js:SystemRuntimeCheckError.constructor",
       "function:mcp/systemRuntime.js:unknownResult",
+      "function:scripts/generate-source-twin.mjs:diagnosticValue",
+      "function:scripts/generate-source-twin.mjs:firstDifference",
       "function:scripts/source-twin-scanner.mjs:addEntity",
       "function:scripts/source-twin-scanner.mjs:addFunction",
       "function:scripts/source-twin-scanner.mjs:addRelation",
       "function:scripts/source-twin-scanner.mjs:buildSourceTwinManifest",
+      "function:scripts/source-twin-scanner.mjs:compareSourceTwinText",
       "function:scripts/source-twin-scanner.mjs:entity",
       "function:scripts/source-twin-scanner.mjs:fileSummary",
       "function:scripts/source-twin-scanner.mjs:filesystemSourceTwinPaths",
@@ -33369,10 +33480,10 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:scripts/test-mcp-logic.mjs:writeDb.from",
       "function:scripts/test-mcp-logic.mjs:writeDb.insert",
       "function:scripts/test-sql-security.mjs:read",
+      "function:shared/digitalTwinProposal.js:DigitalTwinProposalError.constructor",
       "function:shared/digitalTwinProposal.js:applyDigitalTwinGraphProposal",
       "function:shared/digitalTwinProposal.js:createDigitalTwinGraphProposal",
       "function:shared/digitalTwinProposal.js:digitalTwinProposalAutoFitKey",
-      "function:shared/digitalTwinProposal.js:DigitalTwinProposalError.constructor",
       "function:shared/digitalTwinProposal.js:digitalTwinProposalMatchesItem",
       "function:shared/digitalTwinProposal.js:filterDigitalTwinProposalNodeChanges",
       "function:shared/digitalTwinProposal.js:finiteNumber",
@@ -33446,15 +33557,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/systemOntology.js:systemKindDefinition",
       "function:shared/systemOntology.js:systemNodeReality",
       "function:shared/systemPartOntology.js:detachSystemPartBindings",
-      "function:shared/systemPartOntology.js:normalizedId",
       "function:shared/systemPartOntology.js:normalizeDigitalTwinBinding",
       "function:shared/systemPartOntology.js:normalizeSystemPart",
       "function:shared/systemPartOntology.js:normalizeSystemParts",
+      "function:shared/systemPartOntology.js:normalizedId",
       "function:shared/systemPartOntology.js:plainObject",
       "function:shared/systemPartOntology.js:plainText",
       "function:shared/systemPartOntology.js:systemPartContainsSecretLiteral",
       "function:shared/systemPartOntology.js:systemPartKindDefinition",
       "function:shared/systemPartOntology.js:validateSystemPartInput",
+      "function:shared/systemRuntime.js:SystemRuntimeContractError.constructor",
       "function:shared/systemRuntime.js:capability",
       "function:shared/systemRuntime.js:catalogFieldBase",
       "function:shared/systemRuntime.js:count",
@@ -33462,13 +33574,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/systemRuntime.js:failedSystemRuntimeResult",
       "function:shared/systemRuntime.js:metricGroupObservations",
       "function:shared/systemRuntime.js:nonSecretText",
-      "function:shared/systemRuntime.js:normalizedObservationValue",
       "function:shared/systemRuntime.js:normalizeObservationCatalog",
       "function:shared/systemRuntime.js:normalizeSystemRuntimeBatchRequest",
       "function:shared/systemRuntime.js:normalizeSystemRuntimeCanvasRequest",
       "function:shared/systemRuntime.js:normalizeSystemRuntimeRecords",
       "function:shared/systemRuntime.js:normalizeSystemRuntimeRequest",
       "function:shared/systemRuntime.js:normalizeSystemRuntimeResult",
+      "function:shared/systemRuntime.js:normalizedObservationValue",
       "function:shared/systemRuntime.js:plainObject",
       "function:shared/systemRuntime.js:plainText",
       "function:shared/systemRuntime.js:requiredId",
@@ -33477,7 +33589,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/systemRuntime.js:systemRuntimeCapabilityDefinition",
       "function:shared/systemRuntime.js:systemRuntimeCapabilityForPart",
       "function:shared/systemRuntime.js:systemRuntimeCatalogForResult",
-      "function:shared/systemRuntime.js:SystemRuntimeContractError.constructor",
       "function:shared/systemRuntime.js:systemRuntimePathEdgeIds",
       "function:shared/workflowCanvasSystemMap.js:createWorkflowCanvasSystemMap",
       "function:shared/workflowCanvasSystemMap.js:groupNode",
@@ -33523,10 +33634,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/workflowSystemTwinAdapter.js:severityRank",
       "function:shared/workflowSystemTwinAdapter.js:unique",
       "function:shared/workflowSystemTwinAdapter.js:workflowTwinRoot",
+      "function:src/App.jsx:App",
+      "function:src/App.jsx:ContextItem",
+      "function:src/App.jsx:IconBtn",
+      "function:src/App.jsx:TypeItem",
       "function:src/App.jsx:absPos",
       "function:src/App.jsx:afterLogin",
       "function:src/App.jsx:aggregateSystemNodeRuntime",
-      "function:src/App.jsx:App",
       "function:src/App.jsx:baseEdgeStyle",
       "function:src/App.jsx:cancelEdgeLp",
       "function:src/App.jsx:canvasSnapshot",
@@ -33536,7 +33650,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/App.jsx:closestHandles",
       "function:src/App.jsx:cloudRowSnapshot",
       "function:src/App.jsx:commitRename",
-      "function:src/App.jsx:ContextItem",
       "function:src/App.jsx:dedupeParticipants",
       "function:src/App.jsx:detachDigitalTwinBinding",
       "function:src/App.jsx:dim",
@@ -33560,7 +33673,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/App.jsx:handler",
       "function:src/App.jsx:handler#2",
       "function:src/App.jsx:handler#3",
-      "function:src/App.jsx:IconBtn",
       "function:src/App.jsx:isPartEdge",
       "function:src/App.jsx:isTypingTarget",
       "function:src/App.jsx:maxNodeId",
@@ -33584,8 +33696,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/App.jsx:onTouchStart",
       "function:src/App.jsx:onUp",
       "function:src/App.jsx:parseSharedId",
-      "function:src/App.jsx:participantKey",
       "function:src/App.jsx:partIdFromHandle",
+      "function:src/App.jsx:participantKey",
       "function:src/App.jsx:positionMenu",
       "function:src/App.jsx:remapPartHandle",
       "function:src/App.jsx:sanitizeNodes",
@@ -33603,7 +33715,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/App.jsx:systemRuntimeMapFromRecords",
       "function:src/App.jsx:systemRuntimePersistenceError",
       "function:src/App.jsx:systemRuntimeTargetsForNodes",
-      "function:src/App.jsx:TypeItem",
       "function:src/App.jsx:visit",
       "function:src/components/AuthPanel.jsx:AuthPanel",
       "function:src/components/AuthPanel.jsx:Avatar",
@@ -33627,8 +33738,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/components/AuthPanel.jsx:updateSettings",
       "function:src/components/CanvasImage.jsx:CanvasImage",
       "function:src/components/CanvasImage.jsx:refresh",
-      "function:src/components/CanvasTabs.jsx:avatarOf",
       "function:src/components/CanvasTabs.jsx:CanvasTabs",
+      "function:src/components/CanvasTabs.jsx:avatarOf",
       "function:src/components/CanvasTabs.jsx:commit",
       "function:src/components/CanvasTabs.jsx:fmt",
       "function:src/components/CanvasTabs.jsx:formatCount",
@@ -33645,26 +33756,26 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/components/CanvasTabs.jsx:textContent",
       "function:src/components/DigitalTwinReviewPanel.jsx:DigitalTwinReviewPanel",
       "function:src/components/DigitalTwinReviewPanel.jsx:IconButton",
+      "function:src/components/DigitalTwinReviewPanel.jsx:ReviewRow",
       "function:src/components/DigitalTwinReviewPanel.jsx:onMove",
       "function:src/components/DigitalTwinReviewPanel.jsx:onUp",
-      "function:src/components/DigitalTwinReviewPanel.jsx:ReviewRow",
+      "function:src/components/EdgeRelationEditor.jsx:EdgeRelationEditor",
       "function:src/components/EdgeRelationEditor.jsx:commitCustom",
       "function:src/components/EdgeRelationEditor.jsx:commitEvidence",
-      "function:src/components/EdgeRelationEditor.jsx:EdgeRelationEditor",
       "function:src/components/EdgeRelationEditor.jsx:selectRelation",
       "function:src/components/EditToolbar.jsx:AlignButtons",
-      "function:src/components/EditToolbar.jsx:apply",
-      "function:src/components/EditToolbar.jsx:applyColor",
       "function:src/components/EditToolbar.jsx:BlockDropdown",
-      "function:src/components/EditToolbar.jsx:btn",
-      "function:src/components/EditToolbar.jsx:btnStyle",
       "function:src/components/EditToolbar.jsx:ColorPicker",
       "function:src/components/EditToolbar.jsx:Divider",
-      "function:src/components/EditToolbar.jsx:downscaleAndInsert",
       "function:src/components/EditToolbar.jsx:DropItem",
       "function:src/components/EditToolbar.jsx:DropPanel",
       "function:src/components/EditToolbar.jsx:EditToolbar",
       "function:src/components/EditToolbar.jsx:FontSizeDropdown",
+      "function:src/components/EditToolbar.jsx:apply",
+      "function:src/components/EditToolbar.jsx:applyColor",
+      "function:src/components/EditToolbar.jsx:btn",
+      "function:src/components/EditToolbar.jsx:btnStyle",
+      "function:src/components/EditToolbar.jsx:downscaleAndInsert",
       "function:src/components/EditToolbar.jsx:getLayout",
       "function:src/components/EditToolbar.jsx:handleFileChange",
       "function:src/components/EditToolbar.jsx:handler",
@@ -33673,16 +33784,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/components/EditToolbar.jsx:toggle",
       "function:src/components/EditToolbar.jsx:toggle#2",
       "function:src/components/EditToolbar.jsx:toggle#3",
+      "function:src/components/InvitePopover.jsx:InvitePopover",
       "function:src/components/InvitePopover.jsx:handleCopy",
       "function:src/components/InvitePopover.jsx:handleCreateLink",
       "function:src/components/InvitePopover.jsx:handleDelete",
       "function:src/components/InvitePopover.jsx:handleInvite",
-      "function:src/components/InvitePopover.jsx:InvitePopover",
-      "function:src/components/NodePalette.jsx:handleDragStart",
       "function:src/components/NodePalette.jsx:NodePalette",
+      "function:src/components/NodePalette.jsx:handleDragStart",
       "function:src/components/NodePalette.jsx:onDown",
       "function:src/components/NodePalette.jsx:onKey",
       "function:src/components/NodePalette.jsx:payloadOf",
+      "function:src/components/NotesPanel.jsx:IconBtn",
+      "function:src/components/NotesPanel.jsx:ListRow",
+      "function:src/components/NotesPanel.jsx:NotePage",
+      "function:src/components/NotesPanel.jsx:NotesPanel",
+      "function:src/components/NotesPanel.jsx:StageTreeRow",
+      "function:src/components/NotesPanel.jsx:SubNoteRow",
       "function:src/components/NotesPanel.jsx:bodyPreviewText",
       "function:src/components/NotesPanel.jsx:close",
       "function:src/components/NotesPanel.jsx:commit",
@@ -33690,54 +33807,48 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/components/NotesPanel.jsx:flush",
       "function:src/components/NotesPanel.jsx:fn",
       "function:src/components/NotesPanel.jsx:handleBack",
-      "function:src/components/NotesPanel.jsx:IconBtn",
       "function:src/components/NotesPanel.jsx:isPartEdge",
-      "function:src/components/NotesPanel.jsx:ListRow",
       "function:src/components/NotesPanel.jsx:nodeBadge",
       "function:src/components/NotesPanel.jsx:nodeTitle",
-      "function:src/components/NotesPanel.jsx:NotePage",
-      "function:src/components/NotesPanel.jsx:NotesPanel",
       "function:src/components/NotesPanel.jsx:onKeyDown",
       "function:src/components/NotesPanel.jsx:onMove",
       "function:src/components/NotesPanel.jsx:onUp",
       "function:src/components/NotesPanel.jsx:scheduleBodySave",
       "function:src/components/NotesPanel.jsx:scheduleTitleSave",
-      "function:src/components/NotesPanel.jsx:StageTreeRow",
       "function:src/components/NotesPanel.jsx:stripHtml",
-      "function:src/components/NotesPanel.jsx:SubNoteRow",
       "function:src/components/NotesPanel.jsx:uploadImage",
       "function:src/components/OpenInNotesButton.jsx:OpenInNotesButton",
       "function:src/components/ParticipantAvatar.jsx:ParticipantAvatar",
+      "function:src/components/ScopedParticipants.jsx:ScopedParticipants",
       "function:src/components/ScopedParticipants.jsx:avatar",
       "function:src/components/ScopedParticipants.jsx:onKeyDown",
       "function:src/components/ScopedParticipants.jsx:participantKey",
       "function:src/components/ScopedParticipants.jsx:relativeLastSeen",
-      "function:src/components/ScopedParticipants.jsx:ScopedParticipants",
       "function:src/components/SourceTwinPanel.jsx:ChangeEntityList",
       "function:src/components/SourceTwinPanel.jsx:ChangesView",
       "function:src/components/SourceTwinPanel.jsx:EntityDetail",
       "function:src/components/SourceTwinPanel.jsx:EntityRow",
       "function:src/components/SourceTwinPanel.jsx:HistoryView",
       "function:src/components/SourceTwinPanel.jsx:IconButton",
-      "function:src/components/SourceTwinPanel.jsx:onMove",
-      "function:src/components/SourceTwinPanel.jsx:onUp",
       "function:src/components/SourceTwinPanel.jsx:SourceTwinPanel",
       "function:src/components/SourceTwinPanel.jsx:StructureView",
+      "function:src/components/SourceTwinPanel.jsx:onMove",
+      "function:src/components/SourceTwinPanel.jsx:onUp",
       "function:src/components/SourceTwinPanel.jsx:toggle",
-      "function:src/components/SystemObservationCatalog.jsx:formattedValue",
       "function:src/components/SystemObservationCatalog.jsx:SystemObservationCatalog",
+      "function:src/components/SystemObservationCatalog.jsx:formattedValue",
+      "function:src/components/Toolbar.jsx:MobileBtn",
+      "function:src/components/Toolbar.jsx:RuntimeButton",
+      "function:src/components/Toolbar.jsx:SmallIcon",
+      "function:src/components/Toolbar.jsx:ToolBtn",
+      "function:src/components/Toolbar.jsx:Toolbar",
+      "function:src/components/Toolbar.jsx:ViewSelector",
       "function:src/components/Toolbar.jsx:closePalette",
       "function:src/components/Toolbar.jsx:commitRename",
       "function:src/components/Toolbar.jsx:handlePick",
-      "function:src/components/Toolbar.jsx:MobileBtn",
       "function:src/components/Toolbar.jsx:onDoc",
       "function:src/components/Toolbar.jsx:pick",
       "function:src/components/Toolbar.jsx:rowBtn",
-      "function:src/components/Toolbar.jsx:RuntimeButton",
-      "function:src/components/Toolbar.jsx:SmallIcon",
-      "function:src/components/Toolbar.jsx:Toolbar",
-      "function:src/components/Toolbar.jsx:ToolBtn",
-      "function:src/components/Toolbar.jsx:ViewSelector",
       "function:src/demoCanvases.js:colX",
       "function:src/demoCanvases.js:flow",
       "function:src/demoCanvases.js:memo",
@@ -33799,18 +33910,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/lib/sanitizeHtml.js:sanitizeExternalUrl",
       "function:src/lib/sanitizeHtml.js:sanitizeHtml",
       "function:src/lib/sanitizeHtml.js:sanitizeNodeData",
-      "function:src/lib/sharedCanvasApi.js:getSharedCanvas",
-      "function:src/lib/sharedCanvasApi.js:listCanvasParticipants",
-      "function:src/lib/sharedCanvasApi.js:listSharedCanvases",
-      "function:src/lib/sharedCanvasApi.js:request",
-      "function:src/lib/sharedCanvasApi.js:setMemberViewRestriction",
-      "function:src/lib/sharedCanvasApi.js:updateSharedCanvas",
       "function:src/lib/shareLaunchCoordinator.js:claimShareLaunch",
       "function:src/lib/shareLaunchCoordinator.js:claimShareLaunchFallback",
       "function:src/lib/shareLaunchCoordinator.js:claimShareLaunchFallback.release",
       "function:src/lib/shareLaunchCoordinator.js:claimShareLaunchFallback.release#2",
       "function:src/lib/shareLaunchCoordinator.js:claimShareLaunchFallback.release#3",
       "function:src/lib/shareLaunchCoordinator.js:shareTokenFingerprint",
+      "function:src/lib/sharedCanvasApi.js:getSharedCanvas",
+      "function:src/lib/sharedCanvasApi.js:listCanvasParticipants",
+      "function:src/lib/sharedCanvasApi.js:listSharedCanvases",
+      "function:src/lib/sharedCanvasApi.js:request",
+      "function:src/lib/sharedCanvasApi.js:setMemberViewRestriction",
+      "function:src/lib/sharedCanvasApi.js:updateSharedCanvas",
       "function:src/lib/shares.js:claimEmailInvite",
       "function:src/lib/shares.js:claimShareToken",
       "function:src/lib/shares.js:createLinkShare",
@@ -33831,20 +33942,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/lib/sourceTwinApi.js:loadSourceTwinCurrent",
       "function:src/lib/sourceTwinApi.js:loadSourceTwinHistory",
       "function:src/lib/sourceTwinApi.js:sourceTwinRequest",
+      "function:src/lib/systemRuntimeApi.js:SystemRuntimeApiError.constructor",
       "function:src/lib/systemRuntimeApi.js:accessToken",
       "function:src/lib/systemRuntimeApi.js:checkAllSystemRuntime",
       "function:src/lib/systemRuntimeApi.js:checkSystemPartRuntime",
       "function:src/lib/systemRuntimeApi.js:loadLatestSystemRuntime",
       "function:src/lib/systemRuntimeApi.js:runtimeRequest",
-      "function:src/lib/systemRuntimeApi.js:SystemRuntimeApiError.constructor",
       "function:src/lib/wheelRouting.js:axisCanScroll",
       "function:src/lib/wheelRouting.js:elementFromTarget",
       "function:src/lib/wheelRouting.js:hasClass",
       "function:src/lib/wheelRouting.js:nativeWheelScrollTarget",
       "function:src/lib/wheelRouting.js:nearestClass",
+      "function:src/nodes/ContentNode.jsx:ContentNode",
       "function:src/nodes/ContentNode.jsx:caretAtEnd",
       "function:src/nodes/ContentNode.jsx:commitUrl",
-      "function:src/nodes/ContentNode.jsx:ContentNode",
       "function:src/nodes/ContentNode.jsx:downscaleImage",
       "function:src/nodes/ContentNode.jsx:handleDisplayClick",
       "function:src/nodes/ContentNode.jsx:handlePointerDown",
@@ -33860,15 +33971,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/nodes/ContentNode.jsx:placeCaretAt",
       "function:src/nodes/ContentNode.jsx:startEdit",
       "function:src/nodes/ContentNode.jsx:stopEdit",
+      "function:src/nodes/GroupNode.jsx:GroupNode",
       "function:src/nodes/GroupNode.jsx:clamp",
       "function:src/nodes/GroupNode.jsx:commit",
-      "function:src/nodes/GroupNode.jsx:GroupNode",
       "function:src/nodes/GroupNode.jsx:handleLabelClick",
       "function:src/nodes/GroupNode.jsx:handlePointerDown",
       "function:src/nodes/GroupNode.jsx:handlePointerMove",
       "function:src/nodes/GroupNode.jsx:handlePointerUp",
       "function:src/nodes/GroupNode.jsx:mapRange",
       "function:src/nodes/GroupNode.jsx:startEditing",
+      "function:src/nodes/MemoNode.jsx:MemoNode",
       "function:src/nodes/MemoNode.jsx:caretAtEnd",
       "function:src/nodes/MemoNode.jsx:handleDisplayClick",
       "function:src/nodes/MemoNode.jsx:handlePointerDown",
@@ -33877,7 +33989,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/nodes/MemoNode.jsx:handleTextMouseLeave",
       "function:src/nodes/MemoNode.jsx:handleTextMouseMove",
       "function:src/nodes/MemoNode.jsx:justSelected",
-      "function:src/nodes/MemoNode.jsx:MemoNode",
       "function:src/nodes/MemoNode.jsx:onDimPointerCancel",
       "function:src/nodes/MemoNode.jsx:onDimPointerDown",
       "function:src/nodes/MemoNode.jsx:onDimPointerLeave",
@@ -33887,9 +33998,10 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/nodes/MemoNode.jsx:stopEdit",
       "function:src/nodes/MemoNode.jsx:update",
       "function:src/nodes/MemoNode.jsx:wrapLines",
+      "function:src/nodes/StageNode.jsx:HANDLE_STYLE",
+      "function:src/nodes/StageNode.jsx:StageNode",
       "function:src/nodes/StageNode.jsx:caretAtEnd",
       "function:src/nodes/StageNode.jsx:cycleColor",
-      "function:src/nodes/StageNode.jsx:HANDLE_STYLE",
       "function:src/nodes/StageNode.jsx:handleDescMouseLeave",
       "function:src/nodes/StageNode.jsx:handleDescMouseMove",
       "function:src/nodes/StageNode.jsx:handleDisplayClick",
@@ -33902,11 +34014,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/nodes/StageNode.jsx:onDimPointerLeave",
       "function:src/nodes/StageNode.jsx:onDimPointerUp",
       "function:src/nodes/StageNode.jsx:placeCaretAt",
-      "function:src/nodes/StageNode.jsx:StageNode",
       "function:src/nodes/StageNode.jsx:startEdit",
       "function:src/nodes/StageNode.jsx:stopEdit",
       "function:src/nodes/StageNode.jsx:update",
       "function:src/nodes/StageNode.jsx:wrapLines",
+      "function:src/nodes/SystemNode.jsx:SystemNode",
       "function:src/nodes/SystemNode.jsx:blankSystemPart",
       "function:src/nodes/SystemNode.jsx:byId",
       "function:src/nodes/SystemNode.jsx:cancelDimPress",
@@ -33924,7 +34036,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/nodes/SystemNode.jsx:savePart",
       "function:src/nodes/SystemNode.jsx:startDimPress",
       "function:src/nodes/SystemNode.jsx:startTitleEdit",
-      "function:src/nodes/SystemNode.jsx:SystemNode",
       "function:src/storage.js:clearCanvasStorage",
       "function:src/storage.js:dataKey",
       "function:src/storage.js:deleteCanvasData",
@@ -33973,6 +34084,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dependency:vite",
       "dependency:vite-plugin-pwa",
       "dependency:zod",
+      "file:README.md",
       "file:api/mcp.js",
       "file:api/shared-canvas.js",
       "file:api/source-twin-webhook.js",
@@ -33987,7 +34099,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:mcp/store.js",
       "file:mcp/systemRuntime.js",
       "file:package.json",
-      "file:README.md",
       "file:scripts/check-privacy-release.mjs",
       "file:scripts/generate-source-twin.mjs",
       "file:scripts/generate-system-discovery.mjs",
@@ -34041,8 +34152,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:src/lib/presence.js",
       "file:src/lib/profiles.js",
       "file:src/lib/sanitizeHtml.js",
-      "file:src/lib/sharedCanvasApi.js",
       "file:src/lib/shareLaunchCoordinator.js",
+      "file:src/lib/sharedCanvasApi.js",
       "file:src/lib/shares.js",
       "file:src/lib/sourceTwinApi.js",
       "file:src/lib/supabase.js",
@@ -34161,6 +34272,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:mcp/shareAccess.js:sanitizeNode",
       "function:mcp/shareAccess.js:setCanvasMemberViewRestriction",
       "function:mcp/shareAccess.js:stableValue",
+      "function:mcp/sourceTwinStore.js:SourceTwinError.constructor",
       "function:mcp/sourceTwinStore.js:captureSourceTwinSnapshot",
       "function:mcp/sourceTwinStore.js:compareStoredSourceTwinSnapshots",
       "function:mcp/sourceTwinStore.js:currentSourceTwinState",
@@ -34176,7 +34288,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:mcp/sourceTwinStore.js:snapshotRow",
       "function:mcp/sourceTwinStore.js:snapshotSummary",
       "function:mcp/sourceTwinStore.js:sourceTwinDeploymentContext",
-      "function:mcp/sourceTwinStore.js:SourceTwinError.constructor",
       "function:mcp/sourceTwinStore.js:unavailable",
       "function:mcp/store.js:admin",
       "function:mcp/store.js:applyEdgeRelationPatch",
@@ -34243,6 +34354,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:mcp/store.js:updateNodes",
       "function:mcp/store.js:workflowSystemMapRelationRepairPlanId",
       "function:mcp/store.js:writeConflict",
+      "function:mcp/systemRuntime.js:SystemRuntimeCheckError.constructor",
       "function:mcp/systemRuntime.js:claimSystemRuntimeCheck",
       "function:mcp/systemRuntime.js:count",
       "function:mcp/systemRuntime.js:fixedRuntimeEndpoint",
@@ -34260,15 +34372,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:mcp/systemRuntime.js:runSupabaseAuthSessionCheck",
       "function:mcp/systemRuntime.js:runSupabaseHealthCheck",
       "function:mcp/systemRuntime.js:runSystemRuntimeCapability",
-      "function:mcp/systemRuntime.js:runtimeResourceId",
       "function:mcp/systemRuntime.js:runVercelDeploymentCheck",
+      "function:mcp/systemRuntime.js:runtimeResourceId",
       "function:mcp/systemRuntime.js:safeFailure",
-      "function:mcp/systemRuntime.js:SystemRuntimeCheckError.constructor",
       "function:mcp/systemRuntime.js:unknownResult",
+      "function:scripts/generate-source-twin.mjs:diagnosticValue",
+      "function:scripts/generate-source-twin.mjs:firstDifference",
       "function:scripts/source-twin-scanner.mjs:addEntity",
       "function:scripts/source-twin-scanner.mjs:addFunction",
       "function:scripts/source-twin-scanner.mjs:addRelation",
       "function:scripts/source-twin-scanner.mjs:buildSourceTwinManifest",
+      "function:scripts/source-twin-scanner.mjs:compareSourceTwinText",
       "function:scripts/source-twin-scanner.mjs:entity",
       "function:scripts/source-twin-scanner.mjs:fileSummary",
       "function:scripts/source-twin-scanner.mjs:filesystemSourceTwinPaths",
@@ -34353,10 +34467,10 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:scripts/test-mcp-logic.mjs:writeDb.from",
       "function:scripts/test-mcp-logic.mjs:writeDb.insert",
       "function:scripts/test-sql-security.mjs:read",
+      "function:shared/digitalTwinProposal.js:DigitalTwinProposalError.constructor",
       "function:shared/digitalTwinProposal.js:applyDigitalTwinGraphProposal",
       "function:shared/digitalTwinProposal.js:createDigitalTwinGraphProposal",
       "function:shared/digitalTwinProposal.js:digitalTwinProposalAutoFitKey",
-      "function:shared/digitalTwinProposal.js:DigitalTwinProposalError.constructor",
       "function:shared/digitalTwinProposal.js:digitalTwinProposalMatchesItem",
       "function:shared/digitalTwinProposal.js:filterDigitalTwinProposalNodeChanges",
       "function:shared/digitalTwinProposal.js:finiteNumber",
@@ -34430,15 +34544,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/systemOntology.js:systemKindDefinition",
       "function:shared/systemOntology.js:systemNodeReality",
       "function:shared/systemPartOntology.js:detachSystemPartBindings",
-      "function:shared/systemPartOntology.js:normalizedId",
       "function:shared/systemPartOntology.js:normalizeDigitalTwinBinding",
       "function:shared/systemPartOntology.js:normalizeSystemPart",
       "function:shared/systemPartOntology.js:normalizeSystemParts",
+      "function:shared/systemPartOntology.js:normalizedId",
       "function:shared/systemPartOntology.js:plainObject",
       "function:shared/systemPartOntology.js:plainText",
       "function:shared/systemPartOntology.js:systemPartContainsSecretLiteral",
       "function:shared/systemPartOntology.js:systemPartKindDefinition",
       "function:shared/systemPartOntology.js:validateSystemPartInput",
+      "function:shared/systemRuntime.js:SystemRuntimeContractError.constructor",
       "function:shared/systemRuntime.js:capability",
       "function:shared/systemRuntime.js:catalogFieldBase",
       "function:shared/systemRuntime.js:count",
@@ -34446,13 +34561,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/systemRuntime.js:failedSystemRuntimeResult",
       "function:shared/systemRuntime.js:metricGroupObservations",
       "function:shared/systemRuntime.js:nonSecretText",
-      "function:shared/systemRuntime.js:normalizedObservationValue",
       "function:shared/systemRuntime.js:normalizeObservationCatalog",
       "function:shared/systemRuntime.js:normalizeSystemRuntimeBatchRequest",
       "function:shared/systemRuntime.js:normalizeSystemRuntimeCanvasRequest",
       "function:shared/systemRuntime.js:normalizeSystemRuntimeRecords",
       "function:shared/systemRuntime.js:normalizeSystemRuntimeRequest",
       "function:shared/systemRuntime.js:normalizeSystemRuntimeResult",
+      "function:shared/systemRuntime.js:normalizedObservationValue",
       "function:shared/systemRuntime.js:plainObject",
       "function:shared/systemRuntime.js:plainText",
       "function:shared/systemRuntime.js:requiredId",
@@ -34461,7 +34576,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/systemRuntime.js:systemRuntimeCapabilityDefinition",
       "function:shared/systemRuntime.js:systemRuntimeCapabilityForPart",
       "function:shared/systemRuntime.js:systemRuntimeCatalogForResult",
-      "function:shared/systemRuntime.js:SystemRuntimeContractError.constructor",
       "function:shared/systemRuntime.js:systemRuntimePathEdgeIds",
       "function:shared/workflowCanvasSystemMap.js:createWorkflowCanvasSystemMap",
       "function:shared/workflowCanvasSystemMap.js:groupNode",
@@ -34507,10 +34621,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/workflowSystemTwinAdapter.js:severityRank",
       "function:shared/workflowSystemTwinAdapter.js:unique",
       "function:shared/workflowSystemTwinAdapter.js:workflowTwinRoot",
+      "function:src/App.jsx:App",
+      "function:src/App.jsx:ContextItem",
+      "function:src/App.jsx:IconBtn",
+      "function:src/App.jsx:TypeItem",
       "function:src/App.jsx:absPos",
       "function:src/App.jsx:afterLogin",
       "function:src/App.jsx:aggregateSystemNodeRuntime",
-      "function:src/App.jsx:App",
       "function:src/App.jsx:baseEdgeStyle",
       "function:src/App.jsx:cancelEdgeLp",
       "function:src/App.jsx:canvasSnapshot",
@@ -34520,7 +34637,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/App.jsx:closestHandles",
       "function:src/App.jsx:cloudRowSnapshot",
       "function:src/App.jsx:commitRename",
-      "function:src/App.jsx:ContextItem",
       "function:src/App.jsx:dedupeParticipants",
       "function:src/App.jsx:detachDigitalTwinBinding",
       "function:src/App.jsx:dim",
@@ -34544,7 +34660,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/App.jsx:handler",
       "function:src/App.jsx:handler#2",
       "function:src/App.jsx:handler#3",
-      "function:src/App.jsx:IconBtn",
       "function:src/App.jsx:isPartEdge",
       "function:src/App.jsx:isTypingTarget",
       "function:src/App.jsx:maxNodeId",
@@ -34568,8 +34683,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/App.jsx:onTouchStart",
       "function:src/App.jsx:onUp",
       "function:src/App.jsx:parseSharedId",
-      "function:src/App.jsx:participantKey",
       "function:src/App.jsx:partIdFromHandle",
+      "function:src/App.jsx:participantKey",
       "function:src/App.jsx:positionMenu",
       "function:src/App.jsx:remapPartHandle",
       "function:src/App.jsx:sanitizeNodes",
@@ -34587,7 +34702,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/App.jsx:systemRuntimeMapFromRecords",
       "function:src/App.jsx:systemRuntimePersistenceError",
       "function:src/App.jsx:systemRuntimeTargetsForNodes",
-      "function:src/App.jsx:TypeItem",
       "function:src/App.jsx:visit",
       "function:src/components/AuthPanel.jsx:AuthPanel",
       "function:src/components/AuthPanel.jsx:Avatar",
@@ -34611,8 +34725,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/components/AuthPanel.jsx:updateSettings",
       "function:src/components/CanvasImage.jsx:CanvasImage",
       "function:src/components/CanvasImage.jsx:refresh",
-      "function:src/components/CanvasTabs.jsx:avatarOf",
       "function:src/components/CanvasTabs.jsx:CanvasTabs",
+      "function:src/components/CanvasTabs.jsx:avatarOf",
       "function:src/components/CanvasTabs.jsx:commit",
       "function:src/components/CanvasTabs.jsx:fmt",
       "function:src/components/CanvasTabs.jsx:formatCount",
@@ -34629,26 +34743,26 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/components/CanvasTabs.jsx:textContent",
       "function:src/components/DigitalTwinReviewPanel.jsx:DigitalTwinReviewPanel",
       "function:src/components/DigitalTwinReviewPanel.jsx:IconButton",
+      "function:src/components/DigitalTwinReviewPanel.jsx:ReviewRow",
       "function:src/components/DigitalTwinReviewPanel.jsx:onMove",
       "function:src/components/DigitalTwinReviewPanel.jsx:onUp",
-      "function:src/components/DigitalTwinReviewPanel.jsx:ReviewRow",
+      "function:src/components/EdgeRelationEditor.jsx:EdgeRelationEditor",
       "function:src/components/EdgeRelationEditor.jsx:commitCustom",
       "function:src/components/EdgeRelationEditor.jsx:commitEvidence",
-      "function:src/components/EdgeRelationEditor.jsx:EdgeRelationEditor",
       "function:src/components/EdgeRelationEditor.jsx:selectRelation",
       "function:src/components/EditToolbar.jsx:AlignButtons",
-      "function:src/components/EditToolbar.jsx:apply",
-      "function:src/components/EditToolbar.jsx:applyColor",
       "function:src/components/EditToolbar.jsx:BlockDropdown",
-      "function:src/components/EditToolbar.jsx:btn",
-      "function:src/components/EditToolbar.jsx:btnStyle",
       "function:src/components/EditToolbar.jsx:ColorPicker",
       "function:src/components/EditToolbar.jsx:Divider",
-      "function:src/components/EditToolbar.jsx:downscaleAndInsert",
       "function:src/components/EditToolbar.jsx:DropItem",
       "function:src/components/EditToolbar.jsx:DropPanel",
       "function:src/components/EditToolbar.jsx:EditToolbar",
       "function:src/components/EditToolbar.jsx:FontSizeDropdown",
+      "function:src/components/EditToolbar.jsx:apply",
+      "function:src/components/EditToolbar.jsx:applyColor",
+      "function:src/components/EditToolbar.jsx:btn",
+      "function:src/components/EditToolbar.jsx:btnStyle",
+      "function:src/components/EditToolbar.jsx:downscaleAndInsert",
       "function:src/components/EditToolbar.jsx:getLayout",
       "function:src/components/EditToolbar.jsx:handleFileChange",
       "function:src/components/EditToolbar.jsx:handler",
@@ -34657,16 +34771,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/components/EditToolbar.jsx:toggle",
       "function:src/components/EditToolbar.jsx:toggle#2",
       "function:src/components/EditToolbar.jsx:toggle#3",
+      "function:src/components/InvitePopover.jsx:InvitePopover",
       "function:src/components/InvitePopover.jsx:handleCopy",
       "function:src/components/InvitePopover.jsx:handleCreateLink",
       "function:src/components/InvitePopover.jsx:handleDelete",
       "function:src/components/InvitePopover.jsx:handleInvite",
-      "function:src/components/InvitePopover.jsx:InvitePopover",
-      "function:src/components/NodePalette.jsx:handleDragStart",
       "function:src/components/NodePalette.jsx:NodePalette",
+      "function:src/components/NodePalette.jsx:handleDragStart",
       "function:src/components/NodePalette.jsx:onDown",
       "function:src/components/NodePalette.jsx:onKey",
       "function:src/components/NodePalette.jsx:payloadOf",
+      "function:src/components/NotesPanel.jsx:IconBtn",
+      "function:src/components/NotesPanel.jsx:ListRow",
+      "function:src/components/NotesPanel.jsx:NotePage",
+      "function:src/components/NotesPanel.jsx:NotesPanel",
+      "function:src/components/NotesPanel.jsx:StageTreeRow",
+      "function:src/components/NotesPanel.jsx:SubNoteRow",
       "function:src/components/NotesPanel.jsx:bodyPreviewText",
       "function:src/components/NotesPanel.jsx:close",
       "function:src/components/NotesPanel.jsx:commit",
@@ -34674,54 +34794,48 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/components/NotesPanel.jsx:flush",
       "function:src/components/NotesPanel.jsx:fn",
       "function:src/components/NotesPanel.jsx:handleBack",
-      "function:src/components/NotesPanel.jsx:IconBtn",
       "function:src/components/NotesPanel.jsx:isPartEdge",
-      "function:src/components/NotesPanel.jsx:ListRow",
       "function:src/components/NotesPanel.jsx:nodeBadge",
       "function:src/components/NotesPanel.jsx:nodeTitle",
-      "function:src/components/NotesPanel.jsx:NotePage",
-      "function:src/components/NotesPanel.jsx:NotesPanel",
       "function:src/components/NotesPanel.jsx:onKeyDown",
       "function:src/components/NotesPanel.jsx:onMove",
       "function:src/components/NotesPanel.jsx:onUp",
       "function:src/components/NotesPanel.jsx:scheduleBodySave",
       "function:src/components/NotesPanel.jsx:scheduleTitleSave",
-      "function:src/components/NotesPanel.jsx:StageTreeRow",
       "function:src/components/NotesPanel.jsx:stripHtml",
-      "function:src/components/NotesPanel.jsx:SubNoteRow",
       "function:src/components/NotesPanel.jsx:uploadImage",
       "function:src/components/OpenInNotesButton.jsx:OpenInNotesButton",
       "function:src/components/ParticipantAvatar.jsx:ParticipantAvatar",
+      "function:src/components/ScopedParticipants.jsx:ScopedParticipants",
       "function:src/components/ScopedParticipants.jsx:avatar",
       "function:src/components/ScopedParticipants.jsx:onKeyDown",
       "function:src/components/ScopedParticipants.jsx:participantKey",
       "function:src/components/ScopedParticipants.jsx:relativeLastSeen",
-      "function:src/components/ScopedParticipants.jsx:ScopedParticipants",
       "function:src/components/SourceTwinPanel.jsx:ChangeEntityList",
       "function:src/components/SourceTwinPanel.jsx:ChangesView",
       "function:src/components/SourceTwinPanel.jsx:EntityDetail",
       "function:src/components/SourceTwinPanel.jsx:EntityRow",
       "function:src/components/SourceTwinPanel.jsx:HistoryView",
       "function:src/components/SourceTwinPanel.jsx:IconButton",
-      "function:src/components/SourceTwinPanel.jsx:onMove",
-      "function:src/components/SourceTwinPanel.jsx:onUp",
       "function:src/components/SourceTwinPanel.jsx:SourceTwinPanel",
       "function:src/components/SourceTwinPanel.jsx:StructureView",
+      "function:src/components/SourceTwinPanel.jsx:onMove",
+      "function:src/components/SourceTwinPanel.jsx:onUp",
       "function:src/components/SourceTwinPanel.jsx:toggle",
-      "function:src/components/SystemObservationCatalog.jsx:formattedValue",
       "function:src/components/SystemObservationCatalog.jsx:SystemObservationCatalog",
+      "function:src/components/SystemObservationCatalog.jsx:formattedValue",
+      "function:src/components/Toolbar.jsx:MobileBtn",
+      "function:src/components/Toolbar.jsx:RuntimeButton",
+      "function:src/components/Toolbar.jsx:SmallIcon",
+      "function:src/components/Toolbar.jsx:ToolBtn",
+      "function:src/components/Toolbar.jsx:Toolbar",
+      "function:src/components/Toolbar.jsx:ViewSelector",
       "function:src/components/Toolbar.jsx:closePalette",
       "function:src/components/Toolbar.jsx:commitRename",
       "function:src/components/Toolbar.jsx:handlePick",
-      "function:src/components/Toolbar.jsx:MobileBtn",
       "function:src/components/Toolbar.jsx:onDoc",
       "function:src/components/Toolbar.jsx:pick",
       "function:src/components/Toolbar.jsx:rowBtn",
-      "function:src/components/Toolbar.jsx:RuntimeButton",
-      "function:src/components/Toolbar.jsx:SmallIcon",
-      "function:src/components/Toolbar.jsx:Toolbar",
-      "function:src/components/Toolbar.jsx:ToolBtn",
-      "function:src/components/Toolbar.jsx:ViewSelector",
       "function:src/demoCanvases.js:colX",
       "function:src/demoCanvases.js:flow",
       "function:src/demoCanvases.js:memo",
@@ -34783,18 +34897,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/lib/sanitizeHtml.js:sanitizeExternalUrl",
       "function:src/lib/sanitizeHtml.js:sanitizeHtml",
       "function:src/lib/sanitizeHtml.js:sanitizeNodeData",
-      "function:src/lib/sharedCanvasApi.js:getSharedCanvas",
-      "function:src/lib/sharedCanvasApi.js:listCanvasParticipants",
-      "function:src/lib/sharedCanvasApi.js:listSharedCanvases",
-      "function:src/lib/sharedCanvasApi.js:request",
-      "function:src/lib/sharedCanvasApi.js:setMemberViewRestriction",
-      "function:src/lib/sharedCanvasApi.js:updateSharedCanvas",
       "function:src/lib/shareLaunchCoordinator.js:claimShareLaunch",
       "function:src/lib/shareLaunchCoordinator.js:claimShareLaunchFallback",
       "function:src/lib/shareLaunchCoordinator.js:claimShareLaunchFallback.release",
       "function:src/lib/shareLaunchCoordinator.js:claimShareLaunchFallback.release#2",
       "function:src/lib/shareLaunchCoordinator.js:claimShareLaunchFallback.release#3",
       "function:src/lib/shareLaunchCoordinator.js:shareTokenFingerprint",
+      "function:src/lib/sharedCanvasApi.js:getSharedCanvas",
+      "function:src/lib/sharedCanvasApi.js:listCanvasParticipants",
+      "function:src/lib/sharedCanvasApi.js:listSharedCanvases",
+      "function:src/lib/sharedCanvasApi.js:request",
+      "function:src/lib/sharedCanvasApi.js:setMemberViewRestriction",
+      "function:src/lib/sharedCanvasApi.js:updateSharedCanvas",
       "function:src/lib/shares.js:claimEmailInvite",
       "function:src/lib/shares.js:claimShareToken",
       "function:src/lib/shares.js:createLinkShare",
@@ -34815,20 +34929,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/lib/sourceTwinApi.js:loadSourceTwinCurrent",
       "function:src/lib/sourceTwinApi.js:loadSourceTwinHistory",
       "function:src/lib/sourceTwinApi.js:sourceTwinRequest",
+      "function:src/lib/systemRuntimeApi.js:SystemRuntimeApiError.constructor",
       "function:src/lib/systemRuntimeApi.js:accessToken",
       "function:src/lib/systemRuntimeApi.js:checkAllSystemRuntime",
       "function:src/lib/systemRuntimeApi.js:checkSystemPartRuntime",
       "function:src/lib/systemRuntimeApi.js:loadLatestSystemRuntime",
       "function:src/lib/systemRuntimeApi.js:runtimeRequest",
-      "function:src/lib/systemRuntimeApi.js:SystemRuntimeApiError.constructor",
       "function:src/lib/wheelRouting.js:axisCanScroll",
       "function:src/lib/wheelRouting.js:elementFromTarget",
       "function:src/lib/wheelRouting.js:hasClass",
       "function:src/lib/wheelRouting.js:nativeWheelScrollTarget",
       "function:src/lib/wheelRouting.js:nearestClass",
+      "function:src/nodes/ContentNode.jsx:ContentNode",
       "function:src/nodes/ContentNode.jsx:caretAtEnd",
       "function:src/nodes/ContentNode.jsx:commitUrl",
-      "function:src/nodes/ContentNode.jsx:ContentNode",
       "function:src/nodes/ContentNode.jsx:downscaleImage",
       "function:src/nodes/ContentNode.jsx:handleDisplayClick",
       "function:src/nodes/ContentNode.jsx:handlePointerDown",
@@ -34844,15 +34958,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/nodes/ContentNode.jsx:placeCaretAt",
       "function:src/nodes/ContentNode.jsx:startEdit",
       "function:src/nodes/ContentNode.jsx:stopEdit",
+      "function:src/nodes/GroupNode.jsx:GroupNode",
       "function:src/nodes/GroupNode.jsx:clamp",
       "function:src/nodes/GroupNode.jsx:commit",
-      "function:src/nodes/GroupNode.jsx:GroupNode",
       "function:src/nodes/GroupNode.jsx:handleLabelClick",
       "function:src/nodes/GroupNode.jsx:handlePointerDown",
       "function:src/nodes/GroupNode.jsx:handlePointerMove",
       "function:src/nodes/GroupNode.jsx:handlePointerUp",
       "function:src/nodes/GroupNode.jsx:mapRange",
       "function:src/nodes/GroupNode.jsx:startEditing",
+      "function:src/nodes/MemoNode.jsx:MemoNode",
       "function:src/nodes/MemoNode.jsx:caretAtEnd",
       "function:src/nodes/MemoNode.jsx:handleDisplayClick",
       "function:src/nodes/MemoNode.jsx:handlePointerDown",
@@ -34861,7 +34976,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/nodes/MemoNode.jsx:handleTextMouseLeave",
       "function:src/nodes/MemoNode.jsx:handleTextMouseMove",
       "function:src/nodes/MemoNode.jsx:justSelected",
-      "function:src/nodes/MemoNode.jsx:MemoNode",
       "function:src/nodes/MemoNode.jsx:onDimPointerCancel",
       "function:src/nodes/MemoNode.jsx:onDimPointerDown",
       "function:src/nodes/MemoNode.jsx:onDimPointerLeave",
@@ -34871,9 +34985,10 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/nodes/MemoNode.jsx:stopEdit",
       "function:src/nodes/MemoNode.jsx:update",
       "function:src/nodes/MemoNode.jsx:wrapLines",
+      "function:src/nodes/StageNode.jsx:HANDLE_STYLE",
+      "function:src/nodes/StageNode.jsx:StageNode",
       "function:src/nodes/StageNode.jsx:caretAtEnd",
       "function:src/nodes/StageNode.jsx:cycleColor",
-      "function:src/nodes/StageNode.jsx:HANDLE_STYLE",
       "function:src/nodes/StageNode.jsx:handleDescMouseLeave",
       "function:src/nodes/StageNode.jsx:handleDescMouseMove",
       "function:src/nodes/StageNode.jsx:handleDisplayClick",
@@ -34886,11 +35001,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/nodes/StageNode.jsx:onDimPointerLeave",
       "function:src/nodes/StageNode.jsx:onDimPointerUp",
       "function:src/nodes/StageNode.jsx:placeCaretAt",
-      "function:src/nodes/StageNode.jsx:StageNode",
       "function:src/nodes/StageNode.jsx:startEdit",
       "function:src/nodes/StageNode.jsx:stopEdit",
       "function:src/nodes/StageNode.jsx:update",
       "function:src/nodes/StageNode.jsx:wrapLines",
+      "function:src/nodes/SystemNode.jsx:SystemNode",
       "function:src/nodes/SystemNode.jsx:blankSystemPart",
       "function:src/nodes/SystemNode.jsx:byId",
       "function:src/nodes/SystemNode.jsx:cancelDimPress",
@@ -34908,7 +35023,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/nodes/SystemNode.jsx:savePart",
       "function:src/nodes/SystemNode.jsx:startDimPress",
       "function:src/nodes/SystemNode.jsx:startTitleEdit",
-      "function:src/nodes/SystemNode.jsx:SystemNode",
       "function:src/storage.js:clearCanvasStorage",
       "function:src/storage.js:dataKey",
       "function:src/storage.js:deleteCanvasData",
@@ -34937,6 +35051,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "npm-script:preview",
       "npm-script:privacy:check",
       "npm-script:source-twin:check",
+      "npm-script:source-twin:prepare",
       "npm-script:source-twin:update",
       "npm-script:test"
     ],
@@ -34962,7 +35077,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "db-function:revoke_share_member",
       "db-function:share_link_is_active",
       "db-function:share_link_preview",
-      "db-table:{\"zen\":\"source twin\"}",
       "db-table:canvas_shares",
       "db-table:canvases",
       "db-table:mcp_tokens",
@@ -34974,6 +35088,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "db-table:source_twin_snapshots",
       "db-table:system_runtime_observations",
       "db-table:user_prefs",
+      "db-table:{\"zen\":\"source twin\"}",
       "file:api/shared-canvas.js",
       "file:api/system-runtime.js",
       "file:mcp/dataAccessAudit.js",
@@ -35083,15 +35198,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
     ]
   },
   "fingerprints": {
-    "code": "7a37f0934751cae116fc",
-    "database": "10c8e63d86a8c2eed5da",
+    "code": "fb55506717ad8d7a479d",
+    "database": "00834d418c32e59c7b21",
     "security": "c9e24c47086a9a1f8acd",
-    "deployment": "0f39fd2b34c84d6f79fa"
+    "deployment": "fe984a50a2666ecf9e52"
   },
   "summary": {
-    "entities": 1062,
+    "entities": 1066,
     "files": 99,
-    "functions": 858,
+    "functions": 861,
     "imports": 271,
     "apiRoutes": 5,
     "dbTables": 12,
@@ -35133,7 +35248,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "db-function:revoke_share_member",
       "db-function:share_link_is_active",
       "db-function:share_link_preview",
-      "db-table:{\"zen\":\"source twin\"}",
       "db-table:canvas_shares",
       "db-table:canvases",
       "db-table:mcp_tokens",
@@ -35145,6 +35259,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "db-table:source_twin_snapshots",
       "db-table:system_runtime_observations",
       "db-table:user_prefs",
+      "db-table:{\"zen\":\"source twin\"}",
       "dependency:../shared/sourceTwinManifest.js",
       "dependency:../shared/workflowSystemDiscoveryManifest.js",
       "dependency:./index.css",
@@ -35182,6 +35297,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "env:VERCEL_URL",
       "env:WORKFLOW_CANVAS_GITHUB_WEBHOOK_SECRET",
       "env:WORKFLOW_CANVAS_OWNER_USER_ID",
+      "file:README.md",
       "file:api/mcp.js",
       "file:api/shared-canvas.js",
       "file:api/source-twin-webhook.js",
@@ -35196,7 +35312,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:mcp/store.js",
       "file:mcp/systemRuntime.js",
       "file:package.json",
-      "file:README.md",
       "file:scripts/check-privacy-release.mjs",
       "file:scripts/generate-source-twin.mjs",
       "file:scripts/generate-system-discovery.mjs",
@@ -35250,8 +35365,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:src/lib/presence.js",
       "file:src/lib/profiles.js",
       "file:src/lib/sanitizeHtml.js",
-      "file:src/lib/sharedCanvasApi.js",
       "file:src/lib/shareLaunchCoordinator.js",
+      "file:src/lib/sharedCanvasApi.js",
       "file:src/lib/shares.js",
       "file:src/lib/sourceTwinApi.js",
       "file:src/lib/supabase.js",
@@ -35370,6 +35485,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:mcp/shareAccess.js:sanitizeNode",
       "function:mcp/shareAccess.js:setCanvasMemberViewRestriction",
       "function:mcp/shareAccess.js:stableValue",
+      "function:mcp/sourceTwinStore.js:SourceTwinError.constructor",
       "function:mcp/sourceTwinStore.js:captureSourceTwinSnapshot",
       "function:mcp/sourceTwinStore.js:compareStoredSourceTwinSnapshots",
       "function:mcp/sourceTwinStore.js:currentSourceTwinState",
@@ -35385,7 +35501,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:mcp/sourceTwinStore.js:snapshotRow",
       "function:mcp/sourceTwinStore.js:snapshotSummary",
       "function:mcp/sourceTwinStore.js:sourceTwinDeploymentContext",
-      "function:mcp/sourceTwinStore.js:SourceTwinError.constructor",
       "function:mcp/sourceTwinStore.js:unavailable",
       "function:mcp/store.js:admin",
       "function:mcp/store.js:applyEdgeRelationPatch",
@@ -35452,6 +35567,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:mcp/store.js:updateNodes",
       "function:mcp/store.js:workflowSystemMapRelationRepairPlanId",
       "function:mcp/store.js:writeConflict",
+      "function:mcp/systemRuntime.js:SystemRuntimeCheckError.constructor",
       "function:mcp/systemRuntime.js:claimSystemRuntimeCheck",
       "function:mcp/systemRuntime.js:count",
       "function:mcp/systemRuntime.js:fixedRuntimeEndpoint",
@@ -35469,15 +35585,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:mcp/systemRuntime.js:runSupabaseAuthSessionCheck",
       "function:mcp/systemRuntime.js:runSupabaseHealthCheck",
       "function:mcp/systemRuntime.js:runSystemRuntimeCapability",
-      "function:mcp/systemRuntime.js:runtimeResourceId",
       "function:mcp/systemRuntime.js:runVercelDeploymentCheck",
+      "function:mcp/systemRuntime.js:runtimeResourceId",
       "function:mcp/systemRuntime.js:safeFailure",
-      "function:mcp/systemRuntime.js:SystemRuntimeCheckError.constructor",
       "function:mcp/systemRuntime.js:unknownResult",
+      "function:scripts/generate-source-twin.mjs:diagnosticValue",
+      "function:scripts/generate-source-twin.mjs:firstDifference",
       "function:scripts/source-twin-scanner.mjs:addEntity",
       "function:scripts/source-twin-scanner.mjs:addFunction",
       "function:scripts/source-twin-scanner.mjs:addRelation",
       "function:scripts/source-twin-scanner.mjs:buildSourceTwinManifest",
+      "function:scripts/source-twin-scanner.mjs:compareSourceTwinText",
       "function:scripts/source-twin-scanner.mjs:entity",
       "function:scripts/source-twin-scanner.mjs:fileSummary",
       "function:scripts/source-twin-scanner.mjs:filesystemSourceTwinPaths",
@@ -35562,10 +35680,10 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:scripts/test-mcp-logic.mjs:writeDb.from",
       "function:scripts/test-mcp-logic.mjs:writeDb.insert",
       "function:scripts/test-sql-security.mjs:read",
+      "function:shared/digitalTwinProposal.js:DigitalTwinProposalError.constructor",
       "function:shared/digitalTwinProposal.js:applyDigitalTwinGraphProposal",
       "function:shared/digitalTwinProposal.js:createDigitalTwinGraphProposal",
       "function:shared/digitalTwinProposal.js:digitalTwinProposalAutoFitKey",
-      "function:shared/digitalTwinProposal.js:DigitalTwinProposalError.constructor",
       "function:shared/digitalTwinProposal.js:digitalTwinProposalMatchesItem",
       "function:shared/digitalTwinProposal.js:filterDigitalTwinProposalNodeChanges",
       "function:shared/digitalTwinProposal.js:finiteNumber",
@@ -35639,15 +35757,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/systemOntology.js:systemKindDefinition",
       "function:shared/systemOntology.js:systemNodeReality",
       "function:shared/systemPartOntology.js:detachSystemPartBindings",
-      "function:shared/systemPartOntology.js:normalizedId",
       "function:shared/systemPartOntology.js:normalizeDigitalTwinBinding",
       "function:shared/systemPartOntology.js:normalizeSystemPart",
       "function:shared/systemPartOntology.js:normalizeSystemParts",
+      "function:shared/systemPartOntology.js:normalizedId",
       "function:shared/systemPartOntology.js:plainObject",
       "function:shared/systemPartOntology.js:plainText",
       "function:shared/systemPartOntology.js:systemPartContainsSecretLiteral",
       "function:shared/systemPartOntology.js:systemPartKindDefinition",
       "function:shared/systemPartOntology.js:validateSystemPartInput",
+      "function:shared/systemRuntime.js:SystemRuntimeContractError.constructor",
       "function:shared/systemRuntime.js:capability",
       "function:shared/systemRuntime.js:catalogFieldBase",
       "function:shared/systemRuntime.js:count",
@@ -35655,13 +35774,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/systemRuntime.js:failedSystemRuntimeResult",
       "function:shared/systemRuntime.js:metricGroupObservations",
       "function:shared/systemRuntime.js:nonSecretText",
-      "function:shared/systemRuntime.js:normalizedObservationValue",
       "function:shared/systemRuntime.js:normalizeObservationCatalog",
       "function:shared/systemRuntime.js:normalizeSystemRuntimeBatchRequest",
       "function:shared/systemRuntime.js:normalizeSystemRuntimeCanvasRequest",
       "function:shared/systemRuntime.js:normalizeSystemRuntimeRecords",
       "function:shared/systemRuntime.js:normalizeSystemRuntimeRequest",
       "function:shared/systemRuntime.js:normalizeSystemRuntimeResult",
+      "function:shared/systemRuntime.js:normalizedObservationValue",
       "function:shared/systemRuntime.js:plainObject",
       "function:shared/systemRuntime.js:plainText",
       "function:shared/systemRuntime.js:requiredId",
@@ -35670,7 +35789,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/systemRuntime.js:systemRuntimeCapabilityDefinition",
       "function:shared/systemRuntime.js:systemRuntimeCapabilityForPart",
       "function:shared/systemRuntime.js:systemRuntimeCatalogForResult",
-      "function:shared/systemRuntime.js:SystemRuntimeContractError.constructor",
       "function:shared/systemRuntime.js:systemRuntimePathEdgeIds",
       "function:shared/workflowCanvasSystemMap.js:createWorkflowCanvasSystemMap",
       "function:shared/workflowCanvasSystemMap.js:groupNode",
@@ -35716,10 +35834,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/workflowSystemTwinAdapter.js:severityRank",
       "function:shared/workflowSystemTwinAdapter.js:unique",
       "function:shared/workflowSystemTwinAdapter.js:workflowTwinRoot",
+      "function:src/App.jsx:App",
+      "function:src/App.jsx:ContextItem",
+      "function:src/App.jsx:IconBtn",
+      "function:src/App.jsx:TypeItem",
       "function:src/App.jsx:absPos",
       "function:src/App.jsx:afterLogin",
       "function:src/App.jsx:aggregateSystemNodeRuntime",
-      "function:src/App.jsx:App",
       "function:src/App.jsx:baseEdgeStyle",
       "function:src/App.jsx:cancelEdgeLp",
       "function:src/App.jsx:canvasSnapshot",
@@ -35729,7 +35850,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/App.jsx:closestHandles",
       "function:src/App.jsx:cloudRowSnapshot",
       "function:src/App.jsx:commitRename",
-      "function:src/App.jsx:ContextItem",
       "function:src/App.jsx:dedupeParticipants",
       "function:src/App.jsx:detachDigitalTwinBinding",
       "function:src/App.jsx:dim",
@@ -35753,7 +35873,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/App.jsx:handler",
       "function:src/App.jsx:handler#2",
       "function:src/App.jsx:handler#3",
-      "function:src/App.jsx:IconBtn",
       "function:src/App.jsx:isPartEdge",
       "function:src/App.jsx:isTypingTarget",
       "function:src/App.jsx:maxNodeId",
@@ -35777,8 +35896,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/App.jsx:onTouchStart",
       "function:src/App.jsx:onUp",
       "function:src/App.jsx:parseSharedId",
-      "function:src/App.jsx:participantKey",
       "function:src/App.jsx:partIdFromHandle",
+      "function:src/App.jsx:participantKey",
       "function:src/App.jsx:positionMenu",
       "function:src/App.jsx:remapPartHandle",
       "function:src/App.jsx:sanitizeNodes",
@@ -35796,7 +35915,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/App.jsx:systemRuntimeMapFromRecords",
       "function:src/App.jsx:systemRuntimePersistenceError",
       "function:src/App.jsx:systemRuntimeTargetsForNodes",
-      "function:src/App.jsx:TypeItem",
       "function:src/App.jsx:visit",
       "function:src/components/AuthPanel.jsx:AuthPanel",
       "function:src/components/AuthPanel.jsx:Avatar",
@@ -35820,8 +35938,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/components/AuthPanel.jsx:updateSettings",
       "function:src/components/CanvasImage.jsx:CanvasImage",
       "function:src/components/CanvasImage.jsx:refresh",
-      "function:src/components/CanvasTabs.jsx:avatarOf",
       "function:src/components/CanvasTabs.jsx:CanvasTabs",
+      "function:src/components/CanvasTabs.jsx:avatarOf",
       "function:src/components/CanvasTabs.jsx:commit",
       "function:src/components/CanvasTabs.jsx:fmt",
       "function:src/components/CanvasTabs.jsx:formatCount",
@@ -35838,26 +35956,26 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/components/CanvasTabs.jsx:textContent",
       "function:src/components/DigitalTwinReviewPanel.jsx:DigitalTwinReviewPanel",
       "function:src/components/DigitalTwinReviewPanel.jsx:IconButton",
+      "function:src/components/DigitalTwinReviewPanel.jsx:ReviewRow",
       "function:src/components/DigitalTwinReviewPanel.jsx:onMove",
       "function:src/components/DigitalTwinReviewPanel.jsx:onUp",
-      "function:src/components/DigitalTwinReviewPanel.jsx:ReviewRow",
+      "function:src/components/EdgeRelationEditor.jsx:EdgeRelationEditor",
       "function:src/components/EdgeRelationEditor.jsx:commitCustom",
       "function:src/components/EdgeRelationEditor.jsx:commitEvidence",
-      "function:src/components/EdgeRelationEditor.jsx:EdgeRelationEditor",
       "function:src/components/EdgeRelationEditor.jsx:selectRelation",
       "function:src/components/EditToolbar.jsx:AlignButtons",
-      "function:src/components/EditToolbar.jsx:apply",
-      "function:src/components/EditToolbar.jsx:applyColor",
       "function:src/components/EditToolbar.jsx:BlockDropdown",
-      "function:src/components/EditToolbar.jsx:btn",
-      "function:src/components/EditToolbar.jsx:btnStyle",
       "function:src/components/EditToolbar.jsx:ColorPicker",
       "function:src/components/EditToolbar.jsx:Divider",
-      "function:src/components/EditToolbar.jsx:downscaleAndInsert",
       "function:src/components/EditToolbar.jsx:DropItem",
       "function:src/components/EditToolbar.jsx:DropPanel",
       "function:src/components/EditToolbar.jsx:EditToolbar",
       "function:src/components/EditToolbar.jsx:FontSizeDropdown",
+      "function:src/components/EditToolbar.jsx:apply",
+      "function:src/components/EditToolbar.jsx:applyColor",
+      "function:src/components/EditToolbar.jsx:btn",
+      "function:src/components/EditToolbar.jsx:btnStyle",
+      "function:src/components/EditToolbar.jsx:downscaleAndInsert",
       "function:src/components/EditToolbar.jsx:getLayout",
       "function:src/components/EditToolbar.jsx:handleFileChange",
       "function:src/components/EditToolbar.jsx:handler",
@@ -35866,16 +35984,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/components/EditToolbar.jsx:toggle",
       "function:src/components/EditToolbar.jsx:toggle#2",
       "function:src/components/EditToolbar.jsx:toggle#3",
+      "function:src/components/InvitePopover.jsx:InvitePopover",
       "function:src/components/InvitePopover.jsx:handleCopy",
       "function:src/components/InvitePopover.jsx:handleCreateLink",
       "function:src/components/InvitePopover.jsx:handleDelete",
       "function:src/components/InvitePopover.jsx:handleInvite",
-      "function:src/components/InvitePopover.jsx:InvitePopover",
-      "function:src/components/NodePalette.jsx:handleDragStart",
       "function:src/components/NodePalette.jsx:NodePalette",
+      "function:src/components/NodePalette.jsx:handleDragStart",
       "function:src/components/NodePalette.jsx:onDown",
       "function:src/components/NodePalette.jsx:onKey",
       "function:src/components/NodePalette.jsx:payloadOf",
+      "function:src/components/NotesPanel.jsx:IconBtn",
+      "function:src/components/NotesPanel.jsx:ListRow",
+      "function:src/components/NotesPanel.jsx:NotePage",
+      "function:src/components/NotesPanel.jsx:NotesPanel",
+      "function:src/components/NotesPanel.jsx:StageTreeRow",
+      "function:src/components/NotesPanel.jsx:SubNoteRow",
       "function:src/components/NotesPanel.jsx:bodyPreviewText",
       "function:src/components/NotesPanel.jsx:close",
       "function:src/components/NotesPanel.jsx:commit",
@@ -35883,54 +36007,48 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/components/NotesPanel.jsx:flush",
       "function:src/components/NotesPanel.jsx:fn",
       "function:src/components/NotesPanel.jsx:handleBack",
-      "function:src/components/NotesPanel.jsx:IconBtn",
       "function:src/components/NotesPanel.jsx:isPartEdge",
-      "function:src/components/NotesPanel.jsx:ListRow",
       "function:src/components/NotesPanel.jsx:nodeBadge",
       "function:src/components/NotesPanel.jsx:nodeTitle",
-      "function:src/components/NotesPanel.jsx:NotePage",
-      "function:src/components/NotesPanel.jsx:NotesPanel",
       "function:src/components/NotesPanel.jsx:onKeyDown",
       "function:src/components/NotesPanel.jsx:onMove",
       "function:src/components/NotesPanel.jsx:onUp",
       "function:src/components/NotesPanel.jsx:scheduleBodySave",
       "function:src/components/NotesPanel.jsx:scheduleTitleSave",
-      "function:src/components/NotesPanel.jsx:StageTreeRow",
       "function:src/components/NotesPanel.jsx:stripHtml",
-      "function:src/components/NotesPanel.jsx:SubNoteRow",
       "function:src/components/NotesPanel.jsx:uploadImage",
       "function:src/components/OpenInNotesButton.jsx:OpenInNotesButton",
       "function:src/components/ParticipantAvatar.jsx:ParticipantAvatar",
+      "function:src/components/ScopedParticipants.jsx:ScopedParticipants",
       "function:src/components/ScopedParticipants.jsx:avatar",
       "function:src/components/ScopedParticipants.jsx:onKeyDown",
       "function:src/components/ScopedParticipants.jsx:participantKey",
       "function:src/components/ScopedParticipants.jsx:relativeLastSeen",
-      "function:src/components/ScopedParticipants.jsx:ScopedParticipants",
       "function:src/components/SourceTwinPanel.jsx:ChangeEntityList",
       "function:src/components/SourceTwinPanel.jsx:ChangesView",
       "function:src/components/SourceTwinPanel.jsx:EntityDetail",
       "function:src/components/SourceTwinPanel.jsx:EntityRow",
       "function:src/components/SourceTwinPanel.jsx:HistoryView",
       "function:src/components/SourceTwinPanel.jsx:IconButton",
-      "function:src/components/SourceTwinPanel.jsx:onMove",
-      "function:src/components/SourceTwinPanel.jsx:onUp",
       "function:src/components/SourceTwinPanel.jsx:SourceTwinPanel",
       "function:src/components/SourceTwinPanel.jsx:StructureView",
+      "function:src/components/SourceTwinPanel.jsx:onMove",
+      "function:src/components/SourceTwinPanel.jsx:onUp",
       "function:src/components/SourceTwinPanel.jsx:toggle",
-      "function:src/components/SystemObservationCatalog.jsx:formattedValue",
       "function:src/components/SystemObservationCatalog.jsx:SystemObservationCatalog",
+      "function:src/components/SystemObservationCatalog.jsx:formattedValue",
+      "function:src/components/Toolbar.jsx:MobileBtn",
+      "function:src/components/Toolbar.jsx:RuntimeButton",
+      "function:src/components/Toolbar.jsx:SmallIcon",
+      "function:src/components/Toolbar.jsx:ToolBtn",
+      "function:src/components/Toolbar.jsx:Toolbar",
+      "function:src/components/Toolbar.jsx:ViewSelector",
       "function:src/components/Toolbar.jsx:closePalette",
       "function:src/components/Toolbar.jsx:commitRename",
       "function:src/components/Toolbar.jsx:handlePick",
-      "function:src/components/Toolbar.jsx:MobileBtn",
       "function:src/components/Toolbar.jsx:onDoc",
       "function:src/components/Toolbar.jsx:pick",
       "function:src/components/Toolbar.jsx:rowBtn",
-      "function:src/components/Toolbar.jsx:RuntimeButton",
-      "function:src/components/Toolbar.jsx:SmallIcon",
-      "function:src/components/Toolbar.jsx:Toolbar",
-      "function:src/components/Toolbar.jsx:ToolBtn",
-      "function:src/components/Toolbar.jsx:ViewSelector",
       "function:src/demoCanvases.js:colX",
       "function:src/demoCanvases.js:flow",
       "function:src/demoCanvases.js:memo",
@@ -35992,18 +36110,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/lib/sanitizeHtml.js:sanitizeExternalUrl",
       "function:src/lib/sanitizeHtml.js:sanitizeHtml",
       "function:src/lib/sanitizeHtml.js:sanitizeNodeData",
-      "function:src/lib/sharedCanvasApi.js:getSharedCanvas",
-      "function:src/lib/sharedCanvasApi.js:listCanvasParticipants",
-      "function:src/lib/sharedCanvasApi.js:listSharedCanvases",
-      "function:src/lib/sharedCanvasApi.js:request",
-      "function:src/lib/sharedCanvasApi.js:setMemberViewRestriction",
-      "function:src/lib/sharedCanvasApi.js:updateSharedCanvas",
       "function:src/lib/shareLaunchCoordinator.js:claimShareLaunch",
       "function:src/lib/shareLaunchCoordinator.js:claimShareLaunchFallback",
       "function:src/lib/shareLaunchCoordinator.js:claimShareLaunchFallback.release",
       "function:src/lib/shareLaunchCoordinator.js:claimShareLaunchFallback.release#2",
       "function:src/lib/shareLaunchCoordinator.js:claimShareLaunchFallback.release#3",
       "function:src/lib/shareLaunchCoordinator.js:shareTokenFingerprint",
+      "function:src/lib/sharedCanvasApi.js:getSharedCanvas",
+      "function:src/lib/sharedCanvasApi.js:listCanvasParticipants",
+      "function:src/lib/sharedCanvasApi.js:listSharedCanvases",
+      "function:src/lib/sharedCanvasApi.js:request",
+      "function:src/lib/sharedCanvasApi.js:setMemberViewRestriction",
+      "function:src/lib/sharedCanvasApi.js:updateSharedCanvas",
       "function:src/lib/shares.js:claimEmailInvite",
       "function:src/lib/shares.js:claimShareToken",
       "function:src/lib/shares.js:createLinkShare",
@@ -36024,20 +36142,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/lib/sourceTwinApi.js:loadSourceTwinCurrent",
       "function:src/lib/sourceTwinApi.js:loadSourceTwinHistory",
       "function:src/lib/sourceTwinApi.js:sourceTwinRequest",
+      "function:src/lib/systemRuntimeApi.js:SystemRuntimeApiError.constructor",
       "function:src/lib/systemRuntimeApi.js:accessToken",
       "function:src/lib/systemRuntimeApi.js:checkAllSystemRuntime",
       "function:src/lib/systemRuntimeApi.js:checkSystemPartRuntime",
       "function:src/lib/systemRuntimeApi.js:loadLatestSystemRuntime",
       "function:src/lib/systemRuntimeApi.js:runtimeRequest",
-      "function:src/lib/systemRuntimeApi.js:SystemRuntimeApiError.constructor",
       "function:src/lib/wheelRouting.js:axisCanScroll",
       "function:src/lib/wheelRouting.js:elementFromTarget",
       "function:src/lib/wheelRouting.js:hasClass",
       "function:src/lib/wheelRouting.js:nativeWheelScrollTarget",
       "function:src/lib/wheelRouting.js:nearestClass",
+      "function:src/nodes/ContentNode.jsx:ContentNode",
       "function:src/nodes/ContentNode.jsx:caretAtEnd",
       "function:src/nodes/ContentNode.jsx:commitUrl",
-      "function:src/nodes/ContentNode.jsx:ContentNode",
       "function:src/nodes/ContentNode.jsx:downscaleImage",
       "function:src/nodes/ContentNode.jsx:handleDisplayClick",
       "function:src/nodes/ContentNode.jsx:handlePointerDown",
@@ -36053,15 +36171,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/nodes/ContentNode.jsx:placeCaretAt",
       "function:src/nodes/ContentNode.jsx:startEdit",
       "function:src/nodes/ContentNode.jsx:stopEdit",
+      "function:src/nodes/GroupNode.jsx:GroupNode",
       "function:src/nodes/GroupNode.jsx:clamp",
       "function:src/nodes/GroupNode.jsx:commit",
-      "function:src/nodes/GroupNode.jsx:GroupNode",
       "function:src/nodes/GroupNode.jsx:handleLabelClick",
       "function:src/nodes/GroupNode.jsx:handlePointerDown",
       "function:src/nodes/GroupNode.jsx:handlePointerMove",
       "function:src/nodes/GroupNode.jsx:handlePointerUp",
       "function:src/nodes/GroupNode.jsx:mapRange",
       "function:src/nodes/GroupNode.jsx:startEditing",
+      "function:src/nodes/MemoNode.jsx:MemoNode",
       "function:src/nodes/MemoNode.jsx:caretAtEnd",
       "function:src/nodes/MemoNode.jsx:handleDisplayClick",
       "function:src/nodes/MemoNode.jsx:handlePointerDown",
@@ -36070,7 +36189,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/nodes/MemoNode.jsx:handleTextMouseLeave",
       "function:src/nodes/MemoNode.jsx:handleTextMouseMove",
       "function:src/nodes/MemoNode.jsx:justSelected",
-      "function:src/nodes/MemoNode.jsx:MemoNode",
       "function:src/nodes/MemoNode.jsx:onDimPointerCancel",
       "function:src/nodes/MemoNode.jsx:onDimPointerDown",
       "function:src/nodes/MemoNode.jsx:onDimPointerLeave",
@@ -36080,9 +36198,10 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/nodes/MemoNode.jsx:stopEdit",
       "function:src/nodes/MemoNode.jsx:update",
       "function:src/nodes/MemoNode.jsx:wrapLines",
+      "function:src/nodes/StageNode.jsx:HANDLE_STYLE",
+      "function:src/nodes/StageNode.jsx:StageNode",
       "function:src/nodes/StageNode.jsx:caretAtEnd",
       "function:src/nodes/StageNode.jsx:cycleColor",
-      "function:src/nodes/StageNode.jsx:HANDLE_STYLE",
       "function:src/nodes/StageNode.jsx:handleDescMouseLeave",
       "function:src/nodes/StageNode.jsx:handleDescMouseMove",
       "function:src/nodes/StageNode.jsx:handleDisplayClick",
@@ -36095,11 +36214,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/nodes/StageNode.jsx:onDimPointerLeave",
       "function:src/nodes/StageNode.jsx:onDimPointerUp",
       "function:src/nodes/StageNode.jsx:placeCaretAt",
-      "function:src/nodes/StageNode.jsx:StageNode",
       "function:src/nodes/StageNode.jsx:startEdit",
       "function:src/nodes/StageNode.jsx:stopEdit",
       "function:src/nodes/StageNode.jsx:update",
       "function:src/nodes/StageNode.jsx:wrapLines",
+      "function:src/nodes/SystemNode.jsx:SystemNode",
       "function:src/nodes/SystemNode.jsx:blankSystemPart",
       "function:src/nodes/SystemNode.jsx:byId",
       "function:src/nodes/SystemNode.jsx:cancelDimPress",
@@ -36117,7 +36236,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/nodes/SystemNode.jsx:savePart",
       "function:src/nodes/SystemNode.jsx:startDimPress",
       "function:src/nodes/SystemNode.jsx:startTitleEdit",
-      "function:src/nodes/SystemNode.jsx:SystemNode",
       "function:src/storage.js:clearCanvasStorage",
       "function:src/storage.js:dataKey",
       "function:src/storage.js:deleteCanvasData",
@@ -36146,6 +36264,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "npm-script:preview",
       "npm-script:privacy:check",
       "npm-script:source-twin:check",
+      "npm-script:source-twin:prepare",
       "npm-script:source-twin:update",
       "npm-script:test",
       "rls-policy:canvas_shares:invitee selects own invites",
@@ -36173,6 +36292,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
     "changed": [],
     "removed": [],
     "changedPaths": [
+      "README.md",
       "api/mcp.js",
       "api/shared-canvas.js",
       "api/source-twin-webhook.js",
@@ -36187,7 +36307,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "mcp/store.js",
       "mcp/systemRuntime.js",
       "package.json",
-      "README.md",
       "scripts/check-privacy-release.mjs",
       "scripts/generate-source-twin.mjs",
       "scripts/generate-system-discovery.mjs",
@@ -36241,8 +36360,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "src/lib/presence.js",
       "src/lib/profiles.js",
       "src/lib/sanitizeHtml.js",
-      "src/lib/sharedCanvasApi.js",
       "src/lib/shareLaunchCoordinator.js",
+      "src/lib/sharedCanvasApi.js",
       "src/lib/shares.js",
       "src/lib/sourceTwinApi.js",
       "src/lib/supabase.js",
@@ -36274,7 +36393,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "vite.config.js"
     ],
     "summary": {
-      "added": 1062,
+      "added": 1066,
       "changed": 0,
       "removed": 0,
       "paths": 99

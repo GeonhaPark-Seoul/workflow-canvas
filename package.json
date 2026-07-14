@@ -9,12 +9,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run source-twin:check && vite build",
+    "build": "npm run source-twin:prepare && vite build",
     "preview": "vite preview",
     "discover:update": "node scripts/generate-system-discovery.mjs",
     "discover:check": "node scripts/generate-system-discovery.mjs --check",
     "source-twin:update": "node scripts/generate-source-twin.mjs",
     "source-twin:check": "node scripts/generate-source-twin.mjs --check",
+    "source-twin:prepare": "node scripts/generate-source-twin.mjs --prepare",
     "privacy:check": "node scripts/check-privacy-release.mjs",
     "test": "npm run discover:check && npm run source-twin:check && npm run privacy:check && node scripts/test-source-twin.mjs && node scripts/test-mcp-logic.mjs && node scripts/test-sql-security.mjs"
   },

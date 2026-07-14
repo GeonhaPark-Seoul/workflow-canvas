@@ -44,10 +44,16 @@ function hash(value, length = 20) {
   return createHash('sha256').update(normalized(value)).digest('hex').slice(0, length)
 }
 
+export function compareSourceTwinText(left, right) {
+  const leftText = String(left)
+  const rightText = String(right)
+  return leftText < rightText ? -1 : leftText > rightText ? 1 : 0
+}
+
 function stable(value) {
   if (Array.isArray(value)) return value.map(stable)
   if (value && typeof value === 'object') {
-    return Object.fromEntries(Object.keys(value).sort().map((key) => [key, stable(value[key])]))
+    return Object.fromEntries(Object.keys(value).sort(compareSourceTwinText).map((key) => [key, stable(value[key])]))
   }
   return value
 }
@@ -57,7 +63,7 @@ function semanticHash(value, length = 20) {
 }
 
 function unique(values) {
-  return [...new Set(values.filter(Boolean))].sort((left, right) => String(left).localeCompare(String(right)))
+  return [...new Set(values.filter(Boolean))].sort(compareSourceTwinText)
 }
 
 function layerForFile(relativePath) {
@@ -251,11 +257,11 @@ function parseJavaScript(relativePath, content) {
   record.imports = [...new Map(record.imports.filter((item) => item.source).map((item) => [
     `${item.source}:${item.names.join(',')}:${item.dynamic}`,
     { ...item, names: unique(item.names) },
-  ])).values()].sort((left, right) => left.source.localeCompare(right.source))
-  record.functions.sort((left, right) => left.lineStart - right.lineStart || left.name.localeCompare(right.name))
+  ])).values()].sort((left, right) => compareSourceTwinText(left.source, right.source))
+  record.functions.sort((left, right) => left.lineStart - right.lineStart || compareSourceTwinText(left.name, right.name))
   for (const key of ['dbTables', 'dbFunctions', 'env', 'securitySignals', 'externalApiRoutes']) record[key] = unique(record[key])
   record.dbAccess = [...new Map(record.dbAccess.map((item) => [`${item.table}:${item.operation}`, item])).values()]
-    .sort((left, right) => `${left.table}:${left.operation}`.localeCompare(`${right.table}:${right.operation}`))
+    .sort((left, right) => compareSourceTwinText(`${left.table}:${left.operation}`, `${right.table}:${right.operation}`))
   if (relativePath.startsWith('api/')) record.apiRoutes = [`/api/${relativePath.slice(4).replace(/\.js$/, '')}`]
   return record
 }
@@ -344,7 +350,7 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
   const files = filesInput instanceof Map ? filesInput : new Map(Object.entries(filesInput ?? {}))
   const filePaths = new Set(files.keys())
   const records = []
-  for (const [relativePath, rawContent] of [...files.entries()].sort(([left], [right]) => left.localeCompare(right))) {
+  for (const [relativePath, rawContent] of [...files.entries()].sort(([left], [right]) => compareSourceTwinText(left, right))) {
     const content = normalized(rawContent)
     const layer = layerForFile(relativePath)
     const language = languageForFile(relativePath)
@@ -523,7 +529,7 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
   if (packageRecord) {
     try {
       const packageJson = JSON.parse(packageRecord.content)
-      for (const [name, command] of Object.entries(packageJson.scripts ?? {}).sort(([left], [right]) => left.localeCompare(right))) {
+      for (const [name, command] of Object.entries(packageJson.scripts ?? {}).sort(([left], [right]) => compareSourceTwinText(left, right))) {
         addEntity(entity(`npm-script:${name}`, 'npm-script', `npm run ${name}`, semanticHash({ command }), {
           name,
           path: 'package.json',
@@ -537,8 +543,8 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
     } catch {}
   }
 
-  entities.sort((left, right) => left.id.localeCompare(right.id))
-  relations.sort((left, right) => left.id.localeCompare(right.id))
+  entities.sort((left, right) => compareSourceTwinText(left.id, right.id))
+  relations.sort((left, right) => compareSourceTwinText(left.id, right.id))
   const entityFingerprintMap = Object.fromEntries(entities.map((item) => [item.id, item.fingerprint]))
   const perspective = (predicate) => entities.filter(predicate).map((item) => item.id)
   const perspectives = {
@@ -625,7 +631,7 @@ function filesystemSourceTwinPaths(root) {
   const paths = []
   const visit = (absoluteDirectory, relativeDirectory = '') => {
     const entries = readdirSync(absoluteDirectory, { withFileTypes: true })
-      .sort((left, right) => left.name.localeCompare(right.name))
+      .sort((left, right) => compareSourceTwinText(left.name, right.name))
     for (const entry of entries) {
       if (entry.isSymbolicLink()) continue
       const relativePath = relativeDirectory
@@ -641,7 +647,7 @@ function filesystemSourceTwinPaths(root) {
     }
   }
   visit(root)
-  return paths.sort()
+  return paths.sort(compareSourceTwinText)
 }
 
 export function sourceTwinFilePaths(root) {
@@ -651,7 +657,7 @@ export function sourceTwinFilePaths(root) {
       ['ls-files', '--cached', '--others', '--exclude-standard', '-z'],
       { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] },
     )
-    return nulSeparated(output).filter(shouldInspect).sort()
+    return nulSeparated(output).filter(shouldInspect).sort(compareSourceTwinText)
   } catch {
     return filesystemSourceTwinPaths(root)
   }

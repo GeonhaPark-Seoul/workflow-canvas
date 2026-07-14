@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import {
   buildSourceTwinManifest,
+  compareSourceTwinText,
   readSourceTwinWorkingTree,
   serializeSourceTwinManifest,
   parseGeneratedSourceTwin,
@@ -61,6 +62,11 @@ create or replace function public.get_operational_state() returns jsonb language
 const manifest = buildSourceTwinManifest(new Map(fixtureEntries), { repository })
 const reversed = buildSourceTwinManifest(new Map([...fixtureEntries].reverse()), { repository })
 
+assert.deepEqual(
+  ['a', '_', 'Z', '10', '-'].sort(compareSourceTwinText),
+  ['-', '10', 'Z', '_', 'a'],
+  'source twin sorting must use locale-independent code-point order',
+)
 assert.equal(manifest.id, reversed.id, 'file iteration order must not affect the manifest')
 assert.deepEqual(manifest.entities, reversed.entities, 'entities must be deterministic')
 assert.deepEqual(manifest.relations, reversed.relations, 'relations must be deterministic')
