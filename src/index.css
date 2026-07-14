@@ -251,6 +251,9 @@ body[data-theme='light'] .react-flow__edge.wfc-edge.selected .wfc-relation-label
   padding: 10px;
   cursor: default;
 }
+.react-flow__node-system:has(.system-part-editor) {
+  z-index: 2002 !important;
+}
 .system-part-editor-heading,
 .system-part-editor-actions {
   display: flex;

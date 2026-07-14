@@ -489,7 +489,7 @@ export default function SystemNode({ data, selected, id }) {
                 title={data.canRunSystemChecks ? '연결 상태 확인' : '로그인 후 연결 상태 확인'}
                 aria-label="연결 상태 확인"
                 disabled={!data.canRunSystemChecks || partDraftRuntime?.status === 'checking'}
-                onClick={() => data.onCheckSystemPart?.(persistedPartDraft)}
+                onClick={() => data.onCheckSystemPart?.(id, persistedPartDraft)}
               >
                 ↻
               </button>
