@@ -30,9 +30,6 @@ const RESOURCE_PROPOSAL_DEFS = Object.freeze({
   'storage-bucket': {
     parentId: 'map-group-data', systemKind: 'storage', anchorId: 'map-web-app', relationType: 'writes', provider: 'Supabase Storage',
   },
-  'credential-reference': {
-    parentId: 'map-group-experience', systemKind: 'credential', anchorId: 'map-web-app', relationType: 'requires', provider: 'Supabase',
-  },
 })
 
 const KNOWN_RESOURCE_COPY = Object.freeze({
@@ -42,6 +39,7 @@ const KNOWN_RESOURCE_COPY = Object.freeze({
     constraints: '초대자가 다시 초대해 새 공유 행을 만들기 전까지 기존 초대 재사용을 차단',
   },
   'credential-reference:SUPABASE_ANON_KEY': {
+    partLabel: 'Supabase 공개 클라이언트 키',
     purpose: '브라우저의 Supabase 클라이언트 초기화에 사용하는 공개 클라이언트 키 참조다.',
     responsibility: '공개 클라이언트 요청에 프로젝트 식별과 RLS 적용 역할을 제공',
     constraints: '키의 실제 값은 캔버스에 저장하지 않으며 서비스 역할 비밀 키와 구분',
@@ -154,7 +152,56 @@ function relationHandles(source, target, canvas) {
     : { sourceHandle: 'top', targetHandle: 'bottom' }
 }
 
+function credentialPartProposal(resource, item, canvas) {
+  const target = (canvas.nodes ?? []).find((node) => node.id === 'map-web-app' && node.type === 'system')
+  if (!target) return null
+  const suffix = digitalTwinReviewFingerprint({
+    sourceId: WORKFLOW_SYSTEM_TWIN_SOURCE_ID,
+    entityKey: resource.key,
+  }).slice(0, 12)
+  const proposalKey = `model-resource:${resource.key}`
+  const proposalId = `${WORKFLOW_SYSTEM_TWIN_SOURCE_ID}::${proposalKey}`
+  const sourceRefs = unique(resource.source_refs ?? [])
+  const copy = KNOWN_RESOURCE_COPY[resource.key] ?? {}
+  const part = {
+    id: `twin-part-${suffix}`,
+    kind: 'credential_ref',
+    label: copy.partLabel || normalizeSystemPlainText(resource.label || resource.key, 120),
+    ref: normalizeSystemPlainText(resource.label || resource.key.replace(/^credential-reference:/, ''), 240),
+    exposure: resource.details?.classification === 'public-client-reference' ? 'public' : 'secret_reference',
+    sourceKind: 'code',
+    evidenceRef: normalizeSystemPlainText(sourceRefs.join(', '), 500),
+    digitalTwinBinding: {
+      schemaVersion: 1,
+      sourceId: WORKFLOW_SYSTEM_TWIN_SOURCE_ID,
+      entityKey: resource.key,
+      observedFingerprint: WORKFLOW_SYSTEM_DISCOVERY.current.resources[resource.key]?.fingerprint ?? item.fingerprint,
+      observedSnapshotId: WORKFLOW_SYSTEM_DISCOVERY.current.id,
+      proposalId,
+      itemId: item.id,
+      itemFingerprint: item.fingerprint,
+    },
+  }
+  const targetLabel = normalizeSystemPlainText(target.data?.label, 120) || target.id
+  return createDigitalTwinGraphProposal({
+    sourceId: WORKFLOW_SYSTEM_TWIN_SOURCE_ID,
+    proposalKey,
+    itemId: item.id,
+    itemFingerprint: item.fingerprint,
+    snapshotId: WORKFLOW_SYSTEM_DISCOVERY.current.id,
+    title: `${part.label} 파츠 추가`,
+    summary: `${targetLabel} 노드에 키의 실제 값이 아닌 ${part.ref} 참조 파츠 1개를 추가합니다. 기존 노드 필드는 바꾸지 않습니다.`,
+    operations: [{
+      action: 'add_part',
+      targetNodeId: target.id,
+      label: `${targetLabel}에 ${part.label} 추가`,
+      part,
+    }],
+  })
+}
+
 function resourceProposal(resource, item, canvas) {
+  if (resource.kind === 'credential-reference') return credentialPartProposal(resource, item, canvas)
   const definition = RESOURCE_PROPOSAL_DEFS[resource.kind]
   if (!definition) return null
   const anchor = (canvas.nodes ?? []).find((node) => node.id === definition.anchorId)

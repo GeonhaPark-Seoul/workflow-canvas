@@ -26,12 +26,6 @@ const PORTS = [
   { id: 'bottom', position: Position.Bottom },
 ]
 
-// Per-part ports: outlet-style sockets. See .part-socket in index.css for the slot pseudo-elements.
-const PART_SOCKET_STYLE = (partColor) => ({
-  width: 20, height: 26, borderRadius: 4,
-  background: '#0f0f13', border: `1.5px solid ${partColor}`,
-})
-
 // Place caret at end of contentEditable element
 function caretAtEnd(el) {
   const range = document.createRange()
@@ -107,10 +101,6 @@ export default function StageNode({ data, selected, id }) {
   const caretPosRef = useRef(null)
   const [descHover, setDescHover] = useState(null) // { top, height } | null — mousemove-follow line strip
   const [descCaret, setDescCaret] = useState(null) // { top, height } | null — always-on caret line strip while editing
-
-  // Parts list: inline text editing per-row (id of the part currently being edited)
-  const [editingPartId, setEditingPartId] = useState(null)
-  const [partDraft, setPartDraft] = useState('')
 
   // Click-to-edit cycle: click 1 selects (React Flow default), click 2 (while already
   // selected) starts editing. React Flow selects on mousedown, so the first click's
@@ -261,37 +251,6 @@ export default function StageNode({ data, selected, id }) {
     }
     if (!selected || editing || justSelected()) return
     startEdit(field, { x: e.clientX, y: e.clientY })
-  }
-
-  // Parts list handlers
-  const startPartEdit = (part) => {
-    if (data.readOnly) return
-    if (editingPartId === part.id) return
-    setEditingPartId(part.id)
-    setPartDraft(part.text ?? '')
-  }
-  const commitPartEdit = () => {
-    if (editingPartId == null) return
-    const parts = (data.parts ?? []).map((p) => (p.id === editingPartId ? { ...p, text: partDraft } : p))
-    setEditingPartId(null)
-    data.onUpdate?.({ parts })
-  }
-  const cancelPartEdit = () => setEditingPartId(null)
-
-  // Click-to-edit a part row: click 2 while the node is already selected.
-  const handlePartClick = (part) => () => {
-    if (!selected || editingPartId != null || justSelected()) return
-    startPartEdit(part)
-  }
-
-  const addPart = () => {
-    if (data.readOnly) return
-    const newPart = { id: 'pt-' + Date.now().toString(36), text: '새 파츠' }
-    data.onUpdate?.({ parts: [...(data.parts ?? []), newPart] })
-  }
-  const removePart = (partId) => {
-    if (data.readOnly) return
-    data.onUpdate?.({ parts: (data.parts ?? []).filter((p) => p.id !== partId) })
   }
 
   const titleValue = data.label ?? ''
@@ -523,89 +482,6 @@ export default function StageNode({ data, selected, id }) {
               <div style={{ position: 'absolute', left: -4, right: -4, top: descCaret.top, height: descCaret.height, borderRadius: 6, background: '#ffffff12', pointerEvents: 'none' }} />
             )}
           </div>
-        </div>
-      )}
-
-      {/* Parts list — only rendered in normal (non-abstract, non-shape-only) mode, same as description */}
-      {!abstract && !shapeOnly && (
-        <div style={{ padding: '0 12px 10px', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
-          {(data.parts ?? []).map((part) => {
-            const partColor = part.color || '#8b94a7'
-            return (
-              <div
-                key={part.id}
-                style={{
-                  position: 'relative',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  margin: '3px -12px 0',
-                  padding: '4px 12px',
-                  borderLeft: `3px solid ${partColor}`,
-                  background: '#00000038',
-                  borderRadius: 0,
-                }}
-                onClick={handlePartClick(part)}
-              >
-                <Handle
-                  type="target"
-                  position={Position.Left}
-                  id={`p-${part.id}-l`}
-                  className="part-socket"
-                  style={{ ...PART_SOCKET_STYLE(partColor), left: 0, top: '50%', transform: 'translate(-50%, -50%)' }}
-                />
-
-                {editingPartId === part.id ? (
-                  <input
-                    className="nodrag"
-                    autoFocus
-                    value={partDraft}
-                    onChange={(e) => setPartDraft(e.target.value)}
-                    onFocus={(e) => e.target.select()}
-                    onBlur={commitPartEdit}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') { e.preventDefault(); commitPartEdit() }
-                      if (e.key === 'Escape') { e.preventDefault(); cancelPartEdit() }
-                    }}
-                    style={{
-                      flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none',
-                      borderBottom: `1px solid ${partColor}`,
-                      color: '#ccc', fontSize: 11, fontFamily: 'inherit', padding: 0, cursor: 'text',
-                    }}
-                  />
-                ) : (
-                  <span className="text-hover-line" style={{ flex: 1, minWidth: 0, color: '#ccc', fontSize: 11, whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text' }}>
-                    {part.text}
-                  </span>
-                )}
-
-                {selected && editingPartId !== part.id && (
-                  <button
-                    type="button"
-                    className="nodrag stage-part-remove"
-                    onClick={(e) => { e.stopPropagation(); removePart(part.id) }}
-                    title="파츠 삭제"
-                  >
-                    ✕
-                  </button>
-                )}
-
-                <Handle
-                  type="source"
-                  position={Position.Right}
-                  id={`p-${part.id}-r`}
-                  className="part-socket"
-                  style={{ ...PART_SOCKET_STYLE(partColor), right: 0, top: '50%', transform: 'translate(50%, -50%)' }}
-                />
-              </div>
-            )
-          })}
-
-          {selected && (
-            <div className="stage-part-add" onClick={addPart}>
-              ＋ 파츠
-            </div>
-          )}
         </div>
       )}
 

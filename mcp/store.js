@@ -471,6 +471,7 @@ export function toExternalCanvasNode(node, byId, hidden = false) {
       source_kind: data.sourceKind,
       ...(data.provider ? { provider: data.provider } : {}),
       ...(data.externalRef ? { external_ref: data.externalRef } : {}),
+      ...(data.systemParts?.length ? { system_parts: data.systemParts } : {}),
       reality: 'declared',
     }
   }

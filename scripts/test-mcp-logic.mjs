@@ -27,6 +27,12 @@ import {
 } from '../src/lib/canvasSchemaGuard.js'
 import { createSystemNodeData, normalizeSystemNodeData, systemNodeReality } from '../shared/systemOntology.js'
 import {
+  detachSystemPartBindings,
+  normalizeSystemPart,
+  normalizeSystemParts,
+  validateSystemPartInput,
+} from '../shared/systemPartOntology.js'
+import {
   createEdgeRelationData,
   edgeRelationInfo,
   edgeRelationProvenance,
@@ -369,10 +375,49 @@ t('system metadata normalization clamps enums and plain identifiers', () => {
   assert.equal(result.externalRef, 'table name')
 })
 
+t('system parts keep only the generic allowlist and reject literal credentials', () => {
+  const safe = normalizeSystemPart({
+    id: 'supabase-anon-ref', kind: 'credential_ref', label: 'Supabase 공개 키',
+    ref: 'SUPABASE_ANON_KEY', exposure: 'public', sourceKind: 'code',
+    evidenceRef: 'src/lib/supabase.js', rawValue: 'must-not-survive',
+  })
+  assert.deepEqual(safe, {
+    id: 'supabase-anon-ref', kind: 'credential_ref', label: 'Supabase 공개 키',
+    ref: 'SUPABASE_ANON_KEY', exposure: 'public', sourceKind: 'code',
+    evidenceRef: 'src/lib/supabase.js',
+  })
+  assert.match(validateSystemPartInput({
+    ...safe,
+    ref: 'eyJhbGciOiJIUzI1NiJ9.aaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbb',
+  }), /실제 키나 토큰/)
+  assert.deepEqual(normalizeSystemParts([{ ...safe, ref: 'eyJhbGciOiJIUzI1NiJ9.aaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbb' }]), [])
+})
+
+t('copying a system part removes digital-twin identity without losing its visible definition', () => {
+  const copied = detachSystemPartBindings([{
+    id: 'part-one', kind: 'connection', label: '주문 API', ref: '/api/orders',
+    exposure: 'internal', sourceKind: 'code', evidenceRef: 'api/orders.js',
+    digitalTwinBinding: {
+      sourceId: 'source-one', entityKey: 'api:/orders', observedFingerprint: 'abcdef1234567890',
+    },
+  }])
+  assert.equal(copied.length, 1)
+  assert.equal(copied[0].label, '주문 API')
+  assert.equal(Object.hasOwn(copied[0], 'digitalTwinBinding'), false)
+})
+
 t('MCP system patches sanitize provided identifiers without inventing defaults', () => {
-  const patch = { externalRef: ' public.\u0000canvases ' }
+  const patch = {
+    externalRef: ' public.\u0000canvases ',
+    systemParts: [{
+      id: 'orders-api', kind: 'connection', label: '주문 API', ref: '/api/orders',
+      exposure: 'internal', sourceKind: 'code', evidenceRef: 'api/orders.js', ignored: 'drop',
+    }],
+  }
   sanitizeTextFields(patch)
   assert.equal(patch.externalRef, 'public. canvases')
+  assert.equal(patch.systemParts[0].ref, '/api/orders')
+  assert.equal(Object.hasOwn(patch.systemParts[0], 'ignored'), false)
   assert.equal(Object.hasOwn(patch, 'systemKind'), false)
   assert.equal(Object.hasOwn(patch, 'sourceKind'), false)
 })
@@ -384,6 +429,14 @@ t('browser persistence sanitizer removes runtime proof and active markup', () =>
   })
   assert.equal(Object.hasOwn(result, 'twinRuntime'), false)
   assert.equal(result.purpose, '<b>원본 보관</b>')
+})
+
+t('retired text-node parts remain preserved and sanitized in stored canvas data', () => {
+  const result = sanitizeBrowserNodeData({
+    label: '정보 노드',
+    parts: [{ id: 'legacy-part', text: '<img src=x onerror=steal()>기존 정보' }],
+  })
+  assert.deepEqual(result.parts, [{ id: 'legacy-part', text: '기존 정보' }])
 })
 
 console.log('relation ontology')
@@ -841,14 +894,14 @@ t('digital twin proposals reject update and delete operations before they reach 
     itemId: item.id,
     itemFingerprint: item.fingerprint,
     operations: [{ action: 'update_node', node: { id: 'orders' } }],
-  }), /새 노드와 연결선 추가만 허용/)
+  }), /새 노드, 연결선 또는 시스템 파츠 추가만 허용/)
   assert.throws(() => createDigitalTwinGraphProposal({
     sourceId: item.sourceId,
     proposalKey: 'unsafe-delete',
     itemId: item.id,
     itemFingerprint: item.fingerprint,
     operations: [{ action: 'remove_node', node: { id: 'orders' } }],
-  }), /새 노드와 연결선 추가만 허용/)
+  }), /새 노드, 연결선 또는 시스템 파츠 추가만 허용/)
 })
 
 t('proposal preview is read-only and explicit apply adds only the planned graph entities', () => {
@@ -903,6 +956,84 @@ t('proposal preview is read-only and explicit apply adds only the planned graph 
   assert.deepEqual(new Set(repeated.alreadyPresent), new Set(['orders', 'database-orders']))
 })
 
+t('system-part proposal preview is read-only and apply only appends the reviewed part', () => {
+  const item = createDigitalTwinReviewItem({
+    sourceId: 'source-one', itemKey: 'resource:public-key', title: 'public key found', observation: { version: 1 },
+  })
+  const proposal = createDigitalTwinGraphProposal({
+    sourceId: item.sourceId,
+    proposalKey: 'model-public-key',
+    itemId: item.id,
+    itemFingerprint: item.fingerprint,
+    operations: [{
+      action: 'add_part',
+      targetNodeId: 'web-app',
+      part: {
+        id: 'public-key-ref', kind: 'credential_ref', label: '공개 키', ref: 'PUBLIC_ANON_KEY',
+        exposure: 'public', sourceKind: 'code', evidenceRef: 'src/client.js',
+      },
+    }],
+  })
+  const graph = {
+    nodes: [{ id: 'web-app', type: 'system', position: { x: 0, y: 0 }, data: { label: 'Web', untouched: 'keep' } }],
+    edges: [],
+  }
+  const before = structuredClone(graph)
+  const plan = planDigitalTwinGraphProposal(graph, proposal)
+
+  assert.deepEqual(graph, before)
+  assert.deepEqual(proposal.counts, { nodes: 0, edges: 0, parts: 1 })
+  assert.equal(plan.parts[0].targetNodeId, 'web-app')
+  const applied = applyDigitalTwinGraphProposal(graph, proposal)
+  assert.deepEqual(graph, before)
+  assert.equal(applied.nodes[0].data.untouched, 'keep')
+  assert.equal(applied.nodes[0].data.systemParts[0].ref, 'PUBLIC_ANON_KEY')
+  assert.deepEqual(applied.appliedPartIds, ['web-app:public-key-ref'])
+  assert.equal(applied.writesPerformed, true)
+
+  const repeated = applyDigitalTwinGraphProposal(applied, proposal)
+  assert.equal(repeated.writesPerformed, false)
+  assert.deepEqual(repeated.alreadyPresent, ['web-app:public-key-ref'])
+})
+
+t('system-part proposals reject secret literals and conflicting existing ids', () => {
+  const item = createDigitalTwinReviewItem({
+    sourceId: 'source-one', itemKey: 'resource:key', title: 'key found', observation: { version: 1 },
+  })
+  assert.throws(() => createDigitalTwinGraphProposal({
+    sourceId: item.sourceId,
+    proposalKey: 'unsafe-secret',
+    itemId: item.id,
+    itemFingerprint: item.fingerprint,
+    operations: [{
+      action: 'add_part', targetNodeId: 'web-app',
+      part: {
+        id: 'key-ref', kind: 'credential_ref', label: '키',
+        ref: 'eyJhbGciOiJIUzI1NiJ9.aaaaaaaaaaaaaaaa.bbbbbbbbbbbbbbbb',
+      },
+    }],
+  }), /실제 키나 토큰/)
+
+  const proposal = createDigitalTwinGraphProposal({
+    sourceId: item.sourceId,
+    proposalKey: 'conflicting-part',
+    itemId: item.id,
+    itemFingerprint: item.fingerprint,
+    operations: [{
+      action: 'add_part', targetNodeId: 'web-app',
+      part: { id: 'key-ref', kind: 'credential_ref', label: '새 이름', ref: 'PUBLIC_KEY' },
+    }],
+  })
+  const graph = {
+    nodes: [{
+      id: 'web-app', type: 'system', position: { x: 0, y: 0 },
+      data: { systemParts: [{ id: 'key-ref', kind: 'credential_ref', label: '기존 이름', ref: 'PUBLIC_KEY' }] },
+    }],
+    edges: [],
+  }
+  assert.throws(() => planDigitalTwinGraphProposal(graph, proposal), /이미 다른 내용/)
+})
+
 t('a proposal is bound to the exact review evidence and cannot follow a stale item', () => {
   const first = createDigitalTwinReviewItem({
     sourceId: 'source-one', itemKey: 'resource:orders', title: 'orders found', observation: { version: 1 },
@@ -931,6 +1062,17 @@ t('proposal preview measurements never update persisted canvas nodes', () => {
 
   assert.deepEqual(persisted, [changes[0]])
   assert.equal(changes.length, 2)
+})
+
+t('part-preview measurement is ignored while ordinary target-node changes still persist', () => {
+  const changes = [
+    { id: 'web-app', type: 'dimensions', dimensions: { width: 240, height: 140 } },
+    { id: 'web-app', type: 'position', position: { x: 24, y: 36 } },
+    { id: 'other', type: 'select', selected: true },
+  ]
+  const persisted = filterDigitalTwinProposalNodeChanges(changes, new Set(), new Set(['web-app']))
+
+  assert.deepEqual(persisted, [changes[1], changes[2]])
 })
 
 t('proposal auto-fit key stays stable across rerenders and changes with the proposal', () => {
@@ -974,11 +1116,13 @@ t('Workflow Canvas resource proposals contain provenance but never credential va
 
   assert.ok(credential?.proposal)
   assert.ok(revocations?.proposal)
-  assert.deepEqual(credential.proposal.counts, { nodes: 1, edges: 1 })
-  assert.deepEqual(revocations.proposal.counts, { nodes: 1, edges: 1 })
-  const credentialNode = credential.proposal.operations.find((operation) => operation.action === 'add_node').node
-  assert.equal(credentialNode.data.digitalTwinBinding.entityKey, 'credential-reference:SUPABASE_ANON_KEY')
-  assert.equal(credentialNode.data.constraints.includes('실제 값은 캔버스에 저장하지 않'), true)
+  assert.deepEqual(credential.proposal.counts, { nodes: 0, edges: 0, parts: 1 })
+  assert.deepEqual(revocations.proposal.counts, { nodes: 1, edges: 1, parts: 0 })
+  const credentialOperation = credential.proposal.operations.find((operation) => operation.action === 'add_part')
+  assert.equal(credentialOperation.targetNodeId, 'map-web-app')
+  assert.equal(credentialOperation.part.ref, 'SUPABASE_ANON_KEY')
+  assert.equal(credentialOperation.part.exposure, 'public')
+  assert.equal(credentialOperation.part.digitalTwinBinding.entityKey, 'credential-reference:SUPABASE_ANON_KEY')
   assert.equal(JSON.stringify(credential.proposal).includes('SUPABASE_SERVICE_ROLE_KEY'), false)
   assert.equal(JSON.stringify(credential.proposal).includes('eyJ'), false)
 })
@@ -1008,6 +1152,36 @@ t('an applied Workflow Canvas proposal becomes modeled and remains fingerprint-t
   )))
 })
 
+t('an applied credential-reference part becomes modeled and reopens when its evidence changes', () => {
+  const map = createWorkflowCanvasSystemMap()
+  const review = inspectWorkflowSystemTwin(map)
+  const item = review.items.find((candidate) => candidate.itemKey === 'resource:credential-reference:SUPABASE_ANON_KEY')
+  const applied = applyDigitalTwinGraphProposal(map, item.proposal)
+  const extended = { ...map, nodes: applied.nodes, edges: applied.edges }
+  const after = inspectWorkflowSystemTwin(extended)
+  const webApp = extended.nodes.find((node) => node.id === 'map-web-app')
+  const appliedPart = webApp.data.systemParts.find((part) => (
+    part.digitalTwinBinding?.entityKey === 'credential-reference:SUPABASE_ANON_KEY'
+  ))
+
+  assert.ok(appliedPart)
+  assert.equal(after.items.some((candidate) => candidate.itemKey === item.itemKey), false)
+  assert.equal(after.report.summary.unmodeled_resources, review.report.summary.unmodeled_resources - 1)
+
+  const changedDiscovery = structuredClone(WORKFLOW_SYSTEM_DISCOVERY)
+  changedDiscovery.current.resources['credential-reference:SUPABASE_ANON_KEY'].fingerprint = '22222222222222222222'
+  const changedReport = inspectWorkflowSystemMap({
+    canvas: extended,
+    expectedMap: createWorkflowCanvasSystemMap(),
+    discovery: changedDiscovery,
+  })
+  assert.ok(changedReport.node_findings.some((finding) => (
+    finding.node_id === 'map-web-app'
+    && finding.status === 'changed'
+    && finding.resources.some((resource) => resource.key === 'credential-reference:SUPABASE_ANON_KEY')
+  )))
+})
+
 t('different resource proposals merge without duplicate nodes across two canvas editors', () => {
   const map = createWorkflowCanvasSystemMap()
   const review = inspectWorkflowSystemTwin(map)
@@ -1019,9 +1193,10 @@ t('different resource proposals merge without duplicate nodes across two canvas 
   const local = { ...base, nodes: localApplied.nodes, edges: localApplied.edges }
   const remote = { ...base, nodes: remoteApplied.nodes, edges: remoteApplied.edges }
   const { merged, conflicts } = mergeCanvasSnapshots(base, local, remote)
-  const bindings = merged.nodes
-    .map((node) => node.data?.digitalTwinBinding?.entityKey)
-    .filter(Boolean)
+  const bindings = merged.nodes.flatMap((node) => [
+    node.data?.digitalTwinBinding?.entityKey,
+    ...(node.data?.systemParts ?? []).map((part) => part.digitalTwinBinding?.entityKey),
+  ]).filter(Boolean)
 
   assert.deepEqual(conflicts, [])
   assert.deepEqual(new Set(bindings), new Set([
@@ -2020,12 +2195,17 @@ t('get_canvas represents system ontology without claiming a live twin', () => {
     data: {
       label: '운영 DB', systemKind: 'database', purpose: '업무 원본 저장',
       environment: 'production', sourceKind: 'manual', provider: 'Supabase', externalRef: 'public.canvases',
+      systemParts: [{
+        id: 'orders-input', kind: 'input', label: '주문 입력', ref: 'orders.id',
+        exposure: 'internal', sourceKind: 'manual', evidenceRef: '',
+      }],
     },
   }
   const result = toExternalCanvasNode(node, new Map([[node.id, node]]))
   assert.equal(result.system_kind, 'database')
   assert.equal(result.environment, 'production')
   assert.equal(result.external_ref, 'public.canvases')
+  assert.equal(result.system_parts[0].ref, 'orders.id')
   assert.equal(result.reality, 'declared')
 })
 }

@@ -1,4 +1,5 @@
 import { normalizeSystemNodeData, SYSTEM_ONTOLOGY_TEXT_FIELDS } from '../shared/systemOntology.js'
+import { normalizeSystemParts } from '../shared/systemPartOntology.js'
 
 // HTML allowlist sanitizer for MCP-supplied node text (label/description/header/text).
 //
@@ -93,6 +94,7 @@ export function sanitizeTextFields(obj) {
     if (typeof obj[key] === 'string') obj[key] = sanitizeHtml(obj[key])
   }
   if (typeof obj.url === 'string') obj.url = sanitizeExternalUrl(obj.url)
+  if (Array.isArray(obj.systemParts)) obj.systemParts = normalizeSystemParts(obj.systemParts)
   const systemPlainFields = ['systemKind', 'environment', 'sourceKind', 'provider', 'externalRef']
   if (systemPlainFields.some((key) => Object.hasOwn(obj, key))) {
     const normalized = normalizeSystemNodeData(obj)

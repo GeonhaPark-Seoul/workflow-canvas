@@ -129,15 +129,20 @@ function workflowResourceBindings(canvas) {
     nodeId,
     resources: resourceKeys.map((key) => ({ key, observedFingerprint: null })),
   }))
-  for (const node of canvas?.nodes ?? []) {
-    const binding = node?.data?.digitalTwinBinding
-    if (binding?.sourceId !== WORKFLOW_SYSTEM_DISCOVERY_SOURCE_ID) continue
-    if (typeof binding.entityKey !== 'string' || !binding.entityKey.trim()) continue
-    if (typeof binding.observedFingerprint !== 'string' || !/^[a-f0-9]{8,80}$/i.test(binding.observedFingerprint)) continue
+  const addDigitalTwinBinding = (nodeId, binding) => {
+    if (binding?.sourceId !== WORKFLOW_SYSTEM_DISCOVERY_SOURCE_ID) return
+    if (typeof binding.entityKey !== 'string' || !binding.entityKey.trim()) return
+    if (typeof binding.observedFingerprint !== 'string' || !/^[a-f0-9]{8,80}$/i.test(binding.observedFingerprint)) return
     bindings.push({
-      nodeId: node.id,
+      nodeId,
       resources: [{ key: binding.entityKey, observedFingerprint: binding.observedFingerprint }],
     })
+  }
+  for (const node of canvas?.nodes ?? []) {
+    addDigitalTwinBinding(node.id, node?.data?.digitalTwinBinding)
+    for (const part of node?.data?.systemParts ?? []) {
+      addDigitalTwinBinding(node.id, part?.digitalTwinBinding)
+    }
   }
   return bindings
 }

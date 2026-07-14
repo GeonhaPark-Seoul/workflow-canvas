@@ -2,6 +2,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { sanitizeHtml, sanitizeTextFields } from './sanitize.js'
 import { normalizeEdgeRelationData } from '../shared/relationOntology.js'
+import { normalizeSystemParts } from '../shared/systemPartOntology.js'
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://tuaifwiigkacrflbhjmu.supabase.co'
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -234,6 +235,7 @@ function sanitizeNode(node) {
   if (Array.isArray(data.parts)) {
     data.parts = data.parts.map((part) => ({ ...part, text: typeof part.text === 'string' ? sanitizeHtml(part.text) : part.text }))
   }
+  if (Array.isArray(data.systemParts)) data.systemParts = normalizeSystemParts(data.systemParts)
   return { ...node, data }
 }
 

@@ -64,6 +64,7 @@ import {
 } from './lib/shares'
 import { getMyProfile, loadMySettings, upsertMyEmail, touchLastSeen } from './lib/profiles'
 import { createSystemNodeData } from '../shared/systemOntology.js'
+import { detachSystemPartBindings, normalizeSystemParts } from '../shared/systemPartOntology.js'
 import {
   clearDigitalTwinReviewDecision,
   partitionDigitalTwinReviewItems,
@@ -269,6 +270,11 @@ function isPartEdge(e) {
   return !!e.data?.partsLink || (!!e.sourceHandle?.startsWith('p-') && !!e.targetHandle?.startsWith('p-'))
 }
 
+function partIdFromHandle(handle) {
+  const match = typeof handle === 'string' ? handle.match(/^p-(.+)-(l|r)$/) : null
+  return match?.[1] ?? null
+}
+
 // Base (unselected) appearance for an edge, derived purely from whether it's a
 // dashed memo link or a part link. Used to force a clean look on deselect so
 // selection-bold can never linger — even if a stale bold style got baked into
@@ -296,7 +302,8 @@ function stripNode(n) {
 }
 function detachDigitalTwinBinding(data) {
   const { digitalTwinBinding, ...rest } = data ?? {}
-  return rest
+  if (!Array.isArray(rest.systemParts)) return rest
+  return { ...rest, systemParts: detachSystemPartBindings(rest.systemParts) }
 }
 const stripNote = (note) => ({ ...note, data: sanitizeNodeData(note.data) })
 const stripEdge = ({ selected, data, redacted, ...edge }) => {
@@ -2094,14 +2101,14 @@ export default function App() {
     : null
   const activeTwinProposal = twinProposalPreviewItem?.proposal ?? null
   const twinProposalPlan = useMemo(() => {
-    if (!activeTwinProposal) return { nodes: [], edges: [], alreadyPresent: [], error: null }
+    if (!activeTwinProposal) return { nodes: [], edges: [], parts: [], alreadyPresent: [], error: null }
     try {
       return {
         ...planDigitalTwinGraphProposal({ nodes, edges }, activeTwinProposal),
         error: null,
       }
     } catch (error) {
-      return { nodes: [], edges: [], alreadyPresent: [], error: error?.message ?? '수정안을 미리 볼 수 없습니다.' }
+      return { nodes: [], edges: [], parts: [], alreadyPresent: [], error: error?.message ?? '수정안을 미리 볼 수 없습니다.' }
     }
   }, [activeTwinProposal, nodes, edges])
   const twinProposalPreviewNodes = useMemo(() => twinProposalPlan.nodes.map((node) => ({
@@ -2115,6 +2122,19 @@ export default function App() {
   const twinProposalPreviewNodeIds = useMemo(
     () => new Set(twinProposalPreviewNodes.map((node) => node.id)),
     [twinProposalPreviewNodes],
+  )
+  const twinProposalPreviewPartsByNode = useMemo(() => {
+    const byNode = new Map()
+    for (const planned of twinProposalPlan.parts) {
+      const current = byNode.get(planned.targetNodeId) ?? []
+      current.push(planned.part)
+      byNode.set(planned.targetNodeId, current)
+    }
+    return byNode
+  }, [twinProposalPlan.parts])
+  const twinProposalPreviewAugmentedNodeIds = useMemo(
+    () => new Set(twinProposalPreviewPartsByNode.keys()),
+    [twinProposalPreviewPartsByNode],
   )
   const twinProposalPreviewEdges = useMemo(() => twinProposalPlan.edges.map((edge) => ({
     ...edge,
@@ -2145,19 +2165,20 @@ export default function App() {
     if (
       !rfInstance
       || twinProposalPlan.error
-      || !twinProposalPlan.nodes.length
+      || (!twinProposalPlan.nodes.length && !twinProposalPlan.edges.length && !twinProposalPlan.parts.length)
       || lastFittedTwinProposalRef.current === twinProposalFitKey
     ) return undefined
     lastFittedTwinProposalRef.current = twinProposalFitKey
     const ids = [...new Set([
       ...twinProposalPlan.nodes.map((node) => node.id),
       ...twinProposalPlan.edges.flatMap((edge) => [edge.source, edge.target]),
+      ...twinProposalPlan.parts.map((planned) => planned.targetNodeId),
     ])]
     const timer = setTimeout(() => {
       rfInstance.fitView({ nodes: ids.map((id) => ({ id })), duration: 450, padding: 0.4, maxZoom: 1.05 })
     }, 0)
     return () => clearTimeout(timer)
-  }, [rfInstance, twinProposalFitKey, twinProposalPlan.error, twinProposalPlan.nodes, twinProposalPlan.edges])
+  }, [rfInstance, twinProposalFitKey, twinProposalPlan.error, twinProposalPlan.nodes, twinProposalPlan.edges, twinProposalPlan.parts])
 
   const decideDigitalTwinReviewItem = useCallback((item, disposition) => {
     if (!canDecideTwinReview || item?.sourceId !== digitalTwinReview?.source.id) return
@@ -2231,7 +2252,7 @@ export default function App() {
       setTwinProposalStatus({
         type: 'success',
         message: result.writesPerformed
-          ? `지도에 노드 ${result.appliedNodeIds.length}개와 연결선 ${result.appliedEdgeIds.length}개를 추가했습니다.`
+          ? `지도에 노드 ${result.appliedNodeIds.length}개, 연결선 ${result.appliedEdgeIds.length}개, 시스템 파츠 ${result.appliedPartIds.length}개를 추가했습니다.`
           : '같은 수정안이 이미 지도에 적용되어 있습니다.',
       })
     } catch (error) {
@@ -2327,7 +2348,16 @@ export default function App() {
   // ── Node data ────────────────────────────────────────────────────────────
   const updateNodeData = useCallback((id, patch) => {
     setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: sanitizeNodeData({ ...n.data, ...patch }) } : n))
-  }, [setNodes])
+    if (Object.hasOwn(patch, 'systemParts')) {
+      const remainingPartIds = new Set(normalizeSystemParts(patch.systemParts).map((part) => part.id))
+      setEdges((currentEdges) => currentEdges.filter((edge) => {
+        if (!isPartEdge(edge)) return true
+        if (edge.source === id && !remainingPartIds.has(partIdFromHandle(edge.sourceHandle))) return false
+        if (edge.target === id && !remainingPartIds.has(partIdFromHandle(edge.targetHandle))) return false
+        return true
+      }))
+    }
+  }, [setEdges, setNodes])
 
   const updateNoteData = useCallback((id, patch) => {
     if (!canEditNotes) return
@@ -2593,7 +2623,10 @@ export default function App() {
     const idMap = new Map()
     clip.nodes.forEach((n) => idMap.set(n.id, nextId()))
     const partIdMap = new Map()
-    clip.nodes.forEach((n) => (n.data?.parts ?? []).forEach((p) => partIdMap.set(p.id, `pt-${uid()}`)))
+    clip.nodes.forEach((n) => {
+      ;[...(n.data?.parts ?? []), ...(n.data?.systemParts ?? [])]
+        .forEach((p) => partIdMap.set(p.id, `pt-${uid()}`))
+    })
 
     // Delta applied to top-level (not parented within this clip) node positions.
     let delta
@@ -2619,7 +2652,15 @@ export default function App() {
 
       const parts = n.data?.parts ? n.data.parts.map((p) => ({ ...p, id: partIdMap.get(p.id) ?? p.id })) : undefined
       const copiedData = detachDigitalTwinBinding(n.data)
+      const systemParts = copiedData.systemParts
+        ? copiedData.systemParts.map((part) => ({ ...part, id: partIdMap.get(part.id) ?? part.id }))
+        : undefined
       const { parentId: _drop, ...rest } = n
+      const nextData = {
+        ...copiedData,
+        ...(parts ? { parts } : {}),
+        ...(systemParts ? { systemParts } : {}),
+      }
 
       return {
         ...rest,
@@ -2627,7 +2668,7 @@ export default function App() {
         position,
         ...(parentId ? { parentId } : {}),
         selected: true,
-        data: parts ? { ...copiedData, parts } : copiedData,
+        data: nextData,
       }
     })
 
@@ -2673,6 +2714,9 @@ export default function App() {
     const targetIsPart = !!params.targetHandle?.startsWith('p-')
     if (sourceIsPart !== targetIsPart) return
     if (sourceIsPart && targetIsPart) {
+      const sourceNode = nodes.find((node) => node.id === params.source)
+      const targetNode = nodes.find((node) => node.id === params.target)
+      if (sourceNode?.type !== 'system' || targetNode?.type !== 'system') return
       const newEdge = {
         ...params,
         id: `e-${uid()}`,
@@ -2708,13 +2752,18 @@ export default function App() {
     const newSourceIsPart = !!newConnection.sourceHandle?.startsWith('p-')
     const newTargetIsPart = !!newConnection.targetHandle?.startsWith('p-')
     if (oldIsPart ? !(newSourceIsPart && newTargetIsPart) : (newSourceIsPart || newTargetIsPart)) return
+    if (oldIsPart) {
+      const sourceNode = nodes.find((node) => node.id === newConnection.source)
+      const targetNode = nodes.find((node) => node.id === newConnection.target)
+      if (sourceNode?.type !== 'system' || targetNode?.type !== 'system') return
+    }
     // Reconnect the clean edge from state, not the styled (bold) object React
     // Flow hands back — otherwise the selection styling gets baked in permanently.
     setEdges((eds) => {
       const clean = eds.find((e) => e.id === oldEdge.id) ?? oldEdge
       return reconnectEdge(clean, newConnection, eds)
     })
-  }, [setEdges, perm, isNodeEditable])
+  }, [nodes, setEdges, perm, isNodeEditable])
 
   // ── Alignment guides (Obsidian-style): while dragging a node, compare its
   // absolute edges/center against every other visible node's and snap +
@@ -2843,7 +2892,11 @@ export default function App() {
   // since the resizer's own onEnd recomputes size from the raw pointer
   // delta and would otherwise snap the box back out of alignment on release.
   const handleNodesChange = useCallback((changes) => {
-    const persistedChanges = filterDigitalTwinProposalNodeChanges(changes, twinProposalPreviewNodeIds)
+    const persistedChanges = filterDigitalTwinProposalNodeChanges(
+      changes,
+      twinProposalPreviewNodeIds,
+      twinProposalPreviewAugmentedNodeIds,
+    )
     if (!persistedChanges.length) return
     onNodesChange(persistedChanges)
 
@@ -2874,7 +2927,14 @@ export default function App() {
         }
       : n))
     setAlignGuides(dimChange.resizing ? snap.guides : [])
-  }, [onNodesChange, nodes, computeResizeAlignSnap, setNodes, twinProposalPreviewNodeIds])
+  }, [
+    onNodesChange,
+    nodes,
+    computeResizeAlignSnap,
+    setNodes,
+    twinProposalPreviewNodeIds,
+    twinProposalPreviewAugmentedNodeIds,
+  ])
 
   // Clicking a node bolds every edge connected to it (reuses the same
   // selected-edge bold styling as clicking an edge directly — see styledEdges).
@@ -3185,7 +3245,19 @@ export default function App() {
   // Non-selected edges get a forced base style so baked-in bold can never linger.
   // Selected edges get reconnectable + a bold stroke and colored marker. The
   // cross-browser blue halo is rendered as a real SVG path by StubEdge.
-  const styledEdges = edges.map((e) => {
+  const systemPartIdsByNode = new Map(nodes
+    .filter((node) => node.type === 'system')
+    .map((node) => [node.id, new Set(normalizeSystemParts(node.data?.systemParts).map((part) => part.id))]))
+  const visibleEdges = edges.filter((edge) => {
+    if (!isPartEdge(edge)) return true
+    const sourcePartId = partIdFromHandle(edge.sourceHandle)
+    const targetPartId = partIdFromHandle(edge.targetHandle)
+    return !!sourcePartId
+      && !!targetPartId
+      && systemPartIdsByNode.get(edge.source)?.has(sourcePartId)
+      && systemPartIdsByNode.get(edge.target)?.has(targetPartId)
+  })
+  const styledEdges = visibleEdges.map((e) => {
     // Delete key / built-in delete UI must also respect the edit gating.
     // (isNodeEditable already resolves to "always true" for owners/full-edit
     // canvas-scope invitees via editableSet === null.)
@@ -3221,9 +3293,23 @@ export default function App() {
       markerEnd: isMemo || !relation.directed ? undefined : { type: MarkerType.ArrowClosed, color },
     }
   })
-  const renderedCanvasNodes = twinProposalPreviewNodes.length
-    ? [...nodes, ...twinProposalPreviewNodes]
+  const previewAugmentedNodes = twinProposalPreviewPartsByNode.size
+    ? nodes.map((node) => {
+        const previewParts = twinProposalPreviewPartsByNode.get(node.id)
+        if (!previewParts?.length) return node
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            systemParts: [...normalizeSystemParts(node.data?.systemParts), ...previewParts],
+            digitalTwinProposalPreviewPartIds: previewParts.map((part) => part.id),
+          },
+        }
+      })
     : nodes
+  const renderedCanvasNodes = twinProposalPreviewNodes.length
+    ? [...previewAugmentedNodes, ...twinProposalPreviewNodes]
+    : previewAugmentedNodes
   const renderedCanvasEdges = twinProposalPreviewEdges.length
     ? [...styledEdges, ...twinProposalPreviewEdges]
     : styledEdges

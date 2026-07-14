@@ -526,32 +526,6 @@ function NotePage({ node, byId, inMap, outMap, isEditable, onUpdateNode, onFocus
           </div>
         )}
 
-        {/* 파츠 (stage only) — read-only placeholder */}
-        {node.type === 'stage' && (
-          <div style={{ marginTop: 16 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#666', textTransform: 'uppercase', marginBottom: 6 }}>파츠</div>
-            {(node.data?.parts ?? []).length === 0 ? (
-              <div style={{ fontSize: 12, color: '#555' }}>파츠가 없습니다</div>
-            ) : (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6 }}>
-                {node.data.parts.map((p) => (
-                  <div
-                    key={p.id}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 6, background: '#ffffff10',
-                      border: '1px solid #ffffff18', borderRadius: 999, padding: '4px 10px', fontSize: 12, color: '#ddd',
-                    }}
-                  >
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: p.color || '#8b94a7', flexShrink: 0 }} />
-                    {stripHtml(p.text) || p.text}
-                  </div>
-                ))}
-              </div>
-            )}
-            <div style={{ fontSize: 11, color: '#666' }}>파츠 기능은 준비 중입니다.</div>
-          </div>
-        )}
-
         {/* 상위 노트 (incoming edges) */}
         {parents.length > 0 && (
           <div style={{ marginTop: 18, borderTop: '1px solid #ffffff18', paddingTop: 10 }}>

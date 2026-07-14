@@ -1,4 +1,5 @@
 import { normalizeSystemNodeData, SYSTEM_ONTOLOGY_TEXT_FIELDS } from '../../shared/systemOntology.js'
+import { normalizeSystemParts } from '../../shared/systemPartOntology.js'
 
 // Browser-side allowlist for rich-text node fields rendered as HTML.
 const ALLOWED_TAGS = new Set([
@@ -74,6 +75,7 @@ export function sanitizeNodeData(data) {
   if (Array.isArray(next.parts)) {
     next.parts = next.parts.map((part) => ({ ...part, text: typeof part.text === 'string' ? sanitizeHtml(part.text) : part.text }))
   }
+  if (Array.isArray(next.systemParts)) next.systemParts = normalizeSystemParts(next.systemParts)
   if (next.systemKind != null || next.sourceKind != null || next.externalRef != null) {
     next = normalizeSystemNodeData(next)
   }

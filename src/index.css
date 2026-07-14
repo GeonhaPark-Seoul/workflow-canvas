@@ -148,6 +148,164 @@ body[data-theme='light'] .react-flow__edge.wfc-edge.selected .wfc-relation-label
   background: #aab2c5;
 }
 
+.system-parts-strip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  height: 24px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+.system-parts-strip::-webkit-scrollbar { display: none; }
+.system-part-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  max-width: 130px;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  border: 1px solid var(--part-color);
+  border-radius: 4px;
+  background: #151923;
+  color: #dce2ee;
+  padding: 1px 8px;
+  font-size: 9px;
+  cursor: pointer;
+  transition: border-color 0.12s, background-color 0.12s, color 0.12s;
+}
+.system-part-chip > span:last-of-type {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.system-part-chip:hover {
+  border-color: var(--part-color);
+  background: #202737;
+  color: #fff;
+}
+.system-part-chip.is-preview {
+  border-style: dashed;
+  border-color: #f59e0b;
+  background: #2a2114;
+  color: #fcd34d;
+  cursor: default;
+}
+.system-part-add {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #596174;
+  border-radius: 4px;
+  background: #171a21;
+  color: #aeb6c6;
+  padding: 0;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+.system-part-add:hover {
+  border-color: #60a5fa;
+  background: #1d2a3c;
+  color: #fff;
+}
+.system-part-editor {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 30;
+  width: 270px;
+  box-sizing: border-box;
+  border: 1px solid #4b5563;
+  border-radius: 6px;
+  background: #171a21;
+  box-shadow: 0 10px 28px #0009;
+  color: #e5e7eb;
+  padding: 10px;
+  cursor: default;
+}
+.system-part-editor-heading,
+.system-part-editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.system-part-editor-heading {
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 11px;
+}
+.system-part-editor-heading button {
+  width: 22px;
+  height: 22px;
+  border: 0;
+  background: transparent;
+  color: #9ca3af;
+  font-size: 17px;
+  cursor: pointer;
+}
+.system-part-editor-heading button:hover { color: #fff; }
+.system-part-editor label {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  margin-top: 6px;
+  color: #9ca3af;
+  font-size: 9px;
+}
+.system-part-editor input,
+.system-part-editor select {
+  width: 100%;
+  height: 27px;
+  box-sizing: border-box;
+  border: 1px solid #3d4452;
+  border-radius: 4px;
+  outline: none;
+  background: #101218;
+  color: #e5e7eb;
+  padding: 3px 7px;
+  font-family: inherit;
+  font-size: 10px;
+  line-height: 1.2;
+}
+.system-part-editor input:focus,
+.system-part-editor select:focus { border-color: #60a5fa; }
+.system-part-editor-error {
+  margin-top: 7px;
+  color: #fca5a5;
+  font-size: 9px;
+  line-height: 1.4;
+}
+.system-part-editor-actions {
+  margin-top: 10px;
+}
+.system-part-editor-actions > span { flex: 1; }
+.system-part-editor-actions button {
+  height: 26px;
+  border: 1px solid #4b5563;
+  border-radius: 4px;
+  background: #20242d;
+  color: #cbd5e1;
+  padding: 0 9px;
+  font-family: inherit;
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+}
+.system-part-editor-actions button:hover { border-color: #94a3b8; color: #fff; }
+.system-part-editor-actions button.is-save { border-color: #2563eb; background: #2563eb; color: #fff; }
+.system-part-editor-actions button.is-delete { border-color: #7f1d1d; background: transparent; color: #fca5a5; }
+
 /* Safe-area padding for notch / home-bar devices */
 :root {
   --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -189,28 +347,6 @@ body[data-theme='light'] .react-flow__edge.wfc-edge.selected .wfc-relation-label
 .rich-content ul, .rich-content ol { padding-left: 18px; margin: 2px 0; }
 .rich-content li { margin: 1px 0; }
 .rich-content b, .rich-content strong { font-weight: 800; }
-
-/* Stage node parts list: add-row button and per-row remove button */
-.stage-part-add {
-  margin-top: 4px;
-  font-size: 10px;
-  color: #666;
-  cursor: pointer;
-  user-select: none;
-}
-.stage-part-add:hover { color: #aaa; }
-
-.stage-part-remove {
-  flex-shrink: 0;
-  background: none;
-  border: none;
-  padding: 0 2px;
-  font-size: 11px;
-  line-height: 1;
-  color: #555;
-  cursor: pointer;
-}
-.stage-part-remove:hover { color: #ef4444; }
 
 /* One dense, uniformly thin grid. */
 .react-flow__background-pattern.lines {

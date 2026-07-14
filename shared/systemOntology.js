@@ -1,3 +1,5 @@
+import { normalizeSystemParts } from './systemPartOntology.js'
+
 export const SYSTEM_KIND_DEFS = Object.freeze([
   { id: 'actor', label: '사용자·주체', icon: '◎', color: '#22c55e' },
   { id: 'frontend', label: '프론트엔드', icon: '▣', color: '#3b82f6' },
@@ -61,7 +63,7 @@ export function normalizeSystemNodeData(data = {}) {
   const systemKind = KIND_BY_ID.has(data.systemKind) ? data.systemKind : 'service'
   const environment = ENVIRONMENT_IDS.has(data.environment) ? data.environment : 'unknown'
   const sourceKind = SOURCE_IDS.has(data.sourceKind) ? data.sourceKind : 'manual'
-  return {
+  const normalized = {
     ...data,
     systemKind,
     environment,
@@ -69,6 +71,8 @@ export function normalizeSystemNodeData(data = {}) {
     provider: normalizeSystemPlainText(data.provider, 120),
     externalRef: normalizeSystemPlainText(data.externalRef, 300),
   }
+  if (Array.isArray(data.systemParts)) normalized.systemParts = normalizeSystemParts(data.systemParts)
+  return normalized
 }
 
 export function createSystemNodeData(systemKind = 'service') {
