@@ -56,6 +56,8 @@ const STATUS_LABELS = {
   changed: '구현 변경',
   discovered_since_baseline: '기준 이후 발견',
   baseline_unavailable: '기준 없음',
+  system_part_missing: '실행 파츠 없음',
+  system_part_modified: '실행 파츠 변경',
   unmodeled: '지도에 없음',
 }
 
@@ -283,25 +285,56 @@ function resourceProposal(resource, item, canvas) {
   })
 }
 
+function expectedSystemPartProposal(finding, item, canvas) {
+  if (finding.status !== 'system_part_missing' || !finding.expected_part) return null
+  const target = (canvas.nodes ?? []).find((node) => node.id === finding.node_id && node.type === 'system')
+  if (!target) return null
+  const targetLabel = normalizeSystemPlainText(target.data?.label, 120) || target.id
+  const partLabel = normalizeSystemPlainText(finding.expected_part.label, 120) || finding.expected_part.id
+  return createDigitalTwinGraphProposal({
+    sourceId: WORKFLOW_SYSTEM_TWIN_SOURCE_ID,
+    proposalKey: `restore-system-part:${target.id}:${finding.expected_part.id}`,
+    itemId: item.id,
+    itemFingerprint: item.fingerprint,
+    snapshotId: WORKFLOW_SYSTEM_DISCOVERY.current.id,
+    title: `${partLabel} 실행 파츠 추가`,
+    summary: `${targetLabel} 노드에 서버가 허용한 읽기 전용 ${partLabel} 파츠 1개를 추가합니다. 기존 노드 필드는 바꾸지 않습니다.`,
+    operations: [{
+      action: 'add_part',
+      targetNodeId: target.id,
+      label: `${targetLabel}에 ${partLabel} 추가`,
+      part: finding.expected_part,
+    }],
+  })
+}
+
 function nodeReviewItem(finding, canvas) {
   const isResourceFinding = Array.isArray(finding.resources)
+  const isPartFinding = !!finding.expected_part
   const status = finding.status
-  const itemKey = `${isResourceFinding ? 'entity-resources' : 'entity-structure'}:${finding.node_id}`
+  const itemKey = isPartFinding
+    ? `entity-part:${finding.node_id}:${finding.expected_part.id}`
+    : `${isResourceFinding ? 'entity-resources' : 'entity-structure'}:${finding.node_id}`
   const severity = ['missing_on_canvas', 'source_missing'].includes(status) ? 'critical' : 'attention'
   const changeType = status === 'missing_on_canvas' || status === 'source_missing'
     ? 'removed'
-    : status === 'baseline_unavailable'
-      ? 'warning'
-      : 'changed'
-  return createDigitalTwinReviewItem({
+    : status === 'system_part_missing'
+      ? 'added'
+      : status === 'baseline_unavailable'
+        ? 'warning'
+        : 'changed'
+  const evidence = isPartFinding
+    ? String(finding.expected_part.evidenceRef ?? '').split(',').map((value) => value.trim()).filter(Boolean)
+    : evidenceForResources(finding.resources)
+  const item = createDigitalTwinReviewItem({
     sourceId: WORKFLOW_SYSTEM_TWIN_SOURCE_ID,
     itemKey,
-    category: 'entity',
+    category: isPartFinding ? 'runtime' : 'entity',
     changeType,
     severity,
     title: `${finding.label ?? finding.node_id} · ${STATUS_LABELS[status] ?? status}`,
     summary: finding.reason,
-    evidence: evidenceForResources(finding.resources),
+    evidence,
     focus: (canvas.nodes ?? []).some((node) => node.id === finding.node_id)
       ? { nodeId: finding.node_id }
       : null,
@@ -310,8 +343,15 @@ function nodeReviewItem(finding, canvas) {
       nodeId: finding.node_id,
       status,
       resources: resourceObservation(finding.resources),
+      ...(isPartFinding ? {
+        partId: finding.expected_part.id,
+        expectedPart: finding.expected_part,
+        actualPart: finding.actual_part ?? null,
+      } : {}),
     },
   })
+  const proposal = expectedSystemPartProposal(finding, item, canvas)
+  return proposal ? { ...item, proposal } : item
 }
 
 function relationReviewItem(finding, canvas) {

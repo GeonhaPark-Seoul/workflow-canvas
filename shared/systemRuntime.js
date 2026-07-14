@@ -1,13 +1,44 @@
 export const SYSTEM_RUNTIME_SCHEMA_VERSION = 1
+export const SYSTEM_RUNTIME_MAX_SUMMARY_ITEMS = 50
 
 export const SYSTEM_RUNTIME_CAPABILITY_DEFS = Object.freeze([
   Object.freeze({
     id: 'workflow.supabase.user-canvases.read',
     label: 'Supabase 읽기 연결',
+    operation: 'check',
+    resultKind: 'health',
     sourceId: 'workflow-canvas:self-system',
     entityKey: 'credential-reference:SUPABASE_ANON_KEY',
     targetNodeId: 'map-web-app',
     partKinds: Object.freeze(['credential_ref']),
+    partRefs: Object.freeze(['SUPABASE_ANON_KEY']),
+    sourceRefs: Object.freeze([
+      'shared/systemRuntime.js',
+      'mcp/systemRuntime.js',
+      'api/system-runtime.js',
+      'src/lib/systemRuntimeApi.js',
+      'src/lib/supabase.js',
+      'src/nodes/SystemNode.jsx',
+    ]),
+  }),
+  Object.freeze({
+    id: 'workflow.supabase.user-canvases.summary',
+    label: '내 캔버스 현황',
+    operation: 'read',
+    resultKind: 'record_summaries',
+    sourceId: 'workflow-canvas:self-system',
+    entityKey: 'runtime-capability:workflow.supabase.user-canvases.summary',
+    targetNodeId: 'map-canvases-table',
+    partKinds: Object.freeze(['output']),
+    partRefs: Object.freeze(['workflow.supabase.user-canvases.summary']),
+    sourceRefs: Object.freeze([
+      'shared/systemRuntime.js',
+      'mcp/systemRuntime.js',
+      'api/system-runtime.js',
+      'src/lib/systemRuntimeApi.js',
+      'src/nodes/SystemNode.jsx',
+      'supabase-runtime-read.sql',
+    ]),
   }),
 ])
 
@@ -51,14 +82,15 @@ export function systemRuntimeCapabilityForPart(part, nodeId) {
     && definition.sourceId === part.digitalTwinBinding.sourceId
     && definition.entityKey === part.digitalTwinBinding.entityKey
     && definition.partKinds.includes(part.kind)
+    && definition.partRefs.includes(part.ref)
   )) ?? null
 }
 
 export function normalizeSystemRuntimeRequest(value) {
-  if (!plainObject(value)) throw new SystemRuntimeContractError('INVALID_REQUEST', '연결 확인 요청이 올바르지 않습니다.')
+  if (!plainObject(value)) throw new SystemRuntimeContractError('INVALID_REQUEST', '시스템 작업 요청이 올바르지 않습니다.')
   const unexpected = Object.keys(value).filter((key) => !REQUEST_KEYS.has(key))
   if (unexpected.length) {
-    throw new SystemRuntimeContractError('UNEXPECTED_FIELD', '연결 확인 요청에 허용되지 않은 항목이 있습니다.')
+    throw new SystemRuntimeContractError('UNEXPECTED_FIELD', '시스템 작업 요청에 허용되지 않은 항목이 있습니다.')
   }
   return {
     canvasId: requiredId(value.canvasId, '캔버스 ID'),
@@ -78,9 +110,10 @@ export function normalizeSystemRuntimeResult(value) {
   }
   const latency = Number(value.latencyMs)
   const errorCode = plainText(value.errorCode, 80)
-  return {
+  const result = {
     schemaVersion: SYSTEM_RUNTIME_SCHEMA_VERSION,
     capabilityId: capability.id,
+    resultKind: capability.resultKind,
     status,
     verification: status === 'healthy' && value.verification === 'verified' ? 'verified' : 'failed',
     resourceId: requiredId(value.resourceId, '런타임 자원 ID'),
@@ -88,6 +121,55 @@ export function normalizeSystemRuntimeResult(value) {
     latencyMs: Number.isFinite(latency) ? Math.max(0, Math.min(30_000, Math.round(latency))) : 0,
     summary: plainText(value.summary, 180),
     ...(status === 'failed' && SAFE_ERROR_CODE.test(errorCode) ? { errorCode } : {}),
+  }
+  if (status !== 'healthy' || capability.resultKind !== 'record_summaries') return result
+
+  const rawItems = Array.isArray(value.items) ? value.items.slice(0, SYSTEM_RUNTIME_MAX_SUMMARY_ITEMS) : []
+  const items = rawItems.map((item) => {
+    if (!plainObject(item)) throw new SystemRuntimeContractError('INVALID_RESULT', '캔버스 요약 항목이 올바르지 않습니다.')
+    if (typeof item.updatedAt !== 'string' || !item.updatedAt.trim()) {
+      throw new SystemRuntimeContractError('INVALID_RESULT', '캔버스 수정 시각이 올바르지 않습니다.')
+    }
+    const updatedAt = new Date(item.updatedAt)
+    if (!Number.isFinite(updatedAt.getTime())) {
+      throw new SystemRuntimeContractError('INVALID_RESULT', '캔버스 수정 시각이 올바르지 않습니다.')
+    }
+    const count = (raw) => {
+      const number = Number(raw)
+      return Number.isFinite(number) ? Math.max(0, Math.min(1_000_000, Math.trunc(number))) : 0
+    }
+    const metrics = []
+    const metricIds = new Set()
+    for (const metric of (Array.isArray(item.metrics) ? item.metrics : []).slice(0, 8)) {
+      if (!plainObject(metric)) {
+        throw new SystemRuntimeContractError('INVALID_RESULT', '요약 지표가 올바르지 않습니다.')
+      }
+      const id = requiredId(metric.id, '요약 지표 ID')
+      if (metricIds.has(id)) continue
+      metricIds.add(id)
+      metrics.push({
+        id,
+        label: plainText(metric.label, 40) || '값',
+        value: count(metric.value),
+      })
+    }
+    return {
+      id: requiredId(item.id, '요약 항목 ID'),
+      title: plainText(item.title, 120) || '항목',
+      updatedAt: updatedAt.toISOString(),
+      metrics,
+    }
+  })
+  const rawTotal = Number(value.totalCount)
+  const totalCount = Number.isFinite(rawTotal)
+    ? Math.max(items.length, Math.min(1_000_000, Math.trunc(rawTotal)))
+    : items.length
+  return {
+    ...result,
+    collectionLabel: plainText(value.collectionLabel, 80) || capability.label,
+    totalCount,
+    items,
+    truncated: totalCount > items.length,
   }
 }
 
@@ -109,7 +191,11 @@ export function systemPartRuntimeReality(value) {
   try {
     const result = normalizeSystemRuntimeResult(value)
     return result.status === 'healthy'
-      ? { id: 'healthy', label: 'LIVE', color: '#22c55e' }
+      ? {
+          id: 'healthy',
+          label: result.resultKind === 'record_summaries' ? '조회됨' : 'LIVE',
+          color: '#22c55e',
+        }
       : { id: 'failed', label: '오류', color: '#ef4444' }
   } catch {
     return { id: 'declared', label: '설계', color: '#f59e0b' }

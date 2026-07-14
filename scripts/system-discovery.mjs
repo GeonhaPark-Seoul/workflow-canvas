@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
+import { SYSTEM_RUNTIME_CAPABILITY_DEFS } from '../shared/systemRuntime.js'
 
 export const DISCOVERY_MANIFEST_PATH = 'shared/workflowSystemDiscoveryManifest.js'
 
@@ -93,6 +94,31 @@ export function buildDiscoveryManifest(filesInput) {
     const fileHash = fingerprint(contentForFingerprint(content))
     fileFingerprints[relativePath] = fileHash
     createResource(resources, `file:${relativePath}`, 'file', relativePath, [relativePath], fileHash)
+  }
+
+  for (const capability of SYSTEM_RUNTIME_CAPABILITY_DEFS) {
+    const sourceRefs = sortedUnique((capability.sourceRefs ?? []).filter((ref) => files.has(ref)))
+    createResource(
+      resources,
+      `runtime-capability:${capability.id}`,
+      'runtime-capability',
+      capability.label,
+      sourceRefs,
+      {
+        id: capability.id,
+        operation: capability.operation,
+        resultKind: capability.resultKind,
+        targetNodeId: capability.targetNodeId,
+        partKinds: capability.partKinds,
+        partRefs: capability.partRefs,
+        implementation: sourceRefs.map((ref) => [ref, fileFingerprints[ref]]),
+      },
+      {
+        operation: capability.operation,
+        resultKind: capability.resultKind,
+        targetNodeId: capability.targetNodeId,
+      },
+    )
   }
 
   const packageJson = files.has('package.json') ? JSON.parse(files.get('package.json')) : {}
@@ -330,6 +356,7 @@ export function buildDiscoveryManifest(filesInput) {
       dbFunctions: normalizedFunctions.length,
       environmentVariableNames: environmentNames.size,
       credentialReferences: credentialReferences.size,
+      runtimeCapabilities: SYSTEM_RUNTIME_CAPABILITY_DEFS.length,
     },
   }
 }

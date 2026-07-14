@@ -56,7 +56,7 @@ export default async function handler(req, res) {
     if (error instanceof SystemRuntimeContractError) {
       return send(res, 400, { error: error.message, code: error.code })
     }
-    console.error('[system-runtime] check failed:', error)
-    return send(res, 500, { error: '연결 상태를 확인하지 못했습니다.', code: 'INTERNAL_ERROR' })
+    console.error('[system-runtime] execution failed:', error)
+    return send(res, 500, { error: '시스템 작업을 실행하지 못했습니다.', code: 'INTERNAL_ERROR' })
   }
 }

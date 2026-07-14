@@ -2,6 +2,7 @@ import {
   compareWorkflowSystemMapRelation,
   hasWorkflowRelationMetadata,
 } from './workflowSystemMapRepair.js'
+import { normalizeSystemParts } from './systemPartOntology.js'
 
 export const LEGACY_SYSTEM_MAP_BASELINE_ID = 'phase3-41ca765'
 export const WORKFLOW_SYSTEM_DISCOVERY_SOURCE_ID = 'workflow-canvas:self-system'
@@ -125,18 +126,23 @@ function appliedResourceStatus(current, observedFingerprint) {
 }
 
 function workflowResourceBindings(canvas) {
-  const bindings = Object.entries(WORKFLOW_SYSTEM_MAP_NODE_BINDINGS).map(([nodeId, resourceKeys]) => ({
-    nodeId,
-    resources: resourceKeys.map((key) => ({ key, observedFingerprint: null })),
-  }))
+  const byNode = new Map()
+  const addBinding = (nodeId, key, observedFingerprint = null) => {
+    if (!byNode.has(nodeId)) byNode.set(nodeId, new Map())
+    const resources = byNode.get(nodeId)
+    const current = resources.get(key)
+    if (!current || (!current.observedFingerprint && observedFingerprint)) {
+      resources.set(key, { key, observedFingerprint })
+    }
+  }
+  for (const [nodeId, resourceKeys] of Object.entries(WORKFLOW_SYSTEM_MAP_NODE_BINDINGS)) {
+    for (const key of resourceKeys) addBinding(nodeId, key)
+  }
   const addDigitalTwinBinding = (nodeId, binding) => {
     if (binding?.sourceId !== WORKFLOW_SYSTEM_DISCOVERY_SOURCE_ID) return
     if (typeof binding.entityKey !== 'string' || !binding.entityKey.trim()) return
     if (typeof binding.observedFingerprint !== 'string' || !/^[a-f0-9]{8,80}$/i.test(binding.observedFingerprint)) return
-    bindings.push({
-      nodeId,
-      resources: [{ key: binding.entityKey, observedFingerprint: binding.observedFingerprint }],
-    })
+    addBinding(nodeId, binding.entityKey, binding.observedFingerprint)
   }
   for (const node of canvas?.nodes ?? []) {
     addDigitalTwinBinding(node.id, node?.data?.digitalTwinBinding)
@@ -144,7 +150,7 @@ function workflowResourceBindings(canvas) {
       addDigitalTwinBinding(node.id, part?.digitalTwinBinding)
     }
   }
-  return bindings
+  return [...byNode].map(([nodeId, resources]) => ({ nodeId, resources: [...resources.values()] }))
 }
 
 function priorityStatus(statuses) {
@@ -169,6 +175,18 @@ function compactResource(resource, status) {
     source_refs: resource?.sourceRefs ?? [],
     ...(resource?.details ? { details: resource.details } : {}),
   }
+}
+
+function systemPartContractSignature(part) {
+  return JSON.stringify({
+    id: part.id,
+    kind: part.kind,
+    ref: part.ref,
+    exposure: part.exposure,
+    sourceId: part.digitalTwinBinding?.sourceId ?? null,
+    entityKey: part.digitalTwinBinding?.entityKey ?? null,
+    observedFingerprint: part.digitalTwinBinding?.observedFingerprint ?? null,
+  })
 }
 
 export function inspectWorkflowSystemMap({ canvas, expectedMap, discovery }) {
@@ -202,6 +220,28 @@ export function inspectWorkflowSystemMap({ canvas, expectedMap, discovery }) {
         label: nodeLabel(actual, nodeId),
         reason: `노드 종류가 ${expected.type}에서 ${actual.type}으로 바뀌었습니다.`,
       })
+    }
+    const actualParts = new Map(normalizeSystemParts(actual.data?.systemParts).map((part) => [part.id, part]))
+    for (const expectedPart of normalizeSystemParts(expected.data?.systemParts)) {
+      const actualPart = actualParts.get(expectedPart.id)
+      if (!actualPart) {
+        nodeFindings.push({
+          status: 'system_part_missing',
+          node_id: nodeId,
+          label: nodeLabel(actual, nodeId),
+          expected_part: expectedPart,
+          reason: `${expectedPart.label} 실행 파츠가 현재 시스템 지도에 없습니다.`,
+        })
+      } else if (systemPartContractSignature(actualPart) !== systemPartContractSignature(expectedPart)) {
+        nodeFindings.push({
+          status: 'system_part_modified',
+          node_id: nodeId,
+          label: nodeLabel(actual, nodeId),
+          expected_part: expectedPart,
+          actual_part: actualPart,
+          reason: `${expectedPart.label} 실행 파츠가 기준과 다르게 수정되었습니다.`,
+        })
+      }
     }
   }
 

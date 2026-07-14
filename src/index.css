@@ -238,7 +238,7 @@ body[data-theme='light'] .react-flow__edge.wfc-edge.selected .wfc-relation-label
 }
 .system-part-editor {
   position: relative;
-  width: 270px;
+  width: min(270px, calc(100vw - 24px));
   box-sizing: border-box;
   border: 1px solid #4b5563;
   border-radius: 6px;
@@ -247,6 +247,9 @@ body[data-theme='light'] .react-flow__edge.wfc-edge.selected .wfc-relation-label
   color: #e5e7eb;
   padding: 10px;
   cursor: default;
+}
+.system-part-editor.has-runtime-data {
+  width: min(390px, calc(100vw - 24px));
 }
 .system-part-editor-heading,
 .system-part-editor-actions {
@@ -364,6 +367,96 @@ body[data-theme='light'] .react-flow__edge.wfc-edge.selected .wfc-relation-label
 }
 @keyframes system-runtime-spin {
   to { transform: rotate(360deg); }
+}
+.system-runtime-data {
+  margin-top: 7px;
+  border: 1px solid #334155;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #0d1016;
+}
+.system-runtime-data-heading {
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1px solid #273244;
+  padding: 0 8px;
+  color: #dbe4f0;
+  font-size: 9px;
+}
+.system-runtime-data-heading span {
+  color: #8b95a7;
+}
+.system-runtime-data-list {
+  max-height: 220px;
+  overflow: auto;
+}
+.system-runtime-data-row {
+  padding: 7px 8px;
+  border-bottom: 1px solid #202938;
+}
+.system-runtime-data-row:last-child {
+  border-bottom: 0;
+}
+.system-runtime-data-row:hover {
+  background: #172033;
+}
+.system-runtime-data-title,
+.system-runtime-data-counts {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.system-runtime-data-title {
+  justify-content: space-between;
+  gap: 10px;
+}
+.system-runtime-data-title strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #e5e7eb;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.system-runtime-data-title time {
+  flex: 0 0 auto;
+  color: #7f8a9c;
+  font-size: 8px;
+  white-space: nowrap;
+}
+.system-runtime-data-counts {
+  flex-wrap: wrap;
+  gap: 9px;
+  row-gap: 3px;
+  margin-top: 4px;
+  color: #8b95a7;
+  font-size: 8px;
+}
+.system-runtime-data-counts span {
+  white-space: nowrap;
+}
+.system-runtime-data-counts b {
+  color: #cbd5e1;
+  font-variant-numeric: tabular-nums;
+}
+.system-runtime-data-counts code {
+  min-width: 0;
+  margin-left: auto;
+  overflow: hidden;
+  color: #667085;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 7.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.system-runtime-data-empty {
+  padding: 16px 8px;
+  color: #7f8a9c;
+  font-size: 9px;
+  text-align: center;
 }
 .system-part-editor-actions {
   margin-top: 10px;

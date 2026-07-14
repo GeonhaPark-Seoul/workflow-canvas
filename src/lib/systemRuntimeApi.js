@@ -28,12 +28,12 @@ export async function checkSystemPartRuntime({ canvasId, nodeId, partId }) {
     })
     const body = await response.json().catch(() => ({}))
     if (!response.ok) {
-      throw new SystemRuntimeApiError(body.code || 'REQUEST_FAILED', body.error || '연결 상태를 확인하지 못했습니다.')
+      throw new SystemRuntimeApiError(body.code || 'REQUEST_FAILED', body.error || '시스템 작업을 실행하지 못했습니다.')
     }
     return normalizeSystemRuntimeResult(body.result)
   } catch (error) {
     if (error?.name === 'AbortError') {
-      throw new SystemRuntimeApiError('CLIENT_TIMEOUT', '연결 확인 응답을 기다리는 시간이 초과되었습니다.')
+      throw new SystemRuntimeApiError('CLIENT_TIMEOUT', '시스템 작업 응답을 기다리는 시간이 초과되었습니다.')
     }
     throw error
   } finally {

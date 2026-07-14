@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 
 const read = (name) => readFile(new URL(`../${name}`, import.meta.url), 'utf8')
-const [shares, profiles, profilePrivacy, images, tokens, notes, relationGuard] = await Promise.all([
+const [shares, profiles, profilePrivacy, images, tokens, notes, relationGuard, runtimeRead] = await Promise.all([
   read('supabase-shares.sql'),
   read('supabase-profiles.sql'),
   read('supabase-profile-privacy.sql'),
@@ -10,6 +10,7 @@ const [shares, profiles, profilePrivacy, images, tokens, notes, relationGuard] =
   read('supabase-mcp-schema.sql'),
   read('supabase-canvas-notes.sql'),
   read('supabase-relation-metadata-guard.sql'),
+  read('supabase-runtime-read.sql'),
 ])
 
 const restrictedFunctions = [
@@ -73,5 +74,22 @@ assert.match(relationGuard, /grant execute on function public\.canvas_relation_m
 for (const key of ['relationType', 'relationEvidence', 'relationEvidenceRef', 'relationRuntime']) {
   assert.ok(relationGuard.includes(`'${key}'`), `relation guard key missing: ${key}`)
 }
+
+assert.match(runtimeRead, /create or replace function public\.get_own_canvas_summaries\(max_rows integer default 50\)/i)
+assert.match(runtimeRead, /stable\s+security invoker/i, 'runtime summary function must remain read-only and use caller permissions')
+assert.match(runtimeRead, /where c\.user_id\s*=\s*auth\.uid\(\)/i, 'runtime summary must explicitly scope rows to the caller')
+assert.match(runtimeRead, /limit least\(greatest\(coalesce\(max_rows, 50\), 1\), 50\)/i, 'runtime summary must cap result rows')
+assert.match(runtimeRead, /jsonb_array_length\(c\.nodes\).*?node_count/is)
+assert.match(runtimeRead, /jsonb_array_length\(c\.edges\).*?edge_count/is)
+assert.match(runtimeRead, /jsonb_array_length\(c\.notes\).*?note_count/is)
+assert.match(
+  runtimeRead,
+  /revoke execute on function public\.get_own_canvas_summaries\(integer\) from PUBLIC, anon;/i,
+)
+assert.match(
+  runtimeRead,
+  /grant execute on function public\.get_own_canvas_summaries\(integer\) to authenticated;/i,
+)
+assert.match(runtimeRead, /notify pgrst, 'reload schema';/i, 'runtime RPC must refresh the PostgREST schema cache')
 
 console.log('SQL security checks passed')

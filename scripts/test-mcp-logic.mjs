@@ -470,12 +470,34 @@ const runtimeCredentialPart = {
   },
 }
 
+const runtimeCanvasSummaryPart = {
+  id: 'map-part-own-canvas-summary',
+  kind: 'output',
+  label: '내 캔버스 현황',
+  ref: 'workflow.supabase.user-canvases.summary',
+  exposure: 'internal',
+  sourceKind: 'code',
+  evidenceRef: 'mcp/systemRuntime.js, supabase-runtime-read.sql',
+  digitalTwinBinding: {
+    sourceId: 'workflow-canvas:self-system',
+    entityKey: 'runtime-capability:workflow.supabase.user-canvases.summary',
+    observedFingerprint: '1234567890abcdef',
+  },
+}
+
 const runtimeCanvas = {
-  nodes: [{
-    id: 'map-web-app',
-    type: 'system',
-    data: { systemParts: [runtimeCredentialPart] },
-  }],
+  nodes: [
+    {
+      id: 'map-web-app',
+      type: 'system',
+      data: { systemParts: [runtimeCredentialPart] },
+    },
+    {
+      id: 'map-canvases-table',
+      type: 'system',
+      data: { systemParts: [runtimeCanvasSummaryPart] },
+    },
+  ],
 }
 
 t('runtime requests accept identifiers only and reject URLs or credential material', () => {
@@ -507,6 +529,14 @@ t('only the exact persisted digital-twin part receives the registered capability
     ...runtimeCredentialPart,
     digitalTwinBinding: { ...digitalTwinBinding, entityKey: 'credential-reference:OTHER_KEY' },
   }, 'map-web-app'), null)
+  assert.equal(
+    systemRuntimeCapabilityForPart(runtimeCanvasSummaryPart, 'map-canvases-table')?.id,
+    'workflow.supabase.user-canvases.summary',
+  )
+  assert.equal(systemRuntimeCapabilityForPart({
+    ...runtimeCanvasSummaryPart,
+    ref: 'attacker.arbitrary-query',
+  }, 'map-canvases-table'), null)
 })
 
 t('runtime target resolution requires the owner and the server-saved allowlisted part', () => {
@@ -518,6 +548,14 @@ t('runtime target resolution requires the owner and the server-saved allowlisted
     partId: 'supabase-anon-ref',
   })
   assert.equal(target.capability.id, 'workflow.supabase.user-canvases.read')
+  const summaryTarget = resolveSystemRuntimeTarget({
+    canvas: runtimeCanvas,
+    actorUserId: 'owner-1',
+    ownerUserId: 'owner-1',
+    nodeId: 'map-canvases-table',
+    partId: 'map-part-own-canvas-summary',
+  })
+  assert.equal(summaryTarget.capability.id, 'workflow.supabase.user-canvases.summary')
   assert.throws(() => resolveSystemRuntimeTarget({
     canvas: runtimeCanvas,
     actorUserId: 'invitee-1',
@@ -531,7 +569,7 @@ t('runtime target resolution requires the owner and the server-saved allowlisted
     ownerUserId: 'owner-1',
     nodeId: 'map-web-app',
     partId: 'supabase-anon-ref',
-  }), /허용된 연결 검사/)
+  }), /허용된 시스템 작업/)
 })
 
 t('runtime checks are rate-limited per owner, canvas, node and part key', () => {
@@ -574,6 +612,41 @@ t('runtime results clamp public fields and map only server-known capabilities', 
   }), /등록되지 않은/)
 })
 
+t('canvas summary results allow only bounded metadata and never preserve row bodies', () => {
+  const result = normalizeSystemRuntimeResult({
+    capabilityId: 'workflow.supabase.user-canvases.summary',
+    status: 'healthy',
+    verification: 'verified',
+    resourceId: 'workflow-supabase:owned-canvas-summaries',
+    checkedAt: '2026-07-15T00:00:00.000Z',
+    latencyMs: 18,
+    summary: '요약',
+    totalCount: 70,
+    items: Array.from({ length: 60 }, (_, index) => ({
+      id: `canvas-${index}`,
+      title: `캔버스 ${index}`,
+      updatedAt: '2026-07-15T00:00:00.000Z',
+      metrics: [
+        { id: 'nodes', label: '노드', value: index },
+        { id: 'edges', label: '선', value: index + 1 },
+        { id: 'notes', label: '노트', value: index + 2 },
+      ],
+      nodes: [{ secretBody: true }],
+      ownerEmail: 'private@example.com',
+    })),
+    arbitrarySql: 'select * from auth.users',
+  })
+  assert.equal(result.resultKind, 'record_summaries')
+  assert.equal(result.items.length, 50)
+  assert.equal(result.totalCount, 70)
+  assert.equal(result.truncated, true)
+  assert.equal(result.items[0].metrics[0].value, 0)
+  assert.equal(Object.hasOwn(result.items[0], 'nodes'), false)
+  assert.equal(Object.hasOwn(result.items[0], 'ownerEmail'), false)
+  assert.equal(Object.hasOwn(result, 'arbitrarySql'), false)
+  assert.equal(systemPartRuntimeReality(result).label, '조회됨')
+})
+
 await ta('the Supabase adapter uses a fixed HEAD/RLS request and returns no secrets or row body', async () => {
   const calls = []
   const times = [1_000, 1_025]
@@ -612,6 +685,65 @@ await ta('the Supabase adapter uses a fixed HEAD/RLS request and returns no secr
   assert.equal(JSON.stringify(result).includes(anonKey), false)
 })
 
+await ta('the canvas summary adapter calls only the fixed read-only RPC and returns bounded metadata', async () => {
+  const calls = []
+  const times = [5_000, 5_032]
+  const accessToken = 'private-summary-token'
+  const anonKey = 'public-summary-anon-key'
+  const result = await runSystemRuntimeCapability({
+    capabilityId: 'workflow.supabase.user-canvases.summary',
+    actorUserId: 'owner-1',
+    accessToken,
+    supabaseUrl: 'https://project.supabase.co',
+    supabaseAnonKey: anonKey,
+    now: () => times.shift(),
+    fetchImpl: async (url, options) => {
+      calls.push({ url: String(url), options })
+      return {
+        ok: true,
+        status: 200,
+        json: async () => [{
+          canvas_id: 'canvas-1',
+          name: '제품 지도',
+          node_count: 28,
+          edge_count: 38,
+          note_count: 3,
+          updated_at: '2026-07-15T00:00:00.000Z',
+          total_count: 1,
+          nodes: [{ mustNotSurvive: true }],
+        }],
+      }
+    },
+  })
+  assert.equal(calls.length, 1)
+  const endpoint = new URL(calls[0].url)
+  assert.equal(endpoint.origin, 'https://project.supabase.co')
+  assert.equal(endpoint.pathname, '/rest/v1/rpc/get_own_canvas_summaries')
+  assert.equal(endpoint.search, '')
+  assert.equal(calls[0].options.method, 'POST')
+  assert.equal(calls[0].options.redirect, 'error')
+  assert.equal(calls[0].options.headers.apikey, anonKey)
+  assert.equal(calls[0].options.headers.Authorization, `Bearer ${accessToken}`)
+  assert.deepEqual(JSON.parse(calls[0].options.body), { max_rows: 50 })
+  assert.equal(result.status, 'healthy')
+  assert.equal(result.resultKind, 'record_summaries')
+  assert.equal(result.collectionLabel, '캔버스')
+  assert.equal(result.latencyMs, 32)
+  assert.deepEqual(result.items, [{
+    id: 'canvas-1',
+    title: '제품 지도',
+    updatedAt: '2026-07-15T00:00:00.000Z',
+    metrics: [
+      { id: 'nodes', label: '노드', value: 28 },
+      { id: 'edges', label: '선', value: 38 },
+      { id: 'notes', label: '노트', value: 3 },
+    ],
+  }])
+  assert.equal(JSON.stringify(result).includes('mustNotSurvive'), false)
+  assert.equal(JSON.stringify(result).includes(accessToken), false)
+  assert.equal(JSON.stringify(result).includes(anonKey), false)
+})
+
 await ta('upstream rejection, network errors and timeouts expose safe summaries only', async () => {
   const secret = 'do-not-leak-this-token'
   const rejected = await runSystemRuntimeCapability({
@@ -623,6 +755,30 @@ await ta('upstream rejection, network errors and timeouts expose safe summaries 
   })
   assert.equal(rejected.errorCode, 'AUTH_OR_RLS_REJECTED')
   assert.equal(JSON.stringify(rejected).includes(secret), false)
+
+  const summaryUnavailable = await runSystemRuntimeCapability({
+    capabilityId: 'workflow.supabase.user-canvases.summary',
+    actorUserId: 'owner-1', accessToken: secret,
+    supabaseUrl: 'https://project.supabase.co', supabaseAnonKey: 'anon-test',
+    now: (() => { const values = [2_100, 2_110]; return () => values.shift() })(),
+    fetchImpl: async () => ({ ok: false, status: 404, rawBody: secret }),
+  })
+  assert.equal(summaryUnavailable.errorCode, 'READ_FUNCTION_UNAVAILABLE')
+  assert.equal(JSON.stringify(summaryUnavailable).includes(secret), false)
+
+  const malformedSummary = await runSystemRuntimeCapability({
+    capabilityId: 'workflow.supabase.user-canvases.summary',
+    actorUserId: 'owner-1', accessToken: secret,
+    supabaseUrl: 'https://project.supabase.co', supabaseAnonKey: 'anon-test',
+    now: (() => { const values = [2_200, 2_210]; return () => values.shift() })(),
+    fetchImpl: async () => ({
+      ok: true,
+      status: 200,
+      json: async () => [{ canvas_id: 'canvas-1', name: secret, updated_at: null }],
+    }),
+  })
+  assert.equal(malformedSummary.errorCode, 'INVALID_UPSTREAM_RESPONSE')
+  assert.equal(JSON.stringify(malformedSummary).includes(secret), false)
 
   const network = await runSystemRuntimeCapability({
     capabilityId: 'workflow.supabase.user-canvases.read',
@@ -885,7 +1041,12 @@ t('generated discovery manifest covers current API, DB, storage, realtime and MC
     'storage-bucket:canvas-images',
     'realtime-table:canvases',
     'credential-reference:SUPABASE_ANON_KEY',
+    'runtime-capability:workflow.supabase.user-canvases.summary',
   ]) assert.ok(resources[key], `missing discovery resource: ${key}`)
+  assert.deepEqual(
+    resources['runtime-capability:workflow.supabase.user-canvases.summary'].details,
+    { operation: 'read', resultKind: 'record_summaries', targetNodeId: 'map-canvases-table' },
+  )
   for (const tool of [
     'inspect_workflow_system_map',
     'preview_workflow_system_map_relation_repair',
@@ -1341,6 +1502,34 @@ t('Workflow Canvas resource proposals contain provenance but never credential va
   assert.equal(JSON.stringify(credential.proposal).includes('eyJ'), false)
 })
 
+t('an existing system map receives the read-only canvas summary part through explicit review', () => {
+  const oldMap = structuredClone(createWorkflowCanvasSystemMap())
+  const canvasesNode = oldMap.nodes.find((node) => node.id === 'map-canvases-table')
+  canvasesNode.data.systemParts = []
+
+  const review = inspectWorkflowSystemTwin(oldMap)
+  const item = review.items.find((candidate) => (
+    candidate.itemKey === 'entity-part:map-canvases-table:map-part-own-canvas-summary'
+  ))
+  assert.ok(item?.proposal)
+  assert.equal(item.category, 'runtime')
+  assert.deepEqual(item.proposal.counts, { nodes: 0, edges: 0, parts: 1 })
+  assert.equal(item.proposal.operations[0].action, 'add_part')
+  assert.equal(item.proposal.operations[0].part.kind, 'output')
+  assert.equal(item.proposal.operations[0].part.ref, 'workflow.supabase.user-canvases.summary')
+
+  const applied = applyDigitalTwinGraphProposal(oldMap, item.proposal)
+  const extended = { ...oldMap, nodes: applied.nodes, edges: applied.edges }
+  const after = inspectWorkflowSystemTwin(extended)
+  assert.equal(after.items.some((candidate) => candidate.itemKey === item.itemKey), false)
+  const appliedPart = extended.nodes.find((node) => node.id === 'map-canvases-table')
+    .data.systemParts.find((part) => part.id === 'map-part-own-canvas-summary')
+  assert.equal(
+    appliedPart.digitalTwinBinding.entityKey,
+    'runtime-capability:workflow.supabase.user-canvases.summary',
+  )
+})
+
 t('an applied Workflow Canvas proposal becomes modeled and remains fingerprint-tracked', () => {
   const map = createWorkflowCanvasSystemMap()
   const review = inspectWorkflowSystemTwin(map)
@@ -1414,6 +1603,7 @@ t('different resource proposals merge without duplicate nodes across two canvas 
 
   assert.deepEqual(conflicts, [])
   assert.deepEqual(new Set(bindings), new Set([
+    'runtime-capability:workflow.supabase.user-canvases.summary',
     'credential-reference:SUPABASE_ANON_KEY',
     'db-table:share_revocations',
   ]))

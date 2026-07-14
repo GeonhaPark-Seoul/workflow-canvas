@@ -9,6 +9,25 @@ const GROUPS = Object.freeze([
   { id: 'map-group-development', label: '개발·검증·배포층', x: 0, y: 650, width: 2020, height: 510 },
 ])
 
+const OWN_CANVAS_SUMMARY_PART = Object.freeze({
+  id: 'map-part-own-canvas-summary',
+  kind: 'output',
+  label: '내 캔버스 현황',
+  ref: 'workflow.supabase.user-canvases.summary',
+  exposure: 'internal',
+  sourceKind: 'code',
+  evidenceRef: 'mcp/systemRuntime.js, supabase-runtime-read.sql',
+  digitalTwinBinding: {
+    schemaVersion: 1,
+    sourceId: 'workflow-canvas:self-system',
+    entityKey: 'runtime-capability:workflow.supabase.user-canvases.summary',
+    observedFingerprint: WORKFLOW_SYSTEM_DISCOVERY.current.resources[
+      'runtime-capability:workflow.supabase.user-canvases.summary'
+    ]?.fingerprint ?? '',
+    observedSnapshotId: WORKFLOW_SYSTEM_DISCOVERY.current.id,
+  },
+})
+
 function groupNode(group) {
   return {
     id: group.id,
@@ -52,6 +71,9 @@ function systemNode(id, parentId, x, y, systemKind, label, fields = {}) {
       sourceKind: 'code',
       provider: fields.provider ?? '',
       externalRef: fields.externalRef ?? '',
+      ...(Array.isArray(fields.systemParts) && fields.systemParts.length
+        ? { systemParts: fields.systemParts }
+        : {}),
     },
   }
 }
@@ -188,6 +210,7 @@ function mapNodes() {
       evidence: '기본 캔버스 스키마',
       provider: 'Supabase',
       externalRef: 'public.canvases',
+      systemParts: [OWN_CANVAS_SUMMARY_PART],
     }),
     systemNode('map-sharing-tables', 'map-group-data', 350, 300, 'table', 'canvas_shares·share_members', {
       purpose: '초대 수단과 실제 참여 상태를 분리해 기록한다.',

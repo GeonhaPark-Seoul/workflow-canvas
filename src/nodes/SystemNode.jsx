@@ -39,6 +39,15 @@ function runtimeCheckedAtLabel(value) {
   return checkedAt.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
 }
 
+function runtimeUpdatedAtLabel(value) {
+  if (!value) return ''
+  const updatedAt = new Date(value)
+  if (!Number.isFinite(updatedAt.getTime())) return ''
+  return updatedAt.toLocaleString('ko-KR', {
+    month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit',
+  })
+}
+
 function runtimeTitle(runtime, reality) {
   const details = [reality.label]
   if (runtime?.summary) details.push(runtime.summary)
@@ -194,6 +203,14 @@ export default function SystemNode({ data, selected, id }) {
   const partDraftRuntimeReality = partDraftRuntimeCapability
     ? systemPartRuntimeReality(partDraftRuntime)
     : null
+  const partDraftRuntimeItems = partDraftRuntime?.status === 'healthy'
+    && partDraftRuntime?.resultKind === 'record_summaries'
+    && Array.isArray(partDraftRuntime.items)
+    ? partDraftRuntime.items
+    : null
+  const runtimeActionLabel = partDraftRuntimeCapability?.operation === 'read'
+    ? '데이터 새로 조회'
+    : '연결 상태 확인'
 
   return (
     <div
@@ -436,7 +453,7 @@ export default function SystemNode({ data, selected, id }) {
           style={{ zIndex: 2002, pointerEvents: 'all' }}
         >
           <div
-            className="system-part-editor nodrag nowheel"
+            className={`system-part-editor nodrag nowheel${partDraftRuntimeItems ? ' has-runtime-data' : ''}`}
             onPointerDown={(event) => event.stopPropagation()}
             onClick={(event) => event.stopPropagation()}
           >
@@ -470,38 +487,73 @@ export default function SystemNode({ data, selected, id }) {
               </select>
             </label>
             {partDraftRuntimeCapability && partDraftRuntimeReality && (
-              <div
-                className={`system-part-runtime is-${partDraftRuntimeReality.id}`}
-                style={{ '--runtime-color': partDraftRuntimeReality.color }}
-                title={runtimeTitle(partDraftRuntime, partDraftRuntimeReality)}
-              >
-                <span
-                  className="system-part-runtime-dot"
+              <>
+                <div
+                  className={`system-part-runtime is-${partDraftRuntimeReality.id}`}
                   style={{ '--runtime-color': partDraftRuntimeReality.color }}
-                  aria-hidden="true"
-                />
-                <strong>{partDraftRuntimeReality.label}</strong>
-                <span className="system-part-runtime-summary">
-                  {partDraftRuntime?.summary || partDraftRuntimeCapability.label}
-                </span>
-                {(Number.isFinite(partDraftRuntime?.latencyMs) || partDraftRuntime?.checkedAt) && (
-                  <span className="system-part-runtime-latency">
-                    {Number.isFinite(partDraftRuntime?.latencyMs) ? `${partDraftRuntime.latencyMs}ms` : ''}
-                    {Number.isFinite(partDraftRuntime?.latencyMs) && partDraftRuntime?.checkedAt ? ' · ' : ''}
-                    {runtimeCheckedAtLabel(partDraftRuntime?.checkedAt)}
-                  </span>
-                )}
-                <button
-                  type="button"
-                  className="system-part-runtime-check"
-                  title={data.canRunSystemChecks ? '연결 상태 확인' : '로그인 후 연결 상태 확인'}
-                  aria-label="연결 상태 확인"
-                  disabled={!data.canRunSystemChecks || partDraftRuntime?.status === 'checking'}
-                  onClick={() => data.onCheckSystemPart?.(id, persistedPartDraft)}
+                  title={runtimeTitle(partDraftRuntime, partDraftRuntimeReality)}
                 >
-                  ↻
-                </button>
-              </div>
+                  <span
+                    className="system-part-runtime-dot"
+                    style={{ '--runtime-color': partDraftRuntimeReality.color }}
+                    aria-hidden="true"
+                  />
+                  <strong>{partDraftRuntimeReality.label}</strong>
+                  <span className="system-part-runtime-summary">
+                    {partDraftRuntime?.summary || partDraftRuntimeCapability.label}
+                  </span>
+                  {(Number.isFinite(partDraftRuntime?.latencyMs) || partDraftRuntime?.checkedAt) && (
+                    <span className="system-part-runtime-latency">
+                      {Number.isFinite(partDraftRuntime?.latencyMs) ? `${partDraftRuntime.latencyMs}ms` : ''}
+                      {Number.isFinite(partDraftRuntime?.latencyMs) && partDraftRuntime?.checkedAt ? ' · ' : ''}
+                      {runtimeCheckedAtLabel(partDraftRuntime?.checkedAt)}
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    className="system-part-runtime-check"
+                    title={data.canRunSystemChecks ? runtimeActionLabel : `로그인 후 ${runtimeActionLabel}`}
+                    aria-label={runtimeActionLabel}
+                    disabled={!data.canRunSystemChecks || partDraftRuntime?.status === 'checking'}
+                    onClick={() => data.onCheckSystemPart?.(id, persistedPartDraft)}
+                  >
+                    ↻
+                  </button>
+                </div>
+                {partDraftRuntimeItems && (
+                  <div
+                    className="system-runtime-data"
+                    aria-label={partDraftRuntime.collectionLabel || partDraftRuntimeCapability.label}
+                  >
+                    <div className="system-runtime-data-heading">
+                      <strong>
+                        {partDraftRuntime.collectionLabel || '항목'} {partDraftRuntime.totalCount ?? partDraftRuntimeItems.length}
+                      </strong>
+                      {partDraftRuntime.truncated && <span>최근 {partDraftRuntimeItems.length}개</span>}
+                    </div>
+                    <div className="system-runtime-data-list">
+                      {partDraftRuntimeItems.length ? partDraftRuntimeItems.map((item) => (
+                        <div className="system-runtime-data-row" key={item.id}>
+                          <div className="system-runtime-data-title">
+                            <strong title={item.title}>{item.title}</strong>
+                            <time dateTime={item.updatedAt}>{runtimeUpdatedAtLabel(item.updatedAt)}</time>
+                          </div>
+                          <div className="system-runtime-data-counts">
+                            {item.metrics.map((metric) => (
+                              <span key={metric.id}>{metric.label} <b>{metric.value}</b></span>
+                            ))}
+                            <code title={item.id}>{item.id}</code>
+                          </div>
+                        </div>
+                      )) : (
+                        <div className="system-runtime-data-empty">
+                          조회된 {partDraftRuntime.collectionLabel || '항목'} 없음
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
             {partError && <div className="system-part-editor-error">{partError}</div>}
             <div className="system-part-editor-actions">
