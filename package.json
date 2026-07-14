@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "discover:update": "node scripts/generate-system-discovery.mjs",
     "discover:check": "node scripts/generate-system-discovery.mjs --check",
-    "test": "npm run discover:check && node scripts/test-mcp-logic.mjs && node scripts/test-sql-security.mjs"
+    "privacy:check": "node scripts/check-privacy-release.mjs",
+    "test": "npm run discover:check && npm run privacy:check && node scripts/test-mcp-logic.mjs && node scripts/test-sql-security.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",

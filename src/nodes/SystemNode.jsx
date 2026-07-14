@@ -409,7 +409,12 @@ export default function SystemNode({ data, selected, id }) {
                         className={`system-part-chip${preview ? ' is-preview' : ''}${runtimeReality ? ` is-runtime-${runtimeReality.id}` : ''}`}
                         style={{ '--part-color': partKind.color }}
                         title={`${partKind.label} · ${part.label}${part.ref ? ` · ${part.ref}` : ''}${preview ? ' · 미리보기' : ''}${runtimeReality ? ` · ${runtimeTitle(runtime, runtimeReality)}` : ''}`}
-                        onClick={(event) => { event.stopPropagation(); if (!preview) openPartEditor(part) }}
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          if (preview) return
+                          data.onSelectForPart?.()
+                          openPartEditor(part)
+                        }}
                       >
                         <Handle
                           type="source"

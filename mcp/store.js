@@ -27,6 +27,16 @@ import {
   restoreMissingWorkflowSystemMapRelations,
   WORKFLOW_RELATION_REPAIR_CONFIRMATION,
 } from '../shared/workflowSystemMapRepair.js'
+import {
+  composeSharePermission,
+  editableGroupIdSet,
+  editableNodeIdSetForPermission,
+  permissionCanEditEdge,
+  permissionCanEditNodeStructure,
+  permissionFromAccess,
+  visibleNodeIdSetForPermission,
+} from '../shared/sharePermissions.js'
+import { recordCanvasDataAccess } from './dataAccessAudit.js'
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://tuaifwiigkacrflbhjmu.supabase.co'
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -184,6 +194,14 @@ export async function listCanvases(userId) {
     .eq('user_id', userId)
     .order('updated_at', { ascending: true })
   if (error) throw new Error(error.message)
+  await Promise.all((data ?? []).map((row) => recordCanvasDataAccess(db, {
+    actorUserId: userId,
+    ownerUserId: userId,
+    canvasId: row.canvas_id,
+    source: 'mcp',
+    purpose: 'mcp_canvas_operation',
+    operation: 'read',
+  })))
   const own = (data ?? []).map((r) => ({
     canvas_id: r.canvas_id,
     name: r.name,
@@ -192,28 +210,33 @@ export async function listCanvases(userId) {
     updated_at: r.updated_at,
   }))
 
-  // Canvases shared to me: best (most permissive) scope per owner+canvas.
+  // Canvases shared to me: compose every accepted scope per owner+canvas.
   const shares = await mySharesFor(userId, null)
-  const best = new Map() // `${owner}:${canvas}` -> share
+  const grouped = new Map()
   for (const s of shares) {
     const key = `${s.owner_id}:${s.canvas_id}`
-    const prev = best.get(key)
-    if (!prev
-        || SCOPE_RANK[s.scope] < SCOPE_RANK[prev.scope]
-        || (s.scope === prev.scope && Number(s.can_edit) > Number(prev.can_edit))
-        || (s.scope === prev.scope && s.can_edit === prev.can_edit && Number(s.restrict_view) < Number(prev.restrict_view))) {
-      best.set(key, s)
-    }
+    const current = grouped.get(key) ?? { ownerId: s.owner_id, canvasId: s.canvas_id, grants: [] }
+    current.grants.push(s)
+    grouped.set(key, current)
   }
   const shared = []
-  for (const s of best.values()) {
+  for (const item of grouped.values()) {
+    const permission = composeSharePermission(item.grants)
     const { data: r } = await db
       .from('canvases')
       .select('canvas_id, name, nodes, edges, updated_at')
-      .eq('user_id', s.owner_id)
-      .eq('canvas_id', s.canvas_id)
+      .eq('user_id', item.ownerId)
+      .eq('canvas_id', item.canvasId)
       .maybeSingle()
     if (!r) continue
+    await recordCanvasDataAccess(db, {
+      actorUserId: userId,
+      ownerUserId: item.ownerId,
+      canvasId: item.canvasId,
+      source: 'mcp',
+      purpose: 'mcp_canvas_operation',
+      operation: 'read',
+    })
     shared.push({
       canvas_id: r.canvas_id,
       name: r.name,
@@ -221,7 +244,8 @@ export async function listCanvases(userId) {
       edge_count: (r.edges ?? []).length,
       updated_at: r.updated_at,
       shared: true,
-      permission_scope: s.scope,
+      permission_scope: permission.scope,
+      permission_grants: permission.grants,
     })
   }
   return [...own, ...shared]
@@ -230,8 +254,6 @@ export async function listCanvases(userId) {
 // ── Shared-canvas access ─────────────────────────────────────────────────────
 // The service-role client bypasses RLS, so shared-canvas access and the invited
 // region are enforced explicitly here (mirrors the browser's gating in App.jsx).
-
-const SCOPE_RANK = { canvas: 0, group: 1, node: 2 }
 
 // Shares addressed to this user. Email invitations are converted to memberships
 // at login, so a revoked membership cannot regain access through email matching.
@@ -242,38 +264,73 @@ async function mySharesFor(userId, canvasId) {
   const { data: shares, error } = await q
   if (error) throw new Error(error.message)
   if (!shares?.length) return []
-  const { data: mems, error: e2 } = await db.from('share_members').select('share_id, can_edit').eq('user_id', userId)
+  const { data: mems, error: e2 } = await db.from('share_members')
+    .select('share_id, can_edit, restrict_view_override').eq('user_id', userId)
   if (e2) throw new Error(e2.message)
-  const canEditByShareId = new Map((mems ?? []).map((m) => [m.share_id, m.can_edit]))
+  const memberByShareId = new Map((mems ?? []).map((m) => [m.share_id, m]))
   return shares
-    .filter((s) => s.owner_id !== userId && canEditByShareId.has(s.id))
-    .map((s) => ({ ...s, can_edit: canEditByShareId.has(s.id) ? canEditByShareId.get(s.id) : true }))
+    .filter((s) => s.owner_id !== userId && memberByShareId.has(s.id))
+    .map((s) => {
+      const member = memberByShareId.get(s.id)
+      return {
+        ...s,
+        can_edit: member.can_edit !== false,
+        restrict_view: member.restrict_view_override ?? !!s.restrict_view,
+      }
+    })
 }
 
 // Resolve what `userId` may do with `canvasId`: own it, or hold an invite.
 // Returns { row, role:'owner'|'invitee', ownerId, scope?, targetId? } (invitee
-// gets the most permissive scope when several invites exist).
+// gets the union of every accepted scope when several invites exist).
 async function resolveCanvasAccess(userId, canvasId) {
   const db = admin()
   const { data: own, error } = await db
     .from('canvases').select('*').eq('user_id', userId).eq('canvas_id', canvasId).maybeSingle()
   if (error) throw new Error(error.message)
-  if (own) return { row: own, role: 'owner', ownerId: userId }
+  if (own) {
+    await recordCanvasDataAccess(db, {
+      actorUserId: userId,
+      ownerUserId: userId,
+      canvasId,
+      source: 'mcp',
+      purpose: 'mcp_canvas_operation',
+      operation: 'read_for_write',
+    })
+    return { row: own, role: 'owner', ownerId: userId }
+  }
 
   const mine = await mySharesFor(userId, canvasId)
   if (mine.length) {
-    mine.sort((a, b) => (
-      SCOPE_RANK[a.scope] - SCOPE_RANK[b.scope]
-      || Number(b.can_edit) - Number(a.can_edit)
-      || Number(a.restrict_view) - Number(b.restrict_view)
+    const byOwner = new Map()
+    for (const share of mine) {
+      const grants = byOwner.get(share.owner_id) ?? []
+      grants.push(share)
+      byOwner.set(share.owner_id, grants)
+    }
+    const candidates = [...byOwner.entries()].map(([ownerId, grants]) => ({
+      ownerId,
+      permission: composeSharePermission(grants),
+    })).sort((left, right) => (
+      Number(right.permission.canEditCanvas) - Number(left.permission.canEditCanvas)
+      || Number(right.permission.canEdit) - Number(left.permission.canEdit)
+      || Number(left.permission.restrictView) - Number(right.permission.restrictView)
+      || right.permission.grants.length - left.permission.grants.length
     ))
-    const best = mine[0]
+    const selected = candidates[0]
     const { data: row, error: e3 } = await db
-      .from('canvases').select('*').eq('user_id', best.owner_id).eq('canvas_id', canvasId).maybeSingle()
+      .from('canvases').select('*').eq('user_id', selected.ownerId).eq('canvas_id', canvasId).maybeSingle()
     if (e3) throw new Error(e3.message)
-    if (row) return {
-      row, role: 'invitee', ownerId: best.owner_id, scope: best.scope, targetId: best.target_id,
-      canEdit: best.can_edit !== false, restrictView: !!best.restrict_view,
+    if (row) {
+      await recordCanvasDataAccess(db, {
+        actorUserId: userId,
+        ownerUserId: selected.ownerId,
+        canvasId,
+        source: 'mcp',
+        purpose: 'mcp_canvas_operation',
+        operation: 'read_for_write',
+      })
+      return { row, ownerId: selected.ownerId, ...selected.permission }
     }
   }
   throw new Error(`캔버스를 찾을 수 없습니다: ${canvasId}`)
@@ -286,22 +343,19 @@ function assertOwner(access, what) {
 // ── Region gating (pure, unit-tested) ────────────────────────────────────────
 // null → unrestricted (owner, or canvas-scope invite)
 export function editableNodeIdSet(access, nodes) {
-  if (access.role === 'owner' || access.scope === 'canvas') return null
-  if (access.scope === 'group') {
-    return new Set((nodes ?? []).filter((n) => n.parentId === access.targetId).map((n) => n.id))
-  }
-  return new Set([access.targetId]) // scope 'node'
+  return editableNodeIdSetForPermission(access, nodes)
 }
 
 // action: { kind: 'canvas-admin'|'types'|'graph'|'node-create'|'node-update'|
 //           'node-delete'|'edge', nodeId?, nodeIds?, source?, target?, movesPosition? }
 // Throws a teaching-style error when the invite's region doesn't allow it.
 export function assertRegionEdit(access, nodes, action) {
-  if (access.role === 'owner') return
+  const permission = permissionFromAccess(access)
+  if (permission.role === 'owner') return
   const deny = (msg) => { throw new Error(msg) }
-  if (access.canEdit === false) deny('읽기 전용 초대에서는 변경할 수 없습니다.')
+  if (!permission.canEdit) deny('읽기 전용 초대에서는 변경할 수 없습니다.')
   if (action.kind === 'canvas-admin') deny('캔버스 삭제/이름 변경/초기화는 소유자만 할 수 있습니다.')
-  if (access.scope === 'canvas') return
+  if (permission.canEditCanvas) return
 
   if (action.kind === 'types') {
     deny('단계 종류 편집은 캔버스 전체 초대 권한이 필요합니다 (그룹/노드 초대로는 불가).')
@@ -309,25 +363,16 @@ export function assertRegionEdit(access, nodes, action) {
   if (action.kind === 'graph') {
     deny('초대 구역 편집에서는 create_graph를 쓸 수 없습니다. create_node/update_nodes/delete_nodes를 사용하세요.')
   }
-  const editable = editableNodeIdSet(access, nodes)
-
-  if (access.scope === 'node') {
-    if (action.kind !== 'node-update') {
-      deny('노드 초대 권한으로는 해당 노드의 내용·크기 수정만 가능합니다 (추가/삭제/연결선 불가).')
-    }
-    const ids = action.nodeIds ?? [action.nodeId]
-    const bad = ids.filter((id) => !editable.has(id))
-    if (bad.length) deny(`초대된 노드(${access.targetId}) 외에는 수정할 수 없습니다: ${bad.join(', ')}`)
-    if (action.movesPosition) deny('노드 초대 권한으로는 위치(x/y)를 옮길 수 없습니다 (내용·크기만 수정 가능).')
-    return
+  const editable = editableNodeIdSet(permission, nodes)
+  const byId = new Map((nodes ?? []).map((node) => [node.id, node]))
+  const groupIds = editableGroupIdSet(permission)
+  if (action.kind === 'node-create') {
+    if (groupIds.size) return
+    deny('노드 초대 권한으로는 해당 노드의 내용·크기 수정만 가능합니다 (추가/삭제/연결선 불가).')
   }
-
-  // scope 'group'
-  if (action.kind === 'node-create') return // caller forces the node into the frame
   if (action.kind === 'edge') {
-    const bad = [action.source, action.target].filter((id) => !editable.has(id))
-    if (bad.length) {
-      deny(`연결선의 양 끝이 모두 초대 구역(그룹 ${access.targetId}) 안에 있어야 합니다. 구역 밖: ${bad.join(', ')}`)
+    if (!permissionCanEditEdge(permission, byId.get(action.source), byId.get(action.target))) {
+      deny('연결선의 양 끝이 모두 초대된 그룹 편집 구역 안에 있어야 합니다.')
     }
     return
   }
@@ -335,8 +380,14 @@ export function assertRegionEdit(access, nodes, action) {
   const bad = ids.filter((id) => !editable.has(id))
   if (bad.length) {
     deny(
-      `초대된 편집 구역(그룹 ${access.targetId}) 밖 노드입니다: ${bad.join(', ')}. ` +
+      `초대된 편집 구역 밖 노드입니다: ${bad.join(', ')}. ` +
       '편집 가능한 노드는 get_canvas 응답의 my_permission.editable_node_ids를 참고하세요.')
+  }
+  if (action.kind === 'node-delete' && ids.some((id) => !permissionCanEditNodeStructure(permission, byId.get(id)))) {
+    deny('노드 초대 권한으로는 해당 노드를 삭제할 수 없습니다.')
+  }
+  if (action.movesPosition && ids.some((id) => !permissionCanEditNodeStructure(permission, byId.get(id)))) {
+    deny('노드 초대 권한으로는 위치(x/y)를 옮길 수 없습니다 (내용·크기만 수정 가능).')
   }
 }
 
@@ -522,15 +573,25 @@ export async function getCanvas(userId, canvasId) {
   const access = await resolveCanvasAccess(userId, canvasId)
   const row = access.row
   const editable = access.role === 'invitee' ? editableNodeIdSet(access, row.nodes) : null
+  const permission = permissionFromAccess(access)
+  const visible = access.role === 'invitee' ? visibleNodeIdSetForPermission(permission, row.nodes) : null
   const myPermission = access.role === 'invitee'
     ? {
         role: 'invitee',
-        scope: access.scope,
-        target_id: access.targetId,
+        scope: permission.scope,
+        target_id: permission.targetId,
         // null = 전체 편집 가능 (canvas 범위 초대)
         editable_node_ids: editable === null ? null : [...editable],
-        can_edit: access.canEdit !== false,
-        restrict_view: !!access.restrictView,
+        can_edit: permission.canEdit,
+        can_edit_canvas: permission.canEditCanvas,
+        restrict_view: permission.restrictView,
+        grants: permission.grants.map((grant) => ({
+          share_id: grant.shareId,
+          scope: grant.scope,
+          target_id: grant.targetId,
+          can_edit: grant.canEdit,
+          restrict_view: grant.restrictView,
+        })),
       }
     : undefined
   const byId = new Map((row.nodes ?? []).map((node) => [node.id, node]))
@@ -544,14 +605,13 @@ export async function getCanvas(userId, canvasId) {
     nodes: (row.nodes ?? []).map((node) => toExternalCanvasNode(
       node,
       byId,
-      access.role === 'invitee' && access.restrictView && editable !== null && !editable.has(node.id),
+      access.role === 'invitee' && visible !== null && !visible.has(node.id),
     )),
     edges: (row.edges ?? []).map((edge) => toExternalCanvasEdge(
       edge,
       access.role === 'invitee'
-        && access.restrictView
-        && editable !== null
-        && (!editable.has(edge.source) || !editable.has(edge.target)),
+        && visible !== null
+        && (!visible.has(edge.source) || !visible.has(edge.target)),
     )),
   }
 }
@@ -902,10 +962,21 @@ export async function createNode(userId, canvasId, opts) {
   const nodes = row.nodes ?? []
   sanitizeTextFields(opts)
 
-  // Group-scope invitees create INSIDE the frame: parentId is forced and x/y
-  // are frame-relative (auto free spot among siblings when omitted).
-  if (access.role === 'invitee' && access.scope === 'group') {
-    const siblings = nodes.filter((n) => n.parentId === access.targetId)
+  // Scoped invitees create inside an explicitly authorized group. A single
+  // group grant is inferred; overlapping group grants require target_group_id.
+  const permission = permissionFromAccess(access)
+  if (access.role === 'invitee' && !permission.canEditCanvas) {
+    const groupIds = editableGroupIdSet(permission)
+    const requestedGroupId = opts.target_group_id ?? opts.targetGroupId ?? null
+    const targetGroupId = requestedGroupId ?? (groupIds.size === 1 ? [...groupIds][0] : null)
+    if (!targetGroupId || !groupIds.has(targetGroupId)) {
+      throw new Error(groupIds.size > 1
+        ? '편집 가능한 그룹이 여러 개입니다. target_group_id로 새 노드를 넣을 그룹을 지정하세요.'
+        : '새 노드를 만들 수 있는 그룹 초대 권한이 없습니다.')
+    }
+    const targetGroup = nodes.find((node) => node.id === targetGroupId && node.type === 'group')
+    if (!targetGroup) throw new Error(`초대된 그룹을 찾을 수 없습니다: ${targetGroupId}`)
+    const siblings = nodes.filter((n) => n.parentId === targetGroupId)
     const size = clampSize(opts.type, opts.width, opts.height)
     const w = size.width ?? SIZE[opts.type]?.w ?? SIZE.stage.w
     const h = size.height ?? SIZE[opts.type]?.h ?? SIZE.stage.h
@@ -914,7 +985,7 @@ export async function createNode(userId, canvasId, opts) {
       : { x: 24, y: 56 }
     const spot = findNonOverlapping(siblings.map(nodeRect), desired, w, h)
     const node = materializeNode(opts, { x: spot.x, y: spot.y }, rowStageTypes(row))
-    node.parentId = access.targetId
+    node.parentId = targetGroupId
     await saveArrays(access.ownerId, canvasId, [...nodes, node], row.edges ?? [], row.updated_at)
     return spot.shifted ? { ...node, shifted: { from: desired, to: { x: spot.x, y: spot.y } } } : node
   }

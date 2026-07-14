@@ -17,6 +17,7 @@ import {
   SystemRuntimeContractError,
 } from '../shared/systemRuntime.js'
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from '../src/lib/supabase.js'
+import { recordCanvasDataAccess } from '../mcp/dataAccessAudit.js'
 
 const recentChecks = new Map()
 
@@ -51,11 +52,19 @@ function deploymentContext() {
   }
 }
 
-async function loadSystemCanvas(operatorUserId, canvasId) {
+async function loadSystemCanvas(operatorUserId, canvasId, actorUserId) {
   const { data: canvas, error } = await admin().from('canvases').select('nodes, edges')
     .eq('user_id', operatorUserId).eq('canvas_id', canvasId).maybeSingle()
   if (error) throw new SystemRuntimeCheckError(500, 'CANVAS_LOOKUP_FAILED', '등록된 시스템 지도를 확인하지 못했습니다.')
   if (!canvas) throw new SystemRuntimeCheckError(404, 'CANVAS_NOT_FOUND', '등록된 시스템 지도를 찾을 수 없습니다.')
+  await recordCanvasDataAccess(admin(), {
+    actorUserId,
+    ownerUserId: operatorUserId,
+    canvasId,
+    source: 'system_runtime',
+    purpose: 'system_map_runtime',
+    operation: 'read',
+  })
   return canvas
 }
 
@@ -102,7 +111,7 @@ export default async function handler(req, res) {
 
     if (req.method === 'GET') {
       const request = normalizeSystemRuntimeCanvasRequest(req.query)
-      const canvas = await loadSystemCanvas(operatorUserId, request.canvasId)
+      const canvas = await loadSystemCanvas(operatorUserId, request.canvasId, user.id)
       const latest = await loadLatestSystemRuntimeObservations(admin(), {
         canvasId: request.canvasId,
         canvas,
@@ -119,7 +128,7 @@ export default async function handler(req, res) {
     if (req.body?.action === 'check_all') {
       const request = normalizeSystemRuntimeBatchRequest(req.body)
       claimSystemRuntimeCheck(recentChecks, `${user.id}:${request.canvasId}:all`)
-      const canvas = await loadSystemCanvas(operatorUserId, request.canvasId)
+      const canvas = await loadSystemCanvas(operatorUserId, request.canvasId, user.id)
       const targets = resolveSystemRuntimeTargets({ canvas, actorUserId: user.id, ownerUserId: operatorUserId })
       const records = await Promise.all(targets.map(async (target) => ({
         target,
@@ -136,7 +145,7 @@ export default async function handler(req, res) {
 
     const request = normalizeSystemRuntimeRequest(req.body)
     claimSystemRuntimeCheck(recentChecks, `${user.id}:${request.canvasId}:${request.nodeId}:${request.partId}`)
-    const canvas = await loadSystemCanvas(operatorUserId, request.canvasId)
+    const canvas = await loadSystemCanvas(operatorUserId, request.canvasId, user.id)
     const target = resolveSystemRuntimeTarget({
       canvas,
       actorUserId: user.id,

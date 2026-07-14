@@ -2,6 +2,8 @@ import {
   admin, applySharedCanvasUpdate, listCanvasParticipants, mySharesFor, redactCanvas,
   setCanvasMemberViewRestriction, resolveBrowserUser, resolveSharedCanvasAccess,
 } from '../mcp/shareAccess.js'
+import { composeSharePermission } from '../shared/sharePermissions.js'
+import { recordCanvasDataAccess } from '../mcp/dataAccessAudit.js'
 
 function send(res, status, body) {
   res.status(status).json(body)
@@ -36,13 +38,22 @@ export default async function handler(req, res) {
 
     if (req.method === 'GET' && req.query.mode === 'list') {
       const shares = await mySharesFor(user.id)
-      const canvases = await Promise.all(shares.map(async (share) => {
+      const grouped = new Map()
+      for (const share of shares) {
+        const key = `${share.owner_id}:${share.canvas_id}`
+        const current = grouped.get(key) ?? { ownerId: share.owner_id, canvasId: share.canvas_id, grants: [] }
+        current.grants.push(share)
+        grouped.set(key, current)
+      }
+      const canvases = await Promise.all([...grouped.values()].map(async (item) => {
         const { data } = await admin().from('canvases').select('name')
-          .eq('user_id', share.owner_id).eq('canvas_id', share.canvas_id).maybeSingle()
+          .eq('user_id', item.ownerId).eq('canvas_id', item.canvasId).maybeSingle()
+        const permission = composeSharePermission(item.grants)
         return data ? {
-          ownerId: share.owner_id, canvasId: share.canvas_id, name: data.name,
-          scope: share.scope, targetId: share.target_id, restrictView: !!share.restrict_view,
-          canEdit: share.can_edit !== false,
+          ownerId: item.ownerId, canvasId: item.canvasId, name: data.name,
+          scope: permission.scope, targetId: permission.targetId,
+          restrictView: permission.restrictView, canEdit: permission.canEdit,
+          canEditCanvas: permission.canEditCanvas, grants: permission.grants,
         } : null
       }))
       return send(res, 200, { canvases: canvases.filter(Boolean) })
@@ -65,7 +76,9 @@ export default async function handler(req, res) {
       return send(res, 200, { ok: true })
     }
 
-    const access = await resolveSharedCanvasAccess(user.id, ownerId, canvasId)
+    const access = await resolveSharedCanvasAccess(user.id, ownerId, canvasId, {
+      operation: req.method === 'PUT' ? 'read_for_write' : 'read',
+    })
 
     if (req.method === 'GET') return send(res, 200, redactCanvas(access))
     if (req.method === 'PUT') {
@@ -76,7 +89,7 @@ export default async function handler(req, res) {
         stageTypes: input.stageTypes,
       })
       const patch = { nodes: update.nodes, edges: update.edges, updated_at: nextRevision(input.revision) }
-      if (access.scope === 'canvas') {
+      if (access.canEditCanvas) {
         patch.notes = update.notes
         patch.views = update.views
         patch.stage_types = update.stageTypes
@@ -86,6 +99,14 @@ export default async function handler(req, res) {
         .select('updated_at').maybeSingle()
       if (error) throw new Error(error.message)
       if (!data) throw conflict()
+      await recordCanvasDataAccess(admin(), {
+        actorUserId: user.id,
+        ownerUserId: ownerId,
+        canvasId,
+        source: 'shared_canvas_api',
+        purpose: 'collaborator_canvas_write',
+        operation: 'write',
+      })
       const saved = redactCanvas({
         ...access,
         row: { ...access.row, ...patch, updated_at: data.updated_at },

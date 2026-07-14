@@ -122,7 +122,7 @@ export default function CanvasTabs({
     const scopedGrants = grants.filter((grant) => grant.scope === 'group' || grant.scope === 'node')
     const participant = {
       ...p,
-      restrictView: !hasCanvasGrant && scopedGrants.some((grant) => grant.restrictView),
+      restrictView: !hasCanvasGrant && scopedGrants.length > 0 && scopedGrants.every((grant) => grant.restrictView),
     }
     return <ParticipantAvatar
       participant={participant}
@@ -488,24 +488,26 @@ export default function CanvasTabs({
                         <span className="participant-scope-tag">캔버스 소유자</span>
                       ) : grants.map((grant) => (
                         <span key={grant.shareId ?? `${grant.scope}:${grant.targetId ?? ''}`} className="participant-scope-tag">
-                          {grantLabel(grant)}
+                          {grantLabel(grant)} · {grant.canEdit === false ? '읽기' : '편집'}
                         </span>
                       ))}
                     </div>
                   </div>
                   {isOwnActive && p.shareId && p.userId && !p.isOwner && (
                     <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
-                      <button
-                        onClick={() => onToggleMemberEdit(p)}
-                        title="편집 권한 전환"
-                        style={{
-                          background: 'transparent', border: '1px solid #3b82f655', borderRadius: 4,
-                          color: '#3b82f6', fontSize: 10, fontWeight: 600, padding: '3px 6px',
-                          cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {p.canEdit ? '편집' : '읽기'}
-                      </button>
+                      {grants.length === 1 && (
+                        <button
+                          onClick={() => onToggleMemberEdit(p)}
+                          title="편집 권한 전환"
+                          style={{
+                            background: 'transparent', border: '1px solid #3b82f655', borderRadius: 4,
+                            color: '#3b82f6', fontSize: 10, fontWeight: 600, padding: '3px 6px',
+                            cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {p.canEdit ? '편집' : '읽기'}
+                        </button>
+                      )}
                       <button
                         onClick={() => { if (window.confirm(`"${nickname}"님을 추방할까요?`)) onKickMember(p) }}
                         title="추방"

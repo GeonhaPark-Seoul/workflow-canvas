@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 
 const read = (name) => readFile(new URL(`../${name}`, import.meta.url), 'utf8')
-const [shares, profiles, profilePrivacy, images, tokens, notes, relationGuard, runtimeRead, runtimeObservations] = await Promise.all([
+const [shares, profiles, profilePrivacy, images, tokens, notes, relationGuard, runtimeRead, runtimeObservations, dataAccessAudit] = await Promise.all([
   read('supabase-shares.sql'),
   read('supabase-profiles.sql'),
   read('supabase-profile-privacy.sql'),
@@ -12,6 +12,7 @@ const [shares, profiles, profilePrivacy, images, tokens, notes, relationGuard, r
   read('supabase-relation-metadata-guard.sql'),
   read('supabase-runtime-read.sql'),
   read('supabase-runtime-observations.sql'),
+  read('supabase-data-access-audit.sql'),
 ])
 
 const restrictedFunctions = [
@@ -110,5 +111,17 @@ assert.match(runtimeObservations, /grant select, insert, delete on table public\
 assert.doesNotMatch(runtimeObservations, /grant [^;]*update[^;]*system_runtime_observations/i, 'runtime evidence must stay append-only')
 assert.doesNotMatch(runtimeObservations, /grant [^;]*system_runtime_observations to (?:anon|authenticated)/i)
 assert.match(runtimeObservations, /octet_length\(result::text\) <= 100000/i, 'runtime evidence payloads must remain bounded')
+
+assert.match(dataAccessAudit, /create table if not exists public\.server_data_access_audit/i)
+assert.match(dataAccessAudit, /alter table public\.server_data_access_audit enable row level security;/i)
+assert.match(dataAccessAudit, /revoke all on table public\.server_data_access_audit from public, anon, authenticated;/i)
+assert.match(dataAccessAudit, /grant select, insert on table public\.server_data_access_audit to service_role;/i)
+assert.doesNotMatch(dataAccessAudit, /grant [^;]*(?:update|delete)[^;]*server_data_access_audit/i)
+assert.match(dataAccessAudit, /before update or delete on public\.server_data_access_audit/i)
+assert.match(dataAccessAudit, /raise exception 'server_data_access_audit is append-only'/i)
+assert.match(dataAccessAudit, /security definer stable set search_path = public/i)
+assert.match(dataAccessAudit, /where audit\.owner_user_id = auth\.uid\(\)/i)
+assert.match(dataAccessAudit, /revoke execute on function public\.get_my_canvas_data_access_audit\(text, integer\) from public, anon;/i)
+assert.match(dataAccessAudit, /grant execute on function public\.get_my_canvas_data_access_audit\(text, integer\) to authenticated;/i)
 
 console.log('SQL security checks passed')

@@ -31,6 +31,8 @@ import { absoluteNodePosition, boundsForNodeIds } from '../src/lib/canvasGeometr
 import { mergeCanvasSnapshots } from '../src/lib/canvasMerge.js'
 import { getStubEdgeGeometry } from '../src/edges/stubEdgeGeometry.js'
 import { chooseOwnCanvasToRestore } from '../src/lib/canvasNavigation.js'
+import { nativeWheelScrollTarget } from '../src/lib/wheelRouting.js'
+import { claimShareLaunchFallback, shareTokenFingerprint } from '../src/lib/shareLaunchCoordinator.js'
 import {
   canvasWriteError,
   CanvasSchemaGuardError,
@@ -105,6 +107,18 @@ import {
   systemRuntimePathEdgeIds,
 } from '../shared/systemRuntime.js'
 import { buildDiscoveryManifest } from './system-discovery.mjs'
+import { recordCanvasDataAccess } from '../mcp/dataAccessAudit.js'
+import {
+  composeSharePermission,
+  editableNodeIdSetForPermission,
+  permissionCanEditEdge,
+  visibleNodeIdSetForPermission,
+} from '../shared/sharePermissions.js'
+import {
+  assertPrivacyReleaseGate,
+  CANVAS_ENCRYPTION_TRANSITION,
+  CANVAS_PRIVACY_CAPABILITIES,
+} from '../shared/privacyCapabilities.js'
 
 let passed = 0
 function t(name, fn) {
@@ -574,7 +588,7 @@ t('observation catalogs register bounded fields, provenance and explicit unavail
     }
   }
   const operations = systemRuntimeCatalogForResult('workflow.supabase.canvas-service.operations', null)
-  assert.equal(operations.length, 22)
+  assert.equal(operations.length, 27)
   assert.equal(operations.find((item) => item.id === 'canvas-bodies').availability, 'protected')
   assert.equal(operations.find((item) => item.id === 'database-size').availability, 'connector_required')
   assert.equal(systemObservationAvailabilityDefinition('protected').label, '보호됨')
@@ -1436,7 +1450,7 @@ t('generated discovery manifest covers current API, DB, storage, realtime and MC
   assert.equal(operationsDetails.risk, 'low')
   assert.equal(operationsDetails.sideEffect, 'none')
   assert.equal(operationsDetails.targetNodeId, 'map-canvases-table')
-  assert.equal(operationsDetails.catalogFieldCount, 22)
+  assert.equal(operationsDetails.catalogFieldCount, 27)
   assert.ok(operationsDetails.catalogFieldIds.includes('active-memberships'))
   assert.ok(operationsDetails.catalogFieldIds.includes('canvas-bodies'))
   for (const tool of [
@@ -2885,11 +2899,120 @@ console.log('assertRegionEdit / editableNodeIdSet')
 
 t('node-scope: content update on target only; move/delete/create/edge denied', () => {
     assertRegionEdit(nodeInv, NODES, { kind: 'node-update', nodeId: 'a' })
-    assert.throws(() => assertRegionEdit(nodeInv, NODES, { kind: 'node-update', nodeId: 'b' }), /외에는 수정할 수 없습니다/)
+    assert.throws(() => assertRegionEdit(nodeInv, NODES, { kind: 'node-update', nodeId: 'b' }), /밖 노드입니다/)
     assert.throws(() => assertRegionEdit(nodeInv, NODES, { kind: 'node-update', nodeId: 'a', movesPosition: true }), /위치\(x\/y\)/)
-    assert.throws(() => assertRegionEdit(nodeInv, NODES, { kind: 'node-delete', nodeId: 'a' }), /내용·크기 수정만/)
+    assert.throws(() => assertRegionEdit(nodeInv, NODES, { kind: 'node-delete', nodeId: 'a' }), /삭제할 수 없습니다/)
     assert.throws(() => assertRegionEdit(nodeInv, NODES, { kind: 'node-create' }), /내용·크기 수정만/)
-    assert.throws(() => assertRegionEdit(nodeInv, NODES, { kind: 'edge', source: 'a', target: 'b' }), /내용·크기 수정만/)
+    assert.throws(() => assertRegionEdit(nodeInv, NODES, { kind: 'edge', source: 'a', target: 'b' }), /양 끝/)
+})
+
+t('composed grants union full-canvas reading with scoped group editing', () => {
+  const permission = composeSharePermission([
+    { id: 'canvas-read', scope: 'canvas', can_edit: false, restrict_view: false },
+    { id: 'group-edit', scope: 'group', target_id: 'grp', can_edit: true, restrict_view: true },
+  ])
+  assert.equal(permission.scope, 'composed')
+  assert.equal(permission.canEdit, true)
+  assert.equal(permission.canEditCanvas, false)
+  assert.equal(permission.restrictView, false)
+  assert.deepEqual([...editableNodeIdSetForPermission(permission, NODES)].sort(), ['a', 'b'])
+  assert.equal(visibleNodeIdSetForPermission(permission, NODES), null)
+})
+
+t('composed group grants edit the union and allow edges only inside granted groups', () => {
+  const nodes = [
+    { id: 'g1', type: 'group' }, { id: 'a', parentId: 'g1' },
+    { id: 'g2', type: 'group' }, { id: 'b', parentId: 'g2' },
+    { id: 'outside' },
+  ]
+  const permission = composeSharePermission([
+    { scope: 'group', targetId: 'g1', canEdit: true, restrictView: true },
+    { scope: 'group', targetId: 'g2', canEdit: true, restrictView: true },
+  ])
+  assert.deepEqual([...editableNodeIdSetForPermission(permission, nodes)].sort(), ['a', 'b'])
+  assert.deepEqual([...visibleNodeIdSetForPermission(permission, nodes)].sort(), ['a', 'b', 'g1', 'g2'])
+  assert.equal(permissionCanEditEdge(permission, nodes[1], nodes[3]), true)
+  assert.equal(permissionCanEditEdge(permission, nodes[1], nodes[4]), false)
+})
+
+console.log('wheel routing / share launch coordination')
+
+function fakeElement(classes, parentElement = null, dimensions = {}, style = {}) {
+  return {
+    nodeType: 1,
+    parentElement,
+    classList: { contains: (name) => classes.includes(name) },
+    scrollHeight: dimensions.scrollHeight ?? 100,
+    clientHeight: dimensions.clientHeight ?? 100,
+    scrollWidth: dimensions.scrollWidth ?? 100,
+    clientWidth: dimensions.clientWidth ?? 100,
+    _style: { overflowY: 'visible', overflowX: 'visible', ...style },
+  }
+}
+
+t('node body scroll is native only while its node is selected', () => {
+  const root = fakeElement(['react-flow'])
+  const unselected = fakeElement(['react-flow__node'], root)
+  const unselectedBody = fakeElement(['rich-content'], unselected, { scrollHeight: 400, clientHeight: 100 }, { overflowY: 'auto' })
+  assert.equal(nativeWheelScrollTarget(unselectedBody, root, 0, 20, (el) => el._style), null)
+
+  const selected = fakeElement(['react-flow__node', 'selected'], root)
+  const selectedBody = fakeElement(['rich-content'], selected, { scrollHeight: 400, clientHeight: 100 }, { overflowY: 'auto' })
+  assert.equal(nativeWheelScrollTarget(selectedBody, root, 0, 20, (el) => el._style), selectedBody)
+})
+
+t('open part catalog keeps native scrolling even without a selected-node ancestor', () => {
+  const root = fakeElement(['react-flow'])
+  const editor = fakeElement(['system-part-editor'], root)
+  const list = fakeElement(['system-observation-catalog-list'], editor, { scrollHeight: 500, clientHeight: 120 }, { overflowY: 'auto' })
+  assert.equal(nativeWheelScrollTarget(list, root, 0, 20, (el) => el._style), list)
+})
+
+t('share launch fallback keeps one claimant and never stores the raw token', () => {
+  const values = new Map()
+  const storage = {
+    getItem: (key) => values.get(key) ?? null,
+    setItem: (key, value) => values.set(key, value),
+    removeItem: (key) => values.delete(key),
+  }
+  const token = 'secret-share-token'
+  const first = claimShareLaunchFallback(token, { storage, now: 1, ownerId: 'tab-a' })
+  const second = claimShareLaunchFallback(token, { storage, now: 2, ownerId: 'tab-b' })
+  assert.ok(first)
+  assert.equal(second, null)
+  assert.equal(JSON.stringify([...values]), JSON.stringify([...values]).replaceAll(token, ''))
+  assert.equal(shareTokenFingerprint(token), shareTokenFingerprint(token))
+  first.release()
+  assert.ok(claimShareLaunchFallback(token, { storage, now: 3, ownerId: 'tab-b' }))
+})
+
+t('privacy release status cannot claim operator blindness before encryption', () => {
+  assert.equal(CANVAS_PRIVACY_CAPABILITIES.operatorBlind, false)
+  assert.equal(CANVAS_PRIVACY_CAPABILITIES.endToEndEncryption, false)
+  assert.ok(CANVAS_ENCRYPTION_TRANSITION.compatibilityGates.includes('explicit-mcp-key-delegation'))
+  assert.throws(() => assertPrivacyReleaseGate({ WORKFLOW_CANVAS_PUBLIC_RELEASE: 'true' }), /게이트 차단/)
+  assert.equal(assertPrivacyReleaseGate({}).publicReleaseGate, 'blocked-pending-operator-blind-storage')
+})
+
+await ta('server data access audit uses an allowlist and can fail closed', async () => {
+  let inserted = null
+  const healthyDb = { from: () => ({ insert: async (row) => { inserted = row; return { error: null } } }) }
+  const entry = {
+    actorUserId: 'actor', ownerUserId: 'owner', canvasId: 'canvas',
+    source: 'mcp', purpose: 'mcp_canvas_operation', operation: 'read',
+  }
+  assert.deepEqual(await recordCanvasDataAccess(healthyDb, entry, {}), { available: true, recorded: true })
+  assert.equal(inserted.canvas_id, 'canvas')
+
+  const unavailableDb = { from: () => ({ insert: async () => ({ error: { code: '42P01' } }) }) }
+  await assert.rejects(
+    () => recordCanvasDataAccess(unavailableDb, entry, { WORKFLOW_CANVAS_ACCESS_AUDIT_MODE: 'required' }),
+    /감사 기록/,
+  )
+  await assert.rejects(
+    () => recordCanvasDataAccess(healthyDb, { ...entry, purpose: 'arbitrary_operator_read' }, {}),
+    /허용되지 않은/,
+  )
 })
 
 console.log('shared canvas server gateway')
@@ -2914,6 +3037,7 @@ const sharedRow = {
 
 t('restrict_view: server redacts body data outside the invited group', () => {
   const result = redactCanvas({ row: sharedRow, scope: 'group', targetId: 'frame', canEdit: true, restrictView: true })
+  assert.equal(result.nodes.find((node) => node.id === 'frame').data.label, '비공개 그룹')
   const hidden = result.nodes.find((node) => node.id === 'outside')
   assert.deepEqual(hidden.data, { redacted: true })
   assert.equal(JSON.stringify(hidden).includes('비공개'), false)
@@ -2922,6 +3046,24 @@ t('restrict_view: server redacts body data outside the invited group', () => {
   assert.equal(JSON.stringify(result.edges).includes('민감한'), false)
   assert.equal(JSON.stringify(result.edges).includes('runbook'), false)
   assert.deepEqual(result.notes, [])
+})
+
+t('composed canvas-read plus group-edit saves only the group union', () => {
+  const access = {
+    row: sharedRow,
+    grants: [
+      { scope: 'canvas', canEdit: false, restrictView: false },
+      { scope: 'group', targetId: 'frame', canEdit: true, restrictView: true },
+    ],
+  }
+  const submitted = structuredClone(sharedRow.nodes)
+  submitted.find((node) => node.id === 'inside').data.text = '합성 권한으로 수정'
+  const result = applySharedCanvasUpdate(access, submitted, sharedRow.edges, {
+    notes: [{ id: 'forged' }],
+  })
+  assert.equal(result.nodes.find((node) => node.id === 'inside').data.text, '합성 권한으로 수정')
+  assert.equal(result.nodes.find((node) => node.id === 'outside').data.text, '보이면 안 됨')
+  assert.equal(Object.hasOwn(result, 'notes'), false)
 })
 
 t('restrict_view: saving redacted edges preserves the hidden original relation', () => {

@@ -5,6 +5,7 @@ import {
   systemRuntimeCapabilityDefinition,
   systemRuntimeCapabilityForPart,
 } from '../shared/systemRuntime.js'
+import { CANVAS_PRIVACY_CAPABILITIES } from '../shared/privacyCapabilities.js'
 
 const DEFAULT_TIMEOUT_MS = 5_000
 const DEFAULT_RATE_WINDOW_MS = 3_000
@@ -584,6 +585,11 @@ async function runCanvasServiceOperationsRead({
           observation('group-scope-shares', '그룹 범위 공유', 'number', count('group_scope_share_count'), { category: 'collaboration', sourceKind: 'connector' }),
           observation('node-scope-shares', '노드 범위 공유', 'number', count('node_scope_share_count'), { category: 'collaboration', sourceKind: 'connector' }),
           observation('invalid-documents', '문서 구조 경고', 'number', invalidDocuments, { category: 'integrity', sourceKind: 'connector' }),
+          observation('operator-blind', '운영자 본문 차단', 'boolean', CANVAS_PRIVACY_CAPABILITIES.operatorBlind, { category: 'security', sourceKind: 'code' }),
+          observation('end-to-end-encryption', '종단간 암호화', 'boolean', CANVAS_PRIVACY_CAPABILITIES.endToEndEncryption, { category: 'security', sourceKind: 'code' }),
+          observation('server-access-audit', '서버 접근 감사', 'status', CANVAS_PRIVACY_CAPABILITIES.serverAccessAudit, { category: 'security', sourceKind: 'code' }),
+          observation('direct-db-audit-coverage', 'DB 관리자 직접 접근 감사', 'boolean', CANVAS_PRIVACY_CAPABILITIES.auditCoversDirectDatabaseOwnerAccess, { category: 'security', sourceKind: 'code' }),
+          observation('privacy-release-gate', '개인정보 출시 게이트', 'status', CANVAS_PRIVACY_CAPABILITIES.publicReleaseGate, { category: 'security', sourceKind: 'code' }),
         ],
         items: [
           {

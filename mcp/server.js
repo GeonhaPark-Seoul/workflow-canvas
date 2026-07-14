@@ -290,6 +290,10 @@ export function buildServer(getUserId) {
       width: z.number().optional().describe('노드 너비(px). stage/system 최소 200, memo 최소 160. 생략 시 기본값.'),
       height: z.number().optional().describe('노드 높이(px). stage/memo 최소 80, system 최소 110. 생략 시 기본값.'),
       dimmed: z.boolean().optional().describe('노드를 흐리게 표시 (완료/비활성 표현용, 데이터는 유지됨).'),
+      target_group_id: z.string().optional().describe(
+        '공유 캔버스에서 편집 가능한 그룹이 여러 개일 때 새 노드를 넣을 그룹 id. ' +
+        'get_canvas의 my_permission.grants에서 group target_id를 확인하세요.'
+      ),
     },
   }, g(async (userId, a) => {
     const r = await store.createNode(userId, a.canvas_id, a)

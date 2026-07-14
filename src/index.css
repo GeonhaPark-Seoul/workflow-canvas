@@ -196,6 +196,7 @@ body[data-theme='light'] .react-flow__edge.wfc-edge.selected .wfc-relation-label
   height: 24px;
   overflow-x: auto;
   overflow-y: hidden;
+  overscroll-behavior: contain;
   scrollbar-width: none;
 }
 .system-parts-strip::-webkit-scrollbar { display: none; }
@@ -282,6 +283,7 @@ body[data-theme='light'] .react-flow__edge.wfc-edge.selected .wfc-relation-label
 .system-part-editor {
   position: relative;
   width: min(270px, calc(100vw - 24px));
+  max-height: min(680px, calc(100vh - 24px));
   box-sizing: border-box;
   border: 1px solid #4b5563;
   border-radius: 6px;
@@ -290,6 +292,8 @@ body[data-theme='light'] .react-flow__edge.wfc-edge.selected .wfc-relation-label
   color: #e5e7eb;
   padding: 10px;
   cursor: default;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 .system-part-editor.has-runtime-data {
   width: min(460px, calc(100vw - 24px));
@@ -566,6 +570,7 @@ body[data-theme='light'] .react-flow__edge.wfc-edge.selected .wfc-relation-label
 .system-observation-catalog-list {
   max-height: min(300px, 42vh);
   overflow: auto;
+  overscroll-behavior: contain;
 }
 .system-observation-category-heading {
   position: sticky;

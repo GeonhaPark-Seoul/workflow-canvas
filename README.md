@@ -190,6 +190,20 @@ claude mcp add --transport http workflow-canvas \
 - 토큰은 본인 캔버스에 대한 전체 접근 권한입니다. 유출되면 앱의 MCP 연결 목록에서 해당 토큰을 삭제하세요.
 - service_role 키는 서버(Vercel 환경변수)에만 두고 클라이언트에 노출하지 마세요.
 
+### 개인정보 출시 게이트
+
+`supabase-data-access-audit.sql`은 공유 API, MCP, 시스템 런타임이 service role로 캔버스
+본문을 읽을 때 소유자·캔버스·목적·시각만 기록하는 append-only 감사 저장소를 만듭니다.
+SQL 적용 뒤 Vercel의 `WORKFLOW_CANVAS_ACCESS_AUDIT_MODE=required`를 설정하면 감사 기록에
+실패한 서버 경로는 응답도 실패합니다. 사용자는 `get_my_canvas_data_access_audit` RPC로
+자신의 캔버스 기록을 조회할 수 있습니다.
+
+이 감사는 애플리케이션 서버 경로만 다룹니다. 현재 JSON 본문은 서버가 읽을 수 있고,
+Supabase 프로젝트 관리자가 직접 실행한 SQL을 탐지하거나 막지 못하므로 운영자 차단이나
+종단간 암호화로 표현하면 안 됩니다. `WORKFLOW_CANVAS_PUBLIC_RELEASE=true`는 이 상태에서
+프로덕션 빌드를 의도적으로 차단합니다. 해당 플래그는 클라이언트 암호화, 참여자 키 래핑,
+복구 키, 충돌 처리와 MCP 키 위임이 모두 구현된 뒤에만 활성화합니다.
+
 ## 로컬 개발
 
 ```bash
