@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Handle, NodeResizer, Position, useStore } from '@xyflow/react'
+import { Handle, NodeResizer, NodeToolbar, Position, useStore } from '@xyflow/react'
 import OpenInNotesButton from '../components/OpenInNotesButton'
 import ScopedParticipants from '../components/ScopedParticipants'
 import { sanitizeHtml } from '../lib/sanitizeHtml'
@@ -427,84 +427,93 @@ export default function SystemNode({ data, selected, id }) {
       )}
 
       {partDraft && selected && !partEditingLocked && (
-        <div
-          className="system-part-editor nodrag nowheel"
-          onPointerDown={(event) => event.stopPropagation()}
-          onClick={(event) => event.stopPropagation()}
+        <NodeToolbar
+          nodeId={id}
+          isVisible
+          position={Position.Bottom}
+          align="start"
+          offset={8}
+          style={{ zIndex: 2002, pointerEvents: 'all' }}
         >
-          <div className="system-part-editor-heading">
-            <strong>시스템 파츠</strong>
-            <button type="button" title="닫기" aria-label="닫기" onClick={() => setPartDraft(null)}>×</button>
-          </div>
-          <label>
-            <span>종류</span>
-            <select value={partDraft.kind} onChange={(event) => setPartDraft({ ...partDraft, kind: event.target.value })}>
-              {SYSTEM_PART_KIND_DEFS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
-            </select>
-          </label>
-          <label>
-            <span>이름</span>
-            <input value={partDraft.label} maxLength={120} onChange={(event) => setPartDraft({ ...partDraft, label: event.target.value })} />
-          </label>
-          <label>
-            <span>참조</span>
-            <input
-              value={partDraft.ref}
-              maxLength={240}
-              placeholder={partDraft.kind === 'credential_ref' ? 'SUPABASE_ANON_KEY' : '선택 사항'}
-              onChange={(event) => setPartDraft({ ...partDraft, ref: event.target.value })}
-            />
-          </label>
-          <label>
-            <span>노출</span>
-            <select value={partDraft.exposure} onChange={(event) => setPartDraft({ ...partDraft, exposure: event.target.value })}>
-              {SYSTEM_PART_EXPOSURE_DEFS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
-            </select>
-          </label>
-          {partDraftRuntimeCapability && partDraftRuntimeReality && (
-            <div
-              className={`system-part-runtime is-${partDraftRuntimeReality.id}`}
-              style={{ '--runtime-color': partDraftRuntimeReality.color }}
-              title={runtimeTitle(partDraftRuntime, partDraftRuntimeReality)}
-            >
-              <span
-                className="system-part-runtime-dot"
-                style={{ '--runtime-color': partDraftRuntimeReality.color }}
-                aria-hidden="true"
-              />
-              <strong>{partDraftRuntimeReality.label}</strong>
-              <span className="system-part-runtime-summary">
-                {partDraftRuntime?.summary || partDraftRuntimeCapability.label}
-              </span>
-              {(Number.isFinite(partDraftRuntime?.latencyMs) || partDraftRuntime?.checkedAt) && (
-                <span className="system-part-runtime-latency">
-                  {Number.isFinite(partDraftRuntime?.latencyMs) ? `${partDraftRuntime.latencyMs}ms` : ''}
-                  {Number.isFinite(partDraftRuntime?.latencyMs) && partDraftRuntime?.checkedAt ? ' · ' : ''}
-                  {runtimeCheckedAtLabel(partDraftRuntime?.checkedAt)}
-                </span>
-              )}
-              <button
-                type="button"
-                className="system-part-runtime-check"
-                title={data.canRunSystemChecks ? '연결 상태 확인' : '로그인 후 연결 상태 확인'}
-                aria-label="연결 상태 확인"
-                disabled={!data.canRunSystemChecks || partDraftRuntime?.status === 'checking'}
-                onClick={() => data.onCheckSystemPart?.(id, persistedPartDraft)}
-              >
-                ↻
-              </button>
+          <div
+            className="system-part-editor nodrag nowheel"
+            onPointerDown={(event) => event.stopPropagation()}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="system-part-editor-heading">
+              <strong>시스템 파츠</strong>
+              <button type="button" title="닫기" aria-label="닫기" onClick={() => setPartDraft(null)}>×</button>
             </div>
-          )}
-          {partError && <div className="system-part-editor-error">{partError}</div>}
-          <div className="system-part-editor-actions">
-            {systemParts.some((part) => part.id === partDraft.id) && (
-              <button type="button" className="is-delete" onClick={removePart}>삭제</button>
+            <label>
+              <span>종류</span>
+              <select value={partDraft.kind} onChange={(event) => setPartDraft({ ...partDraft, kind: event.target.value })}>
+                {SYSTEM_PART_KIND_DEFS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
+              </select>
+            </label>
+            <label>
+              <span>이름</span>
+              <input value={partDraft.label} maxLength={120} onChange={(event) => setPartDraft({ ...partDraft, label: event.target.value })} />
+            </label>
+            <label>
+              <span>참조</span>
+              <input
+                value={partDraft.ref}
+                maxLength={240}
+                placeholder={partDraft.kind === 'credential_ref' ? 'SUPABASE_ANON_KEY' : '선택 사항'}
+                onChange={(event) => setPartDraft({ ...partDraft, ref: event.target.value })}
+              />
+            </label>
+            <label>
+              <span>노출</span>
+              <select value={partDraft.exposure} onChange={(event) => setPartDraft({ ...partDraft, exposure: event.target.value })}>
+                {SYSTEM_PART_EXPOSURE_DEFS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
+              </select>
+            </label>
+            {partDraftRuntimeCapability && partDraftRuntimeReality && (
+              <div
+                className={`system-part-runtime is-${partDraftRuntimeReality.id}`}
+                style={{ '--runtime-color': partDraftRuntimeReality.color }}
+                title={runtimeTitle(partDraftRuntime, partDraftRuntimeReality)}
+              >
+                <span
+                  className="system-part-runtime-dot"
+                  style={{ '--runtime-color': partDraftRuntimeReality.color }}
+                  aria-hidden="true"
+                />
+                <strong>{partDraftRuntimeReality.label}</strong>
+                <span className="system-part-runtime-summary">
+                  {partDraftRuntime?.summary || partDraftRuntimeCapability.label}
+                </span>
+                {(Number.isFinite(partDraftRuntime?.latencyMs) || partDraftRuntime?.checkedAt) && (
+                  <span className="system-part-runtime-latency">
+                    {Number.isFinite(partDraftRuntime?.latencyMs) ? `${partDraftRuntime.latencyMs}ms` : ''}
+                    {Number.isFinite(partDraftRuntime?.latencyMs) && partDraftRuntime?.checkedAt ? ' · ' : ''}
+                    {runtimeCheckedAtLabel(partDraftRuntime?.checkedAt)}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  className="system-part-runtime-check"
+                  title={data.canRunSystemChecks ? '연결 상태 확인' : '로그인 후 연결 상태 확인'}
+                  aria-label="연결 상태 확인"
+                  disabled={!data.canRunSystemChecks || partDraftRuntime?.status === 'checking'}
+                  onClick={() => data.onCheckSystemPart?.(id, persistedPartDraft)}
+                >
+                  ↻
+                </button>
+              </div>
             )}
-            <span />
-            <button type="button" onClick={() => setPartDraft(null)}>취소</button>
-            <button type="button" className="is-save" onClick={savePart}>저장</button>
+            {partError && <div className="system-part-editor-error">{partError}</div>}
+            <div className="system-part-editor-actions">
+              {systemParts.some((part) => part.id === partDraft.id) && (
+                <button type="button" className="is-delete" onClick={removePart}>삭제</button>
+              )}
+              <span />
+              <button type="button" onClick={() => setPartDraft(null)}>취소</button>
+              <button type="button" className="is-save" onClick={savePart}>저장</button>
+            </div>
           </div>
-        </div>
+        </NodeToolbar>
       )}
     </div>
   )

@@ -237,10 +237,7 @@ body[data-theme='light'] .react-flow__edge.wfc-edge.selected .wfc-relation-label
   color: #fff;
 }
 .system-part-editor {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  z-index: 30;
+  position: relative;
   width: 270px;
   box-sizing: border-box;
   border: 1px solid #4b5563;
@@ -250,9 +247,6 @@ body[data-theme='light'] .react-flow__edge.wfc-edge.selected .wfc-relation-label
   color: #e5e7eb;
   padding: 10px;
   cursor: default;
-}
-.react-flow__node-system:has(.system-part-editor) {
-  z-index: 2002 !important;
 }
 .system-part-editor-heading,
 .system-part-editor-actions {
