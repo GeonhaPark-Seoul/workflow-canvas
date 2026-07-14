@@ -31,6 +31,29 @@
 입력 단계에서 거부합니다. 적용된 노드에는 출처·자원 키·관찰 지문이 남아 같은 자원을
 중복 제안하지 않고, 이후 구현 지문이 달라지거나 소스에서 사라지면 다시 검토 신호를 냅니다.
 
+### 소스 코드 디지털 트윈과 통합 상태 이력
+
+제품 소유자는 Workflow Canvas 시스템 지도에서 `코드` 레일을 열어 배포에 포함된 소스 구조를
+읽을 수 있습니다. 빌드 시 Babel AST와 SQL 선언을 결정적으로 분석해 파일, 함수, import,
+API 경로, DB 테이블·함수·RLS, 환경변수 **이름**, 테스트, 배포 설정을 자연어 코드 트리로
+만듭니다. 기능·코드·DB·보안·배포 관점과 검색을 지원하며, 각 항목은 GitHub의 실제 코드
+줄로 이동할 수 있습니다.
+
+GitHub push webhook은 서명과 저장소를 모두 확인한 뒤 commit SHA, branch, 변경 경로만
+append-only 이벤트 이력에 기록합니다. 소스 본문, 커밋 메시지, 환경변수 값, 키·토큰 값은
+저장하지 않습니다. push는 `배포 전 변경` 신호이고, 해당 SHA를 포함한 새 Vercel 배포가
+열려야 AST 코드 트리의 운영 기준이 바뀝니다.
+
+`이력` 탭은 코드 manifest, DB 선언, Vercel 배포 식별자, 집계 운영 지표, 런타임 검증 상태,
+개인정보 기능 선언을 한 시점으로 묶어 비교합니다. 이 표는 코드·DB·배포를 조작하지 않는
+내부 운영 기록입니다. 외부 공증이나 프로젝트 관리자도 위조할 수 없는 투명성 증명은 아닙니다.
+
+- AST 추출기: [`scripts/source-twin-scanner.mjs`](scripts/source-twin-scanner.mjs)
+- 공통 모델: [`shared/sourceTwin.js`](shared/sourceTwin.js)
+- 소유자 전용 API·webhook: [`api/source-twin.js`](api/source-twin.js) · [`api/source-twin-webhook.js`](api/source-twin-webhook.js)
+- 소스 트리 UI: [`src/components/SourceTwinPanel.jsx`](src/components/SourceTwinPanel.jsx)
+- 상태 이력 SQL: [`supabase-source-twin-history.sql`](supabase-source-twin-history.sql)
+
 ---
 
 ## MCP 서버
@@ -59,6 +82,9 @@ Supabase 데이터베이스를 기반으로 동작합니다.
 | `create_canvas` | 새 캔버스 생성 |
 | `create_workflow_system_map` | 제품 소유자 전용 내부 시스템 지도 생성 (환경변수로 허용 사용자 제한) |
 | `inspect_workflow_system_map` | 제품 소유자 전용 시스템 지도 읽기 전용 점검 (코드·SQL·설정 비교, 쓰기 없음) |
+| `inspect_source_twin` | 제품 소유자 전용 AST 코드 트리·변경·운영 상태 읽기 (소스 본문·비밀값 제외) |
+| `list_source_twin_history` | 제품 소유자 전용 통합 상태 스냅샷 목록 (읽기 전용) |
+| `compare_source_twin_snapshots` | 두 통합 상태 스냅샷의 코드·DB·배포·운영 차이 비교 (읽기 전용) |
 | `preview_workflow_system_map_relation_repair` | 제품 소유자 전용 관계 복구 미리보기 (revision 고정 plan 생성, 쓰기 없음) |
 | `repair_workflow_system_map_relations` | 승인된 plan에서 메타데이터가 완전히 없는 관계만 제한적으로 복구 |
 | `rename_canvas` | 캔버스 이름 변경 (탭에 반영) |
@@ -118,6 +144,11 @@ digest로 변환됩니다.
 연결선 삭제, 관계 타입 변경, 근거 편집은 허용됩니다.
 관계 복구 도구도 이 트리거가 설치되고 활성화된 것을 확인하기 전에는 적용을 거부합니다.
 
+소스 트윈의 GitHub push 이벤트와 통합 상태 이력을 사용하려면
+[`supabase-source-twin-history.sql`](supabase-source-twin-history.sql)을 실행하세요. 두 테이블은
+브라우저 역할에 공개되지 않고 service role의 조회·추가만 허용하며, update/delete는 트리거가
+거부합니다.
+
 ### 2) 토큰 발급
 
 앱에서 로그인한 뒤 프로필 → `MCP 연결` → `새 토큰 만들기`를 사용하세요.
@@ -131,7 +162,8 @@ Vercel 프로젝트 → Settings → Environment Variables에 추가:
 |---|---|---|
 | `SUPABASE_SERVICE_ROLE_KEY` | ✅ | Supabase Dashboard → Settings → API의 service_role 키 (서버에서만 사용, 절대 노출 금지) |
 | `SUPABASE_URL` | 선택 | 기본값은 앱의 Supabase 프로젝트 URL |
-| `WORKFLOW_CANVAS_OWNER_USER_ID` | 선택 | 내부 시스템 지도 생성·점검·복구 도구를 허용할 제품 소유자의 Supabase Auth 사용자 UUID. 미설정 시 관련 도구는 비활성화됨 |
+| `WORKFLOW_CANVAS_OWNER_USER_ID` | 선택 | 내부 시스템 지도와 소스 트윈 조회·이력을 허용할 제품 소유자의 Supabase Auth 사용자 UUID. 미설정 시 관련 도구는 비활성화됨 |
+| `WORKFLOW_CANVAS_GITHUB_WEBHOOK_SECRET` | 선택 | GitHub push 서명 검증용 임의의 긴 비밀값. 미설정 시 배포 manifest 비교만 사용 |
 
 ### 4) 배포
 
@@ -141,6 +173,11 @@ vercel --prod
 
 배포 후 엔드포인트: `https://<your-app>.vercel.app/api/mcp`.
 Streamable HTTP 규격상 브라우저 GET은 의도적으로 `405`를 반환하고 MCP의 POST 요청만 처리합니다.
+
+GitHub 실시간 변경 신호를 쓰려면 저장소 Settings → Webhooks에서 Payload URL을
+`https://<your-app>.vercel.app/api/source-twin-webhook`, Content type을 `application/json`,
+Secret을 Vercel의 `WORKFLOW_CANVAS_GITHUB_WEBHOOK_SECRET`과 같게 설정하고 push 이벤트만
+선택하세요. 다른 저장소 이름의 이벤트는 서명이 맞아도 거부됩니다.
 
 ---
 
@@ -219,6 +256,8 @@ API 키, 토큰의 실제 값은 생성 파일에 저장하지 않습니다. 관
 ```bash
 npm run discover:update  # 읽기 전용 발견 manifest 갱신
 npm run discover:check   # 커밋할 manifest가 현재 소스와 일치하는지 확인
+npm run source-twin:update # AST 소스 코드 디지털 트윈 갱신
+npm run source-twin:check  # 배포 manifest와 현재 소스 일치 확인
 npm test
 ```
 

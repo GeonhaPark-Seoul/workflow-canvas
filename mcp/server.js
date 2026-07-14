@@ -19,12 +19,14 @@ import {
   RELATION_TYPE_IDS,
 } from '../shared/relationOntology.js'
 import { WORKFLOW_RELATION_REPAIR_CONFIRMATION } from '../shared/workflowSystemMapRepair.js'
+import { SOURCE_TWIN_PERSPECTIVES } from '../shared/sourceTwin.js'
 
 const SYSTEM_KIND_IDS = SYSTEM_KIND_DEFS.map(({ id }) => id)
 const SYSTEM_ENVIRONMENT_IDS = SYSTEM_ENVIRONMENT_DEFS.map(({ id }) => id)
 const SYSTEM_SOURCE_IDS = SYSTEM_SOURCE_DEFS.map(({ id }) => id)
 const RELATION_SOURCE_IDS = RELATION_SOURCE_DEFS.map(({ id }) => id)
 const RELATION_CONFIDENCE_IDS = RELATION_CONFIDENCE_DEFS.map(({ id }) => id)
+const SOURCE_TWIN_PERSPECTIVE_IDS = Object.keys(SOURCE_TWIN_PERSPECTIVES)
 
 // Reused across create/update schemas. These fields describe a declared system
 // entity; no MCP input can supply the server-owned proof required for LIVE.
@@ -167,6 +169,13 @@ sourceHandle/targetHandle은 생략 가능 — 생략하면 실제 좌표 기반
 - changed, needs_review, unmodeled는 오류나 취약점이 확정되었다는 뜻이 아니라 사람이 확인할 지점이라는 뜻입니다.
 - 점검 결과를 근거로 지도·코드·DB를 자동 수정하지 마세요. 수정은 영향 범위와 보안 경계를 설명하고 사용자의 별도 승인을 받은 다음 진행합니다.
 - 응답의 writes_performed가 false인지 확인하고, 발견 결과와 기준선 신뢰도를 함께 설명하세요.
+
+### 읽기 전용 소스 코드 디지털 트윈
+- inspect_source_twin은 빌드 시 AST로 추출한 파일·함수·import·API·DB 접근·환경변수 이름·테스트·배포 구조를 읽습니다.
+- 소스 본문과 환경변수·키·토큰의 실제 값은 수집하거나 반환하지 않습니다. 실제 코드는 반환된 경로와 GitHub 링크에서 사용자가 별도로 확인합니다.
+- change_set과 GitHub push 이벤트는 변경 신호이며, 배포 성공이나 런타임 동작을 단독으로 증명하지 않습니다.
+- list_source_twin_history와 compare_source_twin_snapshots는 코드·DB 선언·배포·운영 상태의 내부 append-only 이력을 읽습니다. 외부 공증이나 운영자도 위조할 수 없는 증명으로 표현하지 마세요.
+- 세 도구는 모두 읽기 전용입니다. 응답의 writes_performed=false를 확인하고 코드·DB·배포를 자동 수정하지 마세요.
 
 ### 시스템 지도 관계 복구
 - preview_workflow_system_map_relation_repair는 읽기 전용입니다. 먼저 실행해 repairable, protected, blockers와 plan_id를 사용자에게 그대로 설명하세요.
@@ -502,6 +511,41 @@ export function buildServer(getUserId) {
       canvas_id: z.string().describe('검사할 Workflow Canvas 시스템 지도의 캔버스 ID'),
     },
   }, g(async (userId, a) => ok(await store.inspectWorkflowSystemMap(userId, a.canvas_id))))
+
+  server.registerTool('inspect_source_twin', {
+    description:
+      '제품 소유자 전용 읽기 전용 조회: 배포에 포함된 AST 소스 manifest에서 파일·함수·import·API·DB 접근·' +
+      '환경변수 이름·테스트·배포 구조와 최근 변경 신호를 조회합니다. 소스 본문과 비밀값은 반환하지 않으며 ' +
+      '코드·DB·캔버스·배포를 수정하지 않습니다.',
+    inputSchema: {
+      perspective: z.enum(SOURCE_TWIN_PERSPECTIVE_IDS).optional().describe('전체/기능/코드/DB/보안/배포 관점. 기본 all.'),
+      query: z.string().max(120).optional().describe('파일명·함수명·경로·요약 검색어.'),
+      limit: z.number().int().min(1).max(500).optional().describe('반환할 entity 최대 개수. 기본 200.'),
+    },
+  }, g(async (userId, a) => ok(await store.inspectSourceTwin(userId, a))))
+
+  server.registerTool('list_source_twin_history', {
+    description:
+      '제품 소유자 전용 읽기 전용 조회: 코드·DB 선언·배포·운영 상태를 함께 기록한 내부 append-only 스냅샷 목록을 ' +
+      '가져옵니다. 이 이력은 운영 추적용이며 외부 공증이나 운영자도 위조할 수 없는 증명은 아닙니다.',
+    inputSchema: {
+      limit: z.number().int().min(1).max(100).optional().describe('최근 스냅샷 개수. 기본 30.'),
+    },
+  }, g(async (userId, a) => ok(await store.getSourceTwinHistory(userId, a.limit))))
+
+  server.registerTool('compare_source_twin_snapshots', {
+    description:
+      '제품 소유자 전용 읽기 전용 비교: 두 통합 상태 스냅샷 사이의 코드 entity, DB 선언, 배포, 운영 지표, ' +
+      '런타임 검증, 보안 선언 차이를 계산합니다. 어떤 시스템도 수정하지 않습니다.',
+    inputSchema: {
+      from_snapshot_id: z.string().min(1).max(160).describe('이전 스냅샷 ID'),
+      to_snapshot_id: z.string().min(1).max(160).describe('이후 스냅샷 ID'),
+    },
+  }, g(async (userId, a) => ok(await store.compareSourceTwinHistory(
+    userId,
+    a.from_snapshot_id,
+    a.to_snapshot_id,
+  ))))
 
   server.registerTool('preview_workflow_system_map_relation_repair', {
     description:

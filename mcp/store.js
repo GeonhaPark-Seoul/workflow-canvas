@@ -1519,3 +1519,66 @@ export async function deleteEdge(userId, canvasId, edgeId) {
   await saveArrays(access.ownerId, canvasId, row.nodes ?? [], edges, row.updated_at)
   return { deleted: edgeId, remaining_edges: edges.length }
 }
+
+export async function inspectSourceTwin(userId, {
+  perspective = 'all',
+  query = '',
+  limit = 200,
+} = {}) {
+  const [{ currentSourceTwinState, requireSourceTwinOwner }, { sourceTwinEntities }] = await Promise.all([
+    import('./sourceTwinStore.js'),
+    import('../shared/sourceTwin.js'),
+  ])
+  requireSourceTwinOwner(userId, process.env.WORKFLOW_CANVAS_OWNER_USER_ID)
+  const state = await currentSourceTwinState(admin())
+  const entities = sourceTwinEntities(state.manifest, { perspective, query, limit })
+  const entityIds = new Set(entities.map((entity) => entity.id))
+  const relations = (state.manifest.relations ?? [])
+    .filter((relation) => entityIds.has(relation.source) && entityIds.has(relation.target))
+    .slice(0, 2_000)
+  return {
+    mode: 'read-only-source-twin',
+    writes_performed: false,
+    source: state.manifest.source,
+    manifest_id: state.manifest.id,
+    summary: state.manifest.summary,
+    perspective,
+    query,
+    entities,
+    relations,
+    change_set: state.manifest.changeSet,
+    deployment: state.deployment,
+    database: state.database,
+    operations: state.operations,
+    runtime: state.runtime,
+    privacy: state.privacy,
+    webhook_configured: state.webhookConfigured,
+    recent_events: state.events,
+    source_content_included: false,
+    credential_values_included: false,
+  }
+}
+
+export async function getSourceTwinHistory(userId, limit = 30) {
+  const { listSourceTwinSnapshots, requireSourceTwinOwner } = await import('./sourceTwinStore.js')
+  requireSourceTwinOwner(userId, process.env.WORKFLOW_CANVAS_OWNER_USER_ID)
+  return {
+    mode: 'read-only-source-twin-history',
+    writes_performed: false,
+    ...(await listSourceTwinSnapshots(admin(), limit)),
+    evidence_scope: 'internal-append-only-database-history',
+    external_immutability_proof: false,
+  }
+}
+
+export async function compareSourceTwinHistory(userId, fromSnapshotId, toSnapshotId) {
+  const { compareStoredSourceTwinSnapshots, requireSourceTwinOwner } = await import('./sourceTwinStore.js')
+  requireSourceTwinOwner(userId, process.env.WORKFLOW_CANVAS_OWNER_USER_ID)
+  return {
+    mode: 'read-only-source-twin-comparison',
+    writes_performed: false,
+    comparison: await compareStoredSourceTwinSnapshots(admin(), fromSnapshotId, toSnapshotId),
+    evidence_scope: 'internal-append-only-database-history',
+    external_immutability_proof: false,
+  }
+}

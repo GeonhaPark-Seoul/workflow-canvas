@@ -24,6 +24,7 @@ import AuthPanel from './components/AuthPanel'
 import InvitePopover from './components/InvitePopover'
 import NotesPanel from './components/NotesPanel'
 import DigitalTwinReviewPanel from './components/DigitalTwinReviewPanel'
+import SourceTwinPanel from './components/SourceTwinPanel'
 import EdgeRelationEditor from './components/EdgeRelationEditor'
 import {
   initCanvases, loadCanvasData, saveCanvasData, deleteCanvasData,
@@ -482,6 +483,7 @@ export default function App() {
   const [renamingTypeIdx, setRenamingTypeIdx] = useState(null)
   const [notesPanel, setNotesPanel] = useState(null) // { type: 'stage'|'memo'|'content'|'system' } | null
   const [twinReviewOpen, setTwinReviewOpen] = useState(false)
+  const [sourceTwinOpen, setSourceTwinOpen] = useState(false)
   const [digitalTwinReview, setDigitalTwinReview] = useState(null)
   const [twinProposalPreview, setTwinProposalPreview] = useState(null) // { itemId, itemFingerprint } | null
   const [twinProposalStatus, setTwinProposalStatus] = useState(null) // { type, message } | null
@@ -2313,6 +2315,7 @@ export default function App() {
 
   useEffect(() => {
     setDigitalTwinReview(null)
+    setSourceTwinOpen(false)
     setTwinProposalPreview(null)
     setTwinProposalStatus(null)
   }, [activeCanvasId])
@@ -3516,6 +3519,7 @@ export default function App() {
   }, [edges, focusNode, nodes, rfInstance, setEdges])
 
   const openNotesPanel = useCallback((type) => {
+    setSourceTwinOpen(false)
     setTwinReviewOpen(false)
     setTwinProposalPreview(null)
     setTwinProposalStatus(null)
@@ -3524,6 +3528,7 @@ export default function App() {
   }, [])
 
   const openNodeInNotes = useCallback((nodeId, type) => {
+    setSourceTwinOpen(false)
     if (!['stage', 'memo', 'content', 'system'].includes(type)) return
     setTwinReviewOpen(false)
     setTwinProposalPreview(null)
@@ -3533,11 +3538,21 @@ export default function App() {
   }, [])
 
   const toggleDigitalTwinReview = useCallback(() => {
+    setSourceTwinOpen(false)
     setNotesPanel(null)
     setNotesSelectedId(null)
     setTwinProposalPreview(null)
     setTwinProposalStatus(null)
     setTwinReviewOpen((open) => !open)
+  }, [])
+
+  const toggleSourceTwin = useCallback(() => {
+    setNotesPanel(null)
+    setNotesSelectedId(null)
+    setTwinReviewOpen(false)
+    setTwinProposalPreview(null)
+    setTwinProposalStatus(null)
+    setSourceTwinOpen((open) => !open)
   }, [])
 
   // ── Saved views ───────────────────────────────────────────────────────────
@@ -4208,6 +4223,27 @@ export default function App() {
           borderRadius: notesSide === 'right' ? '10px 0 0 10px' : '0 10px 10px 0', padding: 5,
         }}
       >
+        {digitalTwinReview && perm.role === 'owner' && (
+          <>
+            <button
+              type="button"
+              className="notes-rail-button source-twin-rail-button"
+              data-tooltip="소스 코드 트리와 상태 이력"
+              title="소스 코드 트리와 상태 이력"
+              aria-label="소스 코드 트리와 상태 이력"
+              onClick={toggleSourceTwin}
+              style={{
+                background: sourceTwinOpen ? '#06b6d433' : 'transparent',
+                border: 'none', borderRadius: 6, color: sourceTwinOpen ? '#67e8f9' : '#ccc',
+                width: 32, height: 32, fontSize: 9, fontWeight: 800, padding: 0, cursor: 'pointer',
+                display: 'grid', placeItems: 'center', fontFamily: 'inherit',
+              }}
+            >
+              코드
+            </button>
+            <div style={{ height: 1, background: '#ffffff18', margin: '2px 3px' }} />
+          </>
+        )}
         {digitalTwinReview && (
           <>
             <button
@@ -4519,6 +4555,13 @@ export default function App() {
           proposalPlanError={twinProposalPlan.error}
           onPreviewProposal={previewDigitalTwinProposal}
           onApplyProposal={applyDigitalTwinProposal}
+        />
+      )}
+      {sourceTwinOpen && digitalTwinReview && perm.role === 'owner' && (
+        <SourceTwinPanel
+          side={notesSide}
+          onSideChange={setNotesSide}
+          onClose={() => setSourceTwinOpen(false)}
         />
       )}
     </div>

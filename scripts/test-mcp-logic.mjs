@@ -1455,6 +1455,9 @@ t('generated discovery manifest covers current API, DB, storage, realtime and MC
   assert.ok(operationsDetails.catalogFieldIds.includes('canvas-bodies'))
   for (const tool of [
     'inspect_workflow_system_map',
+    'inspect_source_twin',
+    'list_source_twin_history',
+    'compare_source_twin_snapshots',
     'preview_workflow_system_map_relation_repair',
     'repair_workflow_system_map_relations',
   ]) assert.ok(resources['collection:mcp-tools'].details.items.includes(tool), `missing MCP tool: ${tool}`)

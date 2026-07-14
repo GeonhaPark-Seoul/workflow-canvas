@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 
 const read = (name) => readFile(new URL(`../${name}`, import.meta.url), 'utf8')
-const [shares, profiles, profilePrivacy, images, tokens, notes, relationGuard, runtimeRead, runtimeObservations, dataAccessAudit] = await Promise.all([
+const [shares, profiles, profilePrivacy, images, tokens, notes, relationGuard, runtimeRead, runtimeObservations, dataAccessAudit, sourceTwinHistory] = await Promise.all([
   read('supabase-shares.sql'),
   read('supabase-profiles.sql'),
   read('supabase-profile-privacy.sql'),
@@ -13,6 +13,7 @@ const [shares, profiles, profilePrivacy, images, tokens, notes, relationGuard, r
   read('supabase-runtime-read.sql'),
   read('supabase-runtime-observations.sql'),
   read('supabase-data-access-audit.sql'),
+  read('supabase-source-twin-history.sql'),
 ])
 
 const restrictedFunctions = [
@@ -123,5 +124,17 @@ assert.match(dataAccessAudit, /security definer stable set search_path = public/
 assert.match(dataAccessAudit, /where audit\.owner_user_id = auth\.uid\(\)/i)
 assert.match(dataAccessAudit, /revoke execute on function public\.get_my_canvas_data_access_audit\(text, integer\) from public, anon;/i)
 assert.match(dataAccessAudit, /grant execute on function public\.get_my_canvas_data_access_audit\(text, integer\) to authenticated;/i)
+
+for (const table of ['source_twin_snapshots', 'source_twin_events']) {
+  assert.match(sourceTwinHistory, new RegExp(`create table if not exists public\\.${table}`, 'i'))
+  assert.match(sourceTwinHistory, new RegExp(`alter table public\\.${table} enable row level security`, 'i'))
+}
+assert.match(sourceTwinHistory, /revoke all on table public\.source_twin_snapshots, public\.source_twin_events from public, anon, authenticated;/i)
+assert.match(sourceTwinHistory, /grant select, insert on table public\.source_twin_snapshots, public\.source_twin_events to service_role;/i)
+assert.doesNotMatch(sourceTwinHistory, /grant [^;]*(?:update|delete)[^;]*source_twin_(?:snapshots|events)/i)
+assert.match(sourceTwinHistory, /before update or delete on public\.source_twin_snapshots/i)
+assert.match(sourceTwinHistory, /before update or delete on public\.source_twin_events/i)
+assert.match(sourceTwinHistory, /raise exception 'source twin history is append-only'/i)
+assert.match(sourceTwinHistory, /revoke execute on function public\.reject_source_twin_history_mutation\(\) from public, anon, authenticated;/i)
 
 console.log('SQL security checks passed')
