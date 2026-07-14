@@ -117,6 +117,17 @@ export function buildDiscoveryManifest(filesInput) {
         freshnessMs: capability.freshnessMs,
         partKinds: capability.partKinds,
         partRefs: capability.partRefs,
+        catalogFields: capability.catalogFields.map((field) => ({
+          id: field.id,
+          category: field.category,
+          valueType: field.valueType,
+          sensitivity: field.sensitivity,
+          sourceKind: field.sourceKind,
+          refreshMode: field.refreshMode,
+          evidenceRef: field.evidenceRef,
+          defaultAvailability: field.defaultAvailability,
+          lockedAvailability: field.lockedAvailability,
+        })),
         implementation: sourceRefs.map((ref) => [ref, fileFingerprints[ref]]),
       },
       {
@@ -129,6 +140,8 @@ export function buildDiscoveryManifest(filesInput) {
         targetNodeId: capability.targetNodeId,
         pathEdgeIds: capability.pathEdgeIds,
         freshnessMs: capability.freshnessMs,
+        catalogFieldCount: capability.catalogFields.length,
+        catalogFieldIds: capability.catalogFields.map((field) => field.id),
       },
     )
   }

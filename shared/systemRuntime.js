@@ -1,6 +1,10 @@
 import { systemPartContainsSecretLiteral } from './systemPartOntology.js'
+import {
+  SYSTEM_OBSERVATION_AVAILABILITY_DEFS,
+  systemObservationCatalogForCapability,
+} from './systemObservationCatalog.js'
 
-export const SYSTEM_RUNTIME_SCHEMA_VERSION = 2
+export const SYSTEM_RUNTIME_SCHEMA_VERSION = 3
 export const SYSTEM_RUNTIME_MAX_METRIC_GROUPS = 12
 export const SYSTEM_RUNTIME_MAX_OBSERVATIONS = 64
 
@@ -29,6 +33,11 @@ const capability = (definition) => {
     sideEffect: operation.sideEffect,
     risk: operation.risk,
     pathEdgeIds: Object.freeze([...(definition.pathEdgeIds ?? [])]),
+    sourceRefs: Object.freeze([...new Set([
+      'shared/systemObservationCatalog.js',
+      ...(definition.sourceRefs ?? []),
+    ])]),
+    catalogFields: systemObservationCatalogForCapability(definition.id),
   })
 }
 
@@ -170,6 +179,7 @@ export const SYSTEM_RUNTIME_CAPABILITY_DEFS = Object.freeze([
 const CAPABILITY_BY_ID = new Map(SYSTEM_RUNTIME_CAPABILITY_DEFS.map((definition) => [definition.id, definition]))
 const SAFE_ID = /^[a-zA-Z0-9][a-zA-Z0-9._:-]{0,239}$/
 const SAFE_ERROR_CODE = /^[A-Z][A-Z0-9_]{0,79}$/
+const OBSERVATION_AVAILABILITY_IDS = new Set(SYSTEM_OBSERVATION_AVAILABILITY_DEFS.map((item) => item.id))
 const REQUEST_KEYS = new Set(['canvasId', 'nodeId', 'partId'])
 const CANVAS_REQUEST_KEYS = new Set(['canvasId'])
 const BATCH_REQUEST_KEYS = new Set(['canvasId', 'action'])
@@ -258,6 +268,112 @@ export function normalizeSystemRuntimeBatchRequest(value) {
   return { canvasId: requiredId(value.canvasId, '캔버스 ID'), action: 'check_all' }
 }
 
+function catalogFieldBase(field) {
+  return {
+    id: field.id,
+    category: field.category,
+    label: field.label,
+    valueType: field.valueType,
+    unit: field.unit,
+    sensitivity: field.sensitivity,
+    sourceKind: field.sourceKind,
+    refreshMode: field.refreshMode,
+    evidenceRef: field.evidenceRef,
+  }
+}
+
+function defaultCatalogEntry(field) {
+  return {
+    ...catalogFieldBase(field),
+    availability: field.defaultAvailability,
+    verification: field.lockedAvailability ? 'declared' : 'unavailable',
+    reason: field.defaultReason,
+  }
+}
+
+function normalizedObservationValue(item, field) {
+  if (field.valueType === 'number' || field.valueType === 'duration_ms') {
+    const number = Number(item.value)
+    return Number.isFinite(number)
+      ? Math.max(-1_000_000_000_000, Math.min(1_000_000_000_000, number))
+      : 0
+  }
+  if (field.valueType === 'boolean') return item.value === true
+  if (field.valueType === 'timestamp') {
+    const timestamp = new Date(item.value)
+    if (!Number.isFinite(timestamp.getTime())) {
+      throw new SystemRuntimeContractError('INVALID_RESULT', '운영 관측 시각이 올바르지 않습니다.')
+    }
+    return timestamp.toISOString()
+  }
+  return nonSecretText(item.value, 240)
+}
+
+function metricGroupObservations(value) {
+  if (!Array.isArray(value.items)) return []
+  const observations = []
+  let latestUpdate = ''
+  for (const group of value.items.slice(0, SYSTEM_RUNTIME_MAX_METRIC_GROUPS)) {
+    if (!plainObject(group)) continue
+    for (const metric of (Array.isArray(group.metrics) ? group.metrics : []).slice(0, 16)) {
+      if (!plainObject(metric)) continue
+      observations.push({ id: metric.id, value: metric.value, availability: 'available' })
+    }
+    if (!latestUpdate && typeof group.updatedAt === 'string') latestUpdate = group.updatedAt
+  }
+  if (latestUpdate) observations.push({ id: 'latest-update', value: latestUpdate, availability: 'available' })
+  return observations
+}
+
+function normalizeObservationCatalog(capability, rawItems, checkedAt, resultVerification) {
+  const fieldById = new Map(capability.catalogFields.map((field) => [field.id, field]))
+  const rawById = new Map()
+  for (const item of rawItems.slice(0, SYSTEM_RUNTIME_MAX_OBSERVATIONS)) {
+    if (!plainObject(item)) throw new SystemRuntimeContractError('INVALID_RESULT', '운영 관측값이 올바르지 않습니다.')
+    const id = requiredId(item.id, '운영 관측값 ID')
+    if (!fieldById.has(id) || rawById.has(id)) continue
+    rawById.set(id, item)
+  }
+  return capability.catalogFields.map((field) => {
+    const item = rawById.get(field.id)
+    if (!item || field.lockedAvailability) return defaultCatalogEntry(field)
+    const requestedAvailability = OBSERVATION_AVAILABILITY_IDS.has(item.availability)
+      ? item.availability
+      : Object.hasOwn(item, 'value')
+        ? 'available'
+        : field.defaultAvailability
+    if (requestedAvailability !== 'available' || !Object.hasOwn(item, 'value')) {
+      const availability = requestedAvailability === 'available' ? 'not_observed' : requestedAvailability
+      return {
+        ...catalogFieldBase(field),
+        availability,
+        verification: 'unavailable',
+        reason: nonSecretText(item.reason, 240) || field.defaultReason,
+      }
+    }
+    const observedAt = item.observedAt ? new Date(item.observedAt) : checkedAt
+    if (!Number.isFinite(observedAt.getTime())) {
+      throw new SystemRuntimeContractError('INVALID_RESULT', '운영 관측 시각이 올바르지 않습니다.')
+    }
+    return {
+      ...catalogFieldBase(field),
+      availability: 'available',
+      verification: ['verified', 'partial', 'declared'].includes(item.verification)
+        ? item.verification
+        : resultVerification,
+      value: normalizedObservationValue(item, field),
+      observedAt: observedAt.toISOString(),
+    }
+  })
+}
+
+export function systemRuntimeCatalogForResult(capabilityId, result) {
+  const capability = systemRuntimeCapabilityDefinition(capabilityId)
+  if (!capability) return []
+  if (Array.isArray(result?.catalog)) return result.catalog
+  return capability.catalogFields.map(defaultCatalogEntry)
+}
+
 export function normalizeSystemRuntimeResult(value) {
   if (!plainObject(value)) throw new SystemRuntimeContractError('INVALID_RESULT', '연결 확인 결과가 올바르지 않습니다.')
   const capability = systemRuntimeCapabilityDefinition(value.capabilityId)
@@ -269,18 +385,28 @@ export function normalizeSystemRuntimeResult(value) {
   }
   const latency = Number(value.latencyMs)
   const errorCode = plainText(value.errorCode, 80)
+  const verification = status === 'healthy' && value.verification === 'verified'
+    ? 'verified'
+    : status === 'degraded' && ['verified', 'partial'].includes(value.verification)
+      ? 'partial'
+      : status === 'unknown'
+        ? 'unavailable'
+        : 'failed'
+  const rawObservations = ['healthy', 'degraded'].includes(status)
+    ? [
+        ...(Array.isArray(value.observations) ? value.observations : []),
+        ...(Array.isArray(value.catalog) ? value.catalog : []),
+        ...(capability.resultKind === 'metric_groups' ? metricGroupObservations(value) : []),
+      ]
+    : []
+  const catalog = normalizeObservationCatalog(capability, rawObservations, checkedAt, verification)
+  const availableObservations = catalog.filter((item) => item.availability === 'available')
   const result = {
     schemaVersion: SYSTEM_RUNTIME_SCHEMA_VERSION,
     capabilityId: capability.id,
     resultKind: capability.resultKind,
     status,
-    verification: status === 'healthy' && value.verification === 'verified'
-      ? 'verified'
-      : status === 'degraded' && ['verified', 'partial'].includes(value.verification)
-        ? 'partial'
-        : status === 'unknown'
-          ? 'unavailable'
-          : 'failed',
+    verification,
     authorization: capability.authorization,
     dataScope: capability.dataScope,
     operation: capability.operation,
@@ -290,71 +416,19 @@ export function normalizeSystemRuntimeResult(value) {
     checkedAt: checkedAt.toISOString(),
     latencyMs: Number.isFinite(latency) ? Math.max(0, Math.min(30_000, Math.round(latency))) : 0,
     summary: nonSecretText(value.summary, 180),
+    catalog,
+    catalogCount: catalog.length,
+    availableCatalogCount: availableObservations.length,
     ...(['failed', 'unknown'].includes(status) && SAFE_ERROR_CODE.test(errorCode) ? { errorCode } : {}),
   }
   if (!['healthy', 'degraded'].includes(status)) return result
   if (capability.resultKind === 'observations') {
-    const rawObservations = Array.isArray(value.observations)
-      ? value.observations.slice(0, SYSTEM_RUNTIME_MAX_OBSERVATIONS)
-      : []
-    const observationIds = new Set()
-    const observations = []
-    for (const item of rawObservations) {
-      if (!plainObject(item)) throw new SystemRuntimeContractError('INVALID_RESULT', '운영 관측값이 올바르지 않습니다.')
-      const id = requiredId(item.id, '운영 관측값 ID')
-      if (observationIds.has(id)) continue
-      observationIds.add(id)
-      const valueType = ['number', 'boolean', 'text', 'timestamp', 'duration_ms', 'status'].includes(item.valueType)
-        ? item.valueType
-        : 'text'
-      let normalizedValue
-      if (valueType === 'number' || valueType === 'duration_ms') {
-        const number = Number(item.value)
-        normalizedValue = Number.isFinite(number) ? Math.max(-1_000_000_000_000, Math.min(1_000_000_000_000, number)) : 0
-      } else if (valueType === 'boolean') {
-        normalizedValue = item.value === true
-      } else if (valueType === 'timestamp') {
-        const timestamp = new Date(item.value)
-        if (!Number.isFinite(timestamp.getTime())) {
-          throw new SystemRuntimeContractError('INVALID_RESULT', '운영 관측 시각이 올바르지 않습니다.')
-        }
-        normalizedValue = timestamp.toISOString()
-      } else {
-        normalizedValue = nonSecretText(item.value, 240)
-      }
-      const observedAt = item.observedAt ? new Date(item.observedAt) : checkedAt
-      if (!Number.isFinite(observedAt.getTime())) {
-        throw new SystemRuntimeContractError('INVALID_RESULT', '운영 관측 시각이 올바르지 않습니다.')
-      }
-      observations.push({
-        id,
-        category: nonSecretText(item.category, 80) || 'general',
-        label: nonSecretText(item.label, 120) || id,
-        valueType,
-        value: normalizedValue,
-        unit: nonSecretText(item.unit, 32),
-        sensitivity: ['public', 'internal', 'sensitive', 'secret_reference'].includes(item.sensitivity)
-          ? item.sensitivity
-          : 'internal',
-        sourceKind: ['runtime', 'code', 'connector', 'manual'].includes(item.sourceKind)
-          ? item.sourceKind
-          : 'runtime',
-        verification: ['verified', 'partial', 'declared', 'unavailable'].includes(item.verification)
-          ? item.verification
-          : result.verification,
-        availability: ['available', 'blocked', 'unobservable'].includes(item.availability)
-          ? item.availability
-          : 'available',
-        evidenceRef: nonSecretText(item.evidenceRef, 300),
-        observedAt: observedAt.toISOString(),
-      })
-    }
     return {
       ...result,
       collectionLabel: nonSecretText(value.collectionLabel, 80) || capability.label,
-      totalCount: observations.length,
-      observations,
-      truncated: Array.isArray(value.observations) && value.observations.length > observations.length,
+      totalCount: availableObservations.length,
+      observations: availableObservations,
+      truncated: rawObservations.length > SYSTEM_RUNTIME_MAX_OBSERVATIONS,
     }
   }
   if (capability.resultKind !== 'metric_groups') return result

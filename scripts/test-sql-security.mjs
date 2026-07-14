@@ -77,6 +77,7 @@ for (const key of ['relationType', 'relationEvidence', 'relationEvidenceRef', 'r
 }
 
 assert.match(runtimeRead, /drop function if exists public\.get_own_canvas_summaries\(integer\)/i, 'retired account summary RPC must be removed')
+assert.match(runtimeRead, /drop function if exists public\.get_workflow_system_operational_snapshot\(\)/i)
 assert.match(runtimeRead, /create or replace function public\.get_workflow_system_operational_snapshot\(\)/i)
 assert.match(runtimeRead, /stable\s+security invoker/i, 'runtime operations function must remain read-only and use caller permissions')
 assert.doesNotMatch(runtimeRead, /auth\.uid\(\)/i, 'application aggregate must not pretend the operator account represents the product')
@@ -86,6 +87,12 @@ assert.match(runtimeRead, /filter \(where c\.updated_at >= now\(\) - interval '7
 assert.match(runtimeRead, /jsonb_array_length\(c\.nodes\).*?node_count/is)
 assert.match(runtimeRead, /jsonb_array_length\(c\.edges\).*?edge_count/is)
 assert.match(runtimeRead, /jsonb_array_length\(c\.notes\).*?note_count/is)
+assert.match(runtimeRead, /count\(\*\) filter \(where s\.invitation_active\).*?active_invitation_count/is)
+assert.match(runtimeRead, /count\(\*\).*?active_membership_count from public\.share_members/is)
+assert.match(runtimeRead, /count\(\*\).*?revoked_membership_count from public\.share_revocations/is)
+for (const scope of ['canvas', 'group', 'node']) {
+  assert.match(runtimeRead, new RegExp(`s\\.scope = '${scope}'`, 'i'), `missing ${scope} share aggregate`)
+}
 assert.match(
   runtimeRead,
   /revoke execute on function public\.get_workflow_system_operational_snapshot\(\) from PUBLIC, anon, authenticated;/i,

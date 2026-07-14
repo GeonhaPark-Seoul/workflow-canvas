@@ -292,7 +292,7 @@ body[data-theme='light'] .react-flow__edge.wfc-edge.selected .wfc-relation-label
   cursor: default;
 }
 .system-part-editor.has-runtime-data {
-  width: min(390px, calc(100vw - 24px));
+  width: min(460px, calc(100vw - 24px));
 }
 .system-part-editor-heading,
 .system-part-editor-actions {
@@ -510,6 +510,164 @@ body[data-theme='light'] .react-flow__edge.wfc-edge.selected .wfc-relation-label
   color: #7f8a9c;
   font-size: 9px;
   text-align: center;
+}
+.system-observation-catalog {
+  margin-top: 7px;
+  overflow: hidden;
+  border: 1px solid #334155;
+  border-radius: 4px;
+  background: #0d1016;
+}
+.system-observation-catalog-heading {
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1px solid #273244;
+  padding: 0 8px;
+  color: #dbe4f0;
+  font-size: 9px;
+}
+.system-observation-catalog-heading span {
+  color: #8b95a7;
+  font-variant-numeric: tabular-nums;
+}
+.system-observation-catalog-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  min-height: 27px;
+  border-bottom: 1px solid #273244;
+  background: #111722;
+}
+.system-observation-catalog-filters button {
+  min-width: 0;
+  border: 0;
+  border-right: 1px solid #273244;
+  background: transparent;
+  color: #7f8a9c;
+  padding: 0 6px;
+  font-family: inherit;
+  font-size: 8px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.system-observation-catalog-filters button:last-child {
+  border-right: 0;
+}
+.system-observation-catalog-filters button:hover {
+  background: #1b2638;
+  color: #e5e7eb;
+}
+.system-observation-catalog-filters button.is-active {
+  background: #233047;
+  color: #fff;
+}
+.system-observation-catalog-list {
+  max-height: min(300px, 42vh);
+  overflow: auto;
+}
+.system-observation-category-heading {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1px solid #202938;
+  background: #141b27;
+  padding: 0 8px;
+  color: #aeb8c8;
+  font-size: 8px;
+}
+.system-observation-category-heading span {
+  color: #69758a;
+  font-variant-numeric: tabular-nums;
+}
+.system-observation-row {
+  padding: 7px 8px;
+  border-bottom: 1px solid #202938;
+  transition: background-color 0.15s;
+}
+.system-observation-category:last-child .system-observation-row:last-child {
+  border-bottom: 0;
+}
+.system-observation-row:hover {
+  background: #172033;
+}
+.system-observation-row-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+.system-observation-row-heading strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #e5e7eb;
+  font-size: 9.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.system-observation-row-heading span {
+  flex: 0 0 auto;
+  border: 1px solid #475569;
+  border-radius: 3px;
+  color: #94a3b8;
+  padding: 1px 4px;
+  font-size: 7px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.system-observation-row-heading span.is-healthy {
+  border-color: #166534;
+  color: #86efac;
+}
+.system-observation-row-heading span.is-warning {
+  border-color: #a16207;
+  color: #fde68a;
+}
+.system-observation-row-heading span.is-protected {
+  border-color: #6d28d9;
+  color: #d8b4fe;
+}
+.system-observation-value {
+  margin-top: 3px;
+  overflow-wrap: anywhere;
+  color: #d7deea;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.35;
+}
+.system-observation-value.is-unavailable {
+  color: #8b95a7;
+  font-size: 8.5px;
+}
+.system-observation-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin-top: 4px;
+  color: #667085;
+  font-size: 7px;
+}
+.system-observation-meta span {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.system-observation-meta code {
+  min-width: 0;
+  margin-left: auto;
+  overflow: hidden;
+  color: #718096;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 7px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .system-part-editor-actions {
   margin-top: 10px;

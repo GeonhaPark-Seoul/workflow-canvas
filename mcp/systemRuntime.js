@@ -210,7 +210,14 @@ async function runFixedRouteCheck({
       collectionLabel: '경로 관측',
       observations: [
         observation('route', '경로', 'text', pathname, { category: 'endpoint', evidenceRef: pathname }),
+        observation('request-method', '요청 방식', 'status', 'GET', { category: 'endpoint' }),
         observation('http-status', 'HTTP 상태', 'number', response.status, { category: 'endpoint' }),
+        ...(accessToken
+          ? [observation('authentication', '로그인 검증 포함', 'boolean', true, { category: 'authentication' })]
+          : []),
+        ...(expectedAllow
+          ? [observation('allowed-method', '허용 방식', 'status', expectedAllow, { category: 'endpoint' })]
+          : []),
         observation('coverage', '검증 범위', 'status', fullCoverage ? '인증 포함' : '라우트만', {
           category: 'verification',
           verification: fullCoverage ? 'verified' : 'partial',
@@ -278,13 +285,18 @@ function runVercelDeploymentCheck({ capability, deploymentContext, now }) {
     return unknownResult(capability, checkedAt, 'Vercel 실행 환경 메타데이터가 없어 프로덕션 배포를 확인하지 못했습니다.')
   }
   const values = [
+    observation('runtime-active', '프로덕션 함수 응답', 'boolean', true, {
+      category: 'runtime', evidenceRef: 'api/system-runtime.js', sourceKind: 'runtime',
+    }),
     observation('environment', '환경', 'status', deploymentContext.environment || 'production', {
       category: 'deployment', evidenceRef: 'VERCEL_ENV', sourceKind: 'runtime',
     }),
-    observation('region', '실행 리전', 'text', deploymentContext.region || 'unknown', {
-      category: 'deployment', evidenceRef: 'VERCEL_REGION', sourceKind: 'runtime',
-    }),
   ]
+  if (deploymentContext.region) {
+    values.push(observation('region', '실행 리전', 'text', deploymentContext.region, {
+      category: 'deployment', evidenceRef: 'VERCEL_REGION', sourceKind: 'runtime',
+    }))
+  }
   if (deploymentContext.commitSha) {
     values.push(observation('commit', '배포 커밋', 'text', deploymentContext.commitSha.slice(0, 12), {
       category: 'version', evidenceRef: 'VERCEL_GIT_COMMIT_SHA', sourceKind: 'runtime',
@@ -354,6 +366,24 @@ async function runSupabaseHealthCheck({
       checkedAt: new Date(completedAt).toISOString(),
       latencyMs,
       summary: 'Supabase 인증·RLS 읽기 경로에 연결되었습니다.',
+      collectionLabel: 'RLS 경로 관측',
+      observations: [
+        observation('endpoint', '고정 테이블 경로', 'text', '/rest/v1/canvases', {
+          category: 'endpoint', sourceKind: 'code', evidenceRef: 'src/lib/supabase.js',
+        }),
+        observation('request-method', '요청 방식', 'status', 'HEAD', {
+          category: 'endpoint', sourceKind: 'code', evidenceRef: 'mcp/systemRuntime.js',
+        }),
+        observation('http-status', 'HTTP 상태', 'number', response.status, {
+          category: 'verification', evidenceRef: 'Supabase PostgREST',
+        }),
+        observation('authenticated', '로그인 세션 포함', 'boolean', true, {
+          category: 'authentication', evidenceRef: 'Authorization header',
+        }),
+        observation('rls-path', 'RLS 읽기 경로', 'boolean', true, {
+          category: 'authorization', evidenceRef: 'supabase-schema.sql',
+        }),
+      ],
     })
   } catch (error) {
     const completedAt = now()
@@ -496,6 +526,14 @@ async function runCanvasServiceOperationsRead({
       'canvases_updated_7d',
       'accounts_updated_7d',
       'invalid_document_count',
+      'active_invitation_count',
+      'active_email_invitation_count',
+      'active_link_invitation_count',
+      'active_membership_count',
+      'revoked_membership_count',
+      'canvas_scope_share_count',
+      'group_scope_share_count',
+      'node_scope_share_count',
     ]
     const counts = Object.fromEntries(countKeys.map((key) => [key, Number(row[key])]))
     if (Object.values(counts).some((value) => !Number.isFinite(value) || value < 0)) {
@@ -524,6 +562,29 @@ async function runCanvasServiceOperationsRead({
         latencyMs,
         summary: `전체 캔버스 ${Number.isFinite(canvasCount) ? canvasCount : 0}개 · 24시간 변경 ${Number.isFinite(updated24h) ? updated24h : 0}개 · 구조 경고 ${Number.isFinite(invalidDocuments) ? invalidDocuments : 0}개`,
         collectionLabel: '앱 운영 지표',
+        observations: [
+          observation('accounts', '캔버스 보유 사용자', 'number', count('account_count'), { category: 'storage', sourceKind: 'connector' }),
+          observation('canvases', '캔버스', 'number', canvasCount, { category: 'storage', sourceKind: 'connector' }),
+          observation('nodes', '노드', 'number', count('node_count'), { category: 'storage', sourceKind: 'connector' }),
+          observation('edges', '연결선', 'number', count('edge_count'), { category: 'storage', sourceKind: 'connector' }),
+          observation('notes', '노트', 'number', count('note_count'), { category: 'storage', sourceKind: 'connector' }),
+          observation('canvases-24h', '24시간 변경 캔버스', 'number', updated24h, { category: 'activity', sourceKind: 'connector' }),
+          observation('accounts-24h', '24시간 변경 사용자', 'number', count('accounts_updated_24h'), { category: 'activity', sourceKind: 'connector' }),
+          observation('canvases-7d', '7일 변경 캔버스', 'number', count('canvases_updated_7d'), { category: 'activity', sourceKind: 'connector' }),
+          observation('accounts-7d', '7일 변경 사용자', 'number', count('accounts_updated_7d'), { category: 'activity', sourceKind: 'connector' }),
+          ...(latestCanvasUpdate
+            ? [observation('latest-update', '마지막 캔버스 변경', 'timestamp', latestCanvasUpdate, { category: 'activity', sourceKind: 'connector' })]
+            : []),
+          observation('active-invitations', '활성 초대 경로', 'number', count('active_invitation_count'), { category: 'collaboration', sourceKind: 'connector' }),
+          observation('active-email-invitations', '이메일 초대 경로', 'number', count('active_email_invitation_count'), { category: 'collaboration', sourceKind: 'connector' }),
+          observation('active-link-invitations', '링크 초대 경로', 'number', count('active_link_invitation_count'), { category: 'collaboration', sourceKind: 'connector' }),
+          observation('active-memberships', '참여 관계', 'number', count('active_membership_count'), { category: 'collaboration', sourceKind: 'connector' }),
+          observation('revoked-memberships', '거절·추방 기록', 'number', count('revoked_membership_count'), { category: 'collaboration', sourceKind: 'connector' }),
+          observation('canvas-scope-shares', '캔버스 범위 공유', 'number', count('canvas_scope_share_count'), { category: 'collaboration', sourceKind: 'connector' }),
+          observation('group-scope-shares', '그룹 범위 공유', 'number', count('group_scope_share_count'), { category: 'collaboration', sourceKind: 'connector' }),
+          observation('node-scope-shares', '노드 범위 공유', 'number', count('node_scope_share_count'), { category: 'collaboration', sourceKind: 'connector' }),
+          observation('invalid-documents', '문서 구조 경고', 'number', invalidDocuments, { category: 'integrity', sourceKind: 'connector' }),
+        ],
         items: [
           {
             id: 'storage-scale',
@@ -545,6 +606,20 @@ async function runCanvasServiceOperationsRead({
               { id: 'accounts-24h', label: '24시간 변경 사용자', value: count('accounts_updated_24h') },
               { id: 'canvases-7d', label: '7일 캔버스', value: count('canvases_updated_7d') },
               { id: 'accounts-7d', label: '7일 변경 사용자', value: count('accounts_updated_7d') },
+            ],
+          },
+          {
+            id: 'collaboration',
+            title: '공유·협업',
+            metrics: [
+              { id: 'active-invitations', label: '초대 경로', value: count('active_invitation_count') },
+              { id: 'active-email-invitations', label: '이메일 경로', value: count('active_email_invitation_count') },
+              { id: 'active-link-invitations', label: '링크 경로', value: count('active_link_invitation_count') },
+              { id: 'active-memberships', label: '참여 관계', value: count('active_membership_count') },
+              { id: 'revoked-memberships', label: '거절·추방', value: count('revoked_membership_count') },
+              { id: 'canvas-scope-shares', label: '캔버스 공유', value: count('canvas_scope_share_count') },
+              { id: 'group-scope-shares', label: '그룹 공유', value: count('group_scope_share_count') },
+              { id: 'node-scope-shares', label: '노드 공유', value: count('node_scope_share_count') },
             ],
           },
           {

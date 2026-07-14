@@ -86,6 +86,12 @@ import {
   WORKFLOW_SYSTEM_TWIN_SOURCE_ID,
 } from '../shared/workflowSystemTwinAdapter.js'
 import {
+  SYSTEM_OBSERVATION_CATALOGS,
+  systemObservationAvailabilityDefinition,
+  systemObservationCategoryDefinition,
+  systemObservationRefreshDefinition,
+} from '../shared/systemObservationCatalog.js'
+import {
   SYSTEM_CAPABILITY_OPERATION_DEFS,
   normalizeSystemRuntimeBatchRequest,
   normalizeSystemRuntimeCanvasRequest,
@@ -94,6 +100,7 @@ import {
   normalizeSystemRuntimeResult,
   systemCapabilityOperationDefinition,
   systemPartRuntimeReality,
+  systemRuntimeCatalogForResult,
   systemRuntimeCapabilityForPart,
   systemRuntimePathEdgeIds,
 } from '../shared/systemRuntime.js'
@@ -554,6 +561,27 @@ t('capability operations distinguish observation, mutation, approval, automation
   assert.equal(systemCapabilityOperationDefinition('unknown'), null)
 })
 
+t('observation catalogs register bounded fields, provenance and explicit unavailable states', () => {
+  for (const [capabilityId, fields] of Object.entries(SYSTEM_OBSERVATION_CATALOGS)) {
+    assert.ok(fields.length > 0 && fields.length <= 64, `catalog size invalid: ${capabilityId}`)
+    assert.equal(new Set(fields.map((field) => field.id)).size, fields.length, `duplicate field: ${capabilityId}`)
+    for (const field of fields) {
+      assert.ok(field.category)
+      assert.ok(field.valueType)
+      assert.ok(field.sourceKind)
+      assert.ok(field.refreshMode)
+      assert.ok(field.evidenceRef)
+    }
+  }
+  const operations = systemRuntimeCatalogForResult('workflow.supabase.canvas-service.operations', null)
+  assert.equal(operations.length, 22)
+  assert.equal(operations.find((item) => item.id === 'canvas-bodies').availability, 'protected')
+  assert.equal(operations.find((item) => item.id === 'database-size').availability, 'connector_required')
+  assert.equal(systemObservationAvailabilityDefinition('protected').label, '보호됨')
+  assert.equal(systemObservationCategoryDefinition('collaboration').label, '공유·협업')
+  assert.equal(systemObservationRefreshDefinition('on_deploy').label, '배포 시')
+})
+
 t('only the exact persisted digital-twin part receives the registered capability', () => {
   assert.equal(
     systemRuntimeCapabilityForPart(runtimeCredentialPart, 'map-web-app')?.id,
@@ -716,7 +744,7 @@ t('application metric groups preserve aggregate counts only and discard user or 
   assert.equal(systemPartRuntimeReality(result).label, '운영 조회')
 })
 
-t('generic observations keep typed scalar metadata only and block literal credentials', () => {
+t('generic observation catalogs keep allowlisted scalars, explain missing fields and block credentials', () => {
   const result = normalizeSystemRuntimeResult({
     capabilityId: 'workflow.vercel.deployment.runtime',
     status: 'healthy',
@@ -726,37 +754,39 @@ t('generic observations keep typed scalar metadata only and block literal creden
     latencyMs: 4,
     summary: '배포 함수가 실행 중입니다.',
     collectionLabel: '배포 관측',
-    observations: Array.from({ length: 70 }, (_, index) => ({
-      id: `observation-${index}`,
-      category: index === 0 ? 'deployment' : 'runtime',
-      label: index === 0 ? '실행 리전' : `관측값 ${index}`,
-      valueType: index === 0 ? 'text' : 'number',
-      value: index === 0 ? 'icn1' : index,
-      sensitivity: 'internal',
-      sourceKind: 'runtime',
-      verification: 'verified',
-      availability: 'available',
-      evidenceRef: index === 0 ? 'VERCEL_REGION' : '',
-      ownerEmail: 'private@example.com',
-      rowBody: { private: true },
-    })),
+    observations: [
+      { id: 'runtime-active', value: true, availability: 'available' },
+      { id: 'environment', value: 'production', availability: 'available' },
+      {
+        id: 'region', value: 'icn1', availability: 'available', ownerEmail: 'private@example.com',
+        rowBody: { private: true }, category: 'forged', label: 'forged', evidenceRef: 'forged',
+      },
+      { id: 'commit', value: '1234567890ab', availability: 'available' },
+      { id: 'host', value: 'workflow.example.com', availability: 'available' },
+      { id: 'attacker-field', value: 'must-not-survive', availability: 'available' },
+    ],
   })
   assert.equal(result.operation, 'observe')
   assert.equal(result.sideEffect, 'none')
   assert.equal(result.risk, 'none')
-  assert.equal(result.observations.length, 64)
-  assert.equal(result.totalCount, 64)
-  assert.equal(result.truncated, true)
-  assert.equal(result.observations[0].value, 'icn1')
-  assert.equal(Object.hasOwn(result.observations[0], 'ownerEmail'), false)
-  assert.equal(Object.hasOwn(result.observations[0], 'rowBody'), false)
+  assert.equal(result.catalog.length, 7)
+  assert.equal(result.availableCatalogCount, 5)
+  assert.equal(result.observations.length, 5)
+  assert.equal(result.totalCount, 5)
+  assert.equal(result.truncated, false)
+  assert.equal(result.catalog.find((item) => item.id === 'region').value, 'icn1')
+  assert.equal(result.catalog.find((item) => item.id === 'region').category, 'deployment')
+  assert.equal(result.catalog.find((item) => item.id === 'region').evidenceRef, 'VERCEL_REGION')
+  assert.equal(result.catalog.find((item) => item.id === 'deployment-history').availability, 'connector_required')
+  assert.equal(result.catalog.some((item) => item.id === 'attacker-field'), false)
+  assert.equal(Object.hasOwn(result.catalog.find((item) => item.id === 'region'), 'ownerEmail'), false)
+  assert.equal(Object.hasOwn(result.catalog.find((item) => item.id === 'region'), 'rowBody'), false)
   assert.deepEqual(systemRuntimePathEdgeIds('workflow.api.shared-canvas.health'), ['map-edge-vercel-shared'])
   assert.deepEqual(systemRuntimePathEdgeIds('unknown'), [])
 
   const token = `eyJ${'a'.repeat(20)}.${'b'.repeat(12)}.${'c'.repeat(12)}`
   assert.throws(() => normalizeSystemRuntimeResult({
-    ...result,
-    observations: [{ id: 'token', label: 'token', valueType: 'text', value: token }],
+    ...result, observations: [{ id: 'host', value: token, availability: 'available' }],
   }), (error) => error.code === 'SECRET_VALUE_BLOCKED')
   assert.throws(() => normalizeSystemRuntimeResult({ ...result, summary: token }), (error) => (
     error.code === 'SECRET_VALUE_BLOCKED'
@@ -816,6 +846,10 @@ await ta('the Supabase adapter uses a fixed HEAD/RLS request and returns no secr
   assert.equal(calls[0].options.headers.Authorization, `Bearer ${accessToken}`)
   assert.equal(result.status, 'healthy')
   assert.equal(result.latencyMs, 25)
+  assert.equal(result.catalog.find((item) => item.id === 'rls-path').value, true)
+  assert.equal(result.catalog.find((item) => item.id === 'policy-name').availability, 'not_observed')
+  assert.equal(result.catalog.find((item) => item.id === 'row-body').availability, 'protected')
+  assert.equal(normalizeSystemRuntimeResult(result).catalog.find((item) => item.id === 'rls-path').value, true)
   assert.equal(JSON.stringify(result).includes(accessToken), false)
   assert.equal(JSON.stringify(result).includes(anonKey), false)
 })
@@ -836,6 +870,7 @@ await ta('deployment, API route, MCP route and Auth runners expose only fixed op
   assert.equal(deployment.status, 'healthy')
   assert.equal(deployment.observations.find((item) => item.id === 'commit').value, '1234567890ab')
   assert.equal(deployment.observations.find((item) => item.id === 'host').value, 'workflow.example.com')
+  assert.equal(deployment.catalog.find((item) => item.id === 'deployment-history').availability, 'connector_required')
 
   const routeCalls = []
   const routeNow = (() => {
@@ -856,6 +891,8 @@ await ta('deployment, API route, MCP route and Auth runners expose only fixed op
   assert.equal(sharedRoute.status, 'healthy')
   assert.equal(routeCalls[0].url, 'https://workflow.example.com/api/shared-canvas?mode=health')
   assert.equal(routeCalls[0].options.headers.Authorization, 'Bearer private-browser-token')
+  assert.equal(sharedRoute.catalog.find((item) => item.id === 'authentication').value, true)
+  assert.equal(sharedRoute.catalog.find((item) => item.id === 'response-body').availability, 'protected')
   assert.equal(JSON.stringify(sharedRoute).includes('private-browser-token'), false)
 
   const mcpRoute = await runSystemRuntimeCapability({
@@ -871,6 +908,8 @@ await ta('deployment, API route, MCP route and Auth runners expose only fixed op
   assert.equal(mcpRoute.status, 'degraded')
   assert.equal(mcpRoute.verification, 'partial')
   assert.equal(routeCalls[1].url, 'https://workflow.example.com/api/mcp')
+  assert.equal(mcpRoute.catalog.find((item) => item.id === 'allowed-method').value, 'POST')
+  assert.equal(mcpRoute.catalog.find((item) => item.id === 'tool-invocation').availability, 'not_observed')
 
   let verifiedToken = ''
   const authNow = (() => { const values = [3_000, 3_011]; return () => values.shift() })()
@@ -883,6 +922,7 @@ await ta('deployment, API route, MCP route and Auth runners expose only fixed op
   })
   assert.equal(verifiedToken, 'private-auth-token')
   assert.equal(auth.status, 'healthy')
+  assert.equal(auth.catalog.find((item) => item.id === 'identity-payload').availability, 'protected')
   assert.equal(JSON.stringify(auth).includes('private-auth-token'), false)
   assert.equal(JSON.stringify(auth).includes('private@example.com'), false)
 })
@@ -909,6 +949,14 @@ await ta('the application operations adapter calls only the fixed service-role a
               canvases_updated_7d: 19,
               accounts_updated_7d: 9,
               invalid_document_count: 0,
+              active_invitation_count: 8,
+              active_email_invitation_count: 3,
+              active_link_invitation_count: 5,
+              active_membership_count: 11,
+              revoked_membership_count: 2,
+              canvas_scope_share_count: 4,
+              group_scope_share_count: 3,
+              node_scope_share_count: 6,
               latest_canvas_update: '2026-07-15T00:00:00.000Z',
               user_ids: [privateUserId],
             }],
@@ -932,10 +980,14 @@ await ta('the application operations adapter calls only the fixed service-role a
   assert.equal(result.dataScope, 'application_aggregate')
   assert.equal(result.collectionLabel, '앱 운영 지표')
   assert.equal(result.latencyMs, 32)
-  assert.deepEqual(result.items.map((item) => item.id), ['storage-scale', 'recent-activity', 'document-integrity'])
+  assert.deepEqual(result.items.map((item) => item.id), ['storage-scale', 'recent-activity', 'collaboration', 'document-integrity'])
   assert.equal(result.items[0].metrics.find((metric) => metric.id === 'canvases').value, 30)
   assert.equal(result.items[1].metrics.find((metric) => metric.id === 'accounts-24h').value, 4)
-  assert.equal(result.items[2].metrics[0].value, 0)
+  assert.equal(result.items[2].metrics.find((metric) => metric.id === 'active-memberships').value, 11)
+  assert.equal(result.items[3].metrics[0].value, 0)
+  assert.equal(result.catalog.find((item) => item.id === 'active-link-invitations').value, 5)
+  assert.equal(result.catalog.find((item) => item.id === 'canvas-bodies').availability, 'protected')
+  assert.equal(result.catalog.find((item) => item.id === 'database-size').availability, 'connector_required')
   assert.equal(JSON.stringify(result).includes(privateUserId), false)
 })
 
@@ -1374,20 +1426,19 @@ t('generated discovery manifest covers current API, DB, storage, realtime and MC
     'runtime-capability:workflow.supabase.canvas-service.operations',
   ]) assert.ok(resources[key], `missing discovery resource: ${key}`)
   assert.equal(Object.hasOwn(resources, 'db-table:public'), false)
-  assert.deepEqual(
-    resources['runtime-capability:workflow.supabase.canvas-service.operations'].details,
-    {
-      authorization: 'system_operator',
-      dataScope: 'application_aggregate',
-      freshnessMs: 900000,
-      operation: 'read',
-      pathEdgeIds: [],
-      resultKind: 'metric_groups',
-      risk: 'low',
-      sideEffect: 'none',
-      targetNodeId: 'map-canvases-table',
-    },
-  )
+  const operationsDetails = resources['runtime-capability:workflow.supabase.canvas-service.operations'].details
+  assert.equal(operationsDetails.authorization, 'system_operator')
+  assert.equal(operationsDetails.dataScope, 'application_aggregate')
+  assert.equal(operationsDetails.freshnessMs, 900000)
+  assert.equal(operationsDetails.operation, 'read')
+  assert.deepEqual(operationsDetails.pathEdgeIds, [])
+  assert.equal(operationsDetails.resultKind, 'metric_groups')
+  assert.equal(operationsDetails.risk, 'low')
+  assert.equal(operationsDetails.sideEffect, 'none')
+  assert.equal(operationsDetails.targetNodeId, 'map-canvases-table')
+  assert.equal(operationsDetails.catalogFieldCount, 22)
+  assert.ok(operationsDetails.catalogFieldIds.includes('active-memberships'))
+  assert.ok(operationsDetails.catalogFieldIds.includes('canvas-bodies'))
   for (const tool of [
     'inspect_workflow_system_map',
     'preview_workflow_system_map_relation_repair',

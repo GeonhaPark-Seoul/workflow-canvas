@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Handle, NodeResizer, NodeToolbar, Position, useStore } from '@xyflow/react'
 import OpenInNotesButton from '../components/OpenInNotesButton'
 import ScopedParticipants from '../components/ScopedParticipants'
+import SystemObservationCatalog from '../components/SystemObservationCatalog'
 import { sanitizeHtml } from '../lib/sanitizeHtml'
 import {
   SYSTEM_ENVIRONMENT_DEFS,
@@ -19,6 +20,7 @@ import {
 } from '../../shared/systemPartOntology.js'
 import {
   systemPartRuntimeReality,
+  systemRuntimeCatalogForResult,
   systemRuntimeCapabilityForPart,
 } from '../../shared/systemRuntime.js'
 
@@ -220,6 +222,9 @@ export default function SystemNode({ data, selected, id }) {
     && Array.isArray(partDraftRuntime.observations)
     ? partDraftRuntime.observations
     : null
+  const partDraftRuntimeCatalog = partDraftRuntimeCapability
+    ? systemRuntimeCatalogForResult(partDraftRuntimeCapability.id, partDraftRuntime)
+    : []
   const runtimeActionLabel = partDraftRuntimeCapability?.operation === 'read'
     ? '데이터 새로 조회'
     : ['observe', 'validate'].includes(partDraftRuntimeCapability?.operation)
@@ -467,7 +472,7 @@ export default function SystemNode({ data, selected, id }) {
           style={{ zIndex: 2002, pointerEvents: 'all' }}
         >
           <div
-            className={`system-part-editor nodrag nowheel${partDraftRuntimeItems ? ' has-runtime-data' : ''}`}
+            className={`system-part-editor nodrag nowheel${partDraftRuntimeCatalog.length || partDraftRuntimeItems || partDraftRuntimeObservations ? ' has-runtime-data' : ''}`}
             onPointerDown={(event) => event.stopPropagation()}
             onClick={(event) => event.stopPropagation()}
           >
@@ -534,7 +539,12 @@ export default function SystemNode({ data, selected, id }) {
                     ↻
                   </button>
                 </div>
-                {(partDraftRuntimeItems || partDraftRuntimeObservations) && (
+                {partDraftRuntimeCatalog.length > 0 ? (
+                  <SystemObservationCatalog
+                    catalog={partDraftRuntimeCatalog}
+                    collectionLabel={partDraftRuntime?.collectionLabel || partDraftRuntimeCapability.label}
+                  />
+                ) : (partDraftRuntimeItems || partDraftRuntimeObservations) && (
                   <div
                     className="system-runtime-data"
                     aria-label={partDraftRuntime.collectionLabel || partDraftRuntimeCapability.label}
