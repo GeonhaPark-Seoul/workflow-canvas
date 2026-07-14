@@ -69,6 +69,11 @@ import {
   partitionDigitalTwinReviewItems,
   setDigitalTwinReviewDecision,
 } from '../shared/digitalTwinReview.js'
+import {
+  applyDigitalTwinGraphProposal,
+  digitalTwinProposalMatchesItem,
+  planDigitalTwinGraphProposal,
+} from '../shared/digitalTwinProposal.js'
 import { inspectDigitalTwinCanvas } from './lib/digitalTwinAdapters.js'
 import {
   createEdgeRelationData,
@@ -287,6 +292,10 @@ function stripNode(n) {
   const { selected, ...rest } = n
   return { ...rest, data }
 }
+function detachDigitalTwinBinding(data) {
+  const { digitalTwinBinding, ...rest } = data ?? {}
+  return rest
+}
 const stripNote = (note) => ({ ...note, data: sanitizeNodeData(note.data) })
 const stripEdge = ({ selected, data, redacted, ...edge }) => {
   const safeData = normalizeEdgeRelationData(data)
@@ -337,6 +346,8 @@ export default function App() {
   const [notesPanel, setNotesPanel] = useState(null) // { type: 'stage'|'memo'|'content'|'system' } | null
   const [twinReviewOpen, setTwinReviewOpen] = useState(false)
   const [digitalTwinReview, setDigitalTwinReview] = useState(null)
+  const [twinProposalPreview, setTwinProposalPreview] = useState(null) // { itemId, itemFingerprint } | null
+  const [twinProposalStatus, setTwinProposalStatus] = useState(null) // { type, message } | null
   const [notesSelectedId, setNotesSelectedId] = useState(null)
   const [notesSide, setNotesSide] = useState('right')
   const [renameValue, setRenameValue] = useState('')
@@ -2041,7 +2052,11 @@ export default function App() {
   const canEditCanvas = !(perm.role === 'invitee' && perm.canEdit === false)
   const canEditNotes = canEditCanvas && (perm.role === 'owner' || perm.scope === 'canvas')
 
-  useEffect(() => { setDigitalTwinReview(null) }, [activeCanvasId])
+  useEffect(() => {
+    setDigitalTwinReview(null)
+    setTwinProposalPreview(null)
+    setTwinProposalStatus(null)
+  }, [activeCanvasId])
   useEffect(() => {
     let cancelled = false
     const timer = setTimeout(() => {
@@ -2068,13 +2083,68 @@ export default function App() {
       : { pending: [], reviewed: [], ignored: [], decisions: {} }
   ), [digitalTwinReview, digitalTwinReviewState])
   const canDecideTwinReview = perm.role === 'owner' && !!digitalTwinReview?.source.rootNodeId
+  const twinProposalPreviewItem = twinProposalPreview && digitalTwinReview
+    ? digitalTwinReview.items.find((item) => (
+        item.id === twinProposalPreview.itemId
+        && item.fingerprint === twinProposalPreview.itemFingerprint
+        && digitalTwinProposalMatchesItem(item.proposal, item)
+      ))
+    : null
+  const activeTwinProposal = twinProposalPreviewItem?.proposal ?? null
+  const twinProposalPlan = useMemo(() => {
+    if (!activeTwinProposal) return { nodes: [], edges: [], alreadyPresent: [], error: null }
+    try {
+      return {
+        ...planDigitalTwinGraphProposal({ nodes, edges }, activeTwinProposal),
+        error: null,
+      }
+    } catch (error) {
+      return { nodes: [], edges: [], alreadyPresent: [], error: error?.message ?? '수정안을 미리 볼 수 없습니다.' }
+    }
+  }, [activeTwinProposal, nodes, edges])
+  const twinProposalPreviewNodes = useMemo(() => twinProposalPlan.nodes.map((node) => ({
+    ...node,
+    className: `${node.className ? `${node.className} ` : ''}digital-twin-proposal-node`,
+    draggable: false,
+    selectable: false,
+    deletable: false,
+    data: { ...node.data, digitalTwinProposalPreview: true },
+  })), [twinProposalPlan.nodes])
+  const twinProposalPreviewEdges = useMemo(() => twinProposalPlan.edges.map((edge) => ({
+    ...edge,
+    className: `${edge.className ? `${edge.className} ` : ''}wfc-edge digital-twin-proposal-edge`,
+    selectable: false,
+    deletable: false,
+    reconnectable: false,
+    zIndex: 1000,
+    style: { ...edge.style, stroke: '#f59e0b', strokeWidth: 3, strokeDasharray: '7 5' },
+    markerEnd: edge.markerEnd ? { ...edge.markerEnd, color: '#f59e0b' } : undefined,
+  })), [twinProposalPlan.edges])
 
   useEffect(() => {
     if (!digitalTwinReview) setTwinReviewOpen(false)
   }, [activeCanvasId, digitalTwinReview])
 
+  useEffect(() => {
+    if (twinProposalPreview && !twinProposalPreviewItem) setTwinProposalPreview(null)
+  }, [twinProposalPreview, twinProposalPreviewItem])
+
+  useEffect(() => {
+    if (!rfInstance || !activeTwinProposal || twinProposalPlan.error || !twinProposalPlan.nodes.length) return undefined
+    const ids = [...new Set([
+      ...twinProposalPlan.nodes.map((node) => node.id),
+      ...twinProposalPlan.edges.flatMap((edge) => [edge.source, edge.target]),
+    ])]
+    const timer = setTimeout(() => {
+      rfInstance.fitView({ nodes: ids.map((id) => ({ id })), duration: 450, padding: 0.4, maxZoom: 1.05 })
+    }, 0)
+    return () => clearTimeout(timer)
+  }, [activeTwinProposal, rfInstance, twinProposalPlan.error, twinProposalPlan.nodes, twinProposalPlan.edges])
+
   const decideDigitalTwinReviewItem = useCallback((item, disposition) => {
     if (!canDecideTwinReview || item?.sourceId !== digitalTwinReview?.source.id) return
+    setTwinProposalPreview(null)
+    setTwinProposalStatus(null)
     const rootNodeId = digitalTwinReview.source.rootNodeId
     setNodes((currentNodes) => currentNodes.map((node) => (
       node.id === rootNodeId
@@ -2104,6 +2174,52 @@ export default function App() {
         : node
     )))
   }, [canDecideTwinReview, digitalTwinReview, setNodes])
+
+  const previewDigitalTwinProposal = useCallback((item) => {
+    if (!digitalTwinProposalMatchesItem(item?.proposal, item)) return
+    setTwinProposalStatus(null)
+    setTwinProposalPreview((current) => (
+      current?.itemId === item.id && current?.itemFingerprint === item.fingerprint
+        ? null
+        : { itemId: item.id, itemFingerprint: item.fingerprint }
+    ))
+  }, [])
+
+  const applyDigitalTwinProposal = useCallback((item) => {
+    const isPending = digitalTwinReviewPartitions.pending.some((candidate) => (
+      candidate.id === item?.id && candidate.fingerprint === item?.fingerprint
+    ))
+    if (!canDecideTwinReview || !isPending || !digitalTwinProposalMatchesItem(item?.proposal, item)) {
+      setTwinProposalStatus({ type: 'error', message: '최신 검토 항목이 아니거나 적용 권한이 없습니다.' })
+      return
+    }
+    try {
+      const result = applyDigitalTwinGraphProposal({ nodes, edges }, item.proposal)
+      const rootNodeId = digitalTwinReview.source.rootNodeId
+      const nextNodes = result.nodes.map((node) => (
+        node.id === rootNodeId
+          ? {
+              ...node,
+              data: {
+                ...node.data,
+                digitalTwinReview: setDigitalTwinReviewDecision(node.data?.digitalTwinReview, item, 'reviewed'),
+              },
+            }
+          : node
+      ))
+      setNodes(sanitizeNodes(nextNodes))
+      setEdges(result.edges.map(stripEdge))
+      setTwinProposalPreview(null)
+      setTwinProposalStatus({
+        type: 'success',
+        message: result.writesPerformed
+          ? `지도에 노드 ${result.appliedNodeIds.length}개와 연결선 ${result.appliedEdgeIds.length}개를 추가했습니다.`
+          : '같은 수정안이 이미 지도에 적용되어 있습니다.',
+      })
+    } catch (error) {
+      setTwinProposalStatus({ type: 'error', message: error?.message ?? '수정안을 적용하지 못했습니다.' })
+    }
+  }, [canDecideTwinReview, digitalTwinReview, digitalTwinReviewPartitions.pending, edges, nodes, setEdges, setNodes])
 
   // Set of node ids an invitee may edit; null means "everything" (owner or canvas-scope).
   const editableSet = useMemo(() => {
@@ -2484,6 +2600,7 @@ export default function App() {
       }
 
       const parts = n.data?.parts ? n.data.parts.map((p) => ({ ...p, id: partIdMap.get(p.id) ?? p.id })) : undefined
+      const copiedData = detachDigitalTwinBinding(n.data)
       const { parentId: _drop, ...rest } = n
 
       return {
@@ -2492,7 +2609,7 @@ export default function App() {
         position,
         ...(parentId ? { parentId } : {}),
         selected: true,
-        data: parts ? { ...n.data, parts } : n.data,
+        data: parts ? { ...copiedData, parts } : copiedData,
       }
     })
 
@@ -2934,6 +3051,8 @@ export default function App() {
 
   const openNotesPanel = useCallback((type) => {
     setTwinReviewOpen(false)
+    setTwinProposalPreview(null)
+    setTwinProposalStatus(null)
     setNotesSelectedId(null)
     setNotesPanel((prev) => (prev?.type === type ? null : { type }))
   }, [])
@@ -2941,6 +3060,8 @@ export default function App() {
   const openNodeInNotes = useCallback((nodeId, type) => {
     if (!['stage', 'memo', 'content', 'system'].includes(type)) return
     setTwinReviewOpen(false)
+    setTwinProposalPreview(null)
+    setTwinProposalStatus(null)
     setNotesPanel({ type })
     setNotesSelectedId(nodeId)
   }, [])
@@ -2948,6 +3069,8 @@ export default function App() {
   const toggleDigitalTwinReview = useCallback(() => {
     setNotesPanel(null)
     setNotesSelectedId(null)
+    setTwinProposalPreview(null)
+    setTwinProposalStatus(null)
     setTwinReviewOpen((open) => !open)
   }, [])
 
@@ -3078,6 +3201,12 @@ export default function App() {
       markerEnd: isMemo || !relation.directed ? undefined : { type: MarkerType.ArrowClosed, color },
     }
   })
+  const renderedCanvasNodes = twinProposalPreviewNodes.length
+    ? [...nodes, ...twinProposalPreviewNodes]
+    : nodes
+  const renderedCanvasEdges = twinProposalPreviewEdges.length
+    ? [...styledEdges, ...twinProposalPreviewEdges]
+    : styledEdges
 
   // ── Commit rename on context menu close ───────────────────────────────────
   const commitRename = () => {
@@ -3406,7 +3535,26 @@ export default function App() {
       <ReactFlow
         ref={reactFlowRef}
         className={reconnecting ? 'rf-reconnecting' : undefined}
-        nodes={nodes.map((n) => {
+        nodes={renderedCanvasNodes.map((n) => {
+          if (n.data?.digitalTwinProposalPreview) {
+            return {
+              ...n,
+              draggable: false,
+              selectable: false,
+              deletable: false,
+              data: {
+                ...n.data,
+                stageTypes,
+                lodThreshold: settings.lodThreshold,
+                nodeFill: settings.nodeFill,
+                theme: settings.theme,
+                readOnly: true,
+                canInvite: false,
+                canManageParticipants: false,
+                scopedParticipants: [],
+              },
+            }
+          }
           const isOwner = perm.role === 'owner'
           const nodeScope = n.type === 'group' ? 'group' : 'node'
           const nodeScopedParticipants = scopedParticipantsByTarget[`${nodeScope}:${n.id}`] ?? []
@@ -3455,7 +3603,7 @@ export default function App() {
             },
           }
         })}
-        edges={styledEdges}
+        edges={renderedCanvasEdges}
         onNodesChange={handleNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
@@ -3822,10 +3970,19 @@ export default function App() {
           canDecide={canDecideTwinReview}
           side={notesSide}
           onSideChange={setNotesSide}
-          onClose={() => setTwinReviewOpen(false)}
+          onClose={() => {
+            setTwinReviewOpen(false)
+            setTwinProposalPreview(null)
+            setTwinProposalStatus(null)
+          }}
           onDecision={decideDigitalTwinReviewItem}
           onClearDecision={clearDigitalTwinReviewItem}
           onFocus={focusDigitalTwinReviewItem}
+          proposalPreview={twinProposalPreview}
+          proposalStatus={twinProposalStatus}
+          proposalPlanError={twinProposalPlan.error}
+          onPreviewProposal={previewDigitalTwinProposal}
+          onApplyProposal={applyDigitalTwinProposal}
         />
       )}
     </div>

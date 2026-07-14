@@ -717,6 +717,11 @@ body[data-theme='light'] .react-flow__node:hover .canvas-group-frame {
   background: #f59e0b25;
   color: #fcd34d;
 }
+.twin-review-actions button.is-proposal-active {
+  border-color: #f59e0baa;
+  background: #f59e0b20;
+  color: #fcd34d;
+}
 .twin-review-decision.is-reviewed {
   border-color: #22c55e55;
   background: #22c55e15;
@@ -725,12 +730,153 @@ body[data-theme='light'] .react-flow__node:hover .canvas-group-frame {
 .twin-review-decision.is-ignored {
   color: #7e8798;
 }
+.twin-proposal-status {
+  border-bottom: 1px solid #ffffff12;
+  padding: 8px 12px;
+  font-size: 10px;
+  line-height: 1.45;
+}
+.twin-proposal-status.is-success {
+  background: #22c55e12;
+  color: #86efac;
+}
+.twin-proposal-status.is-error {
+  background: #ef444412;
+  color: #fca5a5;
+}
+.twin-proposal-preview {
+  margin: 9px 0 2px 14px;
+  border-top: 1px solid #f59e0b55;
+  border-bottom: 1px solid #ffffff12;
+  background: #f59e0b0a;
+  padding: 9px 9px 8px;
+}
+.twin-proposal-preview-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.twin-proposal-preview-heading strong {
+  min-width: 0;
+  flex: 1;
+  color: #fcd34d;
+  font-size: 10px;
+}
+.twin-proposal-preview-heading span {
+  flex: 0 0 auto;
+  color: #9aa3b3;
+  font-size: 9px;
+}
+.twin-proposal-preview p {
+  margin: 7px 0;
+  color: #aeb6c6;
+  font-size: 9.5px;
+  line-height: 1.5;
+}
+.twin-proposal-operations {
+  display: grid;
+  gap: 4px;
+}
+.twin-proposal-operations > div {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 6px;
+  align-items: start;
+}
+.twin-proposal-operations span {
+  color: #7e8798;
+  font-size: 8.5px;
+}
+.twin-proposal-operations strong {
+  min-width: 0;
+  color: #d8dae0;
+  font-size: 9px;
+  font-weight: 650;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.twin-proposal-safety,
+.twin-proposal-error {
+  margin-top: 7px;
+  font-size: 8.5px;
+  line-height: 1.45;
+}
+.twin-proposal-safety {
+  color: #86efac;
+}
+.twin-proposal-error {
+  color: #fca5a5;
+}
+.twin-proposal-preview-actions {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 5px;
+}
+.twin-proposal-preview-actions button {
+  min-height: 28px;
+  border: 1px solid #ffffff1f;
+  border-radius: 4px;
+  background: transparent;
+  color: #aeb6c6;
+  padding: 4px 9px;
+  font: inherit;
+  font-size: 9px;
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s, background-color 0.12s;
+}
+.twin-proposal-preview-actions button:hover:not(:disabled) {
+  border-color: #f59e0b88;
+  background: #f59e0b16;
+  color: #fff;
+}
+.twin-proposal-preview-actions button.is-apply {
+  border-color: #22c55e88;
+  background: #22c55e1c;
+  color: #86efac;
+}
+.twin-proposal-preview-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
 .twin-review-empty {
   min-height: 180px;
   display: grid;
   place-items: center;
   color: #697386;
   font-size: 12px;
+}
+
+.react-flow__node.digital-twin-proposal-node {
+  pointer-events: none;
+  opacity: 0.88;
+}
+.react-flow__node.digital-twin-proposal-node .system-node-card {
+  outline: 2px dashed #f59e0b;
+  outline-offset: 5px;
+  background: #2a2114;
+}
+.digital-twin-proposal-node-badge {
+  position: absolute;
+  top: -13px;
+  left: 8px;
+  z-index: 3;
+  border: 1px solid #f59e0b;
+  border-radius: 4px;
+  background: #2a2114;
+  color: #fcd34d;
+  padding: 2px 6px;
+  font-size: 8px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.react-flow__edge.digital-twin-proposal-edge {
+  pointer-events: none;
+}
+.react-flow__edge.digital-twin-proposal-edge .react-flow__edge-path {
+  stroke: #f59e0b;
+  stroke-dasharray: 7 5;
 }
 
 .main-hover-control {

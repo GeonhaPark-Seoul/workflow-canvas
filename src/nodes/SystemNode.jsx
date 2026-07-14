@@ -106,6 +106,7 @@ export default function SystemNode({ data, selected, id }) {
     <div
       className="canvas-node-card system-node-card"
       data-reality={reality.id}
+      data-proposal-preview={data.digitalTwinProposalPreview ? 'true' : undefined}
       style={{
         width: '100%',
         height: '100%',
@@ -143,6 +144,9 @@ export default function SystemNode({ data, selected, id }) {
         }}
         lineStyle={{ borderColor: `${kind.color}66` }}
       />
+      {data.digitalTwinProposalPreview && (
+        <span className="digital-twin-proposal-node-badge">미리보기</span>
+      )}
 
       {PORTS.map((port) => (
         <Handle key={port.id} type="source" id={port.id} position={port.position} style={handleStyle} />

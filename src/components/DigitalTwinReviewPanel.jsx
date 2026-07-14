@@ -36,7 +36,18 @@ function IconButton({ title, onClick, children }) {
   )
 }
 
-function ReviewRow({ item, decision, canDecide, onDecision, onClearDecision, onFocus }) {
+function ReviewRow({
+  item,
+  decision,
+  canDecide,
+  proposalPreviewed,
+  proposalPlanError,
+  onDecision,
+  onClearDecision,
+  onFocus,
+  onPreviewProposal,
+  onApplyProposal,
+}) {
   const color = SEVERITY_COLORS[item.severity] ?? SEVERITY_COLORS.attention
   return (
     <article className="twin-review-row" style={{ '--review-accent': color }}>
@@ -52,10 +63,53 @@ function ReviewRow({ item, decision, canDecide, onDecision, onClearDecision, onF
           {item.evidence.length > 4 && <span>+{item.evidence.length - 4}</span>}
         </div>
       )}
+      {proposalPreviewed && item.proposal && (
+        <div className="twin-proposal-preview">
+          <div className="twin-proposal-preview-heading">
+            <strong>추가 전 미리보기</strong>
+            <span>노드 {item.proposal.counts.nodes} · 연결선 {item.proposal.counts.edges}</span>
+          </div>
+          {item.proposal.summary && <p>{item.proposal.summary}</p>}
+          <div className="twin-proposal-operations">
+            {item.proposal.operations.map((operation, index) => (
+              <div key={`${operation.action}:${operation.node?.id ?? operation.edge?.id ?? index}`}>
+                <span>{operation.action === 'add_node' ? '노드 추가' : '관계 추가'}</span>
+                <strong>{operation.label || operation.node?.id || operation.edge?.id}</strong>
+              </div>
+            ))}
+          </div>
+          <div className="twin-proposal-safety">기존 노드·연결선은 변경하거나 삭제하지 않습니다.</div>
+          {proposalPlanError && <div className="twin-proposal-error">{proposalPlanError}</div>}
+          <div className="twin-proposal-preview-actions">
+            <button type="button" onClick={() => onPreviewProposal(item)}>미리보기 닫기</button>
+            {canDecide && !decision && (
+              <button
+                type="button"
+                className="is-apply"
+                disabled={!!proposalPlanError}
+                title="표시된 새 노드와 연결선만 현재 지도에 추가"
+                onClick={() => onApplyProposal(item)}
+              >
+                지도에 적용
+              </button>
+            )}
+          </div>
+        </div>
+      )}
       <div className="twin-review-actions">
         {item.focus && (
           <button type="button" title="관련 노드 또는 연결선을 캔버스에서 보기" onClick={() => onFocus(item)}>
             캔버스에서 보기
+          </button>
+        )}
+        {item.proposal && (
+          <button
+            type="button"
+            className={proposalPreviewed ? 'is-proposal-active' : ''}
+            title="추가될 노드와 연결선을 저장하지 않고 캔버스에서 확인"
+            onClick={() => onPreviewProposal(item)}
+          >
+            {proposalPreviewed ? '미리보기 중' : '수정안 보기'}
           </button>
         )}
         <span className="twin-review-action-spacer" />
@@ -97,6 +151,11 @@ export default function DigitalTwinReviewPanel({
   onDecision,
   onClearDecision,
   onFocus,
+  proposalPreview,
+  proposalStatus,
+  proposalPlanError,
+  onPreviewProposal,
+  onApplyProposal,
 }) {
   const [paneWidth, setPaneWidth] = useState(440)
   const [tab, setTab] = useState('pending')
@@ -190,6 +249,12 @@ export default function DigitalTwinReviewPanel({
           <span>미모델 <strong>{review.summary.unmodeled_resources}</strong></span>
         </div>
 
+        {proposalStatus && (
+          <div className={`twin-proposal-status is-${proposalStatus.type}`} role="status">
+            {proposalStatus.message}
+          </div>
+        )}
+
         <div className="twin-review-controls">
           <div className="twin-review-segments" role="tablist" aria-label="검토 상태">
             <button type="button" role="tab" aria-selected={tab === 'pending'} className={tab === 'pending' ? 'is-active' : ''} onClick={() => setTab('pending')}>
@@ -217,9 +282,13 @@ export default function DigitalTwinReviewPanel({
               item={item}
               decision={partitions.decisions[item.id] ?? null}
               canDecide={canDecide}
+              proposalPreviewed={proposalPreview?.itemId === item.id && proposalPreview?.itemFingerprint === item.fingerprint}
+              proposalPlanError={proposalPreview?.itemId === item.id ? proposalPlanError : null}
               onDecision={onDecision}
               onClearDecision={onClearDecision}
               onFocus={onFocus}
+              onPreviewProposal={onPreviewProposal}
+              onApplyProposal={onApplyProposal}
             />
           ))}
         </div>

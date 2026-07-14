@@ -56,6 +56,12 @@ import {
   setDigitalTwinReviewDecision,
 } from '../shared/digitalTwinReview.js'
 import {
+  applyDigitalTwinGraphProposal,
+  createDigitalTwinGraphProposal,
+  digitalTwinProposalMatchesItem,
+  planDigitalTwinGraphProposal,
+} from '../shared/digitalTwinProposal.js'
+import {
   inspectWorkflowSystemTwin,
   WORKFLOW_SYSTEM_TWIN_SOURCE_ID,
 } from '../shared/workflowSystemTwinAdapter.js'
@@ -821,6 +827,182 @@ t('Workflow Canvas adapter ignores ordinary canvases instead of coupling the rev
     nodes: [{ id: 'orders', type: 'system', data: { label: 'Orders' } }],
     edges: [],
   }), null)
+})
+
+t('digital twin proposals reject update and delete operations before they reach the canvas', () => {
+  const item = createDigitalTwinReviewItem({
+    sourceId: 'source-one', itemKey: 'resource:orders', title: 'orders found', observation: { version: 1 },
+  })
+  assert.throws(() => createDigitalTwinGraphProposal({
+    sourceId: item.sourceId,
+    proposalKey: 'unsafe-update',
+    itemId: item.id,
+    itemFingerprint: item.fingerprint,
+    operations: [{ action: 'update_node', node: { id: 'orders' } }],
+  }), /새 노드와 연결선 추가만 허용/)
+  assert.throws(() => createDigitalTwinGraphProposal({
+    sourceId: item.sourceId,
+    proposalKey: 'unsafe-delete',
+    itemId: item.id,
+    itemFingerprint: item.fingerprint,
+    operations: [{ action: 'remove_node', node: { id: 'orders' } }],
+  }), /새 노드와 연결선 추가만 허용/)
+})
+
+t('proposal preview is read-only and explicit apply adds only the planned graph entities', () => {
+  const item = createDigitalTwinReviewItem({
+    sourceId: 'source-one', itemKey: 'resource:orders', title: 'orders found', observation: { version: 1 },
+  })
+  const proposal = createDigitalTwinGraphProposal({
+    sourceId: item.sourceId,
+    proposalKey: 'model-orders',
+    itemId: item.id,
+    itemFingerprint: item.fingerprint,
+    snapshotId: 'snapshot-one',
+    operations: [
+      {
+        action: 'add_node',
+        label: 'orders node',
+        node: {
+          id: 'orders', type: 'system', position: { x: 20, y: 30 },
+          data: {
+            label: 'Orders',
+            digitalTwinBinding: {
+              sourceId: item.sourceId, entityKey: 'db-table:orders', itemFingerprint: item.fingerprint,
+            },
+          },
+        },
+      },
+      {
+        action: 'add_edge',
+        label: 'database contains orders',
+        edge: {
+          id: 'database-orders', source: 'database', target: 'orders', type: 'stub',
+          data: { relationType: 'contains', relationEvidenceRef: 'schema.sql' },
+        },
+      },
+    ],
+  })
+  const graph = { nodes: [{ id: 'database', type: 'system', position: { x: 0, y: 0 }, data: { label: 'DB' } }], edges: [] }
+  const before = structuredClone(graph)
+  const plan = planDigitalTwinGraphProposal(graph, proposal)
+
+  assert.deepEqual(graph, before)
+  assert.deepEqual(plan.nodes.map((node) => node.id), ['orders'])
+  assert.deepEqual(plan.edges.map((edge) => edge.id), ['database-orders'])
+  const applied = applyDigitalTwinGraphProposal(graph, proposal)
+  assert.deepEqual(graph, before)
+  assert.deepEqual(applied.nodes.map((node) => node.id), ['database', 'orders'])
+  assert.deepEqual(applied.edges.map((edge) => edge.id), ['database-orders'])
+  assert.equal(applied.writesPerformed, true)
+
+  const repeated = applyDigitalTwinGraphProposal(applied, proposal)
+  assert.equal(repeated.writesPerformed, false)
+  assert.deepEqual(new Set(repeated.alreadyPresent), new Set(['orders', 'database-orders']))
+})
+
+t('a proposal is bound to the exact review evidence and cannot follow a stale item', () => {
+  const first = createDigitalTwinReviewItem({
+    sourceId: 'source-one', itemKey: 'resource:orders', title: 'orders found', observation: { version: 1 },
+  })
+  const changed = createDigitalTwinReviewItem({
+    sourceId: 'source-one', itemKey: 'resource:orders', title: 'orders found', observation: { version: 2 },
+  })
+  const proposal = createDigitalTwinGraphProposal({
+    sourceId: first.sourceId,
+    proposalKey: 'model-orders',
+    itemId: first.id,
+    itemFingerprint: first.fingerprint,
+    operations: [{ action: 'add_node', node: { id: 'orders', type: 'system', position: { x: 0, y: 0 } } }],
+  })
+
+  assert.equal(digitalTwinProposalMatchesItem(proposal, first), true)
+  assert.equal(digitalTwinProposalMatchesItem(proposal, changed), false)
+})
+
+t('proposal apply refuses content changed after the user previewed it', () => {
+  const item = createDigitalTwinReviewItem({
+    sourceId: 'source-one', itemKey: 'resource:orders', title: 'orders found', observation: { version: 1 },
+  })
+  const proposal = createDigitalTwinGraphProposal({
+    sourceId: item.sourceId,
+    proposalKey: 'model-orders',
+    itemId: item.id,
+    itemFingerprint: item.fingerprint,
+    operations: [{ action: 'add_node', node: { id: 'orders', type: 'system', position: { x: 0, y: 0 } } }],
+  })
+  proposal.operations[0].node.data.label = 'changed after preview'
+
+  assert.throws(
+    () => applyDigitalTwinGraphProposal({ nodes: [], edges: [] }, proposal),
+    /미리보기 이후 수정안 내용이 달라졌/,
+  )
+})
+
+t('Workflow Canvas resource proposals contain provenance but never credential values', () => {
+  const review = inspectWorkflowSystemTwin(createWorkflowCanvasSystemMap())
+  const proposed = review.items.filter((item) => item.proposal)
+  const credential = proposed.find((item) => item.itemKey === 'resource:credential-reference:SUPABASE_ANON_KEY')
+  const revocations = proposed.find((item) => item.itemKey === 'resource:db-table:share_revocations')
+
+  assert.ok(credential?.proposal)
+  assert.ok(revocations?.proposal)
+  assert.deepEqual(credential.proposal.counts, { nodes: 1, edges: 1 })
+  assert.deepEqual(revocations.proposal.counts, { nodes: 1, edges: 1 })
+  const credentialNode = credential.proposal.operations.find((operation) => operation.action === 'add_node').node
+  assert.equal(credentialNode.data.digitalTwinBinding.entityKey, 'credential-reference:SUPABASE_ANON_KEY')
+  assert.equal(credentialNode.data.constraints.includes('실제 값은 캔버스에 저장하지 않'), true)
+  assert.equal(JSON.stringify(credential.proposal).includes('SUPABASE_SERVICE_ROLE_KEY'), false)
+  assert.equal(JSON.stringify(credential.proposal).includes('eyJ'), false)
+})
+
+t('an applied Workflow Canvas proposal becomes modeled and remains fingerprint-tracked', () => {
+  const map = createWorkflowCanvasSystemMap()
+  const review = inspectWorkflowSystemTwin(map)
+  const item = review.items.find((candidate) => candidate.itemKey === 'resource:db-table:share_revocations')
+  const applied = applyDigitalTwinGraphProposal(map, item.proposal)
+  const extended = { ...map, nodes: applied.nodes, edges: applied.edges }
+  const after = inspectWorkflowSystemTwin(extended)
+  const appliedNode = extended.nodes.find((node) => node.data?.digitalTwinBinding?.entityKey === 'db-table:share_revocations')
+
+  assert.ok(appliedNode)
+  assert.equal(after.items.some((candidate) => candidate.itemKey === item.itemKey), false)
+  assert.equal(after.report.summary.unmodeled_resources, review.report.summary.unmodeled_resources - 1)
+
+  const changedDiscovery = structuredClone(WORKFLOW_SYSTEM_DISCOVERY)
+  changedDiscovery.current.resources['db-table:share_revocations'].fingerprint = '11111111111111111111'
+  const changedReport = inspectWorkflowSystemMap({
+    canvas: extended,
+    expectedMap: createWorkflowCanvasSystemMap(),
+    discovery: changedDiscovery,
+  })
+  assert.ok(changedReport.node_findings.some((finding) => (
+    finding.node_id === appliedNode.id && finding.status === 'changed'
+  )))
+})
+
+t('different resource proposals merge without duplicate nodes across two canvas editors', () => {
+  const map = createWorkflowCanvasSystemMap()
+  const review = inspectWorkflowSystemTwin(map)
+  const credential = review.items.find((item) => item.itemKey === 'resource:credential-reference:SUPABASE_ANON_KEY')
+  const revocations = review.items.find((item) => item.itemKey === 'resource:db-table:share_revocations')
+  const localApplied = applyDigitalTwinGraphProposal(map, credential.proposal)
+  const remoteApplied = applyDigitalTwinGraphProposal(map, revocations.proposal)
+  const base = { ...map, notes: [], views: map.views, stageTypes: null }
+  const local = { ...base, nodes: localApplied.nodes, edges: localApplied.edges }
+  const remote = { ...base, nodes: remoteApplied.nodes, edges: remoteApplied.edges }
+  const { merged, conflicts } = mergeCanvasSnapshots(base, local, remote)
+  const bindings = merged.nodes
+    .map((node) => node.data?.digitalTwinBinding?.entityKey)
+    .filter(Boolean)
+
+  assert.deepEqual(conflicts, [])
+  assert.deepEqual(new Set(bindings), new Set([
+    'credential-reference:SUPABASE_ANON_KEY',
+    'db-table:share_revocations',
+  ]))
+  assert.equal(new Set(merged.nodes.map((node) => node.id)).size, merged.nodes.length)
+  assert.equal(new Set(merged.edges.map((edge) => edge.id)).size, merged.edges.length)
 })
 
 console.log('system map relation repair safety')

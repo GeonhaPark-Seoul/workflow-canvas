@@ -4,12 +4,15 @@ import {
 } from './workflowSystemMapRepair.js'
 
 export const LEGACY_SYSTEM_MAP_BASELINE_ID = 'phase3-41ca765'
+export const WORKFLOW_SYSTEM_DISCOVERY_SOURCE_ID = 'workflow-canvas:self-system'
 
 export const WORKFLOW_SYSTEM_MAP_NODE_BINDINGS = Object.freeze({
   'map-web-app': [
     'file:src/App.jsx',
     'file:src/components/DigitalTwinReviewPanel.jsx',
     'file:src/lib/digitalTwinAdapters.js',
+    'file:src/nodes/SystemNode.jsx',
+    'file:shared/digitalTwinProposal.js',
     'file:shared/digitalTwinReview.js',
     'file:shared/workflowSystemTwinAdapter.js',
     'dependency:react',
@@ -116,6 +119,29 @@ function changedResourceStatus(current, baseline) {
   return current.fingerprint === baseline.fingerprint ? 'current' : 'changed'
 }
 
+function appliedResourceStatus(current, observedFingerprint) {
+  if (!current) return 'source_missing'
+  return current.fingerprint === observedFingerprint ? 'current' : 'changed'
+}
+
+function workflowResourceBindings(canvas) {
+  const bindings = Object.entries(WORKFLOW_SYSTEM_MAP_NODE_BINDINGS).map(([nodeId, resourceKeys]) => ({
+    nodeId,
+    resources: resourceKeys.map((key) => ({ key, observedFingerprint: null })),
+  }))
+  for (const node of canvas?.nodes ?? []) {
+    const binding = node?.data?.digitalTwinBinding
+    if (binding?.sourceId !== WORKFLOW_SYSTEM_DISCOVERY_SOURCE_ID) continue
+    if (typeof binding.entityKey !== 'string' || !binding.entityKey.trim()) continue
+    if (typeof binding.observedFingerprint !== 'string' || !/^[a-f0-9]{8,80}$/i.test(binding.observedFingerprint)) continue
+    bindings.push({
+      nodeId: node.id,
+      resources: [{ key: binding.entityKey, observedFingerprint: binding.observedFingerprint }],
+    })
+  }
+  return bindings
+}
+
 function priorityStatus(statuses) {
   for (const status of ['source_missing', 'changed', 'discovered_since_baseline']) {
     if (statuses.includes(status)) return status
@@ -151,6 +177,7 @@ export function inspectWorkflowSystemMap({ canvas, expectedMap, discovery }) {
   const nodeFindings = []
   const relationFindings = []
   let unchangedBoundNodes = 0
+  const resourceBindings = workflowResourceBindings(canvas)
 
   for (const [nodeId, expected] of expectedNodes) {
     const actual = canvasNodes.get(nodeId)
@@ -173,13 +200,15 @@ export function inspectWorkflowSystemMap({ canvas, expectedMap, discovery }) {
     }
   }
 
-  for (const [nodeId, resourceKeys] of Object.entries(WORKFLOW_SYSTEM_MAP_NODE_BINDINGS)) {
+  for (const { nodeId, resources: boundResources } of resourceBindings) {
     const actualNode = canvasNodes.get(nodeId)
     if (!actualNode) continue
-    const resources = resourceKeys.map((key) => {
+    const resources = boundResources.map(({ key, observedFingerprint }) => {
       const currentResource = current.resources[key]
       const baselineResource = baseline?.resources?.[key]
-      const status = changedResourceStatus(currentResource, baselineResource)
+      const status = observedFingerprint
+        ? appliedResourceStatus(currentResource, observedFingerprint)
+        : changedResourceStatus(currentResource, baselineResource)
       return compactResource(currentResource ?? baselineResource ?? { key, label: key, sourceRefs: [] }, status)
     })
     const status = baseline ? priorityStatus(resources.map((resource) => resource.status)) : 'baseline_unavailable'
@@ -193,7 +222,7 @@ export function inspectWorkflowSystemMap({ canvas, expectedMap, discovery }) {
         resources: resources.filter((resource) => resource.status !== 'current'),
         reason: status === 'baseline_unavailable'
           ? '비교할 기준 manifest를 찾을 수 없어 현재 존재 여부만 확인했습니다.'
-          : '연결된 코드·설정 자원이 지도 작성 시점과 다릅니다.',
+          : '연결된 코드·설정 자원이 지도 작성 또는 수정안 적용 시점과 다릅니다.',
       })
     }
   }
@@ -262,7 +291,7 @@ export function inspectWorkflowSystemMap({ canvas, expectedMap, discovery }) {
     }
   }
 
-  const modeledResources = new Set(Object.values(WORKFLOW_SYSTEM_MAP_NODE_BINDINGS).flat())
+  const modeledResources = new Set(resourceBindings.flatMap((binding) => binding.resources.map((resource) => resource.key)))
   const unmodeledResources = Object.values(current.resources)
     .filter((resource) => ACTIONABLE_RESOURCE_KINDS.has(resource.kind) && !modeledResources.has(resource.key))
     .map((resource) => compactResource(resource, 'unmodeled'))

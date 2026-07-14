@@ -14,6 +14,7 @@
 코드·SQL·설정에서 **발견된 상태**이며 실제 런타임 작동을 확인한 것으로 표시하지 않습니다.
 
 - 공통 검토 모델: [`shared/digitalTwinReview.js`](shared/digitalTwinReview.js)
+- 추가 전용 수정안 모델: [`shared/digitalTwinProposal.js`](shared/digitalTwinProposal.js)
 - 첫 소스 어댑터: [`shared/workflowSystemTwinAdapter.js`](shared/workflowSystemTwinAdapter.js)
 - 어댑터 레지스트리: [`src/lib/digitalTwinAdapters.js`](src/lib/digitalTwinAdapters.js)
 - 검토 UI: [`src/components/DigitalTwinReviewPanel.jsx`](src/components/DigitalTwinReviewPanel.jsx)
@@ -23,6 +24,12 @@
 항목의 실제 근거 지문이 다시 바뀌면 이전 결정을 재사용하지 않고 검토 대상으로 다시
 나타냅니다. Workflow Canvas 전용 지식은 어댑터에만 두므로 물류·CRM·재무 등 다른 소스도
 공통 검토 UI와 상태 모델을 재사용할 수 있습니다.
+
+지도에 없는 발견 자원은 `수정안 보기`로 새 노드와 연결선을 임시 표시할 수 있습니다.
+미리보기는 캔버스 저장 상태를 바꾸지 않으며, 소유자가 펼쳐진 수정안에서 `지도에 적용`을
+눌러야만 추가됩니다. 이 단계의 수정안 엔진은 기존 노드·연결선의 수정과 삭제 작업을
+입력 단계에서 거부합니다. 적용된 노드에는 출처·자원 키·관찰 지문이 남아 같은 자원을
+중복 제안하지 않고, 이후 구현 지문이 달라지거나 소스에서 사라지면 다시 검토 신호를 냅니다.
 
 ---
 
