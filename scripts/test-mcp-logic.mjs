@@ -58,7 +58,9 @@ import {
 import {
   applyDigitalTwinGraphProposal,
   createDigitalTwinGraphProposal,
+  digitalTwinProposalAutoFitKey,
   digitalTwinProposalMatchesItem,
+  filterDigitalTwinProposalNodeChanges,
   planDigitalTwinGraphProposal,
 } from '../shared/digitalTwinProposal.js'
 import {
@@ -918,6 +920,31 @@ t('a proposal is bound to the exact review evidence and cannot follow a stale it
 
   assert.equal(digitalTwinProposalMatchesItem(proposal, first), true)
   assert.equal(digitalTwinProposalMatchesItem(proposal, changed), false)
+})
+
+t('proposal preview measurements never update persisted canvas nodes', () => {
+  const changes = [
+    { id: 'real-node', type: 'position', position: { x: 10, y: 20 } },
+    { id: 'preview-node', type: 'dimensions', dimensions: { width: 240, height: 140 } },
+  ]
+  const persisted = filterDigitalTwinProposalNodeChanges(changes, new Set(['preview-node']))
+
+  assert.deepEqual(persisted, [changes[0]])
+  assert.equal(changes.length, 2)
+})
+
+t('proposal auto-fit key stays stable across rerenders and changes with the proposal', () => {
+  const proposal = { id: 'source::proposal', fingerprint: 'fingerprint-one' }
+
+  assert.equal(
+    digitalTwinProposalAutoFitKey('canvas-one', proposal),
+    digitalTwinProposalAutoFitKey('canvas-one', structuredClone(proposal)),
+  )
+  assert.notEqual(
+    digitalTwinProposalAutoFitKey('canvas-one', proposal),
+    digitalTwinProposalAutoFitKey('canvas-one', { ...proposal, fingerprint: 'fingerprint-two' }),
+  )
+  assert.equal(digitalTwinProposalAutoFitKey('canvas-one', null), null)
 })
 
 t('proposal apply refuses content changed after the user previewed it', () => {

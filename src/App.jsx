@@ -71,7 +71,9 @@ import {
 } from '../shared/digitalTwinReview.js'
 import {
   applyDigitalTwinGraphProposal,
+  digitalTwinProposalAutoFitKey,
   digitalTwinProposalMatchesItem,
+  filterDigitalTwinProposalNodeChanges,
   planDigitalTwinGraphProposal,
 } from '../shared/digitalTwinProposal.js'
 import { inspectDigitalTwinCanvas } from './lib/digitalTwinAdapters.js'
@@ -2110,6 +2112,10 @@ export default function App() {
     deletable: false,
     data: { ...node.data, digitalTwinProposalPreview: true },
   })), [twinProposalPlan.nodes])
+  const twinProposalPreviewNodeIds = useMemo(
+    () => new Set(twinProposalPreviewNodes.map((node) => node.id)),
+    [twinProposalPreviewNodes],
+  )
   const twinProposalPreviewEdges = useMemo(() => twinProposalPlan.edges.map((edge) => ({
     ...edge,
     className: `${edge.className ? `${edge.className} ` : ''}wfc-edge digital-twin-proposal-edge`,
@@ -2120,6 +2126,8 @@ export default function App() {
     style: { ...edge.style, stroke: '#f59e0b', strokeWidth: 3, strokeDasharray: '7 5' },
     markerEnd: edge.markerEnd ? { ...edge.markerEnd, color: '#f59e0b' } : undefined,
   })), [twinProposalPlan.edges])
+  const twinProposalFitKey = digitalTwinProposalAutoFitKey(activeCanvasId, activeTwinProposal)
+  const lastFittedTwinProposalRef = useRef(null)
 
   useEffect(() => {
     if (!digitalTwinReview) setTwinReviewOpen(false)
@@ -2130,7 +2138,17 @@ export default function App() {
   }, [twinProposalPreview, twinProposalPreviewItem])
 
   useEffect(() => {
-    if (!rfInstance || !activeTwinProposal || twinProposalPlan.error || !twinProposalPlan.nodes.length) return undefined
+    if (!twinProposalFitKey) {
+      lastFittedTwinProposalRef.current = null
+      return undefined
+    }
+    if (
+      !rfInstance
+      || twinProposalPlan.error
+      || !twinProposalPlan.nodes.length
+      || lastFittedTwinProposalRef.current === twinProposalFitKey
+    ) return undefined
+    lastFittedTwinProposalRef.current = twinProposalFitKey
     const ids = [...new Set([
       ...twinProposalPlan.nodes.map((node) => node.id),
       ...twinProposalPlan.edges.flatMap((edge) => [edge.source, edge.target]),
@@ -2139,7 +2157,7 @@ export default function App() {
       rfInstance.fitView({ nodes: ids.map((id) => ({ id })), duration: 450, padding: 0.4, maxZoom: 1.05 })
     }, 0)
     return () => clearTimeout(timer)
-  }, [activeTwinProposal, rfInstance, twinProposalPlan.error, twinProposalPlan.nodes, twinProposalPlan.edges])
+  }, [rfInstance, twinProposalFitKey, twinProposalPlan.error, twinProposalPlan.nodes, twinProposalPlan.edges])
 
   const decideDigitalTwinReviewItem = useCallback((item, disposition) => {
     if (!canDecideTwinReview || item?.sourceId !== digitalTwinReview?.source.id) return
@@ -2825,12 +2843,14 @@ export default function App() {
   // since the resizer's own onEnd recomputes size from the raw pointer
   // delta and would otherwise snap the box back out of alignment on release.
   const handleNodesChange = useCallback((changes) => {
-    onNodesChange(changes)
+    const persistedChanges = filterDigitalTwinProposalNodeChanges(changes, twinProposalPreviewNodeIds)
+    if (!persistedChanges.length) return
+    onNodesChange(persistedChanges)
 
-    const dimChange = changes.find((c) => c.type === 'dimensions' && typeof c.resizing === 'boolean')
+    const dimChange = persistedChanges.find((c) => c.type === 'dimensions' && typeof c.resizing === 'boolean')
     if (!dimChange) return
 
-    const posChange = changes.find((c) => c.type === 'position' && c.id === dimChange.id)
+    const posChange = persistedChanges.find((c) => c.type === 'position' && c.id === dimChange.id)
     const dragged = nodes.find((n) => n.id === dimChange.id)
     if (!dragged) { setAlignGuides([]); return }
 
@@ -2854,7 +2874,7 @@ export default function App() {
         }
       : n))
     setAlignGuides(dimChange.resizing ? snap.guides : [])
-  }, [onNodesChange, nodes, computeResizeAlignSnap, setNodes])
+  }, [onNodesChange, nodes, computeResizeAlignSnap, setNodes, twinProposalPreviewNodeIds])
 
   // Clicking a node bolds every edge connected to it (reuses the same
   // selected-edge bold styling as clicking an edge directly — see styledEdges).

@@ -163,6 +163,24 @@ export function digitalTwinProposalMatchesItem(proposal, item) {
     && proposal?.itemFingerprint === item?.fingerprint
 }
 
+export function filterDigitalTwinProposalNodeChanges(changes, previewNodeIds) {
+  const source = Array.isArray(changes) ? changes : []
+  const ids = previewNodeIds instanceof Set
+    ? previewNodeIds
+    : new Set(Array.isArray(previewNodeIds) ? previewNodeIds : [])
+  if (!ids.size) return source
+  return source.filter((change) => !ids.has(change?.id))
+}
+
+export function digitalTwinProposalAutoFitKey(canvasId, proposal) {
+  const safeCanvasId = safeText(canvasId, 240)
+  const proposalId = safeText(proposal?.id, 480)
+  const proposalFingerprint = safeText(proposal?.fingerprint, 240)
+  return safeCanvasId && proposalId && proposalFingerprint
+    ? `${safeCanvasId}::${proposalId}::${proposalFingerprint}`
+    : null
+}
+
 function matchingAppliedNode(existing, planned) {
   const current = existing?.data?.digitalTwinBinding
   const proposed = planned?.data?.digitalTwinBinding
