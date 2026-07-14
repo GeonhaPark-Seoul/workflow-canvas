@@ -75,20 +75,23 @@ for (const key of ['relationType', 'relationEvidence', 'relationEvidenceRef', 'r
   assert.ok(relationGuard.includes(`'${key}'`), `relation guard key missing: ${key}`)
 }
 
-assert.match(runtimeRead, /create or replace function public\.get_own_canvas_summaries\(max_rows integer default 50\)/i)
-assert.match(runtimeRead, /stable\s+security invoker/i, 'runtime summary function must remain read-only and use caller permissions')
-assert.match(runtimeRead, /where c\.user_id\s*=\s*auth\.uid\(\)/i, 'runtime summary must explicitly scope rows to the caller')
-assert.match(runtimeRead, /limit least\(greatest\(coalesce\(max_rows, 50\), 1\), 50\)/i, 'runtime summary must cap result rows')
+assert.match(runtimeRead, /drop function if exists public\.get_own_canvas_summaries\(integer\)/i, 'retired account summary RPC must be removed')
+assert.match(runtimeRead, /create or replace function public\.get_workflow_system_operational_snapshot\(\)/i)
+assert.match(runtimeRead, /stable\s+security invoker/i, 'runtime operations function must remain read-only and use caller permissions')
+assert.doesNotMatch(runtimeRead, /auth\.uid\(\)/i, 'application aggregate must not pretend the operator account represents the product')
+assert.match(runtimeRead, /count\(distinct c\.user_id\).*?account_count/is)
+assert.match(runtimeRead, /filter \(where c\.updated_at >= now\(\) - interval '24 hours'\)/i)
+assert.match(runtimeRead, /filter \(where c\.updated_at >= now\(\) - interval '7 days'\)/i)
 assert.match(runtimeRead, /jsonb_array_length\(c\.nodes\).*?node_count/is)
 assert.match(runtimeRead, /jsonb_array_length\(c\.edges\).*?edge_count/is)
 assert.match(runtimeRead, /jsonb_array_length\(c\.notes\).*?note_count/is)
 assert.match(
   runtimeRead,
-  /revoke execute on function public\.get_own_canvas_summaries\(integer\) from PUBLIC, anon;/i,
+  /revoke execute on function public\.get_workflow_system_operational_snapshot\(\) from PUBLIC, anon, authenticated;/i,
 )
 assert.match(
   runtimeRead,
-  /grant execute on function public\.get_own_canvas_summaries\(integer\) to authenticated;/i,
+  /grant execute on function public\.get_workflow_system_operational_snapshot\(\) to service_role;/i,
 )
 assert.match(runtimeRead, /notify pgrst, 'reload schema';/i, 'runtime RPC must refresh the PostgREST schema cache')
 

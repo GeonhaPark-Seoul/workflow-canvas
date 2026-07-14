@@ -78,6 +78,7 @@ import {
   digitalTwinProposalMatchesItem,
   filterDigitalTwinProposalNodeChanges,
   planDigitalTwinGraphProposal,
+  previewDigitalTwinPartChanges,
 } from '../shared/digitalTwinProposal.js'
 import { inspectDigitalTwinCanvas } from './lib/digitalTwinAdapters.js'
 import {
@@ -2108,14 +2109,14 @@ export default function App() {
     : null
   const activeTwinProposal = twinProposalPreviewItem?.proposal ?? null
   const twinProposalPlan = useMemo(() => {
-    if (!activeTwinProposal) return { nodes: [], edges: [], parts: [], alreadyPresent: [], error: null }
+    if (!activeTwinProposal) return { nodes: [], edges: [], parts: [], partReplacements: [], alreadyPresent: [], error: null }
     try {
       return {
         ...planDigitalTwinGraphProposal({ nodes, edges }, activeTwinProposal),
         error: null,
       }
     } catch (error) {
-      return { nodes: [], edges: [], parts: [], alreadyPresent: [], error: error?.message ?? '수정안을 미리 볼 수 없습니다.' }
+      return { nodes: [], edges: [], parts: [], partReplacements: [], alreadyPresent: [], error: error?.message ?? '수정안을 미리 볼 수 없습니다.' }
     }
   }, [activeTwinProposal, nodes, edges])
   const twinProposalPreviewNodes = useMemo(() => twinProposalPlan.nodes.map((node) => ({
@@ -2133,12 +2134,17 @@ export default function App() {
   const twinProposalPreviewPartsByNode = useMemo(() => {
     const byNode = new Map()
     for (const planned of twinProposalPlan.parts) {
-      const current = byNode.get(planned.targetNodeId) ?? []
-      current.push(planned.part)
+      const current = byNode.get(planned.targetNodeId) ?? { additions: [], replacements: [] }
+      current.additions.push(planned.part)
+      byNode.set(planned.targetNodeId, current)
+    }
+    for (const planned of twinProposalPlan.partReplacements) {
+      const current = byNode.get(planned.targetNodeId) ?? { additions: [], replacements: [] }
+      current.replacements.push(planned)
       byNode.set(planned.targetNodeId, current)
     }
     return byNode
-  }, [twinProposalPlan.parts])
+  }, [twinProposalPlan.parts, twinProposalPlan.partReplacements])
   const twinProposalPreviewAugmentedNodeIds = useMemo(
     () => new Set(twinProposalPreviewPartsByNode.keys()),
     [twinProposalPreviewPartsByNode],
@@ -2172,7 +2178,12 @@ export default function App() {
     if (
       !rfInstance
       || twinProposalPlan.error
-      || (!twinProposalPlan.nodes.length && !twinProposalPlan.edges.length && !twinProposalPlan.parts.length)
+      || (
+        !twinProposalPlan.nodes.length
+        && !twinProposalPlan.edges.length
+        && !twinProposalPlan.parts.length
+        && !twinProposalPlan.partReplacements.length
+      )
       || lastFittedTwinProposalRef.current === twinProposalFitKey
     ) return undefined
     lastFittedTwinProposalRef.current = twinProposalFitKey
@@ -2180,12 +2191,21 @@ export default function App() {
       ...twinProposalPlan.nodes.map((node) => node.id),
       ...twinProposalPlan.edges.flatMap((edge) => [edge.source, edge.target]),
       ...twinProposalPlan.parts.map((planned) => planned.targetNodeId),
+      ...twinProposalPlan.partReplacements.map((planned) => planned.targetNodeId),
     ])]
     const timer = setTimeout(() => {
       rfInstance.fitView({ nodes: ids.map((id) => ({ id })), duration: 450, padding: 0.4, maxZoom: 1.05 })
     }, 0)
     return () => clearTimeout(timer)
-  }, [rfInstance, twinProposalFitKey, twinProposalPlan.error, twinProposalPlan.nodes, twinProposalPlan.edges, twinProposalPlan.parts])
+  }, [
+    rfInstance,
+    twinProposalFitKey,
+    twinProposalPlan.error,
+    twinProposalPlan.nodes,
+    twinProposalPlan.edges,
+    twinProposalPlan.parts,
+    twinProposalPlan.partReplacements,
+  ])
 
   const decideDigitalTwinReviewItem = useCallback((item, disposition) => {
     if (!canDecideTwinReview || item?.sourceId !== digitalTwinReview?.source.id) return
@@ -2259,7 +2279,7 @@ export default function App() {
       setTwinProposalStatus({
         type: 'success',
         message: result.writesPerformed
-          ? `지도에 노드 ${result.appliedNodeIds.length}개, 연결선 ${result.appliedEdgeIds.length}개, 시스템 파츠 ${result.appliedPartIds.length}개를 추가했습니다.`
+          ? `지도에 노드 ${result.appliedNodeIds.length}개, 연결선 ${result.appliedEdgeIds.length}개, 시스템 파츠 ${result.appliedPartIds.length}개 변경을 적용했습니다.`
           : '같은 수정안이 이미 지도에 적용되어 있습니다.',
       })
     } catch (error) {
@@ -3341,14 +3361,19 @@ export default function App() {
   })
   const previewAugmentedNodes = twinProposalPreviewPartsByNode.size
     ? nodes.map((node) => {
-        const previewParts = twinProposalPreviewPartsByNode.get(node.id)
-        if (!previewParts?.length) return node
+        const previewPlan = twinProposalPreviewPartsByNode.get(node.id)
+        if (!previewPlan) return node
+        const { parts: previewParts, previewPartIds } = previewDigitalTwinPartChanges(
+          node.data?.systemParts,
+          previewPlan.additions,
+          previewPlan.replacements,
+        )
         return {
           ...node,
           data: {
             ...node.data,
-            systemParts: [...normalizeSystemParts(node.data?.systemParts), ...previewParts],
-            digitalTwinProposalPreviewPartIds: previewParts.map((part) => part.id),
+            systemParts: previewParts,
+            digitalTwinProposalPreviewPartIds: previewPartIds,
           },
         }
       })

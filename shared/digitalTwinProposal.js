@@ -120,9 +120,28 @@ function normalizeOperation(operation) {
       part,
     }
   }
+  if (operation.action === 'replace_part') {
+    const partError = validateSystemPartInput(operation.part)
+    const part = partError ? null : normalizeSystemPart(operation.part)
+    if (partError || !part) {
+      throw new DigitalTwinProposalError('INVALID_PART', partError || '교체할 시스템 파츠 정보가 없습니다.')
+    }
+    const partId = safeId(operation.partId, '교체 대상 파츠')
+    if (part.id !== partId) {
+      throw new DigitalTwinProposalError('PART_ID_CHANGE_NOT_ALLOWED', '안전한 파츠 교체는 기존 식별자를 유지해야 합니다.')
+    }
+    return {
+      action: 'replace_part',
+      label: safeText(operation.label, 180),
+      targetNodeId: safeId(operation.targetNodeId, '파츠 대상 노드'),
+      partId,
+      expectedPartFingerprint: safeId(operation.expectedPartFingerprint, '기존 파츠 지문'),
+      part,
+    }
+  }
   throw new DigitalTwinProposalError(
     'UNSAFE_OPERATION',
-    '이번 단계의 디지털 트윈 수정안은 새 노드, 연결선 또는 시스템 파츠 추가만 허용합니다.',
+    '디지털 트윈 수정안은 새 노드·연결선·파츠 추가와 지문이 일치하는 파츠 교체만 허용합니다.',
   )
 }
 
@@ -151,7 +170,7 @@ export function createDigitalTwinGraphProposal({
   const nodeIds = normalizedOperations.filter((operation) => operation.action === 'add_node').map((operation) => operation.node.id)
   const edgeIds = normalizedOperations.filter((operation) => operation.action === 'add_edge').map((operation) => operation.edge.id)
   const partIds = normalizedOperations
-    .filter((operation) => operation.action === 'add_part')
+    .filter((operation) => ['add_part', 'replace_part'].includes(operation.action))
     .map((operation) => `${operation.targetNodeId}:${operation.part.id}`)
   if (
     new Set(nodeIds).size !== nodeIds.length
@@ -199,6 +218,23 @@ export function filterDigitalTwinProposalNodeChanges(changes, previewNodeIds, pr
   ))
 }
 
+export function previewDigitalTwinPartChanges(currentParts, additions = [], replacements = []) {
+  const normalizedAdditions = normalizeSystemParts(additions)
+  const replacementById = new Map((Array.isArray(replacements) ? replacements : [])
+    .map((planned) => [planned?.partId, normalizeSystemPart(planned?.part)])
+    .filter(([partId, part]) => partId && part?.id === partId))
+  return {
+    parts: [
+      ...normalizeSystemParts(currentParts).map((part) => replacementById.get(part.id) ?? part),
+      ...normalizedAdditions,
+    ],
+    previewPartIds: [
+      ...replacementById.keys(),
+      ...normalizedAdditions.map((part) => part.id),
+    ],
+  }
+}
+
 export function digitalTwinProposalAutoFitKey(canvasId, proposal) {
   const safeCanvasId = safeText(canvasId, 240)
   const proposalId = safeText(proposal?.id, 480)
@@ -238,8 +274,8 @@ export function planDigitalTwinGraphProposal(graph, proposal) {
   if (digitalTwinReviewFingerprint(proposalBody) !== fingerprint) {
     throw new DigitalTwinProposalError('PROPOSAL_CHANGED', '미리보기 이후 수정안 내용이 달라졌습니다. 다시 검토해야 합니다.')
   }
-  if (proposal.operations.some((operation) => !['add_node', 'add_edge', 'add_part'].includes(operation?.action))) {
-    throw new DigitalTwinProposalError('UNSAFE_OPERATION', '추가 이외의 수정안 작업은 적용할 수 없습니다.')
+  if (proposal.operations.some((operation) => !['add_node', 'add_edge', 'add_part', 'replace_part'].includes(operation?.action))) {
+    throw new DigitalTwinProposalError('UNSAFE_OPERATION', '허용되지 않은 수정안 작업은 적용할 수 없습니다.')
   }
   const currentNodes = Array.isArray(graph?.nodes) ? graph.nodes : []
   const currentEdges = Array.isArray(graph?.edges) ? graph.edges : []
@@ -250,9 +286,18 @@ export function planDigitalTwinGraphProposal(graph, proposal) {
   const plannedParts = proposal.operations
     .filter((operation) => operation.action === 'add_part')
     .map((operation) => ({ targetNodeId: operation.targetNodeId, part: operation.part }))
+  const plannedPartReplacements = proposal.operations
+    .filter((operation) => operation.action === 'replace_part')
+    .map((operation) => ({
+      targetNodeId: operation.targetNodeId,
+      partId: operation.partId,
+      expectedPartFingerprint: operation.expectedPartFingerprint,
+      part: operation.part,
+    }))
   const addNodes = []
   const addEdges = []
   const addParts = []
+  const replaceParts = []
   const alreadyPresent = []
 
   for (const node of plannedNodes) {
@@ -292,14 +337,38 @@ export function planDigitalTwinGraphProposal(graph, proposal) {
     else throw new DigitalTwinProposalError('PART_ID_CONFLICT', `파츠 ${planned.part.id}가 대상 노드에 이미 다른 내용으로 존재합니다.`)
   }
 
+  for (const planned of plannedPartReplacements) {
+    const target = currentNodeById.get(planned.targetNodeId)
+    if (!target) {
+      throw new DigitalTwinProposalError('MISSING_PART_TARGET', `파츠 대상 노드 ${planned.targetNodeId}를 찾을 수 없습니다.`)
+    }
+    if (target.type !== 'system') {
+      throw new DigitalTwinProposalError('INVALID_PART_TARGET', '시스템 파츠는 시스템 노드에서만 교체할 수 있습니다.')
+    }
+    const existing = normalizeSystemParts(target.data?.systemParts).find((part) => part.id === planned.partId)
+    if (!existing) {
+      throw new DigitalTwinProposalError('PART_MISSING', `교체할 파츠 ${planned.partId}를 찾을 수 없습니다.`)
+    }
+    if (matchingAppliedPart(existing, planned.part)) {
+      alreadyPresent.push(`${planned.targetNodeId}:${planned.part.id}`)
+      continue
+    }
+    const currentFingerprint = digitalTwinReviewFingerprint(normalizeSystemPart(existing))
+    if (currentFingerprint !== planned.expectedPartFingerprint) {
+      throw new DigitalTwinProposalError('PART_CHANGED', `파츠 ${planned.partId}가 미리보기 이후 달라졌습니다. 수정안을 다시 확인해야 합니다.`)
+    }
+    replaceParts.push(planned)
+  }
+
   return {
     proposalId: proposal.id,
     proposalFingerprint: proposal.fingerprint,
     nodes: addNodes,
     edges: addEdges,
     parts: addParts,
+    partReplacements: replaceParts,
     alreadyPresent,
-    writesRequired: addNodes.length > 0 || addEdges.length > 0 || addParts.length > 0,
+    writesRequired: addNodes.length > 0 || addEdges.length > 0 || addParts.length > 0 || replaceParts.length > 0,
   }
 }
 
@@ -311,15 +380,26 @@ export function applyDigitalTwinGraphProposal(graph, proposal) {
     current.push(planned.part)
     partsByNode.set(planned.targetNodeId, current)
   }
+  const replacementsByNode = new Map()
+  for (const planned of plan.partReplacements) {
+    const current = replacementsByNode.get(planned.targetNodeId) ?? new Map()
+    current.set(planned.partId, planned.part)
+    replacementsByNode.set(planned.targetNodeId, current)
+  }
   const currentNodes = Array.isArray(graph?.nodes) ? graph.nodes : []
   const nodesWithParts = currentNodes.map((node) => {
     const additions = partsByNode.get(node.id)
-    if (!additions?.length) return node
+    const replacements = replacementsByNode.get(node.id)
+    if (!additions?.length && !replacements?.size) return node
+    const currentParts = normalizeSystemParts(node.data?.systemParts)
     return {
       ...node,
       data: {
         ...node.data,
-        systemParts: [...normalizeSystemParts(node.data?.systemParts), ...additions],
+        systemParts: [
+          ...currentParts.map((part) => replacements?.get(part.id) ?? part),
+          ...(additions ?? []),
+        ],
       },
     }
   })
@@ -328,7 +408,11 @@ export function applyDigitalTwinGraphProposal(graph, proposal) {
     edges: [...(Array.isArray(graph?.edges) ? graph.edges : []), ...plan.edges],
     appliedNodeIds: plan.nodes.map((node) => node.id),
     appliedEdgeIds: plan.edges.map((edge) => edge.id),
-    appliedPartIds: plan.parts.map((planned) => `${planned.targetNodeId}:${planned.part.id}`),
+    appliedPartIds: [
+      ...plan.parts.map((planned) => `${planned.targetNodeId}:${planned.part.id}`),
+      ...plan.partReplacements.map((planned) => `${planned.targetNodeId}:${planned.part.id}`),
+    ],
+    replacedPartIds: plan.partReplacements.map((planned) => `${planned.targetNodeId}:${planned.part.id}`),
     alreadyPresent: plan.alreadyPresent,
     writesPerformed: plan.writesRequired,
   }

@@ -1,12 +1,14 @@
 export const SYSTEM_RUNTIME_SCHEMA_VERSION = 1
-export const SYSTEM_RUNTIME_MAX_SUMMARY_ITEMS = 50
+export const SYSTEM_RUNTIME_MAX_METRIC_GROUPS = 12
 
 export const SYSTEM_RUNTIME_CAPABILITY_DEFS = Object.freeze([
   Object.freeze({
     id: 'workflow.supabase.user-canvases.read',
-    label: 'Supabase 읽기 연결',
+    label: '브라우저 RLS 읽기 경로',
     operation: 'check',
     resultKind: 'health',
+    authorization: 'system_operator',
+    dataScope: 'operator_canary',
     sourceId: 'workflow-canvas:self-system',
     entityKey: 'credential-reference:SUPABASE_ANON_KEY',
     targetNodeId: 'map-web-app',
@@ -22,18 +24,21 @@ export const SYSTEM_RUNTIME_CAPABILITY_DEFS = Object.freeze([
     ]),
   }),
   Object.freeze({
-    id: 'workflow.supabase.user-canvases.summary',
-    label: '내 캔버스 현황',
+    id: 'workflow.supabase.canvas-service.operations',
+    label: '캔버스 서비스 운영 현황',
     operation: 'read',
-    resultKind: 'record_summaries',
+    resultKind: 'metric_groups',
+    authorization: 'system_operator',
+    dataScope: 'application_aggregate',
     sourceId: 'workflow-canvas:self-system',
-    entityKey: 'runtime-capability:workflow.supabase.user-canvases.summary',
+    entityKey: 'runtime-capability:workflow.supabase.canvas-service.operations',
     targetNodeId: 'map-canvases-table',
     partKinds: Object.freeze(['output']),
-    partRefs: Object.freeze(['workflow.supabase.user-canvases.summary']),
+    partRefs: Object.freeze(['workflow.supabase.canvas-service.operations']),
     sourceRefs: Object.freeze([
       'shared/systemRuntime.js',
       'mcp/systemRuntime.js',
+      'mcp/shareAccess.js',
       'api/system-runtime.js',
       'src/lib/systemRuntimeApi.js',
       'src/nodes/SystemNode.jsx',
@@ -116,35 +121,30 @@ export function normalizeSystemRuntimeResult(value) {
     resultKind: capability.resultKind,
     status,
     verification: status === 'healthy' && value.verification === 'verified' ? 'verified' : 'failed',
+    authorization: capability.authorization,
+    dataScope: capability.dataScope,
     resourceId: requiredId(value.resourceId, '런타임 자원 ID'),
     checkedAt: checkedAt.toISOString(),
     latencyMs: Number.isFinite(latency) ? Math.max(0, Math.min(30_000, Math.round(latency))) : 0,
     summary: plainText(value.summary, 180),
     ...(status === 'failed' && SAFE_ERROR_CODE.test(errorCode) ? { errorCode } : {}),
   }
-  if (status !== 'healthy' || capability.resultKind !== 'record_summaries') return result
+  if (status !== 'healthy' || capability.resultKind !== 'metric_groups') return result
 
-  const rawItems = Array.isArray(value.items) ? value.items.slice(0, SYSTEM_RUNTIME_MAX_SUMMARY_ITEMS) : []
+  const rawItems = Array.isArray(value.items) ? value.items.slice(0, SYSTEM_RUNTIME_MAX_METRIC_GROUPS) : []
   const items = rawItems.map((item) => {
-    if (!plainObject(item)) throw new SystemRuntimeContractError('INVALID_RESULT', '캔버스 요약 항목이 올바르지 않습니다.')
-    if (typeof item.updatedAt !== 'string' || !item.updatedAt.trim()) {
-      throw new SystemRuntimeContractError('INVALID_RESULT', '캔버스 수정 시각이 올바르지 않습니다.')
-    }
-    const updatedAt = new Date(item.updatedAt)
-    if (!Number.isFinite(updatedAt.getTime())) {
-      throw new SystemRuntimeContractError('INVALID_RESULT', '캔버스 수정 시각이 올바르지 않습니다.')
-    }
+    if (!plainObject(item)) throw new SystemRuntimeContractError('INVALID_RESULT', '운영 지표 그룹이 올바르지 않습니다.')
     const count = (raw) => {
       const number = Number(raw)
-      return Number.isFinite(number) ? Math.max(0, Math.min(1_000_000, Math.trunc(number))) : 0
+      return Number.isFinite(number) ? Math.max(0, Math.min(1_000_000_000, Math.trunc(number))) : 0
     }
     const metrics = []
     const metricIds = new Set()
     for (const metric of (Array.isArray(item.metrics) ? item.metrics : []).slice(0, 8)) {
       if (!plainObject(metric)) {
-        throw new SystemRuntimeContractError('INVALID_RESULT', '요약 지표가 올바르지 않습니다.')
+        throw new SystemRuntimeContractError('INVALID_RESULT', '운영 지표가 올바르지 않습니다.')
       }
-      const id = requiredId(metric.id, '요약 지표 ID')
+      const id = requiredId(metric.id, '운영 지표 ID')
       if (metricIds.has(id)) continue
       metricIds.add(id)
       metrics.push({
@@ -153,23 +153,25 @@ export function normalizeSystemRuntimeResult(value) {
         value: count(metric.value),
       })
     }
+    const updatedAt = typeof item.updatedAt === 'string' && item.updatedAt.trim()
+      ? new Date(item.updatedAt)
+      : null
+    if (updatedAt && !Number.isFinite(updatedAt.getTime())) {
+      throw new SystemRuntimeContractError('INVALID_RESULT', '운영 지표 시각이 올바르지 않습니다.')
+    }
     return {
-      id: requiredId(item.id, '요약 항목 ID'),
-      title: plainText(item.title, 120) || '항목',
-      updatedAt: updatedAt.toISOString(),
+      id: requiredId(item.id, '운영 지표 그룹 ID'),
+      title: plainText(item.title, 120) || '운영 지표',
+      ...(updatedAt ? { updatedAt: updatedAt.toISOString() } : {}),
       metrics,
     }
   })
-  const rawTotal = Number(value.totalCount)
-  const totalCount = Number.isFinite(rawTotal)
-    ? Math.max(items.length, Math.min(1_000_000, Math.trunc(rawTotal)))
-    : items.length
   return {
     ...result,
     collectionLabel: plainText(value.collectionLabel, 80) || capability.label,
-    totalCount,
+    totalCount: items.length,
     items,
-    truncated: totalCount > items.length,
+    truncated: Array.isArray(value.items) && value.items.length > items.length,
   }
 }
 
@@ -193,7 +195,7 @@ export function systemPartRuntimeReality(value) {
     return result.status === 'healthy'
       ? {
           id: 'healthy',
-          label: result.resultKind === 'record_summaries' ? '조회됨' : 'LIVE',
+          label: result.resultKind === 'metric_groups' ? '운영 조회' : 'LIVE',
           color: '#22c55e',
         }
       : { id: 'failed', label: '오류', color: '#ef4444' }

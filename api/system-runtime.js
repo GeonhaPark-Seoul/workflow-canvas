@@ -1,6 +1,8 @@
 import { admin, resolveBrowserUser } from '../mcp/shareAccess.js'
 import {
   claimSystemRuntimeCheck,
+  readWorkflowSystemOperations,
+  requireSystemRuntimeOperator,
   resolveSystemRuntimeTarget,
   runSystemRuntimeCapability,
   SystemRuntimeCheckError,
@@ -26,18 +28,19 @@ export default async function handler(req, res) {
     const token = bearerToken(req)
     const user = await resolveBrowserUser(token)
     if (!user) return send(res, 401, { error: '로그인이 필요합니다.', code: 'AUTH_REQUIRED' })
+    const operatorUserId = requireSystemRuntimeOperator(user.id, process.env.WORKFLOW_CANVAS_OWNER_USER_ID)
     const request = normalizeSystemRuntimeRequest(req.body)
     claimSystemRuntimeCheck(recentChecks, `${user.id}:${request.canvasId}:${request.nodeId}:${request.partId}`)
 
     const { data: canvas, error } = await admin().from('canvases').select('nodes')
-      .eq('user_id', user.id).eq('canvas_id', request.canvasId).maybeSingle()
-    if (error) throw new SystemRuntimeCheckError(500, 'CANVAS_LOOKUP_FAILED', '캔버스 소유권을 확인하지 못했습니다.')
-    if (!canvas) throw new SystemRuntimeCheckError(404, 'CANVAS_NOT_FOUND', '소유한 캔버스를 찾을 수 없습니다.')
+      .eq('user_id', operatorUserId).eq('canvas_id', request.canvasId).maybeSingle()
+    if (error) throw new SystemRuntimeCheckError(500, 'CANVAS_LOOKUP_FAILED', '등록된 시스템 지도를 확인하지 못했습니다.')
+    if (!canvas) throw new SystemRuntimeCheckError(404, 'CANVAS_NOT_FOUND', '등록된 시스템 지도를 찾을 수 없습니다.')
 
     const target = resolveSystemRuntimeTarget({
       canvas,
       actorUserId: user.id,
-      ownerUserId: user.id,
+      ownerUserId: operatorUserId,
       nodeId: request.nodeId,
       partId: request.partId,
     })
@@ -47,6 +50,7 @@ export default async function handler(req, res) {
       accessToken: token,
       supabaseUrl: SUPABASE_URL,
       supabaseAnonKey: SUPABASE_ANON_KEY,
+      readOperationalSnapshot: ({ signal }) => readWorkflowSystemOperations(admin(), signal),
     })
     return send(res, 200, { result })
   } catch (error) {

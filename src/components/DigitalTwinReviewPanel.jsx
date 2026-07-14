@@ -32,6 +32,7 @@ const PROPOSAL_OPERATION_LABELS = {
   add_node: '노드 추가',
   add_edge: '관계 추가',
   add_part: '파츠 추가',
+  replace_part: '파츠 교체',
 }
 
 function IconButton({ title, onClick, children }) {
@@ -55,6 +56,7 @@ function ReviewRow({
   onApplyProposal,
 }) {
   const color = SEVERITY_COLORS[item.severity] ?? SEVERITY_COLORS.attention
+  const replacesPart = item.proposal?.operations?.some((operation) => operation.action === 'replace_part')
   return (
     <article className="twin-review-row" style={{ '--review-accent': color }}>
       <div className="twin-review-row-heading">
@@ -72,7 +74,7 @@ function ReviewRow({
       {proposalPreviewed && item.proposal && (
         <div className="twin-proposal-preview">
           <div className="twin-proposal-preview-heading">
-            <strong>추가 전 미리보기</strong>
+            <strong>{replacesPart ? '변경 전 미리보기' : '추가 전 미리보기'}</strong>
             <span>
               노드 {item.proposal.counts.nodes} · 연결선 {item.proposal.counts.edges} · 파츠 {item.proposal.counts.parts ?? 0}
             </span>
@@ -86,7 +88,11 @@ function ReviewRow({
               </div>
             ))}
           </div>
-          <div className="twin-proposal-safety">기존 필드는 바꾸거나 삭제하지 않고 표시된 노드·연결선·파츠만 덧붙입니다.</div>
+          <div className="twin-proposal-safety">
+            {replacesPart
+              ? '표시된 파츠의 현재 지문이 미리보기와 정확히 같을 때만 교체하며, 다른 노드·연결선·파츠는 바꾸지 않습니다.'
+              : '기존 필드는 바꾸거나 삭제하지 않고 표시된 노드·연결선·파츠만 덧붙입니다.'}
+          </div>
           {proposalPlanError && <div className="twin-proposal-error">{proposalPlanError}</div>}
           <div className="twin-proposal-preview-actions">
             <button type="button" onClick={() => onPreviewProposal(item)}>미리보기 닫기</button>
@@ -95,7 +101,7 @@ function ReviewRow({
                 type="button"
                 className="is-apply"
                 disabled={!!proposalPlanError}
-                title="표시된 새 노드, 연결선, 파츠만 현재 지도에 추가"
+                title={replacesPart ? '표시된 파츠만 안전하게 교체' : '표시된 새 노드, 연결선, 파츠만 현재 지도에 추가'}
                 onClick={() => onApplyProposal(item)}
               >
                 지도에 적용
@@ -114,7 +120,7 @@ function ReviewRow({
           <button
             type="button"
             className={proposalPreviewed ? 'is-proposal-active' : ''}
-            title="추가될 노드, 연결선, 파츠를 저장하지 않고 캔버스에서 확인"
+            title="적용될 노드, 연결선, 파츠 변경을 저장하지 않고 캔버스에서 확인"
             onClick={() => onPreviewProposal(item)}
           >
             {proposalPreviewed ? '미리보기 중' : '수정안 보기'}

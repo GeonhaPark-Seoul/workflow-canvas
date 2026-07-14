@@ -204,7 +204,7 @@ export default function SystemNode({ data, selected, id }) {
     ? systemPartRuntimeReality(partDraftRuntime)
     : null
   const partDraftRuntimeItems = partDraftRuntime?.status === 'healthy'
-    && partDraftRuntime?.resultKind === 'record_summaries'
+    && partDraftRuntime?.resultKind === 'metric_groups'
     && Array.isArray(partDraftRuntime.items)
     ? partDraftRuntime.items
     : null
@@ -536,13 +536,12 @@ export default function SystemNode({ data, selected, id }) {
                         <div className="system-runtime-data-row" key={item.id}>
                           <div className="system-runtime-data-title">
                             <strong title={item.title}>{item.title}</strong>
-                            <time dateTime={item.updatedAt}>{runtimeUpdatedAtLabel(item.updatedAt)}</time>
+                            {item.updatedAt && <time dateTime={item.updatedAt}>{runtimeUpdatedAtLabel(item.updatedAt)}</time>}
                           </div>
                           <div className="system-runtime-data-counts">
                             {item.metrics.map((metric) => (
                               <span key={metric.id}>{metric.label} <b>{metric.value}</b></span>
                             ))}
-                            <code title={item.id}>{item.id}</code>
                           </div>
                         </div>
                       )) : (

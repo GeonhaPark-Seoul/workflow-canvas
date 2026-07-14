@@ -4,6 +4,7 @@ import {
 } from './digitalTwinReview.js'
 import { createDigitalTwinGraphProposal } from './digitalTwinProposal.js'
 import { createEdgeRelationData, edgeRelationInfo } from './relationOntology.js'
+import { normalizeSystemPart } from './systemPartOntology.js'
 import { createSystemNodeData, normalizeSystemPlainText } from './systemOntology.js'
 import { createWorkflowCanvasSystemMap } from './workflowCanvasSystemMap.js'
 import {
@@ -286,25 +287,39 @@ function resourceProposal(resource, item, canvas) {
 }
 
 function expectedSystemPartProposal(finding, item, canvas) {
-  if (finding.status !== 'system_part_missing' || !finding.expected_part) return null
+  if (!['system_part_missing', 'system_part_modified'].includes(finding.status) || !finding.expected_part) return null
   const target = (canvas.nodes ?? []).find((node) => node.id === finding.node_id && node.type === 'system')
   if (!target) return null
   const targetLabel = normalizeSystemPlainText(target.data?.label, 120) || target.id
   const partLabel = normalizeSystemPlainText(finding.expected_part.label, 120) || finding.expected_part.id
+  const replacing = finding.status === 'system_part_modified' && !!finding.actual_part
+  const actualPart = replacing ? normalizeSystemPart(finding.actual_part) : null
+  if (replacing && !actualPart) return null
   return createDigitalTwinGraphProposal({
     sourceId: WORKFLOW_SYSTEM_TWIN_SOURCE_ID,
-    proposalKey: `restore-system-part:${target.id}:${finding.expected_part.id}`,
+    proposalKey: `${replacing ? 'replace' : 'restore'}-system-part:${target.id}:${finding.expected_part.id}`,
     itemId: item.id,
     itemFingerprint: item.fingerprint,
     snapshotId: WORKFLOW_SYSTEM_DISCOVERY.current.id,
-    title: `${partLabel} 실행 파츠 추가`,
-    summary: `${targetLabel} 노드에 서버가 허용한 읽기 전용 ${partLabel} 파츠 1개를 추가합니다. 기존 노드 필드는 바꾸지 않습니다.`,
-    operations: [{
-      action: 'add_part',
-      targetNodeId: target.id,
-      label: `${targetLabel}에 ${partLabel} 추가`,
-      part: finding.expected_part,
-    }],
+    title: `${partLabel} 실행 파츠 ${replacing ? '교체' : '추가'}`,
+    summary: replacing
+      ? `${targetLabel} 노드의 기존 파츠가 미리 확인한 지문과 같을 때만 서버가 허용한 읽기 전용 ${partLabel} 파츠로 교체합니다.`
+      : `${targetLabel} 노드에 서버가 허용한 읽기 전용 ${partLabel} 파츠 1개를 추가합니다. 기존 노드 필드는 바꾸지 않습니다.`,
+    operations: [replacing
+      ? {
+          action: 'replace_part',
+          targetNodeId: target.id,
+          partId: actualPart.id,
+          expectedPartFingerprint: digitalTwinReviewFingerprint(actualPart),
+          label: `${targetLabel}의 ${partLabel} 교체`,
+          part: finding.expected_part,
+        }
+      : {
+          action: 'add_part',
+          targetNodeId: target.id,
+          label: `${targetLabel}에 ${partLabel} 추가`,
+          part: finding.expected_part,
+        }],
   })
 }
 

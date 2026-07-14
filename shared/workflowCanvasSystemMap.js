@@ -9,20 +9,21 @@ const GROUPS = Object.freeze([
   { id: 'map-group-development', label: '개발·검증·배포층', x: 0, y: 650, width: 2020, height: 510 },
 ])
 
-const OWN_CANVAS_SUMMARY_PART = Object.freeze({
+const CANVAS_SERVICE_OPERATIONS_PART = Object.freeze({
+  // Keep the original id so an already deployed map can replace this exact part safely.
   id: 'map-part-own-canvas-summary',
   kind: 'output',
-  label: '내 캔버스 현황',
-  ref: 'workflow.supabase.user-canvases.summary',
+  label: '캔버스 서비스 운영 현황',
+  ref: 'workflow.supabase.canvas-service.operations',
   exposure: 'internal',
   sourceKind: 'code',
   evidenceRef: 'mcp/systemRuntime.js, supabase-runtime-read.sql',
   digitalTwinBinding: {
     schemaVersion: 1,
     sourceId: 'workflow-canvas:self-system',
-    entityKey: 'runtime-capability:workflow.supabase.user-canvases.summary',
+    entityKey: 'runtime-capability:workflow.supabase.canvas-service.operations',
     observedFingerprint: WORKFLOW_SYSTEM_DISCOVERY.current.resources[
-      'runtime-capability:workflow.supabase.user-canvases.summary'
+      'runtime-capability:workflow.supabase.canvas-service.operations'
     ]?.fingerprint ?? '',
     observedSnapshotId: WORKFLOW_SYSTEM_DISCOVERY.current.id,
   },
@@ -210,7 +211,7 @@ function mapNodes() {
       evidence: '기본 캔버스 스키마',
       provider: 'Supabase',
       externalRef: 'public.canvases',
-      systemParts: [OWN_CANVAS_SUMMARY_PART],
+      systemParts: [CANVAS_SERVICE_OPERATIONS_PART],
     }),
     systemNode('map-sharing-tables', 'map-group-data', 350, 300, 'table', 'canvas_shares·share_members', {
       purpose: '초대 수단과 실제 참여 상태를 분리해 기록한다.',
