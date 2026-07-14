@@ -195,6 +195,25 @@ body[data-theme='light'] .react-flow__edge.wfc-edge.selected .wfc-relation-label
   color: #fcd34d;
   cursor: default;
 }
+.system-part-chip.is-runtime-declared { border-color: #f59e0b; }
+.system-part-chip.is-runtime-checking { border-color: #60a5fa; }
+.system-part-chip.is-runtime-healthy { border-color: #22c55e; }
+.system-part-chip.is-runtime-failed { border-color: #ef4444; }
+.system-part-runtime-dot {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  background: var(--runtime-color);
+  box-shadow: 0 0 0 2px #ffffff18;
+}
+.system-part-chip.is-runtime-checking .system-part-runtime-dot {
+  animation: system-runtime-pulse 1s ease-in-out infinite;
+}
+@keyframes system-runtime-pulse {
+  50% { opacity: 0.35; }
+}
 .system-part-add {
   width: 22px;
   height: 22px;
@@ -284,6 +303,70 @@ body[data-theme='light'] .react-flow__edge.wfc-edge.selected .wfc-relation-label
   color: #fca5a5;
   font-size: 9px;
   line-height: 1.4;
+}
+.system-part-runtime {
+  display: grid;
+  grid-template-columns: 6px auto minmax(0, 1fr) auto 24px;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  margin-top: 9px;
+  box-sizing: border-box;
+  border: 1px solid #3d4452;
+  border-radius: 4px;
+  background: #101218;
+  color: #cbd5e1;
+  padding: 3px 4px 3px 7px;
+  font-size: 9px;
+}
+.system-part-runtime.is-healthy { border-color: #166534; }
+.system-part-runtime.is-failed { border-color: #991b1b; }
+.system-part-runtime.is-checking { border-color: #1d4ed8; }
+.system-part-runtime strong {
+  color: var(--runtime-color, #e5e7eb);
+  font-size: 9px;
+  white-space: nowrap;
+}
+.system-part-runtime-summary {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.system-part-runtime-latency {
+  color: #8b95a7;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.system-part-runtime-check {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: #aeb6c6;
+  padding: 0;
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+.system-part-runtime-check:hover:not(:disabled) {
+  border-color: #4b5563;
+  background: #202737;
+  color: #fff;
+}
+.system-part-runtime-check:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+.system-part-runtime.is-checking .system-part-runtime-check {
+  animation: system-runtime-spin 0.9s linear infinite;
+}
+@keyframes system-runtime-spin {
+  to { transform: rotate(360deg); }
 }
 .system-part-editor-actions {
   margin-top: 10px;

@@ -68,6 +68,9 @@ export function sanitizeNodeData(data) {
   if (!data || typeof data !== 'object') return data
   let next = { ...data }
   delete next.twinRuntime
+  delete next.systemPartRuntime
+  delete next.canRunSystemChecks
+  delete next.onCheckSystemPart
   for (const key of new Set(['label', 'description', 'header', 'text', ...SYSTEM_ONTOLOGY_TEXT_FIELDS])) {
     if (typeof next[key] === 'string') next[key] = sanitizeHtml(next[key])
   }

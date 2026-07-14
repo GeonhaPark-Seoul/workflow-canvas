@@ -14,6 +14,11 @@ import {
 } from '../mcp/store.js'
 import { sanitizeHtml, sanitizeTextFields } from '../mcp/sanitize.js'
 import { applySharedCanvasUpdate, effectiveShareGrant, pickBestShareAccess, redactCanvas } from '../mcp/shareAccess.js'
+import {
+  claimSystemRuntimeCheck,
+  resolveSystemRuntimeTarget,
+  runSystemRuntimeCapability,
+} from '../mcp/systemRuntime.js'
 import { sanitizeExternalUrl as sanitizeBrowserUrl, sanitizeHtml as sanitizeBrowserHtml, sanitizeNodeData as sanitizeBrowserNodeData } from '../src/lib/sanitizeHtml.js'
 import { appendHistorySnapshot, sameCanvasSnapshot } from '../src/lib/canvasSync.js'
 import { absoluteNodePosition, boundsForNodeIds } from '../src/lib/canvasGeometry.js'
@@ -73,11 +78,22 @@ import {
   inspectWorkflowSystemTwin,
   WORKFLOW_SYSTEM_TWIN_SOURCE_ID,
 } from '../shared/workflowSystemTwinAdapter.js'
+import {
+  normalizeSystemRuntimeRequest,
+  normalizeSystemRuntimeResult,
+  systemPartRuntimeReality,
+  systemRuntimeCapabilityForPart,
+} from '../shared/systemRuntime.js'
 import { buildDiscoveryManifest } from './system-discovery.mjs'
 
 let passed = 0
 function t(name, fn) {
   try { fn(); passed++; console.log(`  ✓ ${name}`) }
+  catch (e) { console.error(`  ✗ ${name}\n    ${e.message}`); process.exitCode = 1 }
+}
+
+async function ta(name, fn) {
+  try { await fn(); passed++; console.log(`  ✓ ${name}`) }
   catch (e) { console.error(`  ✗ ${name}\n    ${e.message}`); process.exitCode = 1 }
 }
 
@@ -422,13 +438,211 @@ t('MCP system patches sanitize provided identifiers without inventing defaults',
   assert.equal(Object.hasOwn(patch, 'sourceKind'), false)
 })
 
-t('browser persistence sanitizer removes runtime proof and active markup', () => {
+t('browser persistence sanitizer removes every runtime-only field and active markup', () => {
   const result = sanitizeBrowserNodeData({
     systemKind: 'database', purpose: '<script>steal()</script><b>원본 보관</b>',
     twinRuntime: { verification: 'verified', resourceId: 'forged', verifiedAt: '2026-07-14T00:00:00Z' },
+    systemPartRuntime: { 'key-ref': { status: 'healthy' } },
+    canRunSystemChecks: true,
+    onCheckSystemPart: 'forged-callback',
   })
   assert.equal(Object.hasOwn(result, 'twinRuntime'), false)
+  assert.equal(Object.hasOwn(result, 'systemPartRuntime'), false)
+  assert.equal(Object.hasOwn(result, 'canRunSystemChecks'), false)
+  assert.equal(Object.hasOwn(result, 'onCheckSystemPart'), false)
   assert.equal(result.purpose, '<b>원본 보관</b>')
+})
+
+console.log('system runtime capability boundary')
+
+const runtimeCredentialPart = {
+  id: 'supabase-anon-ref',
+  kind: 'credential_ref',
+  label: 'Supabase 공개 클라이언트 키',
+  ref: 'SUPABASE_ANON_KEY',
+  exposure: 'public',
+  sourceKind: 'code',
+  evidenceRef: 'src/lib/supabase.js',
+  digitalTwinBinding: {
+    sourceId: 'workflow-canvas:self-system',
+    entityKey: 'credential-reference:SUPABASE_ANON_KEY',
+    observedFingerprint: 'abcdef1234567890',
+  },
+}
+
+const runtimeCanvas = {
+  nodes: [{
+    id: 'map-web-app',
+    type: 'system',
+    data: { systemParts: [runtimeCredentialPart] },
+  }],
+}
+
+t('runtime requests accept identifiers only and reject URLs or credential material', () => {
+  assert.deepEqual(normalizeSystemRuntimeRequest({
+    canvasId: 'canvas-1', nodeId: 'map-web-app', partId: 'supabase-anon-ref',
+  }), {
+    canvasId: 'canvas-1', nodeId: 'map-web-app', partId: 'supabase-anon-ref',
+  })
+  for (const forged of [
+    { url: 'https://attacker.example' },
+    { token: 'stolen-token' },
+    { key: 'stolen-key' },
+  ]) {
+    assert.throws(() => normalizeSystemRuntimeRequest({
+      canvasId: 'canvas-1', nodeId: 'map-web-app', partId: 'supabase-anon-ref', ...forged,
+    }), /허용되지 않은 항목/)
+  }
+})
+
+t('only the exact persisted digital-twin part receives the registered capability', () => {
+  assert.equal(
+    systemRuntimeCapabilityForPart(runtimeCredentialPart, 'map-web-app')?.id,
+    'workflow.supabase.user-canvases.read',
+  )
+  assert.equal(systemRuntimeCapabilityForPart(runtimeCredentialPart, 'different-node'), null)
+  const { digitalTwinBinding, ...copiedPart } = runtimeCredentialPart
+  assert.equal(systemRuntimeCapabilityForPart(copiedPart, 'map-web-app'), null)
+  assert.equal(systemRuntimeCapabilityForPart({
+    ...runtimeCredentialPart,
+    digitalTwinBinding: { ...digitalTwinBinding, entityKey: 'credential-reference:OTHER_KEY' },
+  }, 'map-web-app'), null)
+})
+
+t('runtime target resolution requires the owner and the server-saved allowlisted part', () => {
+  const target = resolveSystemRuntimeTarget({
+    canvas: runtimeCanvas,
+    actorUserId: 'owner-1',
+    ownerUserId: 'owner-1',
+    nodeId: 'map-web-app',
+    partId: 'supabase-anon-ref',
+  })
+  assert.equal(target.capability.id, 'workflow.supabase.user-canvases.read')
+  assert.throws(() => resolveSystemRuntimeTarget({
+    canvas: runtimeCanvas,
+    actorUserId: 'invitee-1',
+    ownerUserId: 'owner-1',
+    nodeId: 'map-web-app',
+    partId: 'supabase-anon-ref',
+  }), /소유자만/)
+  assert.throws(() => resolveSystemRuntimeTarget({
+    canvas: { nodes: [{ ...runtimeCanvas.nodes[0], data: { systemParts: [{ ...runtimeCredentialPart, digitalTwinBinding: undefined }] } }] },
+    actorUserId: 'owner-1',
+    ownerUserId: 'owner-1',
+    nodeId: 'map-web-app',
+    partId: 'supabase-anon-ref',
+  }), /허용된 연결 검사/)
+})
+
+t('runtime checks are rate-limited per owner, canvas, node and part key', () => {
+  const checks = new Map()
+  claimSystemRuntimeCheck(checks, 'owner:canvas:node:part', 1_000, 3_000)
+  assert.throws(
+    () => claimSystemRuntimeCheck(checks, 'owner:canvas:node:part', 2_000, 3_000),
+    /잠시 후/,
+  )
+  claimSystemRuntimeCheck(checks, 'owner:canvas:node:part', 4_000, 3_000)
+})
+
+t('runtime rate-limit memory remains bounded under forged unique identifiers', () => {
+  const checks = new Map()
+  for (let index = 0; index < 1_010; index += 1) {
+    claimSystemRuntimeCheck(checks, `owner:canvas:node:part-${index}`, 1_000, 3_000)
+  }
+  assert.equal(checks.size, 1_000)
+})
+
+t('runtime results clamp public fields and map only server-known capabilities', () => {
+  const result = normalizeSystemRuntimeResult({
+    capabilityId: 'workflow.supabase.user-canvases.read',
+    status: 'healthy',
+    verification: 'verified',
+    resourceId: 'workflow-supabase:canvases-user-read',
+    checkedAt: '2026-07-14T00:00:00.000Z',
+    latencyMs: 99_999,
+    summary: ` 연결됨 ${'x'.repeat(300)} `,
+    secret: 'must-not-survive',
+  })
+  assert.equal(result.latencyMs, 30_000)
+  assert.equal(result.summary.length, 180)
+  assert.equal(Object.hasOwn(result, 'secret'), false)
+  assert.equal(systemPartRuntimeReality(result).id, 'healthy')
+  assert.equal(systemPartRuntimeReality({ status: 'checking' }).id, 'checking')
+  assert.equal(systemPartRuntimeReality(null).id, 'declared')
+  assert.throws(() => normalizeSystemRuntimeResult({
+    ...result, capabilityId: 'attacker.arbitrary-request',
+  }), /등록되지 않은/)
+})
+
+await ta('the Supabase adapter uses a fixed HEAD/RLS request and returns no secrets or row body', async () => {
+  const calls = []
+  const times = [1_000, 1_025]
+  const accessToken = 'private-user-access-token'
+  const anonKey = 'public-anon-key-for-test'
+  const result = await runSystemRuntimeCapability({
+    capabilityId: 'workflow.supabase.user-canvases.read',
+    actorUserId: 'owner-1',
+    accessToken,
+    supabaseUrl: 'https://project.supabase.co',
+    supabaseAnonKey: anonKey,
+    now: () => times.shift(),
+    fetchImpl: async (url, options) => {
+      calls.push({ url: String(url), options })
+      return {
+        ok: true,
+        status: 200,
+        get text() { throw new Error('response body must not be read') },
+      }
+    },
+  })
+  assert.equal(calls.length, 1)
+  const endpoint = new URL(calls[0].url)
+  assert.equal(endpoint.origin, 'https://project.supabase.co')
+  assert.equal(endpoint.pathname, '/rest/v1/canvases')
+  assert.equal(endpoint.searchParams.get('select'), 'canvas_id')
+  assert.equal(endpoint.searchParams.get('user_id'), 'eq.owner-1')
+  assert.equal(endpoint.searchParams.get('limit'), '1')
+  assert.equal(calls[0].options.method, 'HEAD')
+  assert.equal(calls[0].options.redirect, 'error')
+  assert.equal(calls[0].options.headers.apikey, anonKey)
+  assert.equal(calls[0].options.headers.Authorization, `Bearer ${accessToken}`)
+  assert.equal(result.status, 'healthy')
+  assert.equal(result.latencyMs, 25)
+  assert.equal(JSON.stringify(result).includes(accessToken), false)
+  assert.equal(JSON.stringify(result).includes(anonKey), false)
+})
+
+await ta('upstream rejection, network errors and timeouts expose safe summaries only', async () => {
+  const secret = 'do-not-leak-this-token'
+  const rejected = await runSystemRuntimeCapability({
+    capabilityId: 'workflow.supabase.user-canvases.read',
+    actorUserId: 'owner-1', accessToken: secret,
+    supabaseUrl: 'https://project.supabase.co', supabaseAnonKey: 'anon-test',
+    now: (() => { const values = [2_000, 2_010]; return () => values.shift() })(),
+    fetchImpl: async () => ({ ok: false, status: 403, rawBody: secret }),
+  })
+  assert.equal(rejected.errorCode, 'AUTH_OR_RLS_REJECTED')
+  assert.equal(JSON.stringify(rejected).includes(secret), false)
+
+  const network = await runSystemRuntimeCapability({
+    capabilityId: 'workflow.supabase.user-canvases.read',
+    actorUserId: 'owner-1', accessToken: secret,
+    supabaseUrl: 'https://project.supabase.co', supabaseAnonKey: 'anon-test',
+    now: (() => { const values = [3_000, 3_010]; return () => values.shift() })(),
+    fetchImpl: async () => { throw new Error(`network failed with ${secret}`) },
+  })
+  assert.equal(network.errorCode, 'NETWORK_ERROR')
+  assert.equal(JSON.stringify(network).includes(secret), false)
+
+  const timeout = await runSystemRuntimeCapability({
+    capabilityId: 'workflow.supabase.user-canvases.read',
+    actorUserId: 'owner-1', accessToken: secret,
+    supabaseUrl: 'https://project.supabase.co', supabaseAnonKey: 'anon-test',
+    now: (() => { const values = [4_000, 4_050]; return () => values.shift() })(),
+    fetchImpl: async () => { const error = new Error('aborted'); error.name = 'AbortError'; throw error },
+  })
+  assert.equal(timeout.errorCode, 'TIMEOUT')
+  assert.equal(JSON.stringify(timeout).includes(secret), false)
 })
 
 t('retired text-node parts remain preserved and sanitized in stored canvas data', () => {

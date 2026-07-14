@@ -231,6 +231,9 @@ const same = (left, right) => JSON.stringify(stableValue(left)) === JSON.stringi
 function sanitizeNode(node) {
   const storedData = { ...(node.data ?? {}) }
   delete storedData.twinRuntime
+  delete storedData.systemPartRuntime
+  delete storedData.canRunSystemChecks
+  delete storedData.onCheckSystemPart
   const data = sanitizeTextFields({ ...storedData })
   if (Array.isArray(data.parts)) {
     data.parts = data.parts.map((part) => ({ ...part, text: typeof part.text === 'string' ? sanitizeHtml(part.text) : part.text }))

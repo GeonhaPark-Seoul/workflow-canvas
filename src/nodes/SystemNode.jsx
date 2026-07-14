@@ -17,6 +17,10 @@ import {
   systemPartKindDefinition,
   validateSystemPartInput,
 } from '../../shared/systemPartOntology.js'
+import {
+  systemPartRuntimeReality,
+  systemRuntimeCapabilityForPart,
+} from '../../shared/systemRuntime.js'
 
 const PORTS = [
   { id: 'left', position: Position.Left },
@@ -27,6 +31,22 @@ const PORTS = [
 
 const byId = (items, id) => items.find((item) => item.id === id)
 const newPartId = () => `sp-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
+
+function runtimeCheckedAtLabel(value) {
+  if (!value) return ''
+  const checkedAt = new Date(value)
+  if (!Number.isFinite(checkedAt.getTime())) return ''
+  return checkedAt.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+}
+
+function runtimeTitle(runtime, reality) {
+  const details = [reality.label]
+  if (runtime?.summary) details.push(runtime.summary)
+  if (Number.isFinite(runtime?.latencyMs)) details.push(`${runtime.latencyMs}ms`)
+  const checkedAt = runtimeCheckedAtLabel(runtime?.checkedAt)
+  if (checkedAt) details.push(checkedAt)
+  return details.join(' · ')
+}
 
 function blankSystemPart() {
   return {
@@ -162,6 +182,18 @@ export default function SystemNode({ data, selected, id }) {
     setPartDraft(null)
     setPartError('')
   }
+  const persistedPartDraft = partDraft
+    ? systemParts.find((part) => part.id === partDraft.id) ?? null
+    : null
+  const partDraftRuntimeCapability = persistedPartDraft
+    ? systemRuntimeCapabilityForPart(persistedPartDraft, id)
+    : null
+  const partDraftRuntime = persistedPartDraft
+    ? data.systemPartRuntime?.[persistedPartDraft.id]
+    : null
+  const partDraftRuntimeReality = partDraftRuntimeCapability
+    ? systemPartRuntimeReality(partDraftRuntime)
+    : null
 
   return (
     <div
@@ -325,6 +357,9 @@ export default function SystemNode({ data, selected, id }) {
                   {systemParts.map((part) => {
                     const partKind = systemPartKindDefinition(part.kind)
                     const preview = previewPartIds.has(part.id)
+                    const runtimeCapability = preview ? null : systemRuntimeCapabilityForPart(part, id)
+                    const runtime = runtimeCapability ? data.systemPartRuntime?.[part.id] : null
+                    const runtimeReality = runtimeCapability ? systemPartRuntimeReality(runtime) : null
                     const socketStyle = {
                       width: 14,
                       height: 18,
@@ -335,9 +370,9 @@ export default function SystemNode({ data, selected, id }) {
                     return (
                       <div
                         key={part.id}
-                        className={`system-part-chip${preview ? ' is-preview' : ''}`}
+                        className={`system-part-chip${preview ? ' is-preview' : ''}${runtimeReality ? ` is-runtime-${runtimeReality.id}` : ''}`}
                         style={{ '--part-color': partKind.color }}
-                        title={`${partKind.label} · ${part.label}${part.ref ? ` · ${part.ref}` : ''}${preview ? ' · 미리보기' : ''}`}
+                        title={`${partKind.label} · ${part.label}${part.ref ? ` · ${part.ref}` : ''}${preview ? ' · 미리보기' : ''}${runtimeReality ? ` · ${runtimeTitle(runtime, runtimeReality)}` : ''}`}
                         onClick={(event) => { event.stopPropagation(); if (!preview) openPartEditor(part) }}
                       >
                         <Handle
@@ -348,6 +383,13 @@ export default function SystemNode({ data, selected, id }) {
                           isConnectable={!partEditingLocked && !preview}
                           style={{ ...socketStyle, left: 0, top: '50%', transform: 'translate(-50%, -50%)' }}
                         />
+                        {runtimeReality && (
+                          <span
+                            className="system-part-runtime-dot"
+                            style={{ '--runtime-color': runtimeReality.color }}
+                            aria-label={runtimeReality.label}
+                          />
+                        )}
                         <span aria-hidden="true">{partKind.icon}</span>
                         <span>{part.label}</span>
                         <Handle
@@ -419,6 +461,40 @@ export default function SystemNode({ data, selected, id }) {
               {SYSTEM_PART_EXPOSURE_DEFS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
             </select>
           </label>
+          {partDraftRuntimeCapability && partDraftRuntimeReality && (
+            <div
+              className={`system-part-runtime is-${partDraftRuntimeReality.id}`}
+              style={{ '--runtime-color': partDraftRuntimeReality.color }}
+              title={runtimeTitle(partDraftRuntime, partDraftRuntimeReality)}
+            >
+              <span
+                className="system-part-runtime-dot"
+                style={{ '--runtime-color': partDraftRuntimeReality.color }}
+                aria-hidden="true"
+              />
+              <strong>{partDraftRuntimeReality.label}</strong>
+              <span className="system-part-runtime-summary">
+                {partDraftRuntime?.summary || partDraftRuntimeCapability.label}
+              </span>
+              {(Number.isFinite(partDraftRuntime?.latencyMs) || partDraftRuntime?.checkedAt) && (
+                <span className="system-part-runtime-latency">
+                  {Number.isFinite(partDraftRuntime?.latencyMs) ? `${partDraftRuntime.latencyMs}ms` : ''}
+                  {Number.isFinite(partDraftRuntime?.latencyMs) && partDraftRuntime?.checkedAt ? ' · ' : ''}
+                  {runtimeCheckedAtLabel(partDraftRuntime?.checkedAt)}
+                </span>
+              )}
+              <button
+                type="button"
+                className="system-part-runtime-check"
+                title={data.canRunSystemChecks ? '연결 상태 확인' : '로그인 후 연결 상태 확인'}
+                aria-label="연결 상태 확인"
+                disabled={!data.canRunSystemChecks || partDraftRuntime?.status === 'checking'}
+                onClick={() => data.onCheckSystemPart?.(persistedPartDraft)}
+              >
+                ↻
+              </button>
+            </div>
+          )}
           {partError && <div className="system-part-editor-error">{partError}</div>}
           <div className="system-part-editor-actions">
             {systemParts.some((part) => part.id === partDraft.id) && (

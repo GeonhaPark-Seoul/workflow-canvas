@@ -951,6 +951,9 @@ function applyPatch(n, patch, types) {
   const data = { ...n.data }
   // Runtime verification is server-owned evidence, never editable canvas data.
   delete data.twinRuntime
+  delete data.systemPartRuntime
+  delete data.canRunSystemChecks
+  delete data.onCheckSystemPart
   if (patch.label != null) data.label = patch.label
   if (patch.description != null) data.description = patch.description
   if (n.type === 'stage' && (patch.stageTypeIdx != null || patch.colorIdx != null)) {

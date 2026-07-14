@@ -36,6 +36,7 @@ import {
 } from './storage'
 import { supabase } from './lib/supabase'
 import { sanitizeNodeData } from './lib/sanitizeHtml'
+import { checkSystemPartRuntime } from './lib/systemRuntimeApi.js'
 import {
   saveCanvas as cloudSaveCanvas,
   loadAllCanvases as cloudLoadAllCanvases,
@@ -65,6 +66,7 @@ import {
 import { getMyProfile, loadMySettings, upsertMyEmail, touchLastSeen } from './lib/profiles'
 import { createSystemNodeData } from '../shared/systemOntology.js'
 import { detachSystemPartBindings, normalizeSystemParts } from '../shared/systemPartOntology.js'
+import { failedSystemRuntimeResult, systemRuntimeCapabilityForPart } from '../shared/systemRuntime.js'
 import {
   clearDigitalTwinReviewDecision,
   partitionDigitalTwinReviewItems,
@@ -296,7 +298,10 @@ function baseEdgeStyle(e) {
 
 // Strip runtime callbacks (and stageTypes) before snapshot / localStorage save
 function stripNode(n) {
-  const { onUpdate, onEditStart, onEditEnd, onOpenInNotes, stageTypes, imageContext, twinRuntime, ...data } = n.data ?? {}
+  const {
+    onUpdate, onEditStart, onEditEnd, onOpenInNotes, onCheckSystemPart,
+    stageTypes, imageContext, twinRuntime, systemPartRuntime, canRunSystemChecks, ...data
+  } = n.data ?? {}
   const { selected, ...rest } = n
   return { ...rest, data }
 }
@@ -357,6 +362,7 @@ export default function App() {
   const [digitalTwinReview, setDigitalTwinReview] = useState(null)
   const [twinProposalPreview, setTwinProposalPreview] = useState(null) // { itemId, itemFingerprint } | null
   const [twinProposalStatus, setTwinProposalStatus] = useState(null) // { type, message } | null
+  const [systemPartRuntimeByNode, setSystemPartRuntimeByNode] = useState({})
   const [notesSelectedId, setNotesSelectedId] = useState(null)
   const [notesSide, setNotesSide] = useState('right')
   const [renameValue, setRenameValue] = useState('')
@@ -399,6 +405,7 @@ export default function App() {
   // ── Auth + cloud sync ─────────────────────────────────────────────────────
   const [user, setUser] = useState(null)
   const userRef = useRef(null)
+  useEffect(() => { setSystemPartRuntimeByNode({}) }, [activeCanvasId, user?.id])
   // Tracks which user id has already run the full afterLogin() sequence, so a
   // tab-refocus re-emitting SIGNED_IN for the SAME user (supabase-js token
   // revalidation) doesn't re-run loadFromCloud() and yank the viewer back to
@@ -2349,6 +2356,12 @@ export default function App() {
   const updateNodeData = useCallback((id, patch) => {
     setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: sanitizeNodeData({ ...n.data, ...patch }) } : n))
     if (Object.hasOwn(patch, 'systemParts')) {
+      setSystemPartRuntimeByNode((current) => {
+        if (!Object.hasOwn(current, id)) return current
+        const next = { ...current }
+        delete next[id]
+        return next
+      })
       const remainingPartIds = new Set(normalizeSystemParts(patch.systemParts).map((part) => part.id))
       setEdges((currentEdges) => currentEdges.filter((edge) => {
         if (!isPartEdge(edge)) return true
@@ -2358,6 +2371,39 @@ export default function App() {
       }))
     }
   }, [setEdges, setNodes])
+
+  const runSystemPartRuntimeCheck = useCallback(async (nodeId, part) => {
+    const canvasId = latestRef.current.activeCanvasId
+    const capability = systemRuntimeCapabilityForPart(part, nodeId)
+    if (!userRef.current || parseSharedId(canvasId) || !capability) return
+    const partId = part.id
+    setSystemPartRuntimeByNode((current) => ({
+      ...current,
+      [nodeId]: {
+        ...(current[nodeId] ?? {}),
+        [partId]: { status: 'checking', capabilityId: capability.id },
+      },
+    }))
+    try {
+      const result = await checkSystemPartRuntime({ canvasId, nodeId, partId })
+      if (latestRef.current.activeCanvasId !== canvasId) return
+      setSystemPartRuntimeByNode((current) => ({
+        ...current,
+        [nodeId]: { ...(current[nodeId] ?? {}), [partId]: result },
+      }))
+    } catch (error) {
+      if (latestRef.current.activeCanvasId !== canvasId) return
+      const result = failedSystemRuntimeResult(
+        capability.id,
+        error?.message || '연결 상태를 확인하지 못했습니다.',
+        error?.code || 'REQUEST_FAILED',
+      )
+      setSystemPartRuntimeByNode((current) => ({
+        ...current,
+        [nodeId]: { ...(current[nodeId] ?? {}), [partId]: result },
+      }))
+    }
+  }, [])
 
   const updateNoteData = useCallback((id, patch) => {
     if (!canEditNotes) return
@@ -3697,6 +3743,9 @@ export default function App() {
               canManageParticipants: isOwner,
               onToggleViewRestriction: isOwner ? onToggleMemberViewRestriction : undefined,
               scopedParticipants: nodeScopedParticipants,
+              systemPartRuntime: systemPartRuntimeByNode[n.id] ?? {},
+              canRunSystemChecks: isOwner && !!user,
+              onCheckSystemPart: isOwner ? runSystemPartRuntimeCheck : undefined,
               onUpdate: (patch) => updateNodeData(n.id, patch),
               onOpenInNotes: n.type === 'group' ? undefined : () => openNodeInNotes(n.id, n.type),
               onEditStart: () => setIsAnyEditing(true),
