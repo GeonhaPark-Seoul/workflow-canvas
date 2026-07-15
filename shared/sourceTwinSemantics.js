@@ -82,6 +82,7 @@ export const SOURCE_TWIN_SUBSYSTEM_DEFINITIONS = Object.freeze([
   { id: 'sharing-policy', area: 'sharing-collaboration', label: '공유 권한 집행', description: '캔버스·그룹·노드별 읽기·편집·시야 범위' },
   { id: 'identity-account', area: 'identity-profile', label: '계정·프로필', description: '로그인, 사용자 신원과 프로필 설정' },
   { id: 'twin-core', area: 'digital-twin-engine', label: '엔진 공통 규격', description: '모든 프로그램을 같은 엔티티·파츠·관계·증거 형식으로 표현하는 중심 모델' },
+  { id: 'engine-product-registry', area: 'digital-twin-engine', label: '제품·엔진 레지스트리', description: '제품 엔진의 이름, 버전, 내부 구성요소, 입출력과 코드·테스트 근거를 관리' },
   { id: 'twin-discovery', area: 'digital-twin-engine', label: '시스템 발견·정규화', description: '코드·DB·설정에서 실제 구성 요소를 찾고 표준 자료로 변환' },
   { id: 'twin-reconciliation', area: 'digital-twin-engine', label: '변경 대조·검토', description: '새 발견 결과와 현재 캔버스를 비교하고 사람에게 수정안을 제시' },
   { id: 'twin-materialization', area: 'digital-twin-engine', label: '지도 실체화', description: '승인된 엔티티·파츠·관계를 실제 캔버스 요소로 반영' },

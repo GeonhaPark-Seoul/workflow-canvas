@@ -2,6 +2,7 @@ import { digitalTwinReviewFingerprint } from './digitalTwinReview.js'
 import { normalizeOperationDefinition } from './operationLifecycle.js'
 import { RELATION_TYPE_IDS, relationDefinition } from './relationOntology.js'
 import {
+  normalizeLogicalComponent,
   SYSTEM_ENVIRONMENT_DEFS,
   SYSTEM_SOURCE_DEFS,
 } from './systemOntology.js'
@@ -17,7 +18,7 @@ import {
   normalizeTrustZone,
 } from './trustTopology.js'
 
-export const TWIN_BUILD_SCHEMA_VERSION = 2
+export const TWIN_BUILD_SCHEMA_VERSION = 3
 
 const SAFE_ID = /^[a-zA-Z0-9][a-zA-Z0-9._:-]{0,239}$/
 const SAFE_FINGERPRINT = /^[a-f0-9]{8,128}$/i
@@ -204,6 +205,7 @@ function normalizeEntity(value) {
     externalRef: safeText(value.externalRef, 500),
     parentId: value.parentId ? safeId(value.parentId, '부모 엔티티') : null,
     trustZoneId: value.trustZoneId ? safeId(value.trustZoneId, '신뢰영역') : null,
+    logicalComponent: normalizeLogicalComponent(value.logicalComponent),
     evidenceIds: uniqueIds(value.evidenceIds, '근거'),
     placement: normalizePlacement(value.placement, id),
   })
@@ -700,12 +702,12 @@ export function migrateTwinBuild(value) {
     }
   }
   if (migrated.schemaVersion === 1) {
-    return createTwinBuild({
+    migrated = {
       ...migrated,
-      schemaVersion: TWIN_BUILD_SCHEMA_VERSION,
+      schemaVersion: 2,
       source: {
         ...migrated.source,
-        engineSchemaVersion: Math.max(TWIN_BUILD_SCHEMA_VERSION, Number(migrated.source?.engineSchemaVersion) || 1),
+        engineSchemaVersion: Math.max(2, Number(migrated.source?.engineSchemaVersion) || 1),
       },
       dataClasses: migrated.dataClasses ?? [],
       policies: migrated.policies ?? [],
@@ -729,6 +731,16 @@ export function migrateTwinBuild(value) {
           summary: '',
         },
         ...operation,
+      })),
+    }
+  }
+  if (migrated.schemaVersion === 2) {
+    return createTwinBuild({
+      ...migrated,
+      schemaVersion: TWIN_BUILD_SCHEMA_VERSION,
+      entities: (migrated.entities ?? []).map((entity) => ({
+        ...entity,
+        logicalComponent: entity.logicalComponent ?? null,
       })),
     })
   }

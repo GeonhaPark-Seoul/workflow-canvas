@@ -1,7 +1,7 @@
 {
   "name": "workflow-canvas",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0-alpha.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/GeonhaPark-Seoul/workflow-canvas.git"
@@ -9,7 +9,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run source-twin:prepare && vite build",
+    "build": "npm run governance:check && npm run source-twin:prepare && vite build",
     "preview": "vite preview",
     "discover:update": "node scripts/generate-system-discovery.mjs",
     "discover:check": "node scripts/generate-system-discovery.mjs --check",
@@ -18,7 +18,9 @@
     "source-twin:prepare": "node scripts/generate-source-twin.mjs --prepare",
     "local-connector": "node scripts/local-connector-agent.mjs",
     "privacy:check": "node scripts/check-privacy-release.mjs",
-    "test": "npm run discover:check && npm run source-twin:check && npm run privacy:check && node scripts/test-source-twin.mjs && node scripts/test-local-connector-agent.mjs && node scripts/test-twin-build.mjs && node scripts/test-operation-lifecycle.mjs && node scripts/test-twin-adapter-contract.mjs && node scripts/test-mcp-logic.mjs && node scripts/test-sql-security.mjs"
+    "governance:check": "node scripts/check-governance.mjs",
+    "sbom:generate": "npm sbom --package-lock-only --sbom-format=cyclonedx",
+    "test": "npm run discover:check && npm run source-twin:check && npm run privacy:check && npm run governance:check && node scripts/test-source-twin.mjs && node scripts/test-local-connector-agent.mjs && node scripts/test-engine-registry.mjs && node scripts/test-twin-build.mjs && node scripts/test-operation-lifecycle.mjs && node scripts/test-twin-adapter-contract.mjs && node scripts/test-mcp-logic.mjs && node scripts/test-sql-security.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",

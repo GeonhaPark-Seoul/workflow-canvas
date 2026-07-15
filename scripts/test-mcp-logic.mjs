@@ -68,6 +68,8 @@ import {
   RELATION_SOURCE_DEFS,
 } from '../shared/relationOntology.js'
 import { createWorkflowCanvasSystemMap } from '../shared/workflowCanvasSystemMap.js'
+import { ENGINE_CAPABILITY_MAP_GROUP_ID } from '../shared/capabilityMapper.js'
+import { WORKFLOW_ENGINE_REGISTRY } from '../shared/engineRegistry.js'
 import {
   GITHUB_GIT_SYNC_PART_ID,
   LOCAL_GIT_SYNC_CAPABILITY_ID,
@@ -1429,10 +1431,14 @@ t('self map is a declared, evidence-backed model with valid topology', () => {
   const ids = map.nodes.map((node) => node.id)
   const idSet = new Set(ids)
   assert.equal(idSet.size, ids.length)
-  assert.equal(map.views.length, 4)
-  assert.equal(map.nodes.slice(0, 4).every((node) => node.type === 'group'), true)
+  const groupNodes = map.nodes.filter((node) => node.type === 'group')
+  assert.equal(map.views.length, groupNodes.length)
+  assert.equal(groupNodes.some((node) => node.id === ENGINE_CAPABILITY_MAP_GROUP_ID), true)
+  const logicalNodes = map.nodes.filter((node) => node.data?.logicalComponent)
+  assert.equal(logicalNodes.length, WORKFLOW_ENGINE_REGISTRY.components.length)
+  assert.equal(logicalNodes.every((node) => systemNodeReality(node.data).id === 'logical' && !node.data.twinRuntime), true)
   assert.equal(map.nodes.filter((node) => node.type === 'system').every((node) => (
-    systemNodeReality(node.data).id === 'declared' && !node.data.twinRuntime
+    ['declared', 'logical'].includes(systemNodeReality(node.data).id) && !node.data.twinRuntime
   )), true)
   assert.equal(map.edges.every((item) => idSet.has(item.source) && idSet.has(item.target)), true)
   assert.equal(map.edges.every((item) => {

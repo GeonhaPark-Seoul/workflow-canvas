@@ -5,6 +5,8 @@ import ScopedParticipants from '../components/ScopedParticipants'
 import SystemObservationCatalog from '../components/SystemObservationCatalog'
 import { sanitizeHtml } from '../lib/sanitizeHtml'
 import {
+  SYSTEM_COMPONENT_KIND_DEFS,
+  SYSTEM_COMPONENT_MATURITY_DEFS,
   SYSTEM_ENVIRONMENT_DEFS,
   SYSTEM_SOURCE_DEFS,
   systemKindDefinition,
@@ -33,6 +35,19 @@ const PORTS = [
 
 const byId = (items, id) => items.find((item) => item.id === id)
 const newPartId = () => `sp-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
+
+function compactList(items, maximum = 2) {
+  const values = Array.isArray(items) ? items.filter(Boolean) : []
+  if (!values.length) return '없음'
+  const visible = values.slice(0, maximum).join(' · ')
+  return values.length > maximum ? `${visible} 외 ${values.length - maximum}` : visible
+}
+
+function evidenceSummary(items) {
+  const values = Array.isArray(items) ? items.filter(Boolean) : []
+  if (!values.length) return '근거 없음'
+  return values.length > 1 ? `${values[0]} 외 ${values.length - 1}` : values[0]
+}
 
 function runtimeCheckedAtLabel(value) {
   if (!value) return ''
@@ -85,6 +100,10 @@ export default function SystemNode({ data, selected, id }) {
   const shapeOnly = data.forceShapeOnly || zoomShapeOnly
   const kind = systemKindDefinition(data.systemKind)
   const reality = systemNodeReality(data)
+  const logicalComponent = data.logicalComponent ?? null
+  const componentKind = byId(SYSTEM_COMPONENT_KIND_DEFS, logicalComponent?.kind)?.label ?? 'Engine'
+  const componentMaturity = byId(SYSTEM_COMPONENT_MATURITY_DEFS, logicalComponent?.maturity)?.label ?? '프로토타입'
+  const componentManaged = !!logicalComponent
   const environment = byId(SYSTEM_ENVIRONMENT_DEFS, data.environment)?.label ?? '환경 미지정'
   const source = byId(SYSTEM_SOURCE_DEFS, data.sourceKind)?.label ?? '수동 모델'
   const filled = data.nodeFill !== false
@@ -128,7 +147,7 @@ export default function SystemNode({ data, selected, id }) {
   }
 
   const startTitleEdit = () => {
-    if (data.readOnly || !selected || editingTitle || Date.now() - selectedAtRef.current < 300) return
+    if (data.readOnly || componentManaged || !selected || editingTitle || Date.now() - selectedAtRef.current < 300) return
     setTitleDraft(data.label ?? '')
     setEditingTitle(true)
     data.onEditStart?.()
@@ -165,7 +184,7 @@ export default function SystemNode({ data, selected, id }) {
   const linkedPartHandles = new Set(Array.isArray(data.linkedSystemPartHandles) ? data.linkedSystemPartHandles : [])
   const systemPartLayoutKey = systemParts.map((part) => part.id).join('|')
   const previewPartIds = new Set(data.digitalTwinProposalPreviewPartIds ?? [])
-  const partEditingLocked = data.readOnly || previewPartIds.size > 0
+  const partEditingLocked = data.readOnly || componentManaged || previewPartIds.size > 0
   const [partDraft, setPartDraft] = useState(null)
   const [partError, setPartError] = useState('')
 
@@ -408,7 +427,7 @@ export default function SystemNode({ data, selected, id }) {
                 style={{
                   color: titleColor, fontSize: abstract ? 15 : 14, fontWeight: 750,
                   whiteSpace: abstract ? 'normal' : 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                  textAlign: abstract ? 'center' : undefined, cursor: data.readOnly ? 'default' : 'text',
+                  textAlign: abstract ? 'center' : undefined, cursor: data.readOnly || componentManaged ? 'default' : 'text',
                 }}
                 dangerouslySetInnerHTML={{ __html: sanitizeHtml(data.label || `새 ${kind.label}`) }}
               />
@@ -419,7 +438,7 @@ export default function SystemNode({ data, selected, id }) {
             <>
               <div style={{
                 marginTop: 6,
-                minHeight: systemParts.length || selected ? 16 : 30,
+                minHeight: systemParts.length || selected || componentManaged ? 16 : 30,
                 color: bodyColor,
                 fontSize: 11.5,
                 lineHeight: 1.45,
@@ -433,6 +452,33 @@ export default function SystemNode({ data, selected, id }) {
                   <span style={{ opacity: 0.55 }}>목적 미정</span>
                 )}
               </div>
+              {logicalComponent && (
+                <div
+                  className="logical-component-details nodrag nowheel"
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
+                    gap: '4px 8px',
+                    marginTop: 7,
+                    paddingTop: 7,
+                    borderTop: `1px solid ${kind.color}38`,
+                    color: bodyColor,
+                    fontSize: 9.5,
+                    lineHeight: 1.25,
+                    minWidth: 0,
+                  }}
+                >
+                  <span title={`내부 종류: ${componentKind}`}><b style={{ color: kind.color }}>종류</b> {componentKind}</span>
+                  <span title={`성숙도: ${componentMaturity}`}><b style={{ color: kind.color }}>성숙도</b> {componentMaturity}</span>
+                  <span title={`제품 버전 ${logicalComponent.productVersion || '미정'}`}><b style={{ color: kind.color }}>제품</b> {logicalComponent.productVersion || '미정'}</span>
+                  <span title={`기술 버전 ${logicalComponent.technicalVersion || '미정'}${logicalComponent.compatibility?.length ? ` · ${logicalComponent.compatibility.join(' · ')}` : ''}`}><b style={{ color: kind.color }}>기술</b> {logicalComponent.technicalVersion || '미정'}</span>
+                  <span style={{ gridColumn: '1 / -1', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={(logicalComponent.inputs ?? []).join(' · ')}><b style={{ color: kind.color }}>입력</b> {compactList(logicalComponent.inputs)}</span>
+                  <span style={{ gridColumn: '1 / -1', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={(logicalComponent.outputs ?? []).join(' · ')}><b style={{ color: kind.color }}>출력</b> {compactList(logicalComponent.outputs)}</span>
+                  <span style={{ gridColumn: '1 / -1', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={(logicalComponent.codeEvidence ?? []).join(' · ')}><b style={{ color: kind.color }}>코드</b> {evidenceSummary(logicalComponent.codeEvidence)}</span>
+                  <span style={{ gridColumn: '1 / -1', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={(logicalComponent.testEvidence ?? []).join(' · ')}><b style={{ color: kind.color }}>테스트</b> {evidenceSummary(logicalComponent.testEvidence)}</span>
+                  <span style={{ gridColumn: '1 / -1', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={logicalComponent.maintainerAgentId || '현재 담당 Maintainer Agent가 배정되지 않았습니다.'}><b style={{ color: kind.color }}>담당</b> {logicalComponent.maintainerAgentId || '미배정'}</span>
+                </div>
+              )}
               {(systemParts.length > 0 || (selected && !partEditingLocked)) && (
                 <div className="system-parts-strip nodrag nowheel" aria-label="시스템 파츠">
                   {systemParts.map((part) => {
@@ -504,7 +550,7 @@ export default function SystemNode({ data, selected, id }) {
                 </div>
               )}
               <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 5, minWidth: 0, color: bodyColor, fontSize: 9.5 }}>
-                <span style={{ whiteSpace: 'nowrap' }}>{environment}</span>
+                <span style={{ whiteSpace: 'nowrap' }}>{logicalComponent ? '논리 구성요소' : environment}</span>
                 <span style={{ opacity: 0.4 }}>·</span>
                 <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{data.provider || source}</span>
               </div>

@@ -72,6 +72,23 @@ append-only 이벤트 이력에 기록합니다. 소스 본문, 커밋 메시지
 - 신뢰영역·게이트웨이 공통 계약: [`shared/trustTopology.js`](shared/trustTopology.js)
 - 상용화·보안 부채 장부: [`docs/TECHNICAL_DEBT.md`](docs/TECHNICAL_DEBT.md)
 - 범용 트윈 엔진 로드맵: [`docs/TWIN_ENGINE_ROADMAP.md`](docs/TWIN_ENGINE_ROADMAP.md)
+- 제품·엔진 카탈로그: [`docs/product/PRODUCT_CATALOG.md`](docs/product/PRODUCT_CATALOG.md)
+- 엔진 버전 기록: [`docs/product/ENGINE_CHANGELOG.md`](docs/product/ENGINE_CHANGELOG.md)
+
+### 제품·엔진 구성층
+
+Workflow Canvas 시스템 지도에는 서버·DB·저장소 같은 실제 운영 자원과 별도로
+`제품·엔진 구성층 (논리)`이 있습니다. `Twin Core`, `Create Graph`, `Source Lens`,
+`Trust Map`, `LiveOps`, `Safe Operations`, `Connector Bridge`와 내부 구성요소를 보여주며,
+각 노드에는 제품·기술 버전, 성숙도, 입력·출력, 코드·테스트 근거와 담당 Maintainer
+Agent 상태가 표시됩니다. 이 노드들은 중요한 코드 기능을 눈으로 설명하기 위한 논리
+구성요소이며 독립 서버나 실행 프로세스가 아니므로 `LIVE` 대신 `논리 구성`으로 표시됩니다.
+
+기계 가독 원본은 [`shared/engineRegistry.js`](shared/engineRegistry.js)이고
+[`shared/capabilityMapper.js`](shared/capabilityMapper.js)가 같은 내용을 시스템 지도 노드와
+관계로 변환합니다. 기존 시스템 지도에서는 검토 패널의 세 단계 묶음 수정안을 순서대로
+승인해 논리 구성층을 추가합니다. 각 단계는 현재 지도를 다시 검사하므로 오래된 수정안을
+한 번에 덮어쓰지 않습니다.
 
 ### 범용 트윈 엔진 방향
 

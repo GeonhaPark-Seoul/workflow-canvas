@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "lastReviewed": "2026-07-16",
+  "allowedLicenses": [
+    "MIT",
+    "Apache-2.0"
+  ],
+  "dependencies": [
+    {
+      "name": "@modelcontextprotocol/sdk",
+      "scope": "runtime",
+      "requestedRange": "^1.29.0",
+      "lockedVersion": "1.29.0",
+      "license": "MIT",
+      "status": "approved-existing",
+      "decision": "MCP transport and tool contract"
+    },
+    {
+      "name": "@supabase/supabase-js",
+      "scope": "runtime",
+      "requestedRange": "^2.108.2",
+      "lockedVersion": "2.108.2",
+      "license": "MIT",
+      "status": "approved-existing",
+      "decision": "Authentication, database, storage, and realtime client"
+    },
+    {
+      "name": "@xyflow/react",
+      "scope": "runtime",
+      "requestedRange": "^12.3.0",
+      "lockedVersion": "12.11.1",
+      "license": "MIT",
+      "status": "approved-existing",
+      "decision": "Canvas graph rendering and interaction"
+    },
+    {
+      "name": "react",
+      "scope": "runtime",
+      "requestedRange": "^18.3.1",
+      "lockedVersion": "18.3.1",
+      "license": "MIT",
+      "status": "approved-existing",
+      "decision": "Application UI runtime"
+    },
+    {
+      "name": "react-dom",
+      "scope": "runtime",
+      "requestedRange": "^18.3.1",
+      "lockedVersion": "18.3.1",
+      "license": "MIT",
+      "status": "approved-existing",
+      "decision": "Browser UI renderer"
+    },
+    {
+      "name": "zod",
+      "scope": "runtime",
+      "requestedRange": "^4.4.3",
+      "lockedVersion": "4.4.3",
+      "license": "MIT",
+      "status": "approved-existing",
+      "decision": "MCP and server input validation"
+    },
+    {
+      "name": "@babel/parser",
+      "scope": "development",
+      "requestedRange": "^7.29.7",
+      "lockedVersion": "7.29.7",
+      "license": "MIT",
+      "status": "approved-existing",
+      "decision": "Deterministic JavaScript source analysis"
+    },
+    {
+      "name": "@types/react",
+      "scope": "development",
+      "requestedRange": "^18.3.1",
+      "lockedVersion": "18.3.31",
+      "license": "MIT",
+      "status": "approved-existing",
+      "decision": "React editor and build type metadata"
+    },
+    {
+      "name": "@types/react-dom",
+      "scope": "development",
+      "requestedRange": "^18.3.1",
+      "lockedVersion": "18.3.7",
+      "license": "MIT",
+      "status": "approved-existing",
+      "decision": "React DOM editor and build type metadata"
+    },
+    {
+      "name": "@vitejs/plugin-react",
+      "scope": "development",
+      "requestedRange": "^4.3.1",
+      "lockedVersion": "4.7.0",
+      "license": "MIT",
+      "status": "approved-existing",
+      "decision": "React support in the Vite build"
+    },
+    {
+      "name": "sharp",
+      "scope": "development",
+      "requestedRange": "^0.35.2",
+      "lockedVersion": "0.35.2",
+      "license": "Apache-2.0",
+      "status": "approved-existing",
+      "decision": "Deterministic image inspection in tests and tooling"
+    },
+    {
+      "name": "vite",
+      "scope": "development",
+      "requestedRange": "^6.0.0",
+      "lockedVersion": "6.4.3",
+      "license": "MIT",
+      "status": "approved-existing",
+      "decision": "Development server and production build"
+    },
+    {
+      "name": "vite-plugin-pwa",
+      "scope": "development",
+      "requestedRange": "^1.3.0",
+      "lockedVersion": "1.3.0",
+      "license": "MIT",
+      "status": "approved-existing",
+      "decision": "Installable web app and update handling"
+    }
+  ],
+  "exceptions": []
+}

@@ -83,3 +83,24 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - Do not mark debt complete because code exists locally. Require tests and deployment or operational evidence appropriate to the item.
 - Keep Workflow Canvas-specific discovery and operations inside its adapter. The graph, review, security-boundary, and operation contracts must remain reusable for other systems.
 - A cross-zone relation must identify its gateway and data contract. Never equate `local`, `intranet`, or `private` with automatically safe.
+
+## 7. Product Engines And Versions
+
+**Treat engines as versioned product capabilities, not accidental file groups.**
+
+- Read `docs/product/PRODUCT_CATALOG.md`, `docs/product/ENGINE_AGENT_REGISTRY.md`, and `shared/engineRegistry.js` before adding, renaming, or changing an engine or its internal component.
+- Keep user-facing names short (`Twin Core`, `Create Graph`). Use the manifest's internal kind to distinguish Engine, Contract, Resolver, Builder, Pipeline, Agent Skill, Hard Guardrail, Connector, and Manifest.
+- Update the affected engine version, compatibility declaration, code and test evidence, and `docs/product/ENGINE_CHANGELOG.md` together. Product version, engine version, schema version, and contract version are separate.
+- A logical engine component is not an independent server or runtime process. It must display `논리 구성`, never `LIVE`, even if runtime-looking fields are present.
+- Do not assign a Maintainer Agent by name alone. Its manifest must define scope, allowed tools, required tests, escalation conditions, and human-approval boundaries, and the engine registry must reference that validated manifest ID.
+- Prefer an explicit entry point and compatibility contract before moving code into a new folder. Do not perform a broad folder-first refactor merely to make an engine look independent.
+
+## 8. Open Source And Dependency Decisions
+
+**Evaluate existing standards and proven libraries before inventing foundational infrastructure.**
+
+- Read `docs/architecture/OPEN_SOURCE_POLICY.md` and `docs/architecture/DEPENDENCY_DECISIONS.md` before adding a direct dependency or implementing a new parser, layout engine, authorization engine, workflow runtime, graph store, or agent protocol.
+- Record every direct dependency in `docs/architecture/dependency-registry.json` and keep `THIRD_PARTY_NOTICES.md` current.
+- Run `npm run governance:check` before tests and production builds.
+- Do not add a large library or external authorization/service dependency such as elkjs, OpenFGA, or SpiceDB without explaining the concrete benefit, bundle or operations cost, migration path, and license, then obtaining explicit user approval.
+- A candidate listed in the decision log is not an approved dependency and must not appear in runtime code until its decision status changes.

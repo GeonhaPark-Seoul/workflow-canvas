@@ -181,6 +181,15 @@ This is the durable ledger for security, reliability, commercialization, and arc
 - Required work: tenant-scoped common operation-plan, run, approval, event, artifact, cancellation, retry, and recovery tables; append-only DB guards; cryptographic event signing or external anchoring; leases and timeouts; dead-letter handling; independent verifier workers for high-risk operations; retention and redaction policy.
 - Exit criteria: interrupted, duplicated, stale, forged, or partially completed jobs cannot skip a state or duplicate a mutation, and a separate verifier can independently promote supported results to `succeeded`.
 
+### OPS-006 - Open-source, dependency, SBOM, and license governance
+
+- Severity: high
+- Gate: public-release
+- Status: in-progress
+- Current evidence: `docs/architecture/OPEN_SOURCE_POLICY.md` requires standards and proven-library review before foundational custom code, `docs/architecture/dependency-registry.json` records every current direct dependency and locked license, `THIRD_PARTY_NOTICES.md` exposes the direct inventory, and `npm run governance:check` blocks tests and builds when package metadata drifts. No new large dependency was adopted. SBOM generation is available through npm, but retention as a CI release artifact and automated vulnerability review are not yet configured.
+- Required work: retain a CycloneDX SBOM for each release, scan direct and transitive dependencies plus licenses in protected CI, define vulnerability severity and update SLAs, capture copyright notices where licenses require them, review bundled/browser-distributed licenses, and make dependency decisions reviewable before merge.
+- Exit criteria: every release has a retained SBOM and license report tied to its commit, an undeclared direct dependency or disallowed license cannot merge, and critical dependency findings block release under a documented exception process.
+
 ## Twin engine and product architecture
 
 ### ENG-001 - Versioned twin schema and migrations
@@ -188,7 +197,7 @@ This is the durable ledger for security, reliability, commercialization, and arc
 - Severity: high
 - Gate: engine-v1
 - Status: in-progress
-- Current evidence: `TwinBuild v2` now normalizes entities, parts, relations, trust zones, gateways, evidence, data classes, policies, observations, events, operations, controls, and threats with stable IDs, deterministic fingerprints, cross-record reference integrity, secret-reference rejection, and a tested v0-to-v1-to-v2 forward migration. v1 operations retain identity and evidence but remain non-executable declarations until their safety contract is completed. Compatibility support windows, large-build migration performance, and UI materialization for the new overlays remain.
+- Current evidence: `TwinBuild v3` now normalizes entities, parts, relations, trust zones, gateways, evidence, data classes, policies, observations, events, operations, controls, threats, and optional logical-component metadata with stable IDs, deterministic fingerprints, cross-record reference integrity, secret-reference rejection, and a tested v0-to-v1-to-v2-to-v3 forward migration. v1 operations retain identity and evidence but remain non-executable declarations until their safety contract is completed. v2 entities gain a null logical-component field rather than being guessed into engine nodes. Compatibility support windows, large-build migration performance, and UI materialization for the remaining overlays remain.
 - Required work: stable IDs and schemas for entities, capabilities, relations, trust zones, gateways, evidence, observations, operations, policies, events, and threats; provide forward migrations and compatibility windows.
 - Exit criteria: an older twin upgrades without losing manual layout, annotations, decisions, or evidence links.
 
@@ -234,6 +243,15 @@ This is the durable ledger for security, reliability, commercialization, and arc
 - Context: a future user should be able to change an exposed value such as `노드 크기 240` or directly resize an element in a Figma-like editor and have the corresponding source code change safely. This is a bidirectional, code-backed editor, not arbitrary text replacement and not a reason to expose the whole repository to the browser or AI.
 - Required work: define an explicit editable-property schema with stable AST/CST source anchors, types, units, ranges, responsive variants, ownership, evidence, and dependency impact; support deterministic code-to-control and control-to-code round trips; create changes in an isolated branch or worktree; show visual preview plus exact source diff; reject stale anchors and concurrent edits; run formatter, type checks, tests, security checks, and production build; require risk-based approval; commit with provenance; support undo, rollback, and recovery. Direct manipulation must preserve layout constraints rather than writing accidental pixel values. AI may propose values or grouped edits but uses the same contract and cannot bypass validation or consent.
 - Exit criteria: supported properties round-trip without unrelated formatting churn, an invalid or stale edit cannot touch source, every applied edit has a reviewable diff and verified build, and the previous commit can be restored from the canvas without hidden side effects.
+
+### ENG-007 - Versioned product-engine capability map
+
+- Severity: medium
+- Gate: product-v1
+- Status: in-progress
+- Current evidence: Engine Registry v1 defines seven top-level product engines and eighteen internal components with independent technical versions, maturity, inputs, outputs, compatibility, and code/test evidence. Capability Mapper materializes them as a logical system-map layer, and `TwinBuild v3` preserves the metadata. Existing maps receive three bounded batch proposals instead of forty-three individual approvals. Tests force logical components to remain `논리 구성` even when runtime-looking data is present.
+- Required work: validate the three application stages in production, add per-engine compatibility fixtures and release ownership, separate the Workflow Canvas Source Profile from generic Source Lens code, and prove the registry on a materially different second software stack. Avoid folder-first refactors; introduce explicit engine entry points only where they improve a real compatibility boundary.
+- Exit criteria: a non-developer can identify every shipped engine, its purpose, maturity, version, evidence, inputs, outputs, owner, and compatibility from the map; a second adapter adds its engine-facing components without changing the mapper or canvas UI.
 
 ## AI orchestration and automation
 
@@ -285,6 +303,15 @@ This is the durable ledger for security, reliability, commercialization, and arc
 - Status: open
 - Required work: enforce token, currency, time, API-call, mutation, concurrency, and data-volume limits per run, agent, tenant, and billing plan; define escalation and safe-stop behavior.
 - Exit criteria: tests show that no AI or worker can exceed a hard budget through retries, parallel runs, provider failover, or stale leases.
+
+### AI-007 - Engine-bundle Maintainer Agents
+
+- Severity: high
+- Gate: AI phase 2
+- Status: planned
+- Current evidence: Maintainer Agent manifest v1 defines the required scope, allowed tools, required tests, escalation conditions, and human-approval boundaries for a future `Core Engine Maintainer`, while every current Engine Registry assignment remains deliberately `미배정`.
+- Required work: implement provider-neutral agent identity and signed manifest validation, start with one related-engine bundle rather than one agent per small component, grant read/test/proposal tools before mutation tools, and route compatibility, DB, permission, encryption, dependency, commit, push, and deployment changes to explicit human approval.
+- Exit criteria: an assigned agent cannot read or change anything outside manifest scope, cannot skip required tests or escalation, and cannot apply code, schema, dependency, security, Git, or deployment changes without the declared human approval.
 
 ### UX-001 - Parts as capabilities and edge-centered operations
 

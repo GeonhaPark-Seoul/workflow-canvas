@@ -98,6 +98,8 @@ const WORKFLOW_CANVAS_FILE_ROLES = Object.freeze({
   'mcp/localConnectorStore.js': ROLE('source-code-twin', '로컬 커넥터 등록, heartbeat, Git 동기화 계획과 실행 결과를 서버에 보관합니다.', '클라우드가 임의 명령을 보내지 못하고 승인된 Git 작업만 로컬에서 실행되게 합니다.'),
 
   'shared/twinBuild.js': ROLE('digital-twin-engine', '서로 다른 앱에서 발견한 시스템을 엔티티·파츠·관계·신뢰 경계·증거라는 공통 형식으로 정규화합니다.', '어떤 프로그램을 가져와도 같은 캔버스 문법으로 표현할 수 있게 하는 엔진의 중심 규격입니다.'),
+  'shared/engineRegistry.js': ROLE('digital-twin-engine', 'Twin Core, Create Graph 같은 제품 엔진의 이름·버전·내부 구성요소·입출력·근거와 향후 담당 에이전트 계약을 한곳에서 관리합니다.', '시스템 지도에서 실제 제품 엔진이 무엇을 하고 어떤 코드와 테스트로 뒷받침되는지 일관되게 보여줍니다.'),
+  'shared/capabilityMapper.js': ROLE('digital-twin-engine', '제품 엔진 레지스트리를 논리 엔진 노드와 내부 구성 관계로 변환합니다.', '중요한 코드 기능을 독립 서버처럼 오해하지 않으면서 시스템 지도에서 눈으로 확인하게 합니다.'),
   'shared/twinBuildReconciler.js': ROLE('digital-twin-engine', '새로 발견한 디지털 트윈과 현재 캔버스를 비교해 추가·변경·삭제 검토안을 만듭니다.', '재검사할 때 사용자의 배치와 메모를 지키면서 실제 변경만 검토하게 합니다.'),
   'shared/twinBuildCanvas.js': ROLE('digital-twin-engine', '표준 트윈의 엔티티·파츠·관계를 실제 캔버스 노드와 연결선으로 바꾸고 다시 대응시킵니다.', '엔진 결과가 눈에 보이는 캔버스로 실체화되게 합니다.'),
   'shared/twinAdapterContract.js': ROLE('digital-twin-engine', '새 프로그램 종류를 연결하는 어댑터가 제공해야 할 발견·권한·조작 계약을 검증합니다.', '두 번째 앱을 추가할 때 핵심 엔진을 고치지 않고도 안전하게 확장하게 합니다.'),
@@ -132,6 +134,8 @@ const WORKFLOW_CANVAS_FILE_ROLES = Object.freeze({
   'scripts/system-discovery.mjs': ROLE('digital-twin-engine', '코드·SQL·MCP 도구·환경변수 이름을 스캔해 Workflow Canvas 시스템 자원 목록을 만듭니다.', '시스템 지도에서 빠진 실제 구성 요소를 자동으로 발견하게 합니다.'),
   'scripts/generate-system-discovery.mjs': ROLE('digital-twin-engine', '시스템 발견 결과를 배포 manifest로 만들고 현재 코드와 일치하는지 검사합니다.', '시스템 지도 검사의 기준 자료가 배포 시점 코드와 어긋나지 않게 합니다.'),
   'scripts/check-privacy-release.mjs': ROLE('testing-quality', '배포 전에 개인정보 감사 설정과 사용자 본문 접근 경로의 필수 보호 장치를 검사합니다.', '개인정보 보호 조건이 빠진 빌드가 출시되는 것을 차단합니다.'),
+  'scripts/check-governance.mjs': ROLE('testing-quality', '직접 의존성, 잠금 버전, 라이선스와 제3자 고지가 승인된 레지스트리와 일치하는지 검사합니다.', '검토되지 않은 라이브러리나 고지가 빠진 빌드가 출시되는 것을 막습니다.'),
+  'scripts/test-engine-registry.mjs': ROLE('testing-quality', '제품 엔진 레지스트리의 필수 정보, 코드·테스트 근거, 지도 변환과 논리 구성 표시를 자동 검사합니다.', '엔진 이름이나 버전이 지도와 어긋나거나 논리 구성요소가 LIVE로 잘못 표시되는 배포를 막습니다.'),
 
   'supabase-schema.sql': ROLE('data-storage-sync', '캔버스, 노드, 연결선과 사용자 설정의 기본 테이블·권한·저장 함수를 만듭니다.', '로그인한 사용자의 핵심 캔버스 자료가 Supabase에 저장되는 구조를 결정합니다.'),
   'supabase-shares.sql': ROLE('sharing-collaboration', '이메일·링크 초대, 참여자, 취소와 시야 제한을 저장하고 공유 범위별 접근 규칙을 만듭니다.', '초대 수락·거절·나가기·추방과 제한된 본문 공개가 실제 DB 권한으로 작동하게 합니다.'),
@@ -253,6 +257,7 @@ function subsystemFromArea(record, area) {
   }
   if (area === 'identity-profile') return 'identity-account'
   if (area === 'digital-twin-engine') {
+    if (/engineregistry|capabilitymapper/.test(source)) return 'engine-product-registry'
     if (/twinadaptercontract/.test(source)) return 'twin-core'
     if (/workflow(system)?twinadapter|workflow-system-twin-adapter|digitaltwinadapters|workflowsystemtwinbuild/.test(source)) return 'twin-workflow-adapter'
     if (/operationlifecycle|workflowoperation|edgeoperation/.test(source)) return 'twin-operations'
@@ -284,7 +289,7 @@ function subsystemFromArea(record, area) {
   if (area === 'deployment-operations') return /system-runtime|runtime|operation/.test(source) ? 'runtime-operations' : 'build-release'
   if (area === 'testing-quality') {
     if (/source-twin|local-connector/.test(source)) return 'source-tests'
-    if (/twin-build|twin-adapter|operation-lifecycle/.test(source)) return 'engine-tests'
+    if (/twin-build|twin-adapter|operation-lifecycle|engine-registry/.test(source)) return 'engine-tests'
     return 'app-tests'
   }
   if (area === 'project-foundation') return /readme|docs\//.test(source) ? 'project-docs' : 'project-config'

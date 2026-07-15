@@ -14,6 +14,8 @@ import {
   LOCAL_GIT_SYNC_PART_ID,
 } from './localConnector.js'
 import { createSystemNodeData, normalizeSystemPlainText } from './systemOntology.js'
+import { ENGINE_CAPABILITY_MAP_GROUP_ID } from './capabilityMapper.js'
+import { WORKFLOW_ENGINE_REGISTRY } from './engineRegistry.js'
 import { createWorkflowCanvasSystemMap } from './workflowCanvasSystemMap.js'
 import {
   WORKFLOW_GIT_SYNC_EDGE_ID,
@@ -25,6 +27,7 @@ import {
 } from './workflowSystemDiscovery.js'
 import { WORKFLOW_SYSTEM_DISCOVERY } from './workflowSystemDiscoveryManifest.js'
 import { TWIN_ENGINE_SCHEMA_VERSION } from './twinAdapterContract.js'
+import { materializeTwinBuildEntity, materializeTwinBuildRelation } from './twinBuildCanvas.js'
 import { reconcileTwinBuild } from './twinBuildReconciler.js'
 import {
   canInspectWorkflowSystemCanvas,
@@ -35,6 +38,21 @@ import { WORKFLOW_SYSTEM_TWIN_BUILD } from './workflowSystemTwinBuild.js'
 export const WORKFLOW_SYSTEM_TWIN_SOURCE_ID = WORKFLOW_SYSTEM_DISCOVERY_SOURCE_ID
 
 const EXPECTED_MAP = createWorkflowCanvasSystemMap()
+const ENGINE_COMPONENT_NODE_IDS = Object.freeze(WORKFLOW_ENGINE_REGISTRY.components.map((item) => `map-${item.id}`))
+const ENGINE_TOP_NODE_IDS = Object.freeze(WORKFLOW_ENGINE_REGISTRY.components
+  .filter((item) => !item.parentId)
+  .map((item) => `map-${item.id}`))
+const ENGINE_CHILD_NODE_IDS = Object.freeze(WORKFLOW_ENGINE_REGISTRY.components
+  .filter((item) => item.parentId)
+  .map((item) => `map-${item.id}`))
+const ENGINE_COMPONENT_EDGE_IDS = Object.freeze(WORKFLOW_ENGINE_REGISTRY.components
+  .filter((item) => item.parentId)
+  .map((item) => `map-edge-${item.parentId}-${item.id}`))
+const ENGINE_BATCH_ITEM_IDS = Object.freeze([
+  ENGINE_CAPABILITY_MAP_GROUP_ID,
+  ...ENGINE_COMPONENT_NODE_IDS,
+  ...ENGINE_COMPONENT_EDGE_IDS,
+])
 
 const RESOURCE_PROPOSAL_DEFS = Object.freeze({
   api: {
@@ -89,6 +107,98 @@ function workflowTwinRoot(canvas) {
   return nodes.find((node) => node?.data?.systemMapSnapshot)
     ?? nodes.find((node) => node.id === 'map-group-experience')
     ?? null
+}
+
+function engineCapabilityMigrationItem(canvas) {
+  const nodeIds = new Set((canvas?.nodes ?? []).map((node) => node.id))
+  const edgeIds = new Set((canvas?.edges ?? []).map((edge) => edge.id))
+  const expectedEntityByNodeId = new Map(WORKFLOW_SYSTEM_TWIN_BUILD.entities.map((entity) => [entity.placement.nodeId, entity]))
+  const expectedRelationByEdgeId = new Map(WORKFLOW_SYSTEM_TWIN_BUILD.relations.map((relation) => [relation.placement.edgeId, relation]))
+  const stages = [{
+    id: 'engine-layer',
+    status: 'engine_layer_missing',
+    title: '제품·엔진 구성층 추가',
+    summary: '논리 구성요소 전용 층과 Twin Core, Create Graph 등 상위 엔진을 추가합니다.',
+    nodeIds: [ENGINE_CAPABILITY_MAP_GROUP_ID, ...ENGINE_TOP_NODE_IDS],
+    edgeIds: [],
+  }, {
+    id: 'engine-components',
+    status: 'engine_components_missing',
+    title: '엔진 내부 구성요소 추가',
+    summary: 'Contract, Resolver, Builder, Pipeline, Agent Skill과 Guardrail을 각 상위 엔진 아래에 추가합니다.',
+    nodeIds: ENGINE_CHILD_NODE_IDS,
+    edgeIds: [],
+    prerequisites: [ENGINE_CAPABILITY_MAP_GROUP_ID, ...ENGINE_TOP_NODE_IDS],
+  }, {
+    id: 'engine-relations',
+    status: 'engine_relations_missing',
+    title: '엔진 구성 관계 연결',
+    summary: '상위 엔진과 내부 구성요소를 근거가 있는 포함 관계로 연결합니다.',
+    nodeIds: [],
+    edgeIds: ENGINE_COMPONENT_EDGE_IDS,
+    prerequisites: [ENGINE_CAPABILITY_MAP_GROUP_ID, ...ENGINE_COMPONENT_NODE_IDS],
+  }]
+
+  const stage = stages.find((candidate) => {
+    const prerequisitesReady = (candidate.prerequisites ?? []).every((id) => nodeIds.has(id))
+    if (!prerequisitesReady) return false
+    return candidate.nodeIds.some((id) => !nodeIds.has(id)) || candidate.edgeIds.some((id) => !edgeIds.has(id))
+  })
+  if (!stage) return null
+
+  const evidence = ['shared/engineRegistry.js', 'shared/capabilityMapper.js', 'scripts/test-engine-registry.mjs']
+  const item = createDigitalTwinReviewItem({
+    sourceId: WORKFLOW_SYSTEM_TWIN_SOURCE_ID,
+    itemKey: `engine-capability-map:${stage.id}`,
+    category: 'entity',
+    changeType: 'added',
+    severity: 'info',
+    title: stage.title,
+    summary: stage.summary,
+    evidence,
+    focus: null,
+    status: stage.status,
+    observation: {
+      productVersion: WORKFLOW_ENGINE_REGISTRY.product.version,
+      registrySchemaVersion: WORKFLOW_ENGINE_REGISTRY.schemaVersion,
+      missingNodeIds: stage.nodeIds.filter((id) => !nodeIds.has(id)),
+      missingEdgeIds: stage.edgeIds.filter((id) => !edgeIds.has(id)),
+    },
+  })
+  const nodeOperations = stage.nodeIds
+    .filter((id) => !nodeIds.has(id))
+    .map((id) => expectedEntityByNodeId.get(id))
+    .filter(Boolean)
+    .map((entity) => ({
+      action: 'add_node',
+      label: `${entity.label} 추가`,
+      node: materializeTwinBuildEntity(WORKFLOW_SYSTEM_TWIN_BUILD, entity, item),
+    }))
+  const edgeOperations = stage.edgeIds
+    .filter((id) => !edgeIds.has(id))
+    .map((id) => expectedRelationByEdgeId.get(id))
+    .filter(Boolean)
+    .map((relation) => ({
+      action: 'add_edge',
+      label: `${relation.id} 추가`,
+      edge: materializeTwinBuildRelation(WORKFLOW_SYSTEM_TWIN_BUILD, relation),
+    }))
+  const proposal = createDigitalTwinGraphProposal({
+    sourceId: WORKFLOW_SYSTEM_TWIN_SOURCE_ID,
+    proposalKey: `engine-capability-map:${stage.id}`,
+    itemId: item.id,
+    itemFingerprint: item.fingerprint,
+    snapshotId: WORKFLOW_SYSTEM_DISCOVERY.current.id,
+    title: stage.title,
+    summary: `${stage.summary} 기존 노드 위치, 메모와 운영 자원은 변경하지 않습니다.`,
+    operations: [...nodeOperations, ...edgeOperations],
+  })
+  return { ...item, proposal }
+}
+
+function isEngineBatchBuildItem(item) {
+  if (!['missing_on_canvas', 'blocked_dependency'].includes(item?.status)) return false
+  return ENGINE_BATCH_ITEM_IDS.some((id) => item.itemKey?.includes(id))
 }
 
 function resourceObservation(resources = []) {
@@ -590,13 +700,16 @@ export function inspectWorkflowSystemTwin(canvas) {
     discovery: WORKFLOW_SYSTEM_DISCOVERY,
   })
   const codePortMigration = workflowCodePortMigrationItem(canvas)
+  const engineCapabilityMigration = engineCapabilityMigrationItem(canvas)
+  const visibleBuildItems = buildReview.items.filter((item) => !isEngineBatchBuildItem(item))
   const migratedPartIds = new Set([
     WORKFLOW_SOURCE_TWIN_PART_IDS.localCode,
     WORKFLOW_SOURCE_TWIN_PART_IDS.githubCode,
   ])
   const items = [
     ...(codePortMigration ? [codePortMigration] : []),
-    ...buildReview.items.filter((item) => (
+    ...(engineCapabilityMigration ? [engineCapabilityMigration] : []),
+    ...visibleBuildItems.filter((item) => (
       item.category !== 'runtime'
       && !(codePortMigration && item.itemKey.includes('map-edge-repo-github'))
     )),
@@ -643,9 +756,9 @@ export function inspectWorkflowSystemTwin(canvas) {
     },
     summary: {
       ...report.summary,
-      twin_build_findings: buildReview.summary.pending,
-      twin_build_actionable: buildReview.summary.actionable,
-      twin_build_blocked: buildReview.summary.blocked,
+      twin_build_findings: visibleBuildItems.length + (engineCapabilityMigration ? 1 : 0),
+      twin_build_actionable: visibleBuildItems.filter((item) => !!item.proposal).length + (engineCapabilityMigration ? 1 : 0),
+      twin_build_blocked: visibleBuildItems.filter((item) => item.status === 'blocked_dependency').length,
     },
     items,
     report: {

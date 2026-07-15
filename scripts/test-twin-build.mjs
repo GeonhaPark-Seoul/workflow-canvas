@@ -8,7 +8,11 @@ import {
   TwinBuildError,
 } from '../shared/twinBuild.js'
 import { reconcileTwinBuild } from '../shared/twinBuildReconciler.js'
+import { TWIN_ENGINE_SCHEMA_VERSION } from '../shared/twinAdapterContract.js'
 import { createWorkflowCanvasSystemMap } from '../shared/workflowCanvasSystemMap.js'
+import { ENGINE_CAPABILITY_MAP_GROUP_ID } from '../shared/capabilityMapper.js'
+import { WORKFLOW_ENGINE_REGISTRY } from '../shared/engineRegistry.js'
+import { inspectWorkflowSystemTwin } from '../shared/workflowSystemTwinAdapter.js'
 import { WORKFLOW_SYSTEM_TWIN_BUILD } from '../shared/workflowSystemTwinBuild.js'
 import {
   WORKFLOW_GIT_SYNC_OPERATION_DEFINITION,
@@ -86,11 +90,20 @@ const versionOne = {
 }
 const migratedVersionOne = migrateTwinBuild(versionOne)
 assert.equal(migratedVersionOne.schemaVersion, TWIN_BUILD_SCHEMA_VERSION)
-assert.equal(migratedVersionOne.source.engineSchemaVersion, TWIN_BUILD_SCHEMA_VERSION)
+assert.equal(migratedVersionOne.source.engineSchemaVersion, TWIN_ENGINE_SCHEMA_VERSION)
 assert.equal(migratedVersionOne.operations[0].id, 'operation:retry-order-request')
 assert.equal(migratedVersionOne.operations[0].availability, 'declared')
 assert.equal(migratedVersionOne.policies.length, 0)
 assert.equal(migratedVersionOne.events.length, 0)
+
+const versionTwo = {
+  ...structuredClone(rawBuild),
+  schemaVersion: 2,
+  entities: structuredClone(rawBuild.entities).map(({ logicalComponent, ...entity }) => entity),
+}
+const migratedVersionTwo = migrateTwinBuild(versionTwo)
+assert.equal(migratedVersionTwo.schemaVersion, TWIN_BUILD_SCHEMA_VERSION)
+assert.ok(migratedVersionTwo.entities.every((entity) => entity.logicalComponent === null))
 
 assert.throws(
   () => migrateTwinBuild({ ...rawBuild, schemaVersion: 99 }),
@@ -197,6 +210,37 @@ const workflowReview = reconcileTwinBuild({
 })
 assert.equal(workflowReview.summary.pending, 0)
 assert.equal(workflowReview.summary.actionable, 0)
+
+const engineNodeIds = new Set(WORKFLOW_ENGINE_REGISTRY.components.map((item) => `map-${item.id}`))
+const topEngineNodeIds = new Set(WORKFLOW_ENGINE_REGISTRY.components
+  .filter((item) => !item.parentId)
+  .map((item) => `map-${item.id}`))
+const childEngineNodeIds = new Set([...engineNodeIds].filter((id) => !topEngineNodeIds.has(id)))
+const engineEdgeIds = new Set(WORKFLOW_ENGINE_REGISTRY.components
+  .filter((item) => item.parentId)
+  .map((item) => `map-edge-${item.parentId}-${item.id}`))
+const legacySystemMap = createWorkflowCanvasSystemMap()
+legacySystemMap.nodes = legacySystemMap.nodes.filter((node) => (
+  node.id !== ENGINE_CAPABILITY_MAP_GROUP_ID && !engineNodeIds.has(node.id)
+))
+legacySystemMap.edges = legacySystemMap.edges.filter((edge) => !engineEdgeIds.has(edge.id))
+const fullSystemMap = createWorkflowCanvasSystemMap()
+
+const firstEngineStage = inspectWorkflowSystemTwin(legacySystemMap).items
+  .find((item) => item.status === 'engine_layer_missing')
+assert.deepEqual(firstEngineStage.proposal.counts, { nodes: 8, edges: 0, parts: 0 })
+
+legacySystemMap.nodes.push(...structuredClone(fullSystemMap.nodes.filter((node) => (
+  node.id === ENGINE_CAPABILITY_MAP_GROUP_ID || topEngineNodeIds.has(node.id)
+))))
+const secondEngineStage = inspectWorkflowSystemTwin(legacySystemMap).items
+  .find((item) => item.status === 'engine_components_missing')
+assert.deepEqual(secondEngineStage.proposal.counts, { nodes: childEngineNodeIds.size, edges: 0, parts: 0 })
+
+legacySystemMap.nodes.push(...structuredClone(fullSystemMap.nodes.filter((node) => childEngineNodeIds.has(node.id))))
+const thirdEngineStage = inspectWorkflowSystemTwin(legacySystemMap).items
+  .find((item) => item.status === 'engine_relations_missing')
+assert.deepEqual(thirdEngineStage.proposal.counts, { nodes: 0, edges: engineEdgeIds.size, parts: 0 })
 
 const manuallyChanged = createWorkflowCanvasSystemMap()
 const repository = manuallyChanged.nodes.find((node) => node.id === 'map-local-repo')

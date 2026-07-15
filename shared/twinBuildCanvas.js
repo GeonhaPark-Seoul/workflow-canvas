@@ -108,6 +108,7 @@ export function createTwinBuildFromCanvasTemplate({
       externalRef: data.externalRef,
       parentId: node.parentId,
       trustZoneId: data.trustZone?.id ?? null,
+      logicalComponent: data.logicalComponent ?? null,
       evidenceIds,
       placement: {
         nodeId: node.id,
@@ -279,6 +280,7 @@ export function materializeTwinBuildEntity(build, entity, reviewItem = null) {
     sourceKind: entity.sourceKind,
     provider: entity.provider,
     externalRef: entity.externalRef,
+    ...(entity.logicalComponent ? { logicalComponent: entity.logicalComponent } : {}),
     ...(entity.trustZoneId ? { trustZone: entityTrustZone(build, entity) } : {}),
     ...(parts.length ? { systemParts: parts } : {}),
     digitalTwinBinding: binding,

@@ -11,6 +11,12 @@
 
 The recommended user-facing phrase is **시스템 가져오기**. Internally, adapters perform a **twin build** and then **materialize** the result.
 
+User-facing engine names stay short: `Twin Core`, `Create Graph`, `Source Lens`, `Trust Map`, `LiveOps`, `Safe Operations`, and `Connector Bridge`. Internally, the registry distinguishes Engine, Contract, Resolver, Builder, Pipeline, Agent Skill, Hard Guardrail, Connector, and Manifest so a convenient product word does not erase technical responsibility.
+
+## Current commercial focus
+
+The long-term ontology remains general enough for business and life operations, but the first commercial product is deliberately narrow: a non-developer control room for small AI-generated JavaScript/React applications using GitHub, Vercel, and Supabase. The initial audience is vibe coders, solo founders, and small product teams without highly sensitive customer data. General life OS, regulated workloads, 3D rendering, autonomous agents, and operator-blind encryption are later horizons rather than current promises.
+
 ## Core principle
 
 The engine must not ask an AI to draw a plausible architecture from scratch. It first collects deterministic evidence, builds a canonical fact graph, marks unknowns, and then lets AI explain or organize those facts. A canvas element is never `live` merely because code declares it.
@@ -311,7 +317,7 @@ The future AI does not replace this helper or receive direct Mac access. Direct 
 
 ### Phase C - Extract the engine core
 
-Current progress: C1 establishes adapter contract v1 and a provider-neutral registry. C2 adds deterministic normalization, reference and trust-boundary validation, and a common reconciliation engine. C3 upgrades the canonical model to `TwinBuild v2`, adds sequential v0-to-v1-to-v2 migration, and separates data classes, policies, observations, events, threats, and controls. It also establishes the universal operation lifecycle for direct UI, deterministic automation, and future AI initiators. Workflow Canvas is normalized as 28 entities, 9 parts, 38 relations, 3 data classes, 3 policies, 2 executable operations, 2 observations, 3 controls, and one threat. Git synchronization and append-only system snapshots bind their signed plans to canonical operation-definition fingerprints. A second order-service fixture still reaches zero findings through staged common proposals while manual layout, notes, extra parts, and review decisions survive rescans.
+Current progress: C1 establishes adapter contract v1 and a provider-neutral registry. C2 adds deterministic normalization, reference and trust-boundary validation, and a common reconciliation engine. C3 upgrades the canonical model to `TwinBuild v3`, adds sequential v0-to-v1-to-v2-to-v3 migration, separates data classes, policies, observations, events, threats, and controls, and preserves explicit logical-component metadata. It also establishes the universal operation lifecycle for direct UI, deterministic automation, and future AI initiators. Workflow Canvas is normalized as 54 entities, 9 parts, 56 relations, 3 data classes, 3 policies, 2 executable operations, 2 observations, 3 controls, and one threat. Twenty-five entities and eighteen containment relations form the registry-backed product-engine logical layer; they are never promoted to LIVE resources. Git synchronization and append-only system snapshots bind their signed plans to canonical operation-definition fingerprints. A second order-service fixture still reaches zero findings through staged common proposals while manual layout, notes, extra parts, and review decisions survive rescans.
 
 The future orchestration map's human approval, execution connector, test/review gate, runtime status/log, audit, stop/retry, and recovery concepts now share this operation contract. Conversation/context/planning and agent assignment remain deferred; when added, they cannot bypass the contract.
 

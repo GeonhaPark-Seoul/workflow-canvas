@@ -1,5 +1,7 @@
 import { createEdgeRelationData, edgeRelationInfo } from './relationOntology.js'
 import { createSystemNodeData } from './systemOntology.js'
+import { createEngineCapabilityMap } from './capabilityMapper.js'
+import { MAINTAINER_AGENT_MANIFEST, WORKFLOW_ENGINE_REGISTRY } from './engineRegistry.js'
 import { WORKFLOW_SYSTEM_DISCOVERY } from './workflowSystemDiscoveryManifest.js'
 import {
   WORKFLOW_SOURCE_TWIN_PART_IDS,
@@ -192,9 +194,11 @@ function relationEdge(id, source, target, relationType, evidenceRef, evidence, h
   }
 }
 
-function mapNodes() {
+function mapNodes(engineCapabilityMap) {
   return [
     ...GROUPS.map(groupNode),
+    engineCapabilityMap.group,
+    ...engineCapabilityMap.nodes,
 
     systemNode('map-user', 'map-group-experience', 45, 85, 'actor', '브라우저 사용자', {
       purpose: '캔버스를 보고 편집하며 공유와 AI 작업을 승인한다.',
@@ -407,7 +411,7 @@ function mapNodes() {
   ]
 }
 
-function mapEdges() {
+function mapEdges(engineCapabilityMap) {
   return [
     relationEdge('map-edge-user-app', 'map-user', 'map-web-app', 'uses', 'src/App.jsx', '사용자는 브라우저 UI를 통해 캔버스를 조작한다.'),
     relationEdge('map-edge-canvas-part', 'map-canvas-engine', 'map-web-app', 'part_of', 'src/App.jsx', 'ReactFlow가 웹 앱의 중심 캔버스 화면으로 등록되어 있다.', { sourceHandle: 'left', targetHandle: 'right' }),
@@ -453,20 +457,31 @@ function mapEdges() {
       targetHandle: `p-${WORKFLOW_SOURCE_TWIN_PART_IDS.githubCode}-l`,
     }),
     relationEdge('map-edge-github-vercel', 'map-github', 'map-vercel', 'triggers', 'vercel.json', '원격 저장소의 배포 대상 변경이 Vercel 배포 흐름을 촉발한다.', { sourceHandle: 'top', targetHandle: 'bottom' }),
+    ...engineCapabilityMap.edges,
   ]
 }
 
 export function createWorkflowCanvasSystemMap() {
+  const engineCapabilityMap = createEngineCapabilityMap(WORKFLOW_ENGINE_REGISTRY, MAINTAINER_AGENT_MANIFEST)
   return {
     name: 'Workflow Canvas 시스템 지도',
-    nodes: mapNodes(),
-    edges: mapEdges(),
+    nodes: mapNodes(engineCapabilityMap),
+    edges: mapEdges(engineCapabilityMap),
     notes: [],
     views: GROUPS.map((group) => ({
       id: `view-${group.id}`,
       name: group.label,
       bounds: { x: group.x, y: group.y, width: group.width, height: group.height },
-    })),
+    })).concat({
+      id: `view-${engineCapabilityMap.group.id}`,
+      name: engineCapabilityMap.group.data.label,
+      bounds: {
+        x: engineCapabilityMap.group.position.x,
+        y: engineCapabilityMap.group.position.y,
+        width: engineCapabilityMap.group.width,
+        height: engineCapabilityMap.group.height,
+      },
+    }),
     stageTypes: null,
   }
 }

@@ -3,6 +3,7 @@ import { normalizeTrustZone } from './trustTopology.js'
 
 export const SYSTEM_KIND_DEFS = Object.freeze([
   { id: 'actor', label: '사용자·주체', icon: '◎', color: '#22c55e' },
+  { id: 'engine', label: '제품 엔진', icon: '◈', color: '#14b8a6' },
   { id: 'frontend', label: '프론트엔드', icon: '▣', color: '#3b82f6' },
   { id: 'service', label: '백엔드 서비스', icon: '◆', color: '#06b6d4' },
   { id: 'api', label: 'API', icon: '↔', color: '#0ea5e9' },
@@ -17,6 +18,30 @@ export const SYSTEM_KIND_DEFS = Object.freeze([
   { id: 'external', label: '외부 서비스', icon: '↗', color: '#ec4899' },
   { id: 'mcp', label: 'MCP', icon: '⌘', color: '#f97316' },
   { id: 'credential', label: '키 참조', icon: '✦', color: '#eab308' },
+])
+
+export const SYSTEM_COMPONENT_KIND_DEFS = Object.freeze([
+  { id: 'engine', label: 'Engine' },
+  { id: 'contract', label: 'Contract' },
+  { id: 'resolver', label: 'Resolver' },
+  { id: 'builder', label: 'Builder' },
+  { id: 'pipeline', label: 'Pipeline' },
+  { id: 'agent-skill', label: 'Agent Skill' },
+  { id: 'agent-policy', label: 'Agent Policy' },
+  { id: 'guardrail', label: 'Hard Guardrail' },
+  { id: 'workflow', label: 'Workflow' },
+  { id: 'tool', label: 'Tool' },
+  { id: 'connector', label: 'Connector' },
+  { id: 'manifest', label: 'Manifest' },
+])
+
+export const SYSTEM_COMPONENT_MATURITY_DEFS = Object.freeze([
+  { id: 'planned', label: '계획' },
+  { id: 'prototype', label: '프로토타입' },
+  { id: 'alpha', label: '알파' },
+  { id: 'beta', label: '베타' },
+  { id: 'stable', label: '안정화' },
+  { id: 'deprecated', label: '폐기 예정' },
 ])
 
 export const SYSTEM_ENVIRONMENT_DEFS = Object.freeze([
@@ -46,6 +71,8 @@ export const SYSTEM_ONTOLOGY_TEXT_FIELDS = Object.freeze([
 const KIND_BY_ID = new Map(SYSTEM_KIND_DEFS.map((item) => [item.id, item]))
 const ENVIRONMENT_IDS = new Set(SYSTEM_ENVIRONMENT_DEFS.map((item) => item.id))
 const SOURCE_IDS = new Set(SYSTEM_SOURCE_DEFS.map((item) => item.id))
+const COMPONENT_KIND_IDS = new Set(SYSTEM_COMPONENT_KIND_DEFS.map((item) => item.id))
+const COMPONENT_MATURITY_IDS = new Set(SYSTEM_COMPONENT_MATURITY_DEFS.map((item) => item.id))
 
 export function systemKindDefinition(id) {
   return KIND_BY_ID.get(id) ?? KIND_BY_ID.get('service')
@@ -58,6 +85,41 @@ export function normalizeSystemPlainText(value, maxLength = 240) {
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, maxLength)
+}
+
+function normalizeTextList(value, maxItems = 12, maxLength = 240) {
+  const result = []
+  const seen = new Set()
+  for (const item of Array.isArray(value) ? value.slice(0, maxItems) : []) {
+    const normalized = normalizeSystemPlainText(item, maxLength)
+    if (normalized && !seen.has(normalized)) {
+      seen.add(normalized)
+      result.push(normalized)
+    }
+  }
+  return result
+}
+
+export function normalizeLogicalComponent(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null
+  if (value.schemaVersion != null && value.schemaVersion !== 1) return null
+  const kind = COMPONENT_KIND_IDS.has(value.kind) ? value.kind : 'engine'
+  const maturity = COMPONENT_MATURITY_IDS.has(value.maturity) ? value.maturity : 'prototype'
+  const normalized = {
+    schemaVersion: 1,
+    id: normalizeSystemPlainText(value.id, 180),
+    kind,
+    productVersion: normalizeSystemPlainText(value.productVersion, 80),
+    technicalVersion: normalizeSystemPlainText(value.technicalVersion, 80),
+    maturity,
+    maintainerAgentId: normalizeSystemPlainText(value.maintainerAgentId, 180),
+    inputs: normalizeTextList(value.inputs),
+    outputs: normalizeTextList(value.outputs),
+    codeEvidence: normalizeTextList(value.codeEvidence, 16, 300),
+    testEvidence: normalizeTextList(value.testEvidence, 16, 300),
+    compatibility: normalizeTextList(value.compatibility, 12, 160),
+  }
+  return normalized.id ? normalized : null
 }
 
 export function normalizeSystemNodeData(data = {}) {
@@ -76,6 +138,9 @@ export function normalizeSystemNodeData(data = {}) {
   if (trustZone) normalized.trustZone = trustZone
   else delete normalized.trustZone
   if (Array.isArray(data.systemParts)) normalized.systemParts = normalizeSystemParts(data.systemParts)
+  const logicalComponent = normalizeLogicalComponent(data.logicalComponent)
+  if (logicalComponent) normalized.logicalComponent = logicalComponent
+  else delete normalized.logicalComponent
   return normalized
 }
 
@@ -101,6 +166,9 @@ export function createSystemNodeData(systemKind = 'service') {
 // `twinRuntime` is stripped before canvas persistence and must never be treated
 // as user-authored proof by a control action.
 export function systemNodeReality(data = {}) {
+  if (normalizeLogicalComponent(data.logicalComponent)) {
+    return { id: 'logical', label: '논리 구성', color: '#14b8a6' }
+  }
   const runtime = data.twinRuntime
   const verifiedAt = Date.parse(runtime?.verifiedAt ?? '')
   const serverRuntime = typeof runtime?.resourceId === 'string'
