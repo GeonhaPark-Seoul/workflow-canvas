@@ -351,13 +351,22 @@ export function sourceTwinProjectIdentity(files) {
 
 export function explainSourceFile(record, project = {}) {
   if (project.name === 'workflow-canvas' && WORKFLOW_CANVAS_FILE_ROLES[record.path]) {
-    return WORKFLOW_CANVAS_FILE_ROLES[record.path]
+    return {
+      ...WORKFLOW_CANVAS_FILE_ROLES[record.path],
+      explanationMethod: 'curated-product-profile',
+    }
   }
   if (/^scripts\/test-|(?:\.test|\.spec)\.[^.]+$/i.test(record.path)) {
     const subject = baseName(record.path).replace(/^test-/, '').replace(/-/g, ' ')
-    return ROLE('testing-quality', `${subject} 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.`, '회귀나 보안 약화가 있는 빌드의 배포를 막습니다.')
+    return {
+      ...ROLE('testing-quality', `${subject} 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.`, '회귀나 보안 약화가 있는 빌드의 배포를 막습니다.'),
+      explanationMethod: 'test-file-rule',
+    }
   }
-  return genericFileExplanation(record)
+  return {
+    ...genericFileExplanation(record),
+    explanationMethod: 'deterministic-source-rule',
+  }
 }
 
 export function sourceTwinTechnicalSummary(record) {

@@ -14,10 +14,13 @@ import {
 import {
   compareSourceTwinSnapshots,
   createSourceTwinSnapshot,
+  SOURCE_TWIN_AUDIENCE_MODES,
   SOURCE_TWIN_OPERATION_CONFIRMATION,
   SOURCE_TWIN_SNAPSHOT_OPERATION,
+  sourceTwinAudienceMode,
   sourceTwinCodeUrl,
   sourceTwinEntities,
+  sourceTwinExplanationEvidence,
 } from '../shared/sourceTwin.js'
 import {
   groupSourceTwinEntitiesByArea,
@@ -163,6 +166,9 @@ assert.ok(manifest.relations.some((relation) => relation.type === 'accesses' && 
 assert.equal(manifest.source.contentIncluded, false)
 assert.equal(manifest.source.credentialValuesIncluded, false)
 assert.doesNotMatch(JSON.stringify(manifest), /literal-secret-must-not-appear/)
+assert.deepEqual(Object.keys(SOURCE_TWIN_AUDIENCE_MODES), ['easy', 'developer'])
+assert.equal(sourceTwinAudienceMode('developer'), 'developer')
+assert.equal(sourceTwinAudienceMode('unknown'), 'easy')
 const exampleFile = manifest.entities.find((entity) => entity.id === 'file:api/example.js')
 const exampleHandler = manifest.entities.find((entity) => entity.id === 'function:api/example.js:handler')
 assert.ok(exampleFile.area)
@@ -170,9 +176,18 @@ assert.ok(exampleFile.subsystem)
 assert.match(exampleFile.summary, /브라우저 요청|\/api\/example/)
 assert.match(exampleFile.userImpact, /권한|화면/)
 assert.match(exampleFile.technicalSummary, /함수 1개/)
+assert.equal(exampleFile.explanationBasis.method, 'deterministic-source-rule')
+assert.ok(exampleFile.explanationBasis.refs.some((ref) => ref.startsWith('source:api/example.js#L1-L')))
+assert.ok(exampleFile.explanationBasis.refs.includes('api:/api/example'))
+const exampleEvidence = sourceTwinExplanationEvidence(exampleFile)
+assert.match(exampleEvidence.methodLabel, /구조|참조/)
+assert.ok(exampleEvidence.refs.some((item) => item.kind === 'source' && item.label.includes('api/example.js')))
 assert.doesNotMatch(exampleFile.summary, /함수 \d+개|모듈 \d+개/)
 assert.match(exampleHandler.summary, /로그인|입력/)
+assert.equal(exampleHandler.explanationBasis.method, 'symbol-and-source-range')
+assert.ok(exampleHandler.explanationBasis.refs.some((ref) => ref.startsWith('source:api/example.js#L')))
 assert.doesNotMatch(exampleHandler.summary, /handler을\(를\) 처리/)
+assert.ok(manifest.entities.every((entity) => entity.explanationBasis?.method && entity.explanationBasis.refs.length > 0))
 const groupedFixtureEntities = groupSourceTwinEntitiesByArea(manifest, sourceTwinEntities(manifest, { perspective: 'functionality' }))
 assert.ok(groupedFixtureEntities.length > 0)
 assert.ok(groupedFixtureEntities.every((group) => group.label && group.description && group.entities.length))
@@ -191,6 +206,7 @@ const appSemanticEntity = workflowCanvasSemanticManifest.entities.find((entity) 
 const sourcePanelSemanticEntity = workflowCanvasSemanticManifest.entities.find((entity) => entity.id === 'file:src/components/SourceTwinPanel.jsx')
 assert.equal(appSemanticEntity.area, 'canvas-interface')
 assert.match(appSemanticEntity.summary, /노드·연결선 편집/)
+assert.equal(appSemanticEntity.explanationBasis.method, 'curated-product-profile')
 assert.equal(sourcePanelSemanticEntity.area, 'source-code-twin')
 assert.match(sourcePanelSemanticEntity.summary, /역할별 구조/)
 assert.match(sourcePanelSemanticEntity.userImpact, /비개발자/)
@@ -219,16 +235,35 @@ const localManifest = normalizeLocalSourceManifest({
   ...changedManifest,
   source: { ...changedManifest.source, label: 'actual-local-repo' },
   content: 'source-body-must-not-survive',
-  entities: changedManifest.entities.map((entity) => ({ ...entity, content: 'source-body-must-not-survive' })),
+  entities: changedManifest.entities.map((entity) => ({
+    ...entity,
+    content: 'source-body-must-not-survive',
+    ...(entity.id === exampleFile.id ? {
+      explanationBasis: {
+        ...entity.explanationBasis,
+        refs: [
+          ...entity.explanationBasis.refs,
+          'source:/Users/private/project.js#L1',
+          'dependency:../private-package',
+          'env:SUPABASE_SERVICE_ROLE_KEY=literal-secret',
+        ],
+      },
+    } : {}),
+  })),
 })
 assert.ok(localManifest)
 assert.equal(localManifest.source.label, 'actual-local-repo')
 assert.doesNotMatch(JSON.stringify(localManifest), /source-body-must-not-survive/)
+assert.doesNotMatch(JSON.stringify(localManifest), /\/Users\/private|\.\.\/private-package|literal-secret/)
 assert.ok(localManifest.perspectives.code.length > 0)
 assert.equal(localManifest.entities.find((entity) => entity.id === exampleFile.id)?.area, exampleFile.area)
 assert.equal(localManifest.entities.find((entity) => entity.id === exampleFile.id)?.subsystem, exampleFile.subsystem)
 assert.equal(localManifest.entities.find((entity) => entity.id === exampleFile.id)?.userImpact, exampleFile.userImpact)
 assert.match(localManifest.entities.find((entity) => entity.id === exampleFile.id)?.technicalSummary ?? '', /함수 1개/)
+assert.deepEqual(
+  localManifest.entities.find((entity) => entity.id === exampleFile.id)?.explanationBasis,
+  exampleFile.explanationBasis,
+)
 assert.ok(localManifest.areas.some((area) => area.id === exampleFile.area))
 assert.ok(localManifest.subsystems.some((subsystem) => subsystem.id === exampleFile.subsystem))
 const localDifference = compareLocalAndDeployedManifests(manifest, localManifest)

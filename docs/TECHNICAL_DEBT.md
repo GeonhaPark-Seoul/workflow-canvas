@@ -86,6 +86,7 @@ This is the durable ledger for security, reliability, commercialization, and arc
 - Gate: release-blocker
 - Status: open
 - Context: source bodies are excluded today, but paths, names, line ranges, hashes, repository URL, Git state, and security metadata leave the device.
+- Current mitigation: explanation evidence uses only relative repository paths and line ranges plus allowlisted symbol, API, DB, environment-variable-name, dependency, deployment, script, and security-signal references. The server sanitizer rejects absolute paths, parent traversal, URLs, malformed identifiers, source bodies, and credential values before storing a local manifest.
 - Required work: publish a versioned payload schema, show exactly what leaves the device, support metadata-minimal mode, enforce size/rate limits, and add local outbound audit logs.
 - Exit criteria: payload contract tests prove that source bodies, credential values, absolute paths, commit messages, and unrelated filenames cannot leave the device.
 
@@ -213,8 +214,8 @@ This is the durable ledger for security, reliability, commercialization, and arc
 - Severity: medium
 - Gate: product-v1
 - Status: in progress
-- Current evidence: the JavaScript source scanner now separates plain-language role, user impact, product area, and technical counts. The repository view groups code by product areas such as canvas UI, collaboration, digital-twin engine, source-code twin, security, and deployment. Workflow Canvas uses a deterministic semantic profile; unknown repositories fall back to evidence-bound path, API, DB, import, and layer rules. Local connector sanitization preserves these semantic fields without sending source bodies or credential values.
-- Required work: add an explicit easy/developer display switch; attach explanation-basis references to each generated sentence; add golden explanation fixtures for a second non-Workflow-Canvas repository and more languages; measure unclear/fallback explanations; later allow AI to draft improved wording from explicitly granted source context while keeping every claim tied to deterministic evidence. AI may not invent topology, permissions, or runtime truth.
+- Current evidence: the JavaScript source scanner separates plain-language role, user impact, product area, subsystem, and technical counts. Local and GitHub repository views share an explicit `쉬운 설명`/`개발자 정보` switch. Every generated entity records its explanation method and bounded references to the relative source range and relevant symbol, API, DB, environment-variable name, dependency, deployment, script, or security signal. Workflow Canvas uses a curated deterministic product profile; unknown repositories fall back to evidence-bound path, API, DB, import, and layer rules. Local connector sanitization preserves the same explanation evidence without sending source bodies, absolute paths, or credential values.
+- Required work: attach separate evidence sets to each individual summary and user-impact sentence where they differ; add golden explanation fixtures for a second non-Workflow-Canvas repository and more languages; measure unclear/fallback explanations; persist the preferred audience mode per user; later allow AI to draft improved wording from explicitly granted source context while keeping every claim tied to deterministic evidence. AI may not invent topology, permissions, or runtime truth.
 - Exit criteria: every explanation links to evidence and can reveal the technical source without changing the underlying twin.
 
 ### ENG-005 - Review queue usability and proposal lifecycle

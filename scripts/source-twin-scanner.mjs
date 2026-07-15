@@ -269,6 +269,19 @@ function entity(id, kind, label, fingerprint, fields = {}) {
   return { id, kind, label, fingerprint, ...fields }
 }
 
+function sourceEvidenceRef(relativePath, lineStart = 1, lineEnd = lineStart) {
+  const start = Math.max(1, Number(lineStart) || 1)
+  const end = Math.max(start, Number(lineEnd) || start)
+  return `source:${relativePath}#L${start}${end > start ? `-L${end}` : ''}`
+}
+
+function explanationBasis(method, refs = []) {
+  return {
+    method,
+    refs: unique(refs.filter(Boolean)).slice(0, 12),
+  }
+}
+
 function relation(type, source, target, fields = {}) {
   return { id: `relation:${semanticHash({ type, source, target, ...fields }, 16)}`, type, source, target, ...fields }
 }
@@ -389,6 +402,14 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
       summary: record.explanation.summary,
       userImpact: record.explanation.userImpact,
       technicalSummary,
+      explanationBasis: explanationBasis(record.explanation.explanationMethod, [
+        sourceEvidenceRef(record.path, 1, record.lineCount),
+        ...record.apiRoutes.map((route) => `api:${route}`),
+        ...unique(record.dbTables).map((table) => `db-table:${table}`),
+        ...unique(record.dbFunctions).map((name) => `db-function:${name}`),
+        ...unique(record.env).map((name) => `env:${name}`),
+        ...unique(record.securitySignals).map((signal) => `security:${signal}`),
+      ]),
       tags,
       details: {
         functionCount: record.functions.length,
@@ -415,6 +436,10 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
         lineEnd: fn.lineEnd,
         summary: explainSourceFunction(fn, record, record.explanation),
         technicalSummary: `${fn.exported ? '다른 파일에서 사용 가능' : '이 파일 내부에서 사용'}${fn.async ? ' · 서버나 저장소 응답을 기다림' : ''}`,
+        explanationBasis: explanationBasis('symbol-and-source-range', [
+          sourceEvidenceRef(record.path, fn.lineStart, fn.lineEnd),
+          `symbol:${fn.displayName}`,
+        ]),
         tags: unique([record.layer, record.explanation.area, record.subsystem, fn.kind, fn.exported ? 'exported' : '', fn.async ? 'async' : '']),
         details: { functionKind: fn.kind, exported: fn.exported, async: fn.async },
       }))
@@ -432,6 +457,10 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
         lineStart: 1,
         summary: `${route}로 들어온 요청을 받아 “${record.explanation.summary.replace(/합니다\.$/, '')}” 역할을 실행하는 서버 입구입니다.`,
         userImpact: record.explanation.userImpact,
+        explanationBasis: explanationBasis('api-route-and-source', [
+          sourceEvidenceRef(record.path, 1, record.lineCount),
+          `api:${route}`,
+        ]),
         tags: ['api', 'server', record.explanation.area, record.subsystem],
       }))
       addRelation(relation('serves', fileId, id))
@@ -446,6 +475,10 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
         area,
         subsystem,
         summary: explainDatabaseResource('db-table', table),
+        explanationBasis: explanationBasis('database-reference', [
+          sourceEvidenceRef(record.path, 1, record.lineCount),
+          `db-table:${table}`,
+        ]),
         tags: ['database', 'table', area, subsystem],
       }))
       const operations = unique(record.dbAccess.filter((item) => item.table === table).map((item) => item.operation))
@@ -461,6 +494,10 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
         area,
         subsystem,
         summary: explainDatabaseResource('db-function', fnName),
+        explanationBasis: explanationBasis('database-reference', [
+          sourceEvidenceRef(record.path, 1, record.lineCount),
+          `db-function:${fnName}`,
+        ]),
         tags: ['database', 'function', area, subsystem],
       }))
       addRelation(relation('calls-db-function', fileId, id))
@@ -478,6 +515,10 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
         subsystem,
         lineStart: policy.line,
         summary: `${policy.table} 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.`,
+        explanationBasis: explanationBasis('database-policy-declaration', [
+          sourceEvidenceRef(record.path, policy.line, policy.line),
+          `db-table:${policy.table}`,
+        ]),
         tags: ['database', 'security', 'rls', policy.table, area, subsystem],
         details: { table: policy.table },
       }))
@@ -493,6 +534,10 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
         area,
         subsystem,
         summary: explainEnvironmentVariable(envName),
+        explanationBasis: explanationBasis('environment-reference', [
+          sourceEvidenceRef(record.path, 1, record.lineCount),
+          `env:${envName}`,
+        ]),
         tags: unique(['environment', area, subsystem, CREDENTIAL_PATTERN.test(envName) ? 'credential-reference' : 'configuration']),
         details: { credentialReference: CREDENTIAL_PATTERN.test(envName) },
       }))
@@ -506,6 +551,10 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
         subsystem: 'build-release',
         summary: 'Vite 빌드 결과를 Vercel에 배포하는 경로입니다.',
         userImpact: '검증을 통과한 현재 커밋이 실제 사용자가 여는 웹사이트가 되게 합니다.',
+        explanationBasis: explanationBasis('deployment-configuration', [
+          sourceEvidenceRef(record.path, 1, record.lineCount),
+          'deployment:vercel',
+        ]),
         tags: ['deployment', 'vercel', 'vite', 'deployment-operations'],
       }))
       addRelation(relation('configures', fileId, id))
@@ -520,6 +569,10 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
           area: 'project-foundation',
           subsystem: 'project-config',
           summary: `${imported.source} 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.`,
+          explanationBasis: explanationBasis('dependency-reference', [
+            sourceEvidenceRef(record.path, 1, record.lineCount),
+            imported.source.startsWith('.') ? '' : `dependency:${imported.source}`,
+          ]),
           tags: ['dependency', 'project-foundation'],
         }))
       }
@@ -530,7 +583,12 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
       if (!byId.has(target)) addEntity(entity(target, 'api-route', route, semanticHash({ route }), {
         name: route, layer: 'api', area: record.explanation.area,
         subsystem: record.subsystem,
-        summary: `${route} 서버 기능에 자료를 요청하는 연결 대상입니다.`, tags: ['api', record.explanation.area, record.subsystem],
+        summary: `${route} 서버 기능에 자료를 요청하는 연결 대상입니다.`,
+        explanationBasis: explanationBasis('api-route-and-source', [
+          sourceEvidenceRef(record.path, 1, record.lineCount),
+          `api:${route}`,
+        ]),
+        tags: ['api', record.explanation.area, record.subsystem],
       }))
       addRelation(relation('calls-api', fileId, target))
     }
@@ -555,6 +613,10 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
             : /build|deploy|preview/.test(name)
               ? `${name} 단계의 웹 빌드 또는 배포 확인을 실행하는 명령입니다.`
               : `${name} 개발 작업을 정해진 순서로 실행하는 프로젝트 명령입니다.`,
+          explanationBasis: explanationBasis('package-script-declaration', [
+            sourceEvidenceRef('package.json', 1, packageRecord.lineCount),
+            `script:${name}`,
+          ]),
           tags: unique(['npm', area, subsystem, /test|check/.test(name) ? 'test' : '', /build|deploy|preview/.test(name) ? 'deployment' : '']),
         }))
         addRelation(relation('contains', 'file:package.json', `npm-script:${name}`))

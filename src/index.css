@@ -1574,6 +1574,34 @@ body[data-theme='light'] .react-flow__node:hover .canvas-group-frame {
 }
 .local-source-mode-label strong { color: #c7d0dc; font-size: 9.5px; }
 .local-source-mode-label span { color: #697386; font-size: 8.5px; text-align: right; }
+.source-twin-audience-modes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3px;
+  border-bottom: 1px solid #ffffff12;
+  background: #10151a;
+  padding: 7px 10px;
+}
+.source-twin-audience-modes button {
+  min-width: 0;
+  height: 30px;
+  border: 1px solid #ffffff16;
+  border-radius: 4px;
+  background: transparent;
+  color: #7e8798;
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+}
+.source-twin-audience-modes button:hover {
+  border-color: #06b6d455;
+  color: #dbeafe;
+}
+.source-twin-audience-modes button.is-active {
+  border-color: #06b6d477;
+  background: #06b6d41c;
+  color: #67e8f9;
+}
 .source-twin-perspectives {
   display: grid;
   border-bottom: 1px solid #ffffff12;
@@ -1834,6 +1862,54 @@ body[data-theme='light'] .react-flow__node:hover .canvas-group-frame {
 .source-twin-user-impact p {
   margin: 3px 0 0;
 }
+.source-twin-user-impact.is-developer {
+  border-left-color: #64748b66;
+}
+.source-twin-explanation-evidence {
+  margin: 8px -11px 0;
+  border-width: 1px 0;
+  border-style: solid;
+  border-color: #ffffff0e;
+  background: #0b111566;
+  padding: 7px 11px;
+}
+.source-twin-explanation-evidence > div:first-child {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.source-twin-explanation-evidence strong {
+  flex: 0 0 auto;
+  color: #9bdbe6;
+  font-size: 9px;
+}
+.source-twin-explanation-evidence > div:first-child span {
+  min-width: 0;
+  overflow: hidden;
+  color: #758295;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 8.5px;
+}
+.source-twin-explanation-evidence > div:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+.source-twin-explanation-evidence code {
+  max-width: 100%;
+  overflow: hidden;
+  border: 1px solid #ffffff12;
+  border-radius: 3px;
+  color: #8794a6;
+  padding: 2px 5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 8px;
+}
 .source-twin-technical-details {
   margin-top: 8px;
   border-top: 1px solid #ffffff12;
@@ -1843,6 +1919,10 @@ body[data-theme='light'] .react-flow__node:hover .canvas-group-frame {
   color: #8d99aa;
   font-size: 9px;
   cursor: pointer;
+}
+.source-twin-technical-details > strong {
+  color: #8d99aa;
+  font-size: 9px;
 }
 .source-twin-technical-details summary:hover {
   color: #dbeafe;

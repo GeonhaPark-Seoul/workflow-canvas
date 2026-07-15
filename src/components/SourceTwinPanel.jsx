@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
+  SOURCE_TWIN_AUDIENCE_MODES,
   SOURCE_TWIN_PERSPECTIVES,
+  sourceTwinAudienceMode,
   sourceTwinCodeUrl,
   sourceTwinEntities,
   sourceTwinEntityMap,
+  sourceTwinExplanationEvidence,
 } from '../../shared/sourceTwin.js'
 import {
   groupSourceTwinEntitiesByArea,
@@ -112,7 +115,35 @@ function IconButton({ title, onClick, disabled = false, children }) {
   )
 }
 
-function EntityDetail({ manifest, entity, commitSha, onClose }) {
+function ExplanationEvidence({ entity }) {
+  const evidence = sourceTwinExplanationEvidence(entity)
+  return (
+    <div className="source-twin-explanation-evidence">
+      <div><strong>설명 근거</strong><span>{evidence.methodLabel}</span></div>
+      <div>
+        {evidence.refs.map((item) => <code key={item.ref} title={item.ref}>{item.label}</code>)}
+      </div>
+    </div>
+  )
+}
+
+function TechnicalFacts({ entity }) {
+  const details = entity.details ?? {}
+  return (
+    <section className="source-twin-technical-details" aria-label="개발자 정보">
+      <strong>개발 정보</strong>
+      {entity.technicalSummary && <p>{entity.technicalSummary}</p>}
+      <div className="source-twin-detail-facts">
+        {(details.apiRoutes ?? []).map((value) => <span key={`api:${value}`}>{value}</span>)}
+        {(details.dbTables ?? []).map((value) => <span key={`db:${value}`}>DB {value}</span>)}
+        {(details.environmentVariables ?? []).map((value) => <span key={`env:${value}`}>{value}</span>)}
+        {(details.securitySignals ?? []).map((value) => <span className="is-security" key={`security:${value}`}>{SECURITY_SIGNAL_LABELS[value] ?? value}</span>)}
+      </div>
+    </section>
+  )
+}
+
+function EntityDetail({ manifest, entity, commitSha, audienceMode, onClose }) {
   if (!entity) return null
   const codeUrl = sourceTwinCodeUrl(manifest, entity, commitSha)
   const area = sourceTwinAreaDefinition(sourceTwinAreaId(entity), manifest)
@@ -134,31 +165,22 @@ function EntityDetail({ manifest, entity, commitSha, onClose }) {
       </div>
       <p className="source-twin-role-summary">{entity.summary}</p>
       {entity.userImpact && (
-        <div className="source-twin-user-impact">
+        <div className={`source-twin-user-impact${audienceMode === 'developer' ? ' is-developer' : ''}`}>
           <strong>사용자에게 미치는 영향</strong>
           <p>{entity.userImpact}</p>
         </div>
       )}
-      {entity.path && <code>{entity.path}{entity.lineStart ? `:${entity.lineStart}` : ''}</code>}
-      {hasTechnicalFacts && (
-        <details className="source-twin-technical-details">
-          <summary>개발 정보 보기</summary>
-          {entity.technicalSummary && <p>{entity.technicalSummary}</p>}
-          <div className="source-twin-detail-facts">
-            {(details.apiRoutes ?? []).map((value) => <span key={`api:${value}`}>{value}</span>)}
-            {(details.dbTables ?? []).map((value) => <span key={`db:${value}`}>DB {value}</span>)}
-            {(details.environmentVariables ?? []).map((value) => <span key={`env:${value}`}>{value}</span>)}
-            {(details.securitySignals ?? []).map((value) => <span className="is-security" key={`security:${value}`}>{SECURITY_SIGNAL_LABELS[value] ?? value}</span>)}
-          </div>
-        </details>
-      )}
+      <ExplanationEvidence entity={entity} />
+      {audienceMode === 'developer' && entity.path && <code>{entity.path}{entity.lineStart ? `:${entity.lineStart}` : ''}</code>}
+      {audienceMode === 'developer' && hasTechnicalFacts && <TechnicalFacts entity={entity} />}
       {codeUrl && <a href={codeUrl} target="_blank" rel="noreferrer">GitHub에서 실제 코드 열기 ↗</a>}
     </section>
   )
 }
 
-function EntityRow({ entity, children, expanded, selectedId, onToggle, onSelect }) {
+function EntityRow({ entity, children, expanded, selectedId, audienceMode, onToggle, onSelect }) {
   const hasChildren = children.length > 0
+  const developerMode = audienceMode === 'developer'
   return (
     <div className="source-twin-tree-block">
       <button type="button" className={`source-twin-entity-row${selectedId === entity.id ? ' is-selected' : ''}`} onClick={() => onSelect(entity)}>
@@ -171,22 +193,22 @@ function EntityRow({ entity, children, expanded, selectedId, onToggle, onSelect 
         </span>
         <span className="source-twin-entity-main">
           <strong>{entity.label}</strong>
-          <small>{entity.summary}</small>
+          <small>{developerMode ? (entity.technicalSummary || entity.path || entity.summary) : entity.summary}</small>
         </span>
         <span className="source-twin-kind">{KIND_LABELS[entity.kind] ?? entity.kind}</span>
       </button>
       {expanded && children.map((child) => (
         <button type="button" className={`source-twin-function-row${selectedId === child.id ? ' is-selected' : ''}`} key={child.id} onClick={() => onSelect(child)}>
           <span>ƒ</span>
-          <span><strong>{child.label}</strong><small>{child.summary}</small></span>
-          <code>L{child.lineStart}</code>
+          <span><strong>{child.label}</strong><small>{developerMode ? (child.technicalSummary || child.summary) : child.summary}</small></span>
+          {developerMode ? <code>L{child.lineStart}</code> : <span className="source-twin-kind">함수</span>}
         </button>
       ))}
     </div>
   )
 }
 
-function StructureView({ current, perspective, setPerspective, query, setQuery, selectedId, setSelectedId }) {
+function StructureView({ current, perspective, setPerspective, query, setQuery, selectedId, setSelectedId, audienceMode, setAudienceMode }) {
   const manifest = current.manifest
   const [expanded, setExpanded] = useState(() => new Set())
   const [expandedSubsystems, setExpandedSubsystems] = useState(() => new Set())
@@ -239,6 +261,20 @@ function StructureView({ current, perspective, setPerspective, query, setQuery, 
 
   return (
     <>
+      <div className="source-twin-audience-modes" role="group" aria-label="코드 설명 수준">
+        {Object.entries(SOURCE_TWIN_AUDIENCE_MODES).map(([value, label]) => (
+          <button
+            type="button"
+            key={value}
+            className={audienceMode === value ? 'is-active' : ''}
+            aria-pressed={audienceMode === value}
+            title={value === 'easy' ? '제품 역할과 사용자 영향을 중심으로 보기' : '파일 구조, 줄 번호와 기술 정보를 중심으로 보기'}
+            onClick={() => setAudienceMode(sourceTwinAudienceMode(value))}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
       <div className="source-twin-perspectives" role="tablist" aria-label="코드 트리 관점">
         {Object.entries(SOURCE_TWIN_PERSPECTIVES).map(([value, label]) => (
           <button type="button" key={value} className={perspective === value ? 'is-active' : ''} onClick={() => setPerspective(value)}>{label}</button>
@@ -248,7 +284,7 @@ function StructureView({ current, perspective, setPerspective, query, setQuery, 
         <span aria-hidden="true">⌕</span>
         <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="파일, 함수, DB, 환경변수 검색" aria-label="소스 트윈 검색" />
       </div>
-      <EntityDetail manifest={manifest} entity={selected} commitSha={current.deployment?.commitSha} onClose={() => setSelectedId('')} />
+      <EntityDetail manifest={manifest} entity={selected} commitSha={current.deployment?.commitSha} audienceMode={audienceMode} onClose={() => setSelectedId('')} />
       <div className="source-twin-tree">
         {roots.length === 0 ? <div className="twin-review-empty">일치하는 코드 실체 없음</div> : hierarchy.map((area) => (
           <section className="source-twin-area-section" key={area.id}>
@@ -273,7 +309,7 @@ function StructureView({ current, perspective, setPerspective, query, setQuery, 
                   </button>
                   {subsystemExpanded && subsystem.entities.map((entity) => {
                     const children = (childrenByParent.get(entity.id) ?? []).filter((child) => filteredIds.has(child.id))
-                    return <EntityRow key={entity.id} entity={entity} children={children} expanded={expanded.has(entity.id) || !!query} selectedId={selectedId} onToggle={toggle} onSelect={(value) => setSelectedId(value.id)} />
+                    return <EntityRow key={entity.id} entity={entity} children={children} expanded={expanded.has(entity.id) || !!query} selectedId={selectedId} audienceMode={audienceMode} onToggle={toggle} onSelect={(value) => setSelectedId(value.id)} />
                   })}
                 </section>
               )
@@ -680,6 +716,7 @@ export default function SourceTwinPanel({
 }) {
   const [paneWidth, setPaneWidth] = useState(500)
   const [perspective, setPerspective] = useState('functionality')
+  const [audienceMode, setAudienceMode] = useState('easy')
   const [query, setQuery] = useState('')
   const [selectedId, setSelectedId] = useState('')
   const [current, setCurrent] = useState(null)
@@ -974,7 +1011,7 @@ export default function SourceTwinPanel({
                   setLocalError('')
                   onLocalGitOperationStateChange?.({ status: 'idle' })
                 }}
-                structureProps={{ perspective, setPerspective, query, setQuery, selectedId, setSelectedId }}
+                structureProps={{ perspective, setPerspective, query, setQuery, selectedId, setSelectedId, audienceMode, setAudienceMode }}
               />
             : view === 'github-code'
               ? <>
@@ -990,6 +1027,8 @@ export default function SourceTwinPanel({
                     setQuery={setQuery}
                     selectedId={selectedId}
                     setSelectedId={setSelectedId}
+                    audienceMode={audienceMode}
+                    setAudienceMode={setAudienceMode}
                   />
                 </>
             : view === 'changes'

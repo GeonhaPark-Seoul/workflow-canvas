@@ -14,7 +14,26 @@ export const SOURCE_TWIN_PERSPECTIVES = Object.freeze({
   deployment: '배포·운영',
 })
 
+export const SOURCE_TWIN_AUDIENCE_MODES = Object.freeze({
+  easy: '쉬운 설명',
+  developer: '개발자 정보',
+})
+
 const VALID_PERSPECTIVES = new Set(Object.keys(SOURCE_TWIN_PERSPECTIVES))
+const VALID_AUDIENCE_MODES = new Set(Object.keys(SOURCE_TWIN_AUDIENCE_MODES))
+const EXPLANATION_METHOD_LABELS = Object.freeze({
+  'curated-product-profile': '제품 역할 사전과 실제 코드',
+  'test-file-rule': '테스트 파일 규칙과 실제 코드',
+  'deterministic-source-rule': '경로·구조·참조 분석',
+  'symbol-and-source-range': '함수 이름과 실제 함수 범위',
+  'api-route-and-source': 'API 경로와 실제 코드',
+  'database-reference': 'DB 참조와 실제 코드',
+  'database-policy-declaration': 'DB 보안 정책 선언',
+  'environment-reference': '환경변수 이름 참조',
+  'deployment-configuration': '배포 설정 선언',
+  'dependency-reference': '외부 라이브러리 참조',
+  'package-script-declaration': '프로젝트 명령 선언',
+})
 
 function plainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
@@ -30,6 +49,51 @@ function stableValue(value) {
 
 export function sourceTwinFingerprint(value) {
   return digitalTwinReviewFingerprint(stableValue(value))
+}
+
+export function sourceTwinAudienceMode(value) {
+  return VALID_AUDIENCE_MODES.has(value) ? value : 'easy'
+}
+
+function explanationReference(value) {
+  const ref = typeof value === 'string' ? value.trim() : ''
+  const separator = ref.indexOf(':')
+  if (separator < 1) return null
+  const kind = ref.slice(0, separator)
+  const target = ref.slice(separator + 1)
+  if (!target) return null
+  const labels = {
+    source: target.replace('#L', ' · L'),
+    symbol: `함수·기호 ${target}`,
+    api: `API ${target}`,
+    'db-table': `DB 테이블 ${target}`,
+    'db-function': `DB 함수 ${target}`,
+    env: `환경변수 이름 ${target}`,
+    security: `보안 신호 ${target}`,
+    dependency: `외부 라이브러리 ${target}`,
+    deployment: `배포 대상 ${target}`,
+    script: `프로젝트 명령 ${target}`,
+  }
+  return { kind, ref, label: labels[kind] ?? target }
+}
+
+export function sourceTwinExplanationEvidence(entity = {}) {
+  const method = typeof entity.explanationBasis?.method === 'string'
+    ? entity.explanationBasis.method
+    : 'deterministic-source-rule'
+  let refs = Array.isArray(entity.explanationBasis?.refs)
+    ? entity.explanationBasis.refs.map(explanationReference).filter(Boolean)
+    : []
+  if (refs.length === 0 && entity.path) {
+    const start = Number.isInteger(entity.lineStart) ? entity.lineStart : 1
+    const end = Number.isInteger(entity.lineEnd) ? entity.lineEnd : start
+    refs = [explanationReference(`source:${entity.path}#L${start}${end > start ? `-L${end}` : ''}`)].filter(Boolean)
+  }
+  return {
+    method,
+    methodLabel: EXPLANATION_METHOD_LABELS[method] ?? '결정적 코드 구조 분석',
+    refs: refs.slice(0, 12),
+  }
 }
 
 export function sourceTwinEntityMap(manifest) {
@@ -53,6 +117,8 @@ export function sourceTwinEntities(manifest, { perspective = 'all', query = '', 
         entity.summary,
         entity.userImpact,
         entity.technicalSummary,
+        entity.explanationBasis?.method,
+        ...(entity.explanationBasis?.refs ?? []),
         entity.area,
         entity.subsystem,
         ...(entity.tags ?? []),

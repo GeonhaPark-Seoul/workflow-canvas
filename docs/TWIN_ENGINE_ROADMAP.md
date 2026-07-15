@@ -144,12 +144,14 @@ The source-code twin now uses deterministic explanations before active AI integr
 
 - the main sentence states what a file does in the product rather than reporting function or import counts
 - a separate user-impact sentence explains what changes for the person using the product
-- technical counts, paths, API routes, DB references, and security signals remain available as secondary facts
-- product-area classification groups functionality into canvas UI, canvas model, notes/content, collaboration, identity, digital-twin engine, source-code twin, AI/MCP, storage/sync, media, security/privacy, deployment/operations, testing, and project foundation
+- local and GitHub repository views share explicit easy and developer display modes
+- technical counts, paths, line ranges, API routes, DB references, and security signals remain available as developer facts
+- product-area and subsystem classification groups functionality before showing individual files and functions
 - the Workflow Canvas semantic profile contains product-specific roles while the scanner keeps a generic evidence-based fallback for a different repository
-- local connector payloads preserve explanations and classifications but continue to exclude source bodies and credential values
+- each entity records the explanation rule plus bounded relative source-range and structural references
+- local connector payloads preserve explanations, classifications, and allowlisted evidence while excluding source bodies, absolute paths, and credential values
 
-This is the deterministic easy-mode baseline, not the completed semantic engine. A later version must attach sentence-level evidence, validate a second software stack, support additional languages, measure fallback quality, and expose an explicit easy/developer mode. AI can improve wording only after the user grants the necessary source scope; its output remains an explanation artifact rather than verified system truth.
+This is the deterministic explanation baseline, not the completed semantic engine. A later version must split evidence per sentence, validate a second software stack, support additional languages, measure fallback quality, and persist user audience preferences. AI can improve wording only after the user grants the necessary source scope; its output remains an explanation artifact rather than verified system truth.
 
 ### Future manipulable code twin
 

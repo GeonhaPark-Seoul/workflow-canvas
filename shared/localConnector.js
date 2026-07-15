@@ -13,6 +13,16 @@ const SAFE_SHA = /^[a-f0-9]{7,64}$/i
 const SAFE_FINGERPRINT = /^[a-f0-9]{8,128}$/i
 const SAFE_REF = /^[A-Za-z0-9._/@:-]{1,300}$/
 const LOCAL_CONNECTOR_TOKEN_PATTERN = /^wclc_[a-f0-9]{64}$/
+const EXPLANATION_METHODS = new Set([
+  'curated-product-profile', 'test-file-rule', 'deterministic-source-rule',
+  'symbol-and-source-range', 'api-route-and-source', 'database-reference',
+  'database-policy-declaration', 'environment-reference', 'deployment-configuration',
+  'dependency-reference', 'package-script-declaration',
+])
+const EXPLANATION_REFERENCE_KINDS = new Set([
+  'source', 'symbol', 'api', 'db-table', 'db-function', 'env',
+  'security', 'dependency', 'deployment', 'script',
+])
 
 function plainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
@@ -33,6 +43,46 @@ function stringList(value, maximumItems = 80, maximumLength = 240) {
   return Array.isArray(value)
     ? [...new Set(value.slice(0, maximumItems).map((item) => text(item, maximumLength)).filter(Boolean))]
     : []
+}
+
+function explanationReference(value) {
+  const ref = text(value, 500)
+  const separator = ref.indexOf(':')
+  if (separator < 1) return ''
+  const kind = ref.slice(0, separator)
+  const target = ref.slice(separator + 1)
+  if (!EXPLANATION_REFERENCE_KINDS.has(kind) || !target || target.includes('://')) return ''
+  if (kind === 'source') {
+    const match = target.match(/^(.+)#L(\d+)(?:-L(\d+))?$/)
+    if (!match) return ''
+    const relativePath = match[1]
+    if (
+      relativePath.startsWith('/')
+      || relativePath.startsWith('~/')
+      || /^[A-Za-z]:/.test(relativePath)
+      || relativePath.includes('\\')
+      || relativePath.split('/').includes('..')
+    ) return ''
+    const start = integer(match[2], 1, 5_000_000)
+    const end = integer(match[3] ?? start, start, 5_000_000)
+    return `source:${relativePath}#L${start}${end > start ? `-L${end}` : ''}`
+  }
+  if (kind === 'api' && !/^\/api\/[A-Za-z0-9_./:-]{1,300}$/.test(target)) return ''
+  if (['db-table', 'db-function'].includes(kind) && !/^[A-Za-z_][A-Za-z0-9_]{0,179}$/.test(target)) return ''
+  if (kind === 'env' && !/^[A-Z][A-Z0-9_]{0,179}$/.test(target)) return ''
+  if (kind === 'security' && !/^[a-z0-9-]{1,120}$/.test(target)) return ''
+  if (['dependency', 'deployment', 'script'].includes(kind) && !/^[A-Za-z0-9@_./:-]{1,240}$/.test(target)) return ''
+  if (kind === 'dependency' && (target.startsWith('.') || target.split('/').includes('..'))) return ''
+  return `${kind}:${target}`
+}
+
+function explanationBasis(value) {
+  if (!plainObject(value) || !EXPLANATION_METHODS.has(value.method)) return undefined
+  const refs = [...new Set((Array.isArray(value.refs) ? value.refs : [])
+    .slice(0, 12)
+    .map(explanationReference)
+    .filter(Boolean))]
+  return refs.length ? { method: value.method, refs } : undefined
 }
 
 function shellSingleQuote(value) {
@@ -117,6 +167,8 @@ function sourceEntity(value) {
   }
   const details = entityDetails(value.details)
   if (details) normalized.details = details
+  const basis = explanationBasis(value.explanationBasis)
+  if (basis) normalized.explanationBasis = basis
   return normalized
 }
 
