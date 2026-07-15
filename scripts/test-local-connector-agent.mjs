@@ -9,6 +9,7 @@ import {
   localGitSyncApprovalPhrase,
   observeLocalGit,
   resolveRepositoryRoot,
+  verifyApprovedGitSync,
 } from './local-connector-agent.mjs'
 
 function git(cwd, ...args) {
@@ -71,6 +72,13 @@ try {
   }, pushState)
   assert.equal(pushResult.beforeHeadSha, pushState.headSha)
   assert.equal(git(remoteRoot, 'rev-parse', 'refs/heads/main'), git(localRoot, 'rev-parse', 'HEAD'))
+  const verifiedPush = verifyApprovedGitSync(localRoot, {
+    action: 'push',
+    expectedState: pushState,
+  }, pushResult, { requireGitHubOrigin: false })
+  assert.equal(verifiedPush.verification.status, 'verified')
+  assert.equal(verifiedPush.verification.ahead, 0)
+  assert.equal(verifiedPush.verification.behind, 0)
 
   git(fixtureRoot, 'clone', remoteRoot, peerRoot)
   configureRepository(peerRoot)
@@ -91,6 +99,11 @@ try {
     expectedState: pullState,
   }, pullState)
   assert.equal(pullResult.afterHeadSha, git(remoteRoot, 'rev-parse', 'refs/heads/main'))
+  const verifiedPull = verifyApprovedGitSync(localRoot, {
+    action: 'pull_ff_only',
+    expectedState: pullState,
+  }, pullResult, { requireGitHubOrigin: false })
+  assert.equal(verifiedPull.verification.headSha, verifiedPull.verification.upstreamSha)
   assert.equal(await readFile(path.join(localRoot, 'app.js'), 'utf8'), 'export const version = 3\n')
   assert.equal(git(localRoot, 'status', '--porcelain'), '')
 

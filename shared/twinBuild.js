@@ -1,4 +1,5 @@
 import { digitalTwinReviewFingerprint } from './digitalTwinReview.js'
+import { normalizeOperationDefinition } from './operationLifecycle.js'
 import { RELATION_TYPE_IDS, relationDefinition } from './relationOntology.js'
 import {
   SYSTEM_ENVIRONMENT_DEFS,
@@ -16,7 +17,7 @@ import {
   normalizeTrustZone,
 } from './trustTopology.js'
 
-export const TWIN_BUILD_SCHEMA_VERSION = 1
+export const TWIN_BUILD_SCHEMA_VERSION = 2
 
 const SAFE_ID = /^[a-zA-Z0-9][a-zA-Z0-9._:-]{0,239}$/
 const SAFE_FINGERPRINT = /^[a-f0-9]{8,128}$/i
@@ -24,9 +25,7 @@ const UNSAFE_KEYS = new Set(['__proto__', 'prototype', 'constructor'])
 const OBSERVATION_LEVELS = new Set(['declared', 'discovered', 'observed', 'verified'])
 const EVIDENCE_KINDS = new Set(['code', 'config', 'runtime', 'connector', 'document', 'manual', 'declaration'])
 const CONFIDENCE_LEVELS = new Set(['unknown', 'low', 'medium', 'high'])
-const ACCESS_LEVELS = new Set(['read', 'write', 'execute'])
-const APPROVAL_LEVELS = new Set(['none', 'preview', 'explicit'])
-const TARGET_KINDS = new Set(['entity', 'part', 'relation', 'gateway'])
+const RECORD_TARGET_KINDS = new Set(['entity', 'part', 'relation', 'gateway', 'trust_zone', 'data_class', 'operation', 'policy', 'control'])
 const NODE_TYPES = new Set(['system', 'group'])
 const ENVIRONMENT_IDS = new Set(SYSTEM_ENVIRONMENT_DEFS.map((item) => item.id))
 const ENTITY_SOURCE_IDS = new Set(SYSTEM_SOURCE_DEFS.map((item) => item.id))
@@ -34,6 +33,22 @@ const PART_KIND_IDS = new Set(SYSTEM_PART_KIND_DEFS.map((item) => item.id))
 const PART_EXPOSURE_IDS = new Set(SYSTEM_PART_EXPOSURE_DEFS.map((item) => item.id))
 const PART_SOURCE_IDS = new Set(SYSTEM_PART_SOURCE_DEFS.map((item) => item.id))
 const RELATION_IDS = new Set(RELATION_TYPE_IDS)
+const DATA_SENSITIVITY_LEVELS = new Set(['public', 'internal', 'sensitive', 'restricted', 'secret_reference'])
+const DATA_CONTENT_SCOPES = new Set(['metadata', 'aggregate', 'content', 'credential_reference'])
+const DATA_RETENTION_LEVELS = new Set(['none', 'transient', 'persistent', 'unknown'])
+const POLICY_KINDS = new Set(['authorization', 'approval', 'data_handling', 'network', 'retention', 'execution'])
+const POLICY_EFFECTS = new Set(['allow', 'deny', 'require_approval', 'limit'])
+const POLICY_ENFORCEMENTS = new Set(['browser', 'server', 'database', 'connector', 'worker', 'external', 'manual'])
+const OBSERVATION_KINDS = new Set(['state', 'health', 'metric', 'deployment', 'security', 'execution'])
+const REALITY_LEVELS = new Set(['declared', 'discovered', 'observed', 'runtime_verified', 'stale', 'contradicted', 'unknown'])
+const EVENT_ACTOR_KINDS = new Set(['human', 'system', 'connector', 'worker', 'external', 'unknown'])
+const THREAT_CATEGORIES = new Set(['exfiltration', 'unauthorized_access', 'tampering', 'spoofing', 'availability', 'privilege_escalation', 'supply_chain', 'unknown'])
+const THREAT_STATUSES = new Set(['hypothetical', 'observed', 'mitigated', 'accepted', 'unknown'])
+const LIKELIHOOD_LEVELS = new Set(['unknown', 'low', 'medium', 'high'])
+const IMPACT_LEVELS = new Set(['unknown', 'low', 'medium', 'high', 'critical'])
+const CONTROL_KINDS = new Set(['authentication', 'authorization', 'encryption', 'validation', 'rate_limit', 'isolation', 'audit', 'backup', 'recovery', 'approval', 'network', 'unknown'])
+const CONTROL_EFFECTS = new Set(['prevent', 'detect', 'limit', 'recover'])
+const CONTROL_STATUSES = new Set(['declared', 'observed', 'verified', 'unknown'])
 const MAXIMUM_RECORDS = 2_000
 
 export class TwinBuildError extends Error {
@@ -294,26 +309,137 @@ function normalizeGateway(value) {
   })
 }
 
-function normalizeOperation(value) {
-  if (!plainObject(value) || !plainObject(value.target)) {
-    throw new TwinBuildError('INVALID_OPERATION', '조작 기록 형식이 올바르지 않습니다.')
+function normalizeRecordTarget(value, label) {
+  if (!plainObject(value) || !RECORD_TARGET_KINDS.has(value.kind)) {
+    throw new TwinBuildError('INVALID_RECORD_TARGET', `${label} 대상 종류가 올바르지 않습니다.`)
   }
-  const targetKind = TARGET_KINDS.has(value.target.kind) ? value.target.kind : null
-  if (!targetKind) throw new TwinBuildError('INVALID_OPERATION_TARGET', '조작 대상 종류가 올바르지 않습니다.')
+  return { kind: value.kind, id: safeId(value.id, `${label} 대상`) }
+}
+
+function normalizeTimestamp(value, label, { required = false } = {}) {
+  if (!value && !required) return null
+  const parsed = Date.parse(value)
+  if (!Number.isFinite(parsed)) throw new TwinBuildError('INVALID_TIMESTAMP', `${label} 시각이 올바르지 않습니다.`)
+  return new Date(parsed).toISOString()
+}
+
+function normalizeDataClass(value) {
+  if (!plainObject(value)) throw new TwinBuildError('INVALID_DATA_CLASS', '데이터 종류 기록 형식이 올바르지 않습니다.')
+  const id = safeId(value.id, '데이터 종류')
   return withFingerprint({
-    id: safeId(value.id, '조작'),
-    capability: safeId(value.capability, '조작 능력'),
-    label: safeText(value.label, 160),
+    id,
+    label: safeText(value.label, 160) || id,
     description: safeText(value.description, 500),
-    access: ACCESS_LEVELS.has(value.access) ? value.access : 'execute',
-    approval: APPROVAL_LEVELS.has(value.approval) ? value.approval : 'explicit',
-    reversible: value.reversible === true,
-    target: {
-      kind: targetKind,
-      id: safeId(value.target.id, '조작 대상'),
-    },
+    sensitivity: DATA_SENSITIVITY_LEVELS.has(value.sensitivity) ? value.sensitivity : 'internal',
+    contentScope: DATA_CONTENT_SCOPES.has(value.contentScope) ? value.contentScope : 'metadata',
+    retention: DATA_RETENTION_LEVELS.has(value.retention) ? value.retention : 'unknown',
     evidenceIds: uniqueIds(value.evidenceIds, '근거'),
   })
+}
+
+function normalizePolicy(value) {
+  if (!plainObject(value)) throw new TwinBuildError('INVALID_POLICY', '정책 기록 형식이 올바르지 않습니다.')
+  const id = safeId(value.id, '정책')
+  return withFingerprint({
+    id,
+    kind: POLICY_KINDS.has(value.kind) ? value.kind : 'authorization',
+    label: safeText(value.label, 160) || id,
+    description: safeText(value.description, 500),
+    effect: POLICY_EFFECTS.has(value.effect) ? value.effect : 'deny',
+    subjects: uniqueIds(value.subjects, '정책 주체'),
+    actions: uniqueIds(value.actions, '정책 동작'),
+    target: normalizeRecordTarget(value.target, '정책'),
+    enforcement: POLICY_ENFORCEMENTS.has(value.enforcement) ? value.enforcement : 'manual',
+    dataClassIds: uniqueIds(value.dataClassIds, '정책 데이터 종류'),
+    evidenceIds: uniqueIds(value.evidenceIds, '근거'),
+  })
+}
+
+function normalizeObservation(value) {
+  if (!plainObject(value)) throw new TwinBuildError('INVALID_OBSERVATION', '관측 기록 형식이 올바르지 않습니다.')
+  const id = safeId(value.id, '관측')
+  const reality = REALITY_LEVELS.has(value.reality) ? value.reality : 'unknown'
+  const observedAt = normalizeTimestamp(value.observedAt, '관측', {
+    required: ['observed', 'runtime_verified', 'stale', 'contradicted'].includes(reality),
+  })
+  const expiresAt = normalizeTimestamp(value.expiresAt, '관측 만료')
+  if (observedAt && expiresAt && Date.parse(expiresAt) <= Date.parse(observedAt)) {
+    throw new TwinBuildError('INVALID_OBSERVATION_WINDOW', `${id}의 만료 시각은 관측 시각보다 뒤여야 합니다.`)
+  }
+  return withFingerprint({
+    id,
+    kind: OBSERVATION_KINDS.has(value.kind) ? value.kind : 'state',
+    label: safeText(value.label, 160) || id,
+    subject: normalizeRecordTarget(value.subject, '관측'),
+    reality,
+    status: value.status ? safeId(value.status, '관측 상태') : 'unknown',
+    summary: safeText(value.summary, 500),
+    observedAt,
+    expiresAt,
+    dataClassIds: uniqueIds(value.dataClassIds, '관측 데이터 종류'),
+    evidenceIds: uniqueIds(value.evidenceIds, '근거'),
+  })
+}
+
+function normalizeEvent(value) {
+  if (!plainObject(value)) throw new TwinBuildError('INVALID_EVENT', '사건 기록 형식이 올바르지 않습니다.')
+  const id = safeId(value.id, '사건')
+  return withFingerprint({
+    id,
+    type: safeId(value.type, '사건 종류'),
+    subject: normalizeRecordTarget(value.subject, '사건'),
+    actorKind: EVENT_ACTOR_KINDS.has(value.actorKind) ? value.actorKind : 'unknown',
+    actorRef: safeText(value.actorRef, 240),
+    occurredAt: normalizeTimestamp(value.occurredAt, '사건', { required: true }),
+    summary: safeText(value.summary, 500),
+    operationId: value.operationId ? safeId(value.operationId, '사건 조작') : null,
+    dataClassIds: uniqueIds(value.dataClassIds, '사건 데이터 종류'),
+    evidenceIds: uniqueIds(value.evidenceIds, '근거'),
+  })
+}
+
+function normalizeControl(value) {
+  if (!plainObject(value)) throw new TwinBuildError('INVALID_CONTROL', '통제 기록 형식이 올바르지 않습니다.')
+  const id = safeId(value.id, '통제')
+  return withFingerprint({
+    id,
+    kind: CONTROL_KINDS.has(value.kind) ? value.kind : 'unknown',
+    label: safeText(value.label, 160) || id,
+    description: safeText(value.description, 500),
+    effect: CONTROL_EFFECTS.has(value.effect) ? value.effect : 'prevent',
+    status: CONTROL_STATUSES.has(value.status) ? value.status : 'unknown',
+    target: normalizeRecordTarget(value.target, '통제'),
+    policyIds: uniqueIds(value.policyIds, '통제 정책'),
+    evidenceIds: uniqueIds(value.evidenceIds, '근거'),
+  })
+}
+
+function normalizeThreat(value) {
+  if (!plainObject(value)) throw new TwinBuildError('INVALID_THREAT', '위협 기록 형식이 올바르지 않습니다.')
+  const id = safeId(value.id, '위협')
+  return withFingerprint({
+    id,
+    label: safeText(value.label, 160) || id,
+    description: safeText(value.description, 500),
+    category: THREAT_CATEGORIES.has(value.category) ? value.category : 'unknown',
+    status: THREAT_STATUSES.has(value.status) ? value.status : 'hypothetical',
+    likelihood: LIKELIHOOD_LEVELS.has(value.likelihood) ? value.likelihood : 'unknown',
+    impact: IMPACT_LEVELS.has(value.impact) ? value.impact : 'unknown',
+    source: normalizeRecordTarget(value.source, '위협 시작'),
+    target: normalizeRecordTarget(value.target, '위협 도착'),
+    gatewayIds: uniqueIds(value.gatewayIds, '위협 게이트웨이'),
+    dataClassIds: uniqueIds(value.dataClassIds, '위협 데이터 종류'),
+    controlIds: uniqueIds(value.controlIds, '위협 통제'),
+    evidenceIds: uniqueIds(value.evidenceIds, '근거'),
+  })
+}
+
+function normalizeOperation(value) {
+  try {
+    return normalizeOperationDefinition(value)
+  } catch (error) {
+    throw new TwinBuildError(error.code ?? 'INVALID_OPERATION', error.message ?? '조작 기록 형식이 올바르지 않습니다.')
+  }
 }
 
 function requireReferences(build) {
@@ -324,6 +450,9 @@ function requireReferences(build) {
   const zoneById = new Map(build.trustZones.map((item) => [item.id, item]))
   const gatewayById = new Map(build.gateways.map((item) => [item.id, item]))
   const operationIds = new Set(build.operations.map((item) => item.id))
+  const dataClassIds = new Set(build.dataClasses.map((item) => item.id))
+  const policyIds = new Set(build.policies.map((item) => item.id))
+  const controlIds = new Set(build.controls.map((item) => item.id))
 
   const requireUniquePlacement = (records, selector, label) => {
     const ids = records.map(selector)
@@ -349,7 +478,20 @@ function requireReferences(build) {
       }
     }
   }
-  for (const record of [...build.entities, ...build.parts, ...build.relations, ...build.trustZones, ...build.gateways, ...build.operations]) {
+  for (const record of [
+    ...build.entities,
+    ...build.parts,
+    ...build.relations,
+    ...build.trustZones,
+    ...build.gateways,
+    ...build.dataClasses,
+    ...build.policies,
+    ...build.operations,
+    ...build.observations,
+    ...build.events,
+    ...build.controls,
+    ...build.threats,
+  ]) {
     requireEvidence(record)
   }
   if (build.source.rootEntityId && !entityById.has(build.source.rootEntityId)) {
@@ -421,10 +563,74 @@ function requireReferences(build) {
     part: new Set(partById.keys()),
     relation: relationIds,
     gateway: new Set(gatewayById.keys()),
+    trust_zone: new Set(zoneById.keys()),
+    data_class: dataClassIds,
+    operation: operationIds,
+    policy: policyIds,
+    control: controlIds,
+  }
+  const requireTarget = (target, record, label) => {
+    if (!targetSets[target.kind]?.has(target.id)) {
+      throw new TwinBuildError('MISSING_RECORD_TARGET', `${record.id}의 ${label} 대상 ${target.id}를 찾을 수 없습니다.`)
+    }
+  }
+  const requireDataClasses = (record, ids = record.dataClassIds) => {
+    for (const dataClassId of ids ?? []) {
+      if (!dataClassIds.has(dataClassId)) {
+        throw new TwinBuildError('MISSING_DATA_CLASS', `${record.id}가 존재하지 않는 데이터 종류 ${dataClassId}를 참조합니다.`)
+      }
+    }
+  }
+  for (const policy of build.policies) {
+    requireTarget(policy.target, policy, '정책')
+    requireDataClasses(policy)
   }
   for (const operation of build.operations) {
-    if (!targetSets[operation.target.kind].has(operation.target.id)) {
+    if (!targetSets[operation.target.kind]?.has(operation.target.id)) {
       throw new TwinBuildError('MISSING_OPERATION_TARGET', `${operation.id}의 조작 대상을 찾을 수 없습니다.`)
+    }
+    requireDataClasses(operation, operation.input.dataClassIds)
+    for (const policyId of operation.authorizationPolicyIds) {
+      if (!policyIds.has(policyId)) {
+        throw new TwinBuildError('MISSING_OPERATION_POLICY', `${operation.id}가 존재하지 않는 정책 ${policyId}를 참조합니다.`)
+      }
+    }
+    if (operation.recovery.rollbackOperationId && !operationIds.has(operation.recovery.rollbackOperationId)) {
+      throw new TwinBuildError('MISSING_ROLLBACK_OPERATION', `${operation.id}의 롤백 조작을 찾을 수 없습니다.`)
+    }
+  }
+  for (const observation of build.observations) {
+    requireTarget(observation.subject, observation, '관측')
+    requireDataClasses(observation)
+  }
+  for (const event of build.events) {
+    requireTarget(event.subject, event, '사건')
+    requireDataClasses(event)
+    if (event.operationId && !operationIds.has(event.operationId)) {
+      throw new TwinBuildError('MISSING_EVENT_OPERATION', `${event.id}의 조작 ${event.operationId}를 찾을 수 없습니다.`)
+    }
+  }
+  for (const control of build.controls) {
+    requireTarget(control.target, control, '통제')
+    for (const policyId of control.policyIds) {
+      if (!policyIds.has(policyId)) {
+        throw new TwinBuildError('MISSING_CONTROL_POLICY', `${control.id}가 존재하지 않는 정책 ${policyId}를 참조합니다.`)
+      }
+    }
+  }
+  for (const threat of build.threats) {
+    requireTarget(threat.source, threat, '위협 시작')
+    requireTarget(threat.target, threat, '위협 도착')
+    requireDataClasses(threat)
+    for (const gatewayId of threat.gatewayIds) {
+      if (!gatewayById.has(gatewayId)) {
+        throw new TwinBuildError('MISSING_THREAT_GATEWAY', `${threat.id}의 게이트웨이 ${gatewayId}를 찾을 수 없습니다.`)
+      }
+    }
+    for (const controlId of threat.controlIds) {
+      if (!controlIds.has(controlId)) {
+        throw new TwinBuildError('MISSING_THREAT_CONTROL', `${threat.id}의 통제 ${controlId}를 찾을 수 없습니다.`)
+      }
     }
   }
 }
@@ -440,10 +646,16 @@ export function createTwinBuild(value) {
     evidence: recordList(value.evidence, '근거', normalizeEvidence),
     trustZones: recordList(value.trustZones, '신뢰영역', normalizeZone),
     gateways: recordList(value.gateways, '게이트웨이', normalizeGateway),
+    dataClasses: recordList(value.dataClasses, '데이터 종류', normalizeDataClass),
+    policies: recordList(value.policies, '정책', normalizePolicy),
     entities: recordList(value.entities, '엔티티', normalizeEntity),
     operations: recordList(value.operations, '조작', normalizeOperation),
     parts: recordList(value.parts, '파츠', normalizePart),
     relations: recordList(value.relations, '관계', normalizeRelation),
+    observations: recordList(value.observations, '관측', normalizeObservation),
+    events: recordList(value.events, '사건', normalizeEvent),
+    controls: recordList(value.controls, '통제', normalizeControl),
+    threats: recordList(value.threats, '위협', normalizeThreat),
   }
   requireReferences(normalized)
   const summary = {
@@ -454,6 +666,12 @@ export function createTwinBuild(value) {
     gateways: normalized.gateways.length,
     evidence: normalized.evidence.length,
     operations: normalized.operations.length,
+    dataClasses: normalized.dataClasses.length,
+    policies: normalized.policies.length,
+    observations: normalized.observations.length,
+    events: normalized.events.length,
+    controls: normalized.controls.length,
+    threats: normalized.threats.length,
   }
   return deepFreeze({
     ...normalized,
@@ -465,9 +683,11 @@ export function createTwinBuild(value) {
 export function migrateTwinBuild(value) {
   if (!plainObject(value)) throw new TwinBuildError('INVALID_BUILD', '마이그레이션할 TwinBuild가 없습니다.')
   if (value.schemaVersion === TWIN_BUILD_SCHEMA_VERSION) return createTwinBuild(value)
+  let migrated = value
   if (value.schemaVersion === 0) {
-    return createTwinBuild({
-      schemaVersion: TWIN_BUILD_SCHEMA_VERSION,
+    migrated = {
+      ...value,
+      schemaVersion: 1,
       id: value.id,
       source: value.source,
       entities: value.entities ?? value.nodes ?? [],
@@ -477,6 +697,39 @@ export function migrateTwinBuild(value) {
       gateways: value.gateways ?? [],
       evidence: value.evidence ?? [],
       operations: value.operations ?? value.actions ?? [],
+    }
+  }
+  if (migrated.schemaVersion === 1) {
+    return createTwinBuild({
+      ...migrated,
+      schemaVersion: TWIN_BUILD_SCHEMA_VERSION,
+      source: {
+        ...migrated.source,
+        engineSchemaVersion: Math.max(TWIN_BUILD_SCHEMA_VERSION, Number(migrated.source?.engineSchemaVersion) || 1),
+      },
+      dataClasses: migrated.dataClasses ?? [],
+      policies: migrated.policies ?? [],
+      observations: migrated.observations ?? [],
+      events: migrated.events ?? [],
+      controls: migrated.controls ?? [],
+      threats: migrated.threats ?? [],
+      operations: (migrated.operations ?? []).map((operation) => ({
+        availability: 'declared',
+        allowedInitiators: [],
+        authorizationPolicyIds: [],
+        input: { schemaRef: '', dataClassIds: [] },
+        writeSet: [],
+        excludes: [],
+        execution: { adapterId: '', actionId: '', location: 'unknown' },
+        idempotency: { mode: 'none', keyScope: '', replay: 'reject' },
+        verification: { required: false, mode: 'none', adapterId: '', successCriteria: [] },
+        recovery: {
+          mode: operation.reversible === true ? 'manual' : 'unavailable',
+          retry: { maxAttempts: 1, backoff: 'none' },
+          summary: '',
+        },
+        ...operation,
+      })),
     })
   }
   throw new TwinBuildError('MIGRATION_UNAVAILABLE', `TwinBuild v${value.schemaVersion ?? 'unknown'}에서 v${TWIN_BUILD_SCHEMA_VERSION}로 가는 마이그레이션이 없습니다.`)

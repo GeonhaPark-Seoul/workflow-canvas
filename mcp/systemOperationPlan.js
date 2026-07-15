@@ -3,6 +3,12 @@ import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypt
 const PLAN_SCHEMA_VERSION = 1
 const DEFAULT_TTL_MS = 5 * 60 * 1000
 const MAX_TOKEN_LENGTH = 16_000
+const INITIATOR_KINDS = new Set(['human_ui', 'deterministic_automation', 'ai_agent'])
+const RISK_LEVELS = new Set(['none', 'low', 'medium', 'high', 'critical'])
+const SIDE_EFFECT_LEVELS = new Set(['none', 'session', 'external', 'mutation', 'destructive', 'authorization', 'recurring'])
+const APPROVAL_LEVELS = new Set(['none', 'preview', 'explicit', 'multi_party'])
+const VERIFICATION_MODES = new Set(['none', 'postcondition', 'independent'])
+const RECOVERY_MODES = new Set(['unavailable', 'manual', 'automatic', 'append_only'])
 
 export class SystemOperationPlanError extends Error {
   constructor(status, code, message) {
@@ -46,6 +52,43 @@ function parseTimestamp(value, code, message) {
   return parsed
 }
 
+function normalizeOperationContract(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null
+  const definitionFingerprint = requiredText(value.definitionFingerprint, '조작 계약 지문', 128)
+  if (!/^[a-f0-9]{8,128}$/i.test(definitionFingerprint)) {
+    throw new SystemOperationPlanError(400, 'INVALID_OPERATION_PLAN', '조작 계약 지문이 올바르지 않습니다.')
+  }
+  const initiatorKind = INITIATOR_KINDS.has(value.initiatorKind) ? value.initiatorKind : null
+  if (!initiatorKind) throw new SystemOperationPlanError(400, 'INVALID_OPERATION_PLAN', '조작 시작 주체가 올바르지 않습니다.')
+  if (!RISK_LEVELS.has(value.risk) || !SIDE_EFFECT_LEVELS.has(value.sideEffect) || !APPROVAL_LEVELS.has(value.approval)) {
+    throw new SystemOperationPlanError(400, 'INVALID_OPERATION_PLAN', '조작 계약의 위험·부작용·승인 정보가 올바르지 않습니다.')
+  }
+  if (!VERIFICATION_MODES.has(value.verification?.mode) || !RECOVERY_MODES.has(value.recovery?.mode)) {
+    throw new SystemOperationPlanError(400, 'INVALID_OPERATION_PLAN', '조작 계약의 검증 또는 복구 정보가 올바르지 않습니다.')
+  }
+  const timeoutMs = Number(value.timeoutMs)
+  return {
+    definitionId: requiredText(value.definitionId, '조작 계약', 240),
+    definitionFingerprint,
+    initiatorKind,
+    risk: value.risk,
+    sideEffect: value.sideEffect,
+    approval: value.approval,
+    timeoutMs: Number.isInteger(timeoutMs) ? Math.max(1_000, Math.min(24 * 60 * 60 * 1000, timeoutMs)) : 60_000,
+    verification: {
+      required: value.verification?.required === true,
+      mode: value.verification.mode,
+      adapterId: typeof value.verification?.adapterId === 'string' ? value.verification.adapterId.slice(0, 240) : '',
+    },
+    recovery: {
+      mode: value.recovery.mode,
+      maxAttempts: Number.isInteger(value.recovery?.retry?.maxAttempts)
+        ? Math.max(1, Math.min(10, value.recovery.retry.maxAttempts))
+        : 1,
+    },
+  }
+}
+
 export function systemOperationSigningSecret(env = process.env) {
   return signingSecret(env.WORKFLOW_CANVAS_OPERATION_SIGNING_SECRET || env.SUPABASE_SERVICE_ROLE_KEY)
 }
@@ -71,6 +114,7 @@ export function createSignedSystemOperationPlan(definition, secret, {
     writeSet: Array.isArray(definition.writeSet) ? definition.writeSet : [],
     excludes: Array.isArray(definition.excludes) ? definition.excludes : [],
     recovery: definition.recovery ?? {},
+    contract: normalizeOperationContract(definition.contract),
   }
   const encodedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url')
   const token = `${encodedPayload}.${signature(encodedPayload, secret)}`
@@ -88,6 +132,7 @@ export function createSignedSystemOperationPlan(definition, secret, {
       writeSet: payload.writeSet,
       excludes: payload.excludes,
       recovery: payload.recovery,
+      contract: payload.contract,
       confirmation: payload.confirmation,
     },
   }
@@ -97,6 +142,9 @@ export function verifySignedSystemOperationPlan(token, secret, {
   actorId,
   operation,
   confirmation,
+  definitionId,
+  definitionFingerprint,
+  initiatorKind,
   now = new Date(),
 } = {}) {
   if (typeof token !== 'string' || !token || token.length > MAX_TOKEN_LENGTH) {
@@ -130,6 +178,15 @@ export function verifySignedSystemOperationPlan(token, secret, {
   }
   if (payload.confirmation !== confirmation) {
     throw new SystemOperationPlanError(400, 'OPERATION_CONFIRMATION_REQUIRED', '미리보기에서 요구한 확인 문구가 필요합니다.')
+  }
+  if (definitionId && payload.contract?.definitionId !== definitionId) {
+    throw new SystemOperationPlanError(409, 'OPERATION_DEFINITION_MISMATCH', '조작 계획의 표준 계약이 현재 실행 계약과 다릅니다.')
+  }
+  if (definitionFingerprint && payload.contract?.definitionFingerprint !== definitionFingerprint) {
+    throw new SystemOperationPlanError(409, 'OPERATION_DEFINITION_CHANGED', '미리보기 이후 표준 조작 계약이 변경되었습니다.')
+  }
+  if (initiatorKind && payload.contract?.initiatorKind !== initiatorKind) {
+    throw new SystemOperationPlanError(403, 'OPERATION_INITIATOR_MISMATCH', '조작 계획을 시작한 경로가 현재 실행 요청과 다릅니다.')
   }
   const nowMs = now instanceof Date ? now.getTime() : Date.parse(now)
   const issuedAt = parseTimestamp(payload.issuedAt, 'INVALID_OPERATION_PLAN', '조작 계획 생성 시각이 올바르지 않습니다.')

@@ -286,7 +286,9 @@ This ordering preserves the commercial goal that users can eventually connect th
 
 ### Phase C - Extract the engine core
 
-Current progress: C1 establishes adapter contract v1 and a provider-neutral registry. C2 adds `TwinBuild v1`, deterministic normalization, reference and trust-boundary validation, v0-to-v1 migration, and a common reconciliation engine. Workflow Canvas is normalized as 28 entities, 9 parts, 38 relations, and one operation declaration. A second order-service fixture reaches zero findings through staged common proposals while manual layout, notes, extra parts, and review decisions survive rescans.
+Current progress: C1 establishes adapter contract v1 and a provider-neutral registry. C2 adds deterministic normalization, reference and trust-boundary validation, and a common reconciliation engine. C3 upgrades the canonical model to `TwinBuild v2`, adds sequential v0-to-v1-to-v2 migration, and separates data classes, policies, observations, events, threats, and controls. It also establishes the universal operation lifecycle for direct UI, deterministic automation, and future AI initiators. Workflow Canvas is normalized as 28 entities, 9 parts, 38 relations, 3 data classes, 3 policies, 2 executable operations, 2 observations, 3 controls, and one threat. Git synchronization and append-only system snapshots bind their signed plans to canonical operation-definition fingerprints. A second order-service fixture still reaches zero findings through staged common proposals while manual layout, notes, extra parts, and review decisions survive rescans.
+
+The future orchestration map's human approval, execution connector, test/review gate, runtime status/log, audit, stop/retry, and recovery concepts now share this operation contract. Conversation/context/planning and agent assignment remain deferred; when added, they cannot bypass the contract.
 
 - move Workflow Canvas-specific knowledge behind the first adapter
 - create versioned canonical records and migrations
@@ -317,7 +319,7 @@ Add durable queues, isolated workers, leases, heartbeats, dead-letter handling, 
 - Zone boundaries are visible and crossings require gateways.
 - Normal flows and potential attack paths use different overlays.
 - Continuous animation requires observed recurring events.
-- Manual operations animate only while queued/running, show a short completion/failure result, then stop.
+- Manual operations animate only while queued, running, verifying, or recovering; they show a short completion/failure/recovery result, then stop.
 - Every status has a timestamp and becomes stale rather than remaining falsely live.
 - 3D is a later renderer over this model; it must not become the data model itself.
 

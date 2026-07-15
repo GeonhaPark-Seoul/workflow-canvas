@@ -2,7 +2,7 @@ import { digitalTwinReviewFingerprint } from './digitalTwinReview.js'
 import { createEdgeRelationData, edgeRelationInfo } from './relationOntology.js'
 import { createSystemNodeData, normalizeSystemNodeData } from './systemOntology.js'
 import { normalizeSystemPart, normalizeSystemParts } from './systemPartOntology.js'
-import { createTwinBuild } from './twinBuild.js'
+import { createTwinBuild, TWIN_BUILD_SCHEMA_VERSION } from './twinBuild.js'
 
 function safeChildId(prefix, parentId, childId) {
   const candidate = `${prefix}:${parentId}:${childId}`
@@ -65,7 +65,13 @@ export function createTwinBuildFromCanvasTemplate({
   evidence = [],
   trustZones = [],
   gateways = [],
+  dataClasses = [],
+  policies = [],
   operations = [],
+  observations = [],
+  events = [],
+  controls = [],
+  threats = [],
 }) {
   const registry = createEvidenceRegistry(evidence)
   const nodes = Array.isArray(canvas?.nodes) ? canvas.nodes : []
@@ -176,7 +182,7 @@ export function createTwinBuildFromCanvasTemplate({
   })
 
   return createTwinBuild({
-    schemaVersion: 1,
+    schemaVersion: TWIN_BUILD_SCHEMA_VERSION,
     id,
     source,
     entities,
@@ -185,7 +191,13 @@ export function createTwinBuildFromCanvasTemplate({
     trustZones: [...zones.values()],
     gateways: [...gatewayRecords.values()],
     evidence: registry.records,
+    dataClasses,
+    policies,
     operations,
+    observations,
+    events,
+    controls,
+    threats,
   })
 }
 

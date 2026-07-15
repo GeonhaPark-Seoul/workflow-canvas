@@ -9,6 +9,7 @@ import {
   sourceTwinEntities,
 } from '../shared/sourceTwin.js'
 import { CANVAS_PRIVACY_CAPABILITIES } from '../shared/privacyCapabilities.js'
+import { WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION } from '../shared/workflowOperationDefinitions.js'
 import { WORKFLOW_SYSTEM_OPERATIONS_RPC } from './systemRuntime.js'
 import {
   createSignedSystemOperationPlan,
@@ -194,7 +195,11 @@ export async function previewSourceTwinSnapshotOperation(db, {
   env = process.env,
   now = new Date(),
   secret,
+  initiatorKind = 'ai_agent',
 } = {}) {
+  if (!WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION.allowedInitiators.includes(initiatorKind)) {
+    throw new SourceTwinError(403, 'OPERATION_INITIATOR_NOT_ALLOWED', '이 경로에서는 시스템 상태 스냅샷을 시작할 수 없습니다.')
+  }
   const state = await currentSourceTwinState(db, env)
   let signed
   try {
@@ -218,6 +223,17 @@ export async function previewSourceTwinSnapshotOperation(db, {
         strategy: 'append-only-evidence',
         destructiveRollback: false,
         note: '기존 시스템 상태를 변경하지 않으며 생성 기록은 감사 무결성을 위해 수정·삭제하지 않습니다.',
+      },
+      contract: {
+        definitionId: WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION.id,
+        definitionFingerprint: WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION.fingerprint,
+        initiatorKind,
+        risk: WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION.risk,
+        sideEffect: WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION.sideEffect,
+        approval: WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION.approval,
+        timeoutMs: WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION.timeoutMs,
+        verification: WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION.verification,
+        recovery: WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION.recovery,
       },
     }, secret ?? systemOperationSigningSecret(env), { now })
   } catch (error) {
@@ -244,6 +260,7 @@ export async function applySourceTwinSnapshotOperation(db, {
   env = process.env,
   now = new Date(),
   secret,
+  initiatorKind = 'ai_agent',
 } = {}) {
   let verified
   try {
@@ -251,6 +268,9 @@ export async function applySourceTwinSnapshotOperation(db, {
       actorId: actorUserId,
       operation: SOURCE_TWIN_SNAPSHOT_OPERATION,
       confirmation,
+      definitionId: WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION.id,
+      definitionFingerprint: WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION.fingerprint,
+      initiatorKind,
       now,
     })
   } catch (error) {

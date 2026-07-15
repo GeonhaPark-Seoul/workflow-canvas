@@ -32,7 +32,9 @@ import {
 } from '../mcp/systemOperationPlan.js'
 import {
   applyLocalGitSync as applyLocalGitSyncOperation,
+  completeLocalGitSyncOperation,
   LOCAL_GIT_SYNC_CONFIRMATION,
+  normalizeLocalGitSyncVerification,
   previewLocalGitSync as previewLocalGitSyncOperation,
 } from '../mcp/localConnectorStore.js'
 import {
@@ -49,6 +51,10 @@ import {
   WORKFLOW_SOURCE_TWIN_NODE_IDS,
 } from '../shared/workflowSourceTwinCanvas.js'
 import { SOURCE_TWIN_MANIFEST } from '../shared/sourceTwinManifest.js'
+import {
+  WORKFLOW_GIT_SYNC_OPERATION_DEFINITION,
+  WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION,
+} from '../shared/workflowOperationDefinitions.js'
 import {
   compareLocalAndDeployedManifests,
   localGitSyncEdgePresentation,
@@ -171,6 +177,20 @@ assert.equal(localGitSyncDecision({ ...cleanGit, dirty: 1 }).action, 'blocked')
 assert.equal(localGitSyncDecision({ ...cleanGit, ahead: 2, behind: 2 }).action, 'blocked')
 assert.equal(localGitSyncDecision({ ...cleanGit, upstreamRef: 'fork/main' }).action, 'blocked')
 assert.equal(localGitSyncDecision({ ...cleanGit, upstreamRef: 'origin/release' }).action, 'blocked')
+const verifiedGitState = {
+  status: 'verified',
+  branch: cleanGit.branch,
+  headSha: 'd'.repeat(40),
+  upstreamRef: cleanGit.upstreamRef,
+  upstreamSha: 'd'.repeat(40),
+  originFingerprint: cleanGit.originFingerprint,
+  ahead: 0,
+  behind: 0,
+  dirty: 0,
+}
+assert.equal(normalizeLocalGitSyncVerification(verifiedGitState, cleanGit)?.status, 'verified')
+assert.equal(normalizeLocalGitSyncVerification({ ...verifiedGitState, behind: 1 }, cleanGit), null)
+assert.equal(normalizeLocalGitSyncVerification({ ...verifiedGitState, branch: 'other' }, cleanGit), null)
 const localConnectorToken = `wclc_${'a'.repeat(64)}`
 assert.equal(
   localConnectorShellCommand({
@@ -343,6 +363,9 @@ const localSyncPreview = await previewLocalGitSyncOperation(localConnectorDb, {
 })
 assert.equal(localSyncPreview.decision.action, 'push')
 assert.equal(localSyncPreview.plan.scope.action, 'push')
+assert.equal(localSyncPreview.plan.contract.definitionId, WORKFLOW_GIT_SYNC_OPERATION_DEFINITION.id)
+assert.equal(localSyncPreview.plan.contract.definitionFingerprint, WORKFLOW_GIT_SYNC_OPERATION_DEFINITION.fingerprint)
+assert.equal(localSyncPreview.plan.contract.initiatorKind, 'human_ui')
 assert.equal(localConnectorWrites.length, 0, 'local sync preview must not queue or mutate anything')
 const localSyncApplied = await applyLocalGitSyncOperation(localConnectorDb, {
   userId: 'owner-user-id',
@@ -376,6 +399,65 @@ await assert.rejects(() => applyLocalGitSyncOperation(localConnectorDb, {
   now: new Date('2026-07-15T04:00:30.000Z'),
 }), (error) => error.code === 'LOCAL_GIT_STATE_CHANGED')
 localConnectorRow.state_fingerprint = 'b'.repeat(64)
+
+function localCompletionDb(expectedState) {
+  const writes = []
+  return {
+    writes,
+    from(table) {
+      if (table === 'local_connector_operations') {
+        let update = null
+        const query = {
+          select: () => query,
+          eq: () => query,
+          update: (value) => {
+            update = value
+            writes.push({ table, row: value })
+            return query
+          },
+          maybeSingle: async () => ({
+            data: update ? { operation_id: `op-${'9'.repeat(64)}` } : { expected_state: expectedState },
+            error: null,
+          }),
+        }
+        return query
+      }
+      return {
+        insert: async (row) => {
+          writes.push({ table, row })
+          return { data: row, error: null }
+        },
+      }
+    },
+  }
+}
+
+const completionConnector = { id: localConnectorRow.id, user_id: 'owner-user-id' }
+const completionPayload = {
+  operationId: `op-${'9'.repeat(64)}`,
+  status: 'succeeded',
+  result: {
+    summary: 'Git 명령 완료',
+    beforeHeadSha: cleanGit.headSha,
+    afterHeadSha: verifiedGitState.headSha,
+    remoteSha: verifiedGitState.upstreamSha,
+    verification: verifiedGitState,
+  },
+}
+const verifiedCompletionDb = localCompletionDb(cleanGit)
+const verifiedCompletion = await completeLocalGitSyncOperation(verifiedCompletionDb, completionConnector, completionPayload)
+assert.equal(verifiedCompletion.status, 'succeeded')
+assert.equal(verifiedCompletionDb.writes[0].row.status, 'succeeded')
+assert.equal(verifiedCompletionDb.writes[0].row.result.verification.status, 'verified')
+
+const unverifiedCompletionDb = localCompletionDb(cleanGit)
+const unverifiedCompletion = await completeLocalGitSyncOperation(unverifiedCompletionDb, completionConnector, {
+  ...completionPayload,
+  result: { ...completionPayload.result, verification: null },
+})
+assert.equal(unverifiedCompletion.status, 'failed')
+assert.equal(unverifiedCompletionDb.writes[0].row.status, 'failed')
+assert.match(unverifiedCompletionDb.writes[0].row.result.summary, /검증에 실패/)
 
 let operationalCanvasCount = 2
 let appliedOperation = null
@@ -422,6 +504,9 @@ const operationPreview = await previewSourceTwinSnapshotOperation(operationDb, {
 })
 assert.equal(operationPreview.writes_performed, false)
 assert.equal(operationPreview.plan_record_written, false)
+assert.equal(operationPreview.plan.contract.definitionId, WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION.id)
+assert.equal(operationPreview.plan.contract.definitionFingerprint, WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION.fingerprint)
+assert.equal(operationPreview.plan.contract.initiatorKind, 'ai_agent')
 assert.equal(appliedOperation, null, 'preview must not call the write RPC')
 assert.deepEqual(operationPreview.plan.writeSet.map((write) => write.maximumRows), [1, 1])
 const appliedSnapshot = await applySourceTwinSnapshotOperation(operationDb, {

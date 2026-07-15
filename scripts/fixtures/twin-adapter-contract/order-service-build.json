@@ -1,12 +1,12 @@
 {
-  "schemaVersion": 1,
-  "id": "fixture-order-build:v1",
+  "schemaVersion": 2,
+  "id": "fixture-order-build:v2",
   "source": {
     "id": "fixture:order-system",
     "adapterId": "fixture-order-system",
     "adapterContractVersion": 1,
-    "adapterVersion": "1.1.0",
-    "engineSchemaVersion": 1,
+    "adapterVersion": "1.2.0",
+    "engineSchemaVersion": 2,
     "snapshotId": "fixture-order-snapshot-v1",
     "label": "주문 서비스",
     "systemKind": "order-service",
@@ -37,6 +37,32 @@
       "summary": "API와 사설 데이터 영역 사이의 DB 게이트웨이",
       "confidence": "high",
       "fingerprint": "3333333333333333"
+    }
+  ],
+  "dataClasses": [
+    {
+      "id": "data-class:order-record",
+      "label": "주문 레코드",
+      "description": "주문 식별자, 품목, 수량과 처리 상태",
+      "sensitivity": "sensitive",
+      "contentScope": "content",
+      "retention": "persistent",
+      "evidenceIds": ["evidence:order-api-code", "evidence:order-db-schema"]
+    }
+  ],
+  "policies": [
+    {
+      "id": "policy:retry-order-explicit-approval",
+      "kind": "approval",
+      "label": "주문 재시도 명시 승인",
+      "description": "인증된 운영자가 중복 생성 위험과 대상을 미리 본 뒤 한 번 승인합니다.",
+      "effect": "require_approval",
+      "subjects": ["authenticated-order-operator"],
+      "actions": ["orders.retry-request"],
+      "target": { "kind": "operation", "id": "operation:retry-order-request" },
+      "enforcement": "server",
+      "dataClassIds": ["data-class:order-record"],
+      "evidenceIds": ["evidence:order-api-code"]
     }
   ],
   "trustZones": [
@@ -128,11 +154,103 @@
       "capability": "orders.retry-request",
       "label": "주문 요청 재시도",
       "description": "실패한 주문 요청을 명시적 승인 후 한 번 재시도합니다.",
+      "availability": "planned",
       "access": "execute",
       "approval": "explicit",
+      "confirmation": "RETRY_ORDER_REQUEST",
       "reversible": false,
+      "risk": "medium",
+      "sideEffect": "external",
+      "allowedInitiators": ["human_ui"],
+      "authorizationPolicyIds": ["policy:retry-order-explicit-approval"],
       "target": { "kind": "part", "id": "part:orders-api:route" },
+      "input": {
+        "schemaRef": "orders.retry-request.v1",
+        "dataClassIds": ["data-class:order-record"]
+      },
+      "writeSet": [
+        { "resource": "orders_api_retry_queue", "operation": "append", "maximumItems": 1 }
+      ],
+      "excludes": ["credential-values", "unrelated-orders"],
+      "execution": {
+        "adapterId": "fixture.order-worker",
+        "actionId": "orders.retry-request",
+        "location": "worker"
+      },
+      "timeoutMs": 30000,
+      "idempotency": {
+        "mode": "keyed",
+        "keyScope": "order-id-and-failure-attempt",
+        "replay": "return_existing"
+      },
+      "verification": {
+        "required": true,
+        "mode": "independent",
+        "adapterId": "fixture.order-status-observer",
+        "successCriteria": ["같은 주문 ID의 새 주문이 중복 생성되지 않습니다.", "재시도 결과 상태 사건이 기록됩니다."]
+      },
+      "recovery": {
+        "mode": "manual",
+        "retry": { "maxAttempts": 2, "backoff": "fixed" },
+        "summary": "중복 방지 키를 유지한 채 실패 원인을 검토하고 한 번만 다시 시도합니다."
+      },
       "evidenceIds": ["evidence:order-api-code"]
+    }
+  ],
+  "observations": [
+    {
+      "id": "observation:order-retry-route-discovered",
+      "kind": "execution",
+      "label": "주문 재시도 경로 발견",
+      "subject": { "kind": "operation", "id": "operation:retry-order-request" },
+      "reality": "discovered",
+      "status": "planned",
+      "summary": "코드 근거에서 재시도 입력과 중복 방지 요구사항을 발견했습니다.",
+      "dataClassIds": ["data-class:order-record"],
+      "evidenceIds": ["evidence:order-api-code"]
+    }
+  ],
+  "events": [
+    {
+      "id": "event:order-build-discovered",
+      "type": "twin_build_discovered",
+      "subject": { "kind": "entity", "id": "fixture-orders-api" },
+      "actorKind": "system",
+      "actorRef": "fixture-order-system",
+      "occurredAt": "2026-07-15T00:00:00.000Z",
+      "summary": "주문 API와 데이터베이스 구조를 고정 픽스처에서 발견했습니다.",
+      "dataClassIds": ["data-class:order-record"],
+      "evidenceIds": ["evidence:order-api-code", "evidence:order-db-schema"]
+    }
+  ],
+  "controls": [
+    {
+      "id": "control:order-retry-idempotency",
+      "kind": "validation",
+      "label": "주문 재시도 중복 방지 키",
+      "description": "같은 실패 주문을 다시 전달해도 새 주문을 중복 생성하지 않습니다.",
+      "effect": "prevent",
+      "status": "declared",
+      "target": { "kind": "operation", "id": "operation:retry-order-request" },
+      "policyIds": ["policy:retry-order-explicit-approval"],
+      "evidenceIds": ["evidence:order-api-code"]
+    }
+  ],
+  "threats": [
+    {
+      "id": "threat:duplicate-order-on-retry",
+      "label": "재시도로 인한 중복 주문",
+      "description": "실패 결과를 알 수 없는 상태에서 같은 요청을 다시 보내 주문이 두 번 생성될 수 있는 잠재 경로입니다.",
+      "category": "tampering",
+      "status": "mitigated",
+      "likelihood": "low",
+      "impact": "high",
+      "source": { "kind": "part", "id": "part:orders-api:route" },
+      "target": { "kind": "entity", "id": "fixture-orders-db" },
+      "gatewayIds": ["gateway:order-database"],
+      "dataClassIds": ["data-class:order-record"],
+      "controlIds": ["control:order-retry-idempotency"],
+      "evidenceIds": ["evidence:order-api-code", "evidence:order-db-schema"]
     }
   ],
   "parts": [

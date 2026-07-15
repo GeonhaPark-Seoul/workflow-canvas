@@ -10,8 +10,12 @@ import {
   systemOperationSigningSecret,
   verifySignedSystemOperationPlan,
 } from './systemOperationPlan.js'
+import {
+  WORKFLOW_GIT_SYNC_CONFIRMATION,
+  WORKFLOW_GIT_SYNC_OPERATION_DEFINITION,
+} from '../shared/workflowOperationDefinitions.js'
 
-export const LOCAL_GIT_SYNC_CONFIRMATION = 'QUEUE_LOCAL_GIT_SYNC'
+export const LOCAL_GIT_SYNC_CONFIRMATION = WORKFLOW_GIT_SYNC_CONFIRMATION
 
 const OPERATION_TYPE = 'local_git_sync'
 const TOKEN_PATTERN = /^wclc_[a-f0-9]{64}$/
@@ -46,6 +50,37 @@ function fingerprint(value) {
 
 function tokenHash(token) {
   return createHash('sha256').update(token).digest('hex')
+}
+
+export function normalizeLocalGitSyncVerification(value, expectedState) {
+  if (!value || typeof value !== 'object' || value.status !== 'verified') return null
+  const sha = (candidate) => {
+    const normalized = cleanText(candidate, 64)
+    return /^[a-f0-9]{40,64}$/i.test(normalized) ? normalized.toLowerCase() : ''
+  }
+  const verification = {
+    status: 'verified',
+    branch: cleanText(value.branch, 160),
+    headSha: sha(value.headSha),
+    upstreamRef: cleanText(value.upstreamRef, 200),
+    upstreamSha: sha(value.upstreamSha),
+    originFingerprint: sha(value.originFingerprint),
+    ahead: Number(value.ahead),
+    behind: Number(value.behind),
+    dirty: Number(value.dirty),
+  }
+  const expected = expectedState ?? {}
+  if (
+    !verification.headSha
+    || verification.headSha !== verification.upstreamSha
+    || verification.branch !== expected.branch
+    || verification.upstreamRef !== expected.upstreamRef
+    || verification.originFingerprint !== expected.originFingerprint
+    || verification.ahead !== 0
+    || verification.behind !== 0
+    || verification.dirty !== 0
+  ) return null
+  return verification
 }
 
 function databaseError(error, fallback) {
@@ -249,6 +284,17 @@ export async function previewLocalGitSync(db, { userId, connectorId, env = proce
           ? 'fast-forward만 허용하므로 병합 커밋을 만들지 않으며 이전 커밋은 Git 이력에 남습니다.'
           : '변경할 내용이 없어 실행하지 않습니다.',
     },
+    contract: {
+      definitionId: WORKFLOW_GIT_SYNC_OPERATION_DEFINITION.id,
+      definitionFingerprint: WORKFLOW_GIT_SYNC_OPERATION_DEFINITION.fingerprint,
+      initiatorKind: 'human_ui',
+      risk: WORKFLOW_GIT_SYNC_OPERATION_DEFINITION.risk,
+      sideEffect: WORKFLOW_GIT_SYNC_OPERATION_DEFINITION.sideEffect,
+      approval: WORKFLOW_GIT_SYNC_OPERATION_DEFINITION.approval,
+      timeoutMs: WORKFLOW_GIT_SYNC_OPERATION_DEFINITION.timeoutMs,
+      verification: WORKFLOW_GIT_SYNC_OPERATION_DEFINITION.verification,
+      recovery: WORKFLOW_GIT_SYNC_OPERATION_DEFINITION.recovery,
+    },
   }, systemOperationSigningSecret(env), { now })
   return { plan: signed.publicPlan, plan_token: signed.token, decision }
 }
@@ -265,6 +311,9 @@ export async function applyLocalGitSync(db, {
     actorId: userId,
     operation: OPERATION_TYPE,
     confirmation,
+    definitionId: WORKFLOW_GIT_SYNC_OPERATION_DEFINITION.id,
+    definitionFingerprint: WORKFLOW_GIT_SYNC_OPERATION_DEFINITION.fingerprint,
+    initiatorKind: 'human_ui',
     now,
   })
   if (verified.payload.targetKey !== `local-connector:${connectorId}`) {
@@ -363,12 +412,26 @@ export async function completeLocalGitSyncOperation(db, connector, payload) {
   if (!OPERATION_ID_PATTERN.test(operationId)) {
     throw new LocalConnectorError(400, 'INVALID_LOCAL_OPERATION_ID', 'Git 동기화 작업 ID가 올바르지 않습니다.')
   }
-  const succeeded = payload?.status === 'succeeded'
+  const running = await db
+    .from('local_connector_operations')
+    .select('expected_state')
+    .eq('operation_id', operationId)
+    .eq('connector_id', connector.id)
+    .eq('status', 'running')
+    .maybeSingle()
+  if (running.error) throw databaseError(running.error, '실행 중인 Git 동기화 작업을 확인하지 못했습니다.')
+  if (!running.data) throw new LocalConnectorError(409, 'LOCAL_OPERATION_NOT_RUNNING', '실행 중인 Git 동기화 작업을 찾을 수 없습니다.')
+  const requestedSuccess = payload?.status === 'succeeded'
+  const verification = normalizeLocalGitSyncVerification(payload?.result?.verification, running.data.expected_state)
+  const succeeded = requestedSuccess && !!verification
   const result = {
-    summary: cleanText(payload?.result?.summary, 400) || (succeeded ? 'Git 동기화를 완료했습니다.' : 'Git 동기화가 실패했습니다.'),
+    summary: requestedSuccess && !verification
+      ? 'Git 명령은 끝났지만 실행 후 상태 검증에 실패했습니다.'
+      : cleanText(payload?.result?.summary, 400) || (succeeded ? 'Git 동기화를 완료하고 상태를 검증했습니다.' : 'Git 동기화가 실패했습니다.'),
     beforeHeadSha: cleanText(payload?.result?.beforeHeadSha, 64),
-    afterHeadSha: cleanText(payload?.result?.afterHeadSha, 64),
-    remoteSha: cleanText(payload?.result?.remoteSha, 64),
+    afterHeadSha: verification?.headSha ?? cleanText(payload?.result?.afterHeadSha, 64),
+    remoteSha: verification?.upstreamSha ?? cleanText(payload?.result?.remoteSha, 64),
+    verification,
   }
   const completed = await db
     .from('local_connector_operations')

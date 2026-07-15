@@ -13,7 +13,7 @@ import {
 } from './source-twin-scanner.mjs'
 import { localGitSyncDecision, normalizeLocalSourceManifest } from '../shared/localConnector.js'
 
-export const LOCAL_CONNECTOR_AGENT_VERSION = '1.1.0'
+export const LOCAL_CONNECTOR_AGENT_VERSION = '1.2.0'
 
 const MAX_GIT_OUTPUT = 2 * 1024 * 1024
 const HEARTBEAT_INTERVAL_MS = 10_000
@@ -250,6 +250,44 @@ export function executeApprovedGitSync(root, operation, current) {
   }
 }
 
+export function verifyApprovedGitSync(root, operation, executionResult, {
+  expectedOrigin = '',
+  requireGitHubOrigin = true,
+} = {}) {
+  const observed = observeLocalGit(root, {
+    fetchRemote: true,
+    syncEnabled: true,
+    expectedOrigin,
+    requireGitHubOrigin,
+  })
+  const expected = operation.expectedState ?? {}
+  const valid = observed.branch === expected.branch
+    && observed.originFingerprint === expected.originFingerprint
+    && observed.dirty === 0
+    && observed.ahead === 0
+    && observed.behind === 0
+    && !!observed.headSha
+    && observed.headSha === observed.upstreamSha
+    && executionResult?.afterHeadSha === observed.headSha
+  if (!valid) throw new Error('실행 후 Git 상태가 승인된 동기화 완료 조건과 일치하지 않습니다.')
+  return {
+    ...executionResult,
+    afterHeadSha: observed.headSha,
+    remoteSha: observed.upstreamSha,
+    verification: {
+      status: 'verified',
+      branch: observed.branch,
+      headSha: observed.headSha,
+      upstreamRef: observed.upstreamRef,
+      upstreamSha: observed.upstreamSha,
+      originFingerprint: observed.originFingerprint,
+      ahead: observed.ahead,
+      behind: observed.behind,
+      dirty: observed.dirty,
+    },
+  }
+}
+
 export async function runLocalConnectorAgent({
   server,
   token,
@@ -331,7 +369,10 @@ export async function runLocalConnectorAgent({
             syncEnabled: true,
             expectedOrigin: repositoryOrigin,
           })
-          result = executeApprovedGitSync(repositoryRoot, operation, executionState)
+          const executionResult = executeApprovedGitSync(repositoryRoot, operation, executionState)
+          result = verifyApprovedGitSync(repositoryRoot, operation, executionResult, {
+            expectedOrigin: repositoryOrigin,
+          })
           console.log(`[완료] ${result.summary}`)
         } catch (error) {
           status = 'failed'

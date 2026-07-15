@@ -31,7 +31,7 @@ const fixtureReconciliation = JSON.parse(await readFile(new URL('order-service-r
 const fixtureDescriptor = createTwinAdapterDescriptor({
   id: 'fixture-order-system',
   contractVersion: TWIN_ADAPTER_CONTRACT_VERSION,
-  adapterVersion: '1.1.0',
+  adapterVersion: '1.2.0',
   minimumEngineSchemaVersion: TWIN_ENGINE_SCHEMA_VERSION,
   maximumEngineSchemaVersion: TWIN_ENGINE_SCHEMA_VERSION,
   label: '주문 서비스 픽스처',
@@ -103,6 +103,10 @@ assert.equal(
     .find((item) => item.id === 'deployment-source-metadata')?.leavesSource,
   true,
 )
+assert.deepEqual(WORKFLOW_SYSTEM_TWIN_ADAPTER_DESCRIPTOR.operationCapabilities, [
+  'source-twin.snapshot.create',
+  'workflow.local.git-sync',
+])
 
 const fixtureBefore = structuredClone(fixtureCanvas)
 const fixtureResult = await registry.inspect(fixtureCanvas)

@@ -2,7 +2,7 @@
 export const SOURCE_TWIN_MANIFEST = Object.freeze(
 {
   "schemaVersion": 1,
-  "id": "source-twin-v1-cc3d46887dec",
+  "id": "source-twin-v1-295466c896df",
   "source": {
     "id": "workflow-canvas:self-source",
     "label": "Workflow Canvas 소스 코드",
@@ -957,7 +957,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "deployment:vercel-web",
       "kind": "deployment",
       "label": "Vercel 웹 배포",
-      "fingerprint": "bdc607aafedf537b9292",
+      "fingerprint": "09abf472916f707d8dfc",
       "layer": "deployment",
       "summary": "Vite 빌드 결과를 Vercel에 배포하는 경로입니다.",
       "tags": [
@@ -1478,13 +1478,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:mcp/localConnectorStore.js",
       "kind": "file",
       "label": "mcp/localConnectorStore.js",
-      "fingerprint": "5a7fc50c6d33b5af5c7f",
+      "fingerprint": "d1a17913de51c9fa9ce5",
       "path": "mcp/localConnectorStore.js",
       "layer": "mcp",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 393,
-      "summary": "AI 연결 서버에서 local_connector_operation_events, local_connector_operations, local_connectors 데이터 접근 · 함수 17개 정의 · 모듈 3개 연결을 담당합니다.",
+      "lineEnd": 456,
+      "summary": "AI 연결 서버에서 local_connector_operation_events, local_connector_operations, local_connectors 데이터 접근 · 함수 19개 정의 · 모듈 4개 연결을 담당합니다.",
       "tags": [
         "local_connector_operation_events",
         "local_connector_operations",
@@ -1500,6 +1500,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
           "completeLocalGitSyncOperation",
           "createLocalConnector",
           "listLocalConnectors",
+          "normalizeLocalGitSyncVerification",
           "previewLocalGitSync",
           "recordLocalConnectorHeartbeat",
           "resolveLocalConnectorToken",
@@ -1629,13 +1630,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:mcp/sourceTwinStore.js",
       "kind": "file",
       "label": "mcp/sourceTwinStore.js",
-      "fingerprint": "62099525ea34f1d0b5dc",
+      "fingerprint": "6b67b11c4e6b8cc66a2e",
       "path": "mcp/sourceTwinStore.js",
       "layer": "mcp",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 384,
-      "summary": "AI 연결 서버에서 system_runtime_observations 데이터 접근 · 함수 21개 정의 · 모듈 5개 연결을 담당합니다.",
+      "lineEnd": 404,
+      "summary": "AI 연결 서버에서 system_runtime_observations 데이터 접근 · 함수 21개 정의 · 모듈 6개 연결을 담당합니다.",
       "tags": [
         "mcp",
         "system_runtime_observations"
@@ -1755,13 +1756,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:mcp/systemOperationPlan.js",
       "kind": "file",
       "label": "mcp/systemOperationPlan.js",
-      "fingerprint": "f43a2e061b68f961c75e",
+      "fingerprint": "a74f24ab19b8663f3f7f",
       "path": "mcp/systemOperationPlan.js",
       "layer": "mcp",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 145,
-      "summary": "AI 연결 서버에서 함수 9개 정의 · 모듈 1개 연결을 담당합니다.",
+      "lineEnd": 202,
+      "summary": "AI 연결 서버에서 함수 10개 정의 · 모듈 1개 연결을 담당합니다.",
       "tags": [
         "mcp"
       ],
@@ -1820,7 +1821,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:package.json",
       "kind": "file",
       "label": "package.json",
-      "fingerprint": "2c92fcdd28d2c1b156c7",
+      "fingerprint": "ab08ba5636706014a44d",
       "path": "package.json",
       "layer": "deployment",
       "language": "json",
@@ -1916,13 +1917,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:scripts/local-connector-agent.mjs",
       "kind": "file",
       "label": "scripts/local-connector-agent.mjs",
-      "fingerprint": "5531ab56f324d9e1b9f7",
+      "fingerprint": "32fbdec083f855d5ca95",
       "path": "scripts/local-connector-agent.mjs",
       "layer": "documentation",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 383,
-      "summary": "문서에서 함수 20개 정의 · 모듈 9개 연결을 담당합니다.",
+      "lineEnd": 424,
+      "summary": "문서에서 함수 21개 정의 · 모듈 9개 연결을 담당합니다.",
       "tags": [
         "WORKFLOW_CANVAS_LOCAL_CONNECTOR_TOKEN",
         "WORKFLOW_CANVAS_URL",
@@ -1938,7 +1939,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
           "localGitSyncApprovalPhrase",
           "observeLocalGit",
           "resolveRepositoryRoot",
-          "runLocalConnectorAgent"
+          "runLocalConnectorAgent",
+          "verifyApprovedGitSync"
         ],
         "apiRoutes": [],
         "dbTables": [],
@@ -2020,12 +2022,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:scripts/test-local-connector-agent.mjs",
       "kind": "file",
       "label": "scripts/test-local-connector-agent.mjs",
-      "fingerprint": "977a1d2162967b4f2702",
+      "fingerprint": "476db494b127814d7fe6",
       "path": "scripts/test-local-connector-agent.mjs",
       "layer": "test",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 109,
+      "lineEnd": 122,
       "summary": "검증에서 함수 2개 정의 · 모듈 6개 연결을 담당합니다.",
       "tags": [
         "test"
@@ -2044,13 +2046,37 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:scripts/test-mcp-logic.mjs",
       "kind": "file",
       "label": "scripts/test-mcp-logic.mjs",
-      "fingerprint": "9f4859fe812fb68f5547",
+      "fingerprint": "4f03e5a865afa40a4396",
       "path": "scripts/test-mcp-logic.mjs",
       "layer": "test",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 3548,
+      "lineEnd": 3552,
       "summary": "검증에서 함수 32개 정의 · 모듈 35개 연결을 담당합니다.",
+      "tags": [
+        "test"
+      ],
+      "details": {
+        "exports": [],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "parseStatus": "parsed"
+      }
+    },
+    {
+      "id": "file:scripts/test-operation-lifecycle.mjs",
+      "kind": "file",
+      "label": "scripts/test-operation-lifecycle.mjs",
+      "fingerprint": "23dba54ae04630691a01",
+      "path": "scripts/test-operation-lifecycle.mjs",
+      "layer": "test",
+      "language": "javascript",
+      "lineStart": 1,
+      "lineEnd": 286,
+      "summary": "검증에서 함수 1개 정의 · 모듈 2개 연결을 담당합니다.",
       "tags": [
         "test"
       ],
@@ -2068,13 +2094,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:scripts/test-source-twin.mjs",
       "kind": "file",
       "label": "scripts/test-source-twin.mjs",
-      "fingerprint": "1b65dab33a6e3e43a1d7",
+      "fingerprint": "955a7eef206e95276630",
       "path": "scripts/test-source-twin.mjs",
       "layer": "test",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 554,
-      "summary": "검증에서 {\"zen\":\"source twin\"} 데이터 접근 · 함수 2개 정의 · 모듈 15개 연결을 담당합니다.",
+      "lineEnd": 639,
+      "summary": "검증에서 {\"zen\":\"source twin\"} 데이터 접근 · 함수 4개 정의 · 모듈 16개 연결을 담당합니다.",
       "tags": [
         "test",
         "{\"zen\":\"source twin\"}"
@@ -2119,12 +2145,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:scripts/test-twin-adapter-contract.mjs",
       "kind": "file",
       "label": "scripts/test-twin-adapter-contract.mjs",
-      "fingerprint": "45ca08bb6c8ce555f1be",
+      "fingerprint": "1535bb720749a68791b3",
       "path": "scripts/test-twin-adapter-contract.mjs",
       "layer": "test",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 227,
+      "lineEnd": 231,
       "summary": "검증에서 함수 2개 정의 · 모듈 10개 연결을 담당합니다.",
       "tags": [
         "test"
@@ -2143,13 +2169,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:scripts/test-twin-build.mjs",
       "kind": "file",
       "label": "scripts/test-twin-build.mjs",
-      "fingerprint": "ee8ea620e6f11f352082",
+      "fingerprint": "8e3b59b0499276eea41f",
       "path": "scripts/test-twin-build.mjs",
       "layer": "test",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 147,
-      "summary": "검증에서 모듈 6개 연결을 담당합니다.",
+      "lineEnd": 225,
+      "summary": "검증에서 모듈 7개 연결을 담당합니다.",
       "tags": [
         "test"
       ],
@@ -2235,12 +2261,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:shared/edgeOperation.js",
       "kind": "file",
       "label": "shared/edgeOperation.js",
-      "fingerprint": "eabb47312ec9c492a0e8",
+      "fingerprint": "184557badd9774b09415",
       "path": "shared/edgeOperation.js",
       "layer": "shared",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 24,
+      "lineEnd": 34,
       "summary": "공통 도메인 규칙에서 함수 3개 정의을 담당합니다.",
       "tags": [
         "shared"
@@ -2289,6 +2315,54 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
           "localGitSyncEdgePresentation",
           "normalizeLocalGitState",
           "normalizeLocalSourceManifest"
+        ],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "parseStatus": "parsed"
+      }
+    },
+    {
+      "id": "file:shared/operationLifecycle.js",
+      "kind": "file",
+      "label": "shared/operationLifecycle.js",
+      "fingerprint": "072796be78f3c94f42cc",
+      "path": "shared/operationLifecycle.js",
+      "layer": "shared",
+      "language": "javascript",
+      "lineStart": 1,
+      "lineEnd": 803,
+      "summary": "공통 도메인 규칙에서 함수 48개 정의 · 모듈 2개 연결을 담당합니다.",
+      "tags": [
+        "shared"
+      ],
+      "details": {
+        "exports": [
+          "OPERATION_CONTRACT_SCHEMA_VERSION",
+          "OPERATION_INITIATOR_KINDS",
+          "OPERATION_RUN_STATES",
+          "OperationContractError",
+          "acknowledgeOperationCancellation",
+          "completeOperationExecution",
+          "completeOperationRecovery",
+          "completeOperationVerification",
+          "createOperationPlan",
+          "createOperationRun",
+          "failOperationRun",
+          "normalizeOperationDefinition",
+          "operationRunIsActive",
+          "operationRunIsTerminal",
+          "queueOperationRun",
+          "recordOperationApproval",
+          "requestOperationCancellation",
+          "requestOperationRecovery",
+          "retryOperationRun",
+          "startOperationRecovery",
+          "startOperationRun",
+          "verifyOperationEventChain",
+          "verifyOperationPlan"
         ],
         "apiRoutes": [],
         "dbTables": [],
@@ -2616,7 +2690,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:shared/twinAdapterContract.js",
       "kind": "file",
       "label": "shared/twinAdapterContract.js",
-      "fingerprint": "d047070db332b0f49fa0",
+      "fingerprint": "a34e0669d4ab1ffad5c6",
       "path": "shared/twinAdapterContract.js",
       "layer": "shared",
       "language": "javascript",
@@ -2648,13 +2722,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:shared/twinBuild.js",
       "kind": "file",
       "label": "shared/twinBuild.js",
-      "fingerprint": "7808be12a8c59d09c791",
+      "fingerprint": "f537eb6e48f0624f1fa0",
       "path": "shared/twinBuild.js",
       "layer": "shared",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 484,
-      "summary": "공통 도메인 규칙에서 함수 26개 정의 · 모듈 5개 연결을 담당합니다.",
+      "lineEnd": 737,
+      "summary": "공통 도메인 규칙에서 함수 36개 정의 · 모듈 6개 연결을 담당합니다.",
       "tags": [
         "shared"
       ],
@@ -2677,12 +2751,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:shared/twinBuildCanvas.js",
       "kind": "file",
       "label": "shared/twinBuildCanvas.js",
-      "fingerprint": "dfd8eb0a84a1f1604ca3",
+      "fingerprint": "a4474982fec06e32c5f7",
       "path": "shared/twinBuildCanvas.js",
       "layer": "shared",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 366,
+      "lineEnd": 378,
       "summary": "공통 도메인 규칙에서 함수 18개 정의 · 모듈 5개 연결을 담당합니다.",
       "tags": [
         "shared"
@@ -2748,6 +2822,46 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "details": {
         "exports": [
           "createWorkflowCanvasSystemMap"
+        ],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "parseStatus": "parsed"
+      }
+    },
+    {
+      "id": "file:shared/workflowOperationDefinitions.js",
+      "kind": "file",
+      "label": "shared/workflowOperationDefinitions.js",
+      "fingerprint": "ab4b5646a779993427af",
+      "path": "shared/workflowOperationDefinitions.js",
+      "layer": "shared",
+      "language": "javascript",
+      "lineStart": 1,
+      "lineEnd": 131,
+      "summary": "공통 도메인 규칙에서 모듈 2개 연결을 담당합니다.",
+      "tags": [
+        "shared"
+      ],
+      "details": {
+        "exports": [
+          "WORKFLOW_GIT_SYNC_AUDIT_CLASS_ID",
+          "WORKFLOW_GIT_SYNC_CONFIRMATION",
+          "WORKFLOW_GIT_SYNC_CONTROL_EVIDENCE_ID",
+          "WORKFLOW_GIT_SYNC_EVIDENCE_ID",
+          "WORKFLOW_GIT_SYNC_LOCAL_POLICY_ID",
+          "WORKFLOW_GIT_SYNC_OPERATION_DEFINITION",
+          "WORKFLOW_GIT_SYNC_OPERATION_ID",
+          "WORKFLOW_GIT_SYNC_OWNER_POLICY_ID",
+          "WORKFLOW_GIT_SYNC_POLICY_EVIDENCE_ID",
+          "WORKFLOW_GIT_SYNC_STATE_CLASS_ID",
+          "WORKFLOW_SOURCE_METADATA_CLASS_ID",
+          "WORKFLOW_SOURCE_SNAPSHOT_EVIDENCE_ID",
+          "WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION",
+          "WORKFLOW_SOURCE_SNAPSHOT_OPERATION_ID",
+          "WORKFLOW_SOURCE_SNAPSHOT_POLICY_ID"
         ],
         "apiRoutes": [],
         "dbTables": [],
@@ -2882,12 +2996,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:shared/workflowSystemTwinAdapterDescriptor.js",
       "kind": "file",
       "label": "shared/workflowSystemTwinAdapterDescriptor.js",
-      "fingerprint": "f36be2bd24132de83abe",
+      "fingerprint": "368fe4dbcfbb82e50df5",
       "path": "shared/workflowSystemTwinAdapterDescriptor.js",
       "layer": "shared",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 64,
+      "lineEnd": 66,
       "summary": "공통 도메인 규칙에서 함수 1개 정의 · 모듈 1개 연결을 담당합니다.",
       "tags": [
         "shared"
@@ -2909,13 +3023,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:shared/workflowSystemTwinBuild.js",
       "kind": "file",
       "label": "shared/workflowSystemTwinBuild.js",
-      "fingerprint": "b6184505a6b872c01a99",
+      "fingerprint": "56e1db89d9434e227e36",
       "path": "shared/workflowSystemTwinBuild.js",
       "layer": "shared",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 48,
-      "summary": "공통 도메인 규칙에서 함수 1개 정의 · 모듈 6개 연결을 담당합니다.",
+      "lineEnd": 198,
+      "summary": "공통 도메인 규칙에서 함수 1개 정의 · 모듈 7개 연결을 담당합니다.",
       "tags": [
         "shared"
       ],
@@ -6235,8 +6349,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
-      "lineStart": 21,
-      "lineEnd": 26,
+      "lineStart": 25,
+      "lineEnd": 30,
       "summary": "local connector error constructor을(를) 처리하는 함수입니다.",
       "tags": [
         "class-method",
@@ -6252,13 +6366,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:mcp/localConnectorStore.js:applyLocalGitSync",
       "kind": "function",
       "label": "applyLocalGitSync",
-      "fingerprint": "8547c93c806acc1c37cb",
+      "fingerprint": "e8866248cfffdeac9459",
       "name": "applyLocalGitSync",
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
-      "lineStart": 256,
-      "lineEnd": 320,
+      "lineStart": 302,
+      "lineEnd": 369,
       "summary": "local git sync을(를) 적용하는 비동기 함수입니다.",
       "tags": [
         "async",
@@ -6281,8 +6395,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
-      "lineStart": 322,
-      "lineEnd": 359,
+      "lineStart": 371,
+      "lineEnd": 408,
       "summary": "claim local git sync operation을(를) 처리하는 비동기 함수입니다.",
       "tags": [
         "async",
@@ -6305,8 +6419,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
-      "lineStart": 29,
-      "lineEnd": 33,
+      "lineStart": 33,
+      "lineEnd": 37,
       "summary": "clean text을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -6322,13 +6436,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:mcp/localConnectorStore.js:completeLocalGitSyncOperation",
       "kind": "function",
       "label": "completeLocalGitSyncOperation",
-      "fingerprint": "c6dd7f017587b8685c40",
+      "fingerprint": "1a5954c26b10f33eba27",
       "name": "completeLocalGitSyncOperation",
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
-      "lineStart": 361,
-      "lineEnd": 392,
+      "lineStart": 410,
+      "lineEnd": 455,
       "summary": "complete local git sync operation을(를) 처리하는 비동기 함수입니다.",
       "tags": [
         "async",
@@ -6351,8 +6465,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
-      "lineStart": 59,
-      "lineEnd": 81,
+      "lineStart": 94,
+      "lineEnd": 116,
       "summary": "connector row을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -6373,8 +6487,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
-      "lineStart": 131,
-      "lineEnd": 142,
+      "lineStart": 166,
+      "lineEnd": 177,
       "summary": "local connector을(를) 생성하는 비동기 함수입니다.",
       "tags": [
         "async",
@@ -6397,8 +6511,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
-      "lineStart": 51,
-      "lineEnd": 57,
+      "lineStart": 86,
+      "lineEnd": 92,
       "summary": "database error을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -6419,8 +6533,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
-      "lineStart": 43,
-      "lineEnd": 45,
+      "lineStart": 47,
+      "lineEnd": 49,
       "summary": "fingerprint을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -6441,8 +6555,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
-      "lineStart": 96,
-      "lineEnd": 129,
+      "lineStart": 131,
+      "lineEnd": 164,
       "summary": "local connectors을(를) 목록 조회하는 비동기 함수입니다.",
       "tags": [
         "async",
@@ -6465,8 +6579,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
-      "lineStart": 83,
-      "lineEnd": 94,
+      "lineStart": 118,
+      "lineEnd": 129,
       "summary": "owned connector을(를) 불러오기하는 비동기 함수입니다.",
       "tags": [
         "async",
@@ -6480,16 +6594,39 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:mcp/localConnectorStore.js:normalizeLocalGitSyncVerification",
+      "kind": "function",
+      "label": "normalizeLocalGitSyncVerification",
+      "fingerprint": "033ac562bcdf480e5ad6",
+      "name": "normalizeLocalGitSyncVerification",
+      "path": "mcp/localConnectorStore.js",
+      "parentId": "file:mcp/localConnectorStore.js",
+      "layer": "mcp",
+      "lineStart": 55,
+      "lineEnd": 84,
+      "summary": "local git sync verification을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "mcp"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
       "id": "function:mcp/localConnectorStore.js:previewLocalGitSync",
       "kind": "function",
       "label": "previewLocalGitSync",
-      "fingerprint": "1b2113c4b8389751ae61",
+      "fingerprint": "af3de163d6ad2baa4ee5",
       "name": "previewLocalGitSync",
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
-      "lineStart": 214,
-      "lineEnd": 254,
+      "lineStart": 249,
+      "lineEnd": 300,
       "summary": "preview local git sync을(를) 처리하는 비동기 함수입니다.",
       "tags": [
         "async",
@@ -6512,8 +6649,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
-      "lineStart": 170,
-      "lineEnd": 212,
+      "lineStart": 205,
+      "lineEnd": 247,
       "summary": "local connector heartbeat을(를) 기록하는 비동기 함수입니다.",
       "tags": [
         "async",
@@ -6536,8 +6673,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
-      "lineStart": 158,
-      "lineEnd": 168,
+      "lineStart": 193,
+      "lineEnd": 203,
       "summary": "local connector token을(를) 확인하는 비동기 함수입니다.",
       "tags": [
         "async",
@@ -6560,8 +6697,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
-      "lineStart": 144,
-      "lineEnd": 156,
+      "lineStart": 179,
+      "lineEnd": 191,
       "summary": "revoke local connector을(를) 처리하는 비동기 함수입니다.",
       "tags": [
         "async",
@@ -6576,6 +6713,28 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:mcp/localConnectorStore.js:sha",
+      "kind": "function",
+      "label": "sha",
+      "fingerprint": "8de356b846bd336b166c",
+      "name": "sha",
+      "path": "mcp/localConnectorStore.js",
+      "parentId": "file:mcp/localConnectorStore.js",
+      "layer": "mcp",
+      "lineStart": 57,
+      "lineEnd": 60,
+      "summary": "sha을(를) 처리하는 함수입니다.",
+      "tags": [
+        "arrow",
+        "mcp"
+      ],
+      "details": {
+        "functionKind": "arrow",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
       "id": "function:mcp/localConnectorStore.js:stable",
       "kind": "function",
       "label": "stable",
@@ -6584,8 +6743,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
-      "lineStart": 35,
-      "lineEnd": 41,
+      "lineStart": 39,
+      "lineEnd": 45,
       "summary": "stable을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -6606,8 +6765,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
-      "lineStart": 47,
-      "lineEnd": 49,
+      "lineStart": 51,
+      "lineEnd": 53,
       "summary": "token hash을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -7379,8 +7538,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
-      "lineStart": 28,
-      "lineEnd": 33,
+      "lineStart": 29,
+      "lineEnd": 34,
       "summary": "source twin error constructor을(를) 처리하는 함수입니다.",
       "tags": [
         "class-method",
@@ -7396,13 +7555,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:mcp/sourceTwinStore.js:applySourceTwinSnapshotOperation",
       "kind": "function",
       "label": "applySourceTwinSnapshotOperation",
-      "fingerprint": "37dc92f6fdd05a17e0e6",
+      "fingerprint": "f837c5be0d8b149069fb",
       "name": "applySourceTwinSnapshotOperation",
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
-      "lineStart": 240,
-      "lineEnd": 323,
+      "lineStart": 256,
+      "lineEnd": 343,
       "summary": "source twin snapshot operation을(를) 적용하는 비동기 함수입니다.",
       "tags": [
         "async",
@@ -7425,8 +7584,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
-      "lineStart": 59,
-      "lineEnd": 65,
+      "lineStart": 60,
+      "lineEnd": 66,
       "summary": "as source twin error을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -7447,8 +7606,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
-      "lineStart": 350,
-      "lineEnd": 353,
+      "lineStart": 370,
+      "lineEnd": 373,
       "summary": "stored source twin snapshots을(를) 비교하는 비동기 함수입니다.",
       "tags": [
         "async",
@@ -7471,8 +7630,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
-      "lineStart": 145,
-      "lineEnd": 161,
+      "lineStart": 146,
+      "lineEnd": 162,
       "summary": "current source twin state을(를) 처리하는 비동기 함수입니다.",
       "tags": [
         "async",
@@ -7495,8 +7654,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
-      "lineStart": 103,
-      "lineEnd": 112,
+      "lineStart": 104,
+      "lineEnd": 113,
       "summary": "declared database state을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -7517,8 +7676,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
-      "lineStart": 355,
-      "lineEnd": 364,
+      "lineStart": 375,
+      "lineEnd": 384,
       "summary": "source twin events을(를) 목록 조회하는 비동기 함수입니다.",
       "tags": [
         "async",
@@ -7541,8 +7700,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
-      "lineStart": 325,
-      "lineEnd": 337,
+      "lineStart": 345,
+      "lineEnd": 357,
       "summary": "source twin snapshots을(를) 목록 조회하는 비동기 함수입니다.",
       "tags": [
         "async",
@@ -7565,8 +7724,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
-      "lineStart": 339,
-      "lineEnd": 348,
+      "lineStart": 359,
+      "lineEnd": 368,
       "summary": "snapshot을(를) 불러오기하는 비동기 함수입니다.",
       "tags": [
         "async",
@@ -7588,8 +7747,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
-      "lineStart": 67,
-      "lineEnd": 71,
+      "lineStart": 68,
+      "lineEnd": 72,
       "summary": "metrics from operation row을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -7605,13 +7764,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:mcp/sourceTwinStore.js:previewSourceTwinSnapshotOperation",
       "kind": "function",
       "label": "previewSourceTwinSnapshotOperation",
-      "fingerprint": "8ccfeba43c57d033ba20",
+      "fingerprint": "9e5a7c0bc174cfd79624",
       "name": "previewSourceTwinSnapshotOperation",
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
-      "lineStart": 192,
-      "lineEnd": 238,
+      "lineStart": 193,
+      "lineEnd": 254,
       "summary": "preview source twin snapshot operation을(를) 처리하는 비동기 함수입니다.",
       "tags": [
         "async",
@@ -7634,8 +7793,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
-      "lineStart": 73,
-      "lineEnd": 82,
+      "lineStart": 74,
+      "lineEnd": 83,
       "summary": "operational state을(를) 읽기하는 비동기 함수입니다.",
       "tags": [
         "async",
@@ -7657,8 +7816,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
-      "lineStart": 84,
-      "lineEnd": 101,
+      "lineStart": 85,
+      "lineEnd": 102,
       "summary": "runtime state을(를) 읽기하는 비동기 함수입니다.",
       "tags": [
         "async",
@@ -7680,8 +7839,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
-      "lineStart": 366,
-      "lineEnd": 383,
+      "lineStart": 386,
+      "lineEnd": 403,
       "summary": "source twin push event을(를) 기록하는 비동기 함수입니다.",
       "tags": [
         "async",
@@ -7704,8 +7863,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
-      "lineStart": 36,
-      "lineEnd": 40,
+      "lineStart": 37,
+      "lineEnd": 41,
       "summary": "require source twin owner을(를) 처리하는 함수입니다.",
       "tags": [
         "exported",
@@ -7727,8 +7886,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
-      "lineStart": 174,
-      "lineEnd": 190,
+      "lineStart": 175,
+      "lineEnd": 191,
       "summary": "snapshot from state을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -7749,8 +7908,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
-      "lineStart": 114,
-      "lineEnd": 126,
+      "lineStart": 115,
+      "lineEnd": 127,
       "summary": "snapshot row을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -7771,8 +7930,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
-      "lineStart": 128,
-      "lineEnd": 143,
+      "lineStart": 129,
+      "lineEnd": 144,
       "summary": "snapshot summary을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -7793,8 +7952,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
-      "lineStart": 42,
-      "lineEnd": 53,
+      "lineStart": 43,
+      "lineEnd": 54,
       "summary": "source twin deployment context을(를) 처리하는 함수입니다.",
       "tags": [
         "exported",
@@ -7816,8 +7975,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
-      "lineStart": 163,
-      "lineEnd": 172,
+      "lineStart": 164,
+      "lineEnd": 173,
       "summary": "source twin state fingerprint을(를) 처리하는 함수입니다.",
       "tags": [
         "exported",
@@ -7839,8 +7998,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
-      "lineStart": 55,
-      "lineEnd": 57,
+      "lineStart": 56,
+      "lineEnd": 58,
       "summary": "unavailable을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -9409,8 +9568,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemOperationPlan.js",
       "parentId": "file:mcp/systemOperationPlan.js",
       "layer": "mcp",
-      "lineStart": 8,
-      "lineEnd": 13,
+      "lineStart": 14,
+      "lineEnd": 19,
       "summary": "system operation plan error constructor을(를) 처리하는 함수입니다.",
       "tags": [
         "class-method",
@@ -9426,13 +9585,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:mcp/systemOperationPlan.js:createSignedSystemOperationPlan",
       "kind": "function",
       "label": "createSignedSystemOperationPlan",
-      "fingerprint": "1c97934eb0ac98255f7e",
+      "fingerprint": "463b76ac1d7eb7d12aaa",
       "name": "createSignedSystemOperationPlan",
       "path": "mcp/systemOperationPlan.js",
       "parentId": "file:mcp/systemOperationPlan.js",
       "layer": "mcp",
-      "lineStart": 53,
-      "lineEnd": 94,
+      "lineStart": 96,
+      "lineEnd": 139,
       "summary": "signed system operation plan을(를) 생성하는 함수입니다.",
       "tags": [
         "exported",
@@ -9446,6 +9605,28 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:mcp/systemOperationPlan.js:normalizeOperationContract",
+      "kind": "function",
+      "label": "normalizeOperationContract",
+      "fingerprint": "24151626ab0f07fdef13",
+      "name": "normalizeOperationContract",
+      "path": "mcp/systemOperationPlan.js",
+      "parentId": "file:mcp/systemOperationPlan.js",
+      "layer": "mcp",
+      "lineStart": 55,
+      "lineEnd": 90,
+      "summary": "operation contract을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "mcp"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
       "id": "function:mcp/systemOperationPlan.js:operationId",
       "kind": "function",
       "label": "operationId",
@@ -9454,8 +9635,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemOperationPlan.js",
       "parentId": "file:mcp/systemOperationPlan.js",
       "layer": "mcp",
-      "lineStart": 39,
-      "lineEnd": 41,
+      "lineStart": 45,
+      "lineEnd": 47,
       "summary": "operation id을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -9476,8 +9657,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemOperationPlan.js",
       "parentId": "file:mcp/systemOperationPlan.js",
       "layer": "mcp",
-      "lineStart": 43,
-      "lineEnd": 47,
+      "lineStart": 49,
+      "lineEnd": 53,
       "summary": "timestamp을(를) 해석하는 함수입니다.",
       "tags": [
         "function",
@@ -9498,8 +9679,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemOperationPlan.js",
       "parentId": "file:mcp/systemOperationPlan.js",
       "layer": "mcp",
-      "lineStart": 16,
-      "lineEnd": 22,
+      "lineStart": 22,
+      "lineEnd": 28,
       "summary": "required text을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -9520,8 +9701,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemOperationPlan.js",
       "parentId": "file:mcp/systemOperationPlan.js",
       "layer": "mcp",
-      "lineStart": 32,
-      "lineEnd": 37,
+      "lineStart": 38,
+      "lineEnd": 43,
       "summary": "signature을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -9542,8 +9723,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemOperationPlan.js",
       "parentId": "file:mcp/systemOperationPlan.js",
       "layer": "mcp",
-      "lineStart": 24,
-      "lineEnd": 30,
+      "lineStart": 30,
+      "lineEnd": 36,
       "summary": "signing secret을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -9564,8 +9745,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemOperationPlan.js",
       "parentId": "file:mcp/systemOperationPlan.js",
       "layer": "mcp",
-      "lineStart": 49,
-      "lineEnd": 51,
+      "lineStart": 92,
+      "lineEnd": 94,
       "summary": "system operation signing secret을(를) 처리하는 함수입니다.",
       "tags": [
         "exported",
@@ -9582,13 +9763,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:mcp/systemOperationPlan.js:verifySignedSystemOperationPlan",
       "kind": "function",
       "label": "verifySignedSystemOperationPlan",
-      "fingerprint": "89fec67b7226d5fa6522",
+      "fingerprint": "9ce6cf18453d0eb28068",
       "name": "verifySignedSystemOperationPlan",
       "path": "mcp/systemOperationPlan.js",
       "parentId": "file:mcp/systemOperationPlan.js",
       "layer": "mcp",
-      "lineStart": 96,
-      "lineEnd": 144,
+      "lineStart": 141,
+      "lineEnd": 201,
       "summary": "verify signed system operation plan을(를) 처리하는 함수입니다.",
       "tags": [
         "exported",
@@ -10334,8 +10515,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/local-connector-agent.mjs",
       "parentId": "file:scripts/local-connector-agent.mjs",
       "layer": "documentation",
-      "lineStart": 380,
-      "lineEnd": 382,
+      "lineStart": 421,
+      "lineEnd": 423,
       "summary": "local connector state digest을(를) 처리하는 함수입니다.",
       "tags": [
         "documentation",
@@ -10380,8 +10561,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/local-connector-agent.mjs",
       "parentId": "file:scripts/local-connector-agent.mjs",
       "layer": "documentation",
-      "lineStart": 358,
-      "lineEnd": 370,
+      "lineStart": 399,
+      "lineEnd": 411,
       "summary": "main을(를) 처리하는 비동기 함수입니다.",
       "tags": [
         "async",
@@ -10489,13 +10670,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:scripts/local-connector-agent.mjs:runLocalConnectorAgent",
       "kind": "function",
       "label": "runLocalConnectorAgent",
-      "fingerprint": "6dda104667a8c0844b4b",
+      "fingerprint": "f9a8f04818a5b9efc267",
       "name": "runLocalConnectorAgent",
       "path": "scripts/local-connector-agent.mjs",
       "parentId": "file:scripts/local-connector-agent.mjs",
       "layer": "documentation",
-      "lineStart": 253,
-      "lineEnd": 356,
+      "lineStart": 291,
+      "lineEnd": 397,
       "summary": "run local connector agent을(를) 처리하는 비동기 함수입니다.",
       "tags": [
         "async",
@@ -10584,8 +10765,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/local-connector-agent.mjs",
       "parentId": "file:scripts/local-connector-agent.mjs",
       "layer": "documentation",
-      "lineStart": 266,
-      "lineEnd": 266,
+      "lineStart": 304,
+      "lineEnd": 304,
       "summary": "stop을(를) 처리하는 함수입니다.",
       "tags": [
         "arrow",
@@ -10594,6 +10775,29 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "details": {
         "functionKind": "arrow",
         "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:scripts/local-connector-agent.mjs:verifyApprovedGitSync",
+      "kind": "function",
+      "label": "verifyApprovedGitSync",
+      "fingerprint": "e522935f8c9bdaa2be99",
+      "name": "verifyApprovedGitSync",
+      "path": "scripts/local-connector-agent.mjs",
+      "parentId": "file:scripts/local-connector-agent.mjs",
+      "layer": "documentation",
+      "lineStart": 253,
+      "lineEnd": 289,
+      "summary": "verify approved git sync을(를) 처리하는 함수입니다.",
+      "tags": [
+        "documentation",
+        "exported",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
         "async": false
       }
     },
@@ -11873,8 +12077,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-local-connector-agent.mjs",
       "parentId": "file:scripts/test-local-connector-agent.mjs",
       "layer": "test",
-      "lineStart": 22,
-      "lineEnd": 25,
+      "lineStart": 23,
+      "lineEnd": 26,
       "summary": "configure repository을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -11895,8 +12099,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-local-connector-agent.mjs",
       "parentId": "file:scripts/test-local-connector-agent.mjs",
       "layer": "test",
-      "lineStart": 14,
-      "lineEnd": 20,
+      "lineStart": 15,
+      "lineEnd": 21,
       "summary": "git을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -11917,8 +12121,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
-      "lineStart": 3069,
-      "lineEnd": 3069,
+      "lineStart": 3073,
+      "lineEnd": 3073,
       "summary": "big stage을(를) 처리하는 함수입니다.",
       "tags": [
         "arrow",
@@ -12027,8 +12231,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
-      "lineStart": 3234,
-      "lineEnd": 3245,
+      "lineStart": 3238,
+      "lineEnd": 3249,
       "summary": "fake element을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -12049,8 +12253,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
-      "lineStart": 2999,
-      "lineEnd": 3005,
+      "lineStart": 3003,
+      "lineEnd": 3009,
       "summary": "rect을(를) 조회하는 함수입니다.",
       "tags": [
         "arrow",
@@ -12071,8 +12275,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
-      "lineStart": 3093,
-      "lineEnd": 3097,
+      "lineStart": 3097,
+      "lineEnd": 3101,
       "summary": "rect을(를) 조회하는 함수입니다.",
       "tags": [
         "arrow",
@@ -12115,8 +12319,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
-      "lineStart": 3036,
-      "lineEnd": 3036,
+      "lineStart": 3040,
+      "lineEnd": 3040,
       "summary": "padded rect을(를) 처리하는 함수입니다.",
       "tags": [
         "arrow",
@@ -12137,8 +12341,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
-      "lineStart": 3114,
-      "lineEnd": 3114,
+      "lineStart": 3118,
+      "lineEnd": 3118,
       "summary": "padded rect을(를) 처리하는 함수입니다.",
       "tags": [
         "arrow",
@@ -12423,8 +12627,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
-      "lineStart": 1502,
-      "lineEnd": 1508,
+      "lineStart": 1506,
+      "lineEnd": 1512,
       "summary": "scan을(를) 처리하는 함수입니다.",
       "tags": [
         "arrow",
@@ -12614,6 +12818,72 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:scripts/test-operation-lifecycle.mjs:planFor",
+      "kind": "function",
+      "label": "planFor",
+      "fingerprint": "a23d00e8e7febd03b57c",
+      "name": "planFor",
+      "path": "scripts/test-operation-lifecycle.mjs",
+      "parentId": "file:scripts/test-operation-lifecycle.mjs",
+      "layer": "test",
+      "lineStart": 175,
+      "lineEnd": 182,
+      "summary": "plan for을(를) 처리하는 함수입니다.",
+      "tags": [
+        "arrow",
+        "test"
+      ],
+      "details": {
+        "functionKind": "arrow",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:scripts/test-source-twin.mjs:localCompletionDb",
+      "kind": "function",
+      "label": "localCompletionDb",
+      "fingerprint": "75595c3a2d108c1973ec",
+      "name": "localCompletionDb",
+      "path": "scripts/test-source-twin.mjs",
+      "parentId": "file:scripts/test-source-twin.mjs",
+      "layer": "test",
+      "lineStart": 403,
+      "lineEnd": 433,
+      "summary": "local completion db을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "test"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:scripts/test-source-twin.mjs:localCompletionDb.from",
+      "kind": "function",
+      "label": "localCompletionDb.from",
+      "fingerprint": "f0e4f98b0c774a0594d6",
+      "name": "localCompletionDb.from",
+      "path": "scripts/test-source-twin.mjs",
+      "parentId": "file:scripts/test-source-twin.mjs",
+      "layer": "test",
+      "lineStart": 407,
+      "lineEnd": 431,
+      "summary": "local completion db from을(를) 처리하는 함수입니다.",
+      "tags": [
+        "method",
+        "test"
+      ],
+      "details": {
+        "functionKind": "method",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
       "id": "function:scripts/test-source-twin.mjs:localConnectorDb.from",
       "kind": "function",
       "label": "localConnectorDb.from",
@@ -12622,8 +12892,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-source-twin.mjs",
       "parentId": "file:scripts/test-source-twin.mjs",
       "layer": "test",
-      "lineStart": 320,
-      "lineEnd": 336,
+      "lineStart": 340,
+      "lineEnd": 356,
       "summary": "local connector db from을(를) 처리하는 함수입니다.",
       "tags": [
         "method",
@@ -12644,8 +12914,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-source-twin.mjs",
       "parentId": "file:scripts/test-source-twin.mjs",
       "layer": "test",
-      "lineStart": 382,
-      "lineEnd": 390,
+      "lineStart": 464,
+      "lineEnd": 472,
       "summary": "result을(를) 읽기하는 함수입니다.",
       "tags": [
         "arrow",
@@ -13468,13 +13738,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:shared/edgeOperation.js:edgeOperationIsActive",
       "kind": "function",
       "label": "edgeOperationIsActive",
-      "fingerprint": "9c03c508ab00a7c2aa0f",
+      "fingerprint": "422081e9306e58a5b1d7",
       "name": "edgeOperationIsActive",
       "path": "shared/edgeOperation.js",
       "parentId": "file:shared/edgeOperation.js",
       "layer": "shared",
-      "lineStart": 17,
-      "lineEnd": 19,
+      "lineStart": 27,
+      "lineEnd": 29,
       "summary": "edge operation is active을(를) 처리하는 함수입니다.",
       "tags": [
         "exported",
@@ -13491,13 +13761,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:shared/edgeOperation.js:edgeOperationIsTerminal",
       "kind": "function",
       "label": "edgeOperationIsTerminal",
-      "fingerprint": "82537d2a84ab30b16962",
+      "fingerprint": "64cad3ed6fa3e0146083",
       "name": "edgeOperationIsTerminal",
       "path": "shared/edgeOperation.js",
       "parentId": "file:shared/edgeOperation.js",
       "layer": "shared",
-      "lineStart": 21,
-      "lineEnd": 23,
+      "lineStart": 31,
+      "lineEnd": 33,
       "summary": "edge operation is terminal을(를) 처리하는 함수입니다.",
       "tags": [
         "exported",
@@ -13519,8 +13789,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/edgeOperation.js",
       "parentId": "file:shared/edgeOperation.js",
       "layer": "shared",
-      "lineStart": 13,
-      "lineEnd": 15,
+      "lineStart": 23,
+      "lineEnd": 25,
       "summary": "edge operation status definition을(를) 처리하는 함수입니다.",
       "tags": [
         "exported",
@@ -13860,6 +14130,1081 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "lineStart": 21,
       "lineEnd": 25,
       "summary": "text을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:OperationContractError.constructor",
+      "kind": "function",
+      "label": "OperationContractError.constructor",
+      "fingerprint": "895aa913dd67cec14320",
+      "name": "OperationContractError.constructor",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 60,
+      "lineEnd": 64,
+      "summary": "operation contract error constructor을(를) 처리하는 함수입니다.",
+      "tags": [
+        "class-method",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "class-method",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:acknowledgeOperationCancellation",
+      "kind": "function",
+      "label": "acknowledgeOperationCancellation",
+      "fingerprint": "4b44430333821e439fd1",
+      "name": "acknowledgeOperationCancellation",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 691,
+      "lineEnd": 704,
+      "summary": "acknowledge operation cancellation을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:appendEvent",
+      "kind": "function",
+      "label": "appendEvent",
+      "fingerprint": "5be4f728be3c949aeba1",
+      "name": "appendEvent",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 464,
+      "lineEnd": 487,
+      "summary": "append event을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:assertExecutableOperation",
+      "kind": "function",
+      "label": "assertExecutableOperation",
+      "fingerprint": "a601c4988b66b6ace173",
+      "name": "assertExecutableOperation",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 242,
+      "lineEnd": 284,
+      "summary": "assert executable operation을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:assertState",
+      "kind": "function",
+      "label": "assertState",
+      "fingerprint": "6fde21714562b45463a8",
+      "name": "assertState",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 489,
+      "lineEnd": 493,
+      "summary": "assert state을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:boundedInteger",
+      "kind": "function",
+      "label": "boundedInteger",
+      "fingerprint": "d47c2133f7af97094df3",
+      "name": "boundedInteger",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 110,
+      "lineEnd": 113,
+      "summary": "bounded integer을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:completeOperationExecution",
+      "kind": "function",
+      "label": "completeOperationExecution",
+      "fingerprint": "cc5d8919b27c0a0238b1",
+      "name": "completeOperationExecution",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 620,
+      "lineEnd": 634,
+      "summary": "complete operation execution을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:completeOperationRecovery",
+      "kind": "function",
+      "label": "completeOperationRecovery",
+      "fingerprint": "d6bff934e1668ae474b4",
+      "name": "completeOperationRecovery",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 748,
+      "lineEnd": 767,
+      "summary": "complete operation recovery을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:completeOperationVerification",
+      "kind": "function",
+      "label": "completeOperationVerification",
+      "fingerprint": "bb887d0e387bf5cb7b85",
+      "name": "completeOperationVerification",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 636,
+      "lineEnd": 659,
+      "summary": "complete operation verification을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:createOperationPlan",
+      "kind": "function",
+      "label": "createOperationPlan",
+      "fingerprint": "367c460455d972ad5f1c",
+      "name": "createOperationPlan",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 350,
+      "lineEnd": 401,
+      "summary": "operation plan을(를) 생성하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:createOperationRun",
+      "kind": "function",
+      "label": "createOperationRun",
+      "fingerprint": "7e41f0e98ec8c3ea35ee",
+      "name": "createOperationRun",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 495,
+      "lineEnd": 561,
+      "summary": "operation run을(를) 생성하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:deepFreeze",
+      "kind": "function",
+      "label": "deepFreeze",
+      "fingerprint": "28d401f7ffed42e1cb54",
+      "name": "deepFreeze",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 141,
+      "lineEnd": 146,
+      "summary": "deep freeze을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:defaultRisk",
+      "kind": "function",
+      "label": "defaultRisk",
+      "fingerprint": "5147d3115802c9718090",
+      "name": "defaultRisk",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 236,
+      "lineEnd": 240,
+      "summary": "default risk을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:defaultSideEffect",
+      "kind": "function",
+      "label": "defaultSideEffect",
+      "fingerprint": "087f0b783cde404f7bef",
+      "name": "defaultSideEffect",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 230,
+      "lineEnd": 234,
+      "summary": "default side effect을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:failOperationRun",
+      "kind": "function",
+      "label": "failOperationRun",
+      "fingerprint": "ffe0516ea7f557893859",
+      "name": "failOperationRun",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 661,
+      "lineEnd": 673,
+      "summary": "fail operation run을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:nonSecretText",
+      "kind": "function",
+      "label": "nonSecretText",
+      "fingerprint": "b0558d36b1d63478583c",
+      "name": "nonSecretText",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 77,
+      "lineEnd": 83,
+      "summary": "non secret text을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:normalizeActor",
+      "kind": "function",
+      "label": "normalizeActor",
+      "fingerprint": "5f337dad122cc426ec09",
+      "name": "normalizeActor",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 426,
+      "lineEnd": 434,
+      "summary": "actor을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:normalizeEventDetail",
+      "kind": "function",
+      "label": "normalizeEventDetail",
+      "fingerprint": "6b2500e018cd59d6f810",
+      "name": "normalizeEventDetail",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 436,
+      "lineEnd": 462,
+      "summary": "event detail을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:normalizeExecution",
+      "kind": "function",
+      "label": "normalizeExecution",
+      "fingerprint": "d8c4af624474235e557e",
+      "name": "normalizeExecution",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 187,
+      "lineEnd": 194,
+      "summary": "execution을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:normalizeIdempotency",
+      "kind": "function",
+      "label": "normalizeIdempotency",
+      "fingerprint": "06893b6ddc2459dc3835",
+      "name": "normalizeIdempotency",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 196,
+      "lineEnd": 203,
+      "summary": "idempotency을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:normalizeInitiator",
+      "kind": "function",
+      "label": "normalizeInitiator",
+      "fingerprint": "b91be5aa4260fbfc0330",
+      "name": "normalizeInitiator",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 324,
+      "lineEnd": 333,
+      "summary": "initiator을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:normalizeInput",
+      "kind": "function",
+      "label": "normalizeInput",
+      "fingerprint": "5bd486a3c79aa43addbe",
+      "name": "normalizeInput",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 159,
+      "lineEnd": 165,
+      "summary": "input을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:normalizeOperationDefinition",
+      "kind": "function",
+      "label": "normalizeOperationDefinition",
+      "fingerprint": "09f347f3d355fb10e04e",
+      "name": "normalizeOperationDefinition",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 286,
+      "lineEnd": 322,
+      "summary": "operation definition을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:normalizeRecovery",
+      "kind": "function",
+      "label": "normalizeRecovery",
+      "fingerprint": "b99cbfa2f32089a3cc94",
+      "name": "normalizeRecovery",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 216,
+      "lineEnd": 228,
+      "summary": "recovery을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:normalizeScope",
+      "kind": "function",
+      "label": "normalizeScope",
+      "fingerprint": "f85eb3b1a960a033a700",
+      "name": "normalizeScope",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 335,
+      "lineEnd": 348,
+      "summary": "scope을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:normalizeTarget",
+      "kind": "function",
+      "label": "normalizeTarget",
+      "fingerprint": "166631247b87dc1a7b70",
+      "name": "normalizeTarget",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 152,
+      "lineEnd": 157,
+      "summary": "target을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:normalizeVerification",
+      "kind": "function",
+      "label": "normalizeVerification",
+      "fingerprint": "f73c58b04311e0e83295",
+      "name": "normalizeVerification",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 205,
+      "lineEnd": 214,
+      "summary": "verification을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:normalizeWriteSet",
+      "kind": "function",
+      "label": "normalizeWriteSet",
+      "fingerprint": "9e03755cfb28a86ea117",
+      "name": "normalizeWriteSet",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 167,
+      "lineEnd": 185,
+      "summary": "write set을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:operationRunIsActive",
+      "kind": "function",
+      "label": "operationRunIsActive",
+      "fingerprint": "0bbf401afbd5d2ec2d33",
+      "name": "operationRunIsActive",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 769,
+      "lineEnd": 771,
+      "summary": "operation run is active을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:operationRunIsTerminal",
+      "kind": "function",
+      "label": "operationRunIsTerminal",
+      "fingerprint": "73397f644bbd167396c7",
+      "name": "operationRunIsTerminal",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 773,
+      "lineEnd": 775,
+      "summary": "operation run is terminal을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:plainObject",
+      "kind": "function",
+      "label": "plainObject",
+      "fingerprint": "d7e1a654b1d1b1b9a066",
+      "name": "plainObject",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 67,
+      "lineEnd": 69,
+      "summary": "plain object을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:queueOperationRun",
+      "kind": "function",
+      "label": "queueOperationRun",
+      "fingerprint": "1368900111b89eddcc50",
+      "name": "queueOperationRun",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 590,
+      "lineEnd": 599,
+      "summary": "queue operation run을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:recordOperationApproval",
+      "kind": "function",
+      "label": "recordOperationApproval",
+      "fingerprint": "284a92fda3077b0c259c",
+      "name": "recordOperationApproval",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 563,
+      "lineEnd": 588,
+      "summary": "operation approval을(를) 기록하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:requestOperationCancellation",
+      "kind": "function",
+      "label": "requestOperationCancellation",
+      "fingerprint": "1bdab32006ae77a9a29c",
+      "name": "requestOperationCancellation",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 675,
+      "lineEnd": 689,
+      "summary": "request operation cancellation을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:requestOperationRecovery",
+      "kind": "function",
+      "label": "requestOperationRecovery",
+      "fingerprint": "72baf2d5af7c74867f86",
+      "name": "requestOperationRecovery",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 723,
+      "lineEnd": 735,
+      "summary": "request operation recovery을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:retryOperationRun",
+      "kind": "function",
+      "label": "retryOperationRun",
+      "fingerprint": "7839f067fd99b4852ed3",
+      "name": "retryOperationRun",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 706,
+      "lineEnd": 721,
+      "summary": "retry operation run을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:safeFingerprint",
+      "kind": "function",
+      "label": "safeFingerprint",
+      "fingerprint": "7263cdd0eb6ef7a35c36",
+      "name": "safeFingerprint",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 93,
+      "lineEnd": 99,
+      "summary": "safe fingerprint을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:safeId",
+      "kind": "function",
+      "label": "safeId",
+      "fingerprint": "19c23e955ee6eade0ddd",
+      "name": "safeId",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 85,
+      "lineEnd": 91,
+      "summary": "safe id을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:safeText",
+      "kind": "function",
+      "label": "safeText",
+      "fingerprint": "2698e96eadba4deef11c",
+      "name": "safeText",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 71,
+      "lineEnd": 75,
+      "summary": "safe text을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:safeTimestamp",
+      "kind": "function",
+      "label": "safeTimestamp",
+      "fingerprint": "e6d1aa32b6d6f924da94",
+      "name": "safeTimestamp",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 101,
+      "lineEnd": 108,
+      "summary": "safe timestamp을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:startOperationRecovery",
+      "kind": "function",
+      "label": "startOperationRecovery",
+      "fingerprint": "f07cb5fa7f83b2fa8666",
+      "name": "startOperationRecovery",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 737,
+      "lineEnd": 746,
+      "summary": "start operation recovery을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:startOperationRun",
+      "kind": "function",
+      "label": "startOperationRun",
+      "fingerprint": "4af12b5a8454498bbe2e",
+      "name": "startOperationRun",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 601,
+      "lineEnd": 618,
+      "summary": "start operation run을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:uniqueIds",
+      "kind": "function",
+      "label": "uniqueIds",
+      "fingerprint": "2436e4aafeda0a6e7323",
+      "name": "uniqueIds",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 115,
+      "lineEnd": 126,
+      "summary": "unique ids을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:uniqueTexts",
+      "kind": "function",
+      "label": "uniqueTexts",
+      "fingerprint": "bb3406e87b390c03ec78",
+      "name": "uniqueTexts",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 128,
+      "lineEnd": 139,
+      "summary": "unique texts을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:verifyOperationEventChain",
+      "kind": "function",
+      "label": "verifyOperationEventChain",
+      "fingerprint": "ebcbed1ce4db253fff89",
+      "name": "verifyOperationEventChain",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 777,
+      "lineEnd": 802,
+      "summary": "verify operation event chain을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:verifyOperationPlan",
+      "kind": "function",
+      "label": "verifyOperationPlan",
+      "fingerprint": "35e2a621168cb041e004",
+      "name": "verifyOperationPlan",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 403,
+      "lineEnd": 424,
+      "summary": "verify operation plan을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:visit",
+      "kind": "function",
+      "label": "visit",
+      "fingerprint": "ee72e9b172393e85c64e",
+      "name": "visit",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 443,
+      "lineEnd": 460,
+      "summary": "visit을(를) 처리하는 함수입니다.",
+      "tags": [
+        "arrow",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "arrow",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/operationLifecycle.js:withFingerprint",
+      "kind": "function",
+      "label": "withFingerprint",
+      "fingerprint": "0fbdb72de37a2fd6abf5",
+      "name": "withFingerprint",
+      "path": "shared/operationLifecycle.js",
+      "parentId": "file:shared/operationLifecycle.js",
+      "layer": "shared",
+      "lineStart": 148,
+      "lineEnd": 150,
+      "summary": "with fingerprint을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
         "shared"
@@ -16161,8 +17506,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
-      "lineStart": 40,
-      "lineEnd": 44,
+      "lineStart": 55,
+      "lineEnd": 59,
       "summary": "twin build error constructor을(를) 처리하는 함수입니다.",
       "tags": [
         "class-method",
@@ -16178,13 +17523,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:shared/twinBuild.js:createTwinBuild",
       "kind": "function",
       "label": "createTwinBuild",
-      "fingerprint": "f48159f7db58d6f31330",
+      "fingerprint": "e90d50119027b2178eaa",
       "name": "createTwinBuild",
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
-      "lineStart": 432,
-      "lineEnd": 463,
+      "lineStart": 638,
+      "lineEnd": 681,
       "summary": "twin build을(를) 생성하는 함수입니다.",
       "tags": [
         "exported",
@@ -16206,8 +17551,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
-      "lineStart": 108,
-      "lineEnd": 113,
+      "lineStart": 123,
+      "lineEnd": 128,
       "summary": "deep freeze을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -16228,8 +17573,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
-      "lineStart": 73,
-      "lineEnd": 76,
+      "lineStart": 88,
+      "lineEnd": 91,
       "summary": "finite number을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -16245,13 +17590,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:shared/twinBuild.js:migrateTwinBuild",
       "kind": "function",
       "label": "migrateTwinBuild",
-      "fingerprint": "d906cb4f06425b76a102",
+      "fingerprint": "a8b9ffe602afa902ed17",
       "name": "migrateTwinBuild",
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
-      "lineStart": 465,
-      "lineEnd": 483,
+      "lineStart": 683,
+      "lineEnd": 736,
       "summary": "migrate twin build을(를) 처리하는 함수입니다.",
       "tags": [
         "exported",
@@ -16273,9 +17618,53 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
-      "lineStart": 197,
-      "lineEnd": 214,
+      "lineStart": 212,
+      "lineEnd": 229,
       "summary": "binding을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:normalizeControl",
+      "kind": "function",
+      "label": "normalizeControl",
+      "fingerprint": "073b88df9ce415c0dbd1",
+      "name": "normalizeControl",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 401,
+      "lineEnd": 415,
+      "summary": "control을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:normalizeDataClass",
+      "kind": "function",
+      "label": "normalizeDataClass",
+      "fingerprint": "266658b7d7c6537c3f3e",
+      "name": "normalizeDataClass",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 326,
+      "lineEnd": 338,
+      "summary": "data class을(를) 정규화하는 함수입니다.",
       "tags": [
         "function",
         "shared"
@@ -16295,8 +17684,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
-      "lineStart": 240,
-      "lineEnd": 246,
+      "lineStart": 255,
+      "lineEnd": 261,
       "summary": "endpoint을(를) 정규화하는 함수입니다.",
       "tags": [
         "function",
@@ -16317,9 +17706,31 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
-      "lineStart": 174,
-      "lineEnd": 195,
+      "lineStart": 189,
+      "lineEnd": 210,
       "summary": "entity을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:normalizeEvent",
+      "kind": "function",
+      "label": "normalizeEvent",
+      "fingerprint": "8a5e116666de30846b9f",
+      "name": "normalizeEvent",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 384,
+      "lineEnd": 399,
+      "summary": "event을(를) 정규화하는 함수입니다.",
       "tags": [
         "function",
         "shared"
@@ -16339,8 +17750,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
-      "lineStart": 135,
-      "lineEnd": 155,
+      "lineStart": 150,
+      "lineEnd": 170,
       "summary": "evidence을(를) 정규화하는 함수입니다.",
       "tags": [
         "function",
@@ -16361,9 +17772,31 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
-      "lineStart": 288,
-      "lineEnd": 295,
+      "lineStart": 303,
+      "lineEnd": 310,
       "summary": "gateway을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:normalizeObservation",
+      "kind": "function",
+      "label": "normalizeObservation",
+      "fingerprint": "783866c48f96b3fffbc7",
+      "name": "normalizeObservation",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 358,
+      "lineEnd": 382,
+      "summary": "observation을(를) 정규화하는 함수입니다.",
       "tags": [
         "function",
         "shared"
@@ -16378,13 +17811,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:shared/twinBuild.js:normalizeOperation",
       "kind": "function",
       "label": "normalizeOperation",
-      "fingerprint": "319b5803649d025f8cf1",
+      "fingerprint": "07f046e90baf285605c9",
       "name": "normalizeOperation",
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
-      "lineStart": 297,
-      "lineEnd": 317,
+      "lineStart": 437,
+      "lineEnd": 443,
       "summary": "operation을(를) 정규화하는 함수입니다.",
       "tags": [
         "function",
@@ -16405,8 +17838,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
-      "lineStart": 216,
-      "lineEnd": 238,
+      "lineStart": 231,
+      "lineEnd": 253,
       "summary": "part을(를) 정규화하는 함수입니다.",
       "tags": [
         "function",
@@ -16427,9 +17860,53 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
-      "lineStart": 157,
-      "lineEnd": 172,
+      "lineStart": 172,
+      "lineEnd": 187,
       "summary": "placement을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:normalizePolicy",
+      "kind": "function",
+      "label": "normalizePolicy",
+      "fingerprint": "ed285853edb1aa753056",
+      "name": "normalizePolicy",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 340,
+      "lineEnd": 356,
+      "summary": "policy을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:normalizeRecordTarget",
+      "kind": "function",
+      "label": "normalizeRecordTarget",
+      "fingerprint": "6d8cd57db2183a59421f",
+      "name": "normalizeRecordTarget",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 312,
+      "lineEnd": 317,
+      "summary": "record target을(를) 정규화하는 함수입니다.",
       "tags": [
         "function",
         "shared"
@@ -16449,8 +17926,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
-      "lineStart": 248,
-      "lineEnd": 277,
+      "lineStart": 263,
+      "lineEnd": 292,
       "summary": "relation을(를) 정규화하는 함수입니다.",
       "tags": [
         "function",
@@ -16471,9 +17948,53 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
-      "lineStart": 115,
-      "lineEnd": 133,
+      "lineStart": 130,
+      "lineEnd": 148,
       "summary": "source을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:normalizeThreat",
+      "kind": "function",
+      "label": "normalizeThreat",
+      "fingerprint": "af9971cf4065fa306de2",
+      "name": "normalizeThreat",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 417,
+      "lineEnd": 435,
+      "summary": "threat을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:normalizeTimestamp",
+      "kind": "function",
+      "label": "normalizeTimestamp",
+      "fingerprint": "aaa0ab9101b19135f777",
+      "name": "normalizeTimestamp",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 319,
+      "lineEnd": 324,
+      "summary": "timestamp을(를) 정규화하는 함수입니다.",
       "tags": [
         "function",
         "shared"
@@ -16493,8 +18014,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
-      "lineStart": 279,
-      "lineEnd": 286,
+      "lineStart": 294,
+      "lineEnd": 301,
       "summary": "zone을(를) 정규화하는 함수입니다.",
       "tags": [
         "function",
@@ -16515,8 +18036,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
-      "lineStart": 47,
-      "lineEnd": 49,
+      "lineStart": 62,
+      "lineEnd": 64,
       "summary": "plain object을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -16537,8 +18058,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
-      "lineStart": 65,
-      "lineEnd": 71,
+      "lineStart": 80,
+      "lineEnd": 86,
       "summary": "positive integer을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -16559,8 +18080,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
-      "lineStart": 91,
-      "lineEnd": 102,
+      "lineStart": 106,
+      "lineEnd": 117,
       "summary": "list을(를) 기록하는 함수입니다.",
       "tags": [
         "function",
@@ -16568,6 +18089,28 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:requireDataClasses",
+      "kind": "function",
+      "label": "requireDataClasses",
+      "fingerprint": "c1a9599086c4321498c3",
+      "name": "requireDataClasses",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 577,
+      "lineEnd": 583,
+      "summary": "require data classes을(를) 처리하는 함수입니다.",
+      "tags": [
+        "arrow",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "arrow",
         "exported": false,
         "async": false
       }
@@ -16581,8 +18124,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
-      "lineStart": 345,
-      "lineEnd": 351,
+      "lineStart": 474,
+      "lineEnd": 480,
       "summary": "require evidence을(를) 처리하는 함수입니다.",
       "tags": [
         "arrow",
@@ -16598,13 +18141,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:shared/twinBuild.js:requireReferences",
       "kind": "function",
       "label": "requireReferences",
-      "fingerprint": "a79e851f7fe8db08e599",
+      "fingerprint": "4f082acf14ea21ddf2a0",
       "name": "requireReferences",
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
-      "lineStart": 319,
-      "lineEnd": 430,
+      "lineStart": 445,
+      "lineEnd": 636,
       "summary": "require references을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -16612,6 +18155,28 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:requireTarget",
+      "kind": "function",
+      "label": "requireTarget",
+      "fingerprint": "ffae132978247a20aaed",
+      "name": "requireTarget",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 572,
+      "lineEnd": 576,
+      "summary": "require target을(를) 처리하는 함수입니다.",
+      "tags": [
+        "arrow",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "arrow",
         "exported": false,
         "async": false
       }
@@ -16625,8 +18190,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
-      "lineStart": 328,
-      "lineEnd": 333,
+      "lineStart": 457,
+      "lineEnd": 462,
       "summary": "require unique placement을(를) 처리하는 함수입니다.",
       "tags": [
         "arrow",
@@ -16647,8 +18212,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
-      "lineStart": 57,
-      "lineEnd": 63,
+      "lineStart": 72,
+      "lineEnd": 78,
       "summary": "safe id을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -16669,8 +18234,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
-      "lineStart": 51,
-      "lineEnd": 55,
+      "lineStart": 66,
+      "lineEnd": 70,
       "summary": "safe text을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -16691,8 +18256,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
-      "lineStart": 78,
-      "lineEnd": 89,
+      "lineStart": 93,
+      "lineEnd": 104,
       "summary": "unique ids을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -16713,8 +18278,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
-      "lineStart": 104,
-      "lineEnd": 106,
+      "lineStart": 119,
+      "lineEnd": 121,
       "summary": "with fingerprint을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -16796,13 +18361,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:shared/twinBuildCanvas.js:createTwinBuildFromCanvasTemplate",
       "kind": "function",
       "label": "createTwinBuildFromCanvasTemplate",
-      "fingerprint": "c765afdb7b5a829a314b",
+      "fingerprint": "b570c76176e7ef0ea185",
       "name": "createTwinBuildFromCanvasTemplate",
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
       "lineStart": 61,
-      "lineEnd": 190,
+      "lineEnd": 202,
       "summary": "twin build from canvas template을(를) 생성하는 함수입니다.",
       "tags": [
         "exported",
@@ -16824,8 +18389,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
-      "lineStart": 280,
-      "lineEnd": 285,
+      "lineStart": 292,
+      "lineEnd": 297,
       "summary": "endpoint handle을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -16846,8 +18411,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
-      "lineStart": 197,
-      "lineEnd": 200,
+      "lineStart": 209,
+      "lineEnd": 212,
       "summary": "entity parent node id을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -16868,8 +18433,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
-      "lineStart": 202,
-      "lineEnd": 205,
+      "lineStart": 214,
+      "lineEnd": 217,
       "summary": "entity trust zone을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -16912,8 +18477,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
-      "lineStart": 192,
-      "lineEnd": 195,
+      "lineStart": 204,
+      "lineEnd": 207,
       "summary": "evidence refs을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -16934,8 +18499,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
-      "lineStart": 357,
-      "lineEnd": 365,
+      "lineStart": 369,
+      "lineEnd": 377,
       "summary": "find twin build entity node을(를) 처리하는 함수입니다.",
       "tags": [
         "exported",
@@ -16957,8 +18522,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
-      "lineStart": 226,
-      "lineEnd": 273,
+      "lineStart": 238,
+      "lineEnd": 285,
       "summary": "materialize twin build entity을(를) 처리하는 함수입니다.",
       "tags": [
         "exported",
@@ -16980,8 +18545,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
-      "lineStart": 207,
-      "lineEnd": 224,
+      "lineStart": 219,
+      "lineEnd": 236,
       "summary": "materialize twin build part을(를) 처리하는 함수입니다.",
       "tags": [
         "exported",
@@ -17003,8 +18568,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
-      "lineStart": 287,
-      "lineEnd": 310,
+      "lineStart": 299,
+      "lineEnd": 322,
       "summary": "materialize twin build relation을(를) 처리하는 함수입니다.",
       "tags": [
         "exported",
@@ -17048,8 +18613,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
-      "lineStart": 275,
-      "lineEnd": 278,
+      "lineStart": 287,
+      "lineEnd": 290,
       "summary": "relation gateway을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -17092,8 +18657,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
-      "lineStart": 312,
-      "lineEnd": 355,
+      "lineStart": 324,
+      "lineEnd": 367,
       "summary": "twin build entity canvas projection을(를) 처리하는 함수입니다.",
       "tags": [
         "exported",
@@ -18447,8 +20012,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapterDescriptor.js",
       "parentId": "file:shared/workflowSystemTwinAdapterDescriptor.js",
       "layer": "shared",
-      "lineStart": 59,
-      "lineEnd": 63,
+      "lineStart": 61,
+      "lineEnd": 65,
       "summary": "can inspect workflow system canvas을(를) 처리하는 함수입니다.",
       "tags": [
         "exported",
@@ -18465,13 +20030,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:shared/workflowSystemTwinBuild.js:createWorkflowSystemTwinBuild",
       "kind": "function",
       "label": "createWorkflowSystemTwinBuild",
-      "fingerprint": "224794462670259e3044",
+      "fingerprint": "c81e2a4ca0ff962efa02",
       "name": "createWorkflowSystemTwinBuild",
       "path": "shared/workflowSystemTwinBuild.js",
       "parentId": "file:shared/workflowSystemTwinBuild.js",
       "layer": "shared",
-      "lineStart": 10,
-      "lineEnd": 45,
+      "lineStart": 24,
+      "lineEnd": 195,
       "summary": "workflow system twin build을(를) 생성하는 함수입니다.",
       "tags": [
         "exported",
@@ -28378,7 +29943,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "npm-script:test",
       "kind": "npm-script",
       "label": "npm run test",
-      "fingerprint": "715f9db4bf448f02f71e",
+      "fingerprint": "2acb5ed54b843c0204b9",
       "name": "test",
       "path": "package.json",
       "parentId": "file:package.json",
@@ -28968,6 +30533,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:025e4cc84f476452",
+      "type": "imports",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "file:shared/systemPartOntology.js",
+      "names": [
+        "systemPartContainsSecretLiteral"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:0264e6f37a510d27",
       "type": "contains",
       "source": "file:shared/systemRuntime.js",
@@ -29030,6 +30605,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/digitalTwinReview.js:createDigitalTwinReviewItem"
     },
     {
+      "id": "relation:048a81cc5c04223b",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:failOperationRun"
+    },
+    {
       "id": "relation:049093f04f79d219",
       "type": "contains",
       "source": "file:api/system-runtime.js",
@@ -29069,6 +30650,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/sourceTwinStore.js",
       "target": "function:mcp/sourceTwinStore.js:snapshotRow"
+    },
+    {
+      "id": "relation:05cc34abaa8e2321",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:completeOperationRecovery"
     },
     {
       "id": "relation:05d51dde2acb9a53",
@@ -29156,6 +30743,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:scripts/local-connector-agent.mjs:executeApprovedGitSync"
     },
     {
+      "id": "relation:07b08475e2fb0e53",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:nonSecretText"
+    },
+    {
       "id": "relation:07b3042486dadc96",
       "type": "imports",
       "source": "file:src/nodes/ContentNode.jsx",
@@ -29189,6 +30782,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:scripts/test-mcp-logic.mjs",
       "target": "function:scripts/test-mcp-logic.mjs:memo"
+    },
+    {
+      "id": "relation:0818a18a4b152cdc",
+      "type": "contains",
+      "source": "file:scripts/test-source-twin.mjs",
+      "target": "function:scripts/test-source-twin.mjs:localCompletionDb.from"
     },
     {
       "id": "relation:08250db453858011",
@@ -29280,6 +30879,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/lib/sharedCanvasApi.js:setMemberViewRestriction"
     },
     {
+      "id": "relation:0a5a0c982f8ef837",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:deepFreeze"
+    },
+    {
+      "id": "relation:0a6e8aaba7c21b89",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:startOperationRecovery"
+    },
+    {
       "id": "relation:0b0d5707c1a3d7bd",
       "type": "imports",
       "source": "file:scripts/local-connector-agent.mjs",
@@ -29328,6 +30939,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/App.jsx",
       "target": "function:src/App.jsx:closeContext"
+    },
+    {
+      "id": "relation:0c6895fc5cd89001",
+      "type": "imports",
+      "source": "file:shared/workflowOperationDefinitions.js",
+      "target": "file:shared/operationLifecycle.js",
+      "names": [
+        "normalizeOperationDefinition"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:0c7f1009e255decf",
@@ -29689,6 +31310,29 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ]
     },
     {
+      "id": "relation:142c8ed8f6e412cf",
+      "type": "imports",
+      "source": "file:shared/workflowSystemTwinBuild.js",
+      "target": "file:shared/workflowOperationDefinitions.js",
+      "names": [
+        "WORKFLOW_GIT_SYNC_AUDIT_CLASS_ID",
+        "WORKFLOW_GIT_SYNC_CONTROL_EVIDENCE_ID",
+        "WORKFLOW_GIT_SYNC_EVIDENCE_ID",
+        "WORKFLOW_GIT_SYNC_LOCAL_POLICY_ID",
+        "WORKFLOW_GIT_SYNC_OPERATION_DEFINITION",
+        "WORKFLOW_GIT_SYNC_OPERATION_ID",
+        "WORKFLOW_GIT_SYNC_OWNER_POLICY_ID",
+        "WORKFLOW_GIT_SYNC_POLICY_EVIDENCE_ID",
+        "WORKFLOW_GIT_SYNC_STATE_CLASS_ID",
+        "WORKFLOW_SOURCE_METADATA_CLASS_ID",
+        "WORKFLOW_SOURCE_SNAPSHOT_EVIDENCE_ID",
+        "WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION",
+        "WORKFLOW_SOURCE_SNAPSHOT_OPERATION_ID",
+        "WORKFLOW_SOURCE_SNAPSHOT_POLICY_ID"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:144fa338f0201e3a",
       "type": "contains",
       "source": "file:api/system-runtime.js",
@@ -29737,6 +31381,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/nodes/SystemNode.jsx",
       "target": "function:src/nodes/SystemNode.jsx:handlePointerUp"
+    },
+    {
+      "id": "relation:1544849be7ee8bc0",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:uniqueIds"
+    },
+    {
+      "id": "relation:15849b17db1823d4",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:safeId"
     },
     {
       "id": "relation:1593e58d86b6ba19",
@@ -29868,6 +31524,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/components/DigitalTwinReviewPanel.jsx:DigitalTwinReviewPanel"
     },
     {
+      "id": "relation:18431947f3c1a464",
+      "type": "imports",
+      "source": "file:shared/twinBuild.js",
+      "target": "file:shared/operationLifecycle.js",
+      "names": [
+        "normalizeOperationDefinition"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:1865a0a7957a2a60",
       "type": "contains",
       "source": "file:src/App.jsx",
@@ -29911,6 +31577,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:scripts/test-source-twin.mjs",
       "target": "function:scripts/test-source-twin.mjs:localConnectorDb.from"
+    },
+    {
+      "id": "relation:18f97c76a7adf243",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:recordOperationApproval"
     },
     {
       "id": "relation:19019e04be5ad251",
@@ -30178,6 +31850,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/twinBuildReconciler.js:reconcileTwinBuild"
     },
     {
+      "id": "relation:1df7afb07c4308f9",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:createOperationRun"
+    },
+    {
       "id": "relation:1e058b4cf5e61e17",
       "type": "contains",
       "source": "file:src/lib/mcpTokens.js",
@@ -30374,6 +32052,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/sourceTwinStore.js:listSourceTwinEvents"
     },
     {
+      "id": "relation:21ab8181accabfd4",
+      "type": "imports",
+      "source": "file:mcp/localConnectorStore.js",
+      "target": "file:shared/workflowOperationDefinitions.js",
+      "names": [
+        "WORKFLOW_GIT_SYNC_CONFIRMATION",
+        "WORKFLOW_GIT_SYNC_OPERATION_DEFINITION"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:21abb9eec938bfec",
       "type": "contains",
       "source": "file:scripts/local-connector-agent.mjs",
@@ -30451,6 +32140,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/lib/systemRuntimeApi.js:accessToken"
     },
     {
+      "id": "relation:23399ecd5b4e7012",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:requireDataClasses"
+    },
+    {
       "id": "relation:23869e7522597710",
       "type": "imports",
       "source": "file:shared/twinBuild.js",
@@ -30467,6 +32162,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "calls-db-function",
       "source": "file:src/lib/shares.js",
       "target": "db-function:list_pending_email_invites"
+    },
+    {
+      "id": "relation:23e79600cb9c22ed",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:normalizeEventDetail"
     },
     {
       "id": "relation:2421b340a98b5d25",
@@ -30819,6 +32520,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/storage.js:loadActiveId"
     },
     {
+      "id": "relation:2d5b605dd0f3e871",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:operationRunIsTerminal"
+    },
+    {
       "id": "relation:2d85c638600cc6ec",
       "type": "contains",
       "source": "file:src/App.jsx",
@@ -30853,6 +32560,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/components/ScopedParticipants.jsx",
       "target": "function:src/components/ScopedParticipants.jsx:ScopedParticipants"
+    },
+    {
+      "id": "relation:2e845319042dd7f4",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:createOperationPlan"
     },
     {
       "id": "relation:2ee670587cd8852c",
@@ -31022,6 +32735,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:3273b77077607dba",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:verifyOperationEventChain"
+    },
+    {
       "id": "relation:3285456f4f411447",
       "type": "contains",
       "source": "file:src/lib/shareLaunchCoordinator.js",
@@ -31088,6 +32807,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "permissionCanEditNodeStructure",
         "permissionFromAccess",
         "visibleNodeIdSetForPermission"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "relation:338355d96746c5de",
+      "type": "imports",
+      "source": "file:scripts/test-operation-lifecycle.mjs",
+      "target": "dependency:node:assert/strict",
+      "names": [
+        "default"
       ],
       "dynamic": false
     },
@@ -31319,6 +33048,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/nodes/MemoNode.jsx:handlePointerMove"
     },
     {
+      "id": "relation:39f84ff87719d9a9",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:normalizeDataClass"
+    },
+    {
       "id": "relation:3a0670113bd14393",
       "type": "imports",
       "source": "file:scripts/test-twin-adapter-contract.mjs",
@@ -31488,6 +33223,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "file:src/lib/canvasSchemaGuard.js",
       "names": [
         "canvasWriteError"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "relation:3e537cfc888072c4",
+      "type": "imports",
+      "source": "file:shared/twinBuildCanvas.js",
+      "target": "file:shared/twinBuild.js",
+      "names": [
+        "TWIN_BUILD_SCHEMA_VERSION",
+        "createTwinBuild"
       ],
       "dynamic": false
     },
@@ -31730,6 +33476,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/components/SourceTwinPanel.jsx",
       "target": "function:src/components/SourceTwinPanel.jsx:StructureView"
+    },
+    {
+      "id": "relation:42e3f4f66e0246a3",
+      "type": "contains",
+      "source": "file:scripts/local-connector-agent.mjs",
+      "target": "function:scripts/local-connector-agent.mjs:verifyApprovedGitSync"
     },
     {
       "id": "relation:42efd113a71ce5a5",
@@ -32132,6 +33884,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:4bc0fcf5b75fc9d4",
+      "type": "imports",
+      "source": "file:scripts/test-twin-build.mjs",
+      "target": "file:shared/workflowOperationDefinitions.js",
+      "names": [
+        "WORKFLOW_GIT_SYNC_OPERATION_DEFINITION",
+        "WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:4bca50df0e747c24",
       "type": "contains",
       "source": "file:src/components/Toolbar.jsx",
@@ -32146,6 +33909,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "applyDigitalTwinGraphProposal"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:4be6a683394a3918",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:normalizeObservation"
     },
     {
       "id": "relation:4c018a4562d65b65",
@@ -32594,6 +34363,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:54ca71dcacc9f21e",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:verifyOperationPlan"
+    },
+    {
       "id": "relation:54d13e2f397ca83e",
       "type": "contains",
       "source": "file:src/App.jsx",
@@ -33010,6 +34785,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:5d2e85f0d5454735",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:safeText"
+    },
+    {
       "id": "relation:5d743c3c8fc48828",
       "type": "contains",
       "source": "file:src/App.jsx",
@@ -33171,6 +34952,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/store.js:nextRevision"
     },
     {
+      "id": "relation:6077fde3e7826489",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:plainObject"
+    },
+    {
       "id": "relation:607996b81eb1b66f",
       "type": "contains",
       "source": "file:src/components/NotesPanel.jsx",
@@ -33227,6 +35014,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/nodes/SystemNode.jsx:cancelDimPress"
     },
     {
+      "id": "relation:61ca9e983409a6d4",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:requireTarget"
+    },
+    {
       "id": "relation:61f98c0329bf3ded",
       "type": "contains",
       "source": "file:shared/systemRuntime.js",
@@ -33263,6 +35056,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/systemOntology.js:systemNodeReality"
     },
     {
+      "id": "relation:62d7e2ae78883ad2",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:OperationContractError.constructor"
+    },
+    {
       "id": "relation:62dd40dfc2b5f714",
       "type": "contains",
       "source": "file:mcp/localConnectorStore.js",
@@ -33273,6 +35072,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/systemOperationPlan.js",
       "target": "function:mcp/systemOperationPlan.js:signature"
+    },
+    {
+      "id": "relation:6308166a09cbb172",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:normalizePolicy"
     },
     {
       "id": "relation:6317b34798316558",
@@ -33550,6 +35355,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/App.jsx:cancelEdgeLp"
     },
     {
+      "id": "relation:6a6a4ae91e83f9a2",
+      "type": "imports",
+      "source": "file:scripts/test-local-connector-agent.mjs",
+      "target": "file:scripts/local-connector-agent.mjs",
+      "names": [
+        "executeApprovedGitSync",
+        "localConnectorAuthorizationStopped",
+        "localGitSyncApprovalPhrase",
+        "observeLocalGit",
+        "resolveRepositoryRoot",
+        "verifyApprovedGitSync"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:6a7c386b2c3ba6d9",
       "type": "serves",
       "source": "file:api/local-connector.js",
@@ -33716,6 +35536,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/lib/shares.js:revokeShareMember"
     },
     {
+      "id": "relation:6e2780833aba63d1",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:normalizeInput"
+    },
+    {
       "id": "relation:6e856179f137692d",
       "type": "defines-policy",
       "source": "file:supabase-canvas-images.sql",
@@ -33770,6 +35596,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/systemPartOntology.js",
       "target": "function:shared/systemPartOntology.js:plainText"
+    },
+    {
+      "id": "relation:6f40c5fe948fa80c",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:visit"
     },
     {
       "id": "relation:6f4d34bc946ee8e9",
@@ -34071,6 +35903,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/nodes/SystemNode.jsx:newPartId"
     },
     {
+      "id": "relation:7520e059b2a48b81",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:operationRunIsActive"
+    },
+    {
       "id": "relation:756f944b5c25f9f9",
       "type": "accesses",
       "source": "file:supabase-profiles.sql",
@@ -34198,6 +36036,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/shareAccess.js:redactCanvas"
     },
     {
+      "id": "relation:76f8c07e4f4e0e2f",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:normalizeWriteSet"
+    },
+    {
       "id": "relation:770a91d5cb0a82ea",
       "type": "imports",
       "source": "file:scripts/test-twin-adapter-contract.mjs",
@@ -34207,6 +36051,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "setDigitalTwinReviewDecision"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:772c0f5c23e82d51",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:assertState"
     },
     {
       "id": "relation:77348c2cc68cf640",
@@ -34311,6 +36161,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:scripts/local-connector-agent.mjs",
       "target": "function:scripts/local-connector-agent.mjs:observeLocalGit"
+    },
+    {
+      "id": "relation:794605b6298593d7",
+      "type": "imports",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "file:shared/digitalTwinReview.js",
+      "names": [
+        "digitalTwinReviewFingerprint"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:796ab1f9cf17d12e",
@@ -34434,6 +36294,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:7be9fc25f8f5aeb4",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:normalizeActor"
+    },
+    {
       "id": "relation:7c789d13b090d25d",
       "type": "contains",
       "source": "file:mcp/layout.js",
@@ -34498,6 +36364,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/edges/StubEdge.jsx",
       "target": "function:src/edges/StubEdge.jsx:StubEdge"
+    },
+    {
+      "id": "relation:7e132efea6895500",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:retryOperationRun"
     },
     {
       "id": "relation:7e95090f0d0483a5",
@@ -34702,6 +36574,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/layout.js",
       "target": "function:mcp/layout.js:getRect"
+    },
+    {
+      "id": "relation:827ba2581a05461a",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:queueOperationRun"
     },
     {
       "id": "relation:828f54f9b5032a71",
@@ -34967,6 +36845,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:86b0ef51bb7c95d9",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:normalizeOperationDefinition"
+    },
+    {
       "id": "relation:86c602611099e69e",
       "type": "contains",
       "source": "file:src/components/InvitePopover.jsx",
@@ -35188,6 +37072,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/systemRuntime.js:systemRuntimeCapabilityForPart"
     },
     {
+      "id": "relation:8c1bde440607e6ad",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:safeFingerprint"
+    },
+    {
       "id": "relation:8c3e561627ebc13d",
       "type": "contains",
       "source": "file:mcp/store.js",
@@ -35232,6 +37122,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/layout.js",
       "target": "function:mcp/layout.js:refDir"
+    },
+    {
+      "id": "relation:8e0fc2669ec03227",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:safeTimestamp"
     },
     {
       "id": "relation:8e16f7a4a136fc9c",
@@ -35469,6 +37365,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/localConnectorStore.js:connectorRow"
     },
     {
+      "id": "relation:92adc3e3068aa845",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:completeOperationVerification"
+    },
+    {
       "id": "relation:92dba8c52e9fc8c3",
       "type": "contains",
       "source": "file:shared/sourceTwin.js",
@@ -35702,16 +37604,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/layout.js:findNonOverlapping"
     },
     {
-      "id": "relation:987eff09c639c123",
-      "type": "imports",
-      "source": "file:shared/twinBuildCanvas.js",
-      "target": "file:shared/twinBuild.js",
-      "names": [
-        "createTwinBuild"
-      ],
-      "dynamic": false
-    },
-    {
       "id": "relation:9886802c65254e27",
       "type": "contains",
       "source": "file:mcp/systemRuntime.js",
@@ -35805,10 +37697,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/components/NotesPanel.jsx:scheduleTitleSave"
     },
     {
+      "id": "relation:9a490f03b46faa11",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:requestOperationRecovery"
+    },
+    {
       "id": "relation:9a6c902c0a9cb21f",
       "type": "contains",
       "source": "file:scripts/source-twin-scanner.mjs",
       "target": "function:scripts/source-twin-scanner.mjs:fileSummary"
+    },
+    {
+      "id": "relation:9a84073509da5c29",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:startOperationRun"
     },
     {
       "id": "relation:9a8aa3d1206d6b1c",
@@ -36239,6 +38143,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/twinBuildCanvas.js:endpointHandle"
     },
     {
+      "id": "relation:a1f5619af5812f8f",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:normalizeRecordTarget"
+    },
+    {
       "id": "relation:a1fd33c82d1c77bc",
       "type": "contains",
       "source": "file:scripts/test-local-connector-agent.mjs",
@@ -36449,6 +38359,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/shareAccess.js:compareShareAccess"
     },
     {
+      "id": "relation:a67023eedf587ab7",
+      "type": "contains",
+      "source": "file:scripts/test-source-twin.mjs",
+      "target": "function:scripts/test-source-twin.mjs:localCompletionDb"
+    },
+    {
       "id": "relation:a6cbdae9dc260814",
       "type": "contains",
       "source": "file:scripts/test-mcp-logic.mjs",
@@ -36590,6 +38506,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/localConnector.js:stringList"
     },
     {
+      "id": "relation:ab845aba300aee67",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:acknowledgeOperationCancellation"
+    },
+    {
       "id": "relation:ab95b0b6516dc478",
       "type": "imports",
       "source": "file:src/lib/presence.js",
@@ -36610,6 +38532,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/demoCanvases.js",
       "target": "function:src/demoCanvases.js:flow"
+    },
+    {
+      "id": "relation:aba983ce942d9f7d",
+      "type": "imports",
+      "source": "file:scripts/test-source-twin.mjs",
+      "target": "file:shared/workflowOperationDefinitions.js",
+      "names": [
+        "WORKFLOW_GIT_SYNC_OPERATION_DEFINITION",
+        "WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:abbf9b7e71923dba",
@@ -36662,6 +38595,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/systemOntology.js",
       "target": "function:shared/systemOntology.js:normalizeSystemNodeData"
+    },
+    {
+      "id": "relation:acfb4d948294879c",
+      "type": "contains",
+      "source": "file:mcp/localConnectorStore.js",
+      "target": "function:mcp/localConnectorStore.js:sha"
+    },
+    {
+      "id": "relation:ad02ab6fc0979218",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:normalizeRecovery"
     },
     {
       "id": "relation:ad3358e1f3f3274f",
@@ -36864,6 +38809,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/App.jsx:midOf"
     },
     {
+      "id": "relation:b13900a7b1f80086",
+      "type": "contains",
+      "source": "file:mcp/systemOperationPlan.js",
+      "target": "function:mcp/systemOperationPlan.js:normalizeOperationContract"
+    },
+    {
       "id": "relation:b15db97e6fc40252",
       "type": "imports",
       "source": "file:mcp/sourceTwinStore.js",
@@ -36991,6 +38942,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/lib/wheelRouting.js:nativeWheelScrollTarget"
     },
     {
+      "id": "relation:b3b44b8c46f27e14",
+      "type": "contains",
+      "source": "file:mcp/localConnectorStore.js",
+      "target": "function:mcp/localConnectorStore.js:normalizeLocalGitSyncVerification"
+    },
+    {
       "id": "relation:b41131426edd2a83",
       "type": "imports",
       "source": "file:src/main.jsx",
@@ -37031,6 +38988,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/lib/profiles.js:upsertMyProfile"
     },
     {
+      "id": "relation:b5c0d3180cd81cf4",
+      "type": "imports",
+      "source": "file:scripts/test-source-twin.mjs",
+      "target": "file:mcp/localConnectorStore.js",
+      "names": [
+        "LOCAL_GIT_SYNC_CONFIRMATION",
+        "applyLocalGitSync",
+        "completeLocalGitSyncOperation",
+        "normalizeLocalGitSyncVerification",
+        "previewLocalGitSync"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:b60a05992309d7be",
       "type": "contains",
       "source": "file:mcp/shareAccess.js",
@@ -37063,18 +39034,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "dependency:node:child_process",
       "names": [
         "execFileSync"
-      ],
-      "dynamic": false
-    },
-    {
-      "id": "relation:b695a2522a9258e7",
-      "type": "imports",
-      "source": "file:scripts/test-source-twin.mjs",
-      "target": "file:mcp/localConnectorStore.js",
-      "names": [
-        "LOCAL_GIT_SYNC_CONFIRMATION",
-        "applyLocalGitSync",
-        "previewLocalGitSync"
       ],
       "dynamic": false
     },
@@ -37113,6 +39072,35 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "defines-policy",
       "source": "file:supabase-shares.sql",
       "target": "rls-policy:share_members:owner deletes share members"
+    },
+    {
+      "id": "relation:b833bf568893fcfe",
+      "type": "imports",
+      "source": "file:scripts/test-operation-lifecycle.mjs",
+      "target": "file:shared/operationLifecycle.js",
+      "names": [
+        "OperationContractError",
+        "acknowledgeOperationCancellation",
+        "completeOperationExecution",
+        "completeOperationRecovery",
+        "completeOperationVerification",
+        "createOperationPlan",
+        "createOperationRun",
+        "failOperationRun",
+        "normalizeOperationDefinition",
+        "operationRunIsActive",
+        "operationRunIsTerminal",
+        "queueOperationRun",
+        "recordOperationApproval",
+        "requestOperationCancellation",
+        "requestOperationRecovery",
+        "retryOperationRun",
+        "startOperationRecovery",
+        "startOperationRun",
+        "verifyOperationEventChain",
+        "verifyOperationPlan"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:b83e3c4f48cb0c64",
@@ -37155,6 +39143,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/nodes/ContentNode.jsx",
       "target": "function:src/nodes/ContentNode.jsx:startEdit"
+    },
+    {
+      "id": "relation:b994236e7514a78d",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:normalizeControl"
     },
     {
       "id": "relation:b995e2bfbd66aa12",
@@ -37605,6 +39599,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:c47319aac34af4eb",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:normalizeInitiator"
+    },
+    {
       "id": "relation:c4a12556c3959f4a",
       "type": "imports",
       "source": "file:src/components/AuthPanel.jsx",
@@ -37840,6 +39840,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/systemPartOntology.js",
       "target": "function:shared/systemPartOntology.js:systemPartKindDefinition"
+    },
+    {
+      "id": "relation:c8aa1444f04476ad",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:withFingerprint"
     },
     {
       "id": "relation:c8c60537855b3a4d",
@@ -38100,6 +40106,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/App.jsx:handleContextAddMemo"
     },
     {
+      "id": "relation:ce1488a865ed5b0b",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:uniqueTexts"
+    },
+    {
       "id": "relation:ce496ca2763c2ed9",
       "type": "contains",
       "source": "file:src/components/NotesPanel.jsx",
@@ -38192,6 +40204,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/store.js",
       "target": "function:mcp/store.js:checkRadialLevelMixing"
+    },
+    {
+      "id": "relation:d112afce42bc5257",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:defaultSideEffect"
+    },
+    {
+      "id": "relation:d131da5d8d9841dd",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:normalizeIdempotency"
     },
     {
       "id": "relation:d1a23c330709e920",
@@ -38399,6 +40423,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:d6bbcf0121bc5a39",
+      "type": "imports",
+      "source": "file:shared/workflowOperationDefinitions.js",
+      "target": "file:shared/sourceTwin.js",
+      "names": [
+        "SOURCE_TWIN_OPERATION_CONFIRMATION",
+        "SOURCE_TWIN_SNAPSHOT_OPERATION"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:d6c39a8dc4b6156f",
       "type": "contains",
       "source": "file:src/components/EdgeRelationEditor.jsx",
@@ -38592,20 +40627,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "file:src/lib/supabase.js",
       "names": [
         "supabase"
-      ],
-      "dynamic": false
-    },
-    {
-      "id": "relation:dbe81a4e97a429a7",
-      "type": "imports",
-      "source": "file:scripts/test-local-connector-agent.mjs",
-      "target": "file:scripts/local-connector-agent.mjs",
-      "names": [
-        "executeApprovedGitSync",
-        "localConnectorAuthorizationStopped",
-        "localGitSyncApprovalPhrase",
-        "observeLocalGit",
-        "resolveRepositoryRoot"
       ],
       "dynamic": false
     },
@@ -38985,6 +41006,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/workflowSystemTwinBuild.js:createWorkflowSystemTwinBuild"
     },
     {
+      "id": "relation:e3ace1cf47c77b50",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:normalizeVerification"
+    },
+    {
       "id": "relation:e3ad64e8299c0b94",
       "type": "contains",
       "source": "file:src/components/SystemObservationCatalog.jsx",
@@ -39073,6 +41100,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:e5cef4742026c558",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:requestOperationCancellation"
+    },
+    {
       "id": "relation:e64abb4b0549a868",
       "type": "imports",
       "source": "file:mcp/server.js",
@@ -39107,6 +41140,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/localConnectorStore.js",
       "target": "function:mcp/localConnectorStore.js:loadOwnedConnector"
+    },
+    {
+      "id": "relation:e6a00bd6e89a785c",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:normalizeEvent"
     },
     {
       "id": "relation:e6eca7a44826a92f",
@@ -39550,6 +41589,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:ee09136f2c04c198",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:assertExecutableOperation"
+    },
+    {
       "id": "relation:ee7b8bcbdce6acd7",
       "type": "contains",
       "source": "file:mcp/store.js",
@@ -39586,6 +41631,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/twinBuildReconciler.js:compactKey"
     },
     {
+      "id": "relation:ef4647ab81c63d9a",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:boundedInteger"
+    },
+    {
       "id": "relation:ef6f600472d4d5ae",
       "type": "contains",
       "source": "file:src/App.jsx",
@@ -39596,6 +41647,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/sharePermissions.js",
       "target": "function:shared/sharePermissions.js:editableGroupIdSet"
+    },
+    {
+      "id": "relation:f00307c44b5ec6b3",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:defaultRisk"
     },
     {
       "id": "relation:f049844867732449",
@@ -39684,6 +41741,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/localConnector.js",
       "target": "function:shared/localConnector.js:shellSingleQuote"
+    },
+    {
+      "id": "relation:f1881b3ddaa83171",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:normalizeThreat"
     },
     {
       "id": "relation:f1fbbb89628ab812",
@@ -39781,6 +41844,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/shareAccess.js:pickBestShareAccess"
     },
     {
+      "id": "relation:f35ef99367f9c0ac",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:normalizeExecution"
+    },
+    {
       "id": "relation:f36d311885bf5823",
       "type": "contains",
       "source": "file:src/components/EditToolbar.jsx",
@@ -39819,6 +41888,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/storage.js:saveLodThreshold"
     },
     {
+      "id": "relation:f45ba366dceb2f8a",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:normalizeScope"
+    },
+    {
       "id": "relation:f4bf18628de952e6",
       "type": "contains",
       "source": "file:src/App.jsx",
@@ -39847,6 +41922,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/components/CanvasTabs.jsx",
       "target": "function:src/components/CanvasTabs.jsx:onKey"
+    },
+    {
+      "id": "relation:f55c11305d7809ab",
+      "type": "imports",
+      "source": "file:mcp/sourceTwinStore.js",
+      "target": "file:shared/workflowOperationDefinitions.js",
+      "names": [
+        "WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:f583cff911a1aa10",
@@ -39914,6 +41999,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/digitalTwinProposal.js:applyDigitalTwinGraphProposal"
     },
     {
+      "id": "relation:f7297050699c057a",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:appendEvent"
+    },
+    {
       "id": "relation:f740d70716d99bb3",
       "type": "contains",
       "source": "file:src/nodes/SystemNode.jsx",
@@ -39930,6 +42021,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:api/source-twin-webhook.js",
       "target": "function:api/source-twin-webhook.js:send"
+    },
+    {
+      "id": "relation:f87d7c9080602d17",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:normalizeTimestamp"
     },
     {
       "id": "relation:f884ef59447e7508",
@@ -40017,6 +42114,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/twinAdapterContract.js",
       "target": "function:shared/twinAdapterContract.js:uniqueIds"
+    },
+    {
+      "id": "relation:fb34faaff9e37a58",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:normalizeTarget"
     },
     {
       "id": "relation:fbd491e9db5acb39",
@@ -40122,6 +42225,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:fe40accd1bb060a8",
+      "type": "contains",
+      "source": "file:shared/operationLifecycle.js",
+      "target": "function:shared/operationLifecycle.js:completeOperationExecution"
+    },
+    {
       "id": "relation:fefeead6882c39aa",
       "type": "contains",
       "source": "file:shared/systemObservationCatalog.js",
@@ -40143,6 +42252,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "assertPrivacyReleaseGate"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:ff43941c0f606172",
+      "type": "contains",
+      "source": "file:scripts/test-operation-lifecycle.mjs",
+      "target": "function:scripts/test-operation-lifecycle.mjs:planFor"
     },
     {
       "id": "relation:ff8193cfe4dca450",
@@ -40207,6 +42322,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:shared/digitalTwinReview.js",
       "file:shared/edgeOperation.js",
       "file:shared/localConnector.js",
+      "file:shared/operationLifecycle.js",
       "file:shared/privacyCapabilities.js",
       "file:shared/relationOntology.js",
       "file:shared/sharePermissions.js",
@@ -40221,6 +42337,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:shared/twinBuildCanvas.js",
       "file:shared/twinBuildReconciler.js",
       "file:shared/workflowCanvasSystemMap.js",
+      "file:shared/workflowOperationDefinitions.js",
       "file:shared/workflowSourceTwinCanvas.js",
       "file:shared/workflowSystemDiscovery.js",
       "file:shared/workflowSystemMapRepair.js",
@@ -40346,10 +42463,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:mcp/localConnectorStore.js:fingerprint",
       "function:mcp/localConnectorStore.js:listLocalConnectors",
       "function:mcp/localConnectorStore.js:loadOwnedConnector",
+      "function:mcp/localConnectorStore.js:normalizeLocalGitSyncVerification",
       "function:mcp/localConnectorStore.js:previewLocalGitSync",
       "function:mcp/localConnectorStore.js:recordLocalConnectorHeartbeat",
       "function:mcp/localConnectorStore.js:resolveLocalConnectorToken",
       "function:mcp/localConnectorStore.js:revokeLocalConnector",
+      "function:mcp/localConnectorStore.js:sha",
       "function:mcp/localConnectorStore.js:stable",
       "function:mcp/localConnectorStore.js:tokenHash",
       "function:mcp/sanitize.js:sanitizeAttrs",
@@ -40475,6 +42594,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:mcp/store.js:writeConflict",
       "function:mcp/systemOperationPlan.js:SystemOperationPlanError.constructor",
       "function:mcp/systemOperationPlan.js:createSignedSystemOperationPlan",
+      "function:mcp/systemOperationPlan.js:normalizeOperationContract",
       "function:mcp/systemOperationPlan.js:operationId",
       "function:mcp/systemOperationPlan.js:parseTimestamp",
       "function:mcp/systemOperationPlan.js:requiredText",
@@ -40526,6 +42646,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:scripts/local-connector-agent.mjs:sha",
       "function:scripts/local-connector-agent.mjs:stateMatches",
       "function:scripts/local-connector-agent.mjs:stop",
+      "function:scripts/local-connector-agent.mjs:verifyApprovedGitSync",
       "function:scripts/source-twin-scanner.mjs:addEntity",
       "function:scripts/source-twin-scanner.mjs:addFunction",
       "function:scripts/source-twin-scanner.mjs:addRelation",
@@ -40617,6 +42738,9 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:scripts/test-mcp-logic.mjs:writeDb.delete",
       "function:scripts/test-mcp-logic.mjs:writeDb.from",
       "function:scripts/test-mcp-logic.mjs:writeDb.insert",
+      "function:scripts/test-operation-lifecycle.mjs:planFor",
+      "function:scripts/test-source-twin.mjs:localCompletionDb",
+      "function:scripts/test-source-twin.mjs:localCompletionDb.from",
       "function:scripts/test-source-twin.mjs:localConnectorDb.from",
       "function:scripts/test-source-twin.mjs:readResult",
       "function:scripts/test-sql-security.mjs:read",
@@ -40673,6 +42797,54 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/localConnector.js:sourceEntity",
       "function:shared/localConnector.js:stringList",
       "function:shared/localConnector.js:text",
+      "function:shared/operationLifecycle.js:OperationContractError.constructor",
+      "function:shared/operationLifecycle.js:acknowledgeOperationCancellation",
+      "function:shared/operationLifecycle.js:appendEvent",
+      "function:shared/operationLifecycle.js:assertExecutableOperation",
+      "function:shared/operationLifecycle.js:assertState",
+      "function:shared/operationLifecycle.js:boundedInteger",
+      "function:shared/operationLifecycle.js:completeOperationExecution",
+      "function:shared/operationLifecycle.js:completeOperationRecovery",
+      "function:shared/operationLifecycle.js:completeOperationVerification",
+      "function:shared/operationLifecycle.js:createOperationPlan",
+      "function:shared/operationLifecycle.js:createOperationRun",
+      "function:shared/operationLifecycle.js:deepFreeze",
+      "function:shared/operationLifecycle.js:defaultRisk",
+      "function:shared/operationLifecycle.js:defaultSideEffect",
+      "function:shared/operationLifecycle.js:failOperationRun",
+      "function:shared/operationLifecycle.js:nonSecretText",
+      "function:shared/operationLifecycle.js:normalizeActor",
+      "function:shared/operationLifecycle.js:normalizeEventDetail",
+      "function:shared/operationLifecycle.js:normalizeExecution",
+      "function:shared/operationLifecycle.js:normalizeIdempotency",
+      "function:shared/operationLifecycle.js:normalizeInitiator",
+      "function:shared/operationLifecycle.js:normalizeInput",
+      "function:shared/operationLifecycle.js:normalizeOperationDefinition",
+      "function:shared/operationLifecycle.js:normalizeRecovery",
+      "function:shared/operationLifecycle.js:normalizeScope",
+      "function:shared/operationLifecycle.js:normalizeTarget",
+      "function:shared/operationLifecycle.js:normalizeVerification",
+      "function:shared/operationLifecycle.js:normalizeWriteSet",
+      "function:shared/operationLifecycle.js:operationRunIsActive",
+      "function:shared/operationLifecycle.js:operationRunIsTerminal",
+      "function:shared/operationLifecycle.js:plainObject",
+      "function:shared/operationLifecycle.js:queueOperationRun",
+      "function:shared/operationLifecycle.js:recordOperationApproval",
+      "function:shared/operationLifecycle.js:requestOperationCancellation",
+      "function:shared/operationLifecycle.js:requestOperationRecovery",
+      "function:shared/operationLifecycle.js:retryOperationRun",
+      "function:shared/operationLifecycle.js:safeFingerprint",
+      "function:shared/operationLifecycle.js:safeId",
+      "function:shared/operationLifecycle.js:safeText",
+      "function:shared/operationLifecycle.js:safeTimestamp",
+      "function:shared/operationLifecycle.js:startOperationRecovery",
+      "function:shared/operationLifecycle.js:startOperationRun",
+      "function:shared/operationLifecycle.js:uniqueIds",
+      "function:shared/operationLifecycle.js:uniqueTexts",
+      "function:shared/operationLifecycle.js:verifyOperationEventChain",
+      "function:shared/operationLifecycle.js:verifyOperationPlan",
+      "function:shared/operationLifecycle.js:visit",
+      "function:shared/operationLifecycle.js:withFingerprint",
       "function:shared/privacyCapabilities.js:assertPrivacyReleaseGate",
       "function:shared/relationOntology.js:createEdgeRelationData",
       "function:shared/relationOntology.js:edgeRelationInfo",
@@ -40780,21 +42952,31 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/twinBuild.js:finiteNumber",
       "function:shared/twinBuild.js:migrateTwinBuild",
       "function:shared/twinBuild.js:normalizeBinding",
+      "function:shared/twinBuild.js:normalizeControl",
+      "function:shared/twinBuild.js:normalizeDataClass",
       "function:shared/twinBuild.js:normalizeEndpoint",
       "function:shared/twinBuild.js:normalizeEntity",
+      "function:shared/twinBuild.js:normalizeEvent",
       "function:shared/twinBuild.js:normalizeEvidence",
       "function:shared/twinBuild.js:normalizeGateway",
+      "function:shared/twinBuild.js:normalizeObservation",
       "function:shared/twinBuild.js:normalizeOperation",
       "function:shared/twinBuild.js:normalizePart",
       "function:shared/twinBuild.js:normalizePlacement",
+      "function:shared/twinBuild.js:normalizePolicy",
+      "function:shared/twinBuild.js:normalizeRecordTarget",
       "function:shared/twinBuild.js:normalizeRelation",
       "function:shared/twinBuild.js:normalizeSource",
+      "function:shared/twinBuild.js:normalizeThreat",
+      "function:shared/twinBuild.js:normalizeTimestamp",
       "function:shared/twinBuild.js:normalizeZone",
       "function:shared/twinBuild.js:plainObject",
       "function:shared/twinBuild.js:positiveInteger",
       "function:shared/twinBuild.js:recordList",
+      "function:shared/twinBuild.js:requireDataClasses",
       "function:shared/twinBuild.js:requireEvidence",
       "function:shared/twinBuild.js:requireReferences",
+      "function:shared/twinBuild.js:requireTarget",
       "function:shared/twinBuild.js:requireUniquePlacement",
       "function:shared/twinBuild.js:safeId",
       "function:shared/twinBuild.js:safeText",
@@ -41369,6 +43551,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:scripts/system-discovery.mjs",
       "file:scripts/test-local-connector-agent.mjs",
       "file:scripts/test-mcp-logic.mjs",
+      "file:scripts/test-operation-lifecycle.mjs",
       "file:scripts/test-source-twin.mjs",
       "file:scripts/test-sql-security.mjs",
       "file:scripts/test-twin-adapter-contract.mjs",
@@ -41377,6 +43560,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:shared/digitalTwinReview.js",
       "file:shared/edgeOperation.js",
       "file:shared/localConnector.js",
+      "file:shared/operationLifecycle.js",
       "file:shared/privacyCapabilities.js",
       "file:shared/relationOntology.js",
       "file:shared/sharePermissions.js",
@@ -41391,6 +43575,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:shared/twinBuildCanvas.js",
       "file:shared/twinBuildReconciler.js",
       "file:shared/workflowCanvasSystemMap.js",
+      "file:shared/workflowOperationDefinitions.js",
       "file:shared/workflowSourceTwinCanvas.js",
       "file:shared/workflowSystemDiscovery.js",
       "file:shared/workflowSystemMapRepair.js",
@@ -41534,10 +43719,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:mcp/localConnectorStore.js:fingerprint",
       "function:mcp/localConnectorStore.js:listLocalConnectors",
       "function:mcp/localConnectorStore.js:loadOwnedConnector",
+      "function:mcp/localConnectorStore.js:normalizeLocalGitSyncVerification",
       "function:mcp/localConnectorStore.js:previewLocalGitSync",
       "function:mcp/localConnectorStore.js:recordLocalConnectorHeartbeat",
       "function:mcp/localConnectorStore.js:resolveLocalConnectorToken",
       "function:mcp/localConnectorStore.js:revokeLocalConnector",
+      "function:mcp/localConnectorStore.js:sha",
       "function:mcp/localConnectorStore.js:stable",
       "function:mcp/localConnectorStore.js:tokenHash",
       "function:mcp/sanitize.js:sanitizeAttrs",
@@ -41663,6 +43850,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:mcp/store.js:writeConflict",
       "function:mcp/systemOperationPlan.js:SystemOperationPlanError.constructor",
       "function:mcp/systemOperationPlan.js:createSignedSystemOperationPlan",
+      "function:mcp/systemOperationPlan.js:normalizeOperationContract",
       "function:mcp/systemOperationPlan.js:operationId",
       "function:mcp/systemOperationPlan.js:parseTimestamp",
       "function:mcp/systemOperationPlan.js:requiredText",
@@ -41714,6 +43902,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:scripts/local-connector-agent.mjs:sha",
       "function:scripts/local-connector-agent.mjs:stateMatches",
       "function:scripts/local-connector-agent.mjs:stop",
+      "function:scripts/local-connector-agent.mjs:verifyApprovedGitSync",
       "function:scripts/source-twin-scanner.mjs:addEntity",
       "function:scripts/source-twin-scanner.mjs:addFunction",
       "function:scripts/source-twin-scanner.mjs:addRelation",
@@ -41805,6 +43994,9 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:scripts/test-mcp-logic.mjs:writeDb.delete",
       "function:scripts/test-mcp-logic.mjs:writeDb.from",
       "function:scripts/test-mcp-logic.mjs:writeDb.insert",
+      "function:scripts/test-operation-lifecycle.mjs:planFor",
+      "function:scripts/test-source-twin.mjs:localCompletionDb",
+      "function:scripts/test-source-twin.mjs:localCompletionDb.from",
       "function:scripts/test-source-twin.mjs:localConnectorDb.from",
       "function:scripts/test-source-twin.mjs:readResult",
       "function:scripts/test-sql-security.mjs:read",
@@ -41861,6 +44053,54 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/localConnector.js:sourceEntity",
       "function:shared/localConnector.js:stringList",
       "function:shared/localConnector.js:text",
+      "function:shared/operationLifecycle.js:OperationContractError.constructor",
+      "function:shared/operationLifecycle.js:acknowledgeOperationCancellation",
+      "function:shared/operationLifecycle.js:appendEvent",
+      "function:shared/operationLifecycle.js:assertExecutableOperation",
+      "function:shared/operationLifecycle.js:assertState",
+      "function:shared/operationLifecycle.js:boundedInteger",
+      "function:shared/operationLifecycle.js:completeOperationExecution",
+      "function:shared/operationLifecycle.js:completeOperationRecovery",
+      "function:shared/operationLifecycle.js:completeOperationVerification",
+      "function:shared/operationLifecycle.js:createOperationPlan",
+      "function:shared/operationLifecycle.js:createOperationRun",
+      "function:shared/operationLifecycle.js:deepFreeze",
+      "function:shared/operationLifecycle.js:defaultRisk",
+      "function:shared/operationLifecycle.js:defaultSideEffect",
+      "function:shared/operationLifecycle.js:failOperationRun",
+      "function:shared/operationLifecycle.js:nonSecretText",
+      "function:shared/operationLifecycle.js:normalizeActor",
+      "function:shared/operationLifecycle.js:normalizeEventDetail",
+      "function:shared/operationLifecycle.js:normalizeExecution",
+      "function:shared/operationLifecycle.js:normalizeIdempotency",
+      "function:shared/operationLifecycle.js:normalizeInitiator",
+      "function:shared/operationLifecycle.js:normalizeInput",
+      "function:shared/operationLifecycle.js:normalizeOperationDefinition",
+      "function:shared/operationLifecycle.js:normalizeRecovery",
+      "function:shared/operationLifecycle.js:normalizeScope",
+      "function:shared/operationLifecycle.js:normalizeTarget",
+      "function:shared/operationLifecycle.js:normalizeVerification",
+      "function:shared/operationLifecycle.js:normalizeWriteSet",
+      "function:shared/operationLifecycle.js:operationRunIsActive",
+      "function:shared/operationLifecycle.js:operationRunIsTerminal",
+      "function:shared/operationLifecycle.js:plainObject",
+      "function:shared/operationLifecycle.js:queueOperationRun",
+      "function:shared/operationLifecycle.js:recordOperationApproval",
+      "function:shared/operationLifecycle.js:requestOperationCancellation",
+      "function:shared/operationLifecycle.js:requestOperationRecovery",
+      "function:shared/operationLifecycle.js:retryOperationRun",
+      "function:shared/operationLifecycle.js:safeFingerprint",
+      "function:shared/operationLifecycle.js:safeId",
+      "function:shared/operationLifecycle.js:safeText",
+      "function:shared/operationLifecycle.js:safeTimestamp",
+      "function:shared/operationLifecycle.js:startOperationRecovery",
+      "function:shared/operationLifecycle.js:startOperationRun",
+      "function:shared/operationLifecycle.js:uniqueIds",
+      "function:shared/operationLifecycle.js:uniqueTexts",
+      "function:shared/operationLifecycle.js:verifyOperationEventChain",
+      "function:shared/operationLifecycle.js:verifyOperationPlan",
+      "function:shared/operationLifecycle.js:visit",
+      "function:shared/operationLifecycle.js:withFingerprint",
       "function:shared/privacyCapabilities.js:assertPrivacyReleaseGate",
       "function:shared/relationOntology.js:createEdgeRelationData",
       "function:shared/relationOntology.js:edgeRelationInfo",
@@ -41968,21 +44208,31 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/twinBuild.js:finiteNumber",
       "function:shared/twinBuild.js:migrateTwinBuild",
       "function:shared/twinBuild.js:normalizeBinding",
+      "function:shared/twinBuild.js:normalizeControl",
+      "function:shared/twinBuild.js:normalizeDataClass",
       "function:shared/twinBuild.js:normalizeEndpoint",
       "function:shared/twinBuild.js:normalizeEntity",
+      "function:shared/twinBuild.js:normalizeEvent",
       "function:shared/twinBuild.js:normalizeEvidence",
       "function:shared/twinBuild.js:normalizeGateway",
+      "function:shared/twinBuild.js:normalizeObservation",
       "function:shared/twinBuild.js:normalizeOperation",
       "function:shared/twinBuild.js:normalizePart",
       "function:shared/twinBuild.js:normalizePlacement",
+      "function:shared/twinBuild.js:normalizePolicy",
+      "function:shared/twinBuild.js:normalizeRecordTarget",
       "function:shared/twinBuild.js:normalizeRelation",
       "function:shared/twinBuild.js:normalizeSource",
+      "function:shared/twinBuild.js:normalizeThreat",
+      "function:shared/twinBuild.js:normalizeTimestamp",
       "function:shared/twinBuild.js:normalizeZone",
       "function:shared/twinBuild.js:plainObject",
       "function:shared/twinBuild.js:positiveInteger",
       "function:shared/twinBuild.js:recordList",
+      "function:shared/twinBuild.js:requireDataClasses",
       "function:shared/twinBuild.js:requireEvidence",
       "function:shared/twinBuild.js:requireReferences",
+      "function:shared/twinBuild.js:requireTarget",
       "function:shared/twinBuild.js:requireUniquePlacement",
       "function:shared/twinBuild.js:safeId",
       "function:shared/twinBuild.js:safeText",
@@ -42669,90 +44919,162 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
     ]
   },
   "fingerprints": {
-    "code": "1de0a877fc2cf06d6783",
-    "database": "3d68fa3a9125bca19e6b",
+    "code": "6e8160797beec578665e",
+    "database": "20d049a4ab3b0e670bd6",
     "security": "75d8806a671225b1662d",
-    "deployment": "90ce3564aeb5c7c1cb12"
+    "deployment": "ae446f619a0e96953ba2"
   },
   "summary": {
-    "entities": 1278,
-    "files": 118,
-    "functions": 1041,
-    "imports": 363,
+    "entities": 1346,
+    "files": 121,
+    "functions": 1106,
+    "imports": 375,
     "apiRoutes": 6,
     "dbTables": 16,
     "dbFunctions": 24,
     "rlsPolicies": 21,
     "environmentVariables": 13,
-    "testFiles": 6,
+    "testFiles": 7,
     "deploymentEntities": 16,
     "securityEntities": 41,
     "parseFailures": 0
   },
   "changeSet": {
-    "baseManifestId": "source-twin-v1-63d86f270791",
+    "baseManifestId": "source-twin-v1-cc3d46887dec",
     "initialBaseline": false,
     "added": [
-      "file:shared/edgeOperation.js",
-      "function:shared/edgeOperation.js:edgeOperationIsActive",
-      "function:shared/edgeOperation.js:edgeOperationIsTerminal",
-      "function:shared/edgeOperation.js:edgeOperationStatusDefinition",
-      "function:shared/workflowCanvasSystemMap.js:sourceTwinViewPart",
-      "function:shared/workflowSourceTwinCanvas.js:workflowSourceTwinEntryForEdgeOperation",
-      "function:shared/workflowSourceTwinCanvas.js:workflowSourceTwinEntryForPart",
-      "function:src/App.jsx:poll"
+      "file:scripts/test-operation-lifecycle.mjs",
+      "file:shared/operationLifecycle.js",
+      "file:shared/workflowOperationDefinitions.js",
+      "function:mcp/localConnectorStore.js:normalizeLocalGitSyncVerification",
+      "function:mcp/localConnectorStore.js:sha",
+      "function:mcp/systemOperationPlan.js:normalizeOperationContract",
+      "function:scripts/local-connector-agent.mjs:verifyApprovedGitSync",
+      "function:scripts/test-operation-lifecycle.mjs:planFor",
+      "function:scripts/test-source-twin.mjs:localCompletionDb",
+      "function:scripts/test-source-twin.mjs:localCompletionDb.from",
+      "function:shared/operationLifecycle.js:OperationContractError.constructor",
+      "function:shared/operationLifecycle.js:acknowledgeOperationCancellation",
+      "function:shared/operationLifecycle.js:appendEvent",
+      "function:shared/operationLifecycle.js:assertExecutableOperation",
+      "function:shared/operationLifecycle.js:assertState",
+      "function:shared/operationLifecycle.js:boundedInteger",
+      "function:shared/operationLifecycle.js:completeOperationExecution",
+      "function:shared/operationLifecycle.js:completeOperationRecovery",
+      "function:shared/operationLifecycle.js:completeOperationVerification",
+      "function:shared/operationLifecycle.js:createOperationPlan",
+      "function:shared/operationLifecycle.js:createOperationRun",
+      "function:shared/operationLifecycle.js:deepFreeze",
+      "function:shared/operationLifecycle.js:defaultRisk",
+      "function:shared/operationLifecycle.js:defaultSideEffect",
+      "function:shared/operationLifecycle.js:failOperationRun",
+      "function:shared/operationLifecycle.js:nonSecretText",
+      "function:shared/operationLifecycle.js:normalizeActor",
+      "function:shared/operationLifecycle.js:normalizeEventDetail",
+      "function:shared/operationLifecycle.js:normalizeExecution",
+      "function:shared/operationLifecycle.js:normalizeIdempotency",
+      "function:shared/operationLifecycle.js:normalizeInitiator",
+      "function:shared/operationLifecycle.js:normalizeInput",
+      "function:shared/operationLifecycle.js:normalizeOperationDefinition",
+      "function:shared/operationLifecycle.js:normalizeRecovery",
+      "function:shared/operationLifecycle.js:normalizeScope",
+      "function:shared/operationLifecycle.js:normalizeTarget",
+      "function:shared/operationLifecycle.js:normalizeVerification",
+      "function:shared/operationLifecycle.js:normalizeWriteSet",
+      "function:shared/operationLifecycle.js:operationRunIsActive",
+      "function:shared/operationLifecycle.js:operationRunIsTerminal",
+      "function:shared/operationLifecycle.js:plainObject",
+      "function:shared/operationLifecycle.js:queueOperationRun",
+      "function:shared/operationLifecycle.js:recordOperationApproval",
+      "function:shared/operationLifecycle.js:requestOperationCancellation",
+      "function:shared/operationLifecycle.js:requestOperationRecovery",
+      "function:shared/operationLifecycle.js:retryOperationRun",
+      "function:shared/operationLifecycle.js:safeFingerprint",
+      "function:shared/operationLifecycle.js:safeId",
+      "function:shared/operationLifecycle.js:safeText",
+      "function:shared/operationLifecycle.js:safeTimestamp",
+      "function:shared/operationLifecycle.js:startOperationRecovery",
+      "function:shared/operationLifecycle.js:startOperationRun",
+      "function:shared/operationLifecycle.js:uniqueIds",
+      "function:shared/operationLifecycle.js:uniqueTexts",
+      "function:shared/operationLifecycle.js:verifyOperationEventChain",
+      "function:shared/operationLifecycle.js:verifyOperationPlan",
+      "function:shared/operationLifecycle.js:visit",
+      "function:shared/operationLifecycle.js:withFingerprint",
+      "function:shared/twinBuild.js:normalizeControl",
+      "function:shared/twinBuild.js:normalizeDataClass",
+      "function:shared/twinBuild.js:normalizeEvent",
+      "function:shared/twinBuild.js:normalizeObservation",
+      "function:shared/twinBuild.js:normalizePolicy",
+      "function:shared/twinBuild.js:normalizeRecordTarget",
+      "function:shared/twinBuild.js:normalizeThreat",
+      "function:shared/twinBuild.js:normalizeTimestamp",
+      "function:shared/twinBuild.js:requireDataClasses",
+      "function:shared/twinBuild.js:requireTarget"
     ],
     "changed": [
-      "file:scripts/source-twin-scanner.mjs",
-      "file:scripts/system-discovery.mjs",
+      "deployment:vercel-web",
+      "file:mcp/localConnectorStore.js",
+      "file:mcp/sourceTwinStore.js",
+      "file:mcp/systemOperationPlan.js",
+      "file:package.json",
+      "file:scripts/local-connector-agent.mjs",
+      "file:scripts/test-local-connector-agent.mjs",
       "file:scripts/test-mcp-logic.mjs",
       "file:scripts/test-source-twin.mjs",
-      "file:shared/localConnector.js",
-      "file:shared/systemPartOntology.js",
-      "file:shared/workflowCanvasSystemMap.js",
-      "file:shared/workflowSourceTwinCanvas.js",
-      "file:shared/workflowSystemTwinAdapter.js",
-      "file:src/App.jsx",
-      "file:src/components/SourceTwinPanel.jsx",
-      "file:src/edges/StubEdge.jsx",
-      "file:src/nodes/SystemNode.jsx",
-      "function:scripts/source-twin-scanner.mjs:readSourceTwinWorkingTree",
-      "function:scripts/system-discovery.mjs:readWorkingTree",
-      "function:shared/workflowCanvasSystemMap.js:mapEdges",
-      "function:shared/workflowCanvasSystemMap.js:mapNodes",
-      "function:shared/workflowSystemTwinAdapter.js:expectedSystemPartProposal",
-      "function:shared/workflowSystemTwinAdapter.js:relationReviewItem",
-      "function:src/App.jsx:App",
-      "function:src/components/SourceTwinPanel.jsx:SourceTwinPanel",
-      "function:src/edges/StubEdge.jsx:StubEdge",
-      "function:src/nodes/SystemNode.jsx:SystemNode"
+      "file:scripts/test-twin-adapter-contract.mjs",
+      "file:scripts/test-twin-build.mjs",
+      "file:shared/edgeOperation.js",
+      "file:shared/twinAdapterContract.js",
+      "file:shared/twinBuild.js",
+      "file:shared/twinBuildCanvas.js",
+      "file:shared/workflowSystemTwinAdapterDescriptor.js",
+      "file:shared/workflowSystemTwinBuild.js",
+      "function:mcp/localConnectorStore.js:applyLocalGitSync",
+      "function:mcp/localConnectorStore.js:completeLocalGitSyncOperation",
+      "function:mcp/localConnectorStore.js:previewLocalGitSync",
+      "function:mcp/sourceTwinStore.js:applySourceTwinSnapshotOperation",
+      "function:mcp/sourceTwinStore.js:previewSourceTwinSnapshotOperation",
+      "function:mcp/systemOperationPlan.js:createSignedSystemOperationPlan",
+      "function:mcp/systemOperationPlan.js:verifySignedSystemOperationPlan",
+      "function:scripts/local-connector-agent.mjs:runLocalConnectorAgent",
+      "function:shared/edgeOperation.js:edgeOperationIsActive",
+      "function:shared/edgeOperation.js:edgeOperationIsTerminal",
+      "function:shared/twinBuild.js:createTwinBuild",
+      "function:shared/twinBuild.js:migrateTwinBuild",
+      "function:shared/twinBuild.js:normalizeOperation",
+      "function:shared/twinBuild.js:requireReferences",
+      "function:shared/twinBuildCanvas.js:createTwinBuildFromCanvasTemplate",
+      "function:shared/workflowSystemTwinBuild.js:createWorkflowSystemTwinBuild",
+      "npm-script:test"
     ],
-    "removed": [
-      "file:src/components/OpenSourceTwinButton.jsx",
-      "function:src/components/OpenSourceTwinButton.jsx:OpenSourceTwinButton"
-    ],
+    "removed": [],
     "changedPaths": [
-      "scripts/source-twin-scanner.mjs",
-      "scripts/system-discovery.mjs",
+      "mcp/localConnectorStore.js",
+      "mcp/sourceTwinStore.js",
+      "mcp/systemOperationPlan.js",
+      "package.json",
+      "scripts/local-connector-agent.mjs",
+      "scripts/test-local-connector-agent.mjs",
       "scripts/test-mcp-logic.mjs",
+      "scripts/test-operation-lifecycle.mjs",
       "scripts/test-source-twin.mjs",
+      "scripts/test-twin-adapter-contract.mjs",
+      "scripts/test-twin-build.mjs",
       "shared/edgeOperation.js",
-      "shared/localConnector.js",
-      "shared/systemPartOntology.js",
-      "shared/workflowCanvasSystemMap.js",
-      "shared/workflowSourceTwinCanvas.js",
-      "shared/workflowSystemTwinAdapter.js",
-      "src/App.jsx",
-      "src/components/OpenSourceTwinButton.jsx",
-      "src/components/SourceTwinPanel.jsx",
-      "src/edges/StubEdge.jsx",
-      "src/nodes/SystemNode.jsx"
+      "shared/operationLifecycle.js",
+      "shared/twinAdapterContract.js",
+      "shared/twinBuild.js",
+      "shared/twinBuildCanvas.js",
+      "shared/workflowOperationDefinitions.js",
+      "shared/workflowSystemTwinAdapterDescriptor.js",
+      "shared/workflowSystemTwinBuild.js"
     ],
     "summary": {
-      "added": 8,
-      "changed": 23,
-      "removed": 2,
-      "paths": 15
+      "added": 68,
+      "changed": 34,
+      "removed": 0,
+      "paths": 19
     }
   }
 }

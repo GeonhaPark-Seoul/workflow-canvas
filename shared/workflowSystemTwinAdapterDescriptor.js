@@ -3,9 +3,9 @@ import { createTwinAdapterDescriptor } from './twinAdapterContract.js'
 export const WORKFLOW_SYSTEM_TWIN_ADAPTER_DESCRIPTOR = createTwinAdapterDescriptor({
   id: 'workflow-system-discovery',
   contractVersion: 1,
-  adapterVersion: '1.1.0',
-  minimumEngineSchemaVersion: 1,
-  maximumEngineSchemaVersion: 1,
+  adapterVersion: '1.2.0',
+  minimumEngineSchemaVersion: 2,
+  maximumEngineSchemaVersion: 2,
   label: 'Workflow Canvas 시스템 어댑터',
   description: '배포 빌드의 소스·DB·보안·운영 manifest를 현재 시스템 지도와 대조합니다.',
   systemKinds: ['software-application'],
@@ -16,6 +16,8 @@ export const WORKFLOW_SYSTEM_TWIN_ADAPTER_DESCRIPTOR = createTwinAdapterDescript
     'deterministic-discovery',
     'evidence-review',
     'fingerprinted-proposals',
+    'operation-lifecycle-contract',
+    'policy-event-threat-boundaries',
   ],
   dataClasses: [
     {
@@ -53,7 +55,7 @@ export const WORKFLOW_SYSTEM_TWIN_ADAPTER_DESCRIPTOR = createTwinAdapterDescript
       reason: '발견 manifest와 현재 지도 차이를 계산하기 위해 필요합니다.',
     },
   ],
-  operationCapabilities: [],
+  operationCapabilities: ['source-twin.snapshot.create', 'workflow.local.git-sync'],
 })
 
 export function canInspectWorkflowSystemCanvas(canvas) {

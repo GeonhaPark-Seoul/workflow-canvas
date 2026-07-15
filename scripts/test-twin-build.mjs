@@ -10,6 +10,10 @@ import {
 import { reconcileTwinBuild } from '../shared/twinBuildReconciler.js'
 import { createWorkflowCanvasSystemMap } from '../shared/workflowCanvasSystemMap.js'
 import { WORKFLOW_SYSTEM_TWIN_BUILD } from '../shared/workflowSystemTwinBuild.js'
+import {
+  WORKFLOW_GIT_SYNC_OPERATION_DEFINITION,
+  WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION,
+} from '../shared/workflowOperationDefinitions.js'
 
 const fixtureUrl = new URL('./fixtures/twin-adapter-contract/', import.meta.url)
 const rawBuild = JSON.parse(await readFile(new URL('order-service-build.json', fixtureUrl), 'utf8'))
@@ -27,11 +31,20 @@ assert.deepEqual(build.summary, {
   gateways: 1,
   evidence: 3,
   operations: 1,
+  dataClasses: 1,
+  policies: 1,
+  observations: 1,
+  events: 1,
+  controls: 1,
+  threats: 1,
 })
 assert.equal(Object.isFrozen(build), true)
 assert.equal(Object.isFrozen(build.entities[0]), true)
 assert.equal(build.relations[0].gatewayId, 'gateway:order-database')
 assert.equal(build.operations[0].approval, 'explicit')
+assert.equal(build.operations[0].availability, 'planned')
+assert.equal(build.policies[0].target.id, 'operation:retry-order-request')
+assert.equal(build.threats[0].controlIds[0], 'control:order-retry-idempotency')
 
 const legacy = {
   ...structuredClone(rawBuild),
@@ -48,6 +61,36 @@ delete legacy.relations
 delete legacy.trustZones
 delete legacy.operations
 assert.equal(migrateTwinBuild(legacy).fingerprint, build.fingerprint)
+
+const versionOne = {
+  schemaVersion: 1,
+  id: 'fixture-order-build:legacy-v1',
+  source: { ...structuredClone(rawBuild.source), engineSchemaVersion: 1 },
+  evidence: structuredClone(rawBuild.evidence),
+  trustZones: structuredClone(rawBuild.trustZones),
+  gateways: structuredClone(rawBuild.gateways),
+  entities: structuredClone(rawBuild.entities),
+  parts: structuredClone(rawBuild.parts).map((part) => ({ ...part, operationIds: [] })),
+  relations: structuredClone(rawBuild.relations),
+  operations: [{
+    id: 'operation:retry-order-request',
+    capability: 'orders.retry-request',
+    label: '주문 요청 재시도',
+    description: '구형 선언',
+    access: 'execute',
+    approval: 'explicit',
+    reversible: false,
+    target: { kind: 'part', id: 'part:orders-api:route' },
+    evidenceIds: ['evidence:order-api-code'],
+  }],
+}
+const migratedVersionOne = migrateTwinBuild(versionOne)
+assert.equal(migratedVersionOne.schemaVersion, TWIN_BUILD_SCHEMA_VERSION)
+assert.equal(migratedVersionOne.source.engineSchemaVersion, TWIN_BUILD_SCHEMA_VERSION)
+assert.equal(migratedVersionOne.operations[0].id, 'operation:retry-order-request')
+assert.equal(migratedVersionOne.operations[0].availability, 'declared')
+assert.equal(migratedVersionOne.policies.length, 0)
+assert.equal(migratedVersionOne.events.length, 0)
 
 assert.throws(
   () => migrateTwinBuild({ ...rawBuild, schemaVersion: 99 }),
@@ -104,7 +147,42 @@ assert.throws(
   (error) => error instanceof TwinBuildError && error.code === 'UNSAFE_EVIDENCE_REF',
 )
 
+const missingOperationPolicy = structuredClone(rawBuild)
+missingOperationPolicy.operations[0].authorizationPolicyIds = ['policy:not-found']
+assert.throws(
+  () => createTwinBuild(missingOperationPolicy),
+  (error) => error instanceof TwinBuildError && error.code === 'MISSING_OPERATION_POLICY',
+)
+
+const missingThreatControl = structuredClone(rawBuild)
+missingThreatControl.threats[0].controlIds = ['control:not-found']
+assert.throws(
+  () => createTwinBuild(missingThreatControl),
+  (error) => error instanceof TwinBuildError && error.code === 'MISSING_THREAT_CONTROL',
+)
+
+const missingObservationSubject = structuredClone(rawBuild)
+missingObservationSubject.observations[0].subject.id = 'operation:not-found'
+assert.throws(
+  () => createTwinBuild(missingObservationSubject),
+  (error) => error instanceof TwinBuildError && error.code === 'MISSING_RECORD_TARGET',
+)
+
 const expectedWorkflowCanvas = createWorkflowCanvasSystemMap()
+assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.operations.length, 2)
+assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.dataClasses.length, 3)
+assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.policies.length, 3)
+assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.observations.length, 2)
+assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.controls.length, 3)
+assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.threats.length, 1)
+assert.equal(
+  WORKFLOW_SYSTEM_TWIN_BUILD.operations.find((item) => item.id === WORKFLOW_GIT_SYNC_OPERATION_DEFINITION.id)?.fingerprint,
+  WORKFLOW_GIT_SYNC_OPERATION_DEFINITION.fingerprint,
+)
+assert.equal(
+  WORKFLOW_SYSTEM_TWIN_BUILD.operations.find((item) => item.id === WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION.id)?.fingerprint,
+  WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION.fingerprint,
+)
 const workflowReview = reconcileTwinBuild({
   build: WORKFLOW_SYSTEM_TWIN_BUILD,
   canvas: expectedWorkflowCanvas,

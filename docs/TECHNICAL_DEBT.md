@@ -52,7 +52,7 @@ This is the durable ledger for security, reliability, commercialization, and arc
 - Gate: release-blocker
 - Status: implemented-pending-deploy
 - Context: an operation must not continue if its repository root or Git remote changes after startup.
-- Current mitigation: canonical repository root and an exact credential-free GitHub origin are pinned; the origin fingerprint is included in operation state.
+- Current mitigation: canonical repository root and an exact credential-free GitHub origin are pinned; the origin fingerprint is included in operation state. After execution the connector fetches again and verifies branch, origin fingerprint, clean worktree, zero ahead/behind, and matching HEAD/upstream. The server refuses a success result without this bounded postcondition record.
 - Exit criteria: use a stable device-local repository identity and support approved Git providers through provider adapters without weakening the pin.
 
 ### LOC-005 - Trusted helper distribution
@@ -133,7 +133,7 @@ This is the durable ledger for security, reliability, commercialization, and arc
 - Severity: critical
 - Gate: engine-v1 mutations
 - Status: in progress
-- Current evidence: local Git synchronization already uses a browser-initiated preview, signed plan, owner authorization, queued execution, separate local-terminal consent, state revalidation, append-only events, and a bounded non-force push or fast-forward pull. The contract is not yet enforced for every adapter operation.
+- Current evidence: `shared/operationLifecycle.js` now validates executable operation definitions and provides one append-only state machine for direct UI, deterministic automation, and future AI initiators. It covers plan identity, human approval, queue/start, execution result, postcondition or independent verification, cancellation, idempotent retry, recovery, terminal states, and fingerprint-linked audit events. Local Git synchronization and source-twin snapshot creation bind signed plans to canonical definition fingerprints; Git success additionally requires a post-execution state record. Existing product operations outside these two paths and generic durable persistence remain.
 - Required work: every operation implements plan, preview, authorization, local/cloud consent as applicable, execute, verify, audit, timeout, idempotency, recovery, and rollback declaration.
 - Exit criteria: adapters cannot expose an executable action without satisfying the operation contract and risk policy.
 
@@ -161,6 +161,15 @@ This is the durable ledger for security, reliability, commercialization, and arc
 - Required work: dependency scanning, lockfile policy, secret scanning, protected branches, least-privilege GitHub App, signed release artifacts, credential rotation, security contact, incident runbook, and breach notification process.
 - Exit criteria: release CI enforces the controls and a tabletop incident exercise is completed.
 
+### OPS-005 - Durable universal operation runs and verifier isolation
+
+- Severity: critical
+- Gate: engine-v2 mutations
+- Status: open
+- Current limitation: the universal lifecycle is a validated shared contract, while durable storage still uses operation-specific tables. Git postcondition verification runs in the paired local connector process, so it is honest `postcondition` evidence rather than an independently isolated verifier.
+- Required work: tenant-scoped common operation-plan, run, approval, event, artifact, cancellation, retry, and recovery tables; append-only DB guards; cryptographic event signing or external anchoring; leases and timeouts; dead-letter handling; independent verifier workers for high-risk operations; retention and redaction policy.
+- Exit criteria: interrupted, duplicated, stale, forged, or partially completed jobs cannot skip a state or duplicate a mutation, and a separate verifier can independently promote supported results to `succeeded`.
+
 ## Twin engine and product architecture
 
 ### ENG-001 - Versioned twin schema and migrations
@@ -168,7 +177,7 @@ This is the durable ledger for security, reliability, commercialization, and arc
 - Severity: high
 - Gate: engine-v1
 - Status: in-progress
-- Current evidence: `TwinBuild v1` now normalizes entities, parts, relations, trust zones, gateways, evidence references, and operation declarations with stable IDs, deterministic fingerprints, reference integrity, secret-reference rejection, and a tested v0-to-v1 forward migration. Policies, events, threats, execution observations, compatibility windows, and a multi-version migration chain remain.
+- Current evidence: `TwinBuild v2` now normalizes entities, parts, relations, trust zones, gateways, evidence, data classes, policies, observations, events, operations, controls, and threats with stable IDs, deterministic fingerprints, cross-record reference integrity, secret-reference rejection, and a tested v0-to-v1-to-v2 forward migration. v1 operations retain identity and evidence but remain non-executable declarations until their safety contract is completed. Compatibility support windows, large-build migration performance, and UI materialization for the new overlays remain.
 - Required work: stable IDs and schemas for entities, capabilities, relations, trust zones, gateways, evidence, observations, operations, policies, events, and threats; provide forward migrations and compatibility windows.
 - Exit criteria: an older twin upgrades without losing manual layout, annotations, decisions, or evidence links.
 

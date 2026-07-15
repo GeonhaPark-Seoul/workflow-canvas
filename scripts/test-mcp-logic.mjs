@@ -1482,15 +1482,19 @@ t('self map covers the critical runtime, data, security and delivery boundaries'
   )
 })
 
-t('edge operation presentation only animates observed queued or running work', () => {
+t('edge operation presentation animates only execution, verification, and recovery work', () => {
   assert.equal(edgeOperationStatusDefinition('preview').label, '승인 대기')
   assert.equal(edgeOperationStatusDefinition('not-a-status').id, 'idle')
   assert.equal(edgeOperationIsActive('planning'), false)
   assert.equal(edgeOperationIsActive('preview'), false)
   assert.equal(edgeOperationIsActive('queued'), true)
   assert.equal(edgeOperationIsActive('running'), true)
+  assert.equal(edgeOperationIsActive('verifying'), true)
+  assert.equal(edgeOperationIsActive('recovering'), true)
   assert.equal(edgeOperationIsTerminal('succeeded'), true)
   assert.equal(edgeOperationIsTerminal('failed'), true)
+  assert.equal(edgeOperationIsTerminal('cancelled'), true)
+  assert.equal(edgeOperationIsTerminal('recovered'), true)
   assert.equal(edgeOperationIsTerminal('running'), false)
 })
 

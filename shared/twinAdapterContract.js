@@ -4,7 +4,7 @@ import {
 } from './digitalTwinReview.js'
 
 export const TWIN_ADAPTER_CONTRACT_VERSION = 1
-export const TWIN_ENGINE_SCHEMA_VERSION = 1
+export const TWIN_ENGINE_SCHEMA_VERSION = 2
 
 const REQUIRED_INTERFACES = ['describe', 'canInspect', 'inspect']
 const INTERFACE_IDS = new Set([
