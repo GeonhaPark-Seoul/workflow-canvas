@@ -2,7 +2,7 @@
 export const SOURCE_TWIN_MANIFEST = Object.freeze(
 {
   "schemaVersion": 1,
-  "id": "source-twin-v1-0deb4ae89e5a",
+  "id": "source-twin-v1-38ddd57bc5e4",
   "source": {
     "id": "workflow-canvas:self-source",
     "label": "Workflow Canvas 소스 코드",
@@ -957,7 +957,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "deployment:vercel-web",
       "kind": "deployment",
       "label": "Vercel 웹 배포",
-      "fingerprint": "280b0b96b76089363e77",
+      "fingerprint": "4fbdb4484f6532afeffe",
       "layer": "deployment",
       "summary": "Vite 빌드 결과를 Vercel에 배포하는 경로입니다.",
       "tags": [
@@ -1820,7 +1820,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:package.json",
       "kind": "file",
       "label": "package.json",
-      "fingerprint": "e9ef86ad391e876c194b",
+      "fingerprint": "8e7d54839130473561ff",
       "path": "package.json",
       "layer": "deployment",
       "language": "json",
@@ -2102,6 +2102,30 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "lineStart": 1,
       "lineEnd": 171,
       "summary": "검증에서 함수 1개 정의 · 모듈 2개 연결을 담당합니다.",
+      "tags": [
+        "test"
+      ],
+      "details": {
+        "exports": [],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "parseStatus": "parsed"
+      }
+    },
+    {
+      "id": "file:scripts/test-twin-adapter-contract.mjs",
+      "kind": "file",
+      "label": "scripts/test-twin-adapter-contract.mjs",
+      "fingerprint": "3f17af95e22eca9d587f",
+      "path": "scripts/test-twin-adapter-contract.mjs",
+      "layer": "test",
+      "language": "javascript",
+      "lineStart": 1,
+      "lineEnd": 183,
+      "summary": "검증에서 함수 1개 정의 · 모듈 7개 연결을 담당합니다.",
       "tags": [
         "test"
       ],
@@ -2565,6 +2589,38 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "file:shared/twinAdapterContract.js",
+      "kind": "file",
+      "label": "shared/twinAdapterContract.js",
+      "fingerprint": "d047070db332b0f49fa0",
+      "path": "shared/twinAdapterContract.js",
+      "layer": "shared",
+      "language": "javascript",
+      "lineStart": 1,
+      "lineEnd": 270,
+      "summary": "공통 도메인 규칙에서 함수 16개 정의 · 모듈 1개 연결을 담당합니다.",
+      "tags": [
+        "shared"
+      ],
+      "details": {
+        "exports": [
+          "TWIN_ADAPTER_CONTRACT_VERSION",
+          "TWIN_ENGINE_SCHEMA_VERSION",
+          "TwinAdapterContractError",
+          "createTwinAdapterDescriptor",
+          "createTwinAdapterRegistration",
+          "createTwinAdapterRegistry",
+          "validateTwinAdapterReview"
+        ],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "parseStatus": "parsed"
+      }
+    },
+    {
       "id": "file:shared/workflowCanvasSystemMap.js",
       "kind": "file",
       "label": "shared/workflowCanvasSystemMap.js",
@@ -2687,13 +2743,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:shared/workflowSystemTwinAdapter.js",
       "kind": "file",
       "label": "shared/workflowSystemTwinAdapter.js",
-      "fingerprint": "d00ec382c8efb5e43f90",
+      "fingerprint": "36ffb3f018fae0828a01",
       "path": "shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 638,
-      "summary": "공통 도메인 규칙에서 함수 21개 정의 · 모듈 10개 연결을 담당합니다.",
+      "lineEnd": 643,
+      "summary": "공통 도메인 규칙에서 함수 20개 정의 · 모듈 12개 연결을 담당합니다.",
       "tags": [
         "shared"
       ],
@@ -2702,6 +2758,33 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
           "WORKFLOW_SYSTEM_TWIN_SOURCE_ID",
           "inspectWorkflowSystemTwin",
           "workflowSystemTwinAdapter"
+        ],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "parseStatus": "parsed"
+      }
+    },
+    {
+      "id": "file:shared/workflowSystemTwinAdapterDescriptor.js",
+      "kind": "file",
+      "label": "shared/workflowSystemTwinAdapterDescriptor.js",
+      "fingerprint": "0f864f6b76d56734c579",
+      "path": "shared/workflowSystemTwinAdapterDescriptor.js",
+      "layer": "shared",
+      "language": "javascript",
+      "lineStart": 1,
+      "lineEnd": 58,
+      "summary": "공통 도메인 규칙에서 함수 1개 정의 · 모듈 1개 연결을 담당합니다.",
+      "tags": [
+        "shared"
+      ],
+      "details": {
+        "exports": [
+          "WORKFLOW_SYSTEM_TWIN_ADAPTER_DESCRIPTOR",
+          "canInspectWorkflowSystemCanvas"
         ],
         "apiRoutes": [],
         "dbTables": [],
@@ -3398,19 +3481,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:src/lib/digitalTwinAdapters.js",
       "kind": "file",
       "label": "src/lib/digitalTwinAdapters.js",
-      "fingerprint": "41630b09d17f65088a45",
+      "fingerprint": "b6c275d81e80e4e913a4",
       "path": "src/lib/digitalTwinAdapters.js",
       "layer": "frontend",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 23,
-      "summary": "사용자 화면에서 함수 2개 정의을 담당합니다.",
+      "lineEnd": 27,
+      "summary": "사용자 화면에서 함수 1개 정의 · 모듈 2개 연결을 담당합니다.",
       "tags": [
         "frontend"
       ],
       "details": {
         "exports": [
           "DIGITAL_TWIN_ADAPTERS",
+          "DIGITAL_TWIN_ADAPTER_DESCRIPTORS",
+          "DIGITAL_TWIN_ADAPTER_REGISTRY",
           "inspectDigitalTwinCanvas"
         ],
         "apiRoutes": [],
@@ -12457,6 +12542,28 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:scripts/test-twin-adapter-contract.mjs:fixtureAdapter.inspect",
+      "kind": "function",
+      "label": "fixtureAdapter.inspect",
+      "fingerprint": "0f474d616ab185c87abb",
+      "name": "fixtureAdapter.inspect",
+      "path": "scripts/test-twin-adapter-contract.mjs",
+      "parentId": "file:scripts/test-twin-adapter-contract.mjs",
+      "layer": "test",
+      "lineStart": 59,
+      "lineEnd": 62,
+      "summary": "fixture adapter inspect을(를) 처리하는 함수입니다.",
+      "tags": [
+        "method",
+        "test"
+      ],
+      "details": {
+        "functionKind": "method",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
       "id": "function:shared/digitalTwinProposal.js:DigitalTwinProposalError.constructor",
       "kind": "function",
       "label": "DigitalTwinProposalError.constructor",
@@ -15529,6 +15636,363 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:shared/twinAdapterContract.js:TwinAdapterContractError.constructor",
+      "kind": "function",
+      "label": "TwinAdapterContractError.constructor",
+      "fingerprint": "22c751b89d0617ce2752",
+      "name": "TwinAdapterContractError.constructor",
+      "path": "shared/twinAdapterContract.js",
+      "parentId": "file:shared/twinAdapterContract.js",
+      "layer": "shared",
+      "lineStart": 29,
+      "lineEnd": 33,
+      "summary": "twin adapter contract error constructor을(를) 처리하는 함수입니다.",
+      "tags": [
+        "class-method",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "class-method",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinAdapterContract.js:adapterId",
+      "kind": "function",
+      "label": "adapterId",
+      "fingerprint": "83ed4f47e8980046db4e",
+      "name": "adapterId",
+      "path": "shared/twinAdapterContract.js",
+      "parentId": "file:shared/twinAdapterContract.js",
+      "layer": "shared",
+      "lineStart": 46,
+      "lineEnd": 52,
+      "summary": "adapter id을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinAdapterContract.js:cloneSerializable",
+      "kind": "function",
+      "label": "cloneSerializable",
+      "fingerprint": "6b02a1c3cd57e67e7f4d",
+      "name": "cloneSerializable",
+      "path": "shared/twinAdapterContract.js",
+      "parentId": "file:shared/twinAdapterContract.js",
+      "layer": "shared",
+      "lineStart": 119,
+      "lineEnd": 129,
+      "summary": "clone serializable을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinAdapterContract.js:createTwinAdapterDescriptor",
+      "kind": "function",
+      "label": "createTwinAdapterDescriptor",
+      "fingerprint": "91540ff102229eabfaca",
+      "name": "createTwinAdapterDescriptor",
+      "path": "shared/twinAdapterContract.js",
+      "parentId": "file:shared/twinAdapterContract.js",
+      "layer": "shared",
+      "lineStart": 138,
+      "lineEnd": 181,
+      "summary": "twin adapter descriptor을(를) 생성하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinAdapterContract.js:createTwinAdapterRegistration",
+      "kind": "function",
+      "label": "createTwinAdapterRegistration",
+      "fingerprint": "305087b3401e66e89d50",
+      "name": "createTwinAdapterRegistration",
+      "path": "shared/twinAdapterContract.js",
+      "parentId": "file:shared/twinAdapterContract.js",
+      "layer": "shared",
+      "lineStart": 183,
+      "lineEnd": 194,
+      "summary": "twin adapter registration을(를) 생성하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinAdapterContract.js:createTwinAdapterRegistry",
+      "kind": "function",
+      "label": "createTwinAdapterRegistry",
+      "fingerprint": "c455d82c01daa64eeb8a",
+      "name": "createTwinAdapterRegistry",
+      "path": "shared/twinAdapterContract.js",
+      "parentId": "file:shared/twinAdapterContract.js",
+      "layer": "shared",
+      "lineStart": 244,
+      "lineEnd": 269,
+      "summary": "twin adapter registry을(를) 생성하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinAdapterContract.js:createTwinAdapterRegistry.inspect",
+      "kind": "function",
+      "label": "createTwinAdapterRegistry.inspect",
+      "fingerprint": "3090607322a41a2584aa",
+      "name": "createTwinAdapterRegistry.inspect",
+      "path": "shared/twinAdapterContract.js",
+      "parentId": "file:shared/twinAdapterContract.js",
+      "layer": "shared",
+      "lineStart": 257,
+      "lineEnd": 267,
+      "summary": "twin adapter registry inspect을(를) 생성하는 비동기 함수입니다.",
+      "tags": [
+        "async",
+        "method",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "method",
+        "exported": false,
+        "async": true
+      }
+    },
+    {
+      "id": "function:shared/twinAdapterContract.js:deepFreeze",
+      "kind": "function",
+      "label": "deepFreeze",
+      "fingerprint": "bb6e2c23866b4c6f9e0f",
+      "name": "deepFreeze",
+      "path": "shared/twinAdapterContract.js",
+      "parentId": "file:shared/twinAdapterContract.js",
+      "layer": "shared",
+      "lineStart": 131,
+      "lineEnd": 136,
+      "summary": "deep freeze을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinAdapterContract.js:normalizeDataClasses",
+      "kind": "function",
+      "label": "normalizeDataClasses",
+      "fingerprint": "814f27ad1c1fd498578d",
+      "name": "normalizeDataClasses",
+      "path": "shared/twinAdapterContract.js",
+      "parentId": "file:shared/twinAdapterContract.js",
+      "layer": "shared",
+      "lineStart": 78,
+      "lineEnd": 96,
+      "summary": "data classes을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinAdapterContract.js:normalizePermissions",
+      "kind": "function",
+      "label": "normalizePermissions",
+      "fingerprint": "fcb56de7cd29d895e8a7",
+      "name": "normalizePermissions",
+      "path": "shared/twinAdapterContract.js",
+      "parentId": "file:shared/twinAdapterContract.js",
+      "layer": "shared",
+      "lineStart": 98,
+      "lineEnd": 117,
+      "summary": "permissions을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinAdapterContract.js:plainObject",
+      "kind": "function",
+      "label": "plainObject",
+      "fingerprint": "d7e1a654b1d1b1b9a066",
+      "name": "plainObject",
+      "path": "shared/twinAdapterContract.js",
+      "parentId": "file:shared/twinAdapterContract.js",
+      "layer": "shared",
+      "lineStart": 36,
+      "lineEnd": 38,
+      "summary": "plain object을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinAdapterContract.js:positiveInteger",
+      "kind": "function",
+      "label": "positiveInteger",
+      "fingerprint": "cd1c0133ba3ded6a6682",
+      "name": "positiveInteger",
+      "path": "shared/twinAdapterContract.js",
+      "parentId": "file:shared/twinAdapterContract.js",
+      "layer": "shared",
+      "lineStart": 54,
+      "lineEnd": 60,
+      "summary": "positive integer을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinAdapterContract.js:safeText",
+      "kind": "function",
+      "label": "safeText",
+      "fingerprint": "2698e96eadba4deef11c",
+      "name": "safeText",
+      "path": "shared/twinAdapterContract.js",
+      "parentId": "file:shared/twinAdapterContract.js",
+      "layer": "shared",
+      "lineStart": 40,
+      "lineEnd": 44,
+      "summary": "safe text을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinAdapterContract.js:uniqueIds",
+      "kind": "function",
+      "label": "uniqueIds",
+      "fingerprint": "d6c53e9e133d8d05b209",
+      "name": "uniqueIds",
+      "path": "shared/twinAdapterContract.js",
+      "parentId": "file:shared/twinAdapterContract.js",
+      "layer": "shared",
+      "lineStart": 62,
+      "lineEnd": 76,
+      "summary": "unique ids을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinAdapterContract.js:validateLoadedAdapter",
+      "kind": "function",
+      "label": "validateLoadedAdapter",
+      "fingerprint": "1d2145b9e8783ff3b878",
+      "name": "validateLoadedAdapter",
+      "path": "shared/twinAdapterContract.js",
+      "parentId": "file:shared/twinAdapterContract.js",
+      "layer": "shared",
+      "lineStart": 196,
+      "lineEnd": 208,
+      "summary": "loaded adapter을(를) 검증하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinAdapterContract.js:validateTwinAdapterReview",
+      "kind": "function",
+      "label": "validateTwinAdapterReview",
+      "fingerprint": "7b3750f6bba9a6b1132b",
+      "name": "validateTwinAdapterReview",
+      "path": "shared/twinAdapterContract.js",
+      "parentId": "file:shared/twinAdapterContract.js",
+      "layer": "shared",
+      "lineStart": 210,
+      "lineEnd": 242,
+      "summary": "twin adapter review을(를) 검증하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
       "id": "function:shared/workflowCanvasSystemMap.js:createWorkflowCanvasSystemMap",
       "kind": "function",
       "label": "createWorkflowCanvasSystemMap",
@@ -16221,28 +16685,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
-      "id": "function:shared/workflowSystemTwinAdapter.js:canInspectWorkflowSystemTwin",
-      "kind": "function",
-      "label": "canInspectWorkflowSystemTwin",
-      "fingerprint": "9096f9882a310a9d544a",
-      "name": "canInspectWorkflowSystemTwin",
-      "path": "shared/workflowSystemTwinAdapter.js",
-      "parentId": "file:shared/workflowSystemTwinAdapter.js",
-      "layer": "shared",
-      "lineStart": 87,
-      "lineEnd": 90,
-      "summary": "can inspect workflow system twin을(를) 처리하는 함수입니다.",
-      "tags": [
-        "function",
-        "shared"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
       "id": "function:shared/workflowSystemTwinAdapter.js:credentialPartProposal",
       "kind": "function",
       "label": "credentialPartProposal",
@@ -16334,13 +16776,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:shared/workflowSystemTwinAdapter.js:inspectWorkflowSystemTwin",
       "kind": "function",
       "label": "inspectWorkflowSystemTwin",
-      "fingerprint": "6946af068f6f94e30b8c",
+      "fingerprint": "7a12b2ef925385ec2c24",
       "name": "inspectWorkflowSystemTwin",
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
       "lineStart": 581,
-      "lineEnd": 631,
+      "lineEnd": 635,
       "summary": "workflow system twin을(를) 검사하는 함수입니다.",
       "tags": [
         "exported",
@@ -16604,8 +17046,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
-      "lineStart": 76,
-      "lineEnd": 78,
+      "lineStart": 81,
+      "lineEnd": 83,
       "summary": "unique을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -16648,8 +17090,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
-      "lineStart": 80,
-      "lineEnd": 85,
+      "lineStart": 85,
+      "lineEnd": 90,
       "summary": "workflow twin root을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -16658,6 +17100,29 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "details": {
         "functionKind": "function",
         "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/workflowSystemTwinAdapterDescriptor.js:canInspectWorkflowSystemCanvas",
+      "kind": "function",
+      "label": "canInspectWorkflowSystemCanvas",
+      "fingerprint": "407011da8752d23526c9",
+      "name": "canInspectWorkflowSystemCanvas",
+      "path": "shared/workflowSystemTwinAdapterDescriptor.js",
+      "parentId": "file:shared/workflowSystemTwinAdapterDescriptor.js",
+      "layer": "shared",
+      "lineStart": 53,
+      "lineEnd": 57,
+      "summary": "can inspect workflow system canvas을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
         "async": false
       }
     },
@@ -22331,38 +22796,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
-      "id": "function:src/lib/digitalTwinAdapters.js:DIGITAL_TWIN_ADAPTERS.canInspect",
-      "kind": "function",
-      "label": "DIGITAL_TWIN_ADAPTERS.canInspect",
-      "fingerprint": "62a08beb1ecd0887bae2",
-      "name": "DIGITAL_TWIN_ADAPTERS.canInspect",
-      "path": "src/lib/digitalTwinAdapters.js",
-      "parentId": "file:src/lib/digitalTwinAdapters.js",
-      "layer": "frontend",
-      "lineStart": 7,
-      "lineEnd": 11,
-      "summary": "digital twin adapters can inspect을(를) 처리하는 함수입니다.",
-      "tags": [
-        "frontend",
-        "method"
-      ],
-      "details": {
-        "functionKind": "method",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
       "id": "function:src/lib/digitalTwinAdapters.js:inspectDigitalTwinCanvas",
       "kind": "function",
       "label": "inspectDigitalTwinCanvas",
-      "fingerprint": "e65ca0350087d833f828",
+      "fingerprint": "88cfc02720c8cf493979",
       "name": "inspectDigitalTwinCanvas",
       "path": "src/lib/digitalTwinAdapters.js",
       "parentId": "file:src/lib/digitalTwinAdapters.js",
       "layer": "frontend",
-      "lineStart": 17,
-      "lineEnd": 22,
+      "lineStart": 24,
+      "lineEnd": 26,
       "summary": "digital twin canvas을(를) 검사하는 비동기 함수입니다.",
       "tags": [
         "async",
@@ -26577,7 +27020,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "npm-script:test",
       "kind": "npm-script",
       "label": "npm run test",
-      "fingerprint": "0eccd5bff8452d3819d8",
+      "fingerprint": "728a5198730f73858ff7",
       "name": "test",
       "path": "package.json",
       "parentId": "file:package.json",
@@ -28109,6 +28552,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "npm-script:local-connector"
     },
     {
+      "id": "relation:1af86a37e69d4f05",
+      "type": "contains",
+      "source": "file:shared/twinAdapterContract.js",
+      "target": "function:shared/twinAdapterContract.js:validateTwinAdapterReview"
+    },
+    {
       "id": "relation:1b1faf84344909fb",
       "type": "imports",
       "source": "file:api/system-runtime.js",
@@ -29201,6 +29650,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:api/source-twin-webhook.js:compactGitHubPush"
     },
     {
+      "id": "relation:3621fbea9038c30f",
+      "type": "contains",
+      "source": "file:shared/twinAdapterContract.js",
+      "target": "function:shared/twinAdapterContract.js:createTwinAdapterRegistry.inspect"
+    },
+    {
       "id": "relation:36a98e650a8756f1",
       "type": "contains",
       "source": "file:mcp/shareAccess.js",
@@ -29315,10 +29770,26 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/systemRuntime.js:nonSecretText"
     },
     {
+      "id": "relation:39cfe556fc319717",
+      "type": "contains",
+      "source": "file:shared/twinAdapterContract.js",
+      "target": "function:shared/twinAdapterContract.js:deepFreeze"
+    },
+    {
       "id": "relation:39e59c4eb11abd09",
       "type": "contains",
       "source": "file:src/nodes/MemoNode.jsx",
       "target": "function:src/nodes/MemoNode.jsx:handlePointerMove"
+    },
+    {
+      "id": "relation:3a0670113bd14393",
+      "type": "imports",
+      "source": "file:scripts/test-twin-adapter-contract.mjs",
+      "target": "file:shared/workflowCanvasSystemMap.js",
+      "names": [
+        "createWorkflowCanvasSystemMap"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:3a3de500d54cf348",
@@ -29770,6 +30241,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/localConnector.js:localGitSyncEdgePresentation"
     },
     {
+      "id": "relation:43ede54aae28ffd5",
+      "type": "contains",
+      "source": "file:shared/workflowSystemTwinAdapterDescriptor.js",
+      "target": "function:shared/workflowSystemTwinAdapterDescriptor.js:canInspectWorkflowSystemCanvas"
+    },
+    {
       "id": "relation:43f9db1b313bf790",
       "type": "contains",
       "source": "file:src/components/EditToolbar.jsx",
@@ -29812,6 +30289,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/components/NotesPanel.jsx",
       "target": "function:src/components/NotesPanel.jsx:scheduleBodySave"
+    },
+    {
+      "id": "relation:44eb42527cd27c28",
+      "type": "imports",
+      "source": "file:scripts/test-twin-adapter-contract.mjs",
+      "target": "file:shared/workflowSystemTwinAdapter.js",
+      "names": [
+        "workflowSystemTwinAdapter"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:4507f2a4f7e8cd6e",
@@ -30138,6 +30625,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:scripts/system-discovery.mjs:fingerprint"
     },
     {
+      "id": "relation:4cf0f2aaced0cb0d",
+      "type": "imports",
+      "source": "file:scripts/test-twin-adapter-contract.mjs",
+      "target": "file:shared/workflowSystemTwinAdapterDescriptor.js",
+      "names": [
+        "WORKFLOW_SYSTEM_TWIN_ADAPTER_DESCRIPTOR",
+        "canInspectWorkflowSystemCanvas"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:4cf5eb9376a94413",
       "type": "contains",
       "source": "file:mcp/systemOperationPlan.js",
@@ -30415,6 +30913,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:533596cfd72ea771",
+      "type": "contains",
+      "source": "file:shared/twinAdapterContract.js",
+      "target": "function:shared/twinAdapterContract.js:adapterId"
+    },
+    {
       "id": "relation:535184aaf45d89a6",
       "type": "contains",
       "source": "file:src/nodes/ContentNode.jsx",
@@ -30443,6 +30947,27 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:scripts/source-twin-scanner.mjs",
       "target": "function:scripts/source-twin-scanner.mjs:nulSeparated"
+    },
+    {
+      "id": "relation:53b99901586bda3f",
+      "type": "contains",
+      "source": "file:shared/twinAdapterContract.js",
+      "target": "function:shared/twinAdapterContract.js:createTwinAdapterRegistry"
+    },
+    {
+      "id": "relation:53efccdd408bb014",
+      "type": "imports",
+      "source": "file:scripts/test-twin-adapter-contract.mjs",
+      "target": "file:shared/twinAdapterContract.js",
+      "names": [
+        "TWIN_ADAPTER_CONTRACT_VERSION",
+        "TWIN_ENGINE_SCHEMA_VERSION",
+        "TwinAdapterContractError",
+        "createTwinAdapterDescriptor",
+        "createTwinAdapterRegistration",
+        "createTwinAdapterRegistry"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:541749469de3f4d3",
@@ -31180,12 +31705,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/workflowSystemDiscovery.js:compactResource"
     },
     {
-      "id": "relation:648920de4383a826",
-      "type": "contains",
-      "source": "file:shared/workflowSystemTwinAdapter.js",
-      "target": "function:shared/workflowSystemTwinAdapter.js:canInspectWorkflowSystemTwin"
-    },
-    {
       "id": "relation:64d7a49b06f85373",
       "type": "imports",
       "source": "file:src/lib/sourceTwinApi.js",
@@ -31477,6 +31996,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/components/NotesPanel.jsx:stripHtml"
     },
     {
+      "id": "relation:6da703b2c095434e",
+      "type": "contains",
+      "source": "file:shared/twinAdapterContract.js",
+      "target": "function:shared/twinAdapterContract.js:validateLoadedAdapter"
+    },
+    {
       "id": "relation:6dbf1fb39f817461",
       "type": "defines-policy",
       "source": "file:supabase-schema.sql",
@@ -31716,6 +32241,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/sourceTwin.js",
       "target": "function:shared/sourceTwin.js:changedEntities"
+    },
+    {
+      "id": "relation:7258d6d46927a628",
+      "type": "contains",
+      "source": "file:shared/twinAdapterContract.js",
+      "target": "function:shared/twinAdapterContract.js:cloneSerializable"
     },
     {
       "id": "relation:725e499562952def",
@@ -31991,6 +32522,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/shareAccess.js:redactCanvas"
     },
     {
+      "id": "relation:770a91d5cb0a82ea",
+      "type": "imports",
+      "source": "file:scripts/test-twin-adapter-contract.mjs",
+      "target": "file:shared/digitalTwinReview.js",
+      "names": [
+        "digitalTwinReviewDecision",
+        "setDigitalTwinReviewDecision"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:77348c2cc68cf640",
       "type": "contains",
       "source": "file:scripts/local-connector-agent.mjs",
@@ -32194,6 +32736,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/components/NotesPanel.jsx:uploadImage"
     },
     {
+      "id": "relation:7bb9c1e04fbb12f9",
+      "type": "imports",
+      "source": "file:shared/workflowSystemTwinAdapterDescriptor.js",
+      "target": "file:shared/twinAdapterContract.js",
+      "names": [
+        "createTwinAdapterDescriptor"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:7c789d13b090d25d",
       "type": "contains",
       "source": "file:mcp/layout.js",
@@ -32379,6 +32931,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ]
     },
     {
+      "id": "relation:808ec088718ed067",
+      "type": "contains",
+      "source": "file:shared/twinAdapterContract.js",
+      "target": "function:shared/twinAdapterContract.js:createTwinAdapterRegistration"
+    },
+    {
       "id": "relation:8125a1e7cf73f74c",
       "type": "contains",
       "source": "file:scripts/source-twin-scanner.mjs",
@@ -32528,6 +33086,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/components/AuthPanel.jsx",
       "target": "function:src/components/AuthPanel.jsx:Avatar"
+    },
+    {
+      "id": "relation:83facdb62cc15261",
+      "type": "imports",
+      "source": "file:src/lib/digitalTwinAdapters.js",
+      "target": "file:shared/twinAdapterContract.js",
+      "names": [
+        "createTwinAdapterRegistration",
+        "createTwinAdapterRegistry"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:840ffe68a71dc5fe",
@@ -32721,6 +33290,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "npm-script:build"
     },
     {
+      "id": "relation:877a07976df845cc",
+      "type": "imports",
+      "source": "file:scripts/test-twin-adapter-contract.mjs",
+      "target": "dependency:node:assert/strict",
+      "names": [
+        "default"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:882b5dc55cf1dccd",
       "type": "imports",
       "source": "file:api/source-twin-webhook.js",
@@ -32891,6 +33470,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/store.js",
       "target": "function:mcp/store.js:updateEdge"
+    },
+    {
+      "id": "relation:8ce687f04ebfd624",
+      "type": "contains",
+      "source": "file:shared/twinAdapterContract.js",
+      "target": "function:shared/twinAdapterContract.js:safeText"
     },
     {
       "id": "relation:8cf0d8feea6dbc60",
@@ -33210,6 +33795,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/store.js:deleteCanvasRow"
     },
     {
+      "id": "relation:9466c66da5467940",
+      "type": "imports",
+      "source": "file:shared/workflowSystemTwinAdapter.js",
+      "target": "file:shared/twinAdapterContract.js",
+      "names": [
+        "TWIN_ENGINE_SCHEMA_VERSION"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:94c07efc39ed2a45",
       "type": "contains",
       "source": "file:src/App.jsx",
@@ -33268,6 +33863,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/components/AuthPanel.jsx",
       "target": "function:src/components/AuthPanel.jsx:handleLogout"
+    },
+    {
+      "id": "relation:968b34f0f6a75640",
+      "type": "contains",
+      "source": "file:shared/twinAdapterContract.js",
+      "target": "function:shared/twinAdapterContract.js:TwinAdapterContractError.constructor"
     },
     {
       "id": "relation:96dee646124d8780",
@@ -34092,6 +34693,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/nodes/ContentNode.jsx:downscaleImage"
     },
     {
+      "id": "relation:aa2bea1246a22935",
+      "type": "contains",
+      "source": "file:shared/twinAdapterContract.js",
+      "target": "function:shared/twinAdapterContract.js:normalizeDataClasses"
+    },
+    {
       "id": "relation:aa79f8e92972e42e",
       "type": "contains",
       "source": "file:mcp/store.js",
@@ -34381,6 +34988,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:b0dc5e20d0e58137",
+      "type": "contains",
+      "source": "file:shared/twinAdapterContract.js",
+      "target": "function:shared/twinAdapterContract.js:normalizePermissions"
+    },
+    {
       "id": "relation:b10b23be87700cde",
       "type": "contains",
       "source": "file:src/App.jsx",
@@ -34477,17 +35090,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/sourceTwinStore.js",
       "target": "function:mcp/sourceTwinStore.js:unavailable"
-    },
-    {
-      "id": "relation:b32ccfbe1776d79c",
-      "type": "imports",
-      "source": "file:shared/workflowSystemTwinAdapter.js",
-      "target": "file:shared/digitalTwinReview.js",
-      "names": [
-        "createDigitalTwinReviewItem",
-        "digitalTwinReviewFingerprint"
-      ],
-      "dynamic": false
     },
     {
       "id": "relation:b3603a14ac3677ab",
@@ -35328,6 +35930,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "db-function:leave_shared_canvas"
     },
     {
+      "id": "relation:c8f017ae307fe964",
+      "type": "contains",
+      "source": "file:shared/twinAdapterContract.js",
+      "target": "function:shared/twinAdapterContract.js:plainObject"
+    },
+    {
       "id": "relation:c90c91f5268e0ada",
       "type": "contains",
       "source": "file:shared/workflowSystemTwinAdapter.js",
@@ -36063,6 +36671,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/nodes/StageNode.jsx:placeCaretAt"
     },
     {
+      "id": "relation:dc85651f368ed647",
+      "type": "contains",
+      "source": "file:scripts/test-twin-adapter-contract.mjs",
+      "target": "function:scripts/test-twin-adapter-contract.mjs:fixtureAdapter.inspect"
+    },
+    {
       "id": "relation:dcdaf396a12c4d25",
       "type": "contains",
       "source": "file:api/local-connector.js",
@@ -36153,10 +36767,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/localConnectorStore.js:cleanText"
     },
     {
-      "id": "relation:de27eeaa324f7532",
-      "type": "contains",
-      "source": "file:src/lib/digitalTwinAdapters.js",
-      "target": "function:src/lib/digitalTwinAdapters.js:DIGITAL_TWIN_ADAPTERS.canInspect"
+      "id": "relation:de440c25d5b35e76",
+      "type": "imports",
+      "source": "file:shared/workflowSystemTwinAdapter.js",
+      "target": "file:shared/workflowSystemTwinAdapterDescriptor.js",
+      "names": [
+        "WORKFLOW_SYSTEM_TWIN_ADAPTER_DESCRIPTOR",
+        "canInspectWorkflowSystemCanvas"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:dea1f0a99ed1c505",
@@ -36325,6 +36944,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/components/AuthPanel.jsx:onDown"
     },
     {
+      "id": "relation:e120809232496465",
+      "type": "imports",
+      "source": "file:shared/twinAdapterContract.js",
+      "target": "file:shared/digitalTwinReview.js",
+      "names": [
+        "DIGITAL_TWIN_REVIEW_SCHEMA_VERSION",
+        "digitalTwinReviewFingerprint"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:e14a885332a95e88",
       "type": "contains",
       "source": "file:src/components/EditToolbar.jsx",
@@ -36446,6 +37076,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/nodes/SystemNode.jsx",
       "target": "function:src/nodes/SystemNode.jsx:byId"
+    },
+    {
+      "id": "relation:e4d9854f1ded24ce",
+      "type": "contains",
+      "source": "file:shared/twinAdapterContract.js",
+      "target": "function:shared/twinAdapterContract.js:positiveInteger"
     },
     {
       "id": "relation:e52a2216dc7277b4",
@@ -36663,6 +37299,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/sourceTwinStore.js",
       "target": "function:mcp/sourceTwinStore.js:compareStoredSourceTwinSnapshots"
+    },
+    {
+      "id": "relation:ea33811d1ae47d53",
+      "type": "imports",
+      "source": "file:scripts/test-twin-adapter-contract.mjs",
+      "target": "dependency:node:fs/promises",
+      "names": [
+        "readFile"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:ea4101b0204c2843",
@@ -37033,6 +37679,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:f212cc423969531b",
+      "type": "imports",
+      "source": "file:shared/workflowSystemTwinAdapter.js",
+      "target": "file:shared/digitalTwinReview.js",
+      "names": [
+        "DIGITAL_TWIN_REVIEW_SCHEMA_VERSION",
+        "createDigitalTwinReviewItem",
+        "digitalTwinReviewFingerprint"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:f2290609944e4c0b",
       "type": "contains",
       "source": "file:shared/localConnector.js",
@@ -37186,6 +37844,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:scripts/system-discovery.mjs:sortedUnique"
     },
     {
+      "id": "relation:f5e9e0222a0bdf76",
+      "type": "imports",
+      "source": "file:src/lib/digitalTwinAdapters.js",
+      "target": "file:shared/workflowSystemTwinAdapterDescriptor.js",
+      "names": [
+        "WORKFLOW_SYSTEM_TWIN_ADAPTER_DESCRIPTOR",
+        "canInspectWorkflowSystemCanvas"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:f64e677aff9518b0",
       "type": "contains",
       "source": "file:mcp/store.js",
@@ -37315,6 +37984,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:scripts/source-twin-scanner.mjs:sourceTwinFilePaths"
     },
     {
+      "id": "relation:fb241498199f89b2",
+      "type": "contains",
+      "source": "file:shared/twinAdapterContract.js",
+      "target": "function:shared/twinAdapterContract.js:uniqueIds"
+    },
+    {
       "id": "relation:fbd491e9db5acb39",
       "type": "contains",
       "source": "file:shared/digitalTwinReview.js",
@@ -37342,6 +38017,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "workflowSystemMapRelationRepairPlanId"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:fc1219d939cf7ae3",
+      "type": "contains",
+      "source": "file:shared/twinAdapterContract.js",
+      "target": "function:shared/twinAdapterContract.js:createTwinAdapterDescriptor"
     },
     {
       "id": "relation:fc4da8e2603a6e16",
@@ -37506,11 +38187,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:shared/systemPartOntology.js",
       "file:shared/systemRuntime.js",
       "file:shared/trustTopology.js",
+      "file:shared/twinAdapterContract.js",
       "file:shared/workflowCanvasSystemMap.js",
       "file:shared/workflowSourceTwinCanvas.js",
       "file:shared/workflowSystemDiscovery.js",
       "file:shared/workflowSystemMapRepair.js",
       "file:shared/workflowSystemTwinAdapter.js",
+      "file:shared/workflowSystemTwinAdapterDescriptor.js",
       "file:src/App.jsx",
       "file:src/components/AuthPanel.jsx",
       "file:src/components/CanvasImage.jsx",
@@ -37904,6 +38587,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:scripts/test-source-twin.mjs:localConnectorDb.from",
       "function:scripts/test-source-twin.mjs:readResult",
       "function:scripts/test-sql-security.mjs:read",
+      "function:scripts/test-twin-adapter-contract.mjs:fixtureAdapter.inspect",
       "function:shared/digitalTwinProposal.js:DigitalTwinProposalError.constructor",
       "function:shared/digitalTwinProposal.js:applyDigitalTwinGraphProposal",
       "function:shared/digitalTwinProposal.js:createDigitalTwinGraphProposal",
@@ -38040,6 +38724,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/trustTopology.js:plainText",
       "function:shared/trustTopology.js:safeId",
       "function:shared/trustTopology.js:uniqueTextList",
+      "function:shared/twinAdapterContract.js:TwinAdapterContractError.constructor",
+      "function:shared/twinAdapterContract.js:adapterId",
+      "function:shared/twinAdapterContract.js:cloneSerializable",
+      "function:shared/twinAdapterContract.js:createTwinAdapterDescriptor",
+      "function:shared/twinAdapterContract.js:createTwinAdapterRegistration",
+      "function:shared/twinAdapterContract.js:createTwinAdapterRegistry",
+      "function:shared/twinAdapterContract.js:createTwinAdapterRegistry.inspect",
+      "function:shared/twinAdapterContract.js:deepFreeze",
+      "function:shared/twinAdapterContract.js:normalizeDataClasses",
+      "function:shared/twinAdapterContract.js:normalizePermissions",
+      "function:shared/twinAdapterContract.js:plainObject",
+      "function:shared/twinAdapterContract.js:positiveInteger",
+      "function:shared/twinAdapterContract.js:safeText",
+      "function:shared/twinAdapterContract.js:uniqueIds",
+      "function:shared/twinAdapterContract.js:validateLoadedAdapter",
+      "function:shared/twinAdapterContract.js:validateTwinAdapterReview",
       "function:shared/workflowCanvasSystemMap.js:createWorkflowCanvasSystemMap",
       "function:shared/workflowCanvasSystemMap.js:groupNode",
       "function:shared/workflowCanvasSystemMap.js:mapEdges",
@@ -38071,7 +38771,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/workflowSystemMapRepair.js:relationShape",
       "function:shared/workflowSystemMapRepair.js:restoreMissingWorkflowSystemMapRelations",
       "function:shared/workflowSystemTwinAdapter.js:absolutePosition",
-      "function:shared/workflowSystemTwinAdapter.js:canInspectWorkflowSystemTwin",
       "function:shared/workflowSystemTwinAdapter.js:credentialPartProposal",
       "function:shared/workflowSystemTwinAdapter.js:evidenceForResources",
       "function:shared/workflowSystemTwinAdapter.js:expectedSystemPartProposal",
@@ -38091,6 +38790,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/workflowSystemTwinAdapter.js:unique",
       "function:shared/workflowSystemTwinAdapter.js:workflowCodePortMigrationItem",
       "function:shared/workflowSystemTwinAdapter.js:workflowTwinRoot",
+      "function:shared/workflowSystemTwinAdapterDescriptor.js:canInspectWorkflowSystemCanvas",
       "function:src/App.jsx:App",
       "function:src/App.jsx:ContextItem",
       "function:src/App.jsx:IconBtn",
@@ -38346,7 +39046,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/lib/cloudStorage.js:nextRevision",
       "function:src/lib/cloudStorage.js:saveCanvas",
       "function:src/lib/cloudStorage.js:saveUserPrefs",
-      "function:src/lib/digitalTwinAdapters.js:DIGITAL_TWIN_ADAPTERS.canInspect",
       "function:src/lib/digitalTwinAdapters.js:inspectDigitalTwinCanvas",
       "function:src/lib/imageStorage.js:dataUrlToBlob",
       "function:src/lib/imageStorage.js:getCanvasImageUrl",
@@ -38584,6 +39283,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:scripts/test-mcp-logic.mjs",
       "file:scripts/test-source-twin.mjs",
       "file:scripts/test-sql-security.mjs",
+      "file:scripts/test-twin-adapter-contract.mjs",
       "file:shared/digitalTwinProposal.js",
       "file:shared/digitalTwinReview.js",
       "file:shared/edgeOperation.js",
@@ -38597,11 +39297,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:shared/systemPartOntology.js",
       "file:shared/systemRuntime.js",
       "file:shared/trustTopology.js",
+      "file:shared/twinAdapterContract.js",
       "file:shared/workflowCanvasSystemMap.js",
       "file:shared/workflowSourceTwinCanvas.js",
       "file:shared/workflowSystemDiscovery.js",
       "file:shared/workflowSystemMapRepair.js",
       "file:shared/workflowSystemTwinAdapter.js",
+      "file:shared/workflowSystemTwinAdapterDescriptor.js",
       "file:src/App.jsx",
       "file:src/components/AuthPanel.jsx",
       "file:src/components/CanvasImage.jsx",
@@ -39013,6 +39715,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:scripts/test-source-twin.mjs:localConnectorDb.from",
       "function:scripts/test-source-twin.mjs:readResult",
       "function:scripts/test-sql-security.mjs:read",
+      "function:scripts/test-twin-adapter-contract.mjs:fixtureAdapter.inspect",
       "function:shared/digitalTwinProposal.js:DigitalTwinProposalError.constructor",
       "function:shared/digitalTwinProposal.js:applyDigitalTwinGraphProposal",
       "function:shared/digitalTwinProposal.js:createDigitalTwinGraphProposal",
@@ -39149,6 +39852,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/trustTopology.js:plainText",
       "function:shared/trustTopology.js:safeId",
       "function:shared/trustTopology.js:uniqueTextList",
+      "function:shared/twinAdapterContract.js:TwinAdapterContractError.constructor",
+      "function:shared/twinAdapterContract.js:adapterId",
+      "function:shared/twinAdapterContract.js:cloneSerializable",
+      "function:shared/twinAdapterContract.js:createTwinAdapterDescriptor",
+      "function:shared/twinAdapterContract.js:createTwinAdapterRegistration",
+      "function:shared/twinAdapterContract.js:createTwinAdapterRegistry",
+      "function:shared/twinAdapterContract.js:createTwinAdapterRegistry.inspect",
+      "function:shared/twinAdapterContract.js:deepFreeze",
+      "function:shared/twinAdapterContract.js:normalizeDataClasses",
+      "function:shared/twinAdapterContract.js:normalizePermissions",
+      "function:shared/twinAdapterContract.js:plainObject",
+      "function:shared/twinAdapterContract.js:positiveInteger",
+      "function:shared/twinAdapterContract.js:safeText",
+      "function:shared/twinAdapterContract.js:uniqueIds",
+      "function:shared/twinAdapterContract.js:validateLoadedAdapter",
+      "function:shared/twinAdapterContract.js:validateTwinAdapterReview",
       "function:shared/workflowCanvasSystemMap.js:createWorkflowCanvasSystemMap",
       "function:shared/workflowCanvasSystemMap.js:groupNode",
       "function:shared/workflowCanvasSystemMap.js:mapEdges",
@@ -39180,7 +39899,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/workflowSystemMapRepair.js:relationShape",
       "function:shared/workflowSystemMapRepair.js:restoreMissingWorkflowSystemMapRelations",
       "function:shared/workflowSystemTwinAdapter.js:absolutePosition",
-      "function:shared/workflowSystemTwinAdapter.js:canInspectWorkflowSystemTwin",
       "function:shared/workflowSystemTwinAdapter.js:credentialPartProposal",
       "function:shared/workflowSystemTwinAdapter.js:evidenceForResources",
       "function:shared/workflowSystemTwinAdapter.js:expectedSystemPartProposal",
@@ -39200,6 +39918,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/workflowSystemTwinAdapter.js:unique",
       "function:shared/workflowSystemTwinAdapter.js:workflowCodePortMigrationItem",
       "function:shared/workflowSystemTwinAdapter.js:workflowTwinRoot",
+      "function:shared/workflowSystemTwinAdapterDescriptor.js:canInspectWorkflowSystemCanvas",
       "function:src/App.jsx:App",
       "function:src/App.jsx:ContextItem",
       "function:src/App.jsx:IconBtn",
@@ -39455,7 +40174,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/lib/cloudStorage.js:nextRevision",
       "function:src/lib/cloudStorage.js:saveCanvas",
       "function:src/lib/cloudStorage.js:saveUserPrefs",
-      "function:src/lib/digitalTwinAdapters.js:DIGITAL_TWIN_ADAPTERS.canInspect",
       "function:src/lib/digitalTwinAdapters.js:inspectDigitalTwinCanvas",
       "function:src/lib/imageStorage.js:dataUrlToBlob",
       "function:src/lib/imageStorage.js:getCanvasImageUrl",
@@ -39803,22 +40521,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
     ]
   },
   "fingerprints": {
-    "code": "1404708426f61385fc02",
+    "code": "d3936559d5136a541c51",
     "database": "3d68fa3a9125bca19e6b",
     "security": "75d8806a671225b1662d",
-    "deployment": "64656d51310852b3ac7e"
+    "deployment": "ad34e0fc4380d7595efb"
   },
   "summary": {
-    "entities": 1199,
-    "files": 110,
-    "functions": 970,
-    "imports": 318,
+    "entities": 1218,
+    "files": 113,
+    "functions": 986,
+    "imports": 331,
     "apiRoutes": 6,
     "dbTables": 16,
     "dbFunctions": 24,
     "rlsPolicies": 21,
     "environmentVariables": 13,
-    "testFiles": 4,
+    "testFiles": 5,
     "deploymentEntities": 16,
     "securityEntities": 41,
     "parseFailures": 0

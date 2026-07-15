@@ -286,6 +286,8 @@ This ordering preserves the commercial goal that users can eventually connect th
 
 ### Phase C - Extract the engine core
 
+Current progress: C1 establishes adapter contract v1, a provider-neutral registry, lazy-module identity checks, declared permission/data boundaries, and golden tests proving a second software adapter can use the same review path while manual layout and review decisions survive rescans.
+
 - move Workflow Canvas-specific knowledge behind the first adapter
 - create versioned canonical records and migrations
 - add golden fixture repositories and expected twin snapshots

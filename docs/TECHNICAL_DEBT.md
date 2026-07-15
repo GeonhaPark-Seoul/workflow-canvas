@@ -167,7 +167,8 @@ This is the durable ledger for security, reliability, commercialization, and arc
 
 - Severity: high
 - Gate: engine-v1
-- Status: open
+- Status: in-progress
+- Current evidence: adapter contract, review, proposal, system-part, relation, and trust-topology records now carry explicit schema or contract versions. Fingerprint-guarded part/edge migrations exist, but one canonical provider-neutral `TwinBuild` graph and forward migration chain do not yet exist.
 - Required work: stable IDs and schemas for entities, capabilities, relations, trust zones, gateways, evidence, observations, operations, policies, events, and threats; provide forward migrations and compatibility windows.
 - Exit criteria: an older twin upgrades without losing manual layout, annotations, decisions, or evidence links.
 
@@ -175,7 +176,8 @@ This is the durable ledger for security, reliability, commercialization, and arc
 
 - Severity: high
 - Gate: engine-v1
-- Status: open
+- Status: in-progress
+- Current evidence: `shared/twinAdapterContract.js` validates version compatibility, declared interfaces, data classes, permissions, operation capability IDs, lazy module identity, and review output. The browser uses a generic registry, Workflow Canvas is the first registered adapter, and a second order-service fixture plugs in without changing registry or review code.
 - Required work: a versioned adapter contract for discovery, identity resolution, evidence, operation capabilities, and verification. Workflow Canvas remains the reference adapter, not a hard-coded special case in the engine core.
 - Exit criteria: a second software stack can be onboarded without changing the core graph/review/execution engine.
 

@@ -18,7 +18,7 @@
     "source-twin:prepare": "node scripts/generate-source-twin.mjs --prepare",
     "local-connector": "node scripts/local-connector-agent.mjs",
     "privacy:check": "node scripts/check-privacy-release.mjs",
-    "test": "npm run discover:check && npm run source-twin:check && npm run privacy:check && node scripts/test-source-twin.mjs && node scripts/test-local-connector-agent.mjs && node scripts/test-mcp-logic.mjs && node scripts/test-sql-security.mjs"
+    "test": "npm run discover:check && npm run source-twin:check && npm run privacy:check && node scripts/test-source-twin.mjs && node scripts/test-local-connector-agent.mjs && node scripts/test-twin-adapter-contract.mjs && node scripts/test-mcp-logic.mjs && node scripts/test-sql-security.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",

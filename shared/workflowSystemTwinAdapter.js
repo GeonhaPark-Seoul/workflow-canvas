@@ -1,4 +1,5 @@
 import {
+  DIGITAL_TWIN_REVIEW_SCHEMA_VERSION,
   createDigitalTwinReviewItem,
   digitalTwinReviewFingerprint,
 } from './digitalTwinReview.js'
@@ -23,10 +24,14 @@ import {
   WORKFLOW_SYSTEM_DISCOVERY_SOURCE_ID,
 } from './workflowSystemDiscovery.js'
 import { WORKFLOW_SYSTEM_DISCOVERY } from './workflowSystemDiscoveryManifest.js'
+import { TWIN_ENGINE_SCHEMA_VERSION } from './twinAdapterContract.js'
+import {
+  canInspectWorkflowSystemCanvas,
+  WORKFLOW_SYSTEM_TWIN_ADAPTER_DESCRIPTOR,
+} from './workflowSystemTwinAdapterDescriptor.js'
 
 export const WORKFLOW_SYSTEM_TWIN_SOURCE_ID = WORKFLOW_SYSTEM_DISCOVERY_SOURCE_ID
 
-const SIGNATURE_NODE_IDS = ['map-web-app', 'map-mcp-api', 'map-postgres', 'map-canvases-table']
 const EXPECTED_MAP = createWorkflowCanvasSystemMap()
 
 const RESOURCE_PROPOSAL_DEFS = Object.freeze({
@@ -82,11 +87,6 @@ function workflowTwinRoot(canvas) {
   return nodes.find((node) => node?.data?.systemMapSnapshot)
     ?? nodes.find((node) => node.id === 'map-group-experience')
     ?? null
-}
-
-function canInspectWorkflowSystemTwin(canvas) {
-  const ids = new Set((canvas?.nodes ?? []).map((node) => node.id))
-  return SIGNATURE_NODE_IDS.every((id) => ids.has(id))
 }
 
 function resourceObservation(resources = []) {
@@ -579,7 +579,7 @@ function severityRank(severity) {
 }
 
 export function inspectWorkflowSystemTwin(canvas) {
-  if (!canInspectWorkflowSystemTwin(canvas)) return null
+  if (!canInspectWorkflowSystemCanvas(canvas)) return null
   const root = workflowTwinRoot(canvas)
   const report = inspectWorkflowSystemMap({
     canvas,
@@ -611,8 +611,12 @@ export function inspectWorkflowSystemTwin(canvas) {
   ))
 
   return {
+    schemaVersion: DIGITAL_TWIN_REVIEW_SCHEMA_VERSION,
     source: {
-      adapterId: 'workflow-system-discovery',
+      adapterId: WORKFLOW_SYSTEM_TWIN_ADAPTER_DESCRIPTOR.id,
+      adapterContractVersion: WORKFLOW_SYSTEM_TWIN_ADAPTER_DESCRIPTOR.contractVersion,
+      adapterVersion: WORKFLOW_SYSTEM_TWIN_ADAPTER_DESCRIPTOR.adapterVersion,
+      engineSchemaVersion: TWIN_ENGINE_SCHEMA_VERSION,
       id: WORKFLOW_SYSTEM_TWIN_SOURCE_ID,
       label: 'Workflow Canvas 시스템',
       snapshotId: report.scanner.manifest_id,
@@ -631,7 +635,8 @@ export function inspectWorkflowSystemTwin(canvas) {
 }
 
 export const workflowSystemTwinAdapter = Object.freeze({
-  id: 'workflow-system-discovery',
-  canInspect: canInspectWorkflowSystemTwin,
+  id: WORKFLOW_SYSTEM_TWIN_ADAPTER_DESCRIPTOR.id,
+  describe: () => WORKFLOW_SYSTEM_TWIN_ADAPTER_DESCRIPTOR,
+  canInspect: canInspectWorkflowSystemCanvas,
   inspect: inspectWorkflowSystemTwin,
 })

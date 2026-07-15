@@ -1,0 +1,16 @@
+{
+  "nodes": [
+    {
+      "id": "fixture-orders-api",
+      "type": "system",
+      "position": { "x": 140, "y": 90 },
+      "width": 260,
+      "height": 150,
+      "data": {
+        "label": "주문 API",
+        "fixtureSystem": "order-service"
+      }
+    }
+  ],
+  "edges": []
+}

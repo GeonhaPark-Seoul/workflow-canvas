@@ -1,22 +1,26 @@
-// Domain adapters translate source-specific observations into one review model.
-// Logistics, CRM, finance, health, or other systems can be registered here
-// without teaching the review UI their schemas.
+import {
+  createTwinAdapterRegistration,
+  createTwinAdapterRegistry,
+} from '../../shared/twinAdapterContract.js'
+import {
+  canInspectWorkflowSystemCanvas,
+  WORKFLOW_SYSTEM_TWIN_ADAPTER_DESCRIPTOR,
+} from '../../shared/workflowSystemTwinAdapterDescriptor.js'
+
+// Product-specific modules stay behind registrations. The registry validates
+// one adapter contract and one review schema regardless of the source system.
 export const DIGITAL_TWIN_ADAPTERS = Object.freeze([
-  {
-    id: 'workflow-system-discovery',
-    canInspect(canvas) {
-      const ids = new Set((canvas?.nodes ?? []).map((node) => node.id))
-      return ['map-web-app', 'map-mcp-api', 'map-postgres', 'map-canvases-table']
-        .every((id) => ids.has(id))
-    },
+  createTwinAdapterRegistration({
+    descriptor: WORKFLOW_SYSTEM_TWIN_ADAPTER_DESCRIPTOR,
+    canInspect: canInspectWorkflowSystemCanvas,
     load: () => import('../../shared/workflowSystemTwinAdapter.js')
       .then((module) => module.workflowSystemTwinAdapter),
-  },
+  }),
 ])
 
+export const DIGITAL_TWIN_ADAPTER_REGISTRY = createTwinAdapterRegistry(DIGITAL_TWIN_ADAPTERS)
+export const DIGITAL_TWIN_ADAPTER_DESCRIPTORS = DIGITAL_TWIN_ADAPTER_REGISTRY.descriptors
+
 export async function inspectDigitalTwinCanvas(canvas) {
-  const registration = DIGITAL_TWIN_ADAPTERS.find((candidate) => candidate.canInspect(canvas))
-  if (!registration) return null
-  const adapter = await registration.load()
-  return adapter.inspect(canvas)
+  return DIGITAL_TWIN_ADAPTER_REGISTRY.inspect(canvas)
 }
