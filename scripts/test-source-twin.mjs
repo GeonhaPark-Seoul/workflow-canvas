@@ -41,12 +41,17 @@ import {
   validGitHubSignature,
 } from '../api/source-twin-webhook.js'
 import {
+  WORKFLOW_GIT_SYNC_EDGE_ID,
+  WORKFLOW_SOURCE_TWIN_PART_REFS,
+  workflowSourceTwinEntryForEdgeOperation,
   workflowSourceTwinEntryForNode,
+  workflowSourceTwinEntryForPart,
   WORKFLOW_SOURCE_TWIN_NODE_IDS,
 } from '../shared/workflowSourceTwinCanvas.js'
 import { SOURCE_TWIN_MANIFEST } from '../shared/sourceTwinManifest.js'
 import {
   compareLocalAndDeployedManifests,
+  LOCAL_GIT_SYNC_CAPABILITY_ID,
   localConnectorShellCommand,
   localGitSyncDecision,
   normalizeLocalSourceManifest,
@@ -62,6 +67,13 @@ assert.equal(workflowSourceTwinEntryForNode('map-local-repo').view, 'structure')
 assert.equal(workflowSourceTwinEntryForNode('map-github').view, 'changes')
 assert.equal(workflowSourceTwinEntryForNode('map-vercel').view, 'history')
 assert.equal(workflowSourceTwinEntryForNode('map-web-app'), null)
+assert.equal(workflowSourceTwinEntryForPart('map-local-repo', WORKFLOW_SOURCE_TWIN_PART_REFS.localStructure).view, 'structure')
+assert.equal(workflowSourceTwinEntryForPart('map-github', WORKFLOW_SOURCE_TWIN_PART_REFS.githubChanges).view, 'changes')
+assert.equal(workflowSourceTwinEntryForPart('map-vercel', WORKFLOW_SOURCE_TWIN_PART_REFS.vercelHistory).view, 'history')
+assert.equal(workflowSourceTwinEntryForPart('map-github', LOCAL_GIT_SYNC_CAPABILITY_ID).focus, 'git-sync')
+assert.equal(workflowSourceTwinEntryForPart('map-web-app', WORKFLOW_SOURCE_TWIN_PART_REFS.localStructure), null)
+assert.equal(workflowSourceTwinEntryForEdgeOperation(WORKFLOW_GIT_SYNC_EDGE_ID).focus, 'git-sync')
+assert.equal(workflowSourceTwinEntryForEdgeOperation('map-edge-github-vercel'), null)
 assert.equal(SOURCE_TWIN_MANIFEST.changeSet.initialBaseline, false, 'generated source history must keep the committed parent manifest')
 
 const fixtureEntries = [
@@ -496,6 +508,23 @@ try {
   assert.deepEqual([...noGitFiles.keys()], ['package.json', 'src/app.js'])
 } finally {
   await rm(noGitRoot, { recursive: true, force: true })
+}
+
+const deletedGitRoot = await mkdtemp(path.join(tmpdir(), 'source-twin-deleted-'))
+try {
+  execFileSync('git', ['init', '--initial-branch=main'], { cwd: deletedGitRoot, stdio: 'ignore' })
+  await mkdir(path.join(deletedGitRoot, 'src'), { recursive: true })
+  await writeFile(path.join(deletedGitRoot, 'package.json'), '{"name":"deleted-file"}\n')
+  await writeFile(path.join(deletedGitRoot, 'src', 'removed.js'), 'export const removed = true\n')
+  execFileSync('git', ['add', 'package.json', 'src/removed.js'], { cwd: deletedGitRoot, stdio: 'ignore' })
+  await rm(path.join(deletedGitRoot, 'src', 'removed.js'))
+  assert.deepEqual(
+    [...readSourceTwinWorkingTree(deletedGitRoot).keys()],
+    ['package.json'],
+    'a tracked file deleted in the working tree must not break source-twin generation before commit',
+  )
+} finally {
+  await rm(deletedGitRoot, { recursive: true, force: true })
 }
 
 const unsafeGitRoot = await mkdtemp(path.join(tmpdir(), 'source-twin-symlink-'))

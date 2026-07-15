@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
-import { lstatSync, readFileSync, readdirSync, realpathSync } from 'node:fs'
+import { existsSync, lstatSync, readFileSync, readdirSync, realpathSync } from 'node:fs'
 import path from 'node:path'
 import { parse } from '@babel/parser'
 import { SOURCE_TWIN_SCHEMA_VERSION, SOURCE_TWIN_SOURCE_ID } from '../shared/sourceTwin.js'
@@ -694,6 +694,7 @@ export function readSourceTwinWorkingTree(root) {
   const files = new Map()
   let totalBytes = 0
   for (const relativePath of sourceTwinFilePaths(root)) {
+    if (!existsSync(path.resolve(root, relativePath))) continue
     const sourceFile = safeSourceFile(root, relativePath)
     totalBytes += sourceFile.size
     if (totalBytes > MAX_SOURCE_TOTAL_BYTES) {

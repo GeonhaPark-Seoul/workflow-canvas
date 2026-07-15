@@ -1,6 +1,7 @@
 export const LOCAL_CONNECTOR_SCHEMA_VERSION = 1
 export const LOCAL_CONNECTOR_SOURCE_ID = 'workflow-local-repository'
 export const LOCAL_GIT_SYNC_PART_ID = 'workflow-local-git-sync'
+export const GITHUB_GIT_SYNC_PART_ID = 'workflow-github-git-sync'
 export const LOCAL_GIT_SYNC_CAPABILITY_ID = 'workflow.local.git-sync'
 export const LOCAL_CONNECTOR_ONLINE_MS = 45_000
 

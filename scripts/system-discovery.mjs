@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { SYSTEM_RUNTIME_CAPABILITY_DEFS } from '../shared/systemRuntime.js'
 
@@ -404,7 +404,9 @@ export function readWorkingTree(root) {
   )
   const files = new Map()
   for (const relativePath of nulSeparated(output).filter(shouldInspect).sort()) {
-    files.set(relativePath, readFileSync(path.join(root, relativePath), 'utf8'))
+    const absolutePath = path.join(root, relativePath)
+    if (!existsSync(absolutePath)) continue
+    files.set(relativePath, readFileSync(absolutePath, 'utf8'))
   }
   return files
 }

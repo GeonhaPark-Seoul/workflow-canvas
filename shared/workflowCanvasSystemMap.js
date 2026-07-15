@@ -1,7 +1,15 @@
 import { createEdgeRelationData, edgeRelationInfo } from './relationOntology.js'
-import { LOCAL_GIT_SYNC_CAPABILITY_ID, LOCAL_GIT_SYNC_PART_ID } from './localConnector.js'
+import {
+  GITHUB_GIT_SYNC_PART_ID,
+  LOCAL_GIT_SYNC_CAPABILITY_ID,
+  LOCAL_GIT_SYNC_PART_ID,
+} from './localConnector.js'
 import { createSystemNodeData } from './systemOntology.js'
 import { WORKFLOW_SYSTEM_DISCOVERY } from './workflowSystemDiscoveryManifest.js'
+import {
+  WORKFLOW_SOURCE_TWIN_PART_IDS,
+  WORKFLOW_SOURCE_TWIN_PART_REFS,
+} from './workflowSourceTwinCanvas.js'
 
 const GROUPS = Object.freeze([
   { id: 'map-group-experience', label: '사용자 인터페이스층', x: 0, y: 0, width: 1000, height: 560 },
@@ -46,6 +54,45 @@ const LOCAL_GIT_SYNC_PART = Object.freeze({
   exposure: 'internal',
   sourceKind: 'connector',
   evidenceRef: 'scripts/local-connector-agent.mjs, api/local-connector.js, map-edge-repo-github',
+})
+
+const GITHUB_GIT_SYNC_PART = Object.freeze({
+  ...LOCAL_GIT_SYNC_PART,
+  id: GITHUB_GIT_SYNC_PART_ID,
+  label: '로컬 동기화',
+})
+
+function sourceTwinViewPart({ id, label, ref, evidenceRef }) {
+  return Object.freeze({
+    id,
+    kind: 'view',
+    label,
+    ref,
+    exposure: 'internal',
+    sourceKind: 'code',
+    evidenceRef,
+  })
+}
+
+const LOCAL_CODE_STRUCTURE_PART = sourceTwinViewPart({
+  id: WORKFLOW_SOURCE_TWIN_PART_IDS.localStructure,
+  label: '코드 구조',
+  ref: WORKFLOW_SOURCE_TWIN_PART_REFS.localStructure,
+  evidenceRef: 'scripts/source-twin-scanner.mjs, scripts/local-connector-agent.mjs',
+})
+
+const GITHUB_COMMIT_CHANGES_PART = sourceTwinViewPart({
+  id: WORKFLOW_SOURCE_TWIN_PART_IDS.githubChanges,
+  label: '커밋 변경',
+  ref: WORKFLOW_SOURCE_TWIN_PART_REFS.githubChanges,
+  evidenceRef: 'api/source-twin-webhook.js, shared/sourceTwinManifest.js',
+})
+
+const VERCEL_STATUS_HISTORY_PART = sourceTwinViewPart({
+  id: WORKFLOW_SOURCE_TWIN_PART_IDS.vercelHistory,
+  label: '상태 이력',
+  ref: WORKFLOW_SOURCE_TWIN_PART_REFS.vercelHistory,
+  evidenceRef: 'mcp/sourceTwinStore.js, supabase-source-twin-history.sql',
 })
 
 const SHARED_API_RUNTIME_PART = runtimePart({
@@ -206,7 +253,7 @@ function mapNodes() {
       evidence: 'Vercel 라우팅과 API 엔트리',
       provider: 'Vercel',
       externalRef: 'vercel.json',
-      systemParts: [VERCEL_RUNTIME_PART],
+      systemParts: [VERCEL_RUNTIME_PART, VERCEL_STATUS_HISTORY_PART],
     }),
     systemNode('map-shared-api', 'map-group-runtime', 350, 65, 'api', '공유 캔버스 API', {
       purpose: '공유 참여자의 읽기·저장을 서버에서 다시 검증한다.',
@@ -344,7 +391,7 @@ function mapNodes() {
       environment: 'local',
       provider: 'Git',
       externalRef: 'workflow-canvas local checkout',
-      systemParts: [LOCAL_GIT_SYNC_PART],
+      systemParts: [LOCAL_CODE_STRUCTURE_PART, LOCAL_GIT_SYNC_PART],
     }),
     systemNode('map-tests', 'map-group-development', 960, 100, 'service', '테스트·보안 검사', {
       purpose: '코드 변경이 기존 동작과 권한 경계를 깨지 않았는지 확인한다.',
@@ -363,6 +410,7 @@ function mapNodes() {
       environment: 'production',
       provider: 'GitHub',
       externalRef: 'origin/main',
+      systemParts: [GITHUB_GIT_SYNC_PART, GITHUB_COMMIT_CHANGES_PART],
     }),
   ]
 }
@@ -410,7 +458,7 @@ function mapEdges() {
     relationEdge('map-edge-tests-repo', 'map-tests', 'map-local-repo', 'reads', 'scripts/test-mcp-logic.mjs, scripts/test-sql-security.mjs', '테스트와 빌드가 로컬 소스의 동작·보안 규칙을 검사한다.', { sourceHandle: 'left', targetHandle: 'right' }),
     relationEdge('map-edge-repo-github', 'map-local-repo', 'map-github', 'syncs_with', 'Git remote origin/main', 'Git 동기화 파츠가 계획·승인 뒤 일반 push 또는 fast-forward pull만 실행한다.', {
       sourceHandle: `p-${LOCAL_GIT_SYNC_PART_ID}-r`,
-      targetHandle: 'left',
+      targetHandle: `p-${GITHUB_GIT_SYNC_PART_ID}-l`,
     }),
     relationEdge('map-edge-github-vercel', 'map-github', 'map-vercel', 'triggers', 'vercel.json', '원격 저장소의 배포 대상 변경이 Vercel 배포 흐름을 촉발한다.', { sourceHandle: 'top', targetHandle: 'bottom' }),
   ]

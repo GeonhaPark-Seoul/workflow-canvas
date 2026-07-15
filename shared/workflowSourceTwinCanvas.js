@@ -1,8 +1,24 @@
+import { LOCAL_GIT_SYNC_CAPABILITY_ID } from './localConnector.js'
+
+export const WORKFLOW_GIT_SYNC_EDGE_ID = 'map-edge-repo-github'
+
+export const WORKFLOW_SOURCE_TWIN_PART_IDS = Object.freeze({
+  localStructure: 'workflow-local-code-structure',
+  githubChanges: 'workflow-github-commit-changes',
+  vercelHistory: 'workflow-vercel-status-history',
+})
+
+export const WORKFLOW_SOURCE_TWIN_PART_REFS = Object.freeze({
+  localStructure: 'workflow.source.local.structure',
+  githubChanges: 'workflow.source.github.changes',
+  vercelHistory: 'workflow.source.vercel.history',
+})
+
 const SOURCE_TWIN_NODE_ENTRIES = Object.freeze({
   'map-local-repo': Object.freeze({
     nodeId: 'map-local-repo',
     view: 'structure',
-    actionLabel: '로컬 코드',
+    actionLabel: '코드 구조',
     panelTitle: '로컬 프로젝트 저장소',
     description: '허용한 로컬 커넥터가 실제 프로젝트 구조와 Git 상태를 갱신합니다. 미연결 때만 현재 배포 코드를 대체 표시합니다.',
   }),
@@ -22,8 +38,34 @@ const SOURCE_TWIN_NODE_ENTRIES = Object.freeze({
   }),
 })
 
+const PART_REF_ENTRIES = Object.freeze({
+  [`map-local-repo:${WORKFLOW_SOURCE_TWIN_PART_REFS.localStructure}`]: SOURCE_TWIN_NODE_ENTRIES['map-local-repo'],
+  [`map-github:${WORKFLOW_SOURCE_TWIN_PART_REFS.githubChanges}`]: SOURCE_TWIN_NODE_ENTRIES['map-github'],
+  [`map-vercel:${WORKFLOW_SOURCE_TWIN_PART_REFS.vercelHistory}`]: SOURCE_TWIN_NODE_ENTRIES['map-vercel'],
+})
+
+const GIT_SYNC_ENTRY = Object.freeze({
+  ...SOURCE_TWIN_NODE_ENTRIES['map-local-repo'],
+  actionLabel: 'Git 동기화',
+  focus: 'git-sync',
+})
+
 export function workflowSourceTwinEntryForNode(nodeId) {
   return SOURCE_TWIN_NODE_ENTRIES[nodeId] ?? null
+}
+
+export function workflowSourceTwinEntryForPart(nodeId, part) {
+  const ref = typeof part === 'string' ? part : part?.ref
+  if (!ref) return null
+  if (
+    ref === LOCAL_GIT_SYNC_CAPABILITY_ID
+    && ['map-local-repo', 'map-github'].includes(nodeId)
+  ) return GIT_SYNC_ENTRY
+  return PART_REF_ENTRIES[`${nodeId}:${ref}`] ?? null
+}
+
+export function workflowSourceTwinEntryForEdgeOperation(edgeId) {
+  return edgeId === WORKFLOW_GIT_SYNC_EDGE_ID ? GIT_SYNC_ENTRY : null
 }
 
 export const WORKFLOW_SOURCE_TWIN_NODE_IDS = Object.freeze(Object.keys(SOURCE_TWIN_NODE_ENTRIES))

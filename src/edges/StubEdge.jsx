@@ -1,7 +1,8 @@
 import { useId } from 'react'
-import { BaseEdge } from '@xyflow/react'
+import { BaseEdge, EdgeLabelRenderer } from '@xyflow/react'
 import { getStubEdgeGeometry } from './stubEdgeGeometry'
 import { edgeRelationInfo } from '../../shared/relationOntology.js'
+import { edgeOperationStatusDefinition } from '../../shared/edgeOperation.js'
 
 // Perpendicular stub: the line leaves each connection point straight out
 // (perpendicular to the node side) for a fixed stub length, then curves
@@ -26,8 +27,13 @@ export default function StubEdge({
   const relation = edgeRelationInfo(data, style?.strokeDasharray ? 'references' : 'flows_to')
   const relationLabel = relation.label.length > 16 ? `${relation.label.slice(0, 15)}…` : relation.label
   const relationWidth = Math.max(58, Math.min(162, relationLabel.length * 11 + 32))
-  const showRelation = relation.explicit && !partLink
+  const operation = data?.edgeOperation
+  const showRelation = relation.explicit && !partLink && !operation
   const runtime = data?.systemRuntime
+  const operationStatus = edgeOperationStatusDefinition(operation?.status)
+  const operationTitle = operation
+    ? [operation.label, operationStatus.label, operation.message].filter(Boolean).join(' · ')
+    : ''
 
   return (
     <>
@@ -92,6 +98,25 @@ export default function StubEdge({
           <circle r="3" className="system-runtime-edge-indicator-dot" />
           <title>{[runtime.label, runtime.summary].filter(Boolean).join(' · ')}</title>
         </g>
+      )}
+      {operation && (
+        <EdgeLabelRenderer>
+          <button
+            type="button"
+            className={`edge-operation-control nodrag nopan nowheel is-${operationStatus.id}`}
+            style={{ transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)` }}
+            title={operationTitle}
+            aria-label={operationTitle}
+            onPointerDown={(event) => event.stopPropagation()}
+            onDoubleClick={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation()
+              operation.onOpen?.()
+            }}
+          >
+            <span aria-hidden="true">{operationStatus.icon}</span>
+          </button>
+        </EdgeLabelRenderer>
       )}
     </>
   )

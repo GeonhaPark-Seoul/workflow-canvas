@@ -53,6 +53,11 @@ import {
   validateSystemPartInput,
 } from '../shared/systemPartOntology.js'
 import {
+  edgeOperationIsActive,
+  edgeOperationIsTerminal,
+  edgeOperationStatusDefinition,
+} from '../shared/edgeOperation.js'
+import {
   createEdgeRelationData,
   edgeRelationInfo,
   edgeRelationProvenance,
@@ -1444,9 +1449,15 @@ t('self map covers the critical runtime, data, security and delivery boundaries'
   }
   const localRepository = map.nodes.find((node) => node.id === 'map-local-repo')
   assert.equal(localRepository.data.systemParts.some((part) => part.ref === 'workflow.local.git-sync'), true)
+  assert.equal(localRepository.data.systemParts.some((part) => part.ref === 'workflow.source.local.structure'), true)
+  const githubRepository = map.nodes.find((node) => node.id === 'map-github')
+  assert.equal(githubRepository.data.systemParts.some((part) => part.ref === 'workflow.local.git-sync'), true)
+  assert.equal(githubRepository.data.systemParts.some((part) => part.ref === 'workflow.source.github.changes'), true)
+  const vercel = map.nodes.find((node) => node.id === 'map-vercel')
+  assert.equal(vercel.data.systemParts.some((part) => part.ref === 'workflow.source.vercel.history'), true)
   const gitSyncEdge = map.edges.find((edge) => edge.id === 'map-edge-repo-github')
   assert.equal(gitSyncEdge.sourceHandle, 'p-workflow-local-git-sync-r')
-  assert.equal(gitSyncEdge.targetHandle, 'left')
+  assert.equal(gitSyncEdge.targetHandle, 'p-workflow-github-git-sync-l')
   assert.equal(JSON.stringify(map).includes('SUPABASE_SERVICE_ROLE_KEY='), false)
   assert.deepEqual(
     resolveSystemRuntimeTargets({ canvas: map, actorUserId: 'owner-1', ownerUserId: 'owner-1' })
@@ -1459,6 +1470,18 @@ t('self map covers the critical runtime, data, security and delivery boundaries'
       'workflow.supabase.canvas-service.operations',
     ],
   )
+})
+
+t('edge operation presentation only animates observed queued or running work', () => {
+  assert.equal(edgeOperationStatusDefinition('preview').label, '승인 대기')
+  assert.equal(edgeOperationStatusDefinition('not-a-status').id, 'idle')
+  assert.equal(edgeOperationIsActive('planning'), false)
+  assert.equal(edgeOperationIsActive('preview'), false)
+  assert.equal(edgeOperationIsActive('queued'), true)
+  assert.equal(edgeOperationIsActive('running'), true)
+  assert.equal(edgeOperationIsTerminal('succeeded'), true)
+  assert.equal(edgeOperationIsTerminal('failed'), true)
+  assert.equal(edgeOperationIsTerminal('running'), false)
 })
 
 console.log('read-only system discovery')
@@ -2179,31 +2202,48 @@ t('a missing app operations part remains an additive, reviewable proposal', () =
   assert.equal(item.proposal.operations[0].part.ref, 'workflow.supabase.canvas-service.operations')
 })
 
-t('an older local repository map upgrades its Git sync part and edge through two explicit proposals', () => {
+t('an older source twin upgrades contextual parts and both Git sync endpoints through explicit proposals', () => {
   const map = structuredClone(createWorkflowCanvasSystemMap())
   const localRepository = map.nodes.find((node) => node.id === 'map-local-repo')
   localRepository.data.systemParts = []
+  const githubRepository = map.nodes.find((node) => node.id === 'map-github')
+  githubRepository.data.systemParts = []
+  const vercel = map.nodes.find((node) => node.id === 'map-vercel')
+  vercel.data.systemParts = vercel.data.systemParts.filter((part) => part.ref !== 'workflow.source.vercel.history')
   const gitSyncEdge = map.edges.find((edge) => edge.id === 'map-edge-repo-github')
   gitSyncEdge.sourceHandle = 'right'
+  gitSyncEdge.targetHandle = 'left'
   gitSyncEdge.data.relationEvidence = '검토된 로컬 커밋이 GitHub 원격과 동기화된다.'
 
   const review = inspectWorkflowSystemTwin(map)
-  const partItem = review.items.find((candidate) => (
-    candidate.itemKey === 'entity-part:map-local-repo:workflow-local-git-sync'
-  ))
+  const expectedPartKeys = [
+    'entity-part:map-local-repo:workflow-local-code-structure',
+    'entity-part:map-local-repo:workflow-local-git-sync',
+    'entity-part:map-github:workflow-github-git-sync',
+    'entity-part:map-github:workflow-github-commit-changes',
+    'entity-part:map-vercel:workflow-vercel-status-history',
+  ]
+  const partItems = expectedPartKeys.map((key) => review.items.find((candidate) => candidate.itemKey === key))
   const edgeItem = review.items.find((candidate) => candidate.itemKey === 'relation:map-edge-repo-github')
-  assert.equal(partItem.proposal.operations[0].action, 'add_part')
-  assert.equal(partItem.proposal.operations[0].part.ref, 'workflow.local.git-sync')
-  assert.match(partItem.proposal.summary, /서버 허용 목록/)
-  assert.doesNotMatch(partItem.proposal.summary, /읽기 전용/)
+  assert.equal(partItems.every((item) => item?.proposal?.operations[0].action === 'add_part'), true)
+  const gitPartItem = partItems.find((item) => item.itemKey.endsWith(':workflow-local-git-sync'))
+  assert.equal(gitPartItem.proposal.operations[0].part.ref, 'workflow.local.git-sync')
+  assert.match(gitPartItem.proposal.summary, /서버 허용 목록/)
+  assert.doesNotMatch(gitPartItem.proposal.summary, /읽기 전용/)
+  const viewPartItem = partItems.find((item) => item.itemKey.endsWith(':workflow-local-code-structure'))
+  assert.match(viewPartItem.proposal.summary, /구현 근거/)
+  assert.doesNotMatch(viewPartItem.proposal.summary, /실행 파츠/)
   assert.equal(edgeItem.proposal.operations[0].action, 'replace_edge')
+  assert.match(edgeItem.proposal.summary, /연결선 양 끝/)
 
-  const partApplied = applyDigitalTwinGraphProposal(map, partItem.proposal)
-  const afterPart = { ...map, nodes: partApplied.nodes, edges: partApplied.edges }
-  const edgeApplied = applyDigitalTwinGraphProposal(afterPart, edgeItem.proposal)
-  const upgraded = { ...afterPart, nodes: edgeApplied.nodes, edges: edgeApplied.edges }
+  const afterParts = partItems.reduce((canvas, item) => {
+    const applied = applyDigitalTwinGraphProposal(canvas, item.proposal)
+    return { ...canvas, nodes: applied.nodes, edges: applied.edges }
+  }, map)
+  const edgeApplied = applyDigitalTwinGraphProposal(afterParts, edgeItem.proposal)
+  const upgraded = { ...afterParts, nodes: edgeApplied.nodes, edges: edgeApplied.edges }
   const after = inspectWorkflowSystemTwin(upgraded)
-  assert.equal(after.items.some((candidate) => candidate.itemKey === partItem.itemKey), false)
+  assert.equal(after.items.some((candidate) => expectedPartKeys.includes(candidate.itemKey)), false)
   assert.equal(after.items.some((candidate) => candidate.itemKey === edgeItem.itemKey), false)
 })
 

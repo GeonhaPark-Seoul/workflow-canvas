@@ -555,7 +555,13 @@ function HistoryView({
   )
 }
 
-export default function SourceTwinPanel({ entry, side = 'right', onSideChange, onClose }) {
+export default function SourceTwinPanel({
+  entry,
+  side = 'right',
+  onSideChange,
+  onClose,
+  onLocalGitOperationStateChange,
+}) {
   const [paneWidth, setPaneWidth] = useState(500)
   const [perspective, setPerspective] = useState('functionality')
   const [query, setQuery] = useState('')
@@ -675,20 +681,28 @@ export default function SourceTwinPanel({ entry, side = 'right', onSideChange, o
     setLocalBusy(true)
     setLocalError('')
     setLocalStatus('')
+    onLocalGitOperationStateChange?.({ status: 'planning', message: '최신 Git 상태로 동기화 계획을 확인하고 있습니다.' })
     try {
-      setLocalSyncPlan(await previewLocalGitSync(connectorId))
+      const preview = await previewLocalGitSync(connectorId)
+      setLocalSyncPlan(preview)
+      onLocalGitOperationStateChange?.({
+        status: preview.decision?.action === 'noop' ? 'succeeded' : 'preview',
+        message: preview.decision?.reason || '동기화 계획을 확인한 뒤 승인할 수 있습니다.',
+      })
     } catch (previewError) {
       setLocalError(previewError.message)
+      onLocalGitOperationStateChange?.({ status: 'failed', message: previewError.message })
     } finally {
       setLocalBusy(false)
     }
-  }, [])
+  }, [onLocalGitOperationStateChange])
 
   const applyGitSync = useCallback(async (connectorId) => {
     if (!localSyncPlan?.plan_token) return
     setLocalBusy(true)
     setLocalError('')
     setLocalStatus('')
+    onLocalGitOperationStateChange?.({ status: 'planning', message: '승인된 동기화 요청을 확인하고 있습니다.' })
     try {
       const result = await applyLocalGitSync(
         connectorId,
@@ -699,16 +713,24 @@ export default function SourceTwinPanel({ entry, side = 'right', onSideChange, o
       setLocalStatus(result.queued
         ? '승인된 Git 동기화를 로컬 커넥터 실행 대기열에 넣었습니다.'
         : '로컬과 GitHub가 이미 동기화되어 있습니다.')
+      onLocalGitOperationStateChange?.({
+        status: result.queued ? 'queued' : 'succeeded',
+        operationId: result.operationId,
+        message: result.queued
+          ? '로컬 터미널 확인을 기다리고 있습니다.'
+          : '로컬과 GitHub가 이미 동기화되어 있습니다.',
+      })
       await refreshLocalConnectors()
     } catch (applyError) {
       if (['LOCAL_GIT_STATE_CHANGED', 'LOCAL_GIT_DIRECTION_CHANGED', 'OPERATION_PLAN_EXPIRED'].includes(applyError.code)) {
         setLocalSyncPlan(null)
       }
       setLocalError(applyError.message)
+      onLocalGitOperationStateChange?.({ status: 'failed', message: applyError.message })
     } finally {
       setLocalBusy(false)
     }
-  }, [localSyncPlan, refreshLocalConnectors])
+  }, [localSyncPlan, onLocalGitOperationStateChange, refreshLocalConnectors])
 
   const previewCapture = useCallback(async () => {
     setCaptureBusy(true)
@@ -807,7 +829,12 @@ export default function SourceTwinPanel({ entry, side = 'right', onSideChange, o
                 current={current}
                 localState={localState}
                 selectedConnectorId={selectedConnectorId}
-                onSelectConnector={(connectorId) => { setSelectedConnectorId(connectorId); setLocalSyncPlan(null); setLocalStatus('') }}
+                onSelectConnector={(connectorId) => {
+                  setSelectedConnectorId(connectorId)
+                  setLocalSyncPlan(null)
+                  setLocalStatus('')
+                  onLocalGitOperationStateChange?.({ status: 'idle' })
+                }}
                 setup={localSetup}
                 repositoryPath={localRepositoryPath}
                 onRepositoryPathChange={setLocalRepositoryPath}
@@ -821,7 +848,11 @@ export default function SourceTwinPanel({ entry, side = 'right', onSideChange, o
                 onRevoke={revokeConnector}
                 onPreviewSync={previewGitSync}
                 onApplySync={applyGitSync}
-                onCancelSync={() => { setLocalSyncPlan(null); setLocalError('') }}
+                onCancelSync={() => {
+                  setLocalSyncPlan(null)
+                  setLocalError('')
+                  onLocalGitOperationStateChange?.({ status: 'idle' })
+                }}
                 structureProps={{ perspective, setPerspective, query, setQuery, selectedId, setSelectedId }}
               />
             : view === 'changes'

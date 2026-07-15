@@ -138,6 +138,12 @@ One canonical fact graph supports two presentation modes selected by the user, n
 
 AI may translate canonical facts and suggest groupings. It may not create verified edges, security claims, or permissions without evidence. Hypotheses remain visibly marked as hypotheses.
 
+## Operation initiators
+
+Direct interface control is a first-class product path, not a temporary substitute for AI. A person clicks a node part or an edge control, reviews the plan, approves it, and sees the verified result in the canvas. Deterministic automation and a future AI agent are additional initiators of the same operation; neither receives a separate bypass.
+
+Every operation records whether it was initiated by a human interface, deterministic automation, or an AI agent. The initiator may change how intent is collected, but authorization, preview, consent, execution, verification, audit, and recovery use one universal contract.
+
 ## Operation maturity by engine version
 
 ### Engine 0.x - Read and reconcile
@@ -224,7 +230,7 @@ Prompts and model output are proposals or run artifacts, not system truth. Only 
 3. Issue short-lived capability grants; never expose arbitrary shell, database, or URL access.
 4. Ask the AI for a typed plan or bounded result.
 5. Apply risk policy and request human or multi-party approval where required.
-6. Execute through the same universal operation contract used by non-AI automation.
+6. Execute through the same universal operation contract used by the direct interface and non-AI automation.
 7. Verify postconditions independently of the AI's own claim.
 8. Append events, cost, evidence, and audit results.
 9. Release the lease and credentials, then stop or sleep according to policy.

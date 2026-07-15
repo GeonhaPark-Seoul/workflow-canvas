@@ -54,6 +54,7 @@ import {
 import { CanvasSchemaGuardError } from './lib/canvasSchemaGuard'
 import { nativeWheelScrollTarget } from './lib/wheelRouting'
 import { claimShareLaunch } from './lib/shareLaunchCoordinator'
+import { loadLocalConnectors } from './lib/localConnectorApi.js'
 import {
   getSharedCanvas, listCanvasParticipants, listSharedCanvases,
   setMemberViewRestriction, updateSharedCanvas,
@@ -72,8 +73,17 @@ import {
 } from './lib/shares'
 import { getMyProfile, loadMySettings, upsertMyEmail, touchLastSeen } from './lib/profiles'
 import { createSystemNodeData } from '../shared/systemOntology.js'
-import { workflowSourceTwinEntryForNode } from '../shared/workflowSourceTwinCanvas.js'
+import {
+  WORKFLOW_GIT_SYNC_EDGE_ID,
+  workflowSourceTwinEntryForEdgeOperation,
+  workflowSourceTwinEntryForPart,
+} from '../shared/workflowSourceTwinCanvas.js'
 import { detachSystemPartBindings, normalizeSystemParts } from '../shared/systemPartOntology.js'
+import {
+  edgeOperationIsActive,
+  edgeOperationIsTerminal,
+  edgeOperationStatusDefinition,
+} from '../shared/edgeOperation.js'
 import {
   failedSystemRuntimeResult,
   systemPartRuntimeReality,
@@ -117,6 +127,12 @@ const defaultEdgeOptions = {
   style: { stroke: '#4a4a5a', strokeWidth: 3 },
   markerEnd: { type: MarkerType.ArrowClosed, color: '#4a4a5a' },
 }
+
+const IDLE_GIT_SYNC_EDGE_OPERATION = Object.freeze({
+  status: 'idle',
+  operationId: '',
+  message: '',
+})
 
 // ── Stage type definitions ──────────────────────────────────────────────────
 const DEFAULT_STAGE_TYPES = [
@@ -485,6 +501,7 @@ export default function App() {
   const [notesPanel, setNotesPanel] = useState(null) // { type: 'stage'|'memo'|'content'|'system' } | null
   const [twinReviewOpen, setTwinReviewOpen] = useState(false)
   const [sourceTwinEntry, setSourceTwinEntry] = useState(null)
+  const [gitSyncEdgeOperation, setGitSyncEdgeOperation] = useState(IDLE_GIT_SYNC_EDGE_OPERATION)
   const [digitalTwinReview, setDigitalTwinReview] = useState(null)
   const [twinProposalPreview, setTwinProposalPreview] = useState(null) // { itemId, itemFingerprint } | null
   const [twinProposalStatus, setTwinProposalStatus] = useState(null) // { type, message } | null
@@ -3558,6 +3575,13 @@ export default function App() {
 
   const openSourceTwinFromNode = useCallback((entry) => {
     if (!entry) return
+    if (entry.focus !== 'git-sync') {
+      setGitSyncEdgeOperation((current) => (
+        ['planning', 'preview'].includes(current.status)
+          ? IDLE_GIT_SYNC_EDGE_OPERATION
+          : current
+      ))
+    }
     setNotesPanel(null)
     setNotesSelectedId(null)
     setTwinReviewOpen(false)
@@ -3565,6 +3589,68 @@ export default function App() {
     setTwinProposalStatus(null)
     setSourceTwinEntry(entry)
   }, [])
+
+  const updateLocalGitOperationState = useCallback((next) => {
+    const status = edgeOperationStatusDefinition(next?.status).id
+    const operationId = String(next?.operationId ?? '')
+    const message = String(next?.message ?? '')
+    setGitSyncEdgeOperation((current) => (
+      current.status === status
+      && current.operationId === operationId
+      && current.message === message
+        ? current
+        : { status, operationId, message }
+    ))
+  }, [])
+
+  const closeSourceTwin = useCallback(() => {
+    setSourceTwinEntry(null)
+    setGitSyncEdgeOperation((current) => (
+      ['planning', 'preview'].includes(current.status)
+        ? IDLE_GIT_SYNC_EDGE_OPERATION
+        : current
+    ))
+  }, [])
+
+  useEffect(() => {
+    if (
+      !gitSyncEdgeOperation.operationId
+      || !edgeOperationIsActive(gitSyncEdgeOperation.status)
+    ) return undefined
+    let cancelled = false
+    const operationId = gitSyncEdgeOperation.operationId
+    const poll = async () => {
+      try {
+        const state = await loadLocalConnectors()
+        const operation = state.operations?.find((item) => item.operationId === operationId)
+        if (!operation || cancelled) return
+        const message = operation.result?.summary || {
+          queued: '로컬 터미널 확인을 기다리고 있습니다.',
+          running: '승인된 Git 동기화를 실행하고 있습니다.',
+          succeeded: '로컬과 GitHub 동기화를 완료했습니다.',
+          failed: 'Git 동기화를 완료하지 못했습니다.',
+        }[operation.status] || ''
+        setGitSyncEdgeOperation((current) => (
+          current.operationId !== operationId
+            ? current
+            : { status: edgeOperationStatusDefinition(operation.status).id, operationId, message }
+        ))
+      } catch {
+        // Keep the last observed state. A transient status read must not invent a failure.
+      }
+    }
+    poll()
+    const timer = setInterval(poll, 2_500)
+    return () => { cancelled = true; clearInterval(timer) }
+  }, [gitSyncEdgeOperation.operationId, gitSyncEdgeOperation.status])
+
+  useEffect(() => {
+    if (!edgeOperationIsTerminal(gitSyncEdgeOperation.status)) return undefined
+    const timer = setTimeout(() => {
+      setGitSyncEdgeOperation(IDLE_GIT_SYNC_EDGE_OPERATION)
+    }, 4_500)
+    return () => clearTimeout(timer)
+  }, [gitSyncEdgeOperation.operationId, gitSyncEdgeOperation.status])
 
   // ── Saved views ───────────────────────────────────────────────────────────
   // Compute the bounding box (in flow coords) of the given node ids.
@@ -3689,13 +3775,30 @@ export default function App() {
           },
         }
       : e.data
+    const operationEntry = perm.role === 'owner' && digitalTwinReview
+      ? workflowSourceTwinEntryForEdgeOperation(e.id)
+      : null
+    const operationData = operationEntry
+      ? {
+          ...(runtimeData ?? {}),
+          edgeOperation: {
+            id: WORKFLOW_GIT_SYNC_EDGE_ID,
+            label: '로컬·GitHub 동기화',
+            ...gitSyncEdgeOperation,
+            onOpen: () => openSourceTwinFromNode(operationEntry),
+          },
+        }
+      : runtimeData
+    const operationClass = operationEntry
+      ? ` edge-operation-edge is-operation-${gitSyncEdgeOperation.status}`
+      : ''
     // Stable hook class so CSS can target `.wfc-edge:hover` for the hover glow.
-    const className = `wfc-edge${e.className ? ` ${e.className}` : ''}${runtimeClass}`
-    if (!e.selected) return { ...e, ...baseEdgeStyle(e), data: runtimeData, deletable, type, className }
+    const className = `wfc-edge${e.className ? ` ${e.className}` : ''}${runtimeClass}${operationClass}`
+    if (!e.selected) return { ...e, ...baseEdgeStyle(e), data: operationData, deletable, type, className }
     if (isPartEdge(e)) {
       return {
         ...e,
-        data: runtimeData,
+        data: operationData,
         deletable,
         type,
         className,
@@ -3710,7 +3813,7 @@ export default function App() {
     const color = isMemo ? '#f59e0b' : '#60a5fa'
     return {
       ...e,
-      data: runtimeData,
+      data: operationData,
       deletable,
       type,
       className,
@@ -4115,9 +4218,6 @@ export default function App() {
           const scopedPermission = !isOwner && !viewOnly && !canEditFullCanvas
           const editable = scopedPermission ? isNodeEditable(n.id) : !viewOnly
           const structureEditable = scopedPermission ? isNodeStructureEditable(n.id) : !viewOnly
-          const nodeSourceTwinEntry = n.type === 'system' && isOwner && digitalTwinReview
-            ? workflowSourceTwinEntryForNode(n.id)
-            : null
           const overrides = viewOnly
             ? { draggable: false, deletable: false, selectable: true }
             : scopedPermission
@@ -4146,8 +4246,14 @@ export default function App() {
                 : undefined,
               canRunSystemChecks: isOwner && !!user,
               onCheckSystemPart: isOwner ? runSystemPartRuntimeCheck : undefined,
-              sourceTwinEntry: nodeSourceTwinEntry,
-              onOpenSourceTwin: nodeSourceTwinEntry ? openSourceTwinFromNode : undefined,
+              onOpenSystemPart: n.type === 'system' && isOwner && digitalTwinReview
+                ? (part) => {
+                    const entry = workflowSourceTwinEntryForPart(n.id, part)
+                    if (!entry) return false
+                    openSourceTwinFromNode(entry)
+                    return true
+                  }
+                : undefined,
               onSelectForPart: () => {
                 setNodes((currentNodes) => currentNodes.map((candidate) => ({
                   ...candidate,
@@ -4557,7 +4663,8 @@ export default function App() {
           entry={sourceTwinEntry}
           side={notesSide}
           onSideChange={setNotesSide}
-          onClose={() => setSourceTwinEntry(null)}
+          onClose={closeSourceTwin}
+          onLocalGitOperationStateChange={updateLocalGitOperationState}
         />
       )}
     </div>

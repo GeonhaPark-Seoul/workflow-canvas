@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Handle, NodeResizer, NodeToolbar, Position, useStore } from '@xyflow/react'
 import OpenInNotesButton from '../components/OpenInNotesButton'
-import OpenSourceTwinButton from '../components/OpenSourceTwinButton'
 import ScopedParticipants from '../components/ScopedParticipants'
 import SystemObservationCatalog from '../components/SystemObservationCatalog'
 import { sanitizeHtml } from '../lib/sanitizeHtml'
@@ -24,7 +23,6 @@ import {
   systemRuntimeCatalogForResult,
   systemRuntimeCapabilityForPart,
 } from '../../shared/systemRuntime.js'
-import { LOCAL_GIT_SYNC_CAPABILITY_ID } from '../../shared/localConnector.js'
 
 const PORTS = [
   { id: 'left', position: Position.Left },
@@ -264,11 +262,6 @@ export default function SystemNode({ data, selected, id }) {
       onPointerCancel={handlePointerUp}
     >
       <OpenInNotesButton visible={selected && !shapeOnly} onOpen={data.onOpenInNotes} />
-      <OpenSourceTwinButton
-        visible={selected && !shapeOnly}
-        entry={data.sourceTwinEntry}
-        onOpen={data.onOpenSourceTwin}
-      />
       <NodeResizer
         isVisible={selected && !data.readOnly}
         minWidth={200}
@@ -420,10 +413,7 @@ export default function SystemNode({ data, selected, id }) {
                           event.stopPropagation()
                           if (preview) return
                           data.onSelectForPart?.()
-                          if (part.ref === LOCAL_GIT_SYNC_CAPABILITY_ID && data.sourceTwinEntry && data.onOpenSourceTwin) {
-                            data.onOpenSourceTwin({ ...data.sourceTwinEntry, focus: 'git-sync' })
-                            return
-                          }
+                          if (data.onOpenSystemPart?.(part) === true) return
                           openPartEditor(part)
                         }}
                       >

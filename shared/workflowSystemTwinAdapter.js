@@ -297,6 +297,10 @@ function expectedSystemPartProposal(finding, item, canvas) {
   const partLabel = normalizeSystemPlainText(finding.expected_part.label, 120) || finding.expected_part.id
   const replacing = finding.status === 'system_part_modified' && !!finding.actual_part
   const actualPart = replacing ? normalizeSystemPart(finding.actual_part) : null
+  const executionPart = ['connection', 'trigger'].includes(finding.expected_part.kind)
+  const partContract = executionPart
+    ? `서버 허용 목록으로 제한된 ${partLabel} 실행 파츠`
+    : `구현 근거가 연결된 ${partLabel} 파츠`
   if (replacing && !actualPart) return null
   return createDigitalTwinGraphProposal({
     sourceId: WORKFLOW_SYSTEM_TWIN_SOURCE_ID,
@@ -304,10 +308,10 @@ function expectedSystemPartProposal(finding, item, canvas) {
     itemId: item.id,
     itemFingerprint: item.fingerprint,
     snapshotId: WORKFLOW_SYSTEM_DISCOVERY.current.id,
-    title: `${partLabel} 실행 파츠 ${replacing ? '교체' : '추가'}`,
+    title: `${partLabel} 파츠 ${replacing ? '교체' : '추가'}`,
     summary: replacing
-      ? `${targetLabel} 노드의 기존 파츠가 미리 확인한 지문과 같을 때만 서버 허용 목록으로 제한된 ${partLabel} 파츠로 교체합니다.`
-      : `${targetLabel} 노드에 서버 허용 목록으로 제한된 ${partLabel} 파츠 1개를 추가합니다. 기존 노드 필드는 바꾸지 않습니다.`,
+      ? `${targetLabel} 노드의 기존 파츠가 미리 확인한 지문과 같을 때만 ${partContract}로 교체합니다.`
+      : `${targetLabel} 노드에 ${partContract} 1개를 추가합니다. 기존 노드 필드는 바꾸지 않습니다.`,
     operations: [replacing
       ? {
           action: 'replace_part',
@@ -430,8 +434,8 @@ function relationReviewItem(finding, canvas) {
     itemId: item.id,
     itemFingerprint: item.fingerprint,
     snapshotId: WORKFLOW_SYSTEM_DISCOVERY.current.id,
-    title: 'Git 동기화 연결선을 실행 파츠에 연결',
-    summary: '로컬 저장소와 GitHub 사이의 기존 양 끝 노드는 유지하고, 연결선 시작점을 Git 동기화 파츠 소켓으로 옮겨 최신 근거 계약으로 교체합니다.',
+    title: 'Git 동기화 연결선을 양쪽 실행 파츠에 연결',
+    summary: '로컬 저장소와 GitHub 사이의 기존 양 끝 노드는 유지하고, 연결선 양 끝을 각 저장소의 Git 동기화 파츠 소켓으로 옮겨 최신 근거 계약으로 교체합니다.',
     operations: [{
       action: 'replace_edge',
       edgeId: actual.id,

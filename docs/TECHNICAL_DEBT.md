@@ -132,7 +132,8 @@ This is the durable ledger for security, reliability, commercialization, and arc
 
 - Severity: critical
 - Gate: engine-v1 mutations
-- Status: open
+- Status: in progress
+- Current evidence: local Git synchronization already uses a browser-initiated preview, signed plan, owner authorization, queued execution, separate local-terminal consent, state revalidation, append-only events, and a bounded non-force push or fast-forward pull. The contract is not yet enforced for every adapter operation.
 - Required work: every operation implements plan, preview, authorization, local/cloud consent as applicable, execute, verify, audit, timeout, idempotency, recovery, and rollback declaration.
 - Exit criteria: adapters cannot expose an executable action without satisfying the operation contract and risk policy.
 
@@ -257,7 +258,8 @@ This is the durable ledger for security, reliability, commercialization, and arc
 
 - Severity: medium
 - Gate: engine-v1 UI
-- Status: open
+- Status: in progress
+- Current evidence: Workflow Canvas source-twin views are modeled as typed parts, the local/GitHub sync contract connects compatible parts, and its edge control opens the direct preview-and-approval interface. Vercel mutation, Supabase operations, and a reusable adapter-level operation descriptor remain.
 - Required work: move entity-specific top buttons into typed parts; connect compatible parts; place relationship operations on the edge; require preview rather than direct execution.
 - Exit criteria: local repository, GitHub, Vercel, database, and future adapters use the same interaction grammar.
 
@@ -265,7 +267,8 @@ This is the durable ledger for security, reliability, commercialization, and arc
 
 - Severity: medium
 - Gate: product-v1
-- Status: open
+- Status: in progress
+- Current evidence: manual Git synchronization animates only for server-observed `queued` or `running` states, briefly reports `succeeded` or `failed`, and honors reduced-motion. No automatic flow is animated because the current adapter has no observed recurring transfer event.
 - Required work: animate only observed events; distinguish configured, idle, polling, queued, running, succeeded, failed, stale, and unknown; support reduced-motion and dense canvases.
 - Exit criteria: animation cannot imply continuous synchronization when only heartbeat or periodic fetch is occurring.
 

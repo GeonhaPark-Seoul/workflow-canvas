@@ -5,6 +5,7 @@ export const SYSTEM_PART_KIND_DEFS = Object.freeze([
   { id: 'output', label: '출력', icon: '←', color: '#22c55e' },
   { id: 'owner', label: '담당자', icon: '◎', color: '#ec4899' },
   { id: 'connection', label: '연결', icon: '↔', color: '#06b6d4' },
+  { id: 'view', label: '보기', icon: '▤', color: '#38bdf8' },
   { id: 'credential_ref', label: '키 참조', icon: '✦', color: '#a855f7' },
 ])
 
