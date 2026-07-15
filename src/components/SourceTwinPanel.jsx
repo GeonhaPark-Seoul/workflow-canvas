@@ -8,6 +8,7 @@ import {
 import {
   compareLocalAndDeployedManifests,
   localConnectorIsOnline,
+  localConnectorShellCommand,
   localGitSyncDecision,
 } from '../../shared/localConnector.js'
 import {
@@ -60,11 +61,6 @@ const LOCAL_SYNC_ACTION_LABELS = {
 }
 const LOCAL_OPERATION_STATUS_LABELS = {
   queued: '실행 대기', running: '실행 중', succeeded: '완료', failed: '실패',
-}
-
-function localConnectorCommand(token) {
-  const origin = typeof window === 'undefined' ? '' : window.location.origin
-  return `WORKFLOW_CANVAS_LOCAL_CONNECTOR_TOKEN='${token}' npm run local-connector -- --server '${origin}'`
 }
 
 function IconButton({ title, onClick, disabled = false, children }) {
@@ -295,6 +291,8 @@ function LocalRepositoryView({
   selectedConnectorId,
   onSelectConnector,
   setup,
+  repositoryPath,
+  onRepositoryPathChange,
   busy,
   error,
   status,
@@ -323,6 +321,11 @@ function LocalRepositoryView({
     : null
   const decision = connector ? localGitSyncDecision(connector.git) : null
   const operations = (localState?.operations ?? []).filter((item) => item.connectorId === connector?.id).slice(0, 5)
+  const setupCommand = setup ? localConnectorShellCommand({
+    token: setup.token,
+    serverUrl: typeof window === 'undefined' ? '' : window.location.origin,
+    repositoryPath,
+  }) : ''
 
   return (
     <>
@@ -346,9 +349,20 @@ function LocalRepositoryView({
         {setup && (
           <div className="local-connector-setup">
             <strong>이 토큰은 지금 한 번만 표시됩니다</strong>
-            <p>연결할 프로젝트 폴더에서 아래 명령을 실행하고 터미널 창을 켜 두세요.</p>
-            <code>{localConnectorCommand(setup.token)}</code>
-            <button type="button" onClick={() => navigator.clipboard.writeText(localConnectorCommand(setup.token))}>명령 복사</button>
+            <label className="local-connector-path-field">
+              <span>프로젝트 폴더</span>
+              <input
+                type="text"
+                value={repositoryPath}
+                onChange={(event) => onRepositoryPathChange(event.target.value)}
+                placeholder="~/workflow-canvas"
+                spellCheck="false"
+                autoCapitalize="none"
+              />
+            </label>
+            <p>복사한 명령이 먼저 이 폴더로 이동하므로 어느 위치에서 터미널을 열어도 됩니다.</p>
+            <code>{setupCommand || '프로젝트 폴더와 서버 주소를 확인하세요.'}</code>
+            <button type="button" disabled={!setupCommand} onClick={() => navigator.clipboard.writeText(setupCommand)}>명령 복사</button>
           </div>
         )}
 
@@ -544,6 +558,7 @@ export default function SourceTwinPanel({ entry, side = 'right', onSideChange, o
   const [localState, setLocalState] = useState(null)
   const [selectedConnectorId, setSelectedConnectorId] = useState('')
   const [localSetup, setLocalSetup] = useState(null)
+  const [localRepositoryPath, setLocalRepositoryPath] = useState('~/workflow-canvas')
   const [localBusy, setLocalBusy] = useState(false)
   const [localError, setLocalError] = useState('')
   const [localStatus, setLocalStatus] = useState('')
@@ -778,6 +793,8 @@ export default function SourceTwinPanel({ entry, side = 'right', onSideChange, o
                 selectedConnectorId={selectedConnectorId}
                 onSelectConnector={(connectorId) => { setSelectedConnectorId(connectorId); setLocalSyncPlan(null); setLocalStatus('') }}
                 setup={localSetup}
+                repositoryPath={localRepositoryPath}
+                onRepositoryPathChange={setLocalRepositoryPath}
                 busy={localBusy}
                 error={localError}
                 status={localStatus}

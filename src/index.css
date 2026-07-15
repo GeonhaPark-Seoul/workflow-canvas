@@ -1147,6 +1147,34 @@ body[data-theme='light'] .react-flow__node:hover .canvas-group-frame {
   font-size: 9px;
   line-height: 1.45;
 }
+.local-connector-path-field {
+  display: grid;
+  grid-template-columns: 86px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.local-connector-path-field span {
+  color: #9aa5b5;
+  font-size: 9px;
+}
+.local-connector-path-field input {
+  min-width: 0;
+  height: 28px;
+  box-sizing: border-box;
+  border: 1px solid #ffffff1c;
+  border-radius: 4px;
+  outline: none;
+  background: #0c1115;
+  color: #d8dee8;
+  padding: 0 7px;
+  font: inherit;
+  font-size: 9px;
+}
+.local-connector-path-field input:hover,
+.local-connector-path-field input:focus {
+  border-color: #06b6d477;
+}
 .local-connector-setup code {
   display: block;
   max-height: 76px;
@@ -1229,6 +1257,7 @@ body[data-theme='light'] .react-flow__node:hover .canvas-group-frame {
   flex: 0 0 auto;
 }
 .local-sync-decision button:disabled,
+.local-connector-setup button:disabled,
 .local-connector-header-actions button:disabled {
   cursor: default;
   opacity: 0.45;

@@ -2,7 +2,7 @@
 export const SOURCE_TWIN_MANIFEST = Object.freeze(
 {
   "schemaVersion": 1,
-  "id": "source-twin-v1-32965924eea8",
+  "id": "source-twin-v1-61fb21fade31",
   "source": {
     "id": "workflow-canvas:self-source",
     "label": "Workflow Canvas 소스 코드",
@@ -2054,12 +2054,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:scripts/test-source-twin.mjs",
       "kind": "file",
       "label": "scripts/test-source-twin.mjs",
-      "fingerprint": "14fbd538d598bef02f52",
+      "fingerprint": "ddeaf6902a323cbdac0f",
       "path": "scripts/test-source-twin.mjs",
       "layer": "test",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 474,
+      "lineEnd": 491,
       "summary": "검증에서 {\"zen\":\"source twin\"} 데이터 접근 · 함수 2개 정의 · 모듈 14개 연결을 담당합니다.",
       "tags": [
         "test",
@@ -2173,13 +2173,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:shared/localConnector.js",
       "kind": "file",
       "label": "shared/localConnector.js",
-      "fingerprint": "9198e367055b95c6a500",
+      "fingerprint": "f5d3f3ad05436cf851c3",
       "path": "shared/localConnector.js",
       "layer": "shared",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 214,
-      "summary": "공통 도메인 규칙에서 함수 12개 정의을 담당합니다.",
+      "lineEnd": 249,
+      "summary": "공통 도메인 규칙에서 함수 14개 정의을 담당합니다.",
       "tags": [
         "shared"
       ],
@@ -2192,6 +2192,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
           "LOCAL_GIT_SYNC_PART_ID",
           "compareLocalAndDeployedManifests",
           "localConnectorIsOnline",
+          "localConnectorShellCommand",
           "localGitSyncDecision",
           "normalizeLocalGitState",
           "normalizeLocalSourceManifest"
@@ -3008,13 +3009,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:src/components/SourceTwinPanel.jsx",
       "kind": "file",
       "label": "src/components/SourceTwinPanel.jsx",
-      "fingerprint": "68d43d88e4bb799e5385",
+      "fingerprint": "c1aa8f4508c70c48926d",
       "path": "src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
       "language": "jsx",
       "lineStart": 1,
-      "lineEnd": 813,
-      "summary": "사용자 화면에서 함수 15개 정의 · 모듈 5개 연결을 담당합니다.",
+      "lineEnd": 830,
+      "summary": "사용자 화면에서 함수 14개 정의 · 모듈 5개 연결을 담당합니다.",
       "tags": [
         "frontend"
       ],
@@ -12206,8 +12207,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-source-twin.mjs",
       "parentId": "file:scripts/test-source-twin.mjs",
       "layer": "test",
-      "lineStart": 276,
-      "lineEnd": 292,
+      "lineStart": 293,
+      "lineEnd": 309,
       "summary": "local connector db from을(를) 처리하는 함수입니다.",
       "tags": [
         "method",
@@ -12228,8 +12229,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-source-twin.mjs",
       "parentId": "file:scripts/test-source-twin.mjs",
       "layer": "test",
-      "lineStart": 336,
-      "lineEnd": 344,
+      "lineStart": 353,
+      "lineEnd": 361,
       "summary": "result을(를) 읽기하는 함수입니다.",
       "tags": [
         "arrow",
@@ -13013,8 +13014,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/localConnector.js",
       "parentId": "file:shared/localConnector.js",
       "layer": "shared",
-      "lineStart": 135,
-      "lineEnd": 157,
+      "lineStart": 170,
+      "lineEnd": 192,
       "summary": "local and deployed manifests을(를) 비교하는 함수입니다.",
       "tags": [
         "exported",
@@ -13036,8 +13037,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/localConnector.js",
       "parentId": "file:shared/localConnector.js",
       "layer": "shared",
-      "lineStart": 36,
-      "lineEnd": 48,
+      "lineStart": 71,
+      "lineEnd": 83,
       "summary": "entity details을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -13058,8 +13059,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/localConnector.js",
       "parentId": "file:shared/localConnector.js",
       "layer": "shared",
-      "lineStart": 25,
-      "lineEnd": 28,
+      "lineStart": 26,
+      "lineEnd": 29,
       "summary": "integer을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -13080,9 +13081,32 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/localConnector.js",
       "parentId": "file:shared/localConnector.js",
       "layer": "shared",
-      "lineStart": 210,
-      "lineEnd": 213,
+      "lineStart": 245,
+      "lineEnd": 248,
       "summary": "local connector is online을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/localConnector.js:localConnectorShellCommand",
+      "kind": "function",
+      "label": "localConnectorShellCommand",
+      "fingerprint": "bb7bde89d071d1ee6d06",
+      "name": "localConnectorShellCommand",
+      "path": "shared/localConnector.js",
+      "parentId": "file:shared/localConnector.js",
+      "layer": "shared",
+      "lineStart": 41,
+      "lineEnd": 69,
+      "summary": "local connector shell command을(를) 처리하는 함수입니다.",
       "tags": [
         "exported",
         "function",
@@ -13103,8 +13127,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/localConnector.js",
       "parentId": "file:shared/localConnector.js",
       "layer": "shared",
-      "lineStart": 180,
-      "lineEnd": 208,
+      "lineStart": 215,
+      "lineEnd": 243,
       "summary": "local git sync decision을(를) 처리하는 함수입니다.",
       "tags": [
         "exported",
@@ -13126,8 +13150,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/localConnector.js",
       "parentId": "file:shared/localConnector.js",
       "layer": "shared",
-      "lineStart": 159,
-      "lineEnd": 178,
+      "lineStart": 194,
+      "lineEnd": 213,
       "summary": "local git state을(를) 정규화하는 함수입니다.",
       "tags": [
         "exported",
@@ -13149,8 +13173,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/localConnector.js",
       "parentId": "file:shared/localConnector.js",
       "layer": "shared",
-      "lineStart": 76,
-      "lineEnd": 133,
+      "lineStart": 111,
+      "lineEnd": 168,
       "summary": "local source manifest을(를) 정규화하는 함수입니다.",
       "tags": [
         "exported",
@@ -13172,8 +13196,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/localConnector.js",
       "parentId": "file:shared/localConnector.js",
       "layer": "shared",
-      "lineStart": 92,
-      "lineEnd": 92,
+      "lineStart": 127,
+      "lineEnd": 127,
       "summary": "perspective을(를) 처리하는 함수입니다.",
       "tags": [
         "arrow",
@@ -13194,9 +13218,31 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/localConnector.js",
       "parentId": "file:shared/localConnector.js",
       "layer": "shared",
-      "lineStart": 15,
-      "lineEnd": 17,
+      "lineStart": 16,
+      "lineEnd": 18,
       "summary": "plain object을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/localConnector.js:shellSingleQuote",
+      "kind": "function",
+      "label": "shellSingleQuote",
+      "fingerprint": "3d5ca8302a1583f42a80",
+      "name": "shellSingleQuote",
+      "path": "shared/localConnector.js",
+      "parentId": "file:shared/localConnector.js",
+      "layer": "shared",
+      "lineStart": 37,
+      "lineEnd": 39,
+      "summary": "shell single quote을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
         "shared"
@@ -13216,8 +13262,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/localConnector.js",
       "parentId": "file:shared/localConnector.js",
       "layer": "shared",
-      "lineStart": 50,
-      "lineEnd": 74,
+      "lineStart": 85,
+      "lineEnd": 109,
       "summary": "source entity을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -13238,8 +13284,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/localConnector.js",
       "parentId": "file:shared/localConnector.js",
       "layer": "shared",
-      "lineStart": 30,
-      "lineEnd": 34,
+      "lineStart": 31,
+      "lineEnd": 35,
       "summary": "string list을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -13260,8 +13306,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/localConnector.js",
       "parentId": "file:shared/localConnector.js",
       "layer": "shared",
-      "lineStart": 19,
-      "lineEnd": 23,
+      "lineStart": 20,
+      "lineEnd": 24,
       "summary": "text을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -20280,8 +20326,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 195,
-      "lineEnd": 215,
+      "lineStart": 191,
+      "lineEnd": 211,
       "summary": "change entity list을(를) 처리하는 함수입니다.",
       "tags": [
         "frontend",
@@ -20302,8 +20348,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 217,
-      "lineEnd": 259,
+      "lineStart": 213,
+      "lineEnd": 255,
       "summary": "changes view을(를) 처리하는 함수입니다.",
       "tags": [
         "frontend",
@@ -20324,8 +20370,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 78,
-      "lineEnd": 103,
+      "lineStart": 74,
+      "lineEnd": 99,
       "summary": "entity detail을(를) 처리하는 함수입니다.",
       "tags": [
         "frontend",
@@ -20346,8 +20392,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 105,
-      "lineEnd": 132,
+      "lineStart": 101,
+      "lineEnd": 128,
       "summary": "entity row을(를) 처리하는 함수입니다.",
       "tags": [
         "frontend",
@@ -20368,8 +20414,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 452,
-      "lineEnd": 527,
+      "lineStart": 466,
+      "lineEnd": 541,
       "summary": "history view을(를) 처리하는 함수입니다.",
       "tags": [
         "frontend",
@@ -20390,8 +20436,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 70,
-      "lineEnd": 76,
+      "lineStart": 66,
+      "lineEnd": 72,
       "summary": "icon button을(를) 처리하는 함수입니다.",
       "tags": [
         "frontend",
@@ -20407,13 +20453,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/components/SourceTwinPanel.jsx:LocalRepositoryView",
       "kind": "function",
       "label": "LocalRepositoryView",
-      "fingerprint": "a5dc83780b92560284ea",
+      "fingerprint": "62203cae1369a6c84c78",
       "name": "LocalRepositoryView",
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 292,
-      "lineEnd": 417,
+      "lineStart": 288,
+      "lineEnd": 431,
       "summary": "local repository view을(를) 처리하는 함수입니다.",
       "tags": [
         "frontend",
@@ -20434,8 +20480,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 261,
-      "lineEnd": 290,
+      "lineStart": 257,
+      "lineEnd": 286,
       "summary": "local sync plan preview을(를) 처리하는 함수입니다.",
       "tags": [
         "frontend",
@@ -20456,8 +20502,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 419,
-      "lineEnd": 450,
+      "lineStart": 433,
+      "lineEnd": 464,
       "summary": "operation plan preview을(를) 처리하는 함수입니다.",
       "tags": [
         "frontend",
@@ -20473,13 +20519,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/components/SourceTwinPanel.jsx:SourceTwinPanel",
       "kind": "function",
       "label": "SourceTwinPanel",
-      "fingerprint": "8e9ddfe6cf7a9c3bce89",
+      "fingerprint": "be87e6996cefe2018299",
       "name": "SourceTwinPanel",
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 529,
-      "lineEnd": 812,
+      "lineStart": 543,
+      "lineEnd": 829,
       "summary": "source twin panel을(를) 처리하는 함수입니다.",
       "tags": [
         "exported",
@@ -20501,31 +20547,9 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 134,
-      "lineEnd": 193,
+      "lineStart": 130,
+      "lineEnd": 189,
       "summary": "structure view을(를) 처리하는 함수입니다.",
-      "tags": [
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:src/components/SourceTwinPanel.jsx:localConnectorCommand",
-      "kind": "function",
-      "label": "localConnectorCommand",
-      "fingerprint": "450c6d4ae78b71f5832e",
-      "name": "localConnectorCommand",
-      "path": "src/components/SourceTwinPanel.jsx",
-      "parentId": "file:src/components/SourceTwinPanel.jsx",
-      "layer": "frontend",
-      "lineStart": 65,
-      "lineEnd": 68,
-      "summary": "local connector command을(를) 처리하는 함수입니다.",
       "tags": [
         "frontend",
         "function"
@@ -20545,8 +20569,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 732,
-      "lineEnd": 737,
+      "lineStart": 747,
+      "lineEnd": 752,
       "summary": "on move을(를) 처리하는 함수입니다.",
       "tags": [
         "arrow",
@@ -20567,8 +20591,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 738,
-      "lineEnd": 742,
+      "lineStart": 753,
+      "lineEnd": 757,
       "summary": "on up을(를) 처리하는 함수입니다.",
       "tags": [
         "arrow",
@@ -20589,8 +20613,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 166,
-      "lineEnd": 171,
+      "lineStart": 162,
+      "lineEnd": 167,
       "summary": "toggle을(를) 처리하는 함수입니다.",
       "tags": [
         "arrow",
@@ -27371,6 +27395,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:scripts/test-source-twin.mjs:localConnectorDb.from"
     },
     {
+      "id": "relation:19019e04be5ad251",
+      "type": "imports",
+      "source": "file:src/components/SourceTwinPanel.jsx",
+      "target": "file:shared/localConnector.js",
+      "names": [
+        "compareLocalAndDeployedManifests",
+        "localConnectorIsOnline",
+        "localConnectorShellCommand",
+        "localGitSyncDecision"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:191b1c9a0619cd6d",
       "type": "contains",
       "source": "file:src/lib/mcpTokens.js",
@@ -27458,12 +27495,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/systemRuntime.js",
       "target": "function:shared/systemRuntime.js:normalizeObservationCatalog"
-    },
-    {
-      "id": "relation:1b251b12976c4087",
-      "type": "contains",
-      "source": "file:src/components/SourceTwinPanel.jsx",
-      "target": "function:src/components/SourceTwinPanel.jsx:localConnectorCommand"
     },
     {
       "id": "relation:1b4a7c6f930c503d",
@@ -28106,6 +28137,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/nodes/StageNode.jsx",
       "target": "function:src/nodes/StageNode.jsx:startEdit"
+    },
+    {
+      "id": "relation:2c163d503c3da405",
+      "type": "imports",
+      "source": "file:scripts/test-source-twin.mjs",
+      "target": "file:shared/localConnector.js",
+      "names": [
+        "compareLocalAndDeployedManifests",
+        "localConnectorShellCommand",
+        "localGitSyncDecision",
+        "normalizeLocalSourceManifest"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:2c40ed26d40fa473",
@@ -34430,18 +34474,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ]
     },
     {
-      "id": "relation:c86a9ae553a86ba5",
-      "type": "imports",
-      "source": "file:src/components/SourceTwinPanel.jsx",
-      "target": "file:shared/localConnector.js",
-      "names": [
-        "compareLocalAndDeployedManifests",
-        "localConnectorIsOnline",
-        "localGitSyncDecision"
-      ],
-      "dynamic": false
-    },
-    {
       "id": "relation:c88a23ab781073b5",
       "type": "contains",
       "source": "file:shared/systemPartOntology.js",
@@ -35449,6 +35481,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:e0d942742e44d2fe",
+      "type": "contains",
+      "source": "file:shared/localConnector.js",
+      "target": "function:shared/localConnector.js:localConnectorShellCommand"
+    },
+    {
       "id": "relation:e0eaccac06d97573",
       "type": "contains",
       "source": "file:src/components/AuthPanel.jsx",
@@ -35590,18 +35628,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "file:src/components/ScopedParticipants.jsx",
       "names": [
         "default"
-      ],
-      "dynamic": false
-    },
-    {
-      "id": "relation:e6361aaf33e660a9",
-      "type": "imports",
-      "source": "file:scripts/test-source-twin.mjs",
-      "target": "file:shared/localConnector.js",
-      "names": [
-        "compareLocalAndDeployedManifests",
-        "localGitSyncDecision",
-        "normalizeLocalSourceManifest"
       ],
       "dynamic": false
     },
@@ -36137,6 +36163,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/digitalTwinReview.js",
       "target": "function:shared/digitalTwinReview.js:partitionDigitalTwinReviewItems"
+    },
+    {
+      "id": "relation:f135ec41dd2aeceb",
+      "type": "contains",
+      "source": "file:shared/localConnector.js",
+      "target": "function:shared/localConnector.js:shellSingleQuote"
     },
     {
       "id": "relation:f1fbbb89628ab812",
@@ -36998,11 +37030,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/localConnector.js:entityDetails",
       "function:shared/localConnector.js:integer",
       "function:shared/localConnector.js:localConnectorIsOnline",
+      "function:shared/localConnector.js:localConnectorShellCommand",
       "function:shared/localConnector.js:localGitSyncDecision",
       "function:shared/localConnector.js:normalizeLocalGitState",
       "function:shared/localConnector.js:normalizeLocalSourceManifest",
       "function:shared/localConnector.js:perspective",
       "function:shared/localConnector.js:plainObject",
+      "function:shared/localConnector.js:shellSingleQuote",
       "function:shared/localConnector.js:sourceEntity",
       "function:shared/localConnector.js:stringList",
       "function:shared/localConnector.js:text",
@@ -37331,7 +37365,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/components/SourceTwinPanel.jsx:OperationPlanPreview",
       "function:src/components/SourceTwinPanel.jsx:SourceTwinPanel",
       "function:src/components/SourceTwinPanel.jsx:StructureView",
-      "function:src/components/SourceTwinPanel.jsx:localConnectorCommand",
       "function:src/components/SourceTwinPanel.jsx:onMove",
       "function:src/components/SourceTwinPanel.jsx:onUp",
       "function:src/components/SourceTwinPanel.jsx:toggle",
@@ -38080,11 +38113,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/localConnector.js:entityDetails",
       "function:shared/localConnector.js:integer",
       "function:shared/localConnector.js:localConnectorIsOnline",
+      "function:shared/localConnector.js:localConnectorShellCommand",
       "function:shared/localConnector.js:localGitSyncDecision",
       "function:shared/localConnector.js:normalizeLocalGitState",
       "function:shared/localConnector.js:normalizeLocalSourceManifest",
       "function:shared/localConnector.js:perspective",
       "function:shared/localConnector.js:plainObject",
+      "function:shared/localConnector.js:shellSingleQuote",
       "function:shared/localConnector.js:sourceEntity",
       "function:shared/localConnector.js:stringList",
       "function:shared/localConnector.js:text",
@@ -38413,7 +38448,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/components/SourceTwinPanel.jsx:OperationPlanPreview",
       "function:src/components/SourceTwinPanel.jsx:SourceTwinPanel",
       "function:src/components/SourceTwinPanel.jsx:StructureView",
-      "function:src/components/SourceTwinPanel.jsx:localConnectorCommand",
       "function:src/components/SourceTwinPanel.jsx:onMove",
       "function:src/components/SourceTwinPanel.jsx:onUp",
       "function:src/components/SourceTwinPanel.jsx:toggle",
@@ -38814,15 +38848,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
     ]
   },
   "fingerprints": {
-    "code": "1c8108e13298428563f5",
-    "database": "579178d0b4957398f550",
+    "code": "e24295f29d6b232d75c7",
+    "database": "0ad05aed00cbb1bc2a7b",
     "security": "e32091ee5b5bad89c897",
     "deployment": "64656d51310852b3ac7e"
   },
   "summary": {
-    "entities": 1172,
+    "entities": 1173,
     "files": 109,
-    "functions": 945,
+    "functions": 946,
     "imports": 305,
     "apiRoutes": 6,
     "dbTables": 16,
@@ -38835,151 +38869,32 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
     "parseFailures": 0
   },
   "changeSet": {
-    "baseManifestId": "source-twin-v1-7a4eb17d9fdf",
+    "baseManifestId": "source-twin-v1-32965924eea8",
     "initialBaseline": false,
     "added": [
-      "api:/api/local-connector",
-      "db-function:reject_local_connector_event_mutation",
-      "db-table:local_connector_operation_events",
-      "db-table:local_connector_operations",
-      "db-table:local_connectors",
-      "dependency:node:process",
-      "env:WORKFLOW_CANVAS_LOCAL_CONNECTOR_TOKEN",
-      "env:WORKFLOW_CANVAS_URL",
-      "file:api/local-connector.js",
-      "file:mcp/localConnectorStore.js",
-      "file:scripts/local-connector-agent.mjs",
-      "file:scripts/test-local-connector-agent.mjs",
-      "file:shared/localConnector.js",
-      "file:src/lib/localConnectorApi.js",
-      "file:supabase-local-connectors.sql",
-      "function:api/local-connector.js:bearerToken",
-      "function:api/local-connector.js:handleAgent",
-      "function:api/local-connector.js:handleBrowser",
-      "function:api/local-connector.js:handler",
-      "function:api/local-connector.js:localToken",
-      "function:api/local-connector.js:send",
-      "function:mcp/localConnectorStore.js:LocalConnectorError.constructor",
-      "function:mcp/localConnectorStore.js:applyLocalGitSync",
-      "function:mcp/localConnectorStore.js:claimLocalGitSyncOperation",
-      "function:mcp/localConnectorStore.js:cleanText",
-      "function:mcp/localConnectorStore.js:completeLocalGitSyncOperation",
-      "function:mcp/localConnectorStore.js:connectorRow",
-      "function:mcp/localConnectorStore.js:createLocalConnector",
-      "function:mcp/localConnectorStore.js:databaseError",
-      "function:mcp/localConnectorStore.js:fingerprint",
-      "function:mcp/localConnectorStore.js:listLocalConnectors",
-      "function:mcp/localConnectorStore.js:loadOwnedConnector",
-      "function:mcp/localConnectorStore.js:previewLocalGitSync",
-      "function:mcp/localConnectorStore.js:recordLocalConnectorHeartbeat",
-      "function:mcp/localConnectorStore.js:resolveLocalConnectorToken",
-      "function:mcp/localConnectorStore.js:revokeLocalConnector",
-      "function:mcp/localConnectorStore.js:stable",
-      "function:mcp/localConnectorStore.js:tokenHash",
-      "function:scripts/local-connector-agent.mjs:argument",
-      "function:scripts/local-connector-agent.mjs:buildLocalConnectorManifest",
-      "function:scripts/local-connector-agent.mjs:changedPaths",
-      "function:scripts/local-connector-agent.mjs:executeApprovedGitSync",
-      "function:scripts/local-connector-agent.mjs:git",
-      "function:scripts/local-connector-agent.mjs:localConnectorStateDigest",
-      "function:scripts/local-connector-agent.mjs:main",
-      "function:scripts/local-connector-agent.mjs:observeLocalGit",
-      "function:scripts/local-connector-agent.mjs:request",
-      "function:scripts/local-connector-agent.mjs:resolveRepositoryRoot",
-      "function:scripts/local-connector-agent.mjs:runLocalConnectorAgent",
-      "function:scripts/local-connector-agent.mjs:safeServerUrl",
-      "function:scripts/local-connector-agent.mjs:sha",
-      "function:scripts/local-connector-agent.mjs:stateMatches",
-      "function:scripts/local-connector-agent.mjs:stop",
-      "function:scripts/test-local-connector-agent.mjs:configureRepository",
-      "function:scripts/test-local-connector-agent.mjs:git",
-      "function:scripts/test-source-twin.mjs:localConnectorDb.from",
-      "function:shared/digitalTwinProposal.js:digitalTwinProposalEdgeFingerprint",
-      "function:shared/localConnector.js:compareLocalAndDeployedManifests",
-      "function:shared/localConnector.js:entityDetails",
-      "function:shared/localConnector.js:integer",
-      "function:shared/localConnector.js:localConnectorIsOnline",
-      "function:shared/localConnector.js:localGitSyncDecision",
-      "function:shared/localConnector.js:normalizeLocalGitState",
-      "function:shared/localConnector.js:normalizeLocalSourceManifest",
-      "function:shared/localConnector.js:perspective",
-      "function:shared/localConnector.js:plainObject",
-      "function:shared/localConnector.js:sourceEntity",
-      "function:shared/localConnector.js:stringList",
-      "function:shared/localConnector.js:text",
-      "function:src/components/SourceTwinPanel.jsx:LocalRepositoryView",
-      "function:src/components/SourceTwinPanel.jsx:LocalSyncPlanPreview",
-      "function:src/components/SourceTwinPanel.jsx:localConnectorCommand",
-      "function:src/lib/localConnectorApi.js:applyLocalGitSync",
-      "function:src/lib/localConnectorApi.js:createLocalConnector",
-      "function:src/lib/localConnectorApi.js:loadLocalConnectors",
-      "function:src/lib/localConnectorApi.js:localConnectorRequest",
-      "function:src/lib/localConnectorApi.js:post",
-      "function:src/lib/localConnectorApi.js:previewLocalGitSync",
-      "function:src/lib/localConnectorApi.js:revokeLocalConnector",
-      "npm-script:local-connector"
+      "function:shared/localConnector.js:localConnectorShellCommand",
+      "function:shared/localConnector.js:shellSingleQuote"
     ],
     "changed": [
-      "deployment:vercel-web",
-      "file:package.json",
-      "file:scripts/test-mcp-logic.mjs",
       "file:scripts/test-source-twin.mjs",
-      "file:scripts/test-sql-security.mjs",
-      "file:shared/digitalTwinProposal.js",
-      "file:shared/workflowCanvasSystemMap.js",
-      "file:shared/workflowSourceTwinCanvas.js",
-      "file:shared/workflowSystemDiscovery.js",
-      "file:shared/workflowSystemMapRepair.js",
-      "file:shared/workflowSystemTwinAdapter.js",
-      "file:src/App.jsx",
-      "file:src/components/DigitalTwinReviewPanel.jsx",
+      "file:shared/localConnector.js",
       "file:src/components/SourceTwinPanel.jsx",
-      "file:src/nodes/SystemNode.jsx",
-      "function:shared/digitalTwinProposal.js:applyDigitalTwinGraphProposal",
-      "function:shared/digitalTwinProposal.js:createDigitalTwinGraphProposal",
-      "function:shared/digitalTwinProposal.js:normalizeOperation",
-      "function:shared/digitalTwinProposal.js:planDigitalTwinGraphProposal",
-      "function:shared/workflowCanvasSystemMap.js:mapEdges",
-      "function:shared/workflowCanvasSystemMap.js:mapNodes",
-      "function:shared/workflowSystemMapRepair.js:compareWorkflowSystemMapRelation",
-      "function:shared/workflowSystemMapRepair.js:relationShape",
-      "function:shared/workflowSystemTwinAdapter.js:expectedSystemPartProposal",
-      "function:shared/workflowSystemTwinAdapter.js:relationReviewItem",
-      "function:src/App.jsx:App",
-      "function:src/components/DigitalTwinReviewPanel.jsx:ReviewRow",
-      "function:src/components/SourceTwinPanel.jsx:SourceTwinPanel",
-      "function:src/nodes/SystemNode.jsx:SystemNode",
-      "npm-script:test"
+      "function:src/components/SourceTwinPanel.jsx:LocalRepositoryView",
+      "function:src/components/SourceTwinPanel.jsx:SourceTwinPanel"
     ],
-    "removed": [],
+    "removed": [
+      "function:src/components/SourceTwinPanel.jsx:localConnectorCommand"
+    ],
     "changedPaths": [
-      "api/local-connector.js",
-      "mcp/localConnectorStore.js",
-      "package.json",
-      "scripts/local-connector-agent.mjs",
-      "scripts/test-local-connector-agent.mjs",
-      "scripts/test-mcp-logic.mjs",
       "scripts/test-source-twin.mjs",
-      "scripts/test-sql-security.mjs",
-      "shared/digitalTwinProposal.js",
       "shared/localConnector.js",
-      "shared/workflowCanvasSystemMap.js",
-      "shared/workflowSourceTwinCanvas.js",
-      "shared/workflowSystemDiscovery.js",
-      "shared/workflowSystemMapRepair.js",
-      "shared/workflowSystemTwinAdapter.js",
-      "src/App.jsx",
-      "src/components/DigitalTwinReviewPanel.jsx",
-      "src/components/SourceTwinPanel.jsx",
-      "src/lib/localConnectorApi.js",
-      "src/nodes/SystemNode.jsx",
-      "supabase-local-connectors.sql"
+      "src/components/SourceTwinPanel.jsx"
     ],
     "summary": {
-      "added": 80,
-      "changed": 30,
-      "removed": 0,
-      "paths": 21
+      "added": 2,
+      "changed": 5,
+      "removed": 1,
+      "paths": 3
     }
   }
 }

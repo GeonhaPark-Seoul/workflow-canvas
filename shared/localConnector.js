@@ -11,6 +11,7 @@ const ENTITY_KINDS = new Set([
 const SAFE_SHA = /^[a-f0-9]{7,64}$/i
 const SAFE_FINGERPRINT = /^[a-f0-9]{8,128}$/i
 const SAFE_REF = /^[A-Za-z0-9._/@:-]{1,300}$/
+const LOCAL_CONNECTOR_TOKEN_PATTERN = /^wclc_[a-f0-9]{64}$/
 
 function plainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
@@ -31,6 +32,40 @@ function stringList(value, maximumItems = 80, maximumLength = 240) {
   return Array.isArray(value)
     ? [...new Set(value.slice(0, maximumItems).map((item) => text(item, maximumLength)).filter(Boolean))]
     : []
+}
+
+function shellSingleQuote(value) {
+  return `'${String(value).replaceAll("'", `'"'"'`)}'`
+}
+
+export function localConnectorShellCommand({
+  token,
+  serverUrl,
+  repositoryPath = '~/workflow-canvas',
+} = {}) {
+  if (!LOCAL_CONNECTOR_TOKEN_PATTERN.test(token ?? '')) return ''
+  let server
+  try {
+    const parsed = new URL(serverUrl)
+    const local = ['localhost', '127.0.0.1', '::1'].includes(parsed.hostname)
+    if (parsed.protocol !== 'https:' && !(local && parsed.protocol === 'http:')) return ''
+    parsed.pathname = ''
+    parsed.search = ''
+    parsed.hash = ''
+    server = parsed.toString().replace(/\/$/, '')
+  } catch {
+    return ''
+  }
+  const requestedPath = typeof repositoryPath === 'string'
+    ? repositoryPath.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 1_000)
+    : ''
+  if (!requestedPath) return ''
+  const directory = requestedPath === '~'
+    ? '"$HOME"'
+    : requestedPath.startsWith('~/')
+      ? `"$HOME"/${shellSingleQuote(requestedPath.slice(2))}`
+      : shellSingleQuote(requestedPath)
+  return `cd ${directory} && WORKFLOW_CANVAS_LOCAL_CONNECTOR_TOKEN=${shellSingleQuote(token)} npm run local-connector -- --server ${shellSingleQuote(server)} --repo .`
 }
 
 function entityDetails(value) {

@@ -46,6 +46,7 @@ import {
 import { SOURCE_TWIN_MANIFEST } from '../shared/sourceTwinManifest.js'
 import {
   compareLocalAndDeployedManifests,
+  localConnectorShellCommand,
   localGitSyncDecision,
   normalizeLocalSourceManifest,
 } from '../shared/localConnector.js'
@@ -148,6 +149,22 @@ assert.equal(localGitSyncDecision({ ...cleanGit, dirty: 1 }).action, 'blocked')
 assert.equal(localGitSyncDecision({ ...cleanGit, ahead: 2, behind: 2 }).action, 'blocked')
 assert.equal(localGitSyncDecision({ ...cleanGit, upstreamRef: 'fork/main' }).action, 'blocked')
 assert.equal(localGitSyncDecision({ ...cleanGit, upstreamRef: 'origin/release' }).action, 'blocked')
+const localConnectorToken = `wclc_${'a'.repeat(64)}`
+assert.equal(
+  localConnectorShellCommand({
+    token: localConnectorToken,
+    serverUrl: 'https://workflow.example.com/source?ignored=yes',
+    repositoryPath: '~/workflow-canvas',
+  }),
+  `cd "$HOME"/'workflow-canvas' && WORKFLOW_CANVAS_LOCAL_CONNECTOR_TOKEN='${localConnectorToken}' npm run local-connector -- --server 'https://workflow.example.com' --repo .`,
+)
+assert.match(localConnectorShellCommand({
+  token: localConnectorToken,
+  serverUrl: 'https://workflow.example.com',
+  repositoryPath: "/Users/example/Client's Project",
+}), /^cd '\/Users\/example\/Client'"'"'s Project' && /)
+assert.equal(localConnectorShellCommand({ token: 'exposed-token', serverUrl: 'https://workflow.example.com' }), '')
+assert.equal(localConnectorShellCommand({ token: localConnectorToken, serverUrl: 'http://remote.example.com' }), '')
 
 const codeEntity = sourceTwinEntities(manifest, { perspective: 'code', query: 'handler' })[0]
 assert.equal(
