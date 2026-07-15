@@ -58,10 +58,12 @@ import {
 } from '../shared/workflowOperationDefinitions.js'
 import {
   compareLocalAndDeployedManifests,
+  localConnectorConnectionState,
   localGitSyncEdgePresentation,
   localConnectorShellCommand,
   localGitSyncDecision,
   normalizeLocalSourceManifest,
+  sortLocalConnectorsForDisplay,
 } from '../shared/localConnector.js'
 
 const repository = {
@@ -88,6 +90,19 @@ assert.deepEqual(localGitSyncEdgePresentation({ action: 'push' }), {
 assert.equal(localGitSyncEdgePresentation({ action: 'pull_ff_only' }).direction, 'github-to-local')
 assert.equal(localGitSyncEdgePresentation({ action: 'noop' }).icon, '✓')
 assert.equal(SOURCE_TWIN_MANIFEST.changeSet.initialBaseline, false, 'generated source history must keep the committed parent manifest')
+
+const connectorNow = Date.parse('2026-07-15T08:00:00.000Z')
+const waitingConnector = { id: 'waiting', createdAt: '2026-07-15T07:59:00.000Z', lastSeenAt: null }
+const offlineConnector = { id: 'offline', createdAt: '2026-07-15T07:00:00.000Z', lastSeenAt: '2026-07-15T07:30:00.000Z' }
+const onlineConnector = { id: 'online', createdAt: '2026-07-14T07:00:00.000Z', lastSeenAt: '2026-07-15T07:59:50.000Z' }
+assert.equal(localConnectorConnectionState(waitingConnector, connectorNow), 'waiting')
+assert.equal(localConnectorConnectionState(offlineConnector, connectorNow), 'offline')
+assert.equal(localConnectorConnectionState(onlineConnector, connectorNow), 'online')
+assert.deepEqual(
+  sortLocalConnectorsForDisplay([waitingConnector, offlineConnector, onlineConnector], connectorNow).map((item) => item.id),
+  ['online', 'offline', 'waiting'],
+  'the currently connected registration must appear before stale duplicate-looking records',
+)
 
 const fixtureEntries = [
   ['package.json', JSON.stringify({ scripts: { build: 'vite build', test: 'node scripts/test-sample.mjs' } }, null, 2)],

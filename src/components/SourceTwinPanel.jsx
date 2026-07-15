@@ -12,7 +12,7 @@ import {
 } from '../../shared/sourceTwinSemantics.js'
 import {
   compareLocalAndDeployedManifests,
-  localConnectorIsOnline,
+  localConnectorConnectionState,
   localConnectorShellCommand,
   localGitSyncDecision,
 } from '../../shared/localConnector.js'
@@ -75,6 +75,30 @@ const LOCAL_SYNC_ACTION_LABELS = {
 }
 const LOCAL_OPERATION_STATUS_LABELS = {
   queued: '실행 대기', running: '실행 중', succeeded: '완료', failed: '실패',
+}
+const LOCAL_CONNECTOR_STATE_LABELS = {
+  online: '연결됨', waiting: '연결 전', offline: '오프라인',
+}
+
+function localConnectorShortId(connector) {
+  return String(connector?.id ?? '').slice(0, 8) || '미확인'
+}
+
+function localConnectorLastSeenLabel(connector, now = Date.now()) {
+  const seenAt = Date.parse(connector?.lastSeenAt)
+  if (!Number.isFinite(seenAt)) return '로컬 명령 실행 전'
+  const elapsed = Math.max(0, now - seenAt)
+  if (elapsed < 60_000) return '방금 응답'
+  if (elapsed < 3_600_000) return `${Math.floor(elapsed / 60_000)}분 전 응답`
+  if (elapsed < 86_400_000) return `${Math.floor(elapsed / 3_600_000)}시간 전 응답`
+  if (elapsed < 604_800_000) return `${Math.floor(elapsed / 86_400_000)}일 전 응답`
+  return `${new Date(seenAt).toLocaleDateString()} 응답`
+}
+
+function localConnectorOptionLabel(connector) {
+  const state = localConnectorConnectionState(connector)
+  const name = connector.repositoryLabel || connector.label || '로컬 연결'
+  return `${name} · ${LOCAL_CONNECTOR_STATE_LABELS[state]} · ${localConnectorShortId(connector)}`
 }
 
 function IconButton({ title, onClick, disabled = false, children }) {
@@ -351,7 +375,9 @@ function LocalRepositoryView({
 }) {
   const connectors = localState?.connectors ?? []
   const connector = connectors.find((item) => item.id === selectedConnectorId) ?? connectors[0] ?? null
-  const online = connector?.online && localConnectorIsOnline(connector)
+  const connectionState = connector ? localConnectorConnectionState(connector) : 'offline'
+  const online = connectionState === 'online'
+  const connectorName = connector?.repositoryLabel || connector?.label || '실제 로컬 프로젝트 연결'
   const manifest = online && connector.manifest ? connector.manifest : current.manifest
   const localCurrent = {
     ...current,
@@ -366,8 +392,9 @@ function LocalRepositoryView({
     : null
   const decision = connector ? localGitSyncDecision(connector.git) : null
   const operations = (localState?.operations ?? []).filter((item) => item.connectorId === connector?.id).slice(0, 5)
-  const setupCommand = setup ? localConnectorShellCommand({
-    token: setup.token,
+  const selectedSetup = setup?.connector?.id === connector?.id ? setup : null
+  const setupCommand = selectedSetup ? localConnectorShellCommand({
+    token: selectedSetup.token,
     serverUrl: typeof window === 'undefined' ? '' : window.location.origin,
     repositoryPath,
     allowGitSync,
@@ -378,21 +405,29 @@ function LocalRepositoryView({
       <section className="local-connector-control" aria-label="로컬 프로젝트 연결">
         <header>
           <div>
-            <strong>{online ? connector.repositoryLabel || connector.label : '실제 로컬 프로젝트 연결'}</strong>
-            <span className={online ? 'is-online' : ''}>{online ? '연결됨' : connector ? '오프라인' : '미연결'}</span>
+            <strong>{connectorName}</strong>
+            <span className={`is-${connector ? connectionState : 'offline'}`}>{connector ? LOCAL_CONNECTOR_STATE_LABELS[connectionState] : '미연결'}</span>
           </div>
           <div className="local-connector-header-actions">
             {connectors.length > 1 && (
               <select value={connector?.id ?? ''} onChange={(event) => onSelectConnector(event.target.value)} aria-label="로컬 커넥터 선택">
-                {connectors.map((item) => <option key={item.id} value={item.id}>{item.repositoryLabel || item.label}</option>)}
+                {connectors.map((item) => <option key={item.id} value={item.id}>{localConnectorOptionLabel(item)}</option>)}
               </select>
             )}
-            <button type="button" onClick={onCreate} disabled={busy} title="새 로컬 프로젝트 연결">＋</button>
-            {connector && <button type="button" onClick={() => onRevoke(connector.id)} disabled={busy} title="로컬 커넥터 해제">×</button>}
+            <button type="button" onClick={onCreate} disabled={busy} title="다른 Mac 또는 프로젝트 연결">＋</button>
+            {connector && <button type="button" onClick={() => onRevoke(connector.id)} disabled={busy} title={`선택한 연결 기록 해제 · ${localConnectorShortId(connector)}`}>×</button>}
           </div>
         </header>
 
-        {setup && (
+        {connector && (
+          <div className="local-connector-registration-meta">
+            <span>연결 ID <strong>{localConnectorShortId(connector)}</strong></span>
+            <span>{localConnectorLastSeenLabel(connector)}</span>
+            {connectors.length > 1 && <span>등록 {connectors.length}개</span>}
+          </div>
+        )}
+
+        {selectedSetup && (
           <div className="local-connector-setup">
             <strong>이 토큰은 지금 한 번만 표시됩니다</strong>
             <label className="local-connector-path-field">
@@ -423,16 +458,17 @@ function LocalRepositoryView({
           </div>
         )}
 
-        {!connector && !setup && (
+        {!connector && !selectedSetup && (
           <div className="local-connector-empty">
             <p>현재 화면은 배포 빌드의 코드 구조를 임시로 보여줍니다. 실제 Mac 프로젝트를 연결하면 로컬 파일 구조와 Git 상태가 자동 갱신됩니다.</p>
             <button type="button" onClick={onCreate} disabled={busy}>{busy ? '만드는 중…' : '로컬 커넥터 만들기'}</button>
           </div>
         )}
 
-        {connector && (
+        {connector && connector.git && (
           <>
             <div className="local-git-state">
+              <span>기준 <strong>{online ? '현재 응답' : '마지막 응답'}</strong></span>
               <span>브랜치 <strong>{connector.git?.branch || '미확인'}</strong></span>
               <span>로컬 변경 <strong>{connector.git?.dirty ?? 0}</strong></span>
               <span>권한 <strong>{connector.git?.syncEnabled ? '읽기 + 승인 동기화' : '읽기 전용'}</strong></span>
@@ -463,6 +499,13 @@ function LocalRepositoryView({
               </div>
             )}
           </>
+        )}
+
+        {connector && !connector.git && !selectedSetup && (
+          <div className="local-connector-pending">
+            <strong>아직 이 연결의 로컬 명령이 실행되지 않았습니다.</strong>
+            <span>토큰은 다시 표시할 수 없습니다. 사용하지 않을 기록이면 ×로 해제한 뒤 ＋로 새 연결을 만드세요.</span>
+          </div>
         )}
 
         {difference && (
@@ -693,7 +736,7 @@ export default function SourceTwinPanel({
     setLocalError('')
     setLocalStatus('')
     try {
-      const result = await createLocalConnector('내 Mac 프로젝트')
+      const result = await createLocalConnector('새 로컬 연결')
       setLocalSetup(result)
       await refreshLocalConnectors()
       setSelectedConnectorId(result.connector.id)
@@ -705,7 +748,9 @@ export default function SourceTwinPanel({
   }, [refreshLocalConnectors])
 
   const revokeConnector = useCallback(async (connectorId) => {
-    if (!window.confirm('이 로컬 커넥터를 해제할까요? 실행 중인 터미널 연결도 즉시 끊깁니다.')) return
+    const target = localState?.connectors?.find((connector) => connector.id === connectorId)
+    const targetName = target?.repositoryLabel || target?.label || '로컬 연결'
+    if (!window.confirm(`“${targetName}” 연결 기록 (${localConnectorShortId(target)})을 해제할까요? 이 ID로 실행 중인 터미널 연결도 즉시 끊깁니다.`)) return
     setLocalBusy(true)
     setLocalError('')
     try {
@@ -718,7 +763,7 @@ export default function SourceTwinPanel({
     } finally {
       setLocalBusy(false)
     }
-  }, [refreshLocalConnectors])
+  }, [localState, refreshLocalConnectors])
 
   const previewGitSync = useCallback(async (connectorId) => {
     setLocalBusy(true)

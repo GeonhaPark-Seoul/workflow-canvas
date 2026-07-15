@@ -323,3 +323,31 @@ export function localConnectorIsOnline(connector, now = Date.now()) {
   const seenAt = Date.parse(connector?.lastSeenAt ?? connector?.last_seen_at)
   return Number.isFinite(seenAt) && now - seenAt <= LOCAL_CONNECTOR_ONLINE_MS
 }
+
+export function localConnectorConnectionState(connector, now = Date.now()) {
+  if (localConnectorIsOnline(connector, now)) return 'online'
+  const seenAt = Date.parse(connector?.lastSeenAt ?? connector?.last_seen_at)
+  return Number.isFinite(seenAt) ? 'offline' : 'waiting'
+}
+
+function connectorTimestamp(connector, key) {
+  const value = key === 'lastSeenAt'
+    ? connector?.lastSeenAt ?? connector?.last_seen_at
+    : connector?.createdAt ?? connector?.created_at
+  const parsed = Date.parse(value)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+export function sortLocalConnectorsForDisplay(connectors = [], now = Date.now()) {
+  const stateRank = { online: 0, offline: 1, waiting: 2 }
+  return [...connectors].sort((left, right) => {
+    const stateDifference = stateRank[localConnectorConnectionState(left, now)]
+      - stateRank[localConnectorConnectionState(right, now)]
+    if (stateDifference) return stateDifference
+    const seenDifference = connectorTimestamp(right, 'lastSeenAt') - connectorTimestamp(left, 'lastSeenAt')
+    if (seenDifference) return seenDifference
+    const createdDifference = connectorTimestamp(right, 'createdAt') - connectorTimestamp(left, 'createdAt')
+    if (createdDifference) return createdDifference
+    return String(left?.id ?? '').localeCompare(String(right?.id ?? ''))
+  })
+}

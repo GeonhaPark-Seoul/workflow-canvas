@@ -89,6 +89,16 @@ This is the durable ledger for security, reliability, commercialization, and arc
 - Required work: publish a versioned payload schema, show exactly what leaves the device, support metadata-minimal mode, enforce size/rate limits, and add local outbound audit logs.
 - Exit criteria: payload contract tests prove that source bodies, credential values, absolute paths, commit messages, and unrelated filenames cannot leave the device.
 
+### LOC-009 - Stable device identity and helper lifecycle
+
+- Severity: high
+- Gate: public local-connector release
+- Status: in progress
+- Context: each press of the pairing button creates a separate revocable registration. The current token-only MVP cannot prove whether two offline registrations are accidental duplicates, two Macs, or two grants for the same repository, so automatic deletion would be unsafe.
+- Current mitigation: the UI distinguishes every registration by connection state, last response time, and short registration ID; currently online registrations sort first; unused records can be explicitly revoked; new records are named as connections rather than project copies.
+- Required work: the signed helper needs a device-bound installation ID, a stable selected-folder grant ID, user-editable device/project names, duplicate-pairing detection, native connection management, login auto-start, signed background updates, health reporting, and clean uninstall/revocation. Re-pairing the same device and folder should rotate credentials instead of accumulating indistinguishable rows.
+- Exit criteria: a user can distinguish device, repository, permission, and health without terminal knowledge; restarting or upgrading does not create a duplicate registration; loss, transfer, reinstall, and revocation have tested lifecycle paths.
+
 ## Privacy, identity, and transparency
 
 ### PRIV-001 - Operator-blind canvas content

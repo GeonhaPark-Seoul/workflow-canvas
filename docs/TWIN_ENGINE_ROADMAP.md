@@ -283,10 +283,14 @@ This ordering preserves the commercial goal that users can eventually connect th
 ### Phase A - Secure Workflow Canvas reference twin
 
 - harden the local connector
+- replace the copied terminal command with a separately signed desktop helper, native folder picker, short-lived pairing, stable device identity, login auto-start, and signed background updates
+- let the helper rotate an existing device-and-folder grant instead of creating indistinguishable duplicate registrations
 - model local/cloud/SaaS trust zones and gateways
 - show exactly which metadata crosses each gateway
 - preserve source bodies and credential values on-device
 - distinguish heartbeat, fetch, sync, and deployment events
+
+The future AI does not replace this helper or receive direct Mac access. Direct canvas controls, deterministic automation, and user-selected AI all request the same typed operation. The signed local helper independently checks the device grant, repository identity, risk policy, and required local consent before it executes anything. Read-only refresh can run automatically under an approved background policy; mutations remain previewable and use the universal operation lifecycle.
 
 ### Phase B - Parts and edges as the common interaction grammar
 

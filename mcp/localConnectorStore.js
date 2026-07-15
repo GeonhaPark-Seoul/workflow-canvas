@@ -4,6 +4,7 @@ import {
   localGitSyncDecision,
   normalizeLocalGitState,
   normalizeLocalSourceManifest,
+  sortLocalConnectorsForDisplay,
 } from '../shared/localConnector.js'
 import {
   createSignedSystemOperationPlan,
@@ -148,8 +149,9 @@ export async function listLocalConnectors(db, userId, now = Date.now()) {
     if (result.error) throw databaseError(result.error, 'Git 동기화 실행 이력을 불러오지 못했습니다.')
     operations = result.data ?? []
   }
+  const connectors = sortLocalConnectorsForDisplay((data ?? []).map((row) => connectorRow(row, now)), now)
   return {
-    connectors: (data ?? []).map((row) => connectorRow(row, now)),
+    connectors,
     operations: operations.map((row) => ({
       operationId: row.operation_id,
       connectorId: row.connector_id,
@@ -169,7 +171,7 @@ export async function createLocalConnector(db, { userId, label }) {
     user_id: userId,
     token_hash: tokenHash(token),
     token_prefix: token.slice(0, 13),
-    label: cleanText(label, 120) || '내 Mac 프로젝트',
+    label: cleanText(label, 120) || '새 로컬 연결',
   }
   const { data, error } = await db.from('local_connectors').insert(row).select('*').single()
   if (error) throw databaseError(error, '로컬 커넥터를 만들지 못했습니다.')

@@ -1233,12 +1233,31 @@ body[data-theme='light'] .react-flow__node:hover .canvas-group-frame {
   border-color: #22c55e55;
   color: #86efac;
 }
+.local-connector-control > header span.is-waiting {
+  border-color: #eab30866;
+  color: #fde68a;
+}
+.local-connector-registration-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 10px;
+  margin-top: 6px;
+  color: #778195;
+  font-size: 8.5px;
+}
+.local-connector-registration-meta span {
+  white-space: nowrap;
+}
+.local-connector-registration-meta strong {
+  color: #a8b2c1;
+  font-size: inherit;
+}
 .local-connector-header-actions {
   flex: 0 0 auto;
   gap: 4px;
 }
 .local-connector-header-actions select {
-  max-width: 160px;
+  max-width: 190px;
   height: 26px;
   border: 1px solid #ffffff1c;
   border-radius: 4px;
@@ -1269,6 +1288,24 @@ body[data-theme='light'] .react-flow__node:hover .canvas-group-frame {
   border-radius: 6px;
   background: #081b20;
   padding: 9px;
+}
+.local-connector-pending {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 9px;
+  border-left: 2px solid #eab308;
+  background: #eab3080b;
+  padding: 7px 8px;
+}
+.local-connector-pending strong {
+  color: #f3e8b0;
+  font-size: 9.5px;
+}
+.local-connector-pending span {
+  color: #8f98a6;
+  font-size: 8.5px;
+  line-height: 1.4;
 }
 .local-connector-setup strong,
 .local-connector-empty strong {
