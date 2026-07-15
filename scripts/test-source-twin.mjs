@@ -51,7 +51,7 @@ import {
 import { SOURCE_TWIN_MANIFEST } from '../shared/sourceTwinManifest.js'
 import {
   compareLocalAndDeployedManifests,
-  LOCAL_GIT_SYNC_CAPABILITY_ID,
+  localGitSyncEdgePresentation,
   localConnectorShellCommand,
   localGitSyncDecision,
   normalizeLocalSourceManifest,
@@ -64,16 +64,22 @@ const repository = {
 
 assert.deepEqual(WORKFLOW_SOURCE_TWIN_NODE_IDS, ['map-local-repo', 'map-github', 'map-vercel'])
 assert.equal(workflowSourceTwinEntryForNode('map-local-repo').view, 'structure')
-assert.equal(workflowSourceTwinEntryForNode('map-github').view, 'changes')
+assert.equal(workflowSourceTwinEntryForNode('map-github').view, 'github-code')
 assert.equal(workflowSourceTwinEntryForNode('map-vercel').view, 'history')
 assert.equal(workflowSourceTwinEntryForNode('map-web-app'), null)
-assert.equal(workflowSourceTwinEntryForPart('map-local-repo', WORKFLOW_SOURCE_TWIN_PART_REFS.localStructure).view, 'structure')
+assert.equal(workflowSourceTwinEntryForPart('map-local-repo', WORKFLOW_SOURCE_TWIN_PART_REFS.localCode).view, 'structure')
+assert.equal(workflowSourceTwinEntryForPart('map-github', WORKFLOW_SOURCE_TWIN_PART_REFS.githubCode).view, 'github-code')
 assert.equal(workflowSourceTwinEntryForPart('map-github', WORKFLOW_SOURCE_TWIN_PART_REFS.githubChanges).view, 'changes')
 assert.equal(workflowSourceTwinEntryForPart('map-vercel', WORKFLOW_SOURCE_TWIN_PART_REFS.vercelHistory).view, 'history')
-assert.equal(workflowSourceTwinEntryForPart('map-github', LOCAL_GIT_SYNC_CAPABILITY_ID).focus, 'git-sync')
-assert.equal(workflowSourceTwinEntryForPart('map-web-app', WORKFLOW_SOURCE_TWIN_PART_REFS.localStructure), null)
+assert.equal(workflowSourceTwinEntryForPart('map-web-app', WORKFLOW_SOURCE_TWIN_PART_REFS.localCode), null)
 assert.equal(workflowSourceTwinEntryForEdgeOperation(WORKFLOW_GIT_SYNC_EDGE_ID).focus, 'git-sync')
 assert.equal(workflowSourceTwinEntryForEdgeOperation('map-edge-github-vercel'), null)
+assert.deepEqual(localGitSyncEdgePresentation({ action: 'push' }), {
+  action: 'push', direction: 'local-to-github', icon: '→',
+  tooltip: 'GitHub 코드를 로컬 코드에 맞춰 동기화합니다. 클릭하면 실행 전 계획을 엽니다.',
+})
+assert.equal(localGitSyncEdgePresentation({ action: 'pull_ff_only' }).direction, 'github-to-local')
+assert.equal(localGitSyncEdgePresentation({ action: 'noop' }).icon, '✓')
 assert.equal(SOURCE_TWIN_MANIFEST.changeSet.initialBaseline, false, 'generated source history must keep the committed parent manifest')
 
 const fixtureEntries = [

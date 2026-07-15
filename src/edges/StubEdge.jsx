@@ -31,8 +31,11 @@ export default function StubEdge({
   const showRelation = relation.explicit && !partLink && !operation
   const runtime = data?.systemRuntime
   const operationStatus = edgeOperationStatusDefinition(operation?.status)
+  const operationIcon = ['planning', 'queued', 'succeeded', 'failed'].includes(operationStatus.id)
+    ? operationStatus.icon
+    : operation?.icon || operationStatus.icon
   const operationTitle = operation
-    ? [operation.label, operationStatus.label, operation.message].filter(Boolean).join(' · ')
+    ? [operation.tooltip || operation.label, operationStatus.label, operation.message].filter(Boolean).join(' · ')
     : ''
 
   return (
@@ -103,7 +106,7 @@ export default function StubEdge({
         <EdgeLabelRenderer>
           <button
             type="button"
-            className={`edge-operation-control nodrag nopan nowheel is-${operationStatus.id}`}
+            className={`edge-operation-control nodrag nopan nowheel is-${operationStatus.id} is-direction-${operation.direction ?? 'unknown'}`}
             style={{ transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)` }}
             title={operationTitle}
             aria-label={operationTitle}
@@ -114,7 +117,8 @@ export default function StubEdge({
               operation.onOpen?.()
             }}
           >
-            <span aria-hidden="true">{operationStatus.icon}</span>
+            <span className="edge-operation-icon" aria-hidden="true">{operationIcon}</span>
+            <span className="edge-operation-tooltip" role="tooltip">{operation.tooltip || operationTitle}</span>
           </button>
         </EdgeLabelRenderer>
       )}

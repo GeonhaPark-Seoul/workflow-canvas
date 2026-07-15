@@ -143,6 +143,15 @@ function normalizeOperation(operation) {
       part,
     }
   }
+  if (operation.action === 'remove_part') {
+    return {
+      action: 'remove_part',
+      label: safeText(operation.label, 180),
+      targetNodeId: safeId(operation.targetNodeId, '파츠 대상 노드'),
+      partId: safeId(operation.partId, '제거 대상 파츠'),
+      expectedPartFingerprint: safeId(operation.expectedPartFingerprint, '기존 파츠 지문'),
+    }
+  }
   if (operation.action === 'replace_edge') {
     const edge = normalizeEdge(operation.edge)
     const edgeId = safeId(operation.edgeId, '교체 대상 연결선')
@@ -159,7 +168,7 @@ function normalizeOperation(operation) {
   }
   throw new DigitalTwinProposalError(
     'UNSAFE_OPERATION',
-    '디지털 트윈 수정안은 새 노드·연결선·파츠 추가와 지문이 일치하는 파츠·연결선 교체만 허용합니다.',
+    '디지털 트윈 수정안은 새 노드·연결선·파츠 추가와 지문이 일치하는 파츠 제거·교체 및 연결선 교체만 허용합니다.',
   )
 }
 
@@ -189,8 +198,8 @@ export function createDigitalTwinGraphProposal({
   const edgeIds = normalizedOperations.filter((operation) => operation.action === 'add_edge').map((operation) => operation.edge.id)
   const replacedEdgeIds = normalizedOperations.filter((operation) => operation.action === 'replace_edge').map((operation) => operation.edge.id)
   const partIds = normalizedOperations
-    .filter((operation) => ['add_part', 'replace_part'].includes(operation.action))
-    .map((operation) => `${operation.targetNodeId}:${operation.part.id}`)
+    .filter((operation) => ['add_part', 'replace_part', 'remove_part'].includes(operation.action))
+    .map((operation) => `${operation.targetNodeId}:${operation.part?.id ?? operation.partId}`)
   if (
     new Set(nodeIds).size !== nodeIds.length
     || new Set([...edgeIds, ...replacedEdgeIds]).size !== edgeIds.length + replacedEdgeIds.length
@@ -237,19 +246,25 @@ export function filterDigitalTwinProposalNodeChanges(changes, previewNodeIds, pr
   ))
 }
 
-export function previewDigitalTwinPartChanges(currentParts, additions = [], replacements = []) {
+export function previewDigitalTwinPartChanges(currentParts, additions = [], replacements = [], removals = []) {
   const normalizedAdditions = normalizeSystemParts(additions)
   const replacementById = new Map((Array.isArray(replacements) ? replacements : [])
     .map((planned) => [planned?.partId, normalizeSystemPart(planned?.part)])
     .filter(([partId, part]) => partId && part?.id === partId))
+  const removalIds = new Set((Array.isArray(removals) ? removals : [])
+    .map((planned) => planned?.partId)
+    .filter(Boolean))
   return {
     parts: [
-      ...normalizeSystemParts(currentParts).map((part) => replacementById.get(part.id) ?? part),
+      ...normalizeSystemParts(currentParts)
+        .filter((part) => !removalIds.has(part.id))
+        .map((part) => replacementById.get(part.id) ?? part),
       ...normalizedAdditions,
     ],
     previewPartIds: [
       ...replacementById.keys(),
       ...normalizedAdditions.map((part) => part.id),
+      ...removalIds,
     ],
   }
 }
@@ -293,7 +308,7 @@ export function planDigitalTwinGraphProposal(graph, proposal) {
   if (digitalTwinReviewFingerprint(proposalBody) !== fingerprint) {
     throw new DigitalTwinProposalError('PROPOSAL_CHANGED', '미리보기 이후 수정안 내용이 달라졌습니다. 다시 검토해야 합니다.')
   }
-  if (proposal.operations.some((operation) => !['add_node', 'add_edge', 'add_part', 'replace_part', 'replace_edge'].includes(operation?.action))) {
+  if (proposal.operations.some((operation) => !['add_node', 'add_edge', 'add_part', 'replace_part', 'remove_part', 'replace_edge'].includes(operation?.action))) {
     throw new DigitalTwinProposalError('UNSAFE_OPERATION', '허용되지 않은 수정안 작업은 적용할 수 없습니다.')
   }
   const currentNodes = Array.isArray(graph?.nodes) ? graph.nodes : []
@@ -320,10 +335,18 @@ export function planDigitalTwinGraphProposal(graph, proposal) {
       expectedPartFingerprint: operation.expectedPartFingerprint,
       part: operation.part,
     }))
+  const plannedPartRemovals = proposal.operations
+    .filter((operation) => operation.action === 'remove_part')
+    .map((operation) => ({
+      targetNodeId: operation.targetNodeId,
+      partId: operation.partId,
+      expectedPartFingerprint: operation.expectedPartFingerprint,
+    }))
   const addNodes = []
   const addEdges = []
   const addParts = []
   const replaceParts = []
+  const removeParts = []
   const replaceEdges = []
   const alreadyPresent = []
 
@@ -404,6 +427,26 @@ export function planDigitalTwinGraphProposal(graph, proposal) {
     replaceParts.push(planned)
   }
 
+  for (const planned of plannedPartRemovals) {
+    const target = currentNodeById.get(planned.targetNodeId)
+    if (!target) {
+      throw new DigitalTwinProposalError('MISSING_PART_TARGET', `파츠 대상 노드 ${planned.targetNodeId}를 찾을 수 없습니다.`)
+    }
+    if (target.type !== 'system') {
+      throw new DigitalTwinProposalError('INVALID_PART_TARGET', '시스템 파츠는 시스템 노드에서만 제거할 수 있습니다.')
+    }
+    const existing = normalizeSystemParts(target.data?.systemParts).find((part) => part.id === planned.partId)
+    if (!existing) {
+      alreadyPresent.push(`${planned.targetNodeId}:${planned.partId}`)
+      continue
+    }
+    const currentFingerprint = digitalTwinReviewFingerprint(normalizeSystemPart(existing))
+    if (currentFingerprint !== planned.expectedPartFingerprint) {
+      throw new DigitalTwinProposalError('PART_CHANGED', `파츠 ${planned.partId}가 미리보기 이후 달라졌습니다. 수정안을 다시 확인해야 합니다.`)
+    }
+    removeParts.push(planned)
+  }
+
   return {
     proposalId: proposal.id,
     proposalFingerprint: proposal.fingerprint,
@@ -412,8 +455,9 @@ export function planDigitalTwinGraphProposal(graph, proposal) {
     edgeReplacements: replaceEdges,
     parts: addParts,
     partReplacements: replaceParts,
+    partRemovals: removeParts,
     alreadyPresent,
-    writesRequired: addNodes.length > 0 || addEdges.length > 0 || replaceEdges.length > 0 || addParts.length > 0 || replaceParts.length > 0,
+    writesRequired: addNodes.length > 0 || addEdges.length > 0 || replaceEdges.length > 0 || addParts.length > 0 || replaceParts.length > 0 || removeParts.length > 0,
   }
 }
 
@@ -431,19 +475,28 @@ export function applyDigitalTwinGraphProposal(graph, proposal) {
     current.set(planned.partId, planned.part)
     replacementsByNode.set(planned.targetNodeId, current)
   }
+  const removalsByNode = new Map()
+  for (const planned of plan.partRemovals) {
+    const current = removalsByNode.get(planned.targetNodeId) ?? new Set()
+    current.add(planned.partId)
+    removalsByNode.set(planned.targetNodeId, current)
+  }
   const currentNodes = Array.isArray(graph?.nodes) ? graph.nodes : []
   const edgeReplacementById = new Map(plan.edgeReplacements.map((planned) => [planned.edgeId, planned.edge]))
   const nodesWithParts = currentNodes.map((node) => {
     const additions = partsByNode.get(node.id)
     const replacements = replacementsByNode.get(node.id)
-    if (!additions?.length && !replacements?.size) return node
+    const removals = removalsByNode.get(node.id)
+    if (!additions?.length && !replacements?.size && !removals?.size) return node
     const currentParts = normalizeSystemParts(node.data?.systemParts)
     return {
       ...node,
       data: {
         ...node.data,
         systemParts: [
-          ...currentParts.map((part) => replacements?.get(part.id) ?? part),
+          ...currentParts
+            .filter((part) => !removals?.has(part.id))
+            .map((part) => replacements?.get(part.id) ?? part),
           ...(additions ?? []),
         ],
       },
@@ -460,8 +513,10 @@ export function applyDigitalTwinGraphProposal(graph, proposal) {
     appliedPartIds: [
       ...plan.parts.map((planned) => `${planned.targetNodeId}:${planned.part.id}`),
       ...plan.partReplacements.map((planned) => `${planned.targetNodeId}:${planned.part.id}`),
+      ...plan.partRemovals.map((planned) => `${planned.targetNodeId}:${planned.partId}`),
     ],
     replacedPartIds: plan.partReplacements.map((planned) => `${planned.targetNodeId}:${planned.part.id}`),
+    removedPartIds: plan.partRemovals.map((planned) => `${planned.targetNodeId}:${planned.partId}`),
     replacedEdgeIds: plan.edgeReplacements.map((planned) => planned.edgeId),
     alreadyPresent: plan.alreadyPresent,
     writesPerformed: plan.writesRequired,

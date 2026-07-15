@@ -1,15 +1,15 @@
-import { LOCAL_GIT_SYNC_CAPABILITY_ID } from './localConnector.js'
-
 export const WORKFLOW_GIT_SYNC_EDGE_ID = 'map-edge-repo-github'
 
 export const WORKFLOW_SOURCE_TWIN_PART_IDS = Object.freeze({
-  localStructure: 'workflow-local-code-structure',
+  localCode: 'workflow-local-code-structure',
+  githubCode: 'workflow-github-code',
   githubChanges: 'workflow-github-commit-changes',
   vercelHistory: 'workflow-vercel-status-history',
 })
 
 export const WORKFLOW_SOURCE_TWIN_PART_REFS = Object.freeze({
-  localStructure: 'workflow.source.local.structure',
+  localCode: 'workflow.source.local.code',
+  githubCode: 'workflow.source.github.code',
   githubChanges: 'workflow.source.github.changes',
   vercelHistory: 'workflow.source.vercel.history',
 })
@@ -18,16 +18,16 @@ const SOURCE_TWIN_NODE_ENTRIES = Object.freeze({
   'map-local-repo': Object.freeze({
     nodeId: 'map-local-repo',
     view: 'structure',
-    actionLabel: '코드 구조',
+    actionLabel: '로컬 코드',
     panelTitle: '로컬 프로젝트 저장소',
     description: '허용한 로컬 커넥터가 실제 프로젝트 구조와 Git 상태를 갱신합니다. 미연결 때만 현재 배포 코드를 대체 표시합니다.',
   }),
   'map-github': Object.freeze({
     nodeId: 'map-github',
-    view: 'changes',
-    actionLabel: '커밋 변경',
+    view: 'github-code',
+    actionLabel: 'GitHub 코드',
     panelTitle: 'GitHub 저장소',
-    description: '배포 manifest의 변경분과 서명이 확인된 GitHub push 신호입니다.',
+    description: '현재 배포에 포함된 GitHub 커밋의 코드 구조입니다. 최신 원격 HEAD와 다를 수 있습니다.',
   }),
   'map-vercel': Object.freeze({
     nodeId: 'map-vercel',
@@ -38,9 +38,17 @@ const SOURCE_TWIN_NODE_ENTRIES = Object.freeze({
   }),
 })
 
+const GITHUB_CHANGES_ENTRY = Object.freeze({
+  ...SOURCE_TWIN_NODE_ENTRIES['map-github'],
+  view: 'changes',
+  actionLabel: '커밋 변경',
+  description: '배포 manifest의 변경분과 서명이 확인된 GitHub push 신호입니다.',
+})
+
 const PART_REF_ENTRIES = Object.freeze({
-  [`map-local-repo:${WORKFLOW_SOURCE_TWIN_PART_REFS.localStructure}`]: SOURCE_TWIN_NODE_ENTRIES['map-local-repo'],
-  [`map-github:${WORKFLOW_SOURCE_TWIN_PART_REFS.githubChanges}`]: SOURCE_TWIN_NODE_ENTRIES['map-github'],
+  [`map-local-repo:${WORKFLOW_SOURCE_TWIN_PART_REFS.localCode}`]: SOURCE_TWIN_NODE_ENTRIES['map-local-repo'],
+  [`map-github:${WORKFLOW_SOURCE_TWIN_PART_REFS.githubCode}`]: SOURCE_TWIN_NODE_ENTRIES['map-github'],
+  [`map-github:${WORKFLOW_SOURCE_TWIN_PART_REFS.githubChanges}`]: GITHUB_CHANGES_ENTRY,
   [`map-vercel:${WORKFLOW_SOURCE_TWIN_PART_REFS.vercelHistory}`]: SOURCE_TWIN_NODE_ENTRIES['map-vercel'],
 })
 
@@ -57,10 +65,6 @@ export function workflowSourceTwinEntryForNode(nodeId) {
 export function workflowSourceTwinEntryForPart(nodeId, part) {
   const ref = typeof part === 'string' ? part : part?.ref
   if (!ref) return null
-  if (
-    ref === LOCAL_GIT_SYNC_CAPABILITY_ID
-    && ['map-local-repo', 'map-github'].includes(nodeId)
-  ) return GIT_SYNC_ENTRY
   return PART_REF_ENTRIES[`${nodeId}:${ref}`] ?? null
 }
 

@@ -80,6 +80,11 @@ import {
 } from '../shared/workflowSourceTwinCanvas.js'
 import { detachSystemPartBindings, normalizeSystemParts } from '../shared/systemPartOntology.js'
 import {
+  localConnectorIsOnline,
+  localGitSyncDecision,
+  localGitSyncEdgePresentation,
+} from '../shared/localConnector.js'
+import {
   edgeOperationIsActive,
   edgeOperationIsTerminal,
   edgeOperationStatusDefinition,
@@ -130,6 +135,7 @@ const defaultEdgeOptions = {
 
 const IDLE_GIT_SYNC_EDGE_OPERATION = Object.freeze({
   status: 'idle',
+  action: '',
   operationId: '',
   message: '',
 })
@@ -502,6 +508,7 @@ export default function App() {
   const [twinReviewOpen, setTwinReviewOpen] = useState(false)
   const [sourceTwinEntry, setSourceTwinEntry] = useState(null)
   const [gitSyncEdgeOperation, setGitSyncEdgeOperation] = useState(IDLE_GIT_SYNC_EDGE_OPERATION)
+  const [gitSyncEdgeDecision, setGitSyncEdgeDecision] = useState(null)
   const [digitalTwinReview, setDigitalTwinReview] = useState(null)
   const [twinProposalPreview, setTwinProposalPreview] = useState(null) // { itemId, itemFingerprint } | null
   const [twinProposalStatus, setTwinProposalStatus] = useState(null) // { type, message } | null
@@ -2372,14 +2379,14 @@ export default function App() {
     : null
   const activeTwinProposal = twinProposalPreviewItem?.proposal ?? null
   const twinProposalPlan = useMemo(() => {
-    if (!activeTwinProposal) return { nodes: [], edges: [], edgeReplacements: [], parts: [], partReplacements: [], alreadyPresent: [], error: null }
+    if (!activeTwinProposal) return { nodes: [], edges: [], edgeReplacements: [], parts: [], partReplacements: [], partRemovals: [], alreadyPresent: [], error: null }
     try {
       return {
         ...planDigitalTwinGraphProposal({ nodes, edges }, activeTwinProposal),
         error: null,
       }
     } catch (error) {
-      return { nodes: [], edges: [], edgeReplacements: [], parts: [], partReplacements: [], alreadyPresent: [], error: error?.message ?? '수정안을 미리 볼 수 없습니다.' }
+      return { nodes: [], edges: [], edgeReplacements: [], parts: [], partReplacements: [], partRemovals: [], alreadyPresent: [], error: error?.message ?? '수정안을 미리 볼 수 없습니다.' }
     }
   }, [activeTwinProposal, nodes, edges])
   const twinProposalPreviewNodes = useMemo(() => twinProposalPlan.nodes.map((node) => ({
@@ -2397,17 +2404,22 @@ export default function App() {
   const twinProposalPreviewPartsByNode = useMemo(() => {
     const byNode = new Map()
     for (const planned of twinProposalPlan.parts) {
-      const current = byNode.get(planned.targetNodeId) ?? { additions: [], replacements: [] }
+      const current = byNode.get(planned.targetNodeId) ?? { additions: [], replacements: [], removals: [] }
       current.additions.push(planned.part)
       byNode.set(planned.targetNodeId, current)
     }
     for (const planned of twinProposalPlan.partReplacements) {
-      const current = byNode.get(planned.targetNodeId) ?? { additions: [], replacements: [] }
+      const current = byNode.get(planned.targetNodeId) ?? { additions: [], replacements: [], removals: [] }
       current.replacements.push(planned)
       byNode.set(planned.targetNodeId, current)
     }
+    for (const planned of twinProposalPlan.partRemovals) {
+      const current = byNode.get(planned.targetNodeId) ?? { additions: [], replacements: [], removals: [] }
+      current.removals.push(planned)
+      byNode.set(planned.targetNodeId, current)
+    }
     return byNode
-  }, [twinProposalPlan.parts, twinProposalPlan.partReplacements])
+  }, [twinProposalPlan.parts, twinProposalPlan.partReplacements, twinProposalPlan.partRemovals])
   const twinProposalPreviewAugmentedNodeIds = useMemo(
     () => new Set(twinProposalPreviewPartsByNode.keys()),
     [twinProposalPreviewPartsByNode],
@@ -2453,6 +2465,7 @@ export default function App() {
         && !twinProposalPlan.edgeReplacements.length
         && !twinProposalPlan.parts.length
         && !twinProposalPlan.partReplacements.length
+        && !twinProposalPlan.partRemovals.length
       )
       || lastFittedTwinProposalRef.current === twinProposalFitKey
     ) return undefined
@@ -2463,6 +2476,7 @@ export default function App() {
       ...twinProposalPlan.edgeReplacements.flatMap((planned) => [planned.edge.source, planned.edge.target]),
       ...twinProposalPlan.parts.map((planned) => planned.targetNodeId),
       ...twinProposalPlan.partReplacements.map((planned) => planned.targetNodeId),
+      ...twinProposalPlan.partRemovals.map((planned) => planned.targetNodeId),
     ])]
     const timer = setTimeout(() => {
       rfInstance.fitView({ nodes: ids.map((id) => ({ id })), duration: 450, padding: 0.4, maxZoom: 1.05 })
@@ -2477,6 +2491,7 @@ export default function App() {
     twinProposalPlan.edgeReplacements,
     twinProposalPlan.parts,
     twinProposalPlan.partReplacements,
+    twinProposalPlan.partRemovals,
   ])
 
   const decideDigitalTwinReviewItem = useCallback((item, disposition) => {
@@ -3592,14 +3607,16 @@ export default function App() {
 
   const updateLocalGitOperationState = useCallback((next) => {
     const status = edgeOperationStatusDefinition(next?.status).id
+    const action = String(next?.action ?? '')
     const operationId = String(next?.operationId ?? '')
     const message = String(next?.message ?? '')
     setGitSyncEdgeOperation((current) => (
       current.status === status
+      && current.action === action
       && current.operationId === operationId
       && current.message === message
         ? current
-        : { status, operationId, message }
+        : { status, action, operationId, message }
     ))
   }, [])
 
@@ -3611,6 +3628,29 @@ export default function App() {
         : current
     ))
   }, [])
+
+  useEffect(() => {
+    if (perm.role !== 'owner' || !digitalTwinReview) {
+      setGitSyncEdgeDecision(null)
+      return undefined
+    }
+    let cancelled = false
+    const refreshDecision = async () => {
+      try {
+        const state = await loadLocalConnectors()
+        if (cancelled) return
+        const connector = state.connectors?.find((item) => localConnectorIsOnline(item)) ?? null
+        setGitSyncEdgeDecision(connector
+          ? localGitSyncDecision(connector.git)
+          : { action: 'unknown', reason: '온라인 로컬 커넥터가 없습니다.' })
+      } catch {
+        if (!cancelled) setGitSyncEdgeDecision({ action: 'unknown', reason: '로컬 커넥터 상태를 확인할 수 없습니다.' })
+      }
+    }
+    refreshDecision()
+    const timer = setInterval(refreshDecision, 10_000)
+    return () => { cancelled = true; clearInterval(timer) }
+  }, [perm.role, digitalTwinReview?.source?.id])
 
   useEffect(() => {
     if (
@@ -3633,7 +3673,7 @@ export default function App() {
         setGitSyncEdgeOperation((current) => (
           current.operationId !== operationId
             ? current
-            : { status: edgeOperationStatusDefinition(operation.status).id, operationId, message }
+            : { status: edgeOperationStatusDefinition(operation.status).id, action: operation.action ?? current.action, operationId, message }
         ))
       } catch {
         // Keep the last observed state. A transient status read must not invent a failure.
@@ -3746,6 +3786,11 @@ export default function App() {
   const systemPartIdsByNode = new Map(nodes
     .filter((node) => node.type === 'system')
     .map((node) => [node.id, new Set(normalizeSystemParts(node.data?.systemParts).map((part) => part.id))]))
+  const gitSyncPresentation = localGitSyncEdgePresentation(
+    gitSyncEdgeOperation.action
+      ? { action: gitSyncEdgeOperation.action, reason: gitSyncEdgeOperation.message }
+      : gitSyncEdgeDecision,
+  )
   const visibleEdges = edges.filter((edge) => {
     if (!isPartEdge(edge)) return true
     const sourcePartId = partIdFromHandle(edge.sourceHandle)
@@ -3784,13 +3829,16 @@ export default function App() {
           edgeOperation: {
             id: WORKFLOW_GIT_SYNC_EDGE_ID,
             label: '로컬·GitHub 동기화',
+            icon: gitSyncPresentation.icon,
+            tooltip: gitSyncPresentation.tooltip,
+            direction: gitSyncPresentation.direction,
             ...gitSyncEdgeOperation,
             onOpen: () => openSourceTwinFromNode(operationEntry),
           },
         }
       : runtimeData
     const operationClass = operationEntry
-      ? ` edge-operation-edge is-operation-${gitSyncEdgeOperation.status}`
+      ? ` edge-operation-edge is-operation-${gitSyncEdgeOperation.status} is-direction-${gitSyncPresentation.direction}`
       : ''
     // Stable hook class so CSS can target `.wfc-edge:hover` for the hover glow.
     const className = `wfc-edge${e.className ? ` ${e.className}` : ''}${runtimeClass}${operationClass}`
@@ -3832,6 +3880,7 @@ export default function App() {
           node.data?.systemParts,
           previewPlan.additions,
           previewPlan.replacements,
+          previewPlan.removals,
         )
         return {
           ...node,
@@ -3849,6 +3898,15 @@ export default function App() {
   const renderedCanvasEdges = twinProposalPreviewEdges.length
     ? [...styledEdges, ...twinProposalPreviewEdges]
     : styledEdges
+  const linkedPartHandlesByNode = new Map()
+  for (const edge of renderedCanvasEdges) {
+    for (const [nodeId, handleId] of [[edge.source, edge.sourceHandle], [edge.target, edge.targetHandle]]) {
+      if (!handleId?.startsWith('p-')) continue
+      const linked = linkedPartHandlesByNode.get(nodeId) ?? new Set()
+      linked.add(handleId)
+      linkedPartHandlesByNode.set(nodeId, linked)
+    }
+  }
 
   // ── Commit rename on context menu close ───────────────────────────────────
   const commitRename = () => {
@@ -4185,6 +4243,7 @@ export default function App() {
         ref={reactFlowRef}
         className={reconnecting ? 'rf-reconnecting' : undefined}
         nodes={renderedCanvasNodes.map((n) => {
+          const linkedSystemPartHandles = [...(linkedPartHandlesByNode.get(n.id) ?? [])]
           if (n.data?.digitalTwinProposalPreview) {
             return {
               ...n,
@@ -4201,6 +4260,7 @@ export default function App() {
                 canInvite: false,
                 canManageParticipants: false,
                 scopedParticipants: [],
+                linkedSystemPartHandles,
               },
             }
           }
@@ -4241,6 +4301,7 @@ export default function App() {
               onToggleViewRestriction: isOwner ? onToggleMemberViewRestriction : undefined,
               scopedParticipants: nodeScopedParticipants,
               systemPartRuntime: systemPartRuntimeByNode[n.id] ?? {},
+              linkedSystemPartHandles,
               twinRuntime: n.type === 'system'
                 ? aggregateSystemNodeRuntime(n, systemPartRuntimeByNode[n.id] ?? {}, systemRuntimeNow)
                 : undefined,

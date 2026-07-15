@@ -259,7 +259,7 @@ This is the durable ledger for security, reliability, commercialization, and arc
 - Severity: medium
 - Gate: engine-v1 UI
 - Status: in progress
-- Current evidence: Workflow Canvas source-twin views are modeled as typed parts, the local/GitHub sync contract connects compatible parts, and its edge control opens the direct preview-and-approval interface. Vercel mutation, Supabase operations, and a reusable adapter-level operation descriptor remain.
+- Current evidence: the local repository and GitHub now expose one code port each, GitHub keeps commit changes as a separate contextual part, and the directional Git operation lives on their connecting edge. A fingerprint-guarded atomic migration retires the two legacy sync parts without an order-dependent broken edge. Vercel mutation, Supabase operations, and a reusable adapter-level operation descriptor remain.
 - Required work: move entity-specific top buttons into typed parts; connect compatible parts; place relationship operations on the edge; require preview rather than direct execution.
 - Exit criteria: local repository, GitHub, Vercel, database, and future adapters use the same interaction grammar.
 
@@ -268,9 +268,18 @@ This is the durable ledger for security, reliability, commercialization, and arc
 - Severity: medium
 - Gate: product-v1
 - Status: in progress
-- Current evidence: manual Git synchronization animates only for server-observed `queued` or `running` states, briefly reports `succeeded` or `failed`, and honors reduced-motion. No automatic flow is animated because the current adapter has no observed recurring transfer event.
+- Current evidence: the edge control shows the currently observed push, fast-forward pull, already-synced, blocked, or unknown direction. Queued work pulses at the control; the edge itself flows only for server-observed `running`, briefly reports `succeeded` or `failed`, and honors reduced-motion. No automatic flow is animated because the current adapter has no observed recurring transfer event.
 - Required work: animate only observed events; distinguish configured, idle, polling, queued, running, succeeded, failed, stale, and unknown; support reduced-motion and dense canvases.
 - Exit criteria: animation cannot imply continuous synchronization when only heartbeat or periodic fetch is occurring.
+
+### UX-003 - Typed part ports and dense node layout
+
+- Severity: medium
+- Gate: engine-v1 UI
+- Status: in progress
+- Current evidence: system parts render as full-width node bands, their sockets sit on the node boundary, connected sockets are visually distinct, and React Flow handle geometry is refreshed when the part list changes.
+- Required work: define adapter-neutral input/output compatibility and direction rules, reject invalid part-to-part contracts before save, distinguish available ports from proven live bindings, and design overflow behavior for nodes with many parts without hiding sockets or moving persisted layout unexpectedly.
+- Exit criteria: incompatible ports cannot be connected, every linked socket resolves to a persisted evidence-backed relation, and 1-20 parts remain usable at supported zoom and viewport sizes.
 
 ## Deferred product horizons
 

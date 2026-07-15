@@ -136,8 +136,8 @@ html, body, #root {
 .edge-operation-control {
   position: absolute;
   z-index: 1003;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   display: grid;
   place-items: center;
   border: 1px solid #526076;
@@ -151,6 +151,40 @@ html, body, #root {
   pointer-events: all;
   cursor: pointer;
   transition: color 0.12s, background-color 0.12s, border-color 0.12s, transform 0.12s;
+}
+.edge-operation-icon {
+  display: block;
+  transform: translateY(-0.5px);
+}
+.edge-operation-tooltip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  width: max-content;
+  max-width: min(300px, calc(100vw - 24px));
+  transform: translateX(-50%) translateY(3px);
+  box-sizing: border-box;
+  border: 1px solid #4b5563;
+  border-radius: 4px;
+  background: #11151d;
+  box-shadow: 0 6px 18px #0008;
+  color: #eef2f7;
+  padding: 6px 8px;
+  font-size: 10px;
+  font-weight: 650;
+  line-height: 1.45;
+  text-align: left;
+  white-space: normal;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.12s ease, transform 0.12s ease, visibility 0.12s;
+}
+.edge-operation-control:hover .edge-operation-tooltip,
+.edge-operation-control:focus-visible .edge-operation-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
 }
 .edge-operation-control:hover,
 .edge-operation-control:focus-visible {
@@ -173,8 +207,8 @@ html, body, #root {
   background: #172554;
   color: #bfdbfe;
 }
-.edge-operation-control.is-running > span {
-  animation: edge-operation-spin 0.8s linear infinite;
+.edge-operation-control.is-queued {
+  animation: edge-operation-pulse 1s ease-in-out infinite;
 }
 .edge-operation-control.is-succeeded {
   border-color: #22c55e;
@@ -186,11 +220,16 @@ html, body, #root {
   background: #3b1717;
   color: #fca5a5;
 }
-.react-flow__edge.wfc-edge.edge-operation-edge.is-operation-queued .react-flow__edge-path,
+.react-flow__edge.wfc-edge.edge-operation-edge.is-operation-queued .react-flow__edge-path {
+  stroke: #3b82f6 !important;
+}
 .react-flow__edge.wfc-edge.edge-operation-edge.is-operation-running .react-flow__edge-path {
   stroke: #3b82f6 !important;
   stroke-dasharray: 8 10;
-  animation: edge-operation-flow 0.85s linear infinite;
+  animation: edge-operation-flow-forward 0.85s linear infinite;
+}
+.react-flow__edge.wfc-edge.edge-operation-edge.is-operation-running.is-direction-github-to-local .react-flow__edge-path {
+  animation-name: edge-operation-flow-reverse;
 }
 .react-flow__edge.wfc-edge.edge-operation-edge.is-operation-succeeded:not(:hover):not(.selected) .react-flow__edge-path {
   stroke: #22c55e !important;
@@ -202,6 +241,12 @@ body[data-theme='light'] .edge-operation-control {
   border-color: #a7b1c2;
   background: #fff;
   color: #334155;
+}
+body[data-theme='light'] .edge-operation-tooltip {
+  border-color: #cbd5e1;
+  background: #fff;
+  box-shadow: 0 6px 18px #0f172a26;
+  color: #1e293b;
 }
 body[data-theme='light'] .edge-operation-control:hover,
 body[data-theme='light'] .edge-operation-control:focus-visible {
@@ -224,15 +269,17 @@ body[data-theme='light'] .edge-operation-control.is-failed {
   background: #fee2e2;
   color: #b91c1c;
 }
-@keyframes edge-operation-flow {
+@keyframes edge-operation-flow-forward {
   to { stroke-dashoffset: -18; }
 }
-@keyframes edge-operation-spin {
-  to { transform: rotate(360deg); }
+@keyframes edge-operation-flow-reverse {
+  to { stroke-dashoffset: 18; }
+}
+@keyframes edge-operation-pulse {
+  50% { box-shadow: 0 0 0 4px #3b82f633; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .edge-operation-control.is-running > span,
-  .react-flow__edge.wfc-edge.edge-operation-edge.is-operation-queued .react-flow__edge-path,
+  .edge-operation-control.is-queued,
   .react-flow__edge.wfc-edge.edge-operation-edge.is-operation-running .react-flow__edge-path {
     animation: none;
   }
@@ -282,6 +329,12 @@ body[data-theme='light'] .react-flow__edge.wfc-edge.selected .wfc-relation-label
   align-items: center;
   justify-content: center;
   gap: 3px;
+  opacity: 0.38;
+  transition: opacity 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+}
+.part-socket.is-linked {
+  opacity: 1;
+  box-shadow: 0 0 0 2px #0f1117, 0 0 8px var(--part-color);
 }
 .part-socket::before,
 .part-socket::after {
@@ -294,30 +347,33 @@ body[data-theme='light'] .react-flow__edge.wfc-edge.selected .wfc-relation-label
 
 .system-parts-strip {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  width: calc(100% + 24px);
   min-width: 0;
-  height: 24px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  overscroll-behavior: contain;
-  scrollbar-width: none;
+  height: auto;
+  margin: 4px -12px 0;
+  overflow: visible;
 }
-.system-parts-strip::-webkit-scrollbar { display: none; }
 .system-part-chip {
   position: relative;
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 4px;
-  height: 20px;
-  max-width: 130px;
-  flex: 0 0 auto;
+  width: 100%;
+  height: 18px;
+  max-width: none;
+  flex: 0 0 18px;
   box-sizing: border-box;
   border: 1px solid var(--part-color);
-  border-radius: 4px;
+  border-left: 0;
+  border-right: 0;
+  border-radius: 0;
   background: #151923;
   color: #dce2ee;
-  padding: 1px 8px;
+  padding: 1px 18px;
   font-size: 9px;
   cursor: pointer;
   transition: border-color 0.12s, background-color 0.12s, color 0.12s;
@@ -378,6 +434,7 @@ body[data-theme='light'] .react-flow__edge.wfc-edge.selected .wfc-relation-label
   font-weight: 700;
   line-height: 1;
   cursor: pointer;
+  margin-left: 12px;
 }
 .system-part-add:hover {
   border-color: #60a5fa;

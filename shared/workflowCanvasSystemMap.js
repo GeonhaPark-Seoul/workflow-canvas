@@ -1,9 +1,4 @@
 import { createEdgeRelationData, edgeRelationInfo } from './relationOntology.js'
-import {
-  GITHUB_GIT_SYNC_PART_ID,
-  LOCAL_GIT_SYNC_CAPABILITY_ID,
-  LOCAL_GIT_SYNC_PART_ID,
-} from './localConnector.js'
 import { createSystemNodeData } from './systemOntology.js'
 import { WORKFLOW_SYSTEM_DISCOVERY } from './workflowSystemDiscoveryManifest.js'
 import {
@@ -46,39 +41,33 @@ const VERCEL_RUNTIME_PART = runtimePart({
   evidenceRef: 'api/system-runtime.js, mcp/systemRuntime.js, vercel.json',
 })
 
-const LOCAL_GIT_SYNC_PART = Object.freeze({
-  id: LOCAL_GIT_SYNC_PART_ID,
-  kind: 'connection',
-  label: 'Git 동기화',
-  ref: LOCAL_GIT_SYNC_CAPABILITY_ID,
-  exposure: 'internal',
-  sourceKind: 'connector',
-  evidenceRef: 'scripts/local-connector-agent.mjs, api/local-connector.js, map-edge-repo-github',
-})
-
-const GITHUB_GIT_SYNC_PART = Object.freeze({
-  ...LOCAL_GIT_SYNC_PART,
-  id: GITHUB_GIT_SYNC_PART_ID,
-  label: '로컬 동기화',
-})
-
-function sourceTwinViewPart({ id, label, ref, evidenceRef }) {
+function sourceTwinViewPart({ id, kind = 'view', label, ref, evidenceRef, sourceKind = 'code' }) {
   return Object.freeze({
     id,
-    kind: 'view',
+    kind,
     label,
     ref,
     exposure: 'internal',
-    sourceKind: 'code',
+    sourceKind,
     evidenceRef,
   })
 }
 
-const LOCAL_CODE_STRUCTURE_PART = sourceTwinViewPart({
-  id: WORKFLOW_SOURCE_TWIN_PART_IDS.localStructure,
-  label: '코드 구조',
-  ref: WORKFLOW_SOURCE_TWIN_PART_REFS.localStructure,
+const LOCAL_CODE_PART = sourceTwinViewPart({
+  id: WORKFLOW_SOURCE_TWIN_PART_IDS.localCode,
+  kind: 'code',
+  label: '로컬 코드',
+  ref: WORKFLOW_SOURCE_TWIN_PART_REFS.localCode,
   evidenceRef: 'scripts/source-twin-scanner.mjs, scripts/local-connector-agent.mjs',
+  sourceKind: 'connector',
+})
+
+const GITHUB_CODE_PART = sourceTwinViewPart({
+  id: WORKFLOW_SOURCE_TWIN_PART_IDS.githubCode,
+  kind: 'code',
+  label: 'GitHub 코드',
+  ref: WORKFLOW_SOURCE_TWIN_PART_REFS.githubCode,
+  evidenceRef: 'shared/sourceTwinManifest.js, api/source-twin.js',
 })
 
 const GITHUB_COMMIT_CHANGES_PART = sourceTwinViewPart({
@@ -391,7 +380,7 @@ function mapNodes() {
       environment: 'local',
       provider: 'Git',
       externalRef: 'workflow-canvas local checkout',
-      systemParts: [LOCAL_CODE_STRUCTURE_PART, LOCAL_GIT_SYNC_PART],
+      systemParts: [LOCAL_CODE_PART],
     }),
     systemNode('map-tests', 'map-group-development', 960, 100, 'service', '테스트·보안 검사', {
       purpose: '코드 변경이 기존 동작과 권한 경계를 깨지 않았는지 확인한다.',
@@ -410,7 +399,7 @@ function mapNodes() {
       environment: 'production',
       provider: 'GitHub',
       externalRef: 'origin/main',
-      systemParts: [GITHUB_GIT_SYNC_PART, GITHUB_COMMIT_CHANGES_PART],
+      systemParts: [GITHUB_CODE_PART, GITHUB_COMMIT_CHANGES_PART],
     }),
   ]
 }
@@ -456,9 +445,9 @@ function mapEdges() {
     relationEdge('map-edge-claude-repo', 'map-claude-code', 'map-local-repo', 'writes', 'CLAUDE.md', 'Claude Code가 전달된 변경을 로컬 저장소에 적용한다.'),
     relationEdge('map-edge-owner-review', 'map-owner', 'map-local-repo', 'reviews', 'CLAUDE.md', '제품 소유자가 동작과 의도를 확인하고 배포를 승인한다.', { sourceHandle: 'bottom', targetHandle: 'left' }),
     relationEdge('map-edge-tests-repo', 'map-tests', 'map-local-repo', 'reads', 'scripts/test-mcp-logic.mjs, scripts/test-sql-security.mjs', '테스트와 빌드가 로컬 소스의 동작·보안 규칙을 검사한다.', { sourceHandle: 'left', targetHandle: 'right' }),
-    relationEdge('map-edge-repo-github', 'map-local-repo', 'map-github', 'syncs_with', 'Git remote origin/main', 'Git 동기화 파츠가 계획·승인 뒤 일반 push 또는 fast-forward pull만 실행한다.', {
-      sourceHandle: `p-${LOCAL_GIT_SYNC_PART_ID}-r`,
-      targetHandle: `p-${GITHUB_GIT_SYNC_PART_ID}-l`,
+    relationEdge('map-edge-repo-github', 'map-local-repo', 'map-github', 'syncs_with', 'Git remote origin/main', '로컬 코드와 GitHub 코드 포트가 연결되며 계획·승인 뒤 일반 push 또는 fast-forward pull만 실행한다.', {
+      sourceHandle: `p-${WORKFLOW_SOURCE_TWIN_PART_IDS.localCode}-r`,
+      targetHandle: `p-${WORKFLOW_SOURCE_TWIN_PART_IDS.githubCode}-l`,
     }),
     relationEdge('map-edge-github-vercel', 'map-github', 'map-vercel', 'triggers', 'vercel.json', '원격 저장소의 배포 대상 변경이 Vercel 배포 흐름을 촉발한다.', { sourceHandle: 'top', targetHandle: 'bottom' }),
   ]

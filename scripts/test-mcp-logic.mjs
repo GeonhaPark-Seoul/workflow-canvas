@@ -68,6 +68,16 @@ import {
   RELATION_SOURCE_DEFS,
 } from '../shared/relationOntology.js'
 import { createWorkflowCanvasSystemMap } from '../shared/workflowCanvasSystemMap.js'
+import {
+  GITHUB_GIT_SYNC_PART_ID,
+  LOCAL_GIT_SYNC_CAPABILITY_ID,
+  LOCAL_GIT_SYNC_PART_ID,
+} from '../shared/localConnector.js'
+import {
+  WORKFLOW_GIT_SYNC_EDGE_ID,
+  WORKFLOW_SOURCE_TWIN_PART_IDS,
+  WORKFLOW_SOURCE_TWIN_PART_REFS,
+} from '../shared/workflowSourceTwinCanvas.js'
 import { WORKFLOW_SYSTEM_DISCOVERY } from '../shared/workflowSystemDiscoveryManifest.js'
 import {
   inspectWorkflowSystemMap,
@@ -1448,16 +1458,16 @@ t('self map covers the critical runtime, data, security and delivery boundaries'
     assert.equal(relationTypes.has(relationType), true, `missing system map relation: ${relationType}`)
   }
   const localRepository = map.nodes.find((node) => node.id === 'map-local-repo')
-  assert.equal(localRepository.data.systemParts.some((part) => part.ref === 'workflow.local.git-sync'), true)
-  assert.equal(localRepository.data.systemParts.some((part) => part.ref === 'workflow.source.local.structure'), true)
+  assert.equal(localRepository.data.systemParts.length, 1)
+  assert.equal(localRepository.data.systemParts.some((part) => part.ref === WORKFLOW_SOURCE_TWIN_PART_REFS.localCode), true)
   const githubRepository = map.nodes.find((node) => node.id === 'map-github')
-  assert.equal(githubRepository.data.systemParts.some((part) => part.ref === 'workflow.local.git-sync'), true)
-  assert.equal(githubRepository.data.systemParts.some((part) => part.ref === 'workflow.source.github.changes'), true)
+  assert.equal(githubRepository.data.systemParts.some((part) => part.ref === WORKFLOW_SOURCE_TWIN_PART_REFS.githubCode), true)
+  assert.equal(githubRepository.data.systemParts.some((part) => part.ref === WORKFLOW_SOURCE_TWIN_PART_REFS.githubChanges), true)
   const vercel = map.nodes.find((node) => node.id === 'map-vercel')
   assert.equal(vercel.data.systemParts.some((part) => part.ref === 'workflow.source.vercel.history'), true)
   const gitSyncEdge = map.edges.find((edge) => edge.id === 'map-edge-repo-github')
-  assert.equal(gitSyncEdge.sourceHandle, 'p-workflow-local-git-sync-r')
-  assert.equal(gitSyncEdge.targetHandle, 'p-workflow-github-git-sync-l')
+  assert.equal(gitSyncEdge.sourceHandle, `p-${WORKFLOW_SOURCE_TWIN_PART_IDS.localCode}-r`)
+  assert.equal(gitSyncEdge.targetHandle, `p-${WORKFLOW_SOURCE_TWIN_PART_IDS.githubCode}-l`)
   assert.equal(JSON.stringify(map).includes('SUPABASE_SERVICE_ROLE_KEY='), false)
   assert.deepEqual(
     resolveSystemRuntimeTargets({ canvas: map, actorUserId: 'owner-1', ownerUserId: 'owner-1' })
@@ -1783,14 +1793,14 @@ t('digital twin proposals reject generic update and delete operations before the
     itemId: item.id,
     itemFingerprint: item.fingerprint,
     operations: [{ action: 'update_node', node: { id: 'orders' } }],
-  }), /파츠·연결선 교체만 허용/)
+  }), /파츠 제거·교체/)
   assert.throws(() => createDigitalTwinGraphProposal({
     sourceId: item.sourceId,
     proposalKey: 'unsafe-delete',
     itemId: item.id,
     itemFingerprint: item.fingerprint,
     operations: [{ action: 'remove_node', node: { id: 'orders' } }],
-  }), /파츠·연결선 교체만 허용/)
+  }), /파츠 제거·교체/)
 })
 
 t('proposal preview is read-only and explicit apply adds only the planned graph entities', () => {
@@ -1936,6 +1946,48 @@ t('system-part replacement requires the exact previewed fingerprint and changes 
   const stale = structuredClone(graph)
   stale.nodes[0].data.systemParts[0].label = '사용자가 수정함'
   assert.throws(() => planDigitalTwinGraphProposal(stale, proposal), /미리보기 이후 달라졌/)
+})
+
+t('system-part retirement requires the exact previewed fingerprint and is idempotent', () => {
+  const item = createDigitalTwinReviewItem({
+    sourceId: 'source-one', itemKey: 'runtime:retire-sync', title: 'retire duplicate sync part', observation: { version: 1 },
+  })
+  const retiredPart = {
+    id: 'duplicate-sync', kind: 'connection', label: '중복 동기화', ref: 'sync.legacy',
+    exposure: 'internal', sourceKind: 'code', evidenceRef: 'legacy.js',
+  }
+  const proposal = createDigitalTwinGraphProposal({
+    sourceId: item.sourceId,
+    proposalKey: 'retire-duplicate-sync',
+    itemId: item.id,
+    itemFingerprint: item.fingerprint,
+    operations: [{
+      action: 'remove_part',
+      targetNodeId: 'repository',
+      partId: retiredPart.id,
+      expectedPartFingerprint: digitalTwinReviewFingerprint(normalizeSystemPart(retiredPart)),
+      label: '중복 동기화 파츠 퇴역',
+    }],
+  })
+  const graph = {
+    nodes: [{
+      id: 'repository', type: 'system', position: { x: 0, y: 0 },
+      data: { untouched: 'keep', systemParts: [retiredPart, { id: 'code', kind: 'code', label: '코드', ref: 'repo.code' }] },
+    }],
+    edges: [],
+  }
+  const applied = applyDigitalTwinGraphProposal(graph, proposal)
+  assert.equal(applied.nodes[0].data.untouched, 'keep')
+  assert.deepEqual(applied.nodes[0].data.systemParts.map((part) => part.id), ['code'])
+  assert.deepEqual(applied.removedPartIds, ['repository:duplicate-sync'])
+  assert.equal(applyDigitalTwinGraphProposal(applied, proposal).writesPerformed, false)
+
+  const stale = structuredClone(graph)
+  stale.nodes[0].data.systemParts[0].label = '사용자가 바꾼 파츠'
+  assert.throws(() => planDigitalTwinGraphProposal(stale, proposal), /미리보기 이후 달라졌/)
+  const preview = previewDigitalTwinPartChanges(graph.nodes[0].data.systemParts, [], [], [{ partId: retiredPart.id }])
+  assert.deepEqual(preview.parts.map((part) => part.id), ['code'])
+  assert.deepEqual(preview.previewPartIds, ['duplicate-sync'])
 })
 
 t('edge contract replacement preserves endpoints and requires the previewed fingerprint', () => {
@@ -2202,49 +2254,78 @@ t('a missing app operations part remains an additive, reviewable proposal', () =
   assert.equal(item.proposal.operations[0].part.ref, 'workflow.supabase.canvas-service.operations')
 })
 
-t('an older source twin upgrades contextual parts and both Git sync endpoints through explicit proposals', () => {
+t('an older source twin atomically migrates duplicate sync parts to connected code ports', () => {
   const map = structuredClone(createWorkflowCanvasSystemMap())
   const localRepository = map.nodes.find((node) => node.id === 'map-local-repo')
-  localRepository.data.systemParts = []
+  localRepository.data.systemParts = [
+    {
+      id: WORKFLOW_SOURCE_TWIN_PART_IDS.localCode,
+      kind: 'view',
+      label: '코드 구조',
+      ref: 'workflow.source.local.structure',
+      exposure: 'internal',
+      sourceKind: 'code',
+      evidenceRef: 'scripts/source-twin-scanner.mjs',
+    },
+    {
+      id: LOCAL_GIT_SYNC_PART_ID,
+      kind: 'connection',
+      label: 'Git 동기화',
+      ref: LOCAL_GIT_SYNC_CAPABILITY_ID,
+      exposure: 'internal',
+      sourceKind: 'connector',
+      evidenceRef: 'scripts/local-connector-agent.mjs',
+    },
+  ]
   const githubRepository = map.nodes.find((node) => node.id === 'map-github')
-  githubRepository.data.systemParts = []
+  githubRepository.data.systemParts = [
+    {
+      id: GITHUB_GIT_SYNC_PART_ID,
+      kind: 'connection',
+      label: '로컬 동기화',
+      ref: LOCAL_GIT_SYNC_CAPABILITY_ID,
+      exposure: 'internal',
+      sourceKind: 'connector',
+      evidenceRef: 'scripts/local-connector-agent.mjs',
+    },
+    githubRepository.data.systemParts.find((part) => part.id === WORKFLOW_SOURCE_TWIN_PART_IDS.githubChanges),
+  ]
   const vercel = map.nodes.find((node) => node.id === 'map-vercel')
   vercel.data.systemParts = vercel.data.systemParts.filter((part) => part.ref !== 'workflow.source.vercel.history')
   const gitSyncEdge = map.edges.find((edge) => edge.id === 'map-edge-repo-github')
-  gitSyncEdge.sourceHandle = 'right'
-  gitSyncEdge.targetHandle = 'left'
+  gitSyncEdge.sourceHandle = `p-${LOCAL_GIT_SYNC_PART_ID}-r`
+  gitSyncEdge.targetHandle = `p-${GITHUB_GIT_SYNC_PART_ID}-l`
   gitSyncEdge.data.relationEvidence = '검토된 로컬 커밋이 GitHub 원격과 동기화된다.'
 
   const review = inspectWorkflowSystemTwin(map)
-  const expectedPartKeys = [
-    'entity-part:map-local-repo:workflow-local-code-structure',
-    'entity-part:map-local-repo:workflow-local-git-sync',
-    'entity-part:map-github:workflow-github-git-sync',
-    'entity-part:map-github:workflow-github-commit-changes',
-    'entity-part:map-vercel:workflow-vercel-status-history',
-  ]
-  const partItems = expectedPartKeys.map((key) => review.items.find((candidate) => candidate.itemKey === key))
-  const edgeItem = review.items.find((candidate) => candidate.itemKey === 'relation:map-edge-repo-github')
-  assert.equal(partItems.every((item) => item?.proposal?.operations[0].action === 'add_part'), true)
-  const gitPartItem = partItems.find((item) => item.itemKey.endsWith(':workflow-local-git-sync'))
-  assert.equal(gitPartItem.proposal.operations[0].part.ref, 'workflow.local.git-sync')
-  assert.match(gitPartItem.proposal.summary, /서버 허용 목록/)
-  assert.doesNotMatch(gitPartItem.proposal.summary, /읽기 전용/)
-  const viewPartItem = partItems.find((item) => item.itemKey.endsWith(':workflow-local-code-structure'))
-  assert.match(viewPartItem.proposal.summary, /구현 근거/)
-  assert.doesNotMatch(viewPartItem.proposal.summary, /실행 파츠/)
-  assert.equal(edgeItem.proposal.operations[0].action, 'replace_edge')
-  assert.match(edgeItem.proposal.summary, /연결선 양 끝/)
+  const migration = review.items.find((candidate) => candidate.itemKey === 'relation:repository-code-ports-migration')
+  const vercelItem = review.items.find((candidate) => candidate.itemKey === 'entity-part:map-vercel:workflow-vercel-status-history')
+  assert.deepEqual(migration.proposal.operations.map((operation) => operation.action), [
+    'replace_part', 'add_part', 'remove_part', 'remove_part', 'replace_edge',
+  ])
+  assert.equal(migration.proposal.counts.parts, 4)
+  assert.equal(migration.proposal.counts.edges, 1)
 
-  const afterParts = partItems.reduce((canvas, item) => {
-    const applied = applyDigitalTwinGraphProposal(canvas, item.proposal)
-    return { ...canvas, nodes: applied.nodes, edges: applied.edges }
-  }, map)
-  const edgeApplied = applyDigitalTwinGraphProposal(afterParts, edgeItem.proposal)
-  const upgraded = { ...afterParts, nodes: edgeApplied.nodes, edges: edgeApplied.edges }
+  const migrated = applyDigitalTwinGraphProposal(map, migration.proposal)
+  assert.deepEqual(migrated.removedPartIds, [
+    `map-local-repo:${LOCAL_GIT_SYNC_PART_ID}`,
+    `map-github:${GITHUB_GIT_SYNC_PART_ID}`,
+  ])
+  const migratedLocal = migrated.nodes.find((node) => node.id === 'map-local-repo')
+  const migratedGithub = migrated.nodes.find((node) => node.id === 'map-github')
+  assert.deepEqual(migratedLocal.data.systemParts.map((part) => part.id), [WORKFLOW_SOURCE_TWIN_PART_IDS.localCode])
+  assert.deepEqual(migratedGithub.data.systemParts.map((part) => part.id), [
+    WORKFLOW_SOURCE_TWIN_PART_IDS.githubChanges,
+    WORKFLOW_SOURCE_TWIN_PART_IDS.githubCode,
+  ])
+  assert.equal(migrated.edges.find((edge) => edge.id === WORKFLOW_GIT_SYNC_EDGE_ID).sourceHandle, `p-${WORKFLOW_SOURCE_TWIN_PART_IDS.localCode}-r`)
+  assert.equal(migrated.edges.find((edge) => edge.id === WORKFLOW_GIT_SYNC_EDGE_ID).targetHandle, `p-${WORKFLOW_SOURCE_TWIN_PART_IDS.githubCode}-l`)
+
+  const afterVercel = applyDigitalTwinGraphProposal(migrated, vercelItem.proposal)
+  const upgraded = { ...map, nodes: afterVercel.nodes, edges: afterVercel.edges }
   const after = inspectWorkflowSystemTwin(upgraded)
-  assert.equal(after.items.some((candidate) => expectedPartKeys.includes(candidate.itemKey)), false)
-  assert.equal(after.items.some((candidate) => candidate.itemKey === edgeItem.itemKey), false)
+  assert.equal(after.items.some((candidate) => candidate.itemKey === migration.itemKey), false)
+  assert.equal(after.items.some((candidate) => candidate.itemKey === vercelItem.itemKey), false)
 })
 
 t('an applied Workflow Canvas proposal becomes modeled and remains fingerprint-tracked', () => {

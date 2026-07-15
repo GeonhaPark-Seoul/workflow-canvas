@@ -254,6 +254,48 @@ export function localGitSyncDecision(state) {
   return { action: 'noop', reason: '로컬과 GitHub가 이미 같은 커밋입니다.' }
 }
 
+export function localGitSyncEdgePresentation(decision) {
+  const action = decision?.action
+  if (action === 'push') {
+    return {
+      action,
+      direction: 'local-to-github',
+      icon: '→',
+      tooltip: 'GitHub 코드를 로컬 코드에 맞춰 동기화합니다. 클릭하면 실행 전 계획을 엽니다.',
+    }
+  }
+  if (action === 'pull_ff_only') {
+    return {
+      action,
+      direction: 'github-to-local',
+      icon: '←',
+      tooltip: '로컬 코드를 GitHub 코드에 맞춰 동기화합니다. 클릭하면 실행 전 계획을 엽니다.',
+    }
+  }
+  if (action === 'noop') {
+    return {
+      action,
+      direction: 'in-sync',
+      icon: '✓',
+      tooltip: '로컬 코드와 GitHub 코드가 이미 같은 상태입니다.',
+    }
+  }
+  if (action === 'blocked') {
+    return {
+      action,
+      direction: 'blocked',
+      icon: '!',
+      tooltip: decision?.reason || '안전한 동기화 방향을 정할 수 없어 실행을 차단했습니다.',
+    }
+  }
+  return {
+    action: 'unknown',
+    direction: 'unknown',
+    icon: '↔',
+    tooltip: '로컬 커넥터 상태를 확인해 안전한 동기화 방향을 결정합니다.',
+  }
+}
+
 export function localConnectorIsOnline(connector, now = Date.now()) {
   const seenAt = Date.parse(connector?.lastSeenAt ?? connector?.last_seen_at)
   return Number.isFinite(seenAt) && now - seenAt <= LOCAL_CONNECTOR_ONLINE_MS

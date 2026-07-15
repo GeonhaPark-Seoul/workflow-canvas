@@ -1,4 +1,5 @@
 export const SYSTEM_PART_KIND_DEFS = Object.freeze([
+  { id: 'code', label: '코드', icon: '</>', color: '#14b8a6' },
   { id: 'trigger', label: '트리거', icon: '▶', color: '#f97316' },
   { id: 'condition', label: '조건', icon: '◇', color: '#eab308' },
   { id: 'input', label: '입력', icon: '→', color: '#3b82f6' },

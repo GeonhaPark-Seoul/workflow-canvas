@@ -8,8 +8,16 @@ import {
 } from './digitalTwinProposal.js'
 import { createEdgeRelationData, edgeRelationInfo } from './relationOntology.js'
 import { normalizeSystemPart } from './systemPartOntology.js'
+import {
+  GITHUB_GIT_SYNC_PART_ID,
+  LOCAL_GIT_SYNC_PART_ID,
+} from './localConnector.js'
 import { createSystemNodeData, normalizeSystemPlainText } from './systemOntology.js'
 import { createWorkflowCanvasSystemMap } from './workflowCanvasSystemMap.js'
+import {
+  WORKFLOW_GIT_SYNC_EDGE_ID,
+  WORKFLOW_SOURCE_TWIN_PART_IDS,
+} from './workflowSourceTwinCanvas.js'
 import {
   inspectWorkflowSystemMap,
   WORKFLOW_SYSTEM_DISCOVERY_SOURCE_ID,
@@ -330,6 +338,103 @@ function expectedSystemPartProposal(finding, item, canvas) {
   })
 }
 
+function workflowCodePortMigrationItem(canvas) {
+  const localNode = (canvas.nodes ?? []).find((node) => node.id === 'map-local-repo' && node.type === 'system')
+  const githubNode = (canvas.nodes ?? []).find((node) => node.id === 'map-github' && node.type === 'system')
+  const expectedLocalNode = EXPECTED_MAP.nodes.find((node) => node.id === 'map-local-repo')
+  const expectedGithubNode = EXPECTED_MAP.nodes.find((node) => node.id === 'map-github')
+  const expectedEdge = EXPECTED_MAP.edges.find((edge) => edge.id === WORKFLOW_GIT_SYNC_EDGE_ID)
+  if (!localNode || !githubNode || !expectedLocalNode || !expectedGithubNode || !expectedEdge) return null
+
+  const localParts = new Map((localNode.data?.systemParts ?? []).map((part) => [part.id, normalizeSystemPart(part)]))
+  const githubParts = new Map((githubNode.data?.systemParts ?? []).map((part) => [part.id, normalizeSystemPart(part)]))
+  const expectedLocalPart = normalizeSystemPart(expectedLocalNode.data?.systemParts?.find((part) => part.id === WORKFLOW_SOURCE_TWIN_PART_IDS.localCode))
+  const expectedGithubPart = normalizeSystemPart(expectedGithubNode.data?.systemParts?.find((part) => part.id === WORKFLOW_SOURCE_TWIN_PART_IDS.githubCode))
+  const actualEdge = (canvas.edges ?? []).find((edge) => edge.id === WORKFLOW_GIT_SYNC_EDGE_ID)
+  if (!expectedLocalPart || !expectedGithubPart) return null
+
+  const operations = []
+  const planPart = (targetNodeId, currentParts, expectedPart, label) => {
+    const currentPart = currentParts.get(expectedPart.id)
+    if (!currentPart) {
+      operations.push({ action: 'add_part', targetNodeId, part: expectedPart, label: `${label} 추가` })
+      return
+    }
+    if (digitalTwinReviewFingerprint(currentPart) === digitalTwinReviewFingerprint(expectedPart)) return
+    operations.push({
+      action: 'replace_part',
+      targetNodeId,
+      partId: currentPart.id,
+      expectedPartFingerprint: digitalTwinReviewFingerprint(currentPart),
+      part: expectedPart,
+      label: `${label} 교체`,
+    })
+  }
+  const retirePart = (targetNodeId, currentParts, partId, label) => {
+    const currentPart = currentParts.get(partId)
+    if (!currentPart) return
+    operations.push({
+      action: 'remove_part',
+      targetNodeId,
+      partId,
+      expectedPartFingerprint: digitalTwinReviewFingerprint(currentPart),
+      label: `${label} 퇴역`,
+    })
+  }
+
+  planPart(localNode.id, localParts, expectedLocalPart, '로컬 코드 파츠')
+  planPart(githubNode.id, githubParts, expectedGithubPart, 'GitHub 코드 파츠')
+  retirePart(localNode.id, localParts, LOCAL_GIT_SYNC_PART_ID, '중복 Git 동기화 파츠')
+  retirePart(githubNode.id, githubParts, GITHUB_GIT_SYNC_PART_ID, '중복 로컬 동기화 파츠')
+
+  if (!actualEdge) {
+    operations.push({ action: 'add_edge', edge: expectedEdge, label: '코드 파츠 동기화 연결선 추가' })
+  } else if (digitalTwinProposalEdgeFingerprint(actualEdge) !== digitalTwinProposalEdgeFingerprint(expectedEdge)) {
+    if (actualEdge.source !== expectedEdge.source || actualEdge.target !== expectedEdge.target) return null
+    operations.push({
+      action: 'replace_edge',
+      edgeId: actualEdge.id,
+      expectedEdgeFingerprint: digitalTwinProposalEdgeFingerprint(actualEdge),
+      edge: expectedEdge,
+      label: '코드 파츠 동기화 연결선 교체',
+    })
+  }
+  if (!operations.length) return null
+
+  const item = createDigitalTwinReviewItem({
+    sourceId: WORKFLOW_SYSTEM_TWIN_SOURCE_ID,
+    itemKey: 'relation:repository-code-ports-migration',
+    category: 'relation',
+    changeType: 'changed',
+    severity: 'attention',
+    title: '저장소 코드 파츠와 동기화 연결 정리',
+    summary: '동기화를 별도 파츠 두 개로 표현한 이전 모델을 정리하고, 로컬 코드와 GitHub 코드 파츠 사이의 방향성 있는 조작 관계로 바꿉니다.',
+    evidence: [
+      'shared/workflowCanvasSystemMap.js',
+      'shared/workflowSourceTwinCanvas.js',
+      'scripts/local-connector-agent.mjs',
+    ],
+    focus: { edgeId: WORKFLOW_GIT_SYNC_EDGE_ID, nodeIds: [localNode.id, githubNode.id] },
+    status: 'map_modified',
+    observation: {
+      localParts: [...localParts.values()].filter(Boolean),
+      githubParts: [...githubParts.values()].filter(Boolean),
+      edge: actualEdge ?? null,
+    },
+  })
+  const proposal = createDigitalTwinGraphProposal({
+    sourceId: WORKFLOW_SYSTEM_TWIN_SOURCE_ID,
+    proposalKey: 'migrate-repository-code-ports',
+    itemId: item.id,
+    itemFingerprint: item.fingerprint,
+    snapshotId: WORKFLOW_SYSTEM_DISCOVERY.current.id,
+    title: '저장소 코드 파츠와 동기화 연결 정리',
+    summary: '로컬 코드와 GitHub 코드 파츠를 만든 뒤 연결선을 두 코드 포트에 연결하고, 중복 동기화 파츠를 같은 적용 안에서 제거합니다.',
+    operations,
+  })
+  return { ...item, proposal }
+}
+
 function nodeReviewItem(finding, canvas) {
   const isResourceFinding = Array.isArray(finding.resources)
   const isPartFinding = !!finding.expected_part
@@ -434,8 +539,8 @@ function relationReviewItem(finding, canvas) {
     itemId: item.id,
     itemFingerprint: item.fingerprint,
     snapshotId: WORKFLOW_SYSTEM_DISCOVERY.current.id,
-    title: 'Git 동기화 연결선을 양쪽 실행 파츠에 연결',
-    summary: '로컬 저장소와 GitHub 사이의 기존 양 끝 노드는 유지하고, 연결선 양 끝을 각 저장소의 Git 동기화 파츠 소켓으로 옮겨 최신 근거 계약으로 교체합니다.',
+    title: 'Git 동기화 연결선을 양쪽 코드 파츠에 연결',
+    summary: '로컬 저장소와 GitHub 사이의 기존 양 끝 노드는 유지하고, 연결선 양 끝을 각 저장소의 코드 파츠 소켓으로 옮겨 최신 근거 계약으로 교체합니다.',
     operations: [{
       action: 'replace_edge',
       edgeId: actual.id,
@@ -481,9 +586,23 @@ export function inspectWorkflowSystemTwin(canvas) {
     expectedMap: EXPECTED_MAP,
     discovery: WORKFLOW_SYSTEM_DISCOVERY,
   })
+  const codePortMigration = workflowCodePortMigrationItem(canvas)
+  const migratedPartIds = new Set([
+    WORKFLOW_SOURCE_TWIN_PART_IDS.localCode,
+    WORKFLOW_SOURCE_TWIN_PART_IDS.githubCode,
+  ])
   const items = [
-    ...report.node_findings.map((finding) => nodeReviewItem(finding, canvas)),
-    ...report.relation_findings.map((finding) => relationReviewItem(finding, canvas)),
+    ...(codePortMigration ? [codePortMigration] : []),
+    ...report.node_findings
+      .filter((finding) => !(
+        codePortMigration
+        && ['map-local-repo', 'map-github'].includes(finding.node_id)
+        && migratedPartIds.has(finding.expected_part?.id)
+      ))
+      .map((finding) => nodeReviewItem(finding, canvas)),
+    ...report.relation_findings
+      .filter((finding) => !(codePortMigration && finding.edge_id === WORKFLOW_GIT_SYNC_EDGE_ID))
+      .map((finding) => relationReviewItem(finding, canvas)),
     ...report.unmodeled_resources.map((resource) => resourceReviewItem(resource, canvas)),
   ].sort((left, right) => (
     severityRank(left.severity) - severityRank(right.severity)

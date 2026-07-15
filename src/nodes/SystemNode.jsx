@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Handle, NodeResizer, NodeToolbar, Position, useStore } from '@xyflow/react'
+import { Handle, NodeResizer, NodeToolbar, Position, useStore, useUpdateNodeInternals } from '@xyflow/react'
 import OpenInNotesButton from '../components/OpenInNotesButton'
 import ScopedParticipants from '../components/ScopedParticipants'
 import SystemObservationCatalog from '../components/SystemObservationCatalog'
@@ -79,6 +79,7 @@ function blankSystemPart() {
 }
 
 export default function SystemNode({ data, selected, id }) {
+  const updateNodeInternals = useUpdateNodeInternals()
   const abstract = useStore((state) => state.transform[2] < (data.lodThreshold ?? 0.55))
   const zoomShapeOnly = useStore((state) => state.transform[2] < (data.lodThreshold ?? 0.55) * 0.45)
   const shapeOnly = data.forceShapeOnly || zoomShapeOnly
@@ -161,6 +162,8 @@ export default function SystemNode({ data, selected, id }) {
   }
   const purpose = data.purpose || data.description || ''
   const systemParts = normalizeSystemParts(data.systemParts)
+  const linkedPartHandles = new Set(Array.isArray(data.linkedSystemPartHandles) ? data.linkedSystemPartHandles : [])
+  const systemPartLayoutKey = systemParts.map((part) => part.id).join('|')
   const previewPartIds = new Set(data.digitalTwinProposalPreviewPartIds ?? [])
   const partEditingLocked = data.readOnly || previewPartIds.size > 0
   const [partDraft, setPartDraft] = useState(null)
@@ -172,6 +175,11 @@ export default function SystemNode({ data, selected, id }) {
       setPartError('')
     }
   }, [selected, partEditingLocked])
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => updateNodeInternals(id))
+    return () => cancelAnimationFrame(frame)
+  }, [id, systemPartLayoutKey, updateNodeInternals])
 
   const openPartEditor = (part = null) => {
     if (partEditingLocked) return
@@ -397,8 +405,8 @@ export default function SystemNode({ data, selected, id }) {
                     const runtime = runtimeCapability ? data.systemPartRuntime?.[part.id] : null
                     const runtimeReality = runtimeCapability ? systemPartRuntimeReality(runtime) : null
                     const socketStyle = {
-                      width: 14,
-                      height: 18,
+                      width: 13,
+                      height: 16,
                       borderRadius: 3,
                       border: `1.5px solid ${partKind.color}`,
                       background: '#0f1117',
@@ -421,7 +429,7 @@ export default function SystemNode({ data, selected, id }) {
                           type="source"
                           position={Position.Left}
                           id={`p-${part.id}-l`}
-                          className="part-socket"
+                          className={`part-socket${linkedPartHandles.has(`p-${part.id}-l`) ? ' is-linked' : ''}`}
                           isConnectable={!partEditingLocked && !preview}
                           style={{ ...socketStyle, left: 0, top: '50%', transform: 'translate(-50%, -50%)' }}
                         />
@@ -438,7 +446,7 @@ export default function SystemNode({ data, selected, id }) {
                           type="source"
                           position={Position.Right}
                           id={`p-${part.id}-r`}
-                          className="part-socket"
+                          className={`part-socket${linkedPartHandles.has(`p-${part.id}-r`) ? ' is-linked' : ''}`}
                           isConnectable={!partEditingLocked && !preview}
                           style={{ ...socketStyle, right: 0, top: '50%', transform: 'translate(50%, -50%)' }}
                         />

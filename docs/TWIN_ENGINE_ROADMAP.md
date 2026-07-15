@@ -277,8 +277,9 @@ This ordering preserves the commercial goal that users can eventually connect th
 
 ### Phase B - Parts and edges as the common interaction grammar
 
-- local repository parts: code structure, Git status, Git sync
-- GitHub parts: remote branch, commit history, webhook events
+- local repository: one code port that opens the local structure and Git state
+- GitHub: one code port plus separate commit-change and webhook views
+- local/GitHub synchronization: a directional operation on the code-port edge, not duplicate sync parts
 - Vercel parts: deployment status, deploy, rollback
 - Supabase parts: schema, aggregate operations, RLS validation
 - edge-centered preview controls for relation operations

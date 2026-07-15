@@ -687,6 +687,7 @@ export default function SourceTwinPanel({
       setLocalSyncPlan(preview)
       onLocalGitOperationStateChange?.({
         status: preview.decision?.action === 'noop' ? 'succeeded' : 'preview',
+        action: preview.decision?.action,
         message: preview.decision?.reason || '동기화 계획을 확인한 뒤 승인할 수 있습니다.',
       })
     } catch (previewError) {
@@ -699,6 +700,7 @@ export default function SourceTwinPanel({
 
   const applyGitSync = useCallback(async (connectorId) => {
     if (!localSyncPlan?.plan_token) return
+    const action = localSyncPlan.plan?.scope?.action || localSyncPlan.decision?.action
     setLocalBusy(true)
     setLocalError('')
     setLocalStatus('')
@@ -715,6 +717,7 @@ export default function SourceTwinPanel({
         : '로컬과 GitHub가 이미 동기화되어 있습니다.')
       onLocalGitOperationStateChange?.({
         status: result.queued ? 'queued' : 'succeeded',
+        action,
         operationId: result.operationId,
         message: result.queued
           ? '로컬 터미널 확인을 기다리고 있습니다.'
@@ -855,6 +858,22 @@ export default function SourceTwinPanel({
                 }}
                 structureProps={{ perspective, setPerspective, query, setQuery, selectedId, setSelectedId }}
               />
+            : view === 'github-code'
+              ? <>
+                  <div className="local-source-mode-label">
+                    <strong>배포에 포함된 GitHub 코드</strong>
+                    <span>현재 배포 커밋 기준 · 최신 원격 HEAD와 다를 수 있음</span>
+                  </div>
+                  <StructureView
+                    current={current}
+                    perspective={perspective}
+                    setPerspective={setPerspective}
+                    query={query}
+                    setQuery={setQuery}
+                    selectedId={selectedId}
+                    setSelectedId={setSelectedId}
+                  />
+                </>
             : view === 'changes'
               ? <ChangesView current={current} />
               : <HistoryView
