@@ -6,12 +6,24 @@ import {
   sourceTwinEntityMap,
 } from '../../shared/sourceTwin.js'
 import {
+  compareLocalAndDeployedManifests,
+  localConnectorIsOnline,
+  localGitSyncDecision,
+} from '../../shared/localConnector.js'
+import {
   applySourceTwinHistoryCapture,
   compareSourceTwinHistory,
   loadSourceTwinCurrent,
   loadSourceTwinHistory,
   previewSourceTwinHistoryCapture,
 } from '../lib/sourceTwinApi.js'
+import {
+  applyLocalGitSync,
+  createLocalConnector,
+  loadLocalConnectors,
+  previewLocalGitSync,
+  revokeLocalConnector,
+} from '../lib/localConnectorApi.js'
 
 const MIN_PANE_WIDTH = 380
 const MIN_CANVAS_WIDTH = 320
@@ -39,6 +51,20 @@ const OPERATION_EXCLUSION_LABELS = {
   'canvas-body': '사용자 캔버스 본문',
   'user-email': '사용자 이메일',
   'credential-values': '키·토큰 실제 값',
+}
+const LOCAL_SYNC_ACTION_LABELS = {
+  push: 'GitHub로 push',
+  pull_ff_only: '로컬로 fast-forward 반영',
+  noop: '이미 동기화됨',
+  blocked: '자동 동기화 차단',
+}
+const LOCAL_OPERATION_STATUS_LABELS = {
+  queued: '실행 대기', running: '실행 중', succeeded: '완료', failed: '실패',
+}
+
+function localConnectorCommand(token) {
+  const origin = typeof window === 'undefined' ? '' : window.location.origin
+  return `WORKFLOW_CANVAS_LOCAL_CONNECTOR_TOKEN='${token}' npm run local-connector -- --server '${origin}'`
 }
 
 function IconButton({ title, onClick, disabled = false, children }) {
@@ -232,6 +258,164 @@ function ChangesView({ current }) {
   )
 }
 
+function LocalSyncPlanPreview({ preview, busy, onApprove, onCancel }) {
+  const plan = preview?.plan
+  if (!plan) return null
+  const action = plan.scope?.action
+  return (
+    <section className="local-sync-plan" aria-label="Git 동기화 실행 계획">
+      <header>
+        <div><strong>실행 전 미리보기</strong><span>아직 Git이나 로컬 파일을 바꾸지 않았습니다</span></div>
+        <code title={plan.id}>{plan.id.slice(0, 15)}…</code>
+      </header>
+      <div className="local-sync-plan-direction">
+        <strong>{LOCAL_SYNC_ACTION_LABELS[action] ?? action}</strong>
+        <span>{plan.scope?.reason}</span>
+      </div>
+      <dl>
+        <div><dt>브랜치</dt><dd>{plan.scope?.branch}</dd></div>
+        <div><dt>로컬</dt><dd>{plan.scope?.headSha?.slice(0, 10)}</dd></div>
+        <div><dt>GitHub</dt><dd>{plan.scope?.upstreamSha?.slice(0, 10)}</dd></div>
+        <div><dt>차이</dt><dd>앞섬 {plan.scope?.ahead ?? 0} · 뒤처짐 {plan.scope?.behind ?? 0}</dd></div>
+      </dl>
+      <p>{plan.recovery?.note}</p>
+      <div className="source-twin-operation-buttons">
+        <button type="button" className="is-secondary" onClick={onCancel} disabled={busy}>취소</button>
+        <button type="button" onClick={onApprove} disabled={busy || action === 'noop'}>
+          {busy ? '요청 중…' : action === 'noop' ? '변경 없음' : '승인하고 동기화 요청'}
+        </button>
+      </div>
+    </section>
+  )
+}
+
+function LocalRepositoryView({
+  current,
+  localState,
+  selectedConnectorId,
+  onSelectConnector,
+  setup,
+  busy,
+  error,
+  status,
+  syncPlan,
+  onCreate,
+  onRevoke,
+  onPreviewSync,
+  onApplySync,
+  onCancelSync,
+  structureProps,
+}) {
+  const connectors = localState?.connectors ?? []
+  const connector = connectors.find((item) => item.id === selectedConnectorId) ?? connectors[0] ?? null
+  const online = connector?.online && localConnectorIsOnline(connector)
+  const manifest = online && connector.manifest ? connector.manifest : current.manifest
+  const localCurrent = {
+    ...current,
+    manifest,
+    deployment: {
+      ...current.deployment,
+      commitSha: online ? connector.git?.headSha : current.deployment?.commitSha,
+    },
+  }
+  const difference = online
+    ? compareLocalAndDeployedManifests(current.manifest, connector.manifest)
+    : null
+  const decision = connector ? localGitSyncDecision(connector.git) : null
+  const operations = (localState?.operations ?? []).filter((item) => item.connectorId === connector?.id).slice(0, 5)
+
+  return (
+    <>
+      <section className="local-connector-control" aria-label="로컬 프로젝트 연결">
+        <header>
+          <div>
+            <strong>{online ? connector.repositoryLabel || connector.label : '실제 로컬 프로젝트 연결'}</strong>
+            <span className={online ? 'is-online' : ''}>{online ? '연결됨' : connector ? '오프라인' : '미연결'}</span>
+          </div>
+          <div className="local-connector-header-actions">
+            {connectors.length > 1 && (
+              <select value={connector?.id ?? ''} onChange={(event) => onSelectConnector(event.target.value)} aria-label="로컬 커넥터 선택">
+                {connectors.map((item) => <option key={item.id} value={item.id}>{item.repositoryLabel || item.label}</option>)}
+              </select>
+            )}
+            <button type="button" onClick={onCreate} disabled={busy} title="새 로컬 프로젝트 연결">＋</button>
+            {connector && <button type="button" onClick={() => onRevoke(connector.id)} disabled={busy} title="로컬 커넥터 해제">×</button>}
+          </div>
+        </header>
+
+        {setup && (
+          <div className="local-connector-setup">
+            <strong>이 토큰은 지금 한 번만 표시됩니다</strong>
+            <p>연결할 프로젝트 폴더에서 아래 명령을 실행하고 터미널 창을 켜 두세요.</p>
+            <code>{localConnectorCommand(setup.token)}</code>
+            <button type="button" onClick={() => navigator.clipboard.writeText(localConnectorCommand(setup.token))}>명령 복사</button>
+          </div>
+        )}
+
+        {!connector && !setup && (
+          <div className="local-connector-empty">
+            <p>현재 화면은 배포 빌드의 코드 구조를 임시로 보여줍니다. 실제 Mac 프로젝트를 연결하면 로컬 파일 구조와 Git 상태가 자동 갱신됩니다.</p>
+            <button type="button" onClick={onCreate} disabled={busy}>{busy ? '만드는 중…' : '로컬 커넥터 만들기'}</button>
+          </div>
+        )}
+
+        {connector && (
+          <>
+            <div className="local-git-state">
+              <span>브랜치 <strong>{connector.git?.branch || '미확인'}</strong></span>
+              <span>로컬 변경 <strong>{connector.git?.dirty ?? 0}</strong></span>
+              <span>앞섬 <strong>{connector.git?.ahead ?? 0}</strong></span>
+              <span>뒤처짐 <strong>{connector.git?.behind ?? 0}</strong></span>
+            </div>
+            <div className={`local-sync-decision is-${decision?.action ?? 'blocked'}`}>
+              <div><strong>{LOCAL_SYNC_ACTION_LABELS[decision?.action] ?? '상태 확인 필요'}</strong><span>{decision?.reason}</span></div>
+              <button
+                type="button"
+                onClick={() => onPreviewSync(connector.id)}
+                disabled={busy || !online || decision?.action === 'blocked' || !!syncPlan}
+              >
+                {busy && !syncPlan ? '확인 중…' : '동기화 계획 보기'}
+              </button>
+            </div>
+            <LocalSyncPlanPreview preview={syncPlan} busy={busy} onApprove={() => onApplySync(connector.id)} onCancel={onCancelSync} />
+            {operations.length > 0 && (
+              <div className="local-sync-operation-list">
+                {operations.map((operation) => (
+                  <div key={operation.operationId}>
+                    <span>{LOCAL_SYNC_ACTION_LABELS[operation.action] ?? operation.action}</span>
+                    <strong className={`is-${operation.status}`}>{LOCAL_OPERATION_STATUS_LABELS[operation.status] ?? operation.status}</strong>
+                    <time>{new Date(operation.completedAt || operation.requestedAt).toLocaleString()}</time>
+                    {operation.result?.summary && <p>{operation.result.summary}</p>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {difference && (
+          <div className={`local-twin-difference${difference.inSync ? ' is-synced' : ''}`}>
+            <div><strong>배포본과 자동 대조</strong><span>{difference.inSync ? '같은 코드 구조' : '승인 전 로컬 변경 감지'}</span></div>
+            <div>
+              <span>추가 <b>{difference.summary.added}</b></span>
+              <span>수정 <b>{difference.summary.changed}</b></span>
+              <span>삭제 <b>{difference.summary.removed}</b></span>
+            </div>
+          </div>
+        )}
+        {status && <div className="source-twin-operation-status">{status}</div>}
+        {error && <div className="source-twin-error">{error}</div>}
+      </section>
+
+      <div className="local-source-mode-label">
+        <strong>{online ? '실제 로컬 코드 구조' : '배포 소스 구조 · 대체 표시'}</strong>
+        <span>{online ? '커넥터가 10초 간격으로 자동 갱신' : 'Mac 로컬 파일을 읽은 결과가 아님'}</span>
+      </div>
+      <StructureView current={localCurrent} {...structureProps} />
+    </>
+  )
+}
+
 function OperationPlanPreview({ preview, busy, onApprove, onCancel }) {
   const plan = preview?.plan
   if (!plan) return null
@@ -357,6 +541,13 @@ export default function SourceTwinPanel({ entry, side = 'right', onSideChange, o
   const [compareBusy, setCompareBusy] = useState(false)
   const [error, setError] = useState('')
   const [historyError, setHistoryError] = useState('')
+  const [localState, setLocalState] = useState(null)
+  const [selectedConnectorId, setSelectedConnectorId] = useState('')
+  const [localSetup, setLocalSetup] = useState(null)
+  const [localBusy, setLocalBusy] = useState(false)
+  const [localError, setLocalError] = useState('')
+  const [localStatus, setLocalStatus] = useState('')
+  const [localSyncPlan, setLocalSyncPlan] = useState(null)
   const dragRef = useRef(null)
   const view = entry?.view ?? 'structure'
 
@@ -365,6 +556,8 @@ export default function SourceTwinPanel({ entry, side = 'right', onSideChange, o
     setComparison(null)
     setCapturePlan(null)
     setCaptureStatus('')
+    setLocalSyncPlan(null)
+    setLocalStatus('')
   }, [view])
 
   const refreshHistory = useCallback(async () => {
@@ -380,17 +573,111 @@ export default function SourceTwinPanel({ entry, side = 'right', onSideChange, o
     return next
   }, [])
 
+  const refreshLocalConnectors = useCallback(async () => {
+    const next = await loadLocalConnectors()
+    setLocalState(next)
+    setSelectedConnectorId((currentId) => (
+      next.connectors.some((connector) => connector.id === currentId)
+        ? currentId
+        : next.connectors[0]?.id ?? ''
+    ))
+    setLocalError('')
+    return next
+  }, [])
+
   useEffect(() => {
     let cancelled = false
     setLoading(true)
-    Promise.all([refreshCurrent(), refreshHistory()])
+    Promise.all([refreshCurrent(), refreshHistory(), refreshLocalConnectors().catch((localLoadError) => {
+      setLocalError(localLoadError.message)
+      return null
+    })])
       .catch((loadError) => { if (!cancelled) setError(loadError.message) })
       .finally(() => { if (!cancelled) setLoading(false) })
     const timer = setInterval(() => {
       refreshCurrent().catch(() => {})
     }, 30_000)
     return () => { cancelled = true; clearInterval(timer) }
-  }, [refreshCurrent, refreshHistory])
+  }, [refreshCurrent, refreshHistory, refreshLocalConnectors])
+
+  useEffect(() => {
+    if (view !== 'structure') return undefined
+    const timer = setInterval(() => {
+      refreshLocalConnectors().catch((localLoadError) => setLocalError(localLoadError.message))
+    }, 10_000)
+    return () => clearInterval(timer)
+  }, [refreshLocalConnectors, view])
+
+  const createConnector = useCallback(async () => {
+    setLocalBusy(true)
+    setLocalError('')
+    setLocalStatus('')
+    try {
+      const result = await createLocalConnector('내 Mac 프로젝트')
+      setLocalSetup(result)
+      await refreshLocalConnectors()
+      setSelectedConnectorId(result.connector.id)
+    } catch (createError) {
+      setLocalError(createError.message)
+    } finally {
+      setLocalBusy(false)
+    }
+  }, [refreshLocalConnectors])
+
+  const revokeConnector = useCallback(async (connectorId) => {
+    if (!window.confirm('이 로컬 커넥터를 해제할까요? 실행 중인 터미널 연결도 즉시 끊깁니다.')) return
+    setLocalBusy(true)
+    setLocalError('')
+    try {
+      await revokeLocalConnector(connectorId)
+      setLocalSetup(null)
+      setLocalSyncPlan(null)
+      await refreshLocalConnectors()
+    } catch (revokeError) {
+      setLocalError(revokeError.message)
+    } finally {
+      setLocalBusy(false)
+    }
+  }, [refreshLocalConnectors])
+
+  const previewGitSync = useCallback(async (connectorId) => {
+    setLocalBusy(true)
+    setLocalError('')
+    setLocalStatus('')
+    try {
+      setLocalSyncPlan(await previewLocalGitSync(connectorId))
+    } catch (previewError) {
+      setLocalError(previewError.message)
+    } finally {
+      setLocalBusy(false)
+    }
+  }, [])
+
+  const applyGitSync = useCallback(async (connectorId) => {
+    if (!localSyncPlan?.plan_token) return
+    setLocalBusy(true)
+    setLocalError('')
+    setLocalStatus('')
+    try {
+      const result = await applyLocalGitSync(
+        connectorId,
+        localSyncPlan.plan_token,
+        localSyncPlan.plan?.confirmation,
+      )
+      setLocalSyncPlan(null)
+      setLocalStatus(result.queued
+        ? '승인된 Git 동기화를 로컬 커넥터 실행 대기열에 넣었습니다.'
+        : '로컬과 GitHub가 이미 동기화되어 있습니다.')
+      await refreshLocalConnectors()
+    } catch (applyError) {
+      if (['LOCAL_GIT_STATE_CHANGED', 'LOCAL_GIT_DIRECTION_CHANGED', 'OPERATION_PLAN_EXPIRED'].includes(applyError.code)) {
+        setLocalSyncPlan(null)
+      }
+      setLocalError(applyError.message)
+    } finally {
+      setLocalBusy(false)
+    }
+  }, [localSyncPlan, refreshLocalConnectors])
 
   const previewCapture = useCallback(async () => {
     setCaptureBusy(true)
@@ -485,7 +772,23 @@ export default function SourceTwinPanel({ entry, side = 'right', onSideChange, o
         )}
         {loading && !current ? <div className="twin-review-empty">소스 트윈 불러오는 중…</div> : error ? <div className="source-twin-error">{error}</div> : current && (
           view === 'structure'
-            ? <StructureView current={current} perspective={perspective} setPerspective={setPerspective} query={query} setQuery={setQuery} selectedId={selectedId} setSelectedId={setSelectedId} />
+            ? <LocalRepositoryView
+                current={current}
+                localState={localState}
+                selectedConnectorId={selectedConnectorId}
+                onSelectConnector={(connectorId) => { setSelectedConnectorId(connectorId); setLocalSyncPlan(null); setLocalStatus('') }}
+                setup={localSetup}
+                busy={localBusy}
+                error={localError}
+                status={localStatus}
+                syncPlan={localSyncPlan}
+                onCreate={createConnector}
+                onRevoke={revokeConnector}
+                onPreviewSync={previewGitSync}
+                onApplySync={applyGitSync}
+                onCancelSync={() => { setLocalSyncPlan(null); setLocalError('') }}
+                structureProps={{ perspective, setPerspective, query, setQuery, selectedId, setSelectedId }}
+              />
             : view === 'changes'
               ? <ChangesView current={current} />
               : <HistoryView

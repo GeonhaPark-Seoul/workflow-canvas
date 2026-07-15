@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 
 const read = (name) => readFile(new URL(`../${name}`, import.meta.url), 'utf8')
-const [shares, profiles, profilePrivacy, images, tokens, notes, relationGuard, runtimeRead, runtimeObservations, dataAccessAudit, sourceTwinHistory] = await Promise.all([
+const [shares, profiles, profilePrivacy, images, tokens, notes, relationGuard, runtimeRead, runtimeObservations, dataAccessAudit, sourceTwinHistory, localConnectors] = await Promise.all([
   read('supabase-shares.sql'),
   read('supabase-profiles.sql'),
   read('supabase-profile-privacy.sql'),
@@ -14,6 +14,7 @@ const [shares, profiles, profilePrivacy, images, tokens, notes, relationGuard, r
   read('supabase-runtime-observations.sql'),
   read('supabase-data-access-audit.sql'),
   read('supabase-source-twin-history.sql'),
+  read('supabase-local-connectors.sql'),
 ])
 
 const restrictedFunctions = [
@@ -151,5 +152,19 @@ assert.match(sourceTwinHistory, /p_audit_result ->> 'snapshotId' is distinct fro
 assert.match(sourceTwinHistory, /insert into public\.system_operation_audit[\s\S]*insert into public\.source_twin_snapshots/i)
 assert.match(sourceTwinHistory, /revoke execute on function public\.apply_source_twin_snapshot_operation\([\s\S]*\) from public, anon, authenticated;/i)
 assert.match(sourceTwinHistory, /grant execute on function public\.apply_source_twin_snapshot_operation\([\s\S]*\) to service_role;/i)
+
+for (const table of ['local_connectors', 'local_connector_operations', 'local_connector_operation_events']) {
+  assert.match(localConnectors, new RegExp(`create table if not exists public\\.${table}`, 'i'))
+  assert.match(localConnectors, new RegExp(`alter table public\\.${table} enable row level security`, 'i'))
+  assert.match(localConnectors, new RegExp(`revoke all on table public\\.${table} from public, anon, authenticated`, 'i'))
+  assert.match(localConnectors, new RegExp(`grant all on table public\\.${table} to service_role`, 'i'))
+}
+assert.match(localConnectors, /token_hash text not null unique check \(token_hash ~ '\^\[a-f0-9\]\{64\}\$'\)/i)
+assert.match(localConnectors, /octet_length\(manifest::text\) <= 2500000/i)
+assert.match(localConnectors, /action in \('push', 'pull_ff_only'\)/i)
+assert.match(localConnectors, /create unique index if not exists local_connector_one_active_operation_idx[\s\S]*where status in \('queued', 'running'\)/i)
+assert.doesNotMatch(localConnectors, /force.push|reset --hard|automatic.commit/i)
+assert.match(localConnectors, /before update or delete on public\.local_connector_operation_events/i)
+assert.match(localConnectors, /raise exception 'local connector operation events are append-only'/i)
 
 console.log('SQL security checks passed')

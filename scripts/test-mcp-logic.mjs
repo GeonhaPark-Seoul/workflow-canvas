@@ -78,6 +78,7 @@ import {
   applyDigitalTwinGraphProposal,
   createDigitalTwinGraphProposal,
   digitalTwinProposalAutoFitKey,
+  digitalTwinProposalEdgeFingerprint,
   digitalTwinProposalMatchesItem,
   filterDigitalTwinProposalNodeChanges,
   planDigitalTwinGraphProposal,
@@ -1370,6 +1371,11 @@ t('self map covers the critical runtime, data, security and delivery boundaries'
   for (const relationType of ['calls', 'reads', 'writes', 'authorizes', 'requires', 'syncs_with', 'triggers']) {
     assert.equal(relationTypes.has(relationType), true, `missing system map relation: ${relationType}`)
   }
+  const localRepository = map.nodes.find((node) => node.id === 'map-local-repo')
+  assert.equal(localRepository.data.systemParts.some((part) => part.ref === 'workflow.local.git-sync'), true)
+  const gitSyncEdge = map.edges.find((edge) => edge.id === 'map-edge-repo-github')
+  assert.equal(gitSyncEdge.sourceHandle, 'p-workflow-local-git-sync-r')
+  assert.equal(gitSyncEdge.targetHandle, 'left')
   assert.equal(JSON.stringify(map).includes('SUPABASE_SERVICE_ROLE_KEY='), false)
   assert.deepEqual(
     resolveSystemRuntimeTargets({ canvas: map, actorUserId: 'owner-1', ownerUserId: 'owner-1' })
@@ -1683,14 +1689,14 @@ t('digital twin proposals reject generic update and delete operations before the
     itemId: item.id,
     itemFingerprint: item.fingerprint,
     operations: [{ action: 'update_node', node: { id: 'orders' } }],
-  }), /파츠 교체만 허용/)
+  }), /파츠·연결선 교체만 허용/)
   assert.throws(() => createDigitalTwinGraphProposal({
     sourceId: item.sourceId,
     proposalKey: 'unsafe-delete',
     itemId: item.id,
     itemFingerprint: item.fingerprint,
     operations: [{ action: 'remove_node', node: { id: 'orders' } }],
-  }), /파츠 교체만 허용/)
+  }), /파츠·연결선 교체만 허용/)
 })
 
 t('proposal preview is read-only and explicit apply adds only the planned graph entities', () => {
@@ -1835,6 +1841,66 @@ t('system-part replacement requires the exact previewed fingerprint and changes 
   assert.equal(repeated.writesPerformed, false)
   const stale = structuredClone(graph)
   stale.nodes[0].data.systemParts[0].label = '사용자가 수정함'
+  assert.throws(() => planDigitalTwinGraphProposal(stale, proposal), /미리보기 이후 달라졌/)
+})
+
+t('edge contract replacement preserves endpoints and requires the previewed fingerprint', () => {
+  const item = createDigitalTwinReviewItem({
+    sourceId: 'source-one', itemKey: 'relation:git-sync', title: 'git sync anchor changed', observation: { version: 1 },
+  })
+  const oldEdge = {
+    id: 'git-sync', source: 'local', target: 'github', type: 'stub',
+    sourceHandle: 'right', targetHandle: 'left',
+    data: { relationType: 'syncs_with', relationEvidenceRef: 'Git remote origin/main' },
+    style: { stroke: '#06b6d4', strokeWidth: 3 },
+  }
+  const newEdge = {
+    ...oldEdge,
+    sourceHandle: 'p-workflow-local-git-sync-r',
+    data: { ...oldEdge.data, relationEvidence: '승인된 안전 동기화' },
+  }
+  const proposal = createDigitalTwinGraphProposal({
+    sourceId: item.sourceId,
+    proposalKey: 'replace-git-sync-edge',
+    itemId: item.id,
+    itemFingerprint: item.fingerprint,
+    operations: [{
+      action: 'replace_edge',
+      edgeId: oldEdge.id,
+      expectedEdgeFingerprint: digitalTwinProposalEdgeFingerprint(oldEdge),
+      edge: newEdge,
+    }],
+  })
+  const graph = {
+    nodes: [
+      { id: 'local', type: 'system', position: { x: 0, y: 0 }, data: {} },
+      { id: 'github', type: 'system', position: { x: 300, y: 0 }, data: {} },
+    ],
+    edges: [oldEdge],
+  }
+  const plan = planDigitalTwinGraphProposal(graph, proposal)
+  assert.equal(plan.edgeReplacements.length, 1)
+  const applied = applyDigitalTwinGraphProposal(graph, proposal)
+  assert.equal(applied.edges[0].source, 'local')
+  assert.equal(applied.edges[0].target, 'github')
+  assert.equal(applied.edges[0].sourceHandle, 'p-workflow-local-git-sync-r')
+  assert.deepEqual(applied.replacedEdgeIds, ['git-sync'])
+
+  const rewired = createDigitalTwinGraphProposal({
+    sourceId: item.sourceId,
+    proposalKey: 'rewire-git-sync-edge',
+    itemId: item.id,
+    itemFingerprint: item.fingerprint,
+    operations: [{
+      action: 'replace_edge',
+      edgeId: oldEdge.id,
+      expectedEdgeFingerprint: digitalTwinProposalEdgeFingerprint(oldEdge),
+      edge: { ...newEdge, target: 'attacker' },
+    }],
+  })
+  assert.throws(() => planDigitalTwinGraphProposal(graph, rewired), /양 끝 노드/)
+  const stale = structuredClone(graph)
+  stale.edges[0].data.relationEvidenceRef = 'user-edited'
   assert.throws(() => planDigitalTwinGraphProposal(stale, proposal), /미리보기 이후 달라졌/)
 })
 
@@ -2040,6 +2106,34 @@ t('a missing app operations part remains an additive, reviewable proposal', () =
   ))
   assert.equal(item.proposal.operations[0].action, 'add_part')
   assert.equal(item.proposal.operations[0].part.ref, 'workflow.supabase.canvas-service.operations')
+})
+
+t('an older local repository map upgrades its Git sync part and edge through two explicit proposals', () => {
+  const map = structuredClone(createWorkflowCanvasSystemMap())
+  const localRepository = map.nodes.find((node) => node.id === 'map-local-repo')
+  localRepository.data.systemParts = []
+  const gitSyncEdge = map.edges.find((edge) => edge.id === 'map-edge-repo-github')
+  gitSyncEdge.sourceHandle = 'right'
+  gitSyncEdge.data.relationEvidence = '검토된 로컬 커밋이 GitHub 원격과 동기화된다.'
+
+  const review = inspectWorkflowSystemTwin(map)
+  const partItem = review.items.find((candidate) => (
+    candidate.itemKey === 'entity-part:map-local-repo:workflow-local-git-sync'
+  ))
+  const edgeItem = review.items.find((candidate) => candidate.itemKey === 'relation:map-edge-repo-github')
+  assert.equal(partItem.proposal.operations[0].action, 'add_part')
+  assert.equal(partItem.proposal.operations[0].part.ref, 'workflow.local.git-sync')
+  assert.match(partItem.proposal.summary, /서버 허용 목록/)
+  assert.doesNotMatch(partItem.proposal.summary, /읽기 전용/)
+  assert.equal(edgeItem.proposal.operations[0].action, 'replace_edge')
+
+  const partApplied = applyDigitalTwinGraphProposal(map, partItem.proposal)
+  const afterPart = { ...map, nodes: partApplied.nodes, edges: partApplied.edges }
+  const edgeApplied = applyDigitalTwinGraphProposal(afterPart, edgeItem.proposal)
+  const upgraded = { ...afterPart, nodes: edgeApplied.nodes, edges: edgeApplied.edges }
+  const after = inspectWorkflowSystemTwin(upgraded)
+  assert.equal(after.items.some((candidate) => candidate.itemKey === partItem.itemKey), false)
+  assert.equal(after.items.some((candidate) => candidate.itemKey === edgeItem.itemKey), false)
 })
 
 t('an applied Workflow Canvas proposal becomes modeled and remains fingerprint-tracked', () => {

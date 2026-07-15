@@ -2355,14 +2355,14 @@ export default function App() {
     : null
   const activeTwinProposal = twinProposalPreviewItem?.proposal ?? null
   const twinProposalPlan = useMemo(() => {
-    if (!activeTwinProposal) return { nodes: [], edges: [], parts: [], partReplacements: [], alreadyPresent: [], error: null }
+    if (!activeTwinProposal) return { nodes: [], edges: [], edgeReplacements: [], parts: [], partReplacements: [], alreadyPresent: [], error: null }
     try {
       return {
         ...planDigitalTwinGraphProposal({ nodes, edges }, activeTwinProposal),
         error: null,
       }
     } catch (error) {
-      return { nodes: [], edges: [], parts: [], partReplacements: [], alreadyPresent: [], error: error?.message ?? '수정안을 미리 볼 수 없습니다.' }
+      return { nodes: [], edges: [], edgeReplacements: [], parts: [], partReplacements: [], alreadyPresent: [], error: error?.message ?? '수정안을 미리 볼 수 없습니다.' }
     }
   }, [activeTwinProposal, nodes, edges])
   const twinProposalPreviewNodes = useMemo(() => twinProposalPlan.nodes.map((node) => ({
@@ -2395,7 +2395,13 @@ export default function App() {
     () => new Set(twinProposalPreviewPartsByNode.keys()),
     [twinProposalPreviewPartsByNode],
   )
-  const twinProposalPreviewEdges = useMemo(() => twinProposalPlan.edges.map((edge) => ({
+  const twinProposalPreviewEdges = useMemo(() => [
+    ...twinProposalPlan.edges,
+    ...twinProposalPlan.edgeReplacements.map((planned) => ({
+      ...planned.edge,
+      id: `${planned.edge.id}::proposal-preview`,
+    })),
+  ].map((edge) => ({
     ...edge,
     className: `${edge.className ? `${edge.className} ` : ''}wfc-edge digital-twin-proposal-edge`,
     selectable: false,
@@ -2404,7 +2410,7 @@ export default function App() {
     zIndex: 1000,
     style: { ...edge.style, stroke: '#f59e0b', strokeWidth: 3, strokeDasharray: '7 5' },
     markerEnd: edge.markerEnd ? { ...edge.markerEnd, color: '#f59e0b' } : undefined,
-  })), [twinProposalPlan.edges])
+  })), [twinProposalPlan.edges, twinProposalPlan.edgeReplacements])
   const twinProposalFitKey = digitalTwinProposalAutoFitKey(activeCanvasId, activeTwinProposal)
   const lastFittedTwinProposalRef = useRef(null)
 
@@ -2427,6 +2433,7 @@ export default function App() {
       || (
         !twinProposalPlan.nodes.length
         && !twinProposalPlan.edges.length
+        && !twinProposalPlan.edgeReplacements.length
         && !twinProposalPlan.parts.length
         && !twinProposalPlan.partReplacements.length
       )
@@ -2436,6 +2443,7 @@ export default function App() {
     const ids = [...new Set([
       ...twinProposalPlan.nodes.map((node) => node.id),
       ...twinProposalPlan.edges.flatMap((edge) => [edge.source, edge.target]),
+      ...twinProposalPlan.edgeReplacements.flatMap((planned) => [planned.edge.source, planned.edge.target]),
       ...twinProposalPlan.parts.map((planned) => planned.targetNodeId),
       ...twinProposalPlan.partReplacements.map((planned) => planned.targetNodeId),
     ])]
@@ -2449,6 +2457,7 @@ export default function App() {
     twinProposalPlan.error,
     twinProposalPlan.nodes,
     twinProposalPlan.edges,
+    twinProposalPlan.edgeReplacements,
     twinProposalPlan.parts,
     twinProposalPlan.partReplacements,
   ])

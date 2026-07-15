@@ -24,6 +24,7 @@ import {
   systemRuntimeCatalogForResult,
   systemRuntimeCapabilityForPart,
 } from '../../shared/systemRuntime.js'
+import { LOCAL_GIT_SYNC_CAPABILITY_ID } from '../../shared/localConnector.js'
 
 const PORTS = [
   { id: 'left', position: Position.Left },
@@ -419,6 +420,10 @@ export default function SystemNode({ data, selected, id }) {
                           event.stopPropagation()
                           if (preview) return
                           data.onSelectForPart?.()
+                          if (part.ref === LOCAL_GIT_SYNC_CAPABILITY_ID && data.sourceTwinEntry && data.onOpenSourceTwin) {
+                            data.onOpenSourceTwin({ ...data.sourceTwinEntry, focus: 'git-sync' })
+                            return
+                          }
                           openPartEditor(part)
                         }}
                       >

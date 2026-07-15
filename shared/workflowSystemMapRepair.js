@@ -21,6 +21,8 @@ function relationShape(edge) {
   return {
     source: edge?.source ?? null,
     target: edge?.target ?? null,
+    source_handle: edge?.sourceHandle ?? null,
+    target_handle: edge?.targetHandle ?? null,
     relation_type: edge?.data?.relationType ?? null,
     relation_metadata_present: hasWorkflowRelationMetadata(edge?.data),
   }
@@ -36,6 +38,8 @@ export function compareWorkflowSystemMapRelation(actual, expected) {
   } else {
     if (actual.source !== expected?.source) differences.push('source')
     if (actual.target !== expected?.target) differences.push('target')
+    if ((actual.sourceHandle ?? null) !== (expected?.sourceHandle ?? null)) differences.push('source_handle')
+    if ((actual.targetHandle ?? null) !== (expected?.targetHandle ?? null)) differences.push('target_handle')
     if (expectedShape.relation_metadata_present && !actualShape.relation_metadata_present) {
       differences.push('relation_metadata')
     } else if (actualShape.relation_type !== expectedShape.relation_type) {

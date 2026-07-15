@@ -2,7 +2,10 @@ import {
   createDigitalTwinReviewItem,
   digitalTwinReviewFingerprint,
 } from './digitalTwinReview.js'
-import { createDigitalTwinGraphProposal } from './digitalTwinProposal.js'
+import {
+  createDigitalTwinGraphProposal,
+  digitalTwinProposalEdgeFingerprint,
+} from './digitalTwinProposal.js'
 import { createEdgeRelationData, edgeRelationInfo } from './relationOntology.js'
 import { normalizeSystemPart } from './systemPartOntology.js'
 import { createSystemNodeData, normalizeSystemPlainText } from './systemOntology.js'
@@ -303,8 +306,8 @@ function expectedSystemPartProposal(finding, item, canvas) {
     snapshotId: WORKFLOW_SYSTEM_DISCOVERY.current.id,
     title: `${partLabel} 실행 파츠 ${replacing ? '교체' : '추가'}`,
     summary: replacing
-      ? `${targetLabel} 노드의 기존 파츠가 미리 확인한 지문과 같을 때만 서버가 허용한 읽기 전용 ${partLabel} 파츠로 교체합니다.`
-      : `${targetLabel} 노드에 서버가 허용한 읽기 전용 ${partLabel} 파츠 1개를 추가합니다. 기존 노드 필드는 바꾸지 않습니다.`,
+      ? `${targetLabel} 노드의 기존 파츠가 미리 확인한 지문과 같을 때만 서버 허용 목록으로 제한된 ${partLabel} 파츠로 교체합니다.`
+      : `${targetLabel} 노드에 서버 허용 목록으로 제한된 ${partLabel} 파츠 1개를 추가합니다. 기존 노드 필드는 바꾸지 않습니다.`,
     operations: [replacing
       ? {
           action: 'replace_part',
@@ -389,7 +392,7 @@ function relationReviewItem(finding, canvas) {
     : status === 'evidence_missing' || status === 'needs_review'
       ? 'evidence'
       : 'changed'
-  return createDigitalTwinReviewItem({
+  const item = createDigitalTwinReviewItem({
     sourceId: WORKFLOW_SYSTEM_TWIN_SOURCE_ID,
     itemKey: `relation:${finding.edge_id}`,
     category: 'relation',
@@ -413,6 +416,31 @@ function relationReviewItem(finding, canvas) {
       expected: finding.expected ?? null,
     },
   })
+  if (
+    finding.edge_id !== 'map-edge-repo-github'
+    || status !== 'map_modified'
+    || !actual
+    || !expected
+    || actual.source !== expected.source
+    || actual.target !== expected.target
+  ) return item
+  const proposal = createDigitalTwinGraphProposal({
+    sourceId: WORKFLOW_SYSTEM_TWIN_SOURCE_ID,
+    proposalKey: `replace-edge-contract:${finding.edge_id}`,
+    itemId: item.id,
+    itemFingerprint: item.fingerprint,
+    snapshotId: WORKFLOW_SYSTEM_DISCOVERY.current.id,
+    title: 'Git 동기화 연결선을 실행 파츠에 연결',
+    summary: '로컬 저장소와 GitHub 사이의 기존 양 끝 노드는 유지하고, 연결선 시작점을 Git 동기화 파츠 소켓으로 옮겨 최신 근거 계약으로 교체합니다.',
+    operations: [{
+      action: 'replace_edge',
+      edgeId: actual.id,
+      expectedEdgeFingerprint: digitalTwinProposalEdgeFingerprint(actual),
+      label: 'Git 동기화 연결선 계약 교체',
+      edge: expected,
+    }],
+  })
+  return { ...item, proposal }
 }
 
 function resourceReviewItem(resource, canvas) {

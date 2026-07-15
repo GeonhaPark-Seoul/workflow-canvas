@@ -2,9 +2,9 @@ const SOURCE_TWIN_NODE_ENTRIES = Object.freeze({
   'map-local-repo': Object.freeze({
     nodeId: 'map-local-repo',
     view: 'structure',
-    actionLabel: '코드 구조',
-    panelTitle: '로컬 코드 저장소',
-    description: '현재 배포 빌드에 포함된 checkout의 구조입니다. Mac의 미커밋 작업 폴더를 직접 읽은 결과는 아닙니다.',
+    actionLabel: '로컬 코드',
+    panelTitle: '로컬 프로젝트 저장소',
+    description: '허용한 로컬 커넥터가 실제 프로젝트 구조와 Git 상태를 갱신합니다. 미연결 때만 현재 배포 코드를 대체 표시합니다.',
   }),
   'map-github': Object.freeze({
     nodeId: 'map-github',

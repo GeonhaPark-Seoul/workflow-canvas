@@ -1,4 +1,5 @@
 import { createEdgeRelationData, edgeRelationInfo } from './relationOntology.js'
+import { LOCAL_GIT_SYNC_CAPABILITY_ID, LOCAL_GIT_SYNC_PART_ID } from './localConnector.js'
 import { createSystemNodeData } from './systemOntology.js'
 import { WORKFLOW_SYSTEM_DISCOVERY } from './workflowSystemDiscoveryManifest.js'
 
@@ -35,6 +36,16 @@ const VERCEL_RUNTIME_PART = runtimePart({
   label: '프로덕션 운영 상태',
   ref: 'workflow.vercel.deployment.runtime',
   evidenceRef: 'api/system-runtime.js, mcp/systemRuntime.js, vercel.json',
+})
+
+const LOCAL_GIT_SYNC_PART = Object.freeze({
+  id: LOCAL_GIT_SYNC_PART_ID,
+  kind: 'connection',
+  label: 'Git 동기화',
+  ref: LOCAL_GIT_SYNC_CAPABILITY_ID,
+  exposure: 'internal',
+  sourceKind: 'connector',
+  evidenceRef: 'scripts/local-connector-agent.mjs, api/local-connector.js, map-edge-repo-github',
 })
 
 const SHARED_API_RUNTIME_PART = runtimePart({
@@ -328,11 +339,12 @@ function mapNodes() {
     systemNode('map-local-repo', 'map-group-development', 655, 100, 'external', '로컬 코드 저장소', {
       purpose: '제품 코드와 SQL·테스트·배포 설정의 변경 기준이 된다.',
       responsibility: 'Git 작업 트리와 커밋 전 소스',
-      constraints: '사용자 변경을 임의로 되돌리지 않음',
-      evidence: '프로젝트 파일 구조',
+      constraints: '허용한 프로젝트만 읽고, 미커밋 변경·분기된 이력·강제 push를 자동 처리하지 않음',
+      evidence: '별도 범위 로컬 커넥터의 AST manifest와 Git 상태',
       environment: 'local',
       provider: 'Git',
       externalRef: 'workflow-canvas local checkout',
+      systemParts: [LOCAL_GIT_SYNC_PART],
     }),
     systemNode('map-tests', 'map-group-development', 960, 100, 'service', '테스트·보안 검사', {
       purpose: '코드 변경이 기존 동작과 권한 경계를 깨지 않았는지 확인한다.',
@@ -396,7 +408,10 @@ function mapEdges() {
     relationEdge('map-edge-claude-repo', 'map-claude-code', 'map-local-repo', 'writes', 'CLAUDE.md', 'Claude Code가 전달된 변경을 로컬 저장소에 적용한다.'),
     relationEdge('map-edge-owner-review', 'map-owner', 'map-local-repo', 'reviews', 'CLAUDE.md', '제품 소유자가 동작과 의도를 확인하고 배포를 승인한다.', { sourceHandle: 'bottom', targetHandle: 'left' }),
     relationEdge('map-edge-tests-repo', 'map-tests', 'map-local-repo', 'reads', 'scripts/test-mcp-logic.mjs, scripts/test-sql-security.mjs', '테스트와 빌드가 로컬 소스의 동작·보안 규칙을 검사한다.', { sourceHandle: 'left', targetHandle: 'right' }),
-    relationEdge('map-edge-repo-github', 'map-local-repo', 'map-github', 'syncs_with', 'Git remote origin/main', '검토된 로컬 커밋이 GitHub 원격과 동기화된다.'),
+    relationEdge('map-edge-repo-github', 'map-local-repo', 'map-github', 'syncs_with', 'Git remote origin/main', 'Git 동기화 파츠가 계획·승인 뒤 일반 push 또는 fast-forward pull만 실행한다.', {
+      sourceHandle: `p-${LOCAL_GIT_SYNC_PART_ID}-r`,
+      targetHandle: 'left',
+    }),
     relationEdge('map-edge-github-vercel', 'map-github', 'map-vercel', 'triggers', 'vercel.json', '원격 저장소의 배포 대상 변경이 Vercel 배포 흐름을 촉발한다.', { sourceHandle: 'top', targetHandle: 'bottom' }),
   ]
 }

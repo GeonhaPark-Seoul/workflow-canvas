@@ -33,6 +33,7 @@ const PROPOSAL_OPERATION_LABELS = {
   add_edge: '관계 추가',
   add_part: '파츠 추가',
   replace_part: '파츠 교체',
+  replace_edge: '관계 교체',
 }
 
 function IconButton({ title, onClick, children }) {
@@ -57,6 +58,8 @@ function ReviewRow({
 }) {
   const color = SEVERITY_COLORS[item.severity] ?? SEVERITY_COLORS.attention
   const replacesPart = item.proposal?.operations?.some((operation) => operation.action === 'replace_part')
+  const replacesEdge = item.proposal?.operations?.some((operation) => operation.action === 'replace_edge')
+  const replacesExisting = replacesPart || replacesEdge
   return (
     <article className="twin-review-row" style={{ '--review-accent': color }}>
       <div className="twin-review-row-heading">
@@ -74,7 +77,7 @@ function ReviewRow({
       {proposalPreviewed && item.proposal && (
         <div className="twin-proposal-preview">
           <div className="twin-proposal-preview-heading">
-            <strong>{replacesPart ? '변경 전 미리보기' : '추가 전 미리보기'}</strong>
+            <strong>{replacesExisting ? '변경 전 미리보기' : '추가 전 미리보기'}</strong>
             <span>
               노드 {item.proposal.counts.nodes} · 연결선 {item.proposal.counts.edges} · 파츠 {item.proposal.counts.parts ?? 0}
             </span>
@@ -89,8 +92,8 @@ function ReviewRow({
             ))}
           </div>
           <div className="twin-proposal-safety">
-            {replacesPart
-              ? '표시된 파츠의 현재 지문이 미리보기와 정확히 같을 때만 교체하며, 다른 노드·연결선·파츠는 바꾸지 않습니다.'
+            {replacesExisting
+              ? '표시된 파츠나 연결선의 현재 지문이 미리보기와 정확히 같을 때만 교체하며, 양 끝 노드와 다른 지도 요소는 바꾸지 않습니다.'
               : '기존 필드는 바꾸거나 삭제하지 않고 표시된 노드·연결선·파츠만 덧붙입니다.'}
           </div>
           {proposalPlanError && <div className="twin-proposal-error">{proposalPlanError}</div>}
@@ -101,7 +104,7 @@ function ReviewRow({
                 type="button"
                 className="is-apply"
                 disabled={!!proposalPlanError}
-                title={replacesPart ? '표시된 파츠만 안전하게 교체' : '표시된 새 노드, 연결선, 파츠만 현재 지도에 추가'}
+                title={replacesExisting ? '표시된 파츠 또는 연결선만 안전하게 교체' : '표시된 새 노드, 연결선, 파츠만 현재 지도에 추가'}
                 onClick={() => onApplyProposal(item)}
               >
                 지도에 적용

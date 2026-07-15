@@ -30,6 +30,11 @@ import {
   verifySignedSystemOperationPlan,
 } from '../mcp/systemOperationPlan.js'
 import {
+  applyLocalGitSync as applyLocalGitSyncOperation,
+  LOCAL_GIT_SYNC_CONFIRMATION,
+  previewLocalGitSync as previewLocalGitSyncOperation,
+} from '../mcp/localConnectorStore.js'
+import {
   compactGitHubPush,
   sourceTwinRepositoryName,
   validGitHubSignature,
@@ -39,6 +44,11 @@ import {
   WORKFLOW_SOURCE_TWIN_NODE_IDS,
 } from '../shared/workflowSourceTwinCanvas.js'
 import { SOURCE_TWIN_MANIFEST } from '../shared/sourceTwinManifest.js'
+import {
+  compareLocalAndDeployedManifests,
+  localGitSyncDecision,
+  normalizeLocalSourceManifest,
+} from '../shared/localConnector.js'
 
 const repository = {
   repositoryUrl: 'https://github.com/example/workflow-canvas',
@@ -114,6 +124,30 @@ const changedManifest = buildSourceTwinManifest(changedFiles, { previous: manife
 assert.equal(changedManifest.changeSet.initialBaseline, false)
 assert.ok(changedManifest.changeSet.changedPaths.includes('src/helper.js'))
 assert.ok(changedManifest.changeSet.added.includes('function:src/helper.js:secondHelper'))
+
+const localManifest = normalizeLocalSourceManifest({
+  ...changedManifest,
+  source: { ...changedManifest.source, label: 'actual-local-repo' },
+  content: 'source-body-must-not-survive',
+  entities: changedManifest.entities.map((entity) => ({ ...entity, content: 'source-body-must-not-survive' })),
+})
+assert.ok(localManifest)
+assert.equal(localManifest.source.label, 'actual-local-repo')
+assert.doesNotMatch(JSON.stringify(localManifest), /source-body-must-not-survive/)
+assert.ok(localManifest.perspectives.code.length > 0)
+const localDifference = compareLocalAndDeployedManifests(manifest, localManifest)
+assert.ok(localDifference.summary.added + localDifference.summary.changed > 0)
+assert.equal(localDifference.inSync, false)
+const cleanGit = {
+  branch: 'main', headSha: 'a'.repeat(40), upstreamRef: 'origin/main', upstreamSha: 'b'.repeat(40),
+  ahead: 1, behind: 0, dirty: 0, changedPaths: [], fetchStatus: 'ok',
+}
+assert.equal(localGitSyncDecision(cleanGit).action, 'push')
+assert.equal(localGitSyncDecision({ ...cleanGit, ahead: 0, behind: 2 }).action, 'pull_ff_only')
+assert.equal(localGitSyncDecision({ ...cleanGit, dirty: 1 }).action, 'blocked')
+assert.equal(localGitSyncDecision({ ...cleanGit, ahead: 2, behind: 2 }).action, 'blocked')
+assert.equal(localGitSyncDecision({ ...cleanGit, upstreamRef: 'fork/main' }).action, 'blocked')
+assert.equal(localGitSyncDecision({ ...cleanGit, upstreamRef: 'origin/release' }).action, 'blocked')
 
 const codeEntity = sourceTwinEntities(manifest, { perspective: 'code', query: 'handler' })[0]
 assert.equal(
@@ -192,7 +226,7 @@ assert.equal(verifySignedSystemOperationPlan(signedOperation.token, operationSec
   actorId: 'owner-user-id',
   operation: SOURCE_TWIN_SNAPSHOT_OPERATION,
   confirmation: SOURCE_TWIN_OPERATION_CONFIRMATION,
-  now: new Date('2026-07-15T04:01:00.000Z'),
+  now: new Date('2026-07-15T04:00:30.000Z'),
 }).id, signedOperation.publicPlan.id)
 const [encodedPlan, planSignature] = signedOperation.token.split('.')
 const changedSignature = `${planSignature[0] === 'a' ? 'b' : 'a'}${planSignature.slice(1)}`
@@ -220,6 +254,82 @@ assert.throws(() => verifySignedSystemOperationPlan(signedOperation.token, opera
   confirmation: SOURCE_TWIN_OPERATION_CONFIRMATION,
   now: new Date('2026-07-15T04:06:00.000Z'),
 }), (error) => error.code === 'OPERATION_PLAN_EXPIRED')
+
+const localConnectorRow = {
+  id: '11111111-1111-4111-8111-111111111111',
+  user_id: 'owner-user-id',
+  token_prefix: 'wclc_1234567',
+  label: 'Test Mac',
+  repository_label: 'workflow-canvas',
+  repository_url: repository.repositoryUrl,
+  manifest: localManifest,
+  manifest_id: localManifest.id,
+  git_state: cleanGit,
+  state_fingerprint: 'b'.repeat(64),
+  agent_version: '1.0.0',
+  last_seen_at: operationNow.toISOString(),
+  revoked_at: null,
+  created_at: operationNow.toISOString(),
+}
+const localConnectorWrites = []
+const localConnectorDb = {
+  from(table) {
+    if (table === 'local_connectors') {
+      const query = {
+        select: () => query,
+        eq: () => query,
+        is: () => query,
+        maybeSingle: async () => ({ data: localConnectorRow, error: null }),
+      }
+      return query
+    }
+    return {
+      insert: async (row) => {
+        localConnectorWrites.push({ table, row })
+        return { data: row, error: null }
+      },
+    }
+  },
+}
+const localSyncPreview = await previewLocalGitSyncOperation(localConnectorDb, {
+  userId: 'owner-user-id',
+  connectorId: localConnectorRow.id,
+  env: { SUPABASE_SERVICE_ROLE_KEY: operationSecret },
+  now: operationNow,
+})
+assert.equal(localSyncPreview.decision.action, 'push')
+assert.equal(localSyncPreview.plan.scope.action, 'push')
+assert.equal(localConnectorWrites.length, 0, 'local sync preview must not queue or mutate anything')
+const localSyncApplied = await applyLocalGitSyncOperation(localConnectorDb, {
+  userId: 'owner-user-id',
+  connectorId: localConnectorRow.id,
+  planToken: localSyncPreview.plan_token,
+  confirmation: LOCAL_GIT_SYNC_CONFIRMATION,
+  env: { SUPABASE_SERVICE_ROLE_KEY: operationSecret },
+  now: new Date('2026-07-15T04:00:30.000Z'),
+})
+assert.equal(localSyncApplied.queued, true)
+assert.deepEqual(localConnectorWrites.map((write) => write.table), [
+  'local_connector_operations',
+  'local_connector_operation_events',
+])
+assert.equal(localConnectorWrites[0].row.action, 'push')
+const staleLocalPreview = await previewLocalGitSyncOperation(localConnectorDb, {
+  userId: 'owner-user-id',
+  connectorId: localConnectorRow.id,
+  env: { SUPABASE_SERVICE_ROLE_KEY: operationSecret },
+  now: operationNow,
+})
+localConnectorRow.state_fingerprint = 'c'.repeat(64)
+await assert.rejects(() => applyLocalGitSyncOperation(localConnectorDb, {
+  userId: 'owner-user-id',
+  connectorId: localConnectorRow.id,
+  planToken: staleLocalPreview.plan_token,
+  confirmation: LOCAL_GIT_SYNC_CONFIRMATION,
+  env: { SUPABASE_SERVICE_ROLE_KEY: operationSecret },
+  now: new Date('2026-07-15T04:00:30.000Z'),
+}), (error) => error.code === 'LOCAL_GIT_STATE_CHANGED')
+localConnectorRow.state_fingerprint = 'b'.repeat(64)
 
 let operationalCanvasCount = 2
 let appliedOperation = null
