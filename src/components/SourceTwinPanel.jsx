@@ -7,8 +7,11 @@ import {
 } from '../../shared/sourceTwin.js'
 import {
   groupSourceTwinEntitiesByArea,
+  groupSourceTwinEntitiesBySubsystem,
   sourceTwinAreaDefinition,
   sourceTwinAreaId,
+  sourceTwinSubsystemDefinition,
+  sourceTwinSubsystemId,
 } from '../../shared/sourceTwinSemantics.js'
 import {
   compareLocalAndDeployedManifests,
@@ -113,6 +116,7 @@ function EntityDetail({ manifest, entity, commitSha, onClose }) {
   if (!entity) return null
   const codeUrl = sourceTwinCodeUrl(manifest, entity, commitSha)
   const area = sourceTwinAreaDefinition(sourceTwinAreaId(entity), manifest)
+  const subsystem = sourceTwinSubsystemDefinition(sourceTwinSubsystemId(entity), manifest)
   const details = entity.details ?? {}
   const hasTechnicalFacts = !!entity.technicalSummary
     || (details.apiRoutes?.length ?? 0) > 0
@@ -124,7 +128,7 @@ function EntityDetail({ manifest, entity, commitSha, onClose }) {
       <div className="source-twin-detail-heading">
         <div>
           <strong>{entity.label}</strong>
-          <span>{area.label} · {KIND_LABELS[entity.kind] ?? entity.kind}</span>
+          <span>{area.label} › {subsystem.label} · {KIND_LABELS[entity.kind] ?? entity.kind}</span>
         </div>
         <IconButton title="선택 해제" onClick={onClose}>✕</IconButton>
       </div>
@@ -185,6 +189,7 @@ function EntityRow({ entity, children, expanded, selectedId, onToggle, onSelect 
 function StructureView({ current, perspective, setPerspective, query, setQuery, selectedId, setSelectedId }) {
   const manifest = current.manifest
   const [expanded, setExpanded] = useState(() => new Set())
+  const [expandedSubsystems, setExpandedSubsystems] = useState(() => new Set())
   const entityMap = useMemo(() => sourceTwinEntityMap(manifest), [manifest])
   const filtered = useMemo(
     () => sourceTwinEntities(manifest, { perspective, query, limit: 700 }),
@@ -214,8 +219,18 @@ function StructureView({ current, perspective, setPerspective, query, setQuery, 
     return result.sort((left, right) => `${left.layer}:${left.path ?? ''}:${left.label}`.localeCompare(`${right.layer}:${right.path ?? ''}:${right.label}`))
   }, [entityMap, filtered])
   const areaGroups = useMemo(() => groupSourceTwinEntitiesByArea(manifest, roots), [manifest, roots])
+  const hierarchy = useMemo(() => areaGroups.map((area) => ({
+    ...area,
+    subsystems: groupSourceTwinEntitiesBySubsystem(manifest, area.entities),
+  })), [areaGroups, manifest])
   const selected = entityMap.get(selectedId)
   const toggle = (id) => setExpanded((currentSet) => {
+    const next = new Set(currentSet)
+    if (next.has(id)) next.delete(id)
+    else next.add(id)
+    return next
+  })
+  const toggleSubsystem = (id) => setExpandedSubsystems((currentSet) => {
     const next = new Set(currentSet)
     if (next.has(id)) next.delete(id)
     else next.add(id)
@@ -235,18 +250,33 @@ function StructureView({ current, perspective, setPerspective, query, setQuery, 
       </div>
       <EntityDetail manifest={manifest} entity={selected} commitSha={current.deployment?.commitSha} onClose={() => setSelectedId('')} />
       <div className="source-twin-tree">
-        {roots.length === 0 ? <div className="twin-review-empty">일치하는 코드 실체 없음</div> : areaGroups.map((group) => (
-          <section className="source-twin-area-section" key={group.id}>
+        {roots.length === 0 ? <div className="twin-review-empty">일치하는 코드 실체 없음</div> : hierarchy.map((area) => (
+          <section className="source-twin-area-section" key={area.id}>
             <header className="source-twin-area-heading">
               <div>
-                <strong>{group.label}</strong>
-                <span>{group.description}</span>
+                <strong>{area.label}</strong>
+                <span>{area.description}</span>
               </div>
-              <em>{group.entities.length}</em>
+              <em>{area.entities.length}</em>
             </header>
-            {group.entities.map((entity) => {
-              const children = (childrenByParent.get(entity.id) ?? []).filter((child) => filteredIds.has(child.id))
-              return <EntityRow key={entity.id} entity={entity} children={children} expanded={expanded.has(entity.id) || !!query} selectedId={selectedId} onToggle={toggle} onSelect={(value) => setSelectedId(value.id)} />
+            {area.subsystems.map((subsystem) => {
+              const subsystemExpanded = expandedSubsystems.has(subsystem.id) || !!query
+              return (
+                <section className="source-twin-subsystem-section" key={subsystem.id}>
+                  <button type="button" className="source-twin-subsystem-heading" onClick={() => toggleSubsystem(subsystem.id)} aria-expanded={subsystemExpanded}>
+                    <span className="source-twin-subsystem-expand" aria-hidden="true">{subsystemExpanded ? '▾' : '▸'}</span>
+                    <span>
+                      <strong>{subsystem.label}</strong>
+                      <small>{subsystem.description}</small>
+                    </span>
+                    <em>{subsystem.entities.length}</em>
+                  </button>
+                  {subsystemExpanded && subsystem.entities.map((entity) => {
+                    const children = (childrenByParent.get(entity.id) ?? []).filter((child) => filteredIds.has(child.id))
+                    return <EntityRow key={entity.id} entity={entity} children={children} expanded={expanded.has(entity.id) || !!query} selectedId={selectedId} onToggle={toggle} onSelect={(value) => setSelectedId(value.id)} />
+                  })}
+                </section>
+              )
             })}
           </section>
         ))}

@@ -19,7 +19,10 @@ import {
   sourceTwinCodeUrl,
   sourceTwinEntities,
 } from '../shared/sourceTwin.js'
-import { groupSourceTwinEntitiesByArea } from '../shared/sourceTwinSemantics.js'
+import {
+  groupSourceTwinEntitiesByArea,
+  groupSourceTwinEntitiesBySubsystem,
+} from '../shared/sourceTwinSemantics.js'
 import {
   APPLY_SOURCE_TWIN_OPERATION_RPC,
   applySourceTwinSnapshotOperation,
@@ -110,10 +113,11 @@ const fixtureEntries = [
 import { helper } from '../src/helper.js'
 export async function handler(req, res) {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? 'literal-secret-must-not-appear'
+  const body = Buffer.from('{"zen":"source twin"}')
   await db.from('canvases').select('id')
   await db.from('source_events').insert({ id: serviceKey.length })
   await db.rpc('get_operational_state')
-  return helper(req, res)
+  return helper(req, res, body)
 }
 `],
   ['src/helper.js', `
@@ -145,9 +149,11 @@ assert.deepEqual(manifest.entities, reversed.entities, 'entities must be determi
 assert.deepEqual(manifest.relations, reversed.relations, 'relations must be deterministic')
 assert.equal(manifest.summary.parseFailures, 0)
 assert.ok(manifest.areas.length > 0)
+assert.ok(manifest.subsystems.length > 0)
 assert.ok(manifest.entities.some((entity) => entity.id === 'function:api/example.js:handler'))
 assert.ok(manifest.entities.some((entity) => entity.id === 'api:/api/example'))
 assert.ok(manifest.entities.some((entity) => entity.id === 'db-table:source_events'))
+assert.ok(!manifest.entities.some((entity) => entity.id === 'db-table:{"zen":"source twin"}'))
 assert.ok(manifest.entities.some((entity) => entity.id === 'db-function:get_operational_state'))
 assert.ok(manifest.entities.some((entity) => entity.id === 'env:SUPABASE_SERVICE_ROLE_KEY'))
 assert.ok(manifest.entities.some((entity) => entity.kind === 'rls-policy'))
@@ -160,6 +166,7 @@ assert.doesNotMatch(JSON.stringify(manifest), /literal-secret-must-not-appear/)
 const exampleFile = manifest.entities.find((entity) => entity.id === 'file:api/example.js')
 const exampleHandler = manifest.entities.find((entity) => entity.id === 'function:api/example.js:handler')
 assert.ok(exampleFile.area)
+assert.ok(exampleFile.subsystem)
 assert.match(exampleFile.summary, /브라우저 요청|\/api\/example/)
 assert.match(exampleFile.userImpact, /권한|화면/)
 assert.match(exampleFile.technicalSummary, /함수 1개/)
@@ -174,6 +181,11 @@ const workflowCanvasSemanticManifest = buildSourceTwinManifest(new Map([
   ['package.json', JSON.stringify({ name: 'workflow-canvas' })],
   ['src/App.jsx', 'export default function App() { return null }\n'],
   ['src/components/SourceTwinPanel.jsx', 'export function SourceTwinPanel() { return null }\n'],
+  ['shared/twinBuild.js', 'export function normalizeTwinBuild() { return null }\n'],
+  ['shared/twinBuildReconciler.js', 'export function reconcileTwinBuild() { return null }\n'],
+  ['shared/twinBuildCanvas.js', 'export function materializeTwinBuildEntity() { return null }\n'],
+  ['shared/systemRuntime.js', 'export function normalizeSystemRuntimeResult() { return null }\n'],
+  ['shared/workflowSystemTwinAdapter.js', 'export function inspectWorkflowSystemTwin() { return null }\n'],
 ]))
 const appSemanticEntity = workflowCanvasSemanticManifest.entities.find((entity) => entity.id === 'file:src/App.jsx')
 const sourcePanelSemanticEntity = workflowCanvasSemanticManifest.entities.find((entity) => entity.id === 'file:src/components/SourceTwinPanel.jsx')
@@ -182,6 +194,16 @@ assert.match(appSemanticEntity.summary, /노드·연결선 편집/)
 assert.equal(sourcePanelSemanticEntity.area, 'source-code-twin')
 assert.match(sourcePanelSemanticEntity.summary, /역할별 구조/)
 assert.match(sourcePanelSemanticEntity.userImpact, /비개발자/)
+const workflowEngineFiles = workflowCanvasSemanticManifest.entities.filter((entity) => entity.kind === 'file' && entity.area === 'digital-twin-engine')
+const workflowEngineSubsystems = groupSourceTwinEntitiesBySubsystem(workflowCanvasSemanticManifest, workflowEngineFiles)
+assert.deepEqual(workflowEngineSubsystems.map((group) => group.id), [
+  'twin-core',
+  'twin-reconciliation',
+  'twin-materialization',
+  'twin-runtime',
+  'twin-workflow-adapter',
+])
+assert.ok(workflowEngineSubsystems.every((group) => group.label && group.description && group.entities.length === 1))
 
 const generated = serializeSourceTwinManifest(manifest)
 assert.deepEqual(parseGeneratedSourceTwin(generated), manifest, 'generated manifest must round-trip')
@@ -204,9 +226,11 @@ assert.equal(localManifest.source.label, 'actual-local-repo')
 assert.doesNotMatch(JSON.stringify(localManifest), /source-body-must-not-survive/)
 assert.ok(localManifest.perspectives.code.length > 0)
 assert.equal(localManifest.entities.find((entity) => entity.id === exampleFile.id)?.area, exampleFile.area)
+assert.equal(localManifest.entities.find((entity) => entity.id === exampleFile.id)?.subsystem, exampleFile.subsystem)
 assert.equal(localManifest.entities.find((entity) => entity.id === exampleFile.id)?.userImpact, exampleFile.userImpact)
 assert.match(localManifest.entities.find((entity) => entity.id === exampleFile.id)?.technicalSummary ?? '', /함수 1개/)
 assert.ok(localManifest.areas.some((area) => area.id === exampleFile.area))
+assert.ok(localManifest.subsystems.some((subsystem) => subsystem.id === exampleFile.subsystem))
 const localDifference = compareLocalAndDeployedManifests(manifest, localManifest)
 assert.ok(localDifference.summary.added + localDifference.summary.changed > 0)
 assert.equal(localDifference.inSync, false)

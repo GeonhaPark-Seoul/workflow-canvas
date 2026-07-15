@@ -151,6 +151,12 @@ The source-code twin now uses deterministic explanations before active AI integr
 
 This is the deterministic easy-mode baseline, not the completed semantic engine. A later version must attach sentence-level evidence, validate a second software stack, support additional languages, measure fallback quality, and expose an explicit easy/developer mode. AI can improve wording only after the user grants the necessary source scope; its output remains an explanation artifact rather than verified system truth.
 
+### Future manipulable code twin
+
+The repository browser should eventually become a **round-trip visual editor**: selected, explicitly supported code values appear as typed controls, and a control change produces a bounded source patch. A later direct-manipulation renderer can provide a Figma-like WYSIWYG surface over the same property schema. This is called a **조작 가능한 코드 디지털 트윈** in product language.
+
+The evolution order is read hierarchy, evidence-bound explanation, typed read-only properties, editable property controls, component preview, bidirectional direct manipulation, and finally AI-assisted multi-property changes. Every write remains AST/CST anchored, diff-first, branch-isolated, test-and-build verified, auditable, and recoverable. The visual editor never performs regex source replacement or edits production code directly.
+
 ## Operation initiators
 
 Direct interface control is a first-class product path, not a temporary substitute for AI. A person clicks a node part or an edge control, reviews the plan, approves it, and sees the verified result in the canvas. Deterministic automation and a future AI agent are additional initiators of the same operation; neither receives a separate bypass.

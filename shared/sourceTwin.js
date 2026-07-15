@@ -54,6 +54,7 @@ export function sourceTwinEntities(manifest, { perspective = 'all', query = '', 
         entity.userImpact,
         entity.technicalSummary,
         entity.area,
+        entity.subsystem,
         ...(entity.tags ?? []),
       ]
         .filter(Boolean)

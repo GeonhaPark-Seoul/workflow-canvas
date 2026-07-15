@@ -4,15 +4,17 @@ import { existsSync, lstatSync, readFileSync, readdirSync, realpathSync } from '
 import path from 'node:path'
 import { parse } from '@babel/parser'
 import { SOURCE_TWIN_SCHEMA_VERSION, SOURCE_TWIN_SOURCE_ID } from '../shared/sourceTwin.js'
-import { sourceTwinAreaCatalog } from '../shared/sourceTwinSemantics.js'
+import { sourceTwinAreaCatalog, sourceTwinSubsystemCatalog } from '../shared/sourceTwinSemantics.js'
 import {
   areaForSourceResource,
   explainDatabaseResource,
   explainEnvironmentVariable,
   explainSourceFile,
   explainSourceFunction,
+  sourceTwinSubsystemForRecord,
   sourceTwinProjectIdentity,
   sourceTwinTechnicalSummary,
+  subsystemForSourceResource,
 } from './source-twin-semantics.mjs'
 
 export const SOURCE_TWIN_MANIFEST_PATH = 'shared/sourceTwinManifest.js'
@@ -21,6 +23,7 @@ const INCLUDED_ROOT_FILES = new Set(['README.md', 'index.html', 'package.json', 
 const EXCLUDED_FILES = new Set([SOURCE_TWIN_MANIFEST_PATH, 'shared/workflowSystemDiscoveryManifest.js'])
 const CODE_EXTENSIONS = ['.js', '.jsx', '.mjs']
 const WRITE_METHODS = new Set(['insert', 'update', 'upsert', 'delete'])
+const DATABASE_IDENTIFIER_PATTERN = /^[a-zA-Z_][a-zA-Z0-9_]*$/
 const CREDENTIAL_PATTERN = /(?:KEY|TOKEN|SECRET|PASSWORD|CREDENTIAL)/i
 const MAX_SOURCE_FILE_BYTES = 2 * 1024 * 1024
 const MAX_SOURCE_TOTAL_BYTES = 24 * 1024 * 1024
@@ -184,13 +187,13 @@ function parseJavaScript(relativePath, content) {
       if (calleeName === 'fetch' && firstString.startsWith('/api/')) record.externalApiRoutes.push(firstString.split('?')[0])
       if (calleeName === 'eval') record.securitySignals.push('dynamic-code-eval')
       if (calleeName === 'Function' && ancestors.some((ancestor) => ancestor.type === 'NewExpression')) record.securitySignals.push('dynamic-function-constructor')
-      if (property === 'from' && firstString) {
+      if (property === 'from' && DATABASE_IDENTIFIER_PATTERN.test(firstString)) {
         const surroundingMethods = ancestors.map(memberProperty).filter(Boolean)
         const operation = surroundingMethods.some((name) => WRITE_METHODS.has(name)) ? 'write' : 'read'
         record.dbTables.push(firstString)
         record.dbAccess.push({ table: firstString, operation })
       }
-      if (property === 'rpc' && firstString) record.dbFunctions.push(firstString)
+      if (property === 'rpc' && DATABASE_IDENTIFIER_PATTERN.test(firstString)) record.dbFunctions.push(firstString)
     }
     if (node.type === 'ImportExpression') {
       const source = stringArgument(node.source)
@@ -346,7 +349,10 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
       parseError: parsed.parseError ?? '',
     })
   }
-  for (const record of records) record.explanation = explainSourceFile(record, project)
+  for (const record of records) {
+    record.explanation = explainSourceFile(record, project)
+    record.subsystem = sourceTwinSubsystemForRecord(record, project, record.explanation.area)
+  }
 
   const entities = []
   const relations = []
@@ -366,6 +372,7 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
     const tags = unique([
       record.layer,
       record.explanation.area,
+      record.subsystem,
       ...record.apiRoutes,
       ...record.dbTables,
       ...record.env,
@@ -378,6 +385,7 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
       lineStart: 1,
       lineEnd: record.lineCount,
       area: record.explanation.area,
+      subsystem: record.subsystem,
       summary: record.explanation.summary,
       userImpact: record.explanation.userImpact,
       technicalSummary,
@@ -402,11 +410,12 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
         parentId: fileId,
         layer: record.layer,
         area: record.explanation.area,
+        subsystem: record.subsystem,
         lineStart: fn.lineStart,
         lineEnd: fn.lineEnd,
         summary: explainSourceFunction(fn, record, record.explanation),
         technicalSummary: `${fn.exported ? '다른 파일에서 사용 가능' : '이 파일 내부에서 사용'}${fn.async ? ' · 서버나 저장소 응답을 기다림' : ''}`,
-        tags: unique([record.layer, record.explanation.area, fn.kind, fn.exported ? 'exported' : '', fn.async ? 'async' : '']),
+        tags: unique([record.layer, record.explanation.area, record.subsystem, fn.kind, fn.exported ? 'exported' : '', fn.async ? 'async' : '']),
         details: { functionKind: fn.kind, exported: fn.exported, async: fn.async },
       }))
       addRelation(relation('contains', fileId, id))
@@ -419,22 +428,25 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
         parentId: fileId,
         layer: 'api',
         area: record.explanation.area,
+        subsystem: record.subsystem,
         lineStart: 1,
         summary: `${route}로 들어온 요청을 받아 “${record.explanation.summary.replace(/합니다\.$/, '')}” 역할을 실행하는 서버 입구입니다.`,
         userImpact: record.explanation.userImpact,
-        tags: ['api', 'server', record.explanation.area],
+        tags: ['api', 'server', record.explanation.area, record.subsystem],
       }))
       addRelation(relation('serves', fileId, id))
     }
     for (const table of unique(record.dbTables)) {
       const id = `db-table:${table}`
       const area = areaForSourceResource('db-table', table, record.explanation.area)
+      const subsystem = subsystemForSourceResource('db-table', table, area, record.subsystem)
       addEntity(entity(id, 'db-table', table, semanticHash({ table }), {
         name: table,
         layer: 'database',
         area,
+        subsystem,
         summary: explainDatabaseResource('db-table', table),
-        tags: ['database', 'table', area],
+        tags: ['database', 'table', area, subsystem],
       }))
       const operations = unique(record.dbAccess.filter((item) => item.table === table).map((item) => item.operation))
       addRelation(relation('accesses', fileId, id, { operations: operations.length ? operations : ['declares'] }))
@@ -442,40 +454,46 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
     for (const fnName of unique(record.dbFunctions)) {
       const id = `db-function:${fnName}`
       const area = areaForSourceResource('db-function', fnName, record.explanation.area)
+      const subsystem = subsystemForSourceResource('db-function', fnName, area, record.subsystem)
       addEntity(entity(id, 'db-function', fnName, semanticHash({ fnName }), {
         name: fnName,
         layer: 'database',
         area,
+        subsystem,
         summary: explainDatabaseResource('db-function', fnName),
-        tags: ['database', 'function', area],
+        tags: ['database', 'function', area, subsystem],
       }))
       addRelation(relation('calls-db-function', fileId, id))
     }
     for (const policy of record.policies) {
       const id = `rls-policy:${policy.table}:${policy.name}`
       const area = areaForSourceResource('rls-policy', `${policy.table} ${policy.name}`, record.explanation.area)
+      const subsystem = subsystemForSourceResource('rls-policy', `${policy.table} ${policy.name}`, area, record.subsystem)
       addEntity(entity(id, 'rls-policy', policy.name, semanticHash(policy), {
         name: policy.name,
         path: record.path,
         parentId: fileId,
         layer: 'database',
         area,
+        subsystem,
         lineStart: policy.line,
         summary: `${policy.table} 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.`,
-        tags: ['database', 'security', 'rls', policy.table, area],
+        tags: ['database', 'security', 'rls', policy.table, area, subsystem],
         details: { table: policy.table },
       }))
       addRelation(relation('defines-policy', fileId, id))
     }
     for (const envName of unique(record.env)) {
       const id = `env:${envName}`
-      const area = CREDENTIAL_PATTERN.test(envName) ? 'security-privacy' : record.explanation.area
+      const area = areaForSourceResource('environment-variable', envName, record.explanation.area)
+      const subsystem = subsystemForSourceResource('environment-variable', envName, area, record.subsystem)
       addEntity(entity(id, 'environment-variable', envName, semanticHash({ envName }), {
         name: envName,
         layer: CREDENTIAL_PATTERN.test(envName) ? 'security' : 'deployment',
         area,
+        subsystem,
         summary: explainEnvironmentVariable(envName),
-        tags: unique(['environment', area, CREDENTIAL_PATTERN.test(envName) ? 'credential-reference' : 'configuration']),
+        tags: unique(['environment', area, subsystem, CREDENTIAL_PATTERN.test(envName) ? 'credential-reference' : 'configuration']),
         details: { credentialReference: CREDENTIAL_PATTERN.test(envName) },
       }))
       addRelation(relation('reads-env', fileId, id))
@@ -485,6 +503,7 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
       addEntity(entity(id, 'deployment', 'Vercel 웹 배포', semanticHash({ files: records.filter((item) => item.layer === 'deployment').map((item) => [item.path, item.fingerprint]) }), {
         layer: 'deployment',
         area: 'deployment-operations',
+        subsystem: 'build-release',
         summary: 'Vite 빌드 결과를 Vercel에 배포하는 경로입니다.',
         userImpact: '검증을 통과한 현재 커밋이 실제 사용자가 여는 웹사이트가 되게 합니다.',
         tags: ['deployment', 'vercel', 'vite', 'deployment-operations'],
@@ -499,6 +518,7 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
           name: imported.source,
           layer: 'code',
           area: 'project-foundation',
+          subsystem: 'project-config',
           summary: `${imported.source} 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.`,
           tags: ['dependency', 'project-foundation'],
         }))
@@ -509,7 +529,8 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
       const target = `api:${route}`
       if (!byId.has(target)) addEntity(entity(target, 'api-route', route, semanticHash({ route }), {
         name: route, layer: 'api', area: record.explanation.area,
-        summary: `${route} 서버 기능에 자료를 요청하는 연결 대상입니다.`, tags: ['api', record.explanation.area],
+        subsystem: record.subsystem,
+        summary: `${route} 서버 기능에 자료를 요청하는 연결 대상입니다.`, tags: ['api', record.explanation.area, record.subsystem],
       }))
       addRelation(relation('calls-api', fileId, target))
     }
@@ -521,18 +542,20 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
       const packageJson = JSON.parse(packageRecord.content)
       for (const [name, command] of Object.entries(packageJson.scripts ?? {}).sort(([left], [right]) => compareSourceTwinText(left, right))) {
         const area = /test|check/.test(name) ? 'testing-quality' : /build|deploy|preview/.test(name) ? 'deployment-operations' : 'project-foundation'
+        const subsystem = sourceTwinSubsystemForRecord({ path: `npm:${name}`, imports: [], layer: area === 'testing-quality' ? 'test' : 'deployment' }, project, area)
         addEntity(entity(`npm-script:${name}`, 'npm-script', `npm run ${name}`, semanticHash({ command }), {
           name,
           path: 'package.json',
           parentId: 'file:package.json',
           layer: /test|check/.test(name) ? 'test' : /build|deploy|preview/.test(name) ? 'deployment' : 'code',
           area,
+          subsystem,
           summary: /test|check/.test(name)
             ? `${name} 검증 묶음을 실행해 코드와 보안 규칙의 회귀를 찾는 명령입니다.`
             : /build|deploy|preview/.test(name)
               ? `${name} 단계의 웹 빌드 또는 배포 확인을 실행하는 명령입니다.`
               : `${name} 개발 작업을 정해진 순서로 실행하는 프로젝트 명령입니다.`,
-          tags: unique(['npm', area, /test|check/.test(name) ? 'test' : '', /build|deploy|preview/.test(name) ? 'deployment' : '']),
+          tags: unique(['npm', area, subsystem, /test|check/.test(name) ? 'test' : '', /build|deploy|preview/.test(name) ? 'deployment' : '']),
         }))
         addRelation(relation('contains', 'file:package.json', `npm-script:${name}`))
       }
@@ -572,6 +595,7 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
     currentMap.get(entityId)?.path || previousMap.get(entityId)?.path
   )))
   const areas = sourceTwinAreaCatalog(entities.map((item) => item.area))
+  const subsystems = sourceTwinSubsystemCatalog(entities.map((item) => item.subsystem))
   const manifest = {
     schemaVersion: SOURCE_TWIN_SCHEMA_VERSION,
     id,
@@ -585,6 +609,7 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
       credentialValuesIncluded: false,
     },
     areas,
+    subsystems,
     entities,
     relations,
     perspectives,
@@ -592,6 +617,7 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
     summary: {
       entities: entities.length,
       areas: areas.length,
+      subsystems: subsystems.length,
       files: entities.filter((item) => item.kind === 'file').length,
       functions: entities.filter((item) => item.kind === 'function').length,
       imports: relations.filter((item) => item.type === 'imports').length,

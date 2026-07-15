@@ -225,6 +225,15 @@ This is the durable ledger for security, reliability, commercialization, and arc
 - Required work: distinguish `apply to map`, `acknowledge`, `ignore this evidence`, `obsolete proposal`, and `security review`; expire proposals on engine/schema changes and support safe batch review.
 - Exit criteria: a non-developer can decide each item without external guidance and no stale proposal can be applied.
 
+### ENG-006 - Round-trip visual code editing
+
+- Severity: high
+- Gate: visual-code-editing
+- Status: open
+- Context: a future user should be able to change an exposed value such as `노드 크기 240` or directly resize an element in a Figma-like editor and have the corresponding source code change safely. This is a bidirectional, code-backed editor, not arbitrary text replacement and not a reason to expose the whole repository to the browser or AI.
+- Required work: define an explicit editable-property schema with stable AST/CST source anchors, types, units, ranges, responsive variants, ownership, evidence, and dependency impact; support deterministic code-to-control and control-to-code round trips; create changes in an isolated branch or worktree; show visual preview plus exact source diff; reject stale anchors and concurrent edits; run formatter, type checks, tests, security checks, and production build; require risk-based approval; commit with provenance; support undo, rollback, and recovery. Direct manipulation must preserve layout constraints rather than writing accidental pixel values. AI may propose values or grouped edits but uses the same contract and cannot bypass validation or consent.
+- Exit criteria: supported properties round-trip without unrelated formatting churn, an invalid or stale edit cannot touch source, every applied edit has a reviewable diff and verified build, and the previous commit can be restored from the canvas without hidden side effects.
+
 ## AI orchestration and automation
 
 ### AI-001 - Provider-neutral agent and run schema

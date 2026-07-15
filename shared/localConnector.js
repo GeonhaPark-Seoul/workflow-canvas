@@ -108,7 +108,7 @@ function sourceEntity(value) {
     technicalSummary: text(value.technicalSummary, 400),
     tags: stringList(value.tags, 40, 120),
   }
-  for (const key of ['path', 'layer', 'language', 'parentId', 'area']) {
+  for (const key of ['path', 'layer', 'language', 'parentId', 'area', 'subsystem']) {
     const next = text(value[key], key === 'path' ? 500 : 180)
     if (next) normalized[key] = next
   }
@@ -164,6 +164,20 @@ export function normalizeLocalSourceManifest(value) {
       order: integer(raw.order, 0, 10_000),
     })
   }
+  const subsystemIds = new Set(entities.map((entity) => entity.subsystem).filter(Boolean))
+  const subsystems = []
+  for (const raw of Array.isArray(value.subsystems) ? value.subsystems.slice(0, 160) : []) {
+    if (!plainObject(raw)) continue
+    const id = text(raw.id, 120)
+    if (!id || !subsystemIds.has(id) || subsystems.some((item) => item.id === id)) continue
+    subsystems.push({
+      id,
+      area: text(raw.area, 120),
+      label: text(raw.label, 120) || id,
+      description: text(raw.description, 300),
+      order: integer(raw.order, 0, 10_000),
+    })
+  }
   return {
     schemaVersion: integer(value.schemaVersion, 1, 20),
     id: manifestId,
@@ -175,6 +189,7 @@ export function normalizeLocalSourceManifest(value) {
       defaultBranch: text(source.defaultBranch, 120) || 'main',
     },
     areas,
+    subsystems,
     perspectives,
     summary: {
       files: entities.filter((entity) => entity.kind === 'file').length,
@@ -182,6 +197,7 @@ export function normalizeLocalSourceManifest(value) {
       apiRoutes: entities.filter((entity) => entity.kind === 'api-route').length,
       dbTables: entities.filter((entity) => entity.kind === 'db-table').length,
       entities: entities.length,
+      subsystems: subsystems.length,
     },
     entities,
     relations: [],

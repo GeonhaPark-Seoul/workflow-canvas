@@ -235,6 +235,67 @@ function genericArea(record) {
   return 'project-foundation'
 }
 
+function subsystemFromArea(record, area) {
+  // A file belongs to the subsystem responsible for its own work. Imports are
+  // evidence of connections between subsystems, not ownership of the file.
+  const source = String(record.path ?? '').toLocaleLowerCase()
+  if (area === 'canvas-interface') {
+    return /src\/(?:nodes|edges)\/|edgerelationeditor|edittoolbar|wheelrouting/.test(source)
+      ? 'canvas-elements'
+      : 'canvas-workspace'
+  }
+  if (area === 'canvas-model') return 'canvas-state'
+  if (area === 'notes-content') return /notespanel|openinnotes|canvas-notes/.test(source) ? 'notes-workspace' : 'content-editing'
+  if (area === 'sharing-collaboration') {
+    if (/invite|shared-canvas|sharelaunch|revocation/.test(source)) return 'sharing-entry'
+    if (/participant|presence|avatar/.test(source)) return 'participants-presence'
+    return 'sharing-policy'
+  }
+  if (area === 'identity-profile') return 'identity-account'
+  if (area === 'digital-twin-engine') {
+    if (/twinadaptercontract/.test(source)) return 'twin-core'
+    if (/workflow(system)?twinadapter|workflow-system-twin-adapter|digitaltwinadapters|workflowsystemtwinbuild/.test(source)) return 'twin-workflow-adapter'
+    if (/operationlifecycle|workflowoperation|edgeoperation/.test(source)) return 'twin-operations'
+    if (/twinbuildcanvas|workflowcanvassystemmap|systemmaprepair/.test(source)) return 'twin-materialization'
+    if (/reconcil|digitaltwinreview|digitaltwinproposal/.test(source)) return 'twin-reconciliation'
+    if (/discovery|system-discovery/.test(source)) return 'twin-discovery'
+    if (/systemruntime|system-runtime|observation|runtime-read|runtime-observations/.test(source)) return 'twin-runtime'
+    return 'twin-core'
+  }
+  if (area === 'source-code-twin') {
+    if (/localconnector|local-connector|local_connectors/.test(source)) return 'local-connector'
+    if (/source-twin-webhook|workflowsourcetwincanvas|github/.test(source)) return 'git-delivery'
+    if (/scripts\/(?:generate-source-twin|source-twin-(?:scanner|semantics))|shared\/sourcetwinsemantics/.test(source)) return 'source-analysis'
+    if (/sourcetwinpanel|sourcetwinapi|api\/source-twin\.js|source-twin-history|shared\/sourcetwin\.js|sourcetwinstore|supabase-source-twin-history/.test(source)) return 'source-browser-history'
+    return 'source-analysis'
+  }
+  if (area === 'ai-integration') return /api\/mcp|mcp\/server|mcptoken|mcp-schema/.test(source) ? 'mcp-transport' : 'mcp-tools'
+  if (area === 'data-storage-sync') {
+    if (/src\/storage\.js/.test(source)) return 'browser-persistence'
+    if (/\.sql$/.test(record.path)) return 'database-schema'
+    return 'cloud-persistence'
+  }
+  if (area === 'media-files') return /canvasimage|contentnode/.test(source) ? 'media-presentation' : 'media-storage'
+  if (area === 'security-privacy') {
+    if (/sanitize|html|url/.test(source)) return 'input-safety'
+    if (/audit|privacy|profile-privacy/.test(source)) return 'access-privacy'
+    return 'trust-controls'
+  }
+  if (area === 'deployment-operations') return /system-runtime|runtime|operation/.test(source) ? 'runtime-operations' : 'build-release'
+  if (area === 'testing-quality') {
+    if (/source-twin|local-connector/.test(source)) return 'source-tests'
+    if (/twin-build|twin-adapter|operation-lifecycle/.test(source)) return 'engine-tests'
+    return 'app-tests'
+  }
+  if (area === 'project-foundation') return /readme|docs\//.test(source) ? 'project-docs' : 'project-config'
+  return 'project-config'
+}
+
+export function sourceTwinSubsystemForRecord(record, project = {}, area = '') {
+  const resolvedArea = area || genericArea(record)
+  return subsystemFromArea(record, resolvedArea)
+}
+
 function genericFileExplanation(record) {
   const label = baseName(record.path)
   const route = record.apiRoutes?.[0]
@@ -351,6 +412,10 @@ export function explainSourceFunction(fn, record, fileExplanation) {
 
 export function areaForSourceResource(kind, name, parentArea = '') {
   const value = String(name ?? '').toLocaleLowerCase()
+  if (kind === 'environment-variable') {
+    if (/secret|token|credential|password|service_role|(?:^|_)key(?:_|$)/.test(value)) return 'security-privacy'
+    if (/vercel|deploy|commit_sha|node_env/.test(value)) return 'deployment-operations'
+  }
   if (/share|invite|participant|revocation/.test(value)) return 'sharing-collaboration'
   if (/profile|auth|session|user_pref/.test(value)) return 'identity-profile'
   if (/source_twin|local_connector|github|git/.test(value)) return 'source-code-twin'
@@ -359,6 +424,28 @@ export function areaForSourceResource(kind, name, parentArea = '') {
   if (/audit|privacy|permission|policy|credential|token|secret/.test(value)) return 'security-privacy'
   if (/canvas|node|edge|stage|view|note/.test(value)) return kind === 'db-table' ? 'data-storage-sync' : 'canvas-model'
   return parentArea || (kind.startsWith('db-') ? 'data-storage-sync' : 'project-foundation')
+}
+
+export function subsystemForSourceResource(kind, name, area = '', parentSubsystem = '') {
+  const value = String(name ?? '').toLocaleLowerCase()
+  if (area === 'source-code-twin') {
+    if (/local_connector/.test(value)) return 'local-connector'
+    if (/github|git/.test(value)) return 'git-delivery'
+    return 'source-browser-history'
+  }
+  if (area === 'sharing-collaboration') return 'sharing-policy'
+  if (area === 'identity-profile') return 'identity-account'
+  if (area === 'digital-twin-engine') {
+    if (/system_operation/.test(value)) return 'twin-operations'
+    if (/runtime|observation/.test(value)) return 'twin-runtime'
+    return 'twin-core'
+  }
+  if (area === 'media-files') return 'media-storage'
+  if (area === 'security-privacy') return /audit|privacy/.test(value) ? 'access-privacy' : 'trust-controls'
+  if (area === 'data-storage-sync') return kind.startsWith('db-') || kind === 'rls-policy' ? 'database-schema' : 'cloud-persistence'
+  if (area === 'canvas-model') return 'canvas-state'
+  if (area === 'deployment-operations') return 'build-release'
+  return parentSubsystem || subsystemFromArea({ path: value, imports: [] }, area)
 }
 
 export function explainDatabaseResource(kind, name) {
