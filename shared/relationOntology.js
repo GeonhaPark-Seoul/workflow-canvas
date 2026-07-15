@@ -1,3 +1,5 @@
+import { normalizeTrustGateway } from './trustTopology.js'
+
 export const RELATION_FAMILY_DEFS = Object.freeze([
   { id: 'general', label: '일반', color: '#8b94a7' },
   { id: 'structure', label: '구조', color: '#a855f7' },
@@ -121,6 +123,7 @@ export function normalizeEdgeRelationData(data = {}, fallbackType = 'flows_to') 
     || data?.relationConfidence != null
     || data?.relationEvidence != null
     || data?.relationEvidenceRef != null
+    || data?.trustGateway != null
   if (!hasRelation) return out
 
   const fallback = relationDefinition(fallbackType)
@@ -136,6 +139,8 @@ export function normalizeEdgeRelationData(data = {}, fallbackType = 'flows_to') 
   const evidenceRef = normalizeRelationPlainText(data.relationEvidenceRef, 300)
   if (evidence) out.relationEvidence = evidence
   if (evidenceRef) out.relationEvidenceRef = evidenceRef
+  const trustGateway = normalizeTrustGateway(data?.trustGateway)
+  if (trustGateway) out.trustGateway = trustGateway
   return out
 }
 
@@ -148,6 +153,7 @@ export function createEdgeRelationData(relationType = 'flows_to', relationLabel 
     relationConfidence: provenance.relationConfidence,
     relationEvidence: provenance.relationEvidence,
     relationEvidenceRef: provenance.relationEvidenceRef,
+    trustGateway: provenance.trustGateway,
   }, relationType)
 }
 

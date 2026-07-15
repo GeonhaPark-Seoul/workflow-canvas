@@ -5,6 +5,8 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 import {
   executeApprovedGitSync,
+  localConnectorAuthorizationStopped,
+  localGitSyncApprovalPhrase,
   observeLocalGit,
   resolveRepositoryRoot,
 } from './local-connector-agent.mjs'
@@ -27,6 +29,12 @@ const remoteRoot = path.join(fixtureRoot, 'remote.git')
 const localRoot = path.join(fixtureRoot, 'local')
 const peerRoot = path.join(fixtureRoot, 'peer')
 
+assert.equal(localGitSyncApprovalPhrase(`op-${'a'.repeat(64)}`), 'SYNC aaaaaaaa')
+assert.equal(localGitSyncApprovalPhrase('invalid-operation'), '')
+assert.equal(localConnectorAuthorizationStopped({ status: 401 }), true)
+assert.equal(localConnectorAuthorizationStopped({ code: 'LOCAL_CONNECTOR_AUTH_REQUIRED' }), true)
+assert.equal(localConnectorAuthorizationStopped({ status: 500 }), false)
+
 try {
   git(fixtureRoot, 'init', '--bare', remoteRoot)
   git(fixtureRoot, 'init', '--initial-branch=main', localRoot)
@@ -38,11 +46,23 @@ try {
   git(localRoot, 'push', '-u', 'origin', 'main')
 
   assert.equal(await realpath(resolveRepositoryRoot(localRoot)), await realpath(localRoot))
+  assert.throws(
+    () => observeLocalGit(localRoot, { syncEnabled: true }),
+    /GitHub origin/,
+    'production connector mode must reject an unapproved Git remote provider',
+  )
+  const readOnlyState = observeLocalGit(localRoot)
+  assert.equal(readOnlyState.syncEnabled, false)
+  assert.equal(readOnlyState.fetchStatus, 'skipped')
 
   await writeFile(path.join(localRoot, 'app.js'), 'export const version = 2\n')
   git(localRoot, 'add', 'app.js')
   git(localRoot, 'commit', '-m', 'Local update')
-  const pushState = observeLocalGit(localRoot, { fetchRemote: true })
+  const pushState = observeLocalGit(localRoot, {
+    fetchRemote: true,
+    syncEnabled: true,
+    requireGitHubOrigin: false,
+  })
   assert.equal(pushState.ahead, 1)
   assert.equal(pushState.behind, 0)
   const pushResult = executeApprovedGitSync(localRoot, {
@@ -59,7 +79,11 @@ try {
   git(peerRoot, 'commit', '-m', 'Remote update')
   git(peerRoot, 'push', 'origin', 'main')
 
-  const pullState = observeLocalGit(localRoot, { fetchRemote: true })
+  const pullState = observeLocalGit(localRoot, {
+    fetchRemote: true,
+    syncEnabled: true,
+    requireGitHubOrigin: false,
+  })
   assert.equal(pullState.ahead, 0)
   assert.equal(pullState.behind, 1)
   const pullResult = executeApprovedGitSync(localRoot, {
@@ -73,7 +97,10 @@ try {
   assert.throws(() => executeApprovedGitSync(localRoot, {
     action: 'push',
     expectedState: { ...pullState, headSha: 'f'.repeat(40) },
-  }, observeLocalGit(localRoot)), /승인 이후 Git 상태가 달라져/)
+  }, observeLocalGit(localRoot, {
+    syncEnabled: true,
+    requireGitHubOrigin: false,
+  })), /승인 이후 Git 상태가 달라져/)
 } finally {
   await rm(fixtureRoot, { recursive: true, force: true })
 }

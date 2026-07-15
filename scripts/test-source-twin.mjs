@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
+import { execFileSync } from 'node:child_process'
 import { createHmac } from 'node:crypto'
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, mkdir, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import {
@@ -141,9 +142,12 @@ assert.ok(localDifference.summary.added + localDifference.summary.changed > 0)
 assert.equal(localDifference.inSync, false)
 const cleanGit = {
   branch: 'main', headSha: 'a'.repeat(40), upstreamRef: 'origin/main', upstreamSha: 'b'.repeat(40),
-  ahead: 1, behind: 0, dirty: 0, changedPaths: [], fetchStatus: 'ok',
+  originFingerprint: 'c'.repeat(64), ahead: 1, behind: 0, dirty: 0, syncEnabled: true,
+  changedPaths: [], fetchStatus: 'ok',
 }
 assert.equal(localGitSyncDecision(cleanGit).action, 'push')
+assert.equal(localGitSyncDecision({ ...cleanGit, syncEnabled: false }).action, 'blocked')
+assert.equal(localGitSyncDecision({ ...cleanGit, originFingerprint: '' }).action, 'blocked')
 assert.equal(localGitSyncDecision({ ...cleanGit, ahead: 0, behind: 2 }).action, 'pull_ff_only')
 assert.equal(localGitSyncDecision({ ...cleanGit, dirty: 1 }).action, 'blocked')
 assert.equal(localGitSyncDecision({ ...cleanGit, ahead: 2, behind: 2 }).action, 'blocked')
@@ -163,6 +167,11 @@ assert.match(localConnectorShellCommand({
   serverUrl: 'https://workflow.example.com',
   repositoryPath: "/Users/example/Client's Project",
 }), /^cd '\/Users\/example\/Client'"'"'s Project' && /)
+assert.match(localConnectorShellCommand({
+  token: localConnectorToken,
+  serverUrl: 'https://workflow.example.com',
+  allowGitSync: true,
+}), / --allow-git-sync$/)
 assert.equal(localConnectorShellCommand({ token: 'exposed-token', serverUrl: 'https://workflow.example.com' }), '')
 assert.equal(localConnectorShellCommand({ token: localConnectorToken, serverUrl: 'http://remote.example.com' }), '')
 
@@ -331,6 +340,8 @@ assert.deepEqual(localConnectorWrites.map((write) => write.table), [
   'local_connector_operation_events',
 ])
 assert.equal(localConnectorWrites[0].row.action, 'push')
+assert.equal(localConnectorWrites[0].row.expected_state.originFingerprint, cleanGit.originFingerprint)
+assert.equal(localConnectorWrites[0].row.expected_state.syncEnabled, true)
 const staleLocalPreview = await previewLocalGitSyncOperation(localConnectorDb, {
   userId: 'owner-user-id',
   connectorId: localConnectorRow.id,
@@ -485,6 +496,23 @@ try {
   assert.deepEqual([...noGitFiles.keys()], ['package.json', 'src/app.js'])
 } finally {
   await rm(noGitRoot, { recursive: true, force: true })
+}
+
+const unsafeGitRoot = await mkdtemp(path.join(tmpdir(), 'source-twin-symlink-'))
+const outsideFile = path.join(unsafeGitRoot, '..', `${path.basename(unsafeGitRoot)}-outside.js`)
+try {
+  execFileSync('git', ['init', '--initial-branch=main'], { cwd: unsafeGitRoot, stdio: 'ignore' })
+  await mkdir(path.join(unsafeGitRoot, 'src'), { recursive: true })
+  await writeFile(outsideFile, 'export const privateOutsideFile = true\n')
+  await symlink(outsideFile, path.join(unsafeGitRoot, 'src', 'outside.js'))
+  assert.throws(
+    () => readSourceTwinWorkingTree(unsafeGitRoot),
+    /refuses symbolic links/,
+    'Git-listed symbolic links must never make the scanner follow files outside the repository',
+  )
+} finally {
+  await rm(outsideFile, { force: true })
+  await rm(unsafeGitRoot, { recursive: true, force: true })
 }
 
 console.log('Source twin checks passed')

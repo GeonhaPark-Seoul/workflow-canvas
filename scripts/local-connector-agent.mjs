@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
+import { realpathSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
+import { createInterface } from 'node:readline/promises'
 import { pathToFileURL } from 'node:url'
 import {
   buildSourceTwinManifest,
@@ -11,7 +13,7 @@ import {
 } from './source-twin-scanner.mjs'
 import { localGitSyncDecision, normalizeLocalSourceManifest } from '../shared/localConnector.js'
 
-export const LOCAL_CONNECTOR_AGENT_VERSION = '1.0.0'
+export const LOCAL_CONNECTOR_AGENT_VERSION = '1.1.0'
 
 const MAX_GIT_OUTPUT = 2 * 1024 * 1024
 const HEARTBEAT_INTERVAL_MS = 10_000
@@ -69,10 +71,29 @@ function sha(value) {
 
 export function resolveRepositoryRoot(requestedRoot) {
   const candidate = path.resolve(requestedRoot || process.cwd())
-  return git(candidate, ['rev-parse', '--show-toplevel'])
+  return realpathSync(git(candidate, ['rev-parse', '--show-toplevel']))
 }
 
-export function observeLocalGit(root, { fetchRemote = false } = {}) {
+function pinnedGitHubOrigin(root, { requireGitHubOrigin = true } = {}) {
+  let origin = ''
+  try { origin = git(root, ['config', '--get', 'remote.origin.url']) } catch {}
+  const githubOrigin = /^(?:git@github\.com:|ssh:\/\/git@github\.com\/|https:\/\/github\.com\/)[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+(?:\.git)?$/i
+  if (requireGitHubOrigin && !githubOrigin.test(origin)) {
+    throw new Error('현재 Git 동기화는 자격증명이 포함되지 않은 GitHub origin만 허용합니다.')
+  }
+  return origin
+}
+
+export function observeLocalGit(root, {
+  fetchRemote = false,
+  syncEnabled = false,
+  expectedOrigin = '',
+  requireGitHubOrigin = syncEnabled,
+} = {}) {
+  const origin = pinnedGitHubOrigin(root, { requireGitHubOrigin })
+  if (expectedOrigin && origin !== expectedOrigin) {
+    throw new Error('실행 중 Git origin이 변경되어 로컬 커넥터를 중단했습니다.')
+  }
   let fetchStatus = 'skipped'
   let fetchMessage = ''
   if (fetchRemote) {
@@ -103,9 +124,11 @@ export function observeLocalGit(root, { fetchRemote = false } = {}) {
     headSha,
     upstreamRef,
     upstreamSha,
+    originFingerprint: origin ? sha(origin) : '',
     ahead,
     behind,
     dirty: paths.length,
+    syncEnabled,
     changedPaths: paths,
     fetchStatus,
     fetchMessage,
@@ -125,6 +148,15 @@ export function buildLocalConnectorManifest(root, previous = null) {
   return normalized
 }
 
+class LocalConnectorRequestError extends Error {
+  constructor(status, code, message) {
+    super(message)
+    this.name = 'LocalConnectorRequestError'
+    this.status = status
+    this.code = code
+  }
+}
+
 async function request(server, token, body) {
   const response = await fetch(`${server}/api/local-connector`, {
     method: 'POST',
@@ -136,8 +168,19 @@ async function request(server, token, body) {
     signal: AbortSignal.timeout(35_000),
   })
   const payload = await response.json().catch(() => ({}))
-  if (!response.ok) throw new Error(payload.error || `로컬 커넥터 서버 오류 (${response.status})`)
+  if (!response.ok) {
+    throw new LocalConnectorRequestError(
+      response.status,
+      String(payload.code ?? ''),
+      payload.error || `로컬 커넥터 서버 오류 (${response.status})`,
+    )
+  }
   return payload
+}
+
+export function localConnectorAuthorizationStopped(error) {
+  return error != null
+    && ([401, 403].includes(error.status) || error.code === 'LOCAL_CONNECTOR_AUTH_REQUIRED')
 }
 
 function stateMatches(current, expected) {
@@ -145,9 +188,37 @@ function stateMatches(current, expected) {
     && current.headSha === expected.headSha
     && current.upstreamRef === expected.upstreamRef
     && current.upstreamSha === expected.upstreamSha
+    && current.originFingerprint === expected.originFingerprint
     && current.ahead === expected.ahead
     && current.behind === expected.behind
+    && current.syncEnabled === true
+    && expected.syncEnabled === true
     && current.dirty === 0
+}
+
+export function localGitSyncApprovalPhrase(operationId) {
+  return /^op-[a-f0-9]{64}$/i.test(operationId ?? '')
+    ? `SYNC ${operationId.slice(-8).toLocaleLowerCase()}`
+    : ''
+}
+
+async function confirmGitSyncInTerminal({ repositoryRoot, origin, operation, current }) {
+  const phrase = localGitSyncApprovalPhrase(operation.operationId)
+  if (!phrase || !process.stdin.isTTY || !process.stdout.isTTY) return false
+  const action = operation.action === 'push' ? 'GitHub로 push' : 'GitHub에서 로컬로 fast-forward 반영'
+  console.log('')
+  console.log('[로컬 승인 필요] 웹 승인은 로컬 파일 변경 권한을 대신하지 않습니다.')
+  console.log(`저장소: ${repositoryRoot}`)
+  console.log(`원격: ${origin}`)
+  console.log(`작업: ${action}`)
+  console.log(`현재 커밋: ${current.headSha}`)
+  const prompt = createInterface({ input: process.stdin, output: process.stdout })
+  try {
+    const answer = await prompt.question(`계속하려면 ${phrase} 입력: `)
+    return answer.trim().toLocaleLowerCase() === phrase.toLocaleLowerCase()
+  } finally {
+    prompt.close()
+  }
 }
 
 export function executeApprovedGitSync(root, operation, current) {
@@ -179,8 +250,16 @@ export function executeApprovedGitSync(root, operation, current) {
   }
 }
 
-export async function runLocalConnectorAgent({ server, token, root, once = false }) {
+export async function runLocalConnectorAgent({
+  server,
+  token,
+  root,
+  once = false,
+  allowGitSync = false,
+  confirmGitSync = confirmGitSyncInTerminal,
+}) {
   const repositoryRoot = resolveRepositoryRoot(root)
+  const repositoryOrigin = pinnedGitHubOrigin(repositoryRoot, { requireGitHubOrigin: allowGitSync })
   let previousManifest = null
   let lastFetchAt = 0
   let stopped = false
@@ -189,13 +268,23 @@ export async function runLocalConnectorAgent({ server, token, root, once = false
   process.once('SIGTERM', stop)
   console.log(`Workflow Canvas 로컬 커넥터 ${LOCAL_CONNECTOR_AGENT_VERSION}`)
   console.log(`허용한 저장소: ${repositoryRoot}`)
+  console.log(allowGitSync
+    ? `고정한 GitHub origin: ${repositoryOrigin}`
+    : 'Git 원격 접근: 사용 안 함')
+  console.log(allowGitSync
+    ? '권한: 구조 읽기 + 로컬 터미널에서 매번 확인한 Git 동기화'
+    : '권한: 구조 읽기 전용 (Git push/pull 차단)')
   console.log('소스 본문과 비밀값은 서버로 보내지 않습니다. 종료: Ctrl+C')
 
   while (!stopped) {
     try {
       const now = Date.now()
-      const shouldFetch = now - lastFetchAt >= FETCH_INTERVAL_MS
-      const gitState = observeLocalGit(repositoryRoot, { fetchRemote: shouldFetch })
+      const shouldFetch = allowGitSync && now - lastFetchAt >= FETCH_INTERVAL_MS
+      const gitState = observeLocalGit(repositoryRoot, {
+        fetchRemote: shouldFetch,
+        syncEnabled: allowGitSync,
+        expectedOrigin: repositoryOrigin,
+      })
       if (shouldFetch) lastFetchAt = now
       const manifest = buildLocalConnectorManifest(repositoryRoot, previousManifest)
       previousManifest = manifest
@@ -212,7 +301,12 @@ export async function runLocalConnectorAgent({ server, token, root, once = false
         let status = 'succeeded'
         let result
         try {
-          const current = observeLocalGit(repositoryRoot, { fetchRemote: true })
+          if (!allowGitSync) throw new Error('읽기 전용 로컬 커넥터는 Git 동기화를 실행하지 않습니다.')
+          const current = observeLocalGit(repositoryRoot, {
+            fetchRemote: true,
+            syncEnabled: true,
+            expectedOrigin: repositoryOrigin,
+          })
           const currentManifest = buildLocalConnectorManifest(repositoryRoot, previousManifest)
           previousManifest = currentManifest
           const currentHeartbeat = await request(server, token, {
@@ -225,7 +319,19 @@ export async function runLocalConnectorAgent({ server, token, root, once = false
           if (currentHeartbeat.stateFingerprint !== operation.stateFingerprint) {
             throw new Error('승인 이후 로컬 코드 또는 GitHub 상태가 달라졌습니다.')
           }
-          result = executeApprovedGitSync(repositoryRoot, operation, current)
+          const locallyApproved = await confirmGitSync({
+            repositoryRoot,
+            origin: repositoryOrigin,
+            operation,
+            current,
+          })
+          if (!locallyApproved) throw new Error('로컬 터미널 승인이 없어 Git 동기화를 실행하지 않았습니다.')
+          const executionState = observeLocalGit(repositoryRoot, {
+            fetchRemote: false,
+            syncEnabled: true,
+            expectedOrigin: repositoryOrigin,
+          })
+          result = executeApprovedGitSync(repositoryRoot, operation, executionState)
           console.log(`[완료] ${result.summary}`)
         } catch (error) {
           status = 'failed'
@@ -237,6 +343,10 @@ export async function runLocalConnectorAgent({ server, token, root, once = false
         return { repositoryRoot, stateFingerprint: heartbeat.stateFingerprint }
       }
     } catch (error) {
+      if (localConnectorAuthorizationStopped(error)) {
+        console.error(`[연결 종료] ${String(error?.message ?? error)}`)
+        return { repositoryRoot, stopped: true, reason: 'authorization_failed' }
+      }
       console.error(`[연결 대기] ${String(error?.message ?? error)}`)
       if (once) throw error
     }
@@ -250,7 +360,13 @@ async function main() {
   if (!/^wclc_[a-f0-9]{64}$/.test(token)) throw new Error('앱에서 발급한 로컬 커넥터 토큰이 필요합니다.')
   const server = safeServerUrl(argument('--server', process.env.WORKFLOW_CANVAS_URL || 'https://workflow-canvas-orpin.vercel.app'))
   const root = argument('--repo', process.cwd())
-  await runLocalConnectorAgent({ server, token, root, once: process.argv.includes('--once') })
+  await runLocalConnectorAgent({
+    server,
+    token,
+    root,
+    once: process.argv.includes('--once'),
+    allowGitSync: process.argv.includes('--allow-git-sync'),
+  })
 }
 
 const isMain = process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url

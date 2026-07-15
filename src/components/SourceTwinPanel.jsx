@@ -293,6 +293,8 @@ function LocalRepositoryView({
   setup,
   repositoryPath,
   onRepositoryPathChange,
+  allowGitSync,
+  onAllowGitSyncChange,
   busy,
   error,
   status,
@@ -325,6 +327,7 @@ function LocalRepositoryView({
     token: setup.token,
     serverUrl: typeof window === 'undefined' ? '' : window.location.origin,
     repositoryPath,
+    allowGitSync,
   }) : ''
 
   return (
@@ -360,7 +363,18 @@ function LocalRepositoryView({
                 autoCapitalize="none"
               />
             </label>
-            <p>복사한 명령이 먼저 이 폴더로 이동하므로 어느 위치에서 터미널을 열어도 됩니다.</p>
+            <label className="local-connector-git-permission">
+              <input
+                type="checkbox"
+                checked={allowGitSync}
+                onChange={(event) => onAllowGitSyncChange(event.target.checked)}
+              />
+              <span>
+                <strong>캔버스에서 Git 동기화 허용</strong>
+                <small>꺼두면 구조 읽기만 합니다. 켜도 push·pull마다 터미널에서 다시 확인합니다.</small>
+              </span>
+            </label>
+            <p>복사한 명령이 먼저 이 폴더로 이동합니다. 표시된 서버·폴더·권한이 맞을 때만 실행하세요.</p>
             <code>{setupCommand || '프로젝트 폴더와 서버 주소를 확인하세요.'}</code>
             <button type="button" disabled={!setupCommand} onClick={() => navigator.clipboard.writeText(setupCommand)}>명령 복사</button>
           </div>
@@ -378,6 +392,7 @@ function LocalRepositoryView({
             <div className="local-git-state">
               <span>브랜치 <strong>{connector.git?.branch || '미확인'}</strong></span>
               <span>로컬 변경 <strong>{connector.git?.dirty ?? 0}</strong></span>
+              <span>권한 <strong>{connector.git?.syncEnabled ? '읽기 + 승인 동기화' : '읽기 전용'}</strong></span>
               <span>앞섬 <strong>{connector.git?.ahead ?? 0}</strong></span>
               <span>뒤처짐 <strong>{connector.git?.behind ?? 0}</strong></span>
             </div>
@@ -559,6 +574,7 @@ export default function SourceTwinPanel({ entry, side = 'right', onSideChange, o
   const [selectedConnectorId, setSelectedConnectorId] = useState('')
   const [localSetup, setLocalSetup] = useState(null)
   const [localRepositoryPath, setLocalRepositoryPath] = useState('~/workflow-canvas')
+  const [localGitSyncEnabled, setLocalGitSyncEnabled] = useState(false)
   const [localBusy, setLocalBusy] = useState(false)
   const [localError, setLocalError] = useState('')
   const [localStatus, setLocalStatus] = useState('')
@@ -795,6 +811,8 @@ export default function SourceTwinPanel({ entry, side = 'right', onSideChange, o
                 setup={localSetup}
                 repositoryPath={localRepositoryPath}
                 onRepositoryPathChange={setLocalRepositoryPath}
+                allowGitSync={localGitSyncEnabled}
+                onAllowGitSyncChange={setLocalGitSyncEnabled}
                 busy={localBusy}
                 error={localError}
                 status={localStatus}

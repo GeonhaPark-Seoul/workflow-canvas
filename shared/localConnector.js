@@ -42,6 +42,7 @@ export function localConnectorShellCommand({
   token,
   serverUrl,
   repositoryPath = '~/workflow-canvas',
+  allowGitSync = false,
 } = {}) {
   if (!LOCAL_CONNECTOR_TOKEN_PATTERN.test(token ?? '')) return ''
   let server
@@ -65,7 +66,8 @@ export function localConnectorShellCommand({
     : requestedPath.startsWith('~/')
       ? `"$HOME"/${shellSingleQuote(requestedPath.slice(2))}`
       : shellSingleQuote(requestedPath)
-  return `cd ${directory} && WORKFLOW_CANVAS_LOCAL_CONNECTOR_TOKEN=${shellSingleQuote(token)} npm run local-connector -- --server ${shellSingleQuote(server)} --repo .`
+  const gitSyncFlag = allowGitSync ? ' --allow-git-sync' : ''
+  return `cd ${directory} && WORKFLOW_CANVAS_LOCAL_CONNECTOR_TOKEN=${shellSingleQuote(token)} npm run local-connector -- --server ${shellSingleQuote(server)} --repo .${gitSyncFlag}`
 }
 
 function entityDetails(value) {
@@ -195,6 +197,7 @@ export function normalizeLocalGitState(value) {
   if (!plainObject(value)) return null
   const headSha = text(value.headSha, 64)
   const upstreamSha = text(value.upstreamSha, 64)
+  const originFingerprint = text(value.originFingerprint, 128)
   const branch = text(value.branch, 120)
   const upstreamRef = text(value.upstreamRef, 300)
   if (!SAFE_SHA.test(headSha) || !branch || !SAFE_REF.test(branch)) return null
@@ -203,9 +206,11 @@ export function normalizeLocalGitState(value) {
     headSha,
     upstreamRef: SAFE_REF.test(upstreamRef) ? upstreamRef : '',
     upstreamSha: SAFE_SHA.test(upstreamSha) ? upstreamSha : '',
+    originFingerprint: SAFE_FINGERPRINT.test(originFingerprint) ? originFingerprint : '',
     ahead: integer(value.ahead, 0, 100_000),
     behind: integer(value.behind, 0, 100_000),
     dirty: integer(value.dirty, 0, 100_000),
+    syncEnabled: value.syncEnabled === true,
     changedPaths: stringList(value.changedPaths, 120, 500),
     fetchStatus: ['ok', 'failed', 'skipped'].includes(value.fetchStatus) ? value.fetchStatus : 'skipped',
     fetchMessage: text(value.fetchMessage, 240),
@@ -215,6 +220,12 @@ export function normalizeLocalGitState(value) {
 export function localGitSyncDecision(state) {
   const git = normalizeLocalGitState(state)
   if (!git) return { action: 'blocked', reason: 'Git 상태를 확인할 수 없습니다.' }
+  if (!git.syncEnabled) {
+    return { action: 'blocked', reason: '로컬 커넥터가 읽기 전용으로 실행 중입니다. Git 동기화를 허용해 다시 연결해야 합니다.' }
+  }
+  if (!git.originFingerprint) {
+    return { action: 'blocked', reason: '고정된 GitHub origin을 확인할 수 없어 동기화를 차단했습니다.' }
+  }
   if (!git.upstreamRef || !git.upstreamSha) {
     return { action: 'blocked', reason: '현재 브랜치에 GitHub upstream이 연결되어 있지 않습니다.' }
   }

@@ -1175,6 +1175,38 @@ body[data-theme='light'] .react-flow__node:hover .canvas-group-frame {
 .local-connector-path-field input:focus {
   border-color: #06b6d477;
 }
+.local-connector-git-permission {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin-top: 8px;
+  border: 1px solid #ffffff12;
+  border-radius: 4px;
+  padding: 7px;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+.local-connector-git-permission:hover {
+  border-color: #06b6d455;
+  background: #06b6d40a;
+}
+.local-connector-git-permission input {
+  margin: 2px 0 0;
+  accent-color: #06b6d4;
+}
+.local-connector-git-permission span {
+  display: grid;
+  gap: 2px;
+}
+.local-connector-git-permission strong {
+  color: #d8dee8;
+  font-size: 9px;
+}
+.local-connector-git-permission small {
+  color: #7f8a9a;
+  font-size: 8px;
+  line-height: 1.4;
+}
 .local-connector-setup code {
   display: block;
   max-height: 76px;

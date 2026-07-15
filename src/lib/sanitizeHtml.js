@@ -79,7 +79,7 @@ export function sanitizeNodeData(data) {
     next.parts = next.parts.map((part) => ({ ...part, text: typeof part.text === 'string' ? sanitizeHtml(part.text) : part.text }))
   }
   if (Array.isArray(next.systemParts)) next.systemParts = normalizeSystemParts(next.systemParts)
-  if (next.systemKind != null || next.sourceKind != null || next.externalRef != null) {
+  if (next.systemKind != null || next.sourceKind != null || next.externalRef != null || next.trustZone != null) {
     next = normalizeSystemNodeData(next)
   }
   return next

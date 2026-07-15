@@ -40,6 +40,13 @@ import {
 } from '../src/lib/canvasSchemaGuard.js'
 import { createSystemNodeData, normalizeSystemNodeData, systemNodeReality } from '../shared/systemOntology.js'
 import {
+  analyzeTrustBoundary,
+  normalizeTrustGateway,
+  normalizeTrustZone,
+  TRUST_GATEWAY_KIND_DEFS,
+  TRUST_ZONE_KIND_DEFS,
+} from '../shared/trustTopology.js'
+import {
   detachSystemPartBindings,
   normalizeSystemPart,
   normalizeSystemParts,
@@ -424,6 +431,70 @@ t('system metadata normalization clamps enums and plain identifiers', () => {
   assert.equal(result.sourceKind, 'manual')
   assert.equal(result.provider, 'Supabase Cloud')
   assert.equal(result.externalRef, 'table name')
+})
+
+console.log('trust topology')
+
+t('trust topology definitions have unique stable ids', () => {
+  assert.equal(new Set(TRUST_ZONE_KIND_DEFS.map(({ id }) => id)).size, TRUST_ZONE_KIND_DEFS.length)
+  assert.equal(new Set(TRUST_GATEWAY_KIND_DEFS.map(({ id }) => id)).size, TRUST_GATEWAY_KIND_DEFS.length)
+})
+
+t('cross-zone relations require an explicit matching gateway', () => {
+  const local = normalizeTrustZone({
+    id: 'zone-local-device', kind: 'local-device', label: '내 Mac', controlOwner: '사용자',
+  })
+  const cloud = normalizeTrustZone({
+    id: 'zone-public-cloud', kind: 'public-cloud', label: 'Vercel', controlOwner: 'Vercel',
+  })
+  assert.equal(analyzeTrustBoundary({ sourceZone: local, targetZone: cloud }).status, 'unknown-gap')
+  const gateway = normalizeTrustGateway({
+    id: 'gateway-local-connector', kind: 'local-connector',
+    sourceZoneId: local.id, targetZoneId: cloud.id,
+    direction: 'bidirectional', exposure: 'restricted', protocol: 'HTTPS',
+    dataClasses: ['코드 구조 메타데이터', 'Git 상태'],
+    authentication: '장치 연결 토큰', authorization: '소유자 + 로컬 승인', encryption: 'TLS',
+  })
+  const result = analyzeTrustBoundary({ sourceZone: local, targetZone: cloud, gateway })
+  assert.equal(result.status, 'through-gateway')
+  assert.equal(result.valid, true)
+  assert.equal(result.gateway.dataClasses.length, 2)
+})
+
+t('same-zone relations do not invent a boundary and mismatched gateways fail closed', () => {
+  const intranet = { id: 'zone-company', kind: 'intranet', label: '사내망' }
+  assert.equal(analyzeTrustBoundary({ sourceZone: intranet, targetZone: intranet }).status, 'inside-zone')
+  const other = { id: 'zone-saas', kind: 'external-saas', label: '외부 서비스' }
+  const mismatched = analyzeTrustBoundary({
+    sourceZone: intranet,
+    targetZone: other,
+    gateway: {
+      id: 'gateway-wrong', kind: 'api-gateway',
+      sourceZoneId: 'zone-other', targetZoneId: 'zone-saas',
+    },
+  })
+  assert.equal(mismatched.status, 'gateway-mismatch')
+  assert.equal(mismatched.valid, false)
+})
+
+t('node and edge persistence sanitize trust topology metadata', () => {
+  const trustZone = {
+    id: 'zone-local', kind: 'local-device', label: ' 로컬\u0000 기기 ',
+    controlOwner: '사용자', secret: 'drop-me',
+  }
+  const node = normalizeSystemNodeData({ systemKind: 'service', trustZone })
+  assert.equal(node.trustZone.label, '로컬 기기')
+  assert.equal(Object.hasOwn(node.trustZone, 'secret'), false)
+  const edge = normalizeEdgeRelationData({
+    relationType: 'syncs_with',
+    trustGateway: {
+      id: 'gateway-sync', kind: 'local-connector',
+      sourceZoneId: 'zone-local', targetZoneId: 'zone-cloud',
+      exposure: 'restricted', token: 'drop-me',
+    },
+  })
+  assert.equal(edge.trustGateway.kind, 'local-connector')
+  assert.equal(Object.hasOwn(edge.trustGateway, 'token'), false)
 })
 
 t('system parts keep only the generic allowlist and reject literal credentials', () => {

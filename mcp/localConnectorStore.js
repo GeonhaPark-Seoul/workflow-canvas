@@ -183,9 +183,11 @@ export async function recordLocalConnectorHeartbeat(db, connector, payload) {
       headSha: git.headSha,
       upstreamRef: git.upstreamRef,
       upstreamSha: git.upstreamSha,
+      originFingerprint: git.originFingerprint,
       ahead: git.ahead,
       behind: git.behind,
       dirty: git.dirty,
+      syncEnabled: git.syncEnabled,
     },
   })
   const update = {
@@ -229,6 +231,7 @@ export async function previewLocalGitSync(db, { userId, connectorId, env = proce
       headSha: connector.git.headSha,
       upstreamRef: connector.git.upstreamRef,
       upstreamSha: connector.git.upstreamSha,
+      originFingerprint: connector.git.originFingerprint,
       ahead: connector.git.ahead,
       behind: connector.git.behind,
     },
@@ -291,9 +294,11 @@ export async function applyLocalGitSync(db, {
       headSha: connector.git.headSha,
       upstreamRef: connector.git.upstreamRef,
       upstreamSha: connector.git.upstreamSha,
+      originFingerprint: connector.git.originFingerprint,
       ahead: connector.git.ahead,
       behind: connector.git.behind,
       dirty: connector.git.dirty,
+      syncEnabled: connector.git.syncEnabled,
     },
   }
   const { error } = await db.from('local_connector_operations').insert(operation)

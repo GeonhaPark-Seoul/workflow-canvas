@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
-import { readFileSync, readdirSync } from 'node:fs'
+import { lstatSync, readFileSync, readdirSync, realpathSync } from 'node:fs'
 import path from 'node:path'
 import { parse } from '@babel/parser'
 import { SOURCE_TWIN_SCHEMA_VERSION, SOURCE_TWIN_SOURCE_ID } from '../shared/sourceTwin.js'
@@ -22,6 +22,8 @@ const LAYER_LABELS = {
 }
 const WRITE_METHODS = new Set(['insert', 'update', 'upsert', 'delete'])
 const CREDENTIAL_PATTERN = /(?:KEY|TOKEN|SECRET|PASSWORD|CREDENTIAL)/i
+const MAX_SOURCE_FILE_BYTES = 2 * 1024 * 1024
+const MAX_SOURCE_TOTAL_BYTES = 24 * 1024 * 1024
 
 function shouldInspect(relativePath) {
   if (EXCLUDED_FILES.has(relativePath)) return false
@@ -663,10 +665,41 @@ export function sourceTwinFilePaths(root) {
   }
 }
 
+function safeSourceFile(root, relativePath) {
+  const repositoryRoot = realpathSync(root)
+  const absolutePath = path.resolve(repositoryRoot, relativePath)
+  const relative = path.relative(repositoryRoot, absolutePath)
+  if (!relative || relative.startsWith('..') || path.isAbsolute(relative)) {
+    throw new Error(`Source twin path escapes the repository: ${relativePath}`)
+  }
+  const stat = lstatSync(absolutePath)
+  if (stat.isSymbolicLink()) {
+    throw new Error(`Source twin refuses symbolic links: ${relativePath}`)
+  }
+  if (!stat.isFile()) {
+    throw new Error(`Source twin accepts regular files only: ${relativePath}`)
+  }
+  if (stat.size > MAX_SOURCE_FILE_BYTES) {
+    throw new Error(`Source twin file exceeds the 2 MiB limit: ${relativePath}`)
+  }
+  const resolvedPath = realpathSync(absolutePath)
+  const resolvedRelative = path.relative(repositoryRoot, resolvedPath)
+  if (!resolvedRelative || resolvedRelative.startsWith('..') || path.isAbsolute(resolvedRelative)) {
+    throw new Error(`Source twin resolved path escapes the repository: ${relativePath}`)
+  }
+  return { absolutePath: resolvedPath, size: stat.size }
+}
+
 export function readSourceTwinWorkingTree(root) {
   const files = new Map()
+  let totalBytes = 0
   for (const relativePath of sourceTwinFilePaths(root)) {
-    files.set(relativePath, readFileSync(path.join(root, relativePath), 'utf8'))
+    const sourceFile = safeSourceFile(root, relativePath)
+    totalBytes += sourceFile.size
+    if (totalBytes > MAX_SOURCE_TOTAL_BYTES) {
+      throw new Error('Source twin files exceed the 24 MiB repository limit.')
+    }
+    files.set(relativePath, readFileSync(sourceFile.absolutePath, 'utf8'))
   }
   return files
 }

@@ -72,3 +72,14 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - Do not add an entity-specific feature to a global rail, toolbar, or right-side tab unless the user explicitly approves that placement.
 - Do not move or replace an existing menu, toggle, or icon without asking first.
 - A side pane may present details after a contextual node action opens it; the global pane launcher is the part to avoid.
+
+## 6. Durable Architecture And Debt
+
+**Do not let security or commercialization obligations disappear between AI sessions.**
+
+- Read `docs/TECHNICAL_DEBT.md` before changing authentication, sharing, encryption, local connectors, external integrations, operations, deployment, telemetry, or public trust claims.
+- Read `docs/TWIN_ENGINE_ROADMAP.md` before adding a system node, part, relation, adapter, trust zone, gateway, operation capability, or AI explanation feature.
+- Record newly discovered release debt in the ledger with a stable ID, severity, status, context, and verifiable exit criteria.
+- Do not mark debt complete because code exists locally. Require tests and deployment or operational evidence appropriate to the item.
+- Keep Workflow Canvas-specific discovery and operations inside its adapter. The graph, review, security-boundary, and operation contracts must remain reusable for other systems.
+- A cross-zone relation must identify its gateway and data contract. Never equate `local`, `intranet`, or `private` with automatically safe.

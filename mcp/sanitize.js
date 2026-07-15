@@ -96,12 +96,17 @@ export function sanitizeTextFields(obj) {
   if (typeof obj.url === 'string') obj.url = sanitizeExternalUrl(obj.url)
   if (Array.isArray(obj.systemParts)) obj.systemParts = normalizeSystemParts(obj.systemParts)
   const systemPlainFields = ['systemKind', 'environment', 'sourceKind', 'provider', 'externalRef']
-  if (systemPlainFields.some((key) => Object.hasOwn(obj, key))) {
+  const hasTrustZone = Object.hasOwn(obj, 'trustZone')
+  if (hasTrustZone || systemPlainFields.some((key) => Object.hasOwn(obj, key))) {
     const normalized = normalizeSystemNodeData(obj)
     // A patch must not gain defaults for fields it did not provide, otherwise
     // editing only externalRef could silently reset the entity kind/source.
     for (const key of systemPlainFields) {
       if (Object.hasOwn(obj, key)) obj[key] = normalized[key]
+    }
+    if (hasTrustZone) {
+      if (normalized.trustZone) obj.trustZone = normalized.trustZone
+      else delete obj.trustZone
     }
   }
   return obj

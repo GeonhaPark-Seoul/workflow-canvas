@@ -1,4 +1,5 @@
 import { normalizeSystemParts } from './systemPartOntology.js'
+import { normalizeTrustZone } from './trustTopology.js'
 
 export const SYSTEM_KIND_DEFS = Object.freeze([
   { id: 'actor', label: '사용자·주체', icon: '◎', color: '#22c55e' },
@@ -71,6 +72,9 @@ export function normalizeSystemNodeData(data = {}) {
     provider: normalizeSystemPlainText(data.provider, 120),
     externalRef: normalizeSystemPlainText(data.externalRef, 300),
   }
+  const trustZone = normalizeTrustZone(data.trustZone)
+  if (trustZone) normalized.trustZone = trustZone
+  else delete normalized.trustZone
   if (Array.isArray(data.systemParts)) normalized.systemParts = normalizeSystemParts(data.systemParts)
   return normalized
 }
