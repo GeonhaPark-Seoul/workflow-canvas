@@ -4,22 +4,22 @@ import { existsSync, lstatSync, readFileSync, readdirSync, realpathSync } from '
 import path from 'node:path'
 import { parse } from '@babel/parser'
 import { SOURCE_TWIN_SCHEMA_VERSION, SOURCE_TWIN_SOURCE_ID } from '../shared/sourceTwin.js'
+import { sourceTwinAreaCatalog } from '../shared/sourceTwinSemantics.js'
+import {
+  areaForSourceResource,
+  explainDatabaseResource,
+  explainEnvironmentVariable,
+  explainSourceFile,
+  explainSourceFunction,
+  sourceTwinProjectIdentity,
+  sourceTwinTechnicalSummary,
+} from './source-twin-semantics.mjs'
 
 export const SOURCE_TWIN_MANIFEST_PATH = 'shared/sourceTwinManifest.js'
 
-const INCLUDED_ROOT_FILES = new Set(['README.md', 'package.json', 'vercel.json', 'vite.config.js'])
+const INCLUDED_ROOT_FILES = new Set(['README.md', 'index.html', 'package.json', 'vercel.json', 'vite.config.js'])
 const EXCLUDED_FILES = new Set([SOURCE_TWIN_MANIFEST_PATH, 'shared/workflowSystemDiscoveryManifest.js'])
 const CODE_EXTENSIONS = ['.js', '.jsx', '.mjs']
-const LAYER_LABELS = {
-  frontend: '사용자 화면',
-  api: '웹 API',
-  mcp: 'AI 연결 서버',
-  shared: '공통 도메인 규칙',
-  database: '데이터베이스 선언',
-  test: '검증',
-  deployment: '빌드·배포 설정',
-  documentation: '문서',
-}
 const WRITE_METHODS = new Set(['insert', 'update', 'upsert', 'delete'])
 const CREDENTIAL_PATTERN = /(?:KEY|TOKEN|SECRET|PASSWORD|CREDENTIAL)/i
 const MAX_SOURCE_FILE_BYTES = 2 * 1024 * 1024
@@ -29,7 +29,7 @@ function shouldInspect(relativePath) {
   if (EXCLUDED_FILES.has(relativePath)) return false
   if (INCLUDED_ROOT_FILES.has(relativePath)) return true
   if (/^[^/]+\.sql$/i.test(relativePath)) return true
-  return /^(api|mcp|scripts|shared|src)\/.*\.(js|jsx|mjs)$/i.test(relativePath)
+  return /^(api|mcp|scripts|shared|src)\/.*\.(css|js|jsx|mjs)$/i.test(relativePath)
 }
 
 function normalized(value) {
@@ -81,49 +81,12 @@ function layerForFile(relativePath) {
 
 function languageForFile(relativePath) {
   if (/\.sql$/i.test(relativePath)) return 'sql'
+  if (/\.css$/i.test(relativePath)) return 'css'
+  if (/\.html$/i.test(relativePath)) return 'html'
   if (/\.jsx$/i.test(relativePath)) return 'jsx'
   if (/\.m?js$/i.test(relativePath)) return 'javascript'
   if (/\.json$/i.test(relativePath)) return 'json'
   return 'markdown'
-}
-
-function identifierWords(value) {
-  return String(value ?? '')
-    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-    .replace(/[_\-.]+/g, ' ')
-    .trim()
-    .toLocaleLowerCase()
-    .split(/\s+/)
-    .filter(Boolean)
-}
-
-function koreanAction(words) {
-  const first = words[0]
-  return {
-    get: '조회', list: '목록 조회', load: '불러오기', read: '읽기', fetch: '가져오기',
-    create: '생성', build: '구성', make: '생성', add: '추가', update: '수정', set: '설정',
-    delete: '삭제', remove: '제거', resolve: '확인', validate: '검증', normalize: '정규화',
-    compare: '비교', inspect: '검사', parse: '해석', serialize: '직렬화', apply: '적용',
-    record: '기록', persist: '저장', capture: '기록', sync: '동기화', filter: '선별',
-  }[first] ?? '처리'
-}
-
-function functionSummary(name, asyncFunction) {
-  const words = identifierWords(name)
-  const subject = words.slice(koreanAction(words) === '처리' ? 0 : 1).join(' ') || name
-  return `${subject}을(를) ${koreanAction(words)}하는${asyncFunction ? ' 비동기' : ''} 함수입니다.`
-}
-
-function fileSummary(record) {
-  const roles = []
-  if (record.apiRoutes.length) roles.push(`${record.apiRoutes.join(', ')} 요청 처리`)
-  if (record.dbTables.length) roles.push(`${record.dbTables.slice(0, 4).join(', ')} 데이터 접근`)
-  if (record.dbFunctions.length) roles.push(`${record.dbFunctions.slice(0, 3).join(', ')} DB 함수 호출`)
-  if (record.functions.length) roles.push(`함수 ${record.functions.length}개 정의`)
-  if (record.imports.length) roles.push(`모듈 ${record.imports.length}개 연결`)
-  if (record.securitySignals.length) roles.push(`보안 신호 ${record.securitySignals.length}개`)
-  const detail = roles.length ? roles.join(' · ') : '구조와 설정 제공'
-  return `${LAYER_LABELS[record.layer]}에서 ${detail}을 담당합니다.`
 }
 
 function nodeName(node) {
@@ -350,6 +313,7 @@ export function readSourceRepositoryMetadata(root) {
 
 export function buildSourceTwinManifest(filesInput, { previous = null, repository = {} } = {}) {
   const files = filesInput instanceof Map ? filesInput : new Map(Object.entries(filesInput ?? {}))
+  const project = sourceTwinProjectIdentity(files)
   const filePaths = new Set(files.keys())
   const records = []
   for (const [relativePath, rawContent] of [...files.entries()].sort(([left], [right]) => compareSourceTwinText(left, right))) {
@@ -382,6 +346,7 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
       parseError: parsed.parseError ?? '',
     })
   }
+  for (const record of records) record.explanation = explainSourceFile(record, project)
 
   const entities = []
   const relations = []
@@ -397,8 +362,10 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
 
   for (const record of records) {
     const fileId = `file:${record.path}`
+    const technicalSummary = sourceTwinTechnicalSummary(record)
     const tags = unique([
       record.layer,
+      record.explanation.area,
       ...record.apiRoutes,
       ...record.dbTables,
       ...record.env,
@@ -410,9 +377,14 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
       language: record.language,
       lineStart: 1,
       lineEnd: record.lineCount,
-      summary: fileSummary(record),
+      area: record.explanation.area,
+      summary: record.explanation.summary,
+      userImpact: record.explanation.userImpact,
+      technicalSummary,
       tags,
       details: {
+        functionCount: record.functions.length,
+        importCount: record.imports.length,
         exports: record.exports,
         apiRoutes: record.apiRoutes,
         dbTables: unique(record.dbTables),
@@ -429,10 +401,12 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
         path: record.path,
         parentId: fileId,
         layer: record.layer,
+        area: record.explanation.area,
         lineStart: fn.lineStart,
         lineEnd: fn.lineEnd,
-        summary: functionSummary(fn.displayName, fn.async),
-        tags: unique([record.layer, fn.kind, fn.exported ? 'exported' : '', fn.async ? 'async' : '']),
+        summary: explainSourceFunction(fn, record, record.explanation),
+        technicalSummary: `${fn.exported ? '다른 파일에서 사용 가능' : '이 파일 내부에서 사용'}${fn.async ? ' · 서버나 저장소 응답을 기다림' : ''}`,
+        tags: unique([record.layer, record.explanation.area, fn.kind, fn.exported ? 'exported' : '', fn.async ? 'async' : '']),
         details: { functionKind: fn.kind, exported: fn.exported, async: fn.async },
       }))
       addRelation(relation('contains', fileId, id))
@@ -444,54 +418,64 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
         path: record.path,
         parentId: fileId,
         layer: 'api',
+        area: record.explanation.area,
         lineStart: 1,
-        summary: `${route} 요청을 처리하는 서버 경로입니다.`,
-        tags: ['api', 'server'],
+        summary: `${route}로 들어온 요청을 받아 “${record.explanation.summary.replace(/합니다\.$/, '')}” 역할을 실행하는 서버 입구입니다.`,
+        userImpact: record.explanation.userImpact,
+        tags: ['api', 'server', record.explanation.area],
       }))
       addRelation(relation('serves', fileId, id))
     }
     for (const table of unique(record.dbTables)) {
       const id = `db-table:${table}`
+      const area = areaForSourceResource('db-table', table, record.explanation.area)
       addEntity(entity(id, 'db-table', table, semanticHash({ table }), {
         name: table,
         layer: 'database',
-        summary: `${table} 테이블의 선언 또는 접근 지점입니다.`,
-        tags: ['database', 'table'],
+        area,
+        summary: explainDatabaseResource('db-table', table),
+        tags: ['database', 'table', area],
       }))
       const operations = unique(record.dbAccess.filter((item) => item.table === table).map((item) => item.operation))
       addRelation(relation('accesses', fileId, id, { operations: operations.length ? operations : ['declares'] }))
     }
     for (const fnName of unique(record.dbFunctions)) {
       const id = `db-function:${fnName}`
+      const area = areaForSourceResource('db-function', fnName, record.explanation.area)
       addEntity(entity(id, 'db-function', fnName, semanticHash({ fnName }), {
         name: fnName,
         layer: 'database',
-        summary: `${fnName} 데이터베이스 함수의 선언 또는 호출 지점입니다.`,
-        tags: ['database', 'function'],
+        area,
+        summary: explainDatabaseResource('db-function', fnName),
+        tags: ['database', 'function', area],
       }))
       addRelation(relation('calls-db-function', fileId, id))
     }
     for (const policy of record.policies) {
       const id = `rls-policy:${policy.table}:${policy.name}`
+      const area = areaForSourceResource('rls-policy', `${policy.table} ${policy.name}`, record.explanation.area)
       addEntity(entity(id, 'rls-policy', policy.name, semanticHash(policy), {
         name: policy.name,
         path: record.path,
         parentId: fileId,
         layer: 'database',
+        area,
         lineStart: policy.line,
-        summary: `${policy.table} 테이블의 행 접근 규칙입니다.`,
-        tags: ['database', 'security', 'rls', policy.table],
+        summary: `${policy.table} 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.`,
+        tags: ['database', 'security', 'rls', policy.table, area],
         details: { table: policy.table },
       }))
       addRelation(relation('defines-policy', fileId, id))
     }
     for (const envName of unique(record.env)) {
       const id = `env:${envName}`
+      const area = CREDENTIAL_PATTERN.test(envName) ? 'security-privacy' : record.explanation.area
       addEntity(entity(id, 'environment-variable', envName, semanticHash({ envName }), {
         name: envName,
         layer: CREDENTIAL_PATTERN.test(envName) ? 'security' : 'deployment',
-        summary: `${envName} 환경변수의 이름 참조입니다. 값은 수집하지 않습니다.`,
-        tags: unique(['environment', CREDENTIAL_PATTERN.test(envName) ? 'credential-reference' : 'configuration']),
+        area,
+        summary: explainEnvironmentVariable(envName),
+        tags: unique(['environment', area, CREDENTIAL_PATTERN.test(envName) ? 'credential-reference' : 'configuration']),
         details: { credentialReference: CREDENTIAL_PATTERN.test(envName) },
       }))
       addRelation(relation('reads-env', fileId, id))
@@ -500,8 +484,10 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
       const id = 'deployment:vercel-web'
       addEntity(entity(id, 'deployment', 'Vercel 웹 배포', semanticHash({ files: records.filter((item) => item.layer === 'deployment').map((item) => [item.path, item.fingerprint]) }), {
         layer: 'deployment',
+        area: 'deployment-operations',
         summary: 'Vite 빌드 결과를 Vercel에 배포하는 경로입니다.',
-        tags: ['deployment', 'vercel', 'vite'],
+        userImpact: '검증을 통과한 현재 커밋이 실제 사용자가 여는 웹사이트가 되게 합니다.',
+        tags: ['deployment', 'vercel', 'vite', 'deployment-operations'],
       }))
       addRelation(relation('configures', fileId, id))
     }
@@ -512,8 +498,9 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
         addEntity(entity(target, 'dependency', imported.source, semanticHash({ dependency: imported.source }), {
           name: imported.source,
           layer: 'code',
-          summary: `${imported.source} 외부 모듈 참조입니다.`,
-          tags: ['dependency'],
+          area: 'project-foundation',
+          summary: `${imported.source} 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.`,
+          tags: ['dependency', 'project-foundation'],
         }))
       }
       addRelation(relation('imports', fileId, target, { names: imported.names, dynamic: imported.dynamic }))
@@ -521,7 +508,8 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
     for (const route of record.externalApiRoutes) {
       const target = `api:${route}`
       if (!byId.has(target)) addEntity(entity(target, 'api-route', route, semanticHash({ route }), {
-        name: route, layer: 'api', summary: `${route} API 호출 대상입니다.`, tags: ['api'],
+        name: route, layer: 'api', area: record.explanation.area,
+        summary: `${route} 서버 기능에 자료를 요청하는 연결 대상입니다.`, tags: ['api', record.explanation.area],
       }))
       addRelation(relation('calls-api', fileId, target))
     }
@@ -532,13 +520,19 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
     try {
       const packageJson = JSON.parse(packageRecord.content)
       for (const [name, command] of Object.entries(packageJson.scripts ?? {}).sort(([left], [right]) => compareSourceTwinText(left, right))) {
+        const area = /test|check/.test(name) ? 'testing-quality' : /build|deploy|preview/.test(name) ? 'deployment-operations' : 'project-foundation'
         addEntity(entity(`npm-script:${name}`, 'npm-script', `npm run ${name}`, semanticHash({ command }), {
           name,
           path: 'package.json',
           parentId: 'file:package.json',
           layer: /test|check/.test(name) ? 'test' : /build|deploy|preview/.test(name) ? 'deployment' : 'code',
-          summary: `${name} 작업을 실행하는 프로젝트 명령입니다.`,
-          tags: unique(['npm', /test|check/.test(name) ? 'test' : '', /build|deploy|preview/.test(name) ? 'deployment' : '']),
+          area,
+          summary: /test|check/.test(name)
+            ? `${name} 검증 묶음을 실행해 코드와 보안 규칙의 회귀를 찾는 명령입니다.`
+            : /build|deploy|preview/.test(name)
+              ? `${name} 단계의 웹 빌드 또는 배포 확인을 실행하는 명령입니다.`
+              : `${name} 개발 작업을 정해진 순서로 실행하는 프로젝트 명령입니다.`,
+          tags: unique(['npm', area, /test|check/.test(name) ? 'test' : '', /build|deploy|preview/.test(name) ? 'deployment' : '']),
         }))
         addRelation(relation('contains', 'file:package.json', `npm-script:${name}`))
       }
@@ -577,24 +571,27 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
   const changedPaths = unique([...added, ...changed, ...removed].map((entityId) => (
     currentMap.get(entityId)?.path || previousMap.get(entityId)?.path
   )))
+  const areas = sourceTwinAreaCatalog(entities.map((item) => item.area))
   const manifest = {
     schemaVersion: SOURCE_TWIN_SCHEMA_VERSION,
     id,
     source: {
       id: SOURCE_TWIN_SOURCE_ID,
-      label: 'Workflow Canvas 소스 코드',
+      label: `${project.label || '소프트웨어'} 소스 코드`,
       repositoryUrl: repository.repositoryUrl ?? '',
       defaultBranch: repository.defaultBranch ?? 'main',
       observationMode: 'build-time-ast',
       contentIncluded: false,
       credentialValuesIncluded: false,
     },
+    areas,
     entities,
     relations,
     perspectives,
     fingerprints,
     summary: {
       entities: entities.length,
+      areas: areas.length,
       files: entities.filter((item) => item.kind === 'file').length,
       functions: entities.filter((item) => item.kind === 'function').length,
       imports: relations.filter((item) => item.type === 'imports').length,

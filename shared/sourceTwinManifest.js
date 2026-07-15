@@ -2,16 +2,102 @@
 export const SOURCE_TWIN_MANIFEST = Object.freeze(
 {
   "schemaVersion": 1,
-  "id": "source-twin-v1-5b4bc1883da2",
+  "id": "source-twin-v1-bfa88dd7ddb3",
   "source": {
     "id": "workflow-canvas:self-source",
-    "label": "Workflow Canvas 소스 코드",
+    "label": "workflow-canvas 소스 코드",
     "repositoryUrl": "https://github.com/GeonhaPark-Seoul/workflow-canvas",
     "defaultBranch": "main",
     "observationMode": "build-time-ast",
     "contentIncluded": false,
     "credentialValuesIncluded": false
   },
+  "areas": [
+    {
+      "id": "canvas-interface",
+      "label": "캔버스 화면·편집",
+      "description": "사용자가 캔버스를 보고 노드·연결선·도구를 직접 조작하는 영역",
+      "order": 0
+    },
+    {
+      "id": "canvas-model",
+      "label": "캔버스 구조·동기화",
+      "description": "캔버스의 구조를 검사하고 위치·저장 상태를 일관되게 유지하는 영역",
+      "order": 1
+    },
+    {
+      "id": "notes-content",
+      "label": "노트·콘텐츠",
+      "description": "메모, 본문, 이미지와 노트 화면을 다루는 영역",
+      "order": 2
+    },
+    {
+      "id": "sharing-collaboration",
+      "label": "공유·협업",
+      "description": "초대, 참여자, 공동 편집 범위와 접속 상태를 다루는 영역",
+      "order": 3
+    },
+    {
+      "id": "identity-profile",
+      "label": "로그인·프로필",
+      "description": "로그인한 사람의 신원, 프로필과 개인 설정을 다루는 영역",
+      "order": 4
+    },
+    {
+      "id": "digital-twin-engine",
+      "label": "디지털 트윈 엔진",
+      "description": "실제 시스템을 발견하고 표준 구조로 바꿔 캔버스와 대조하는 영역",
+      "order": 5
+    },
+    {
+      "id": "source-code-twin",
+      "label": "코드 구조·Git 동기화",
+      "description": "로컬·GitHub 코드 구조와 변경 이력, 안전한 동기화를 다루는 영역",
+      "order": 6
+    },
+    {
+      "id": "ai-integration",
+      "label": "AI·MCP 연결",
+      "description": "AI가 허용된 캔버스 도구를 호출하도록 연결하는 영역",
+      "order": 7
+    },
+    {
+      "id": "data-storage-sync",
+      "label": "데이터 저장·실시간 동기화",
+      "description": "브라우저와 데이터베이스에 상태를 저장하고 최신 상태를 맞추는 영역",
+      "order": 8
+    },
+    {
+      "id": "media-files",
+      "label": "이미지·파일",
+      "description": "캔버스에서 사용하는 이미지와 첨부 파일을 보관하는 영역",
+      "order": 9
+    },
+    {
+      "id": "security-privacy",
+      "label": "보안·개인정보",
+      "description": "권한, 입력 정리, 개인정보 접근 기록과 신뢰 경계를 다루는 영역",
+      "order": 10
+    },
+    {
+      "id": "deployment-operations",
+      "label": "배포·운영",
+      "description": "웹 앱을 빌드·배포하고 실제 운영 상태를 확인하는 영역",
+      "order": 11
+    },
+    {
+      "id": "testing-quality",
+      "label": "테스트·품질",
+      "description": "변경이 기존 기능·보안 규칙을 깨뜨리지 않는지 자동 확인하는 영역",
+      "order": 12
+    },
+    {
+      "id": "project-foundation",
+      "label": "프로젝트 기반·공통 규칙",
+      "description": "여러 기능이 함께 사용하는 공통 규칙, 외부 라이브러리와 문서 영역",
+      "order": 13
+    }
+  ],
   "entities": [
     {
       "id": "api:/api/local-connector",
@@ -22,11 +108,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/local-connector.js",
       "parentId": "file:api/local-connector.js",
       "layer": "api",
+      "area": "source-code-twin",
       "lineStart": 1,
-      "summary": "/api/local-connector 요청을 처리하는 서버 경로입니다.",
+      "summary": "/api/local-connector로 들어온 요청을 받아 “브라우저와 로컬 커넥터 사이에서 페어링, 상태 보고와 승인된 Git 작업 요청을 중계” 역할을 실행하는 서버 입구입니다.",
+      "userImpact": "웹이 로컬 파일 경로를 직접 읽지 않고도 제한된 코드 구조와 Git 상태만 받게 합니다.",
       "tags": [
         "api",
-        "server"
+        "server",
+        "source-code-twin"
       ]
     },
     {
@@ -38,11 +127,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/mcp.js",
       "parentId": "file:api/mcp.js",
       "layer": "api",
+      "area": "ai-integration",
       "lineStart": 1,
-      "summary": "/api/mcp 요청을 처리하는 서버 경로입니다.",
+      "summary": "/api/mcp로 들어온 요청을 받아 “외부 AI의 MCP 요청을 받아 토큰을 확인한 뒤 허용된 캔버스 도구 서버로 전달” 역할을 실행하는 서버 입구입니다.",
+      "userImpact": "연결된 AI가 사용자 권한 안에서 캔버스를 읽고 조작하게 합니다.",
       "tags": [
         "api",
-        "server"
+        "server",
+        "ai-integration"
       ]
     },
     {
@@ -54,11 +146,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/shared-canvas.js",
       "parentId": "file:api/shared-canvas.js",
       "layer": "api",
+      "area": "sharing-collaboration",
       "lineStart": 1,
-      "summary": "/api/shared-canvas 요청을 처리하는 서버 경로입니다.",
+      "summary": "/api/shared-canvas로 들어온 요청을 받아 “공유 링크의 유효성, 최초 참여 동의와 링크 취소 상태를 서버에서 판정” 역할을 실행하는 서버 입구입니다.",
+      "userImpact": "로그아웃 방문자도 링크 안내를 보고 수락·거절할 수 있으며 취소된 링크는 들어오지 못하게 합니다.",
       "tags": [
         "api",
-        "server"
+        "server",
+        "sharing-collaboration"
       ]
     },
     {
@@ -70,11 +165,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/source-twin.js",
       "parentId": "file:api/source-twin.js",
       "layer": "api",
+      "area": "source-code-twin",
       "lineStart": 1,
-      "summary": "/api/source-twin 요청을 처리하는 서버 경로입니다.",
+      "summary": "/api/source-twin로 들어온 요청을 받아 “현재 배포 코드 구조, 변경 이벤트와 상태 스냅샷 조회·생성을 소유자에게 제공” 역할을 실행하는 서버 입구입니다.",
+      "userImpact": "코드 구조 대시보드가 배포 서버의 기준 자료와 이력을 읽게 합니다.",
       "tags": [
         "api",
-        "server"
+        "server",
+        "source-code-twin"
       ]
     },
     {
@@ -86,11 +184,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/source-twin-webhook.js",
       "parentId": "file:api/source-twin-webhook.js",
       "layer": "api",
+      "area": "source-code-twin",
       "lineStart": 1,
-      "summary": "/api/source-twin-webhook 요청을 처리하는 서버 경로입니다.",
+      "summary": "/api/source-twin-webhook로 들어온 요청을 받아 “GitHub push 웹훅의 서명을 검증하고 변경된 커밋과 파일 경로만 기록” 역할을 실행하는 서버 입구입니다.",
+      "userImpact": "어떤 코드 변경이 현재 배포보다 앞서 있는지 코드 구조 화면에 보여줍니다.",
       "tags": [
         "api",
-        "server"
+        "server",
+        "source-code-twin"
       ]
     },
     {
@@ -102,11 +203,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/system-runtime.js",
       "parentId": "file:api/system-runtime.js",
       "layer": "api",
+      "area": "digital-twin-engine",
       "lineStart": 1,
-      "summary": "/api/system-runtime 요청을 처리하는 서버 경로입니다.",
+      "summary": "/api/system-runtime로 들어온 요청을 받아 “시스템 지도에서 선택한 파츠의 실제 운영 상태를 제한된 검사 목록으로 확인하고 결과를 저장” 역할을 실행하는 서버 입구입니다.",
+      "userImpact": "LIVE 여부가 단순 선언이 아니라 방금 확인한 운영 증거를 뜻하게 합니다.",
       "tags": [
         "api",
-        "server"
+        "server",
+        "digital-twin-engine"
       ]
     },
     {
@@ -116,10 +220,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "7d94edd08bc20466ef3b",
       "name": "apply_source_twin_snapshot_operation",
       "layer": "database",
-      "summary": "apply_source_twin_snapshot_operation 데이터베이스 함수의 선언 또는 호출 지점입니다.",
+      "area": "source-code-twin",
+      "summary": "승인된 변경 적용 소스 코드 디지털 트윈 상태 스냅샷 실제 조작 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
       "tags": [
         "database",
-        "function"
+        "function",
+        "source-code-twin"
       ]
     },
     {
@@ -129,10 +235,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "f4d340d87f14a15921a8",
       "name": "can_access_canvas",
       "layer": "database",
-      "summary": "can_access_canvas 데이터베이스 함수의 선언 또는 호출 지점입니다.",
+      "area": "canvas-model",
+      "summary": "접근 권한 캔버스 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
       "tags": [
         "database",
-        "function"
+        "function",
+        "canvas-model"
       ]
     },
     {
@@ -142,10 +250,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "a97d84e93f3286821252",
       "name": "can_access_canvas_image",
       "layer": "database",
-      "summary": "can_access_canvas_image 데이터베이스 함수의 선언 또는 호출 지점입니다.",
+      "area": "media-files",
+      "summary": "접근 권한 캔버스 이미지 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
       "tags": [
         "database",
-        "function"
+        "function",
+        "media-files"
       ]
     },
     {
@@ -155,10 +265,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "73b4320b0e9e221d2309",
       "name": "can_view_profile",
       "layer": "database",
-      "summary": "can_view_profile 데이터베이스 함수의 선언 또는 호출 지점입니다.",
+      "area": "identity-profile",
+      "summary": "화면 상태 프로필 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
       "tags": [
         "database",
-        "function"
+        "function",
+        "identity-profile"
       ]
     },
     {
@@ -168,10 +280,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "4ad674b5acaab7b12474",
       "name": "canvas_relation_metadata_guard_ready",
       "layer": "database",
-      "summary": "canvas_relation_metadata_guard_ready 데이터베이스 함수의 선언 또는 호출 지점입니다.",
+      "area": "canvas-model",
+      "summary": "캔버스 관계 설명 메타데이터 보호 규칙 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
       "tags": [
         "database",
-        "function"
+        "function",
+        "canvas-model"
       ]
     },
     {
@@ -181,10 +295,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "dda799711b7bb3643463",
       "name": "claim_email_invite",
       "layer": "database",
-      "summary": "claim_email_invite 데이터베이스 함수의 선언 또는 호출 지점입니다.",
+      "area": "sharing-collaboration",
+      "summary": "실행 권한 선점 초대 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
       "tags": [
         "database",
-        "function"
+        "function",
+        "sharing-collaboration"
       ]
     },
     {
@@ -194,10 +310,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "9cb3412c775c884a5ba9",
       "name": "claim_email_invites",
       "layer": "database",
-      "summary": "claim_email_invites 데이터베이스 함수의 선언 또는 호출 지점입니다.",
+      "area": "sharing-collaboration",
+      "summary": "실행 권한 선점 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
       "tags": [
         "database",
-        "function"
+        "function",
+        "sharing-collaboration"
       ]
     },
     {
@@ -207,10 +325,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "67ea3687dc32b871d3be",
       "name": "claim_share",
       "layer": "database",
-      "summary": "claim_share 데이터베이스 함수의 선언 또는 호출 지점입니다.",
+      "area": "sharing-collaboration",
+      "summary": "실행 권한 선점 공유 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
       "tags": [
         "database",
-        "function"
+        "function",
+        "sharing-collaboration"
       ]
     },
     {
@@ -220,10 +340,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "f4b98648152ff7b86d0c",
       "name": "disable_share_invitation",
       "layer": "database",
-      "summary": "disable_share_invitation 데이터베이스 함수의 선언 또는 호출 지점입니다.",
+      "area": "sharing-collaboration",
+      "summary": "공유 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
       "tags": [
         "database",
-        "function"
+        "function",
+        "sharing-collaboration"
       ]
     },
     {
@@ -233,10 +355,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "9d02ff7f81f3a56ad3e5",
       "name": "get_my_canvas_data_access_audit",
       "layer": "database",
-      "summary": "get_my_canvas_data_access_audit 데이터베이스 함수의 선언 또는 호출 지점입니다.",
+      "area": "security-privacy",
+      "summary": "캔버스 데이터 접근 권한 접근 감사 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
       "tags": [
         "database",
-        "function"
+        "function",
+        "security-privacy"
       ]
     },
     {
@@ -246,10 +370,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "b0f0107b9998cf2de38c",
       "name": "get_workflow_system_operational_snapshot",
       "layer": "database",
-      "summary": "get_workflow_system_operational_snapshot 데이터베이스 함수의 선언 또는 호출 지점입니다.",
+      "area": "digital-twin-engine",
+      "summary": "워크플로우 시스템 상태 스냅샷 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
       "tags": [
         "database",
-        "function"
+        "function",
+        "digital-twin-engine"
       ]
     },
     {
@@ -259,10 +385,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "e65f40a76c10735aebfa",
       "name": "is_share_member",
       "layer": "database",
-      "summary": "is_share_member 데이터베이스 함수의 선언 또는 호출 지점입니다.",
+      "area": "sharing-collaboration",
+      "summary": "공유 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
       "tags": [
         "database",
-        "function"
+        "function",
+        "sharing-collaboration"
       ]
     },
     {
@@ -272,10 +400,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "533979d2c45d3d05b64c",
       "name": "leave_shared_canvas",
       "layer": "database",
-      "summary": "leave_shared_canvas 데이터베이스 함수의 선언 또는 호출 지점입니다.",
+      "area": "sharing-collaboration",
+      "summary": "캔버스 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
       "tags": [
         "database",
-        "function"
+        "function",
+        "sharing-collaboration"
       ]
     },
     {
@@ -285,10 +415,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "65813a1b924fb242cbdd",
       "name": "list_pending_email_invites",
       "layer": "database",
-      "summary": "list_pending_email_invites 데이터베이스 함수의 선언 또는 호출 지점입니다.",
+      "area": "sharing-collaboration",
+      "summary": "목록 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
       "tags": [
         "database",
-        "function"
+        "function",
+        "sharing-collaboration"
       ]
     },
     {
@@ -298,10 +430,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "9909f727304cc8a3c2e4",
       "name": "owns_share",
       "layer": "database",
-      "summary": "owns_share 데이터베이스 함수의 선언 또는 호출 지점입니다.",
+      "area": "sharing-collaboration",
+      "summary": "공유 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
       "tags": [
         "database",
-        "function"
+        "function",
+        "sharing-collaboration"
       ]
     },
     {
@@ -311,10 +445,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "50a1bc5cf968481439d6",
       "name": "prevent_canvas_relation_metadata_loss",
       "layer": "database",
-      "summary": "prevent_canvas_relation_metadata_loss 데이터베이스 함수의 선언 또는 호출 지점입니다.",
+      "area": "canvas-model",
+      "summary": "캔버스 관계 설명 메타데이터 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
       "tags": [
         "database",
-        "function"
+        "function",
+        "canvas-model"
       ]
     },
     {
@@ -324,10 +460,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "1695b6f77648bb2b2e62",
       "name": "reject_local_connector_event_mutation",
       "layer": "database",
-      "summary": "reject_local_connector_event_mutation 데이터베이스 함수의 선언 또는 호출 지점입니다.",
+      "area": "source-code-twin",
+      "summary": "로컬 저장소 로컬 커넥터 이벤트 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
       "tags": [
         "database",
-        "function"
+        "function",
+        "source-code-twin"
       ]
     },
     {
@@ -337,10 +475,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "90ad89b328e47a1bf6c7",
       "name": "reject_server_data_access_audit_mutation",
       "layer": "database",
-      "summary": "reject_server_data_access_audit_mutation 데이터베이스 함수의 선언 또는 호출 지점입니다.",
+      "area": "security-privacy",
+      "summary": "데이터 접근 권한 접근 감사 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
       "tags": [
         "database",
-        "function"
+        "function",
+        "security-privacy"
       ]
     },
     {
@@ -350,10 +490,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "9bd9af914f3710376e66",
       "name": "reject_source_twin_history_mutation",
       "layer": "database",
-      "summary": "reject_source_twin_history_mutation 데이터베이스 함수의 선언 또는 호출 지점입니다.",
+      "area": "source-code-twin",
+      "summary": "소스 코드 디지털 트윈 상태 이력 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
       "tags": [
         "database",
-        "function"
+        "function",
+        "source-code-twin"
       ]
     },
     {
@@ -363,10 +505,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "00858aa07f25543a34de",
       "name": "reject_system_operation_audit_mutation",
       "layer": "database",
-      "summary": "reject_system_operation_audit_mutation 데이터베이스 함수의 선언 또는 호출 지점입니다.",
+      "area": "digital-twin-engine",
+      "summary": "시스템 실제 조작 접근 감사 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
       "tags": [
         "database",
-        "function"
+        "function",
+        "digital-twin-engine"
       ]
     },
     {
@@ -376,10 +520,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "eb8cc15b595b977d5e3f",
       "name": "revoke_canvas_member",
       "layer": "database",
-      "summary": "revoke_canvas_member 데이터베이스 함수의 선언 또는 호출 지점입니다.",
+      "area": "canvas-model",
+      "summary": "권한 해제 캔버스 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
       "tags": [
         "database",
-        "function"
+        "function",
+        "canvas-model"
       ]
     },
     {
@@ -389,10 +535,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "6f9cbe10405ea90bece5",
       "name": "revoke_share_member",
       "layer": "database",
-      "summary": "revoke_share_member 데이터베이스 함수의 선언 또는 호출 지점입니다.",
+      "area": "sharing-collaboration",
+      "summary": "권한 해제 공유 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
       "tags": [
         "database",
-        "function"
+        "function",
+        "sharing-collaboration"
       ]
     },
     {
@@ -402,10 +550,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "2b599930040452837441",
       "name": "share_link_is_active",
       "layer": "database",
-      "summary": "share_link_is_active 데이터베이스 함수의 선언 또는 호출 지점입니다.",
+      "area": "sharing-collaboration",
+      "summary": "공유 공유 링크 현재 선택 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
       "tags": [
         "database",
-        "function"
+        "function",
+        "sharing-collaboration"
       ]
     },
     {
@@ -415,10 +565,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "ea8ea290b75b6c4c0492",
       "name": "share_link_preview",
       "layer": "database",
-      "summary": "share_link_preview 데이터베이스 함수의 선언 또는 호출 지점입니다.",
+      "area": "sharing-collaboration",
+      "summary": "공유 공유 링크 실행 전 미리보기 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
       "tags": [
         "database",
-        "function"
+        "function",
+        "sharing-collaboration"
       ]
     },
     {
@@ -428,10 +580,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "e43dff470f06026456f3",
       "name": "canvas_shares",
       "layer": "database",
-      "summary": "canvas_shares 테이블의 선언 또는 접근 지점입니다.",
+      "area": "sharing-collaboration",
+      "summary": "캔버스 자료를 데이터베이스에 지속적으로 보관하는 칸입니다.",
       "tags": [
         "database",
-        "table"
+        "table",
+        "sharing-collaboration"
       ]
     },
     {
@@ -441,10 +595,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "ac47cc5c9a5f8b3285da",
       "name": "canvases",
       "layer": "database",
-      "summary": "canvases 테이블의 선언 또는 접근 지점입니다.",
+      "area": "data-storage-sync",
+      "summary": "캔버스 목록 자료를 데이터베이스에 지속적으로 보관하는 칸입니다.",
       "tags": [
         "database",
-        "table"
+        "table",
+        "data-storage-sync"
       ]
     },
     {
@@ -454,10 +610,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "15a9ad66b211df8699c4",
       "name": "local_connector_operation_events",
       "layer": "database",
-      "summary": "local_connector_operation_events 테이블의 선언 또는 접근 지점입니다.",
+      "area": "source-code-twin",
+      "summary": "로컬 저장소 로컬 커넥터 실제 조작 자료를 데이터베이스에 지속적으로 보관하는 칸입니다.",
       "tags": [
         "database",
-        "table"
+        "table",
+        "source-code-twin"
       ]
     },
     {
@@ -467,10 +625,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "c21cd632fb14ae5d7a56",
       "name": "local_connector_operations",
       "layer": "database",
-      "summary": "local_connector_operations 테이블의 선언 또는 접근 지점입니다.",
+      "area": "source-code-twin",
+      "summary": "로컬 저장소 로컬 커넥터 자료를 데이터베이스에 지속적으로 보관하는 칸입니다.",
       "tags": [
         "database",
-        "table"
+        "table",
+        "source-code-twin"
       ]
     },
     {
@@ -480,10 +640,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "d895a30b6749f008ae96",
       "name": "local_connectors",
       "layer": "database",
-      "summary": "local_connectors 테이블의 선언 또는 접근 지점입니다.",
+      "area": "source-code-twin",
+      "summary": "로컬 저장소 자료를 데이터베이스에 지속적으로 보관하는 칸입니다.",
       "tags": [
         "database",
-        "table"
+        "table",
+        "source-code-twin"
       ]
     },
     {
@@ -493,10 +655,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "8212694b045ee6180d3f",
       "name": "mcp_tokens",
       "layer": "database",
-      "summary": "mcp_tokens 테이블의 선언 또는 접근 지점입니다.",
+      "area": "security-privacy",
+      "summary": "AI 도구 연결 자료를 데이터베이스에 지속적으로 보관하는 칸입니다.",
       "tags": [
         "database",
-        "table"
+        "table",
+        "security-privacy"
       ]
     },
     {
@@ -506,10 +670,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "624de939c3edd12da931",
       "name": "profiles",
       "layer": "database",
-      "summary": "profiles 테이블의 선언 또는 접근 지점입니다.",
+      "area": "identity-profile",
+      "summary": "profiles 자료를 데이터베이스에 지속적으로 보관하는 칸입니다.",
       "tags": [
         "database",
-        "table"
+        "table",
+        "identity-profile"
       ]
     },
     {
@@ -519,10 +685,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "ebea237a33bbc7feed7d",
       "name": "server_data_access_audit",
       "layer": "database",
-      "summary": "server_data_access_audit 테이블의 선언 또는 접근 지점입니다.",
+      "area": "security-privacy",
+      "summary": "데이터 접근 권한 접근 감사 자료를 데이터베이스에 지속적으로 보관하는 칸입니다.",
       "tags": [
         "database",
-        "table"
+        "table",
+        "security-privacy"
       ]
     },
     {
@@ -532,10 +700,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "64ecdbe96f4fa202cb17",
       "name": "share_members",
       "layer": "database",
-      "summary": "share_members 테이블의 선언 또는 접근 지점입니다.",
+      "area": "sharing-collaboration",
+      "summary": "공유 자료를 데이터베이스에 지속적으로 보관하는 칸입니다.",
       "tags": [
         "database",
-        "table"
+        "table",
+        "sharing-collaboration"
       ]
     },
     {
@@ -545,10 +715,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "2c3e60f482daeebaf088",
       "name": "share_revocations",
       "layer": "database",
-      "summary": "share_revocations 테이블의 선언 또는 접근 지점입니다.",
+      "area": "sharing-collaboration",
+      "summary": "공유 자료를 데이터베이스에 지속적으로 보관하는 칸입니다.",
       "tags": [
         "database",
-        "table"
+        "table",
+        "sharing-collaboration"
       ]
     },
     {
@@ -558,10 +730,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "19cf2cc6f6776a1dcdc8",
       "name": "source_twin_events",
       "layer": "database",
-      "summary": "source_twin_events 테이블의 선언 또는 접근 지점입니다.",
+      "area": "source-code-twin",
+      "summary": "소스 코드 디지털 트윈 자료를 데이터베이스에 지속적으로 보관하는 칸입니다.",
       "tags": [
         "database",
-        "table"
+        "table",
+        "source-code-twin"
       ]
     },
     {
@@ -571,10 +745,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "9fadbc805dd81448a325",
       "name": "source_twin_snapshots",
       "layer": "database",
-      "summary": "source_twin_snapshots 테이블의 선언 또는 접근 지점입니다.",
+      "area": "source-code-twin",
+      "summary": "소스 코드 디지털 트윈 자료를 데이터베이스에 지속적으로 보관하는 칸입니다.",
       "tags": [
         "database",
-        "table"
+        "table",
+        "source-code-twin"
       ]
     },
     {
@@ -584,10 +760,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "238e4b2baefc3bd1775e",
       "name": "system_operation_audit",
       "layer": "database",
-      "summary": "system_operation_audit 테이블의 선언 또는 접근 지점입니다.",
+      "area": "digital-twin-engine",
+      "summary": "시스템 실제 조작 접근 감사 자료를 데이터베이스에 지속적으로 보관하는 칸입니다.",
       "tags": [
         "database",
-        "table"
+        "table",
+        "digital-twin-engine"
       ]
     },
     {
@@ -597,10 +775,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "c81b426d6fe0da58b106",
       "name": "system_runtime_observations",
       "layer": "database",
-      "summary": "system_runtime_observations 테이블의 선언 또는 접근 지점입니다.",
+      "area": "digital-twin-engine",
+      "summary": "시스템 실제 운영 상태 자료를 데이터베이스에 지속적으로 보관하는 칸입니다.",
       "tags": [
         "database",
-        "table"
+        "table",
+        "digital-twin-engine"
       ]
     },
     {
@@ -610,10 +790,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "e931def31921d1fab083",
       "name": "user_prefs",
       "layer": "database",
-      "summary": "user_prefs 테이블의 선언 또는 접근 지점입니다.",
+      "area": "identity-profile",
+      "summary": "사용자 자료를 데이터베이스에 지속적으로 보관하는 칸입니다.",
       "tags": [
         "database",
-        "table"
+        "table",
+        "identity-profile"
       ]
     },
     {
@@ -623,10 +805,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "719e4675772374c7d9e2",
       "name": "{\"zen\":\"source twin\"}",
       "layer": "database",
-      "summary": "{\"zen\":\"source twin\"} 테이블의 선언 또는 접근 지점입니다.",
+      "area": "digital-twin-engine",
+      "summary": "{\"zen\":\"source twin\"} 자료를 데이터베이스에 지속적으로 보관하는 칸입니다.",
       "tags": [
         "database",
-        "table"
+        "table",
+        "digital-twin-engine"
       ]
     },
     {
@@ -636,9 +820,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "5cbbd8982ead51967cc9",
       "name": "../shared/sourceTwinManifest.js",
       "layer": "code",
-      "summary": "../shared/sourceTwinManifest.js 외부 모듈 참조입니다.",
+      "area": "project-foundation",
+      "summary": "../shared/sourceTwinManifest.js 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.",
       "tags": [
-        "dependency"
+        "dependency",
+        "project-foundation"
       ]
     },
     {
@@ -648,21 +834,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "f7281d8c4430e5e4b798",
       "name": "../shared/workflowSystemDiscoveryManifest.js",
       "layer": "code",
-      "summary": "../shared/workflowSystemDiscoveryManifest.js 외부 모듈 참조입니다.",
+      "area": "project-foundation",
+      "summary": "../shared/workflowSystemDiscoveryManifest.js 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.",
       "tags": [
-        "dependency"
-      ]
-    },
-    {
-      "id": "dependency:./index.css",
-      "kind": "dependency",
-      "label": "./index.css",
-      "fingerprint": "53433396c347a4fa12ff",
-      "name": "./index.css",
-      "layer": "code",
-      "summary": "./index.css 외부 모듈 참조입니다.",
-      "tags": [
-        "dependency"
+        "dependency",
+        "project-foundation"
       ]
     },
     {
@@ -672,9 +848,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "ba5207fe8b5057a443b8",
       "name": "./workflowSystemDiscoveryManifest.js",
       "layer": "code",
-      "summary": "./workflowSystemDiscoveryManifest.js 외부 모듈 참조입니다.",
+      "area": "project-foundation",
+      "summary": "./workflowSystemDiscoveryManifest.js 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.",
       "tags": [
-        "dependency"
+        "dependency",
+        "project-foundation"
       ]
     },
     {
@@ -684,9 +862,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "bde40695bb6f3803ef2a",
       "name": "@babel/parser",
       "layer": "code",
-      "summary": "@babel/parser 외부 모듈 참조입니다.",
+      "area": "project-foundation",
+      "summary": "@babel/parser 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.",
       "tags": [
-        "dependency"
+        "dependency",
+        "project-foundation"
       ]
     },
     {
@@ -696,9 +876,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "13d92ee142268719addf",
       "name": "@modelcontextprotocol/sdk/server/mcp.js",
       "layer": "code",
-      "summary": "@modelcontextprotocol/sdk/server/mcp.js 외부 모듈 참조입니다.",
+      "area": "project-foundation",
+      "summary": "@modelcontextprotocol/sdk/server/mcp.js 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.",
       "tags": [
-        "dependency"
+        "dependency",
+        "project-foundation"
       ]
     },
     {
@@ -708,9 +890,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "f4460c2b39806aab7c00",
       "name": "@modelcontextprotocol/sdk/server/streamableHttp.js",
       "layer": "code",
-      "summary": "@modelcontextprotocol/sdk/server/streamableHttp.js 외부 모듈 참조입니다.",
+      "area": "project-foundation",
+      "summary": "@modelcontextprotocol/sdk/server/streamableHttp.js 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.",
       "tags": [
-        "dependency"
+        "dependency",
+        "project-foundation"
       ]
     },
     {
@@ -720,9 +904,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "656dab7a6eca4119a0cd",
       "name": "@supabase/supabase-js",
       "layer": "code",
-      "summary": "@supabase/supabase-js 외부 모듈 참조입니다.",
+      "area": "project-foundation",
+      "summary": "@supabase/supabase-js 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.",
       "tags": [
-        "dependency"
+        "dependency",
+        "project-foundation"
       ]
     },
     {
@@ -732,9 +918,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "4fbd55eb768161e5ff18",
       "name": "@vitejs/plugin-react",
       "layer": "code",
-      "summary": "@vitejs/plugin-react 외부 모듈 참조입니다.",
+      "area": "project-foundation",
+      "summary": "@vitejs/plugin-react 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.",
       "tags": [
-        "dependency"
+        "dependency",
+        "project-foundation"
       ]
     },
     {
@@ -744,9 +932,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "b9b7bd59bafb20c578e9",
       "name": "@xyflow/react",
       "layer": "code",
-      "summary": "@xyflow/react 외부 모듈 참조입니다.",
+      "area": "project-foundation",
+      "summary": "@xyflow/react 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.",
       "tags": [
-        "dependency"
+        "dependency",
+        "project-foundation"
       ]
     },
     {
@@ -756,9 +946,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "792b45b3b431554457ad",
       "name": "@xyflow/react/dist/style.css",
       "layer": "code",
-      "summary": "@xyflow/react/dist/style.css 외부 모듈 참조입니다.",
+      "area": "project-foundation",
+      "summary": "@xyflow/react/dist/style.css 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.",
       "tags": [
-        "dependency"
+        "dependency",
+        "project-foundation"
       ]
     },
     {
@@ -768,9 +960,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "6542359f15b7b19f6a4d",
       "name": "node:assert/strict",
       "layer": "code",
-      "summary": "node:assert/strict 외부 모듈 참조입니다.",
+      "area": "project-foundation",
+      "summary": "node:assert/strict 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.",
       "tags": [
-        "dependency"
+        "dependency",
+        "project-foundation"
       ]
     },
     {
@@ -780,9 +974,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "cd73a1b96344d728f668",
       "name": "node:child_process",
       "layer": "code",
-      "summary": "node:child_process 외부 모듈 참조입니다.",
+      "area": "project-foundation",
+      "summary": "node:child_process 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.",
       "tags": [
-        "dependency"
+        "dependency",
+        "project-foundation"
       ]
     },
     {
@@ -792,9 +988,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "24af5138c1c3db301c99",
       "name": "node:crypto",
       "layer": "code",
-      "summary": "node:crypto 외부 모듈 참조입니다.",
+      "area": "project-foundation",
+      "summary": "node:crypto 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.",
       "tags": [
-        "dependency"
+        "dependency",
+        "project-foundation"
       ]
     },
     {
@@ -804,9 +1002,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "20215b33d41af9024d7f",
       "name": "node:fs",
       "layer": "code",
-      "summary": "node:fs 외부 모듈 참조입니다.",
+      "area": "project-foundation",
+      "summary": "node:fs 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.",
       "tags": [
-        "dependency"
+        "dependency",
+        "project-foundation"
       ]
     },
     {
@@ -816,9 +1016,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "5a9a976ba6a2ad31da92",
       "name": "node:fs/promises",
       "layer": "code",
-      "summary": "node:fs/promises 외부 모듈 참조입니다.",
+      "area": "project-foundation",
+      "summary": "node:fs/promises 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.",
       "tags": [
-        "dependency"
+        "dependency",
+        "project-foundation"
       ]
     },
     {
@@ -828,9 +1030,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "7b090f0f70c7ae1b18f3",
       "name": "node:os",
       "layer": "code",
-      "summary": "node:os 외부 모듈 참조입니다.",
+      "area": "project-foundation",
+      "summary": "node:os 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.",
       "tags": [
-        "dependency"
+        "dependency",
+        "project-foundation"
       ]
     },
     {
@@ -840,9 +1044,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "21b48497fa1b413e341c",
       "name": "node:path",
       "layer": "code",
-      "summary": "node:path 외부 모듈 참조입니다.",
+      "area": "project-foundation",
+      "summary": "node:path 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.",
       "tags": [
-        "dependency"
+        "dependency",
+        "project-foundation"
       ]
     },
     {
@@ -852,9 +1058,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "41bf1ad68332c4d62209",
       "name": "node:process",
       "layer": "code",
-      "summary": "node:process 외부 모듈 참조입니다.",
+      "area": "project-foundation",
+      "summary": "node:process 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.",
       "tags": [
-        "dependency"
+        "dependency",
+        "project-foundation"
       ]
     },
     {
@@ -864,9 +1072,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "7a2692f0d98289174470",
       "name": "node:readline/promises",
       "layer": "code",
-      "summary": "node:readline/promises 외부 모듈 참조입니다.",
+      "area": "project-foundation",
+      "summary": "node:readline/promises 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.",
       "tags": [
-        "dependency"
+        "dependency",
+        "project-foundation"
       ]
     },
     {
@@ -876,9 +1086,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "b41316a69be765681789",
       "name": "node:url",
       "layer": "code",
-      "summary": "node:url 외부 모듈 참조입니다.",
+      "area": "project-foundation",
+      "summary": "node:url 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.",
       "tags": [
-        "dependency"
+        "dependency",
+        "project-foundation"
       ]
     },
     {
@@ -888,9 +1100,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "5bb5f79b5812a3a75b62",
       "name": "react",
       "layer": "code",
-      "summary": "react 외부 모듈 참조입니다.",
+      "area": "project-foundation",
+      "summary": "react 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.",
       "tags": [
-        "dependency"
+        "dependency",
+        "project-foundation"
       ]
     },
     {
@@ -900,9 +1114,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "0325660784413bae1f20",
       "name": "react-dom",
       "layer": "code",
-      "summary": "react-dom 외부 모듈 참조입니다.",
+      "area": "project-foundation",
+      "summary": "react-dom 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.",
       "tags": [
-        "dependency"
+        "dependency",
+        "project-foundation"
       ]
     },
     {
@@ -912,9 +1128,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "fb64b2c9722d06f371f1",
       "name": "react-dom/client",
       "layer": "code",
-      "summary": "react-dom/client 외부 모듈 참조입니다.",
+      "area": "project-foundation",
+      "summary": "react-dom/client 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.",
       "tags": [
-        "dependency"
+        "dependency",
+        "project-foundation"
       ]
     },
     {
@@ -924,9 +1142,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "bcfc99e6cc3ecf9796b0",
       "name": "vite",
       "layer": "code",
-      "summary": "vite 외부 모듈 참조입니다.",
+      "area": "project-foundation",
+      "summary": "vite 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.",
       "tags": [
-        "dependency"
+        "dependency",
+        "project-foundation"
       ]
     },
     {
@@ -936,9 +1156,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "c8f2a56c5355440f8fbf",
       "name": "vite-plugin-pwa",
       "layer": "code",
-      "summary": "vite-plugin-pwa 외부 모듈 참조입니다.",
+      "area": "project-foundation",
+      "summary": "vite-plugin-pwa 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.",
       "tags": [
-        "dependency"
+        "dependency",
+        "project-foundation"
       ]
     },
     {
@@ -948,9 +1170,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "5dc66d3e96113acb1d27",
       "name": "zod",
       "layer": "code",
-      "summary": "zod 외부 모듈 참조입니다.",
+      "area": "project-foundation",
+      "summary": "zod 라이브러리에서 이미 검증된 기능을 가져와 사용하는 연결입니다.",
       "tags": [
-        "dependency"
+        "dependency",
+        "project-foundation"
       ]
     },
     {
@@ -959,11 +1183,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "label": "Vercel 웹 배포",
       "fingerprint": "09abf472916f707d8dfc",
       "layer": "deployment",
+      "area": "deployment-operations",
       "summary": "Vite 빌드 결과를 Vercel에 배포하는 경로입니다.",
+      "userImpact": "검증을 통과한 현재 커밋이 실제 사용자가 여는 웹사이트가 되게 합니다.",
       "tags": [
         "deployment",
         "vercel",
-        "vite"
+        "vite",
+        "deployment-operations"
       ]
     },
     {
@@ -973,9 +1200,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "d6818daa0402e83abb28",
       "name": "NODE_ENV",
       "layer": "deployment",
-      "summary": "NODE_ENV 환경변수의 이름 참조입니다. 값은 수집하지 않습니다.",
+      "area": "digital-twin-engine",
+      "summary": "NODE_ENV 배포 환경 설정의 이름과 사용 위치입니다. 실제 값은 수집하지 않습니다.",
       "tags": [
         "configuration",
+        "digital-twin-engine",
         "environment"
       ],
       "details": {
@@ -989,10 +1218,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "cda5746e0887e62fba1b",
       "name": "SUPABASE_SERVICE_ROLE_KEY",
       "layer": "security",
-      "summary": "SUPABASE_SERVICE_ROLE_KEY 환경변수의 이름 참조입니다. 값은 수집하지 않습니다.",
+      "area": "security-privacy",
+      "summary": "서버가 제한된 관리자 DB 작업을 할 때 사용하는 비밀 키의 이름입니다. 실제 값은 수집하지 않습니다.",
       "tags": [
         "credential-reference",
-        "environment"
+        "environment",
+        "security-privacy"
       ],
       "details": {
         "credentialReference": true
@@ -1005,10 +1236,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "5bdffb5c819758e07da7",
       "name": "SUPABASE_URL",
       "layer": "deployment",
-      "summary": "SUPABASE_URL 환경변수의 이름 참조입니다. 값은 수집하지 않습니다.",
+      "area": "sharing-collaboration",
+      "summary": "SUPABASE_URL 배포 환경 설정의 이름과 사용 위치입니다. 실제 값은 수집하지 않습니다.",
       "tags": [
         "configuration",
-        "environment"
+        "environment",
+        "sharing-collaboration"
       ],
       "details": {
         "credentialReference": false
@@ -1021,9 +1254,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "d60970636a316d57fa77",
       "name": "VERCEL",
       "layer": "deployment",
-      "summary": "VERCEL 환경변수의 이름 참조입니다. 값은 수집하지 않습니다.",
+      "area": "digital-twin-engine",
+      "summary": "VERCEL 배포 환경 설정의 이름과 사용 위치입니다. 실제 값은 수집하지 않습니다.",
       "tags": [
         "configuration",
+        "digital-twin-engine",
         "environment"
       ],
       "details": {
@@ -1037,9 +1272,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "4486e76d8bc8b160a7aa",
       "name": "VERCEL_ENV",
       "layer": "deployment",
-      "summary": "VERCEL_ENV 환경변수의 이름 참조입니다. 값은 수집하지 않습니다.",
+      "area": "digital-twin-engine",
+      "summary": "VERCEL_ENV 배포 환경 설정의 이름과 사용 위치입니다. 실제 값은 수집하지 않습니다.",
       "tags": [
         "configuration",
+        "digital-twin-engine",
         "environment"
       ],
       "details": {
@@ -1053,9 +1290,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "66dcb8cc88c6d92638b0",
       "name": "VERCEL_GIT_COMMIT_SHA",
       "layer": "deployment",
-      "summary": "VERCEL_GIT_COMMIT_SHA 환경변수의 이름 참조입니다. 값은 수집하지 않습니다.",
+      "area": "digital-twin-engine",
+      "summary": "VERCEL_GIT_COMMIT_SHA 배포 환경 설정의 이름과 사용 위치입니다. 실제 값은 수집하지 않습니다.",
       "tags": [
         "configuration",
+        "digital-twin-engine",
         "environment"
       ],
       "details": {
@@ -1069,9 +1308,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "49c8f306c78ac6318306",
       "name": "VERCEL_PROJECT_PRODUCTION_URL",
       "layer": "deployment",
-      "summary": "VERCEL_PROJECT_PRODUCTION_URL 환경변수의 이름 참조입니다. 값은 수집하지 않습니다.",
+      "area": "digital-twin-engine",
+      "summary": "VERCEL_PROJECT_PRODUCTION_URL 배포 환경 설정의 이름과 사용 위치입니다. 실제 값은 수집하지 않습니다.",
       "tags": [
         "configuration",
+        "digital-twin-engine",
         "environment"
       ],
       "details": {
@@ -1085,9 +1326,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "2babac2a0cad62ed835f",
       "name": "VERCEL_REGION",
       "layer": "deployment",
-      "summary": "VERCEL_REGION 환경변수의 이름 참조입니다. 값은 수집하지 않습니다.",
+      "area": "digital-twin-engine",
+      "summary": "VERCEL_REGION 배포 환경 설정의 이름과 사용 위치입니다. 실제 값은 수집하지 않습니다.",
       "tags": [
         "configuration",
+        "digital-twin-engine",
         "environment"
       ],
       "details": {
@@ -1101,9 +1344,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "7bfaa54caa9a29c245d7",
       "name": "VERCEL_URL",
       "layer": "deployment",
-      "summary": "VERCEL_URL 환경변수의 이름 참조입니다. 값은 수집하지 않습니다.",
+      "area": "digital-twin-engine",
+      "summary": "VERCEL_URL 배포 환경 설정의 이름과 사용 위치입니다. 실제 값은 수집하지 않습니다.",
       "tags": [
         "configuration",
+        "digital-twin-engine",
         "environment"
       ],
       "details": {
@@ -1117,10 +1362,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "54100d40af791a40bce0",
       "name": "WORKFLOW_CANVAS_GITHUB_WEBHOOK_SECRET",
       "layer": "security",
-      "summary": "WORKFLOW_CANVAS_GITHUB_WEBHOOK_SECRET 환경변수의 이름 참조입니다. 값은 수집하지 않습니다.",
+      "area": "security-privacy",
+      "summary": "WORKFLOW_CANVAS_GITHUB_WEBHOOK_SECRET 비밀 설정의 이름 참조입니다. 실제 값은 소스 트윈에 포함하지 않습니다.",
       "tags": [
         "credential-reference",
-        "environment"
+        "environment",
+        "security-privacy"
       ],
       "details": {
         "credentialReference": true
@@ -1133,10 +1380,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "4a957e6b818244f3e38b",
       "name": "WORKFLOW_CANVAS_LOCAL_CONNECTOR_TOKEN",
       "layer": "security",
-      "summary": "WORKFLOW_CANVAS_LOCAL_CONNECTOR_TOKEN 환경변수의 이름 참조입니다. 값은 수집하지 않습니다.",
+      "area": "security-privacy",
+      "summary": "WORKFLOW_CANVAS_LOCAL_CONNECTOR_TOKEN 비밀 설정의 이름 참조입니다. 실제 값은 소스 트윈에 포함하지 않습니다.",
       "tags": [
         "credential-reference",
-        "environment"
+        "environment",
+        "security-privacy"
       ],
       "details": {
         "credentialReference": true
@@ -1149,10 +1398,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "a35289f412eaed0d3347",
       "name": "WORKFLOW_CANVAS_OWNER_USER_ID",
       "layer": "deployment",
-      "summary": "WORKFLOW_CANVAS_OWNER_USER_ID 환경변수의 이름 참조입니다. 값은 수집하지 않습니다.",
+      "area": "source-code-twin",
+      "summary": "내부 시스템 지도와 운영 도구를 사용할 제품 소유자 계정을 지정합니다.",
       "tags": [
         "configuration",
-        "environment"
+        "environment",
+        "source-code-twin"
       ],
       "details": {
         "credentialReference": false
@@ -1165,10 +1416,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "fingerprint": "aa4f5388ab26e4bc5a37",
       "name": "WORKFLOW_CANVAS_URL",
       "layer": "deployment",
-      "summary": "WORKFLOW_CANVAS_URL 환경변수의 이름 참조입니다. 값은 수집하지 않습니다.",
+      "area": "source-code-twin",
+      "summary": "WORKFLOW_CANVAS_URL 배포 환경 설정의 이름과 사용 위치입니다. 실제 값은 수집하지 않습니다.",
       "tags": [
         "configuration",
-        "environment"
+        "environment",
+        "source-code-twin"
       ],
       "details": {
         "credentialReference": false
@@ -1178,17 +1431,23 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:README.md",
       "kind": "file",
       "label": "README.md",
-      "fingerprint": "924ff98b1b66c1f7fca7",
+      "fingerprint": "61df72450ada1c8dff64",
       "path": "README.md",
       "layer": "documentation",
       "language": "markdown",
       "lineStart": 1,
-      "lineEnd": 298,
-      "summary": "문서에서 구조와 설정 제공을 담당합니다.",
+      "lineEnd": 301,
+      "area": "project-foundation",
+      "summary": "README에 필요한 프로젝트 구조와 참고 정보를 제공합니다.",
+      "userImpact": "다른 기능이 같은 기준과 설정을 사용하게 합니다.",
+      "technicalSummary": "301줄의 markdown 파일",
       "tags": [
-        "documentation"
+        "documentation",
+        "project-foundation"
       ],
       "details": {
+        "functionCount": 0,
+        "importCount": 0,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [],
@@ -1208,12 +1467,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 84,
-      "summary": "웹 API에서 /api/local-connector 요청 처리 · 함수 6개 정의 · 모듈 3개 연결을 담당합니다.",
+      "area": "source-code-twin",
+      "summary": "브라우저와 로컬 커넥터 사이에서 페어링, 상태 보고와 승인된 Git 작업 요청을 중계합니다.",
+      "userImpact": "웹이 로컬 파일 경로를 직접 읽지 않고도 제한된 코드 구조와 Git 상태만 받게 합니다.",
+      "technicalSummary": "함수 6개 · 코드 연결 3개 · API 1개",
       "tags": [
         "/api/local-connector",
-        "api"
+        "api",
+        "source-code-twin"
       ],
       "details": {
+        "functionCount": 6,
+        "importCount": 3,
         "exports": [
           "handler"
         ],
@@ -1237,12 +1502,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 5,
-      "summary": "웹 API에서 /api/mcp 요청 처리 · 모듈 1개 연결을 담당합니다.",
+      "area": "ai-integration",
+      "summary": "외부 AI의 MCP 요청을 받아 토큰을 확인한 뒤 허용된 캔버스 도구 서버로 전달합니다.",
+      "userImpact": "연결된 AI가 사용자 권한 안에서 캔버스를 읽고 조작하게 합니다.",
+      "technicalSummary": "코드 연결 1개 · API 1개",
       "tags": [
         "/api/mcp",
+        "ai-integration",
         "api"
       ],
       "details": {
+        "functionCount": 0,
+        "importCount": 1,
         "exports": [
           "default"
         ],
@@ -1266,13 +1537,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 126,
-      "summary": "웹 API에서 /api/shared-canvas 요청 처리 · canvases 데이터 접근 · 함수 5개 정의 · 모듈 3개 연결을 담당합니다.",
+      "area": "sharing-collaboration",
+      "summary": "공유 링크의 유효성, 최초 참여 동의와 링크 취소 상태를 서버에서 판정합니다.",
+      "userImpact": "로그아웃 방문자도 링크 안내를 보고 수락·거절할 수 있으며 취소된 링크는 들어오지 못하게 합니다.",
+      "technicalSummary": "함수 5개 · 코드 연결 3개 · API 1개 · DB 테이블 1개 참조",
       "tags": [
         "/api/shared-canvas",
         "api",
-        "canvases"
+        "canvases",
+        "sharing-collaboration"
       ],
       "details": {
+        "functionCount": 5,
+        "importCount": 3,
         "exports": [
           "handler"
         ],
@@ -1298,13 +1575,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 104,
-      "summary": "웹 API에서 /api/source-twin-webhook 요청 처리 · 함수 7개 정의 · 모듈 4개 연결을 담당합니다.",
+      "area": "source-code-twin",
+      "summary": "GitHub push 웹훅의 서명을 검증하고 변경된 커밋과 파일 경로만 기록합니다.",
+      "userImpact": "어떤 코드 변경이 현재 배포보다 앞서 있는지 코드 구조 화면에 보여줍니다.",
+      "technicalSummary": "함수 7개 · 코드 연결 4개 · API 1개",
       "tags": [
         "/api/source-twin-webhook",
         "WORKFLOW_CANVAS_GITHUB_WEBHOOK_SECRET",
-        "api"
+        "api",
+        "source-code-twin"
       ],
       "details": {
+        "functionCount": 7,
+        "importCount": 4,
         "exports": [
           "compactGitHubPush",
           "config",
@@ -1334,13 +1617,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 55,
-      "summary": "웹 API에서 /api/source-twin 요청 처리 · 함수 3개 정의 · 모듈 2개 연결을 담당합니다.",
+      "area": "source-code-twin",
+      "summary": "현재 배포 코드 구조, 변경 이벤트와 상태 스냅샷 조회·생성을 소유자에게 제공합니다.",
+      "userImpact": "코드 구조 대시보드가 배포 서버의 기준 자료와 이력을 읽게 합니다.",
+      "technicalSummary": "함수 3개 · 코드 연결 2개 · API 1개",
       "tags": [
         "/api/source-twin",
         "WORKFLOW_CANVAS_OWNER_USER_ID",
-        "api"
+        "api",
+        "source-code-twin"
       ],
       "details": {
+        "functionCount": 3,
+        "importCount": 2,
         "exports": [
           "handler"
         ],
@@ -1366,7 +1655,10 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 175,
-      "summary": "웹 API에서 /api/system-runtime 요청 처리 · canvases 데이터 접근 · 함수 9개 정의 · 모듈 5개 연결을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "시스템 지도에서 선택한 파츠의 실제 운영 상태를 제한된 검사 목록으로 확인하고 결과를 저장합니다.",
+      "userImpact": "LIVE 여부가 단순 선언이 아니라 방금 확인한 운영 증거를 뜻하게 합니다.",
+      "technicalSummary": "함수 9개 · 코드 연결 5개 · API 1개 · DB 테이블 1개 참조",
       "tags": [
         "/api/system-runtime",
         "NODE_ENV",
@@ -1378,9 +1670,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "VERCEL_URL",
         "WORKFLOW_CANVAS_OWNER_USER_ID",
         "api",
-        "canvases"
+        "canvases",
+        "digital-twin-engine"
       ],
       "details": {
+        "functionCount": 9,
+        "importCount": 5,
         "exports": [
           "handler"
         ],
@@ -1406,6 +1701,36 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "file:index.html",
+      "kind": "file",
+      "label": "index.html",
+      "fingerprint": "093cb8feece3994550d3",
+      "path": "index.html",
+      "layer": "documentation",
+      "language": "html",
+      "lineStart": 1,
+      "lineEnd": 15,
+      "area": "project-foundation",
+      "summary": "index에 필요한 프로젝트 구조와 참고 정보를 제공합니다.",
+      "userImpact": "다른 기능이 같은 기준과 설정을 사용하게 합니다.",
+      "technicalSummary": "15줄의 html 파일",
+      "tags": [
+        "documentation",
+        "project-foundation"
+      ],
+      "details": {
+        "functionCount": 0,
+        "importCount": 0,
+        "exports": [],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "parseStatus": "parsed"
+      }
+    },
+    {
       "id": "file:mcp/dataAccessAudit.js",
       "kind": "file",
       "label": "mcp/dataAccessAudit.js",
@@ -1415,12 +1740,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 40,
-      "summary": "AI 연결 서버에서 server_data_access_audit 데이터 접근 · 함수 3개 정의을 담당합니다.",
+      "area": "security-privacy",
+      "summary": "관리자 권한으로 사용자 캔버스 자료에 접근한 이유와 결과를 감사 기록으로 남깁니다.",
+      "userImpact": "운영 접근이 조용히 일어나지 않도록 추적 가능한 근거를 만듭니다.",
+      "technicalSummary": "함수 3개 · DB 테이블 1개 참조",
       "tags": [
         "mcp",
+        "security-privacy",
         "server_data_access_audit"
       ],
       "details": {
+        "functionCount": 3,
+        "importCount": 0,
         "exports": [
           "DataAccessAuditError",
           "dataAccessAuditRequired",
@@ -1446,11 +1777,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 932,
-      "summary": "AI 연결 서버에서 함수 29개 정의을 담당합니다.",
+      "area": "canvas-model",
+      "summary": "여러 노드와 연결선을 계층·방사형 같은 배치로 정리할 좌표를 계산합니다.",
+      "userImpact": "AI가 만든 구조도도 겹치지 않고 읽기 쉬운 위치에 놓이게 합니다.",
+      "technicalSummary": "함수 29개",
       "tags": [
+        "canvas-model",
         "mcp"
       ],
       "details": {
+        "functionCount": 29,
+        "importCount": 0,
         "exports": [
           "SIZE",
           "avoidEdgeCrossings",
@@ -1484,14 +1821,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 456,
-      "summary": "AI 연결 서버에서 local_connector_operation_events, local_connector_operations, local_connectors 데이터 접근 · 함수 19개 정의 · 모듈 4개 연결을 담당합니다.",
+      "area": "source-code-twin",
+      "summary": "로컬 커넥터 등록, heartbeat, Git 동기화 계획과 실행 결과를 서버에 보관합니다.",
+      "userImpact": "클라우드가 임의 명령을 보내지 못하고 승인된 Git 작업만 로컬에서 실행되게 합니다.",
+      "technicalSummary": "함수 19개 · 코드 연결 4개 · DB 테이블 3개 참조",
       "tags": [
         "local_connector_operation_events",
         "local_connector_operations",
         "local_connectors",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
+        "functionCount": 19,
+        "importCount": 4,
         "exports": [
           "LOCAL_GIT_SYNC_CONFIRMATION",
           "LocalConnectorError",
@@ -1528,11 +1871,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 114,
-      "summary": "AI 연결 서버에서 함수 4개 정의 · 모듈 2개 연결을 담당합니다.",
+      "area": "security-privacy",
+      "summary": "AI나 외부 요청에서 들어온 텍스트·HTML·URL의 위험한 내용을 서버에서도 제거합니다.",
+      "userImpact": "브라우저 검사를 우회한 악성 입력이 저장되는 것을 막습니다.",
+      "technicalSummary": "함수 4개 · 코드 연결 2개",
       "tags": [
-        "mcp"
+        "mcp",
+        "security-privacy"
       ],
       "details": {
+        "functionCount": 4,
+        "importCount": 2,
         "exports": [
           "sanitizeExternalUrl",
           "sanitizeHtml",
@@ -1556,11 +1905,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 683,
-      "summary": "AI 연결 서버에서 함수 8개 정의 · 모듈 8개 연결을 담당합니다.",
+      "area": "ai-integration",
+      "summary": "AI에게 공개할 캔버스 도구의 이름, 입력 형식과 실행 함수를 등록합니다.",
+      "userImpact": "AI가 할 수 있는 작업의 전체 목록과 경계를 결정합니다.",
+      "technicalSummary": "함수 8개 · 코드 연결 8개",
       "tags": [
+        "ai-integration",
         "mcp"
       ],
       "details": {
+        "functionCount": 8,
+        "importCount": 8,
         "exports": [
           "buildServer",
           "handler"
@@ -1583,7 +1938,10 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 380,
-      "summary": "AI 연결 서버에서 canvas_shares, canvases, profiles, share_members 데이터 접근 · 함수 21개 정의 · 모듈 6개 연결을 담당합니다.",
+      "area": "sharing-collaboration",
+      "summary": "MCP에서 공유 참여자 목록과 초대 범위를 계산하고 시야 제한을 적용합니다.",
+      "userImpact": "AI로 조회해도 캔버스 참여자끼리 허용된 정보만 보이게 합니다.",
+      "technicalSummary": "함수 21개 · 코드 연결 6개 · DB 테이블 4개 참조",
       "tags": [
         "SUPABASE_SERVICE_ROLE_KEY",
         "SUPABASE_URL",
@@ -1591,9 +1949,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "canvases",
         "mcp",
         "profiles",
-        "share_members"
+        "share_members",
+        "sharing-collaboration"
       ],
       "details": {
+        "functionCount": 21,
+        "importCount": 6,
         "exports": [
           "admin",
           "applySharedCanvasUpdate",
@@ -1636,12 +1997,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 404,
-      "summary": "AI 연결 서버에서 system_runtime_observations 데이터 접근 · 함수 21개 정의 · 모듈 6개 연결을 담당합니다.",
+      "area": "source-code-twin",
+      "summary": "소스 트윈 상태 스냅샷의 미리보기·승인·저장·비교를 서버에서 수행합니다.",
+      "userImpact": "특정 배포 시점의 코드·DB·운영 상태를 나중에 다시 비교하게 합니다.",
+      "technicalSummary": "함수 21개 · 코드 연결 6개 · DB 테이블 1개 참조",
       "tags": [
         "mcp",
+        "source-code-twin",
         "system_runtime_observations"
       ],
       "details": {
+        "functionCount": 21,
+        "importCount": 6,
         "exports": [
           "APPLY_SOURCE_TWIN_OPERATION_RPC",
           "SOURCE_TWIN_EVENT_TABLE",
@@ -1679,11 +2046,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 1601,
-      "summary": "AI 연결 서버에서 canvas_shares, canvases, mcp_tokens, share_members 데이터 접근 · canvas_relation_metadata_guard_ready DB 함수 호출 · 함수 67개 정의 · 모듈 12개 연결을 담당합니다.",
+      "area": "ai-integration",
+      "summary": "AI 도구가 캔버스·노드·연결선을 읽고 바꿀 때 소유권과 공유 범위를 검사하고 Supabase에 반영합니다.",
+      "userImpact": "AI가 화면과 같은 권한 규칙을 지키며 실제 캔버스를 조작하게 합니다.",
+      "technicalSummary": "함수 67개 · 코드 연결 12개 · DB 테이블 5개 참조 · DB 함수 1개 참조",
       "tags": [
         "SUPABASE_SERVICE_ROLE_KEY",
         "SUPABASE_URL",
         "WORKFLOW_CANVAS_OWNER_USER_ID",
+        "ai-integration",
         "canvas_shares",
         "canvases",
         "mcp",
@@ -1692,6 +2063,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "user_prefs"
       ],
       "details": {
+        "functionCount": 67,
+        "importCount": 12,
         "exports": [
           "applyEdgeRelationPatch",
           "applySourceTwinSnapshot",
@@ -1762,11 +2135,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 202,
-      "summary": "AI 연결 서버에서 함수 10개 정의 · 모듈 1개 연결을 담당합니다.",
+      "area": "security-privacy",
+      "summary": "실행 전에 대상·변경 범위·만료 시각을 고정한 계획에 서명하고 적용 시 같은 계획인지 검증합니다.",
+      "userImpact": "오래되거나 변조된 승인으로 다른 작업이 실행되는 것을 막습니다.",
+      "technicalSummary": "함수 10개 · 코드 연결 1개",
       "tags": [
-        "mcp"
+        "mcp",
+        "security-privacy"
       ],
       "details": {
+        "functionCount": 10,
+        "importCount": 1,
         "exports": [
           "SystemOperationPlanError",
           "createSignedSystemOperationPlan",
@@ -1791,11 +2170,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 738,
-      "summary": "AI 연결 서버에서 함수 22개 정의 · 모듈 3개 연결을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "Vercel·Supabase·MCP 같은 시스템의 허용된 운영 지표를 수집하고 민감한 값을 제거합니다.",
+      "userImpact": "시스템 노드의 운영 상태를 실제 데이터로 채우되 사용자 본문과 비밀값은 내보내지 않습니다.",
+      "technicalSummary": "함수 22개 · 코드 연결 3개",
       "tags": [
+        "digital-twin-engine",
         "mcp"
       ],
       "details": {
+        "functionCount": 22,
+        "importCount": 3,
         "exports": [
           "SYSTEM_RUNTIME_OBSERVATION_TABLE",
           "SystemRuntimeCheckError",
@@ -1827,11 +2212,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "json",
       "lineStart": 1,
       "lineEnd": 41,
-      "summary": "빌드·배포 설정에서 구조와 설정 제공을 담당합니다.",
+      "area": "deployment-operations",
+      "summary": "개발 코드를 검사·빌드해 실제 웹 서비스로 실행할 설정과 명령을 정의합니다.",
+      "userImpact": "잘못된 빌드가 배포되는 것을 막고 배포 환경의 실행 방식을 결정합니다.",
+      "technicalSummary": "41줄의 json 파일",
       "tags": [
-        "deployment"
+        "deployment",
+        "deployment-operations"
       ],
       "details": {
+        "functionCount": 0,
+        "importCount": 0,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [],
@@ -1851,11 +2242,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 5,
-      "summary": "문서에서 모듈 1개 연결을 담당합니다.",
+      "area": "testing-quality",
+      "summary": "배포 전에 개인정보 감사 설정과 사용자 본문 접근 경로의 필수 보호 장치를 검사합니다.",
+      "userImpact": "개인정보 보호 조건이 빠진 빌드가 출시되는 것을 차단합니다.",
+      "technicalSummary": "코드 연결 1개",
       "tags": [
-        "documentation"
+        "documentation",
+        "testing-quality"
       ],
       "details": {
+        "functionCount": 0,
+        "importCount": 1,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [],
@@ -1875,11 +2272,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 96,
-      "summary": "문서에서 함수 2개 정의 · 모듈 5개 연결을 담당합니다.",
+      "area": "source-code-twin",
+      "summary": "현재 저장소를 스캔해 배포에 포함할 소스 트윈 manifest를 생성하고 오래되지 않았는지 검사합니다.",
+      "userImpact": "배포된 코드 구조 설명이 실제 커밋과 함께 갱신되게 합니다.",
+      "technicalSummary": "함수 2개 · 코드 연결 5개",
       "tags": [
-        "documentation"
+        "documentation",
+        "source-code-twin"
       ],
       "details": {
+        "functionCount": 2,
+        "importCount": 5,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [],
@@ -1899,11 +2302,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 55,
-      "summary": "문서에서 모듈 5개 연결을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "시스템 발견 결과를 배포 manifest로 만들고 현재 코드와 일치하는지 검사합니다.",
+      "userImpact": "시스템 지도 검사의 기준 자료가 배포 시점 코드와 어긋나지 않게 합니다.",
+      "technicalSummary": "코드 연결 5개",
       "tags": [
+        "digital-twin-engine",
         "documentation"
       ],
       "details": {
+        "functionCount": 0,
+        "importCount": 5,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [],
@@ -1923,13 +2332,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 424,
-      "summary": "문서에서 함수 21개 정의 · 모듈 9개 연결을 담당합니다.",
+      "area": "source-code-twin",
+      "summary": "사용자 Mac에서 허용된 저장소만 읽어 코드 구조와 Git 상태를 서버에 주기적으로 보고하고 승인된 동기화를 실행합니다.",
+      "userImpact": "웹 서버에 로컬 파일 접근 권한을 주지 않고도 캔버스에서 실제 로컬 상태를 확인하게 합니다.",
+      "technicalSummary": "함수 21개 · 코드 연결 9개",
       "tags": [
         "WORKFLOW_CANVAS_LOCAL_CONNECTOR_TOKEN",
         "WORKFLOW_CANVAS_URL",
-        "documentation"
+        "documentation",
+        "source-code-twin"
       ],
       "details": {
+        "functionCount": 21,
+        "importCount": 9,
         "exports": [
           "LOCAL_CONNECTOR_AGENT_VERSION",
           "buildLocalConnectorManifest",
@@ -1957,17 +2372,23 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:scripts/source-twin-scanner.mjs",
       "kind": "file",
       "label": "scripts/source-twin-scanner.mjs",
-      "fingerprint": "29af202e7890e65711be",
+      "fingerprint": "7d5831d4f7b7cfe2b8b6",
       "path": "scripts/source-twin-scanner.mjs",
       "layer": "documentation",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 725,
-      "summary": "문서에서 함수 40개 정의 · 모듈 6개 연결을 담당합니다.",
+      "lineEnd": 722,
+      "area": "source-code-twin",
+      "summary": "저장소 파일을 AST로 읽어 파일·함수·API·DB·보안 참조를 증거 기반 소스 트윈으로 만듭니다.",
+      "userImpact": "코드가 바뀔 때 코드 구조 화면의 실체와 연결 관계를 자동 갱신합니다.",
+      "technicalSummary": "함수 36개 · 코드 연결 8개",
       "tags": [
-        "documentation"
+        "documentation",
+        "source-code-twin"
       ],
       "details": {
+        "functionCount": 36,
+        "importCount": 8,
         "exports": [
           "SOURCE_TWIN_MANIFEST_PATH",
           "buildSourceTwinManifest",
@@ -1987,6 +2408,44 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "file:scripts/source-twin-semantics.mjs",
+      "kind": "file",
+      "label": "scripts/source-twin-semantics.mjs",
+      "fingerprint": "751dfff240ba90ab61c6",
+      "path": "scripts/source-twin-semantics.mjs",
+      "layer": "documentation",
+      "language": "javascript",
+      "lineStart": 1,
+      "lineEnd": 378,
+      "area": "source-code-twin",
+      "summary": "발견된 코드 증거를 비개발자가 이해할 역할 설명과 제품 영역으로 바꾸는 규칙을 제공합니다.",
+      "userImpact": "함수 개수 같은 무의미한 요약 대신 제품에서 실제 하는 일을 보여줍니다.",
+      "technicalSummary": "함수 14개",
+      "tags": [
+        "documentation",
+        "source-code-twin"
+      ],
+      "details": {
+        "functionCount": 14,
+        "importCount": 0,
+        "exports": [
+          "areaForSourceResource",
+          "explainDatabaseResource",
+          "explainEnvironmentVariable",
+          "explainSourceFile",
+          "explainSourceFunction",
+          "sourceTwinProjectIdentity",
+          "sourceTwinTechnicalSummary"
+        ],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "parseStatus": "parsed"
+      }
+    },
+    {
       "id": "file:scripts/system-discovery.mjs",
       "kind": "file",
       "label": "scripts/system-discovery.mjs",
@@ -1996,11 +2455,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 443,
-      "summary": "문서에서 함수 17개 정의 · 모듈 5개 연결을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "코드·SQL·MCP 도구·환경변수 이름을 스캔해 Workflow Canvas 시스템 자원 목록을 만듭니다.",
+      "userImpact": "시스템 지도에서 빠진 실제 구성 요소를 자동으로 발견하게 합니다.",
+      "technicalSummary": "함수 17개 · 코드 연결 5개",
       "tags": [
+        "digital-twin-engine",
         "documentation"
       ],
       "details": {
+        "functionCount": 17,
+        "importCount": 5,
         "exports": [
           "DISCOVERY_MANIFEST_PATH",
           "buildDiscoveryManifest",
@@ -2028,11 +2493,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 122,
-      "summary": "검증에서 함수 2개 정의 · 모듈 6개 연결을 담당합니다.",
+      "area": "testing-quality",
+      "summary": "local connector agent 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.",
+      "userImpact": "회귀나 보안 약화가 있는 빌드의 배포를 막습니다.",
+      "technicalSummary": "함수 2개 · 코드 연결 6개",
       "tags": [
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
+        "functionCount": 2,
+        "importCount": 6,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [],
@@ -2052,11 +2523,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 3552,
-      "summary": "검증에서 함수 32개 정의 · 모듈 35개 연결을 담당합니다.",
+      "area": "testing-quality",
+      "summary": "mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.",
+      "userImpact": "회귀나 보안 약화가 있는 빌드의 배포를 막습니다.",
+      "technicalSummary": "함수 32개 · 코드 연결 35개",
       "tags": [
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
+        "functionCount": 32,
+        "importCount": 35,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [],
@@ -2076,11 +2553,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 286,
-      "summary": "검증에서 함수 1개 정의 · 모듈 2개 연결을 담당합니다.",
+      "area": "testing-quality",
+      "summary": "operation lifecycle 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.",
+      "userImpact": "회귀나 보안 약화가 있는 빌드의 배포를 막습니다.",
+      "technicalSummary": "함수 1개 · 코드 연결 2개",
       "tags": [
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
+        "functionCount": 1,
+        "importCount": 2,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [],
@@ -2094,18 +2577,24 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:scripts/test-source-twin.mjs",
       "kind": "file",
       "label": "scripts/test-source-twin.mjs",
-      "fingerprint": "955a7eef206e95276630",
+      "fingerprint": "9377333c1adc6656a02c",
       "path": "scripts/test-source-twin.mjs",
       "layer": "test",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 639,
-      "summary": "검증에서 {\"zen\":\"source twin\"} 데이터 접근 · 함수 4개 정의 · 모듈 16개 연결을 담당합니다.",
+      "lineEnd": 670,
+      "area": "testing-quality",
+      "summary": "source twin 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.",
+      "userImpact": "회귀나 보안 약화가 있는 빌드의 배포를 막습니다.",
+      "technicalSummary": "함수 4개 · 코드 연결 17개 · DB 테이블 1개 참조",
       "tags": [
         "test",
+        "testing-quality",
         "{\"zen\":\"source twin\"}"
       ],
       "details": {
+        "functionCount": 4,
+        "importCount": 17,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [
@@ -2127,11 +2616,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 171,
-      "summary": "검증에서 함수 1개 정의 · 모듈 2개 연결을 담당합니다.",
+      "area": "testing-quality",
+      "summary": "sql security 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.",
+      "userImpact": "회귀나 보안 약화가 있는 빌드의 배포를 막습니다.",
+      "technicalSummary": "함수 1개 · 코드 연결 2개",
       "tags": [
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
+        "functionCount": 1,
+        "importCount": 2,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [],
@@ -2151,11 +2646,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 231,
-      "summary": "검증에서 함수 2개 정의 · 모듈 10개 연결을 담당합니다.",
+      "area": "testing-quality",
+      "summary": "twin adapter contract 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.",
+      "userImpact": "회귀나 보안 약화가 있는 빌드의 배포를 막습니다.",
+      "technicalSummary": "함수 2개 · 코드 연결 10개",
       "tags": [
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
+        "functionCount": 2,
+        "importCount": 10,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [],
@@ -2175,11 +2676,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 233,
-      "summary": "검증에서 모듈 7개 연결을 담당합니다.",
+      "area": "testing-quality",
+      "summary": "twin build 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.",
+      "userImpact": "회귀나 보안 약화가 있는 빌드의 배포를 막습니다.",
+      "technicalSummary": "코드 연결 7개",
       "tags": [
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
+        "functionCount": 0,
+        "importCount": 7,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [],
@@ -2199,11 +2706,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 525,
-      "summary": "공통 도메인 규칙에서 함수 20개 정의 · 모듈 2개 연결을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "검토가 승인된 디지털 트윈 변경만 캔버스 자료에 적용하고 충돌을 검사합니다.",
+      "userImpact": "미리보기와 다른 오래된 수정안이 캔버스를 덮어쓰는 일을 막습니다.",
+      "technicalSummary": "함수 20개 · 코드 연결 2개",
       "tags": [
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
+        "functionCount": 20,
+        "importCount": 2,
         "exports": [
           "DIGITAL_TWIN_PROPOSAL_SCHEMA_VERSION",
           "DigitalTwinProposalError",
@@ -2234,11 +2747,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 207,
-      "summary": "공통 도메인 규칙에서 함수 13개 정의을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "트윈 변경안의 적용·무시·보류 결정을 저장하고 새 검사에서도 같은 결정을 찾습니다.",
+      "userImpact": "검토한 항목이 새로고침할 때 계속 처음 상태로 돌아가지 않게 합니다.",
+      "technicalSummary": "함수 13개",
       "tags": [
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
+        "functionCount": 13,
+        "importCount": 0,
         "exports": [
           "DIGITAL_TWIN_REVIEW_SCHEMA_VERSION",
           "clearDigitalTwinReviewDecision",
@@ -2267,11 +2786,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 34,
-      "summary": "공통 도메인 규칙에서 함수 3개 정의을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "연결선 위 조작의 방향, 실행 상태와 완료 표시를 표준 화면 정보로 바꿉니다.",
+      "userImpact": "자동 흐름과 사용자가 눌러야 하는 수동 조작을 다르게 보이게 합니다.",
+      "technicalSummary": "함수 3개",
       "tags": [
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
+        "functionCount": 3,
+        "importCount": 0,
         "exports": [
           "EDGE_OPERATION_STATUS_DEFS",
           "edgeOperationIsActive",
@@ -2290,17 +2815,23 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:shared/localConnector.js",
       "kind": "file",
       "label": "shared/localConnector.js",
-      "fingerprint": "4253b24a5106028331a9",
+      "fingerprint": "8536aaefb2c74a14bba3",
       "path": "shared/localConnector.js",
       "layer": "shared",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 303,
-      "summary": "공통 도메인 규칙에서 함수 15개 정의을 담당합니다.",
+      "lineEnd": 326,
+      "area": "source-code-twin",
+      "summary": "로컬 커넥터가 클라우드로 보낼 수 있는 코드 메타데이터와 Git 동기화 방향을 제한·판정합니다.",
+      "userImpact": "소스 본문과 토큰을 보내지 않고 파일 역할·Git 상태만 안전하게 보여줍니다.",
+      "technicalSummary": "함수 15개",
       "tags": [
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
+        "functionCount": 15,
+        "importCount": 0,
         "exports": [
           "GITHUB_GIT_SYNC_PART_ID",
           "LOCAL_CONNECTOR_ONLINE_MS",
@@ -2334,11 +2865,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 803,
-      "summary": "공통 도메인 규칙에서 함수 48개 정의 · 모듈 2개 연결을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "직접 클릭·자동화·미래 AI가 실행하는 조작을 계획, 승인, 실행, 확인, 감사, 복구 순서로 제한합니다.",
+      "userImpact": "실제 시스템 조작이 누가 시작했든 같은 안전 절차를 건너뛰지 못하게 합니다.",
+      "technicalSummary": "함수 48개 · 코드 연결 2개",
       "tags": [
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
+        "functionCount": 48,
+        "importCount": 2,
         "exports": [
           "OPERATION_CONTRACT_SCHEMA_VERSION",
           "OPERATION_INITIATOR_KINDS",
@@ -2382,11 +2919,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 33,
-      "summary": "공통 도메인 규칙에서 함수 1개 정의을 담당합니다.",
+      "area": "security-privacy",
+      "summary": "운영자가 어떤 사용자 정보에 접근할 수 있는지와 감사 준비 상태를 표준 항목으로 정의합니다.",
+      "userImpact": "개인정보 보호 주장을 기능별 근거와 함께 표시할 토대를 만듭니다.",
+      "technicalSummary": "함수 1개",
       "tags": [
+        "security-privacy",
         "shared"
       ],
       "details": {
+        "functionCount": 1,
+        "importCount": 0,
         "exports": [
           "CANVAS_ENCRYPTION_TRANSITION",
           "CANVAS_PRIVACY_CAPABILITIES",
@@ -2410,11 +2953,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 206,
-      "summary": "공통 도메인 규칙에서 함수 9개 정의 · 모듈 1개 연결을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "연결선이 호출·읽기·쓰기·동기화 중 무엇인지와 근거·신뢰도를 정의합니다.",
+      "userImpact": "같아 보이는 연결선도 실제 관계와 방향을 명확히 구분하게 합니다.",
+      "technicalSummary": "함수 9개 · 코드 연결 1개",
       "tags": [
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
+        "functionCount": 9,
+        "importCount": 1,
         "exports": [
           "RELATION_CONFIDENCE_DEFS",
           "RELATION_DEFS",
@@ -2449,11 +2998,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 100,
-      "summary": "공통 도메인 규칙에서 함수 9개 정의을 담당합니다.",
+      "area": "sharing-collaboration",
+      "summary": "캔버스·그룹·노드 초대 권한을 합쳐 실제로 볼 수 있고 편집할 수 있는 범위를 계산합니다.",
+      "userImpact": "같은 팀 참여자는 서로 보되 시야 제한을 우회해 본문을 읽지는 못하게 합니다.",
+      "technicalSummary": "함수 9개",
       "tags": [
-        "shared"
+        "shared",
+        "sharing-collaboration"
       ],
       "details": {
+        "functionCount": 9,
+        "importCount": 0,
         "exports": [
           "composeSharePermission",
           "editableGroupIdSet",
@@ -2477,17 +3032,23 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:shared/sourceTwin.js",
       "kind": "file",
       "label": "shared/sourceTwin.js",
-      "fingerprint": "faceee7c52048587bb8f",
+      "fingerprint": "8f92b80f93d635d59b8e",
       "path": "shared/sourceTwin.js",
       "layer": "shared",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 209,
-      "summary": "공통 도메인 규칙에서 함수 13개 정의 · 모듈 1개 연결을 담당합니다.",
+      "lineEnd": 218,
+      "area": "source-code-twin",
+      "summary": "코드 구조 관점, 검색, GitHub 코드 링크와 배포별 상태 스냅샷 형식을 정의합니다.",
+      "userImpact": "코드 구조 화면과 서버가 같은 소스 트윈 자료를 이해하게 합니다.",
+      "technicalSummary": "함수 13개 · 코드 연결 1개",
       "tags": [
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
+        "functionCount": 13,
+        "importCount": 1,
         "exports": [
           "SOURCE_TWIN_OPERATION_CONFIRMATION",
           "SOURCE_TWIN_PERSPECTIVES",
@@ -2510,6 +3071,42 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "file:shared/sourceTwinSemantics.js",
+      "kind": "file",
+      "label": "shared/sourceTwinSemantics.js",
+      "fingerprint": "dc6db3fe0edc9241f9c0",
+      "path": "shared/sourceTwinSemantics.js",
+      "layer": "shared",
+      "language": "javascript",
+      "lineStart": 1,
+      "lineEnd": 142,
+      "area": "source-code-twin",
+      "summary": "코드 파일을 제품 영역별로 묶는 공통 분류 이름과 표시 순서를 정의합니다.",
+      "userImpact": "기능·코드 목록이 파일 경로 나열이 아니라 실제 제품 영역 순서로 보이게 합니다.",
+      "technicalSummary": "함수 5개",
+      "tags": [
+        "shared",
+        "source-code-twin"
+      ],
+      "details": {
+        "functionCount": 5,
+        "importCount": 0,
+        "exports": [
+          "SOURCE_TWIN_AREA_DEFINITIONS",
+          "groupSourceTwinEntitiesByArea",
+          "sourceTwinAreaCatalog",
+          "sourceTwinAreaDefinition",
+          "sourceTwinAreaId"
+        ],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "parseStatus": "parsed"
+      }
+    },
+    {
       "id": "file:shared/systemObservationCatalog.js",
       "kind": "file",
       "label": "shared/systemObservationCatalog.js",
@@ -2519,11 +3116,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 155,
-      "summary": "공통 도메인 규칙에서 함수 7개 정의을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "각 시스템 파츠에서 조회 가능한 운영 정보, 보호되는 정보와 추가 연결이 필요한 정보를 정의합니다.",
+      "userImpact": "사용자가 파츠에서 무엇을 더 볼 수 있고 왜 아직 못 보는지 알게 합니다.",
+      "technicalSummary": "함수 7개",
       "tags": [
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
+        "functionCount": 7,
+        "importCount": 0,
         "exports": [
           "SYSTEM_OBSERVATION_AVAILABILITY_DEFS",
           "SYSTEM_OBSERVATION_CATALOGS",
@@ -2552,11 +3155,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 120,
-      "summary": "공통 도메인 규칙에서 함수 5개 정의 · 모듈 2개 연결을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "앱·서버·DB·사람 같은 시스템 노드 종류와 실재성 표시 규칙을 정의합니다.",
+      "userImpact": "정보성 노드와 실제 시스템에 연결된 노드를 구분하게 합니다.",
+      "technicalSummary": "함수 5개 · 코드 연결 2개",
       "tags": [
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
+        "functionCount": 5,
+        "importCount": 2,
         "exports": [
           "SYSTEM_ENVIRONMENT_DEFS",
           "SYSTEM_KIND_DEFS",
@@ -2586,11 +3195,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 130,
-      "summary": "공통 도메인 규칙에서 함수 10개 정의을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "시스템 노드 파츠의 종류, 연결점과 운영 상태 필드를 공통 규칙으로 정의합니다.",
+      "userImpact": "파츠가 단순 장식이 아니라 확인·입출력·조작 능력을 뜻하게 합니다.",
+      "technicalSummary": "함수 10개",
       "tags": [
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
+        "functionCount": 10,
+        "importCount": 0,
         "exports": [
           "SYSTEM_PART_EXPOSURE_DEFS",
           "SYSTEM_PART_KIND_DEFS",
@@ -2620,11 +3235,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 538,
-      "summary": "공통 도메인 규칙에서 함수 24개 정의 · 모듈 2개 연결을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "운영 상태 검사 요청과 결과, 관측 신선도와 LIVE 판정 기준을 표준화합니다.",
+      "userImpact": "오래된 결과가 계속 살아 있는 것처럼 표시되지 않게 합니다.",
+      "technicalSummary": "함수 24개 · 코드 연결 2개",
       "tags": [
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
+        "functionCount": 24,
+        "importCount": 2,
         "exports": [
           "SYSTEM_CAPABILITY_OPERATION_DEFS",
           "SYSTEM_RUNTIME_CAPABILITY_DEFS",
@@ -2663,11 +3284,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 164,
-      "summary": "공통 도메인 규칙에서 함수 7개 정의을 담당합니다.",
+      "area": "security-privacy",
+      "summary": "로컬·클라우드·외부 SaaS 같은 신뢰 영역과 그 경계를 통과하는 게이트웨이를 검사합니다.",
+      "userImpact": "외부에서 로컬이나 개인정보로 들어올 수 있는 경로와 설명되지 않은 보안 구멍을 표시하게 합니다.",
+      "technicalSummary": "함수 7개",
       "tags": [
+        "security-privacy",
         "shared"
       ],
       "details": {
+        "functionCount": 7,
+        "importCount": 0,
         "exports": [
           "TRUST_GATEWAY_DIRECTION_DEFS",
           "TRUST_GATEWAY_EXPOSURE_DEFS",
@@ -2696,11 +3323,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 270,
-      "summary": "공통 도메인 규칙에서 함수 16개 정의 · 모듈 1개 연결을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "새 프로그램 종류를 연결하는 어댑터가 제공해야 할 발견·권한·조작 계약을 검증합니다.",
+      "userImpact": "두 번째 앱을 추가할 때 핵심 엔진을 고치지 않고도 안전하게 확장하게 합니다.",
+      "technicalSummary": "함수 16개 · 코드 연결 1개",
       "tags": [
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
+        "functionCount": 16,
+        "importCount": 1,
         "exports": [
           "TWIN_ADAPTER_CONTRACT_VERSION",
           "TWIN_ENGINE_SCHEMA_VERSION",
@@ -2728,11 +3361,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 737,
-      "summary": "공통 도메인 규칙에서 함수 36개 정의 · 모듈 6개 연결을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "서로 다른 앱에서 발견한 시스템을 엔티티·파츠·관계·신뢰 경계·증거라는 공통 형식으로 정규화합니다.",
+      "userImpact": "어떤 프로그램을 가져와도 같은 캔버스 문법으로 표현할 수 있게 하는 엔진의 중심 규격입니다.",
+      "technicalSummary": "함수 36개 · 코드 연결 6개",
       "tags": [
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
+        "functionCount": 36,
+        "importCount": 6,
         "exports": [
           "TWIN_BUILD_SCHEMA_VERSION",
           "TwinBuildError",
@@ -2757,11 +3396,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 380,
-      "summary": "공통 도메인 규칙에서 함수 18개 정의 · 모듈 5개 연결을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "표준 트윈의 엔티티·파츠·관계를 실제 캔버스 노드와 연결선으로 바꾸고 다시 대응시킵니다.",
+      "userImpact": "엔진 결과가 눈에 보이는 캔버스로 실체화되게 합니다.",
+      "technicalSummary": "함수 18개 · 코드 연결 5개",
       "tags": [
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
+        "functionCount": 18,
+        "importCount": 5,
         "exports": [
           "createTwinBuildFromCanvasTemplate",
           "findTwinBuildEntityNode",
@@ -2788,11 +3433,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 322,
-      "summary": "공통 도메인 규칙에서 함수 9개 정의 · 모듈 5개 연결을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "새로 발견한 디지털 트윈과 현재 캔버스를 비교해 추가·변경·삭제 검토안을 만듭니다.",
+      "userImpact": "재검사할 때 사용자의 배치와 메모를 지키면서 실제 변경만 검토하게 합니다.",
+      "technicalSummary": "함수 9개 · 코드 연결 5개",
       "tags": [
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
+        "functionCount": 9,
+        "importCount": 5,
         "exports": [
           "TWIN_BUILD_RECONCILIATION_SCHEMA_VERSION",
           "reconcileTwinBuild"
@@ -2815,11 +3466,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 473,
-      "summary": "공통 도메인 규칙에서 함수 8개 정의 · 모듈 4개 연결을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "Workflow Canvas 앱의 브라우저·서버·DB·저장소·배포 구조를 나타내는 기준 시스템 지도를 정의합니다.",
+      "userImpact": "앱 자체를 캔버스에서 개발·점검할 출발 지도를 만듭니다.",
+      "technicalSummary": "함수 8개 · 코드 연결 4개",
       "tags": [
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
+        "functionCount": 8,
+        "importCount": 4,
         "exports": [
           "createWorkflowCanvasSystemMap"
         ],
@@ -2841,11 +3498,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 131,
-      "summary": "공통 도메인 규칙에서 모듈 2개 연결을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "Git 동기화와 상태 스냅샷처럼 현재 허용된 실제 조작의 대상·위험·검증 조건을 선언합니다.",
+      "userImpact": "화면 버튼이 임의 명령이 아니라 정해진 능력만 실행하게 합니다.",
+      "technicalSummary": "코드 연결 2개",
       "tags": [
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
+        "functionCount": 0,
+        "importCount": 2,
         "exports": [
           "WORKFLOW_GIT_SYNC_AUDIT_CLASS_ID",
           "WORKFLOW_GIT_SYNC_CONFIRMATION",
@@ -2881,11 +3544,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 76,
-      "summary": "공통 도메인 규칙에서 함수 3개 정의을 담당합니다.",
+      "area": "source-code-twin",
+      "summary": "시스템 지도의 로컬 저장소·GitHub·Vercel 파츠를 알맞은 코드 구조 화면과 조작에 연결합니다.",
+      "userImpact": "노드 위 코드 파츠를 눌렀을 때 관련 없는 탭이 아니라 해당 저장소 정보가 열리게 합니다.",
+      "technicalSummary": "함수 3개",
       "tags": [
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
+        "functionCount": 3,
+        "importCount": 0,
         "exports": [
           "WORKFLOW_GIT_SYNC_EDGE_ID",
           "WORKFLOW_SOURCE_TWIN_NODE_IDS",
@@ -2913,11 +3582,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 403,
-      "summary": "공통 도메인 규칙에서 함수 13개 정의 · 모듈 2개 연결을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "코드·DB·MCP·환경설정의 현재 발견 결과와 시스템 지도 기준을 비교합니다.",
+      "userImpact": "지도에 빠진 자원이나 실제와 달라진 관계를 검토 항목으로 찾습니다.",
+      "technicalSummary": "함수 13개 · 코드 연결 2개",
       "tags": [
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
+        "functionCount": 13,
+        "importCount": 2,
         "exports": [
           "LEGACY_SYSTEM_MAP_BASELINE_ID",
           "WORKFLOW_SYSTEM_DISCOVERY_SOURCE_ID",
@@ -2943,11 +3618,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 147,
-      "summary": "공통 도메인 규칙에서 함수 6개 정의을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "기존 시스템 지도 연결선에서 빠진 관계 메타데이터만 골라 복구 계획을 만듭니다.",
+      "userImpact": "이미 사람이 수정한 설명은 보호하면서 누락된 근거만 복원하게 합니다.",
+      "technicalSummary": "함수 6개",
       "tags": [
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
+        "functionCount": 6,
+        "importCount": 0,
         "exports": [
           "WORKFLOW_RELATION_METADATA_FIELDS",
           "WORKFLOW_RELATION_REPAIR_CONFIRMATION",
@@ -2974,11 +3655,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 666,
-      "summary": "공통 도메인 규칙에서 함수 20개 정의 · 모듈 14개 연결을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "Workflow Canvas 자체를 디지털 트윈으로 검사해 현재 지도와 다른 점을 검토안으로 만듭니다.",
+      "userImpact": "지금 개발 중인 앱을 첫 실제 사례로 엔진의 발견·대조 과정을 검증합니다.",
+      "technicalSummary": "함수 20개 · 코드 연결 14개",
       "tags": [
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
+        "functionCount": 20,
+        "importCount": 14,
         "exports": [
           "WORKFLOW_SYSTEM_TWIN_SOURCE_ID",
           "inspectWorkflowSystemTwin",
@@ -3002,11 +3689,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 66,
-      "summary": "공통 도메인 규칙에서 함수 1개 정의 · 모듈 1개 연결을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "Workflow Canvas 어댑터가 읽는 정보, 필요한 권한과 지원하는 조작을 선언합니다.",
+      "userImpact": "엔진이 어댑터의 실제 능력보다 넓은 권한을 주지 않게 합니다.",
+      "technicalSummary": "함수 1개 · 코드 연결 1개",
       "tags": [
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
+        "functionCount": 1,
+        "importCount": 1,
         "exports": [
           "WORKFLOW_SYSTEM_TWIN_ADAPTER_DESCRIPTOR",
           "canInspectWorkflowSystemCanvas"
@@ -3029,11 +3722,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 198,
-      "summary": "공통 도메인 규칙에서 함수 1개 정의 · 모듈 7개 연결을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "Workflow Canvas 시스템 지도를 표준 TwinBuild 자료로 변환하고 검증합니다.",
+      "userImpact": "현재 앱에 특화된 구조와 범용 엔진 사이의 번역층 역할을 합니다.",
+      "technicalSummary": "함수 1개 · 코드 연결 7개",
       "tags": [
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
+        "functionCount": 1,
+        "importCount": 7,
         "exports": [
           "WORKFLOW_SYSTEM_TWIN_BUILD",
           "createWorkflowSystemTwinBuild"
@@ -3056,14 +3755,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "jsx",
       "lineStart": 1,
       "lineEnd": 4791,
-      "summary": "사용자 화면에서 canvas_shares, canvases, share_members 데이터 접근 · 함수 84개 정의 · 모듈 46개 연결을 담당합니다.",
+      "area": "canvas-interface",
+      "summary": "캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.",
+      "userImpact": "사용자가 캔버스에서 보고 클릭하는 대부분의 동작이 이 파일을 거쳐 함께 작동합니다.",
+      "technicalSummary": "함수 84개 · 코드 연결 46개 · DB 테이블 3개 참조",
       "tags": [
+        "canvas-interface",
         "canvas_shares",
         "canvases",
         "frontend",
         "share_members"
       ],
       "details": {
+        "functionCount": 84,
+        "importCount": 46,
         "exports": [
           "App"
         ],
@@ -3089,11 +3794,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "jsx",
       "lineStart": 1,
       "lineEnd": 585,
-      "summary": "사용자 화면에서 함수 20개 정의 · 모듈 4개 연결을 담당합니다.",
+      "area": "identity-profile",
+      "summary": "로그인·회원가입·프로필 편집과 아바타 설정 화면을 제공합니다.",
+      "userImpact": "사용자가 자기 계정으로 접속하고 표시 이름과 색상을 관리하게 합니다.",
+      "technicalSummary": "함수 20개 · 코드 연결 4개",
       "tags": [
-        "frontend"
+        "frontend",
+        "identity-profile"
       ],
       "details": {
+        "functionCount": 20,
+        "importCount": 4,
         "exports": [
           "AuthPanel",
           "Avatar"
@@ -3116,11 +3827,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "jsx",
       "lineStart": 1,
       "lineEnd": 34,
-      "summary": "사용자 화면에서 함수 2개 정의 · 모듈 2개 연결을 담당합니다.",
+      "area": "media-files",
+      "summary": "저장된 이미지 주소를 안전하게 불러와 캔버스와 노트에 표시합니다.",
+      "userImpact": "첨부 이미지가 권한과 만료 상태에 맞게 보이도록 합니다.",
+      "technicalSummary": "함수 2개 · 코드 연결 2개",
       "tags": [
-        "frontend"
+        "frontend",
+        "media-files"
       ],
       "details": {
+        "functionCount": 2,
+        "importCount": 2,
         "exports": [
           "CanvasImage"
         ],
@@ -3142,11 +3859,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "jsx",
       "lineStart": 1,
       "lineEnd": 533,
-      "summary": "사용자 화면에서 함수 16개 정의 · 모듈 2개 연결을 담당합니다.",
+      "area": "canvas-interface",
+      "summary": "개인·공유 캔버스 목록과 현재 캔버스 전환 화면을 표시합니다.",
+      "userImpact": "여러 캔버스 사이를 이동하고 공유 상태를 구분하게 합니다.",
+      "technicalSummary": "함수 16개 · 코드 연결 2개",
       "tags": [
+        "canvas-interface",
         "frontend"
       ],
       "details": {
+        "functionCount": 16,
+        "importCount": 2,
         "exports": [
           "CanvasTabs"
         ],
@@ -3168,11 +3891,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "jsx",
       "lineStart": 1,
       "lineEnd": 319,
-      "summary": "사용자 화면에서 함수 5개 정의 · 모듈 2개 연결을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "실제 시스템에서 발견한 변경안을 미리 보고 적용·무시·보류하도록 검토 목록을 보여줍니다.",
+      "userImpact": "엔진이 캔버스를 마음대로 바꾸지 못하게 하고 사람이 변경을 승인하게 합니다.",
+      "technicalSummary": "함수 5개 · 코드 연결 2개",
       "tags": [
+        "digital-twin-engine",
         "frontend"
       ],
       "details": {
+        "functionCount": 5,
+        "importCount": 2,
         "exports": [
           "DigitalTwinReviewPanel"
         ],
@@ -3194,11 +3923,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "jsx",
       "lineStart": 1,
       "lineEnd": 178,
-      "summary": "사용자 화면에서 함수 4개 정의 · 모듈 2개 연결을 담당합니다.",
+      "area": "canvas-interface",
+      "summary": "연결선의 관계 종류, 방향, 근거와 표시 이름을 편집하는 화면을 제공합니다.",
+      "userImpact": "연결선이 단순한 선이 아니라 실제 의미와 근거를 가진 관계가 되게 합니다.",
+      "technicalSummary": "함수 4개 · 코드 연결 2개",
       "tags": [
+        "canvas-interface",
         "frontend"
       ],
       "details": {
+        "functionCount": 4,
+        "importCount": 2,
         "exports": [
           "EdgeRelationEditor"
         ],
@@ -3220,11 +3955,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "jsx",
       "lineStart": 1,
       "lineEnd": 482,
-      "summary": "사용자 화면에서 함수 21개 정의 · 모듈 2개 연결을 담당합니다.",
+      "area": "notes-content",
+      "summary": "선택한 노드 본문의 글꼴, 정렬, 색과 이미지 삽입 도구를 제공합니다.",
+      "userImpact": "노드 내용을 문서처럼 편집하게 합니다.",
+      "technicalSummary": "함수 21개 · 코드 연결 2개",
       "tags": [
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
+        "functionCount": 21,
+        "importCount": 2,
         "exports": [
           "EditToolbar"
         ],
@@ -3246,11 +3987,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "jsx",
       "lineStart": 1,
       "lineEnd": 275,
-      "summary": "사용자 화면에서 함수 5개 정의 · 모듈 3개 연결을 담당합니다.",
+      "area": "sharing-collaboration",
+      "summary": "이메일이나 링크로 캔버스·그룹·노드에 사람을 초대하는 화면을 제공합니다.",
+      "userImpact": "공동 작업자를 초대하고 초대 범위를 지정하게 합니다.",
+      "technicalSummary": "함수 5개 · 코드 연결 3개",
       "tags": [
-        "frontend"
+        "frontend",
+        "sharing-collaboration"
       ],
       "details": {
+        "functionCount": 5,
+        "importCount": 3,
         "exports": [
           "InvitePopover"
         ],
@@ -3272,11 +4019,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "jsx",
       "lineStart": 1,
       "lineEnd": 105,
-      "summary": "사용자 화면에서 함수 5개 정의 · 모듈 1개 연결을 담당합니다.",
+      "area": "canvas-interface",
+      "summary": "새로 만들 수 있는 노드 종류를 보여주고 드래그해 캔버스에 놓을 자료를 준비합니다.",
+      "userImpact": "사용자가 원하는 형태의 노드를 캔버스에 추가하게 합니다.",
+      "technicalSummary": "함수 5개 · 코드 연결 1개",
       "tags": [
+        "canvas-interface",
         "frontend"
       ],
       "details": {
+        "functionCount": 5,
+        "importCount": 1,
         "exports": [
           "NodePalette"
         ],
@@ -3298,13 +4051,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "jsx",
       "lineStart": 1,
       "lineEnd": 855,
-      "summary": "사용자 화면에서 함수 23개 정의 · 모듈 5개 연결 · 보안 신호 2개을 담당합니다.",
+      "area": "notes-content",
+      "summary": "캔버스와 동등한 분할 창에서 노트를 만들고 계층·연결 관계를 문서 형태로 탐색합니다.",
+      "userImpact": "캔버스가 복잡할 때 내용을 노트 앱처럼 읽고 편집하게 합니다.",
+      "technicalSummary": "함수 23개 · 코드 연결 5개 · 보안 점검 신호 2개",
       "tags": [
         "dangerously-set-inner-html",
         "frontend",
+        "notes-content",
         "raw-inner-html"
       ],
       "details": {
+        "functionCount": 23,
+        "importCount": 5,
         "exports": [
           "NotesPanel"
         ],
@@ -3329,11 +4088,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "jsx",
       "lineStart": 1,
       "lineEnd": 19,
-      "summary": "사용자 화면에서 함수 1개 정의을 담당합니다.",
+      "area": "notes-content",
+      "summary": "캔버스 노드를 현재 노트 창에서 바로 여는 단축 버튼을 제공합니다.",
+      "userImpact": "노드 편집 중 긴 내용을 넓은 노트 화면으로 빠르게 이어서 작업하게 합니다.",
+      "technicalSummary": "함수 1개",
       "tags": [
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
+        "functionCount": 1,
+        "importCount": 0,
         "exports": [
           "OpenInNotesButton"
         ],
@@ -3355,11 +4120,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "jsx",
       "lineStart": 1,
       "lineEnd": 42,
-      "summary": "사용자 화면에서 함수 1개 정의 · 모듈 1개 연결을 담당합니다.",
+      "area": "sharing-collaboration",
+      "summary": "참여자 프로필과 접속·시야 제한 상태를 작은 아바타로 표시합니다.",
+      "userImpact": "누가 함께 작업 중이고 어떤 범위만 볼 수 있는지 한눈에 확인하게 합니다.",
+      "technicalSummary": "함수 1개 · 코드 연결 1개",
       "tags": [
-        "frontend"
+        "frontend",
+        "sharing-collaboration"
       ],
       "details": {
+        "functionCount": 1,
+        "importCount": 1,
         "exports": [
           "ParticipantAvatar"
         ],
@@ -3381,11 +4152,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "jsx",
       "lineStart": 1,
       "lineEnd": 179,
-      "summary": "사용자 화면에서 함수 5개 정의 · 모듈 3개 연결을 담당합니다.",
+      "area": "sharing-collaboration",
+      "summary": "캔버스·그룹·노드별 참여자를 초대된 위치와 권한 범위에 맞춰 보여줍니다.",
+      "userImpact": "참여자가 어디에 초대되었고 어떤 접근 권한이 있는지 구분하게 합니다.",
+      "technicalSummary": "함수 5개 · 코드 연결 3개",
       "tags": [
-        "frontend"
+        "frontend",
+        "sharing-collaboration"
       ],
       "details": {
+        "functionCount": 5,
+        "importCount": 3,
         "exports": [
           "ScopedParticipants"
         ],
@@ -3401,17 +4178,23 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:src/components/SourceTwinPanel.jsx",
       "kind": "file",
       "label": "src/components/SourceTwinPanel.jsx",
-      "fingerprint": "0ee72a203f080cadaff3",
+      "fingerprint": "e9106b23331934597807",
       "path": "src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
       "language": "jsx",
       "lineStart": 1,
-      "lineEnd": 898,
-      "summary": "사용자 화면에서 함수 14개 정의 · 모듈 5개 연결을 담당합니다.",
+      "lineEnd": 941,
+      "area": "source-code-twin",
+      "summary": "로컬·GitHub 코드의 역할별 구조, 변경 이력, Git 동기화와 상태 스냅샷을 한 창에서 보여줍니다.",
+      "userImpact": "비개발자도 앱의 어느 부분이 어떤 일을 하는지 보고 실제 코드와 변경 내역까지 따라가게 합니다.",
+      "technicalSummary": "함수 14개 · 코드 연결 6개",
       "tags": [
-        "frontend"
+        "frontend",
+        "source-code-twin"
       ],
       "details": {
+        "functionCount": 14,
+        "importCount": 6,
         "exports": [
           "SourceTwinPanel"
         ],
@@ -3433,11 +4216,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "jsx",
       "lineStart": 1,
       "lineEnd": 119,
-      "summary": "사용자 화면에서 함수 2개 정의 · 모듈 2개 연결을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "시스템 파츠에서 현재 확인할 수 있는 운영 정보와 아직 알 수 없는 정보를 목록으로 보여줍니다.",
+      "userImpact": "LIVE 표시가 무엇을 근거로 하는지, 추가 연결이 필요한 정보는 무엇인지 알게 합니다.",
+      "technicalSummary": "함수 2개 · 코드 연결 2개",
       "tags": [
+        "digital-twin-engine",
         "frontend"
       ],
       "details": {
+        "functionCount": 2,
+        "importCount": 2,
         "exports": [
           "SystemObservationCatalog"
         ],
@@ -3459,11 +4248,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "jsx",
       "lineStart": 1,
       "lineEnd": 383,
-      "summary": "사용자 화면에서 함수 12개 정의 · 모듈 2개 연결을 담당합니다.",
+      "area": "canvas-interface",
+      "summary": "노드 추가, 전체 보기, 되돌리기 같은 캔버스의 주요 명령을 모아 보여줍니다.",
+      "userImpact": "반복해서 쓰는 편집 기능을 빠르게 실행하게 합니다.",
+      "technicalSummary": "함수 12개 · 코드 연결 2개",
       "tags": [
+        "canvas-interface",
         "frontend"
       ],
       "details": {
+        "functionCount": 12,
+        "importCount": 2,
         "exports": [
           "Toolbar"
         ],
@@ -3485,11 +4280,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 98,
-      "summary": "사용자 화면에서 함수 5개 정의 · 모듈 1개 연결을 담당합니다.",
+      "area": "canvas-model",
+      "summary": "개발과 초기 화면에서 사용할 수 있는 예시 캔버스 자료를 정의합니다.",
+      "userImpact": "예시 자료가 실제 사용자 캔버스로 잘못 생성되지 않도록 사용 위치를 확인해야 하는 파일입니다.",
+      "technicalSummary": "함수 5개 · 코드 연결 1개",
       "tags": [
+        "canvas-model",
         "frontend"
       ],
       "details": {
+        "functionCount": 5,
+        "importCount": 1,
         "exports": [
           "DEMO_CANVASES"
         ],
@@ -3511,11 +4312,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "jsx",
       "lineStart": 1,
       "lineEnd": 128,
-      "summary": "사용자 화면에서 함수 1개 정의 · 모듈 5개 연결을 담당합니다.",
+      "area": "canvas-interface",
+      "summary": "노드 사이 연결선, 화살표, 관계 설명과 연결선 위 실행 버튼을 화면에 그립니다.",
+      "userImpact": "사용자가 정보 흐름의 방향을 보고 동기화 같은 관계 조작을 시작하는 방식에 영향을 줍니다.",
+      "technicalSummary": "함수 1개 · 코드 연결 5개",
       "tags": [
+        "canvas-interface",
         "frontend"
       ],
       "details": {
+        "functionCount": 1,
+        "importCount": 5,
         "exports": [
           "StubEdge"
         ],
@@ -3537,14 +4344,50 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 53,
-      "summary": "사용자 화면에서 함수 4개 정의을 담당합니다.",
+      "area": "canvas-model",
+      "summary": "연결선이 노드나 파츠의 실제 테두리에서 시작하고 끝나도록 좌표를 계산합니다.",
+      "userImpact": "화살표가 노드와 떨어지거나 줌할 때 연결점이 어긋나는 현상을 막습니다.",
+      "technicalSummary": "함수 4개",
       "tags": [
+        "canvas-model",
         "frontend"
       ],
       "details": {
+        "functionCount": 4,
+        "importCount": 0,
         "exports": [
           "getStubEdgeGeometry"
         ],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "parseStatus": "parsed"
+      }
+    },
+    {
+      "id": "file:src/index.css",
+      "kind": "file",
+      "label": "src/index.css",
+      "fingerprint": "69b114615b941f567fc6",
+      "path": "src/index.css",
+      "layer": "frontend",
+      "language": "css",
+      "lineStart": 1,
+      "lineEnd": 2747,
+      "area": "canvas-interface",
+      "summary": "캔버스, 노드, 연결선, 패널과 팝업의 크기·색·배치·반응형 모양을 결정합니다.",
+      "userImpact": "화면이 읽기 쉽고 모바일과 데스크톱에서 겹치지 않게 보이는 방식을 바꿉니다.",
+      "technicalSummary": "2747줄의 css 파일",
+      "tags": [
+        "canvas-interface",
+        "frontend"
+      ],
+      "details": {
+        "functionCount": 0,
+        "importCount": 0,
+        "exports": [],
         "apiRoutes": [],
         "dbTables": [],
         "dbFunctions": [],
@@ -3563,11 +4406,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 38,
-      "summary": "사용자 화면에서 함수 2개 정의을 담당합니다.",
+      "area": "canvas-model",
+      "summary": "중첩된 노드의 실제 화면 위치와 여러 노드가 차지하는 범위를 계산합니다.",
+      "userImpact": "선택 영역, 시점 이동과 자동 배치가 정확한 위치를 사용하게 합니다.",
+      "technicalSummary": "함수 2개",
       "tags": [
+        "canvas-model",
         "frontend"
       ],
       "details": {
+        "functionCount": 2,
+        "importCount": 0,
         "exports": [
           "absoluteNodePosition",
           "boundsForNodeIds"
@@ -3590,11 +4439,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 76,
-      "summary": "사용자 화면에서 함수 5개 정의을 담당합니다.",
+      "area": "data-storage-sync",
+      "summary": "브라우저와 서버에서 각각 바뀐 캔버스 자료를 충돌 없이 합칠 기준을 제공합니다.",
+      "userImpact": "동시에 편집하거나 연결이 잠시 끊겨도 작업이 불필요하게 사라지는 일을 줄입니다.",
+      "technicalSummary": "함수 5개",
       "tags": [
+        "data-storage-sync",
         "frontend"
       ],
       "details": {
+        "functionCount": 5,
+        "importCount": 0,
         "exports": [
           "mergeCanvasSnapshots"
         ],
@@ -3616,11 +4471,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 32,
-      "summary": "사용자 화면에서 함수 5개 정의을 담당합니다.",
+      "area": "canvas-model",
+      "summary": "현재 캔버스 ID와 주소를 맞추고 새로고침 뒤에도 같은 캔버스로 돌아오게 합니다.",
+      "userImpact": "새로고침할 때 다른 캔버스로 튀는 일을 막습니다.",
+      "technicalSummary": "함수 5개",
       "tags": [
+        "canvas-model",
         "frontend"
       ],
       "details": {
+        "functionCount": 5,
+        "importCount": 0,
         "exports": [
           "chooseOwnCanvasToRestore",
           "clearLastOpenedCanvas",
@@ -3646,11 +4507,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 15,
-      "summary": "사용자 화면에서 함수 2개 정의을 담당합니다.",
+      "area": "canvas-model",
+      "summary": "저장된 캔버스 자료가 허용된 노드·연결선 형식인지 검사하고 오래된 형식을 안전하게 보정합니다.",
+      "userImpact": "깨진 데이터가 화면 전체를 망가뜨리거나 위험한 필드가 섞이는 일을 줄입니다.",
+      "technicalSummary": "함수 2개",
       "tags": [
+        "canvas-model",
         "frontend"
       ],
       "details": {
+        "functionCount": 2,
+        "importCount": 0,
         "exports": [
           "CanvasSchemaGuardError",
           "RELATION_METADATA_GUARD_MARKER",
@@ -3674,11 +4541,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 19,
-      "summary": "사용자 화면에서 함수 3개 정의을 담당합니다.",
+      "area": "data-storage-sync",
+      "summary": "캔버스 저장 요청, 서버 변경 구독과 충돌 재시도를 한 흐름으로 조율합니다.",
+      "userImpact": "여러 참여자의 변경이 최신 상태로 맞춰지고 저장 실패를 감지하게 합니다.",
+      "technicalSummary": "함수 3개",
       "tags": [
+        "data-storage-sync",
         "frontend"
       ],
       "details": {
+        "functionCount": 3,
+        "importCount": 0,
         "exports": [
           "appendHistorySnapshot",
           "canvasSnapshotSignature",
@@ -3702,13 +4575,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 93,
-      "summary": "사용자 화면에서 canvases, user_prefs 데이터 접근 · 함수 8개 정의 · 모듈 2개 연결을 담당합니다.",
+      "area": "data-storage-sync",
+      "summary": "Supabase에서 캔버스 목록과 노드·연결선을 불러오고 저장·삭제합니다.",
+      "userImpact": "로그인한 사용자의 캔버스가 여러 기기와 참여자 사이에서 유지되게 합니다.",
+      "technicalSummary": "함수 8개 · 코드 연결 2개 · DB 테이블 2개 참조",
       "tags": [
         "canvases",
+        "data-storage-sync",
         "frontend",
         "user_prefs"
       ],
       "details": {
+        "functionCount": 8,
+        "importCount": 2,
         "exports": [
           "CanvasConflictError",
           "deleteCanvas",
@@ -3739,11 +4618,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 27,
-      "summary": "사용자 화면에서 함수 1개 정의 · 모듈 2개 연결을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "화면에서 사용할 디지털 트윈 어댑터를 등록하고 대상 캔버스에 맞는 어댑터를 고릅니다.",
+      "userImpact": "새 시스템 종류를 엔진에 추가해도 검토 화면을 다시 만들지 않게 합니다.",
+      "technicalSummary": "함수 1개 · 코드 연결 2개",
       "tags": [
+        "digital-twin-engine",
         "frontend"
       ],
       "details": {
+        "functionCount": 1,
+        "importCount": 2,
         "exports": [
           "DIGITAL_TWIN_ADAPTERS",
           "DIGITAL_TWIN_ADAPTER_DESCRIPTORS",
@@ -3768,11 +4653,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 51,
-      "summary": "사용자 화면에서 함수 4개 정의 · 모듈 1개 연결을 담당합니다.",
+      "area": "media-files",
+      "summary": "캔버스 이미지를 Supabase Storage에 올리고 삭제하며 접근 가능한 주소를 만듭니다.",
+      "userImpact": "큰 이미지가 캔버스 데이터 본문에 섞이지 않고 별도 파일로 안전하게 보관되게 합니다.",
+      "technicalSummary": "함수 4개 · 코드 연결 1개",
       "tags": [
-        "frontend"
+        "frontend",
+        "media-files"
       ],
       "details": {
+        "functionCount": 4,
+        "importCount": 1,
         "exports": [
           "dataUrlToBlob",
           "getCanvasImageUrl",
@@ -3796,11 +4687,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 46,
-      "summary": "사용자 화면에서 함수 7개 정의 · 모듈 1개 연결을 담당합니다.",
+      "area": "source-code-twin",
+      "summary": "브라우저에서 로컬 커넥터 생성·해제·상태 조회와 Git 동기화 계획 요청을 서버로 보냅니다.",
+      "userImpact": "캔버스에서 로컬 저장소 상태를 보고 승인된 동기화를 시작하게 합니다.",
+      "technicalSummary": "함수 7개 · 코드 연결 1개",
       "tags": [
-        "frontend"
+        "frontend",
+        "source-code-twin"
       ],
       "details": {
+        "functionCount": 7,
+        "importCount": 1,
         "exports": [
           "applyLocalGitSync",
           "createLocalConnector",
@@ -3826,12 +4723,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 56,
-      "summary": "사용자 화면에서 mcp_tokens 데이터 접근 · 함수 5개 정의 · 모듈 1개 연결을 담당합니다.",
+      "area": "ai-integration",
+      "summary": "사용자가 AI 커넥터에 쓸 MCP 토큰을 발급·조회·폐기하도록 서버와 통신합니다.",
+      "userImpact": "AI 연결 권한을 사용자가 직접 끊거나 다시 만들 수 있게 합니다.",
+      "technicalSummary": "함수 5개 · 코드 연결 1개 · DB 테이블 1개 참조",
       "tags": [
+        "ai-integration",
         "frontend",
         "mcp_tokens"
       ],
       "details": {
+        "functionCount": 5,
+        "importCount": 1,
         "exports": [
           "createToken",
           "deleteToken",
@@ -3857,11 +4760,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 43,
-      "summary": "사용자 화면에서 함수 2개 정의 · 모듈 1개 연결을 담당합니다.",
+      "area": "sharing-collaboration",
+      "summary": "같은 캔버스에 접속 중인 참여자와 마지막 활동 상태를 실시간으로 교환합니다.",
+      "userImpact": "공동 작업자가 지금 접속해 있는지 서로 확인하게 합니다.",
+      "technicalSummary": "함수 2개 · 코드 연결 1개",
       "tags": [
-        "frontend"
+        "frontend",
+        "sharing-collaboration"
       ],
       "details": {
+        "functionCount": 2,
+        "importCount": 1,
         "exports": [
           "joinCanvasPresence"
         ],
@@ -3883,13 +4792,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 104,
-      "summary": "사용자 화면에서 profiles, user_prefs 데이터 접근 · 함수 9개 정의 · 모듈 1개 연결을 담당합니다.",
+      "area": "identity-profile",
+      "summary": "사용자 프로필을 불러오고 이름·아바타·색상 변경을 저장합니다.",
+      "userImpact": "프로필 저장 버튼의 결과가 계정에 실제 반영되게 합니다.",
+      "technicalSummary": "함수 9개 · 코드 연결 1개 · DB 테이블 2개 참조",
       "tags": [
         "frontend",
+        "identity-profile",
         "profiles",
         "user_prefs"
       ],
       "details": {
+        "functionCount": 9,
+        "importCount": 1,
         "exports": [
           "getMyProfile",
           "getProfiles",
@@ -3920,11 +4835,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 87,
-      "summary": "사용자 화면에서 함수 4개 정의 · 모듈 2개 연결을 담당합니다.",
+      "area": "security-privacy",
+      "summary": "노드 본문에서 위험한 HTML, 스크립트와 외부 주소를 제거한 뒤 화면에 표시할 자료만 남깁니다.",
+      "userImpact": "공유된 콘텐츠를 이용한 스크립트 실행과 악성 링크 위험을 줄입니다.",
+      "technicalSummary": "함수 4개 · 코드 연결 2개",
       "tags": [
-        "frontend"
+        "frontend",
+        "security-privacy"
       ],
       "details": {
+        "functionCount": 4,
+        "importCount": 2,
         "exports": [
           "sanitizeExternalUrl",
           "sanitizeHtml",
@@ -3948,11 +4869,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 66,
-      "summary": "사용자 화면에서 함수 6개 정의을 담당합니다.",
+      "area": "sharing-collaboration",
+      "summary": "하나의 공유 링크가 브라우저 탭을 중복해서 여는 일을 막고 최초 접속을 한 번만 처리합니다.",
+      "userImpact": "링크 하나를 눌렀을 때 불필요한 창이 여러 개 생기지 않게 합니다.",
+      "technicalSummary": "함수 6개",
       "tags": [
-        "frontend"
+        "frontend",
+        "sharing-collaboration"
       ],
       "details": {
+        "functionCount": 6,
+        "importCount": 0,
         "exports": [
           "claimShareLaunch",
           "claimShareLaunchFallback",
@@ -3976,11 +4903,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 50,
-      "summary": "사용자 화면에서 함수 6개 정의 · 모듈 3개 연결을 담당합니다.",
+      "area": "sharing-collaboration",
+      "summary": "공유 링크 최초 접속의 확인·수락·거절 요청을 전용 서버 경로로 보냅니다.",
+      "userImpact": "링크를 연 사람이 동의하기 전에는 참여자로 확정되지 않게 합니다.",
+      "technicalSummary": "함수 6개 · 코드 연결 3개",
       "tags": [
-        "frontend"
+        "frontend",
+        "sharing-collaboration"
       ],
       "details": {
+        "functionCount": 6,
+        "importCount": 3,
         "exports": [
           "getSharedCanvas",
           "listCanvasParticipants",
@@ -4006,13 +4939,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 162,
-      "summary": "사용자 화면에서 canvas_shares, share_members 데이터 접근 · claim_email_invite, claim_share, disable_share_invitation DB 함수 호출 · 함수 15개 정의 · 모듈 2개 연결을 담당합니다.",
+      "area": "sharing-collaboration",
+      "summary": "초대, 공유 링크, 참여자 권한과 나가기·추방 요청을 서버와 주고받습니다.",
+      "userImpact": "공유 캔버스에 누가 어떤 방식으로 참여하고 나가는지를 실제로 바꿉니다.",
+      "technicalSummary": "함수 15개 · 코드 연결 2개 · DB 테이블 2개 참조 · DB 함수 9개 참조",
       "tags": [
         "canvas_shares",
         "frontend",
-        "share_members"
+        "share_members",
+        "sharing-collaboration"
       ],
       "details": {
+        "functionCount": 15,
+        "importCount": 2,
         "exports": [
           "claimEmailInvite",
           "claimShareToken",
@@ -4060,11 +4999,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 48,
-      "summary": "사용자 화면에서 함수 6개 정의 · 모듈 2개 연결을 담당합니다.",
+      "area": "source-code-twin",
+      "summary": "배포된 코드 구조, GitHub 변경과 상태 스냅샷을 서버에서 불러오고 기록 요청을 보냅니다.",
+      "userImpact": "코드 구조 화면과 이전 배포 비교가 실제 서버 정보로 작동하게 합니다.",
+      "technicalSummary": "함수 6개 · 코드 연결 2개",
       "tags": [
-        "frontend"
+        "frontend",
+        "source-code-twin"
       ],
       "details": {
+        "functionCount": 6,
+        "importCount": 2,
         "exports": [
           "applySourceTwinHistoryCapture",
           "compareSourceTwinHistory",
@@ -4090,11 +5035,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 7,
-      "summary": "사용자 화면에서 모듈 1개 연결을 담당합니다.",
+      "area": "data-storage-sync",
+      "summary": "브라우저가 로그인과 허용된 데이터 요청에 사용할 Supabase 공개 클라이언트를 한 번만 만듭니다.",
+      "userImpact": "앱 화면이 사용자 세션과 데이터베이스에 연결되는 출발점입니다.",
+      "technicalSummary": "코드 연결 1개",
       "tags": [
+        "data-storage-sync",
         "frontend"
       ],
       "details": {
+        "functionCount": 0,
+        "importCount": 1,
         "exports": [
           "SUPABASE_ANON_KEY",
           "SUPABASE_URL",
@@ -4118,11 +5069,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 87,
-      "summary": "사용자 화면에서 함수 6개 정의 · 모듈 2개 연결을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "시스템 파츠의 운영 상태를 서버에 확인하고 최신 관측 결과를 불러옵니다.",
+      "userImpact": "새로고침 버튼을 눌렀을 때 선언이 아니라 실제 확인 결과로 LIVE 상태를 갱신하게 합니다.",
+      "technicalSummary": "함수 6개 · 코드 연결 2개",
       "tags": [
+        "digital-twin-engine",
         "frontend"
       ],
       "details": {
+        "functionCount": 6,
+        "importCount": 2,
         "exports": [
           "SystemRuntimeApiError",
           "checkAllSystemRuntime",
@@ -4147,11 +5104,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 50,
-      "summary": "사용자 화면에서 함수 5개 정의을 담당합니다.",
+      "area": "canvas-interface",
+      "summary": "트랙패드 스크롤을 선택한 노드·파츠 내부 스크롤과 캔버스 확대·이동 중 어디로 보낼지 결정합니다.",
+      "userImpact": "노드 내용을 스크롤하려다 캔버스 전체가 움직이는 불편을 막습니다.",
+      "technicalSummary": "함수 5개",
       "tags": [
+        "canvas-interface",
         "frontend"
       ],
       "details": {
+        "functionCount": 5,
+        "importCount": 0,
         "exports": [
           "nativeWheelScrollTarget"
         ],
@@ -4173,11 +5136,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "jsx",
       "lineStart": 1,
       "lineEnd": 11,
-      "summary": "사용자 화면에서 모듈 4개 연결을 담당합니다.",
+      "area": "canvas-interface",
+      "summary": "브라우저가 Workflow Canvas 화면을 처음 시작하도록 React 앱을 페이지에 연결합니다.",
+      "userImpact": "이 진입점이 실패하면 로그인 화면과 캔버스 자체가 열리지 않습니다.",
+      "technicalSummary": "코드 연결 4개",
       "tags": [
+        "canvas-interface",
         "frontend"
       ],
       "details": {
+        "functionCount": 0,
+        "importCount": 4,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [],
@@ -4197,13 +5166,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "jsx",
       "lineStart": 1,
       "lineEnd": 448,
-      "summary": "사용자 화면에서 함수 18개 정의 · 모듈 8개 연결 · 보안 신호 2개을 담당합니다.",
+      "area": "notes-content",
+      "summary": "본문, 링크와 이미지를 담는 콘텐츠 노드를 그리고 직접 편집할 수 있게 합니다.",
+      "userImpact": "사용자가 자료와 긴 내용을 캔버스 안에서 작성하고 볼 수 있게 합니다.",
+      "technicalSummary": "함수 18개 · 코드 연결 8개 · 보안 점검 신호 2개",
       "tags": [
         "dangerously-set-inner-html",
         "frontend",
+        "notes-content",
         "raw-inner-html"
       ],
       "details": {
+        "functionCount": 18,
+        "importCount": 8,
         "exports": [
           "ContentNode"
         ],
@@ -4228,11 +5203,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "jsx",
       "lineStart": 1,
       "lineEnd": 183,
-      "summary": "사용자 화면에서 함수 9개 정의 · 모듈 3개 연결을 담당합니다.",
+      "area": "canvas-interface",
+      "summary": "여러 노드를 묶는 그룹 상자와 그룹 편집 동작을 화면에 그립니다.",
+      "userImpact": "업무 묶음과 시야·편집 범위를 캔버스에서 구분하게 합니다.",
+      "technicalSummary": "함수 9개 · 코드 연결 3개",
       "tags": [
+        "canvas-interface",
         "frontend"
       ],
       "details": {
+        "functionCount": 9,
+        "importCount": 3,
         "exports": [
           "GroupNode"
         ],
@@ -4254,13 +5235,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "jsx",
       "lineStart": 1,
       "lineEnd": 414,
-      "summary": "사용자 화면에서 함수 18개 정의 · 모듈 6개 연결 · 보안 신호 2개을 담당합니다.",
+      "area": "notes-content",
+      "summary": "짧은 참고 내용과 메모를 빠르게 적는 노드를 화면에 그립니다.",
+      "userImpact": "캔버스 흐름을 방해하지 않고 간단한 설명을 남기게 합니다.",
+      "technicalSummary": "함수 18개 · 코드 연결 6개 · 보안 점검 신호 2개",
       "tags": [
         "dangerously-set-inner-html",
         "frontend",
+        "notes-content",
         "raw-inner-html"
       ],
       "details": {
+        "functionCount": 18,
+        "importCount": 6,
         "exports": [
           "MemoNode"
         ],
@@ -4285,13 +5272,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "jsx",
       "lineStart": 1,
       "lineEnd": 498,
-      "summary": "사용자 화면에서 함수 20개 정의 · 모듈 6개 연결 · 보안 신호 2개을 담당합니다.",
+      "area": "canvas-interface",
+      "summary": "단계와 계층을 나타내는 노드를 그리고 제목·본문 편집을 처리합니다.",
+      "userImpact": "절차와 상하위 구조를 캔버스에서 정리하는 방식에 영향을 줍니다.",
+      "technicalSummary": "함수 20개 · 코드 연결 6개 · 보안 점검 신호 2개",
       "tags": [
+        "canvas-interface",
         "dangerously-set-inner-html",
         "frontend",
         "raw-inner-html"
       ],
       "details": {
+        "functionCount": 20,
+        "importCount": 6,
         "exports": [
           "StageNode"
         ],
@@ -4316,12 +5309,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "jsx",
       "lineStart": 1,
       "lineEnd": 670,
-      "summary": "사용자 화면에서 함수 18개 정의 · 모듈 9개 연결 · 보안 신호 1개을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "앱·서버·DB 같은 실제 시스템 노드와 파츠, 운영 상태, 실행 가능한 기능을 화면에 표시합니다.",
+      "userImpact": "정보성 도형과 실제 시스템에 연결된 디지털 트윈을 구분하고 조작하게 합니다.",
+      "technicalSummary": "함수 18개 · 코드 연결 9개 · 보안 점검 신호 1개",
       "tags": [
         "dangerously-set-inner-html",
+        "digital-twin-engine",
         "frontend"
       ],
       "details": {
+        "functionCount": 18,
+        "importCount": 9,
         "exports": [
           "SystemNode"
         ],
@@ -4345,11 +5344,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 124,
-      "summary": "사용자 화면에서 함수 21개 정의을 담당합니다.",
+      "area": "data-storage-sync",
+      "summary": "로그인 전이나 네트워크 연결 전에도 캔버스 목록과 편집 상태를 브라우저에 보관하고, 오래된 저장 형식을 현재 형식으로 옮깁니다.",
+      "userImpact": "새로고침 뒤 작업이 남아 있게 하고 예전 버전에서 만든 캔버스도 계속 열리게 합니다.",
+      "technicalSummary": "함수 21개",
       "tags": [
+        "data-storage-sync",
         "frontend"
       ],
       "details": {
+        "functionCount": 21,
+        "importCount": 0,
         "exports": [
           "STORAGE_ERROR_EVENT",
           "clearCanvasStorage",
@@ -4387,12 +5392,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "sql",
       "lineStart": 1,
       "lineEnd": 104,
-      "summary": "데이터베이스 선언에서 can_access_canvas_image DB 함수 호출 · 보안 신호 1개을 담당합니다.",
+      "area": "media-files",
+      "summary": "캔버스 이미지 저장 공간과 파일 접근·삭제 권한을 만듭니다.",
+      "userImpact": "이미지 파일을 캔버스 소유권과 공유 범위에 맞게 보호합니다.",
+      "technicalSummary": "DB 함수 1개 참조 · 보안 점검 신호 1개",
       "tags": [
         "database",
+        "media-files",
         "security-definer-function"
       ],
       "details": {
+        "functionCount": 0,
+        "importCount": 0,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [],
@@ -4416,11 +5427,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "sql",
       "lineStart": 1,
       "lineEnd": 6,
-      "summary": "데이터베이스 선언에서 구조와 설정 제공을 담당합니다.",
+      "area": "notes-content",
+      "summary": "캔버스 밖에서 만든 노트와 캔버스 노드의 연결 상태를 저장할 구조를 만듭니다.",
+      "userImpact": "노트 앱에서 만든 내용이 캔버스에 올리기 전에도 보존되게 합니다.",
+      "technicalSummary": "6줄의 sql 파일",
       "tags": [
-        "database"
+        "database",
+        "notes-content"
       ],
       "details": {
+        "functionCount": 0,
+        "importCount": 0,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [],
@@ -4440,11 +5457,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "sql",
       "lineStart": 1,
       "lineEnd": 26,
-      "summary": "데이터베이스 선언에서 구조와 설정 제공을 담당합니다.",
+      "area": "canvas-model",
+      "summary": "캔버스별 단계 종류와 이름을 저장하고 변경하는 DB 함수를 만듭니다.",
+      "userImpact": "사용자가 자기 업무 방식에 맞는 단계 분류를 만들게 합니다.",
+      "technicalSummary": "26줄의 sql 파일",
       "tags": [
+        "canvas-model",
         "database"
       ],
       "details": {
+        "functionCount": 0,
+        "importCount": 0,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [],
@@ -4464,11 +5487,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "sql",
       "lineStart": 1,
       "lineEnd": 9,
-      "summary": "데이터베이스 선언에서 구조와 설정 제공을 담당합니다.",
+      "area": "canvas-model",
+      "summary": "캔버스별 화면 위치와 보기 설정을 사용자마다 저장합니다.",
+      "userImpact": "같은 공유 캔버스에서도 각자 마지막 시점과 보기 설정을 유지하게 합니다.",
+      "technicalSummary": "9줄의 sql 파일",
       "tags": [
+        "canvas-model",
         "database"
       ],
       "details": {
+        "functionCount": 0,
+        "importCount": 0,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [],
@@ -4488,15 +5517,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "sql",
       "lineStart": 1,
       "lineEnd": 65,
-      "summary": "데이터베이스 선언에서 server_data_access_audit 데이터 접근 · reject_server_data_access_audit_mutation, get_my_canvas_data_access_audit DB 함수 호출 · 보안 신호 3개을 담당합니다.",
+      "area": "security-privacy",
+      "summary": "관리자 권한의 사용자 캔버스 접근을 추가만 가능한 감사 기록으로 저장합니다.",
+      "userImpact": "운영자 열람이 있었다면 나중에 지우거나 숨기기 어렵게 만드는 기반입니다.",
+      "technicalSummary": "DB 테이블 1개 참조 · DB 함수 2개 참조 · 보안 점검 신호 3개",
       "tags": [
         "database",
         "row-level-security",
         "security-definer-function",
+        "security-privacy",
         "server_data_access_audit",
         "service-role-grant"
       ],
       "details": {
+        "functionCount": 0,
+        "importCount": 0,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [
@@ -4525,16 +5560,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "sql",
       "lineStart": 1,
       "lineEnd": 94,
-      "summary": "데이터베이스 선언에서 local_connectors, local_connector_operations, local_connector_operation_events 데이터 접근 · reject_local_connector_event_mutation DB 함수 호출 · 보안 신호 2개을 담당합니다.",
+      "area": "source-code-twin",
+      "summary": "로컬 커넥터 등록, heartbeat, 제한된 manifest와 Git 실행 요청을 저장합니다.",
+      "userImpact": "각 사용자의 Mac 연결이 다른 계정과 섞이지 않고 폐기 가능하게 합니다.",
+      "technicalSummary": "DB 테이블 3개 참조 · DB 함수 1개 참조 · 보안 점검 신호 2개",
       "tags": [
         "database",
         "local_connector_operation_events",
         "local_connector_operations",
         "local_connectors",
         "row-level-security",
-        "service-role-grant"
+        "service-role-grant",
+        "source-code-twin"
       ],
       "details": {
+        "functionCount": 0,
+        "importCount": 0,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [
@@ -4563,14 +5604,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "sql",
       "lineStart": 1,
       "lineEnd": 60,
-      "summary": "데이터베이스 선언에서 mcp_tokens 데이터 접근 · 보안 신호 2개을 담당합니다.",
+      "area": "ai-integration",
+      "summary": "AI 연결 토큰과 MCP에서 사용하는 서버 저장 함수를 만들고 계정별 접근을 제한합니다.",
+      "userImpact": "사용자가 발급한 AI 연결만 자기 캔버스에 접근하게 합니다.",
+      "technicalSummary": "DB 테이블 1개 참조 · 보안 점검 신호 2개",
       "tags": [
+        "ai-integration",
         "database",
         "mcp_tokens",
         "row-level-security",
         "service-role-grant"
       ],
       "details": {
+        "functionCount": 0,
+        "importCount": 0,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [
@@ -4595,12 +5642,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "sql",
       "lineStart": 1,
       "lineEnd": 53,
-      "summary": "데이터베이스 선언에서 can_view_profile DB 함수 호출 · 보안 신호 1개을 담당합니다.",
+      "area": "security-privacy",
+      "summary": "프로필 이메일과 마지막 접속 정보가 공유 관계 안에서만 보이도록 DB 조회 경계를 보강합니다.",
+      "userImpact": "관계없는 사람이 프로필 정보를 직접 조회하는 일을 막습니다.",
+      "technicalSummary": "DB 함수 1개 참조 · 보안 점검 신호 1개",
       "tags": [
         "database",
-        "security-definer-function"
+        "security-definer-function",
+        "security-privacy"
       ],
       "details": {
+        "functionCount": 0,
+        "importCount": 0,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [],
@@ -4624,15 +5677,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "sql",
       "lineStart": 1,
       "lineEnd": 74,
-      "summary": "데이터베이스 선언에서 profiles 데이터 접근 · can_view_profile DB 함수 호출 · 보안 신호 3개을 담당합니다.",
+      "area": "identity-profile",
+      "summary": "사용자 프로필과 아바타 정보를 저장하고 허용된 참여자끼리 조회할 규칙을 만듭니다.",
+      "userImpact": "공유 참여자 이름과 아바타가 보이되 관계없는 사용자는 조회하지 못하게 합니다.",
+      "technicalSummary": "DB 테이블 1개 참조 · DB 함수 1개 참조 · 보안 점검 신호 3개",
       "tags": [
         "database",
+        "identity-profile",
         "profiles",
         "row-level-security",
         "security-definer-function",
         "service-role-grant"
       ],
       "details": {
+        "functionCount": 0,
+        "importCount": 0,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [
@@ -4660,11 +5719,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "sql",
       "lineStart": 1,
       "lineEnd": 11,
-      "summary": "데이터베이스 선언에서 구조와 설정 제공을 담당합니다.",
+      "area": "data-storage-sync",
+      "summary": "캔버스 변경을 참여자 브라우저에 실시간으로 알리는 DB 설정을 만듭니다.",
+      "userImpact": "공동 편집자가 새로고침하지 않아도 변경을 받게 합니다.",
+      "technicalSummary": "11줄의 sql 파일",
       "tags": [
+        "data-storage-sync",
         "database"
       ],
       "details": {
+        "functionCount": 0,
+        "importCount": 0,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [],
@@ -4684,13 +5749,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "sql",
       "lineStart": 1,
       "lineEnd": 98,
-      "summary": "데이터베이스 선언에서 prevent_canvas_relation_metadata_loss, canvas_relation_metadata_guard_ready DB 함수 호출 · 보안 신호 2개을 담당합니다.",
+      "area": "security-privacy",
+      "summary": "근거가 채워진 시스템 관계 메타데이터를 오래된 탭이나 무근거 저장이 덮어쓰지 못하게 합니다.",
+      "userImpact": "복구한 연결선 설명과 보안 근거가 다시 사라지는 일을 막습니다.",
+      "technicalSummary": "DB 함수 2개 참조 · 보안 점검 신호 2개",
       "tags": [
         "database",
         "security-definer-function",
+        "security-privacy",
         "service-role-grant"
       ],
       "details": {
+        "functionCount": 0,
+        "importCount": 0,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [],
@@ -4716,14 +5787,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "sql",
       "lineStart": 1,
       "lineEnd": 39,
-      "summary": "데이터베이스 선언에서 system_runtime_observations 데이터 접근 · 보안 신호 2개을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "시스템 파츠의 운영 상태 확인 결과와 확인 시각을 저장합니다.",
+      "userImpact": "LIVE 상태가 새로고침 뒤에도 남고 오래되면 stale로 판정할 근거가 됩니다.",
+      "technicalSummary": "DB 테이블 1개 참조 · 보안 점검 신호 2개",
       "tags": [
         "database",
+        "digital-twin-engine",
         "row-level-security",
         "service-role-grant",
         "system_runtime_observations"
       ],
       "details": {
+        "functionCount": 0,
+        "importCount": 0,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [
@@ -4748,12 +5825,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "sql",
       "lineStart": 1,
       "lineEnd": 99,
-      "summary": "데이터베이스 선언에서 get_workflow_system_operational_snapshot DB 함수 호출 · 보안 신호 1개을 담당합니다.",
+      "area": "digital-twin-engine",
+      "summary": "운영 대시보드가 사용자 본문 없이 집계 상태만 읽도록 제한된 DB 함수를 만듭니다.",
+      "userImpact": "시스템 지도가 사용자 캔버스 내용을 노출하지 않고 운영 수치만 확인하게 합니다.",
+      "technicalSummary": "DB 함수 1개 참조 · 보안 점검 신호 1개",
       "tags": [
         "database",
+        "digital-twin-engine",
         "service-role-grant"
       ],
       "details": {
+        "functionCount": 0,
+        "importCount": 0,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [],
@@ -4777,14 +5860,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "sql",
       "lineStart": 1,
       "lineEnd": 36,
-      "summary": "데이터베이스 선언에서 canvases, user_prefs 데이터 접근 · 보안 신호 1개을 담당합니다.",
+      "area": "data-storage-sync",
+      "summary": "캔버스, 노드, 연결선과 사용자 설정의 기본 테이블·권한·저장 함수를 만듭니다.",
+      "userImpact": "로그인한 사용자의 핵심 캔버스 자료가 Supabase에 저장되는 구조를 결정합니다.",
+      "technicalSummary": "DB 테이블 2개 참조 · 보안 점검 신호 1개",
       "tags": [
         "canvases",
+        "data-storage-sync",
         "database",
         "row-level-security",
         "user_prefs"
       ],
       "details": {
+        "functionCount": 0,
+        "importCount": 0,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [
@@ -4809,7 +5898,10 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "sql",
       "lineStart": 1,
       "lineEnd": 555,
-      "summary": "데이터베이스 선언에서 canvas_shares, share_members, share_revocations 데이터 접근 · claim_share, claim_email_invites, list_pending_email_invites DB 함수 호출 · 보안 신호 3개을 담당합니다.",
+      "area": "sharing-collaboration",
+      "summary": "이메일·링크 초대, 참여자, 취소와 시야 제한을 저장하고 공유 범위별 접근 규칙을 만듭니다.",
+      "userImpact": "초대 수락·거절·나가기·추방과 제한된 본문 공개가 실제 DB 권한으로 작동하게 합니다.",
+      "technicalSummary": "DB 테이블 3개 참조 · DB 함수 13개 참조 · 보안 점검 신호 3개",
       "tags": [
         "canvas_shares",
         "database",
@@ -4817,9 +5909,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "security-definer-function",
         "service-role-grant",
         "share_members",
-        "share_revocations"
+        "share_revocations",
+        "sharing-collaboration"
       ],
       "details": {
+        "functionCount": 0,
+        "importCount": 0,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [
@@ -4861,16 +5956,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "sql",
       "lineStart": 1,
       "lineEnd": 198,
-      "summary": "데이터베이스 선언에서 source_twin_snapshots, source_twin_events, system_operation_audit 데이터 접근 · reject_source_twin_history_mutation, reject_system_operation_audit_mutation, apply_source_twin_snapshot_operation DB 함수 호출 · 보안 신호 2개을 담당합니다.",
+      "area": "source-code-twin",
+      "summary": "배포별 코드·DB·운영 상태 스냅샷과 GitHub 변경 이벤트를 저장합니다.",
+      "userImpact": "현재 상태와 이전 배포를 비교하고 변경 근거를 남기게 합니다.",
+      "technicalSummary": "DB 테이블 3개 참조 · DB 함수 3개 참조 · 보안 점검 신호 2개",
       "tags": [
         "database",
         "row-level-security",
         "service-role-grant",
+        "source-code-twin",
         "source_twin_events",
         "source_twin_snapshots",
         "system_operation_audit"
       ],
       "details": {
+        "functionCount": 0,
+        "importCount": 0,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [
@@ -4901,11 +6002,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "json",
       "lineStart": 1,
       "lineEnd": 6,
-      "summary": "빌드·배포 설정에서 구조와 설정 제공을 담당합니다.",
+      "area": "deployment-operations",
+      "summary": "개발 코드를 검사·빌드해 실제 웹 서비스로 실행할 설정과 명령을 정의합니다.",
+      "userImpact": "잘못된 빌드가 배포되는 것을 막고 배포 환경의 실행 방식을 결정합니다.",
+      "technicalSummary": "6줄의 json 파일",
       "tags": [
-        "deployment"
+        "deployment",
+        "deployment-operations"
       ],
       "details": {
+        "functionCount": 0,
+        "importCount": 0,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [],
@@ -4925,11 +6032,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "language": "javascript",
       "lineStart": 1,
       "lineEnd": 44,
-      "summary": "빌드·배포 설정에서 모듈 4개 연결을 담당합니다.",
+      "area": "deployment-operations",
+      "summary": "개발 코드를 검사·빌드해 실제 웹 서비스로 실행할 설정과 명령을 정의합니다.",
+      "userImpact": "잘못된 빌드가 배포되는 것을 막고 배포 환경의 실행 방식을 결정합니다.",
+      "technicalSummary": "코드 연결 4개",
       "tags": [
-        "deployment"
+        "deployment",
+        "deployment-operations"
       ],
       "details": {
+        "functionCount": 0,
+        "importCount": 4,
         "exports": [
           "default"
         ],
@@ -4950,12 +6063,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/local-connector.js",
       "parentId": "file:api/local-connector.js",
       "layer": "api",
+      "area": "source-code-twin",
       "lineStart": 20,
       "lineEnd": 22,
-      "summary": "bearer token을(를) 처리하는 함수입니다.",
+      "summary": "요청 인증 · 연결 토큰에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "api",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -4972,13 +6088,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/local-connector.js",
       "parentId": "file:api/local-connector.js",
       "layer": "api",
+      "area": "source-code-twin",
       "lineStart": 28,
       "lineEnd": 42,
-      "summary": "handle agent을(를) 처리하는 비동기 함수입니다.",
+      "summary": "로컬 연결 프로그램 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "api",
         "async",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -4995,13 +6114,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/local-connector.js",
       "parentId": "file:api/local-connector.js",
       "layer": "api",
+      "area": "source-code-twin",
       "lineStart": 44,
       "lineEnd": 67,
-      "summary": "handle browser을(를) 처리하는 비동기 함수입니다.",
+      "summary": "브라우저 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "api",
         "async",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -5018,14 +6140,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/local-connector.js",
       "parentId": "file:api/local-connector.js",
       "layer": "api",
+      "area": "source-code-twin",
       "lineStart": 69,
       "lineEnd": 83,
-      "summary": "handler을(를) 처리하는 비동기 함수입니다.",
+      "summary": "이 서버 경로로 들어온 요청의 로그인과 입력을 확인하고 결과를 돌려줍니다. 이 요청은 다음 역할을 맡습니다: 브라우저와 로컬 커넥터 사이에서 페어링, 상태 보고와 승인된 Git 작업 요청을 중계합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "api",
         "async",
         "exported",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -5042,12 +6167,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/local-connector.js",
       "parentId": "file:api/local-connector.js",
       "layer": "api",
+      "area": "source-code-twin",
       "lineStart": 24,
       "lineEnd": 26,
-      "summary": "local token을(를) 처리하는 함수입니다.",
+      "summary": "로컬 저장소 · 연결 토큰에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "api",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -5064,12 +6192,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/local-connector.js",
       "parentId": "file:api/local-connector.js",
       "layer": "api",
+      "area": "source-code-twin",
       "lineStart": 16,
       "lineEnd": 18,
-      "summary": "send을(를) 처리하는 함수입니다.",
+      "summary": "서버 작업의 성공·오류 상태와 결과를 브라우저가 이해할 응답으로 보냅니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "api",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -5086,12 +6217,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/shared-canvas.js",
       "parentId": "file:api/shared-canvas.js",
       "layer": "api",
+      "area": "sharing-collaboration",
       "lineStart": 12,
       "lineEnd": 16,
-      "summary": "conflict을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “공유 링크의 유효성, 최초 참여 동의와 링크 취소 상태를 서버에서 판정합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "api",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -5108,13 +6242,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/shared-canvas.js",
       "parentId": "file:api/shared-canvas.js",
       "layer": "api",
+      "area": "sharing-collaboration",
       "lineStart": 23,
       "lineEnd": 26,
-      "summary": "current user을(를) 처리하는 비동기 함수입니다.",
+      "summary": "현재 상태 · 사용자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "api",
         "async",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -5131,14 +6268,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/shared-canvas.js",
       "parentId": "file:api/shared-canvas.js",
       "layer": "api",
+      "area": "sharing-collaboration",
       "lineStart": 28,
       "lineEnd": 125,
-      "summary": "handler을(를) 처리하는 비동기 함수입니다.",
+      "summary": "이 서버 경로로 들어온 요청의 로그인과 입력을 확인하고 결과를 돌려줍니다. 이 요청은 다음 역할을 맡습니다: 공유 링크의 유효성, 최초 참여 동의와 링크 취소 상태를 서버에서 판정합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "api",
         "async",
         "exported",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -5155,12 +6295,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/shared-canvas.js",
       "parentId": "file:api/shared-canvas.js",
       "layer": "api",
+      "area": "sharing-collaboration",
       "lineStart": 18,
       "lineEnd": 21,
-      "summary": "next revision을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “공유 링크의 유효성, 최초 참여 동의와 링크 취소 상태를 서버에서 판정합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "api",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -5177,12 +6320,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/shared-canvas.js",
       "parentId": "file:api/shared-canvas.js",
       "layer": "api",
+      "area": "sharing-collaboration",
       "lineStart": 8,
       "lineEnd": 10,
-      "summary": "send을(를) 처리하는 함수입니다.",
+      "summary": "서버 작업의 성공·오류 상태와 결과를 브라우저가 이해할 응답으로 보냅니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "api",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -5199,13 +6345,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/source-twin-webhook.js",
       "parentId": "file:api/source-twin-webhook.js",
       "layer": "api",
+      "area": "source-code-twin",
       "lineStart": 50,
       "lineEnd": 71,
-      "summary": "compact git hub push을(를) 처리하는 함수입니다.",
+      "summary": "필요한 정보만 남기기 · GitHub에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "api",
         "exported",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -5222,14 +6371,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/source-twin-webhook.js",
       "parentId": "file:api/source-twin-webhook.js",
       "layer": "api",
+      "area": "source-code-twin",
       "lineStart": 73,
       "lineEnd": 103,
-      "summary": "handler을(를) 처리하는 비동기 함수입니다.",
+      "summary": "이 서버 경로로 들어온 요청의 로그인과 입력을 확인하고 결과를 돌려줍니다. 이 요청은 다음 역할을 맡습니다: GitHub push 웹훅의 서명을 검증하고 변경된 커밋과 파일 경로만 기록합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "api",
         "async",
         "exported",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -5246,13 +6398,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/source-twin-webhook.js",
       "parentId": "file:api/source-twin-webhook.js",
       "layer": "api",
+      "area": "source-code-twin",
       "lineStart": 15,
       "lineEnd": 27,
-      "summary": "raw body을(를) 처리하는 비동기 함수입니다.",
+      "summary": "가공 전 자료 · 요청 본문에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "api",
         "async",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -5269,12 +6424,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/source-twin-webhook.js",
       "parentId": "file:api/source-twin-webhook.js",
       "layer": "api",
+      "area": "source-code-twin",
       "lineStart": 36,
       "lineEnd": 38,
-      "summary": "safe sha을(를) 처리하는 함수입니다.",
+      "summary": "허용 범위로 제한 · Git 커밋 식별값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "api",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -5291,12 +6449,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/source-twin-webhook.js",
       "parentId": "file:api/source-twin-webhook.js",
       "layer": "api",
+      "area": "source-code-twin",
       "lineStart": 10,
       "lineEnd": 13,
-      "summary": "send을(를) 처리하는 함수입니다.",
+      "summary": "서버 작업의 성공·오류 상태와 결과를 브라우저가 이해할 응답으로 보냅니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "api",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -5313,13 +6474,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/source-twin-webhook.js",
       "parentId": "file:api/source-twin-webhook.js",
       "layer": "api",
+      "area": "source-code-twin",
       "lineStart": 40,
       "lineEnd": 48,
-      "summary": "source twin repository name을(를) 처리하는 함수입니다.",
+      "summary": "소스 코드 · 디지털 트윈 · 코드 저장소에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "api",
         "exported",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -5336,13 +6500,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/source-twin-webhook.js",
       "parentId": "file:api/source-twin-webhook.js",
       "layer": "api",
+      "area": "source-code-twin",
       "lineStart": 29,
       "lineEnd": 34,
-      "summary": "valid git hub signature을(를) 처리하는 함수입니다.",
+      "summary": "유효성 · GitHub · 요청 서명에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "api",
         "exported",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -5359,12 +6526,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/source-twin.js",
       "parentId": "file:api/source-twin.js",
       "layer": "api",
+      "area": "source-code-twin",
       "lineStart": 16,
       "lineEnd": 18,
-      "summary": "bearer token을(를) 처리하는 함수입니다.",
+      "summary": "요청 인증 · 연결 토큰에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "api",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -5381,14 +6551,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/source-twin.js",
       "parentId": "file:api/source-twin.js",
       "layer": "api",
+      "area": "source-code-twin",
       "lineStart": 20,
       "lineEnd": 54,
-      "summary": "handler을(를) 처리하는 비동기 함수입니다.",
+      "summary": "이 서버 경로로 들어온 요청의 로그인과 입력을 확인하고 결과를 돌려줍니다. 이 요청은 다음 역할을 맡습니다: 현재 배포 코드 구조, 변경 이벤트와 상태 스냅샷 조회·생성을 소유자에게 제공합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "api",
         "async",
         "exported",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -5405,12 +6578,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/source-twin.js",
       "parentId": "file:api/source-twin.js",
       "layer": "api",
+      "area": "source-code-twin",
       "lineStart": 12,
       "lineEnd": 14,
-      "summary": "send을(를) 처리하는 함수입니다.",
+      "summary": "서버 작업의 성공·오류 상태와 결과를 브라우저가 이해할 응답으로 보냅니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "api",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -5427,11 +6603,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/system-runtime.js",
       "parentId": "file:api/system-runtime.js",
       "layer": "api",
+      "area": "digital-twin-engine",
       "lineStart": 28,
       "lineEnd": 30,
-      "summary": "bearer token을(를) 처리하는 함수입니다.",
+      "summary": "요청 인증 · 연결 토큰에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "api",
+        "digital-twin-engine",
         "function"
       ],
       "details": {
@@ -5449,11 +6628,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/system-runtime.js",
       "parentId": "file:api/system-runtime.js",
       "layer": "api",
+      "area": "digital-twin-engine",
       "lineStart": 45,
       "lineEnd": 53,
-      "summary": "deployment context을(를) 처리하는 함수입니다.",
+      "summary": "배포 · 실행 문맥에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "api",
+        "digital-twin-engine",
         "function"
       ],
       "details": {
@@ -5471,11 +6653,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/system-runtime.js",
       "parentId": "file:api/system-runtime.js",
       "layer": "api",
+      "area": "digital-twin-engine",
       "lineStart": 32,
       "lineEnd": 35,
-      "summary": "deployment host을(를) 처리하는 함수입니다.",
+      "summary": "배포 · 배포 주소에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "api",
+        "digital-twin-engine",
         "function"
       ],
       "details": {
@@ -5493,12 +6678,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/system-runtime.js",
       "parentId": "file:api/system-runtime.js",
       "layer": "api",
+      "area": "digital-twin-engine",
       "lineStart": 99,
       "lineEnd": 174,
-      "summary": "handler을(를) 처리하는 비동기 함수입니다.",
+      "summary": "이 서버 경로로 들어온 요청의 로그인과 입력을 확인하고 결과를 돌려줍니다. 이 요청은 다음 역할을 맡습니다: 시스템 지도에서 선택한 파츠의 실제 운영 상태를 제한된 검사 목록으로 확인하고 결과를 저장합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "api",
         "async",
+        "digital-twin-engine",
         "exported",
         "function"
       ],
@@ -5517,12 +6705,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/system-runtime.js",
       "parentId": "file:api/system-runtime.js",
       "layer": "api",
+      "area": "digital-twin-engine",
       "lineStart": 55,
       "lineEnd": 69,
-      "summary": "system canvas을(를) 불러오기하는 비동기 함수입니다.",
+      "summary": "시스템 · 캔버스 정보를 불러옵니다",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "api",
         "async",
+        "digital-twin-engine",
         "function"
       ],
       "details": {
@@ -5540,12 +6731,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/system-runtime.js",
       "parentId": "file:api/system-runtime.js",
       "layer": "api",
+      "area": "digital-twin-engine",
       "lineStart": 88,
       "lineEnd": 97,
-      "summary": "results을(를) 저장하는 비동기 함수입니다.",
+      "summary": "결과 작업을 저장합니다",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "api",
         "async",
+        "digital-twin-engine",
         "function"
       ],
       "details": {
@@ -5563,12 +6757,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/system-runtime.js",
       "parentId": "file:api/system-runtime.js",
       "layer": "api",
+      "area": "digital-twin-engine",
       "lineStart": 71,
       "lineEnd": 86,
-      "summary": "run target을(를) 처리하는 비동기 함수입니다.",
+      "summary": "대상에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "api",
         "async",
+        "digital-twin-engine",
         "function"
       ],
       "details": {
@@ -5586,11 +6783,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/system-runtime.js",
       "parentId": "file:api/system-runtime.js",
       "layer": "api",
+      "area": "digital-twin-engine",
       "lineStart": 37,
       "lineEnd": 43,
-      "summary": "runtime base url을(를) 처리하는 함수입니다.",
+      "summary": "실제 운영 상태 · 기준 · 웹 주소에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "api",
+        "digital-twin-engine",
         "function"
       ],
       "details": {
@@ -5608,11 +6808,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "api/system-runtime.js",
       "parentId": "file:api/system-runtime.js",
       "layer": "api",
+      "area": "digital-twin-engine",
       "lineStart": 24,
       "lineEnd": 26,
-      "summary": "send을(를) 처리하는 함수입니다.",
+      "summary": "서버 작업의 성공·오류 상태와 결과를 브라우저가 이해할 응답으로 보냅니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "api",
+        "digital-twin-engine",
         "function"
       ],
       "details": {
@@ -5630,12 +6833,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/dataAccessAudit.js",
       "parentId": "file:mcp/dataAccessAudit.js",
       "layer": "mcp",
+      "area": "security-privacy",
       "lineStart": 11,
       "lineEnd": 15,
-      "summary": "data access audit error constructor을(를) 처리하는 함수입니다.",
+      "summary": "데이터 · 접근 권한 · 접근 감사 · 오류에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "class-method",
-        "mcp"
+        "mcp",
+        "security-privacy"
       ],
       "details": {
         "functionKind": "class-method",
@@ -5652,13 +6858,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/dataAccessAudit.js",
       "parentId": "file:mcp/dataAccessAudit.js",
       "layer": "mcp",
+      "area": "security-privacy",
       "lineStart": 18,
       "lineEnd": 20,
-      "summary": "data access audit required을(를) 처리하는 함수입니다.",
+      "summary": "데이터 · 접근 권한 · 접근 감사에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "security-privacy"
       ],
       "details": {
         "functionKind": "function",
@@ -5675,14 +6884,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/dataAccessAudit.js",
       "parentId": "file:mcp/dataAccessAudit.js",
       "layer": "mcp",
+      "area": "security-privacy",
       "lineStart": 22,
       "lineEnd": 39,
-      "summary": "canvas data access을(를) 기록하는 비동기 함수입니다.",
+      "summary": "캔버스 · 데이터 · 접근 권한 작업을 기록합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "security-privacy"
       ],
       "details": {
         "functionKind": "function",
@@ -5699,10 +6911,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 698,
       "lineEnd": 810,
-      "summary": "avoid edge crossings을(를) 처리하는 함수입니다.",
+      "summary": "연결선 · 경계 통과에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "canvas-model",
         "exported",
         "function",
         "mcp"
@@ -5722,11 +6937,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 419,
       "lineEnd": 428,
-      "summary": "base used sides을(를) 처리하는 함수입니다.",
+      "summary": "기준에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-model",
         "mcp"
       ],
       "details": {
@@ -5744,10 +6962,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 576,
       "lineEnd": 647,
-      "summary": "edge anchors을(를) 처리하는 함수입니다.",
+      "summary": "연결선 · 연결점에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "canvas-model",
         "exported",
         "function",
         "mcp"
@@ -5767,10 +6988,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 32,
       "lineEnd": 48,
-      "summary": "find non overlapping을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 상태나 허용 여부를 대상을 찾습니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "canvas-model",
         "exported",
         "function",
         "mcp"
@@ -5790,11 +7014,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 33,
       "lineEnd": 33,
-      "summary": "fits을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “여러 노드와 연결선을 계층·방사형 같은 배치로 정리할 좌표를 계산합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-model",
         "mcp"
       ],
       "details": {
@@ -5812,11 +7039,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 579,
       "lineEnd": 586,
-      "summary": "rect을(를) 조회하는 함수입니다.",
+      "summary": "노드 경계 상자 정보를 불러옵니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-model",
         "mcp"
       ],
       "details": {
@@ -5834,11 +7064,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 703,
       "lineEnd": 710,
-      "summary": "rect을(를) 조회하는 함수입니다.",
+      "summary": "노드 경계 상자 정보를 불러옵니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-model",
         "mcp"
       ],
       "details": {
@@ -5856,10 +7089,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 251,
       "lineEnd": 258,
-      "summary": "side을(를) 조회하는 함수입니다.",
+      "summary": "연결 방향 정보를 불러옵니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-model",
         "function",
         "mcp"
       ],
@@ -5878,10 +7114,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 673,
       "lineEnd": 680,
-      "summary": "handle anchor을(를) 처리하는 함수입니다.",
+      "summary": "연결점 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-model",
         "function",
         "mcp"
       ],
@@ -5900,11 +7139,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 19,
       "lineEnd": 19,
-      "summary": "is structural node을(를) 처리하는 함수입니다.",
+      "summary": "구조용 · 노드 상태나 허용 여부를 해당 상태인지 판단합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "arrow",
+        "canvas-model",
         "exported",
         "mcp"
       ],
@@ -5923,11 +7165,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 116,
       "lineEnd": 120,
-      "summary": "key을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “여러 노드와 연결선을 계층·방사형 같은 배치로 정리할 좌표를 계산합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-model",
         "mcp"
       ],
       "details": {
@@ -5945,10 +7190,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 53,
       "lineEnd": 155,
-      "summary": "layered layout을(를) 처리하는 함수입니다.",
+      "summary": "계층형 · 자동 배치에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-model",
         "function",
         "mcp"
       ],
@@ -5967,10 +7215,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 815,
       "lineEnd": 882,
-      "summary": "layout graph을(를) 처리하는 함수입니다.",
+      "summary": "자동 배치 · 노드·연결선 구조에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "canvas-model",
         "exported",
         "function",
         "mcp"
@@ -5990,11 +7241,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 18,
       "lineEnd": 18,
-      "summary": "node h을(를) 처리하는 함수입니다.",
+      "summary": "노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "arrow",
+        "canvas-model",
         "exported",
         "mcp"
       ],
@@ -6013,10 +7267,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 21,
       "lineEnd": 23,
-      "summary": "node rect을(를) 처리하는 함수입니다.",
+      "summary": "노드 · 노드 경계 상자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "canvas-model",
         "exported",
         "function",
         "mcp"
@@ -6036,11 +7293,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 17,
       "lineEnd": 17,
-      "summary": "node w을(를) 처리하는 함수입니다.",
+      "summary": "노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "arrow",
+        "canvas-model",
         "exported",
         "mcp"
       ],
@@ -6059,10 +7319,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 25,
       "lineEnd": 28,
-      "summary": "overlaps을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “여러 노드와 연결선을 계층·방사형 같은 배치로 정리할 좌표를 계산합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "canvas-model",
         "exported",
         "function",
         "mcp"
@@ -6082,11 +7345,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 712,
       "lineEnd": 712,
-      "summary": "padded rect을(를) 처리하는 함수입니다.",
+      "summary": "노드 경계 상자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-model",
         "mcp"
       ],
       "details": {
@@ -6104,11 +7370,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 435,
       "lineEnd": 442,
-      "summary": "pick side을(를) 처리하는 함수입니다.",
+      "summary": "연결 방향에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-model",
         "mcp"
       ],
       "details": {
@@ -6126,11 +7395,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 430,
       "lineEnd": 433,
-      "summary": "preferred order을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “여러 노드와 연결선을 계층·방사형 같은 배치로 정리할 좌표를 계산합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-model",
         "mcp"
       ],
       "details": {
@@ -6148,10 +7420,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 162,
       "lineEnd": 512,
-      "summary": "radial layout을(를) 처리하는 함수입니다.",
+      "summary": "방사형 · 자동 배치에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-model",
         "function",
         "mcp"
       ],
@@ -6170,10 +7445,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 517,
       "lineEnd": 555,
-      "summary": "radial levels을(를) 처리하는 함수입니다.",
+      "summary": "방사형에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "canvas-model",
         "exported",
         "function",
         "mcp"
@@ -6193,11 +7471,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 291,
       "lineEnd": 291,
-      "summary": "rect of을(를) 처리하는 함수입니다.",
+      "summary": "노드 경계 상자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-model",
         "mcp"
       ],
       "details": {
@@ -6215,11 +7496,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 417,
       "lineEnd": 417,
-      "summary": "ref dir을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “여러 노드와 연결선을 계층·방사형 같은 배치로 정리할 좌표를 계산합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-model",
         "mcp"
       ],
       "details": {
@@ -6237,10 +7521,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 652,
       "lineEnd": 670,
-      "summary": "segment intersects rect을(를) 처리하는 함수입니다.",
+      "summary": "노드 경계 상자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "canvas-model",
         "exported",
         "function",
         "mcp"
@@ -6260,11 +7547,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 237,
       "lineEnd": 238,
-      "summary": "subtree size을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “여러 노드와 연결선을 계층·방사형 같은 배치로 정리할 좌표를 계산합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-model",
         "mcp"
       ],
       "details": {
@@ -6282,11 +7572,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 186,
       "lineEnd": 186,
-      "summary": "total deg을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “여러 노드와 연결선을 계층·방사형 같은 배치로 정리할 좌표를 계산합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-model",
         "mcp"
       ],
       "details": {
@@ -6304,11 +7597,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 531,
       "lineEnd": 531,
-      "summary": "total deg을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “여러 노드와 연결선을 계층·방사형 같은 배치로 정리할 좌표를 계산합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-model",
         "mcp"
       ],
       "details": {
@@ -6326,10 +7622,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/layout.js",
       "parentId": "file:mcp/layout.js",
       "layer": "mcp",
+      "area": "canvas-model",
       "lineStart": 886,
       "lineEnd": 931,
-      "summary": "graph input을(를) 검증하는 함수입니다.",
+      "summary": "노드·연결선 구조 · 입력 자료 상태나 허용 여부를 규칙에 맞는지 검사합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "canvas-model",
         "exported",
         "function",
         "mcp"
@@ -6349,12 +7648,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 25,
       "lineEnd": 30,
-      "summary": "local connector error constructor을(를) 처리하는 함수입니다.",
+      "summary": "로컬 저장소 · 로컬 커넥터 · 오류에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "class-method",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "class-method",
@@ -6371,14 +7673,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 302,
       "lineEnd": 369,
-      "summary": "local git sync을(를) 적용하는 비동기 함수입니다.",
+      "summary": "로컬 저장소 · Git 상태 · 동기화 작업을 승인된 변경을 적용합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -6395,14 +7700,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 371,
       "lineEnd": 408,
-      "summary": "claim local git sync operation을(를) 처리하는 비동기 함수입니다.",
+      "summary": "실행 권한 선점 · 로컬 저장소 · Git 상태 · 동기화 · 실제 조작에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -6419,12 +7727,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 33,
       "lineEnd": 37,
-      "summary": "clean text을(를) 처리하는 함수입니다.",
+      "summary": "텍스트에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -6441,14 +7752,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 410,
       "lineEnd": 455,
-      "summary": "complete local git sync operation을(를) 처리하는 비동기 함수입니다.",
+      "summary": "로컬 저장소 · Git 상태 · 동기화 · 실제 조작에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -6465,12 +7779,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 94,
       "lineEnd": 116,
-      "summary": "connector row을(를) 처리하는 함수입니다.",
+      "summary": "로컬 커넥터에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -6487,14 +7804,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 166,
       "lineEnd": 177,
-      "summary": "local connector을(를) 생성하는 비동기 함수입니다.",
+      "summary": "로컬 저장소 · 로컬 커넥터 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -6511,12 +7831,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 86,
       "lineEnd": 92,
-      "summary": "database error을(를) 처리하는 함수입니다.",
+      "summary": "오류에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -6533,12 +7856,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 47,
       "lineEnd": 49,
-      "summary": "fingerprint을(를) 처리하는 함수입니다.",
+      "summary": "변경 식별값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -6555,14 +7881,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 131,
       "lineEnd": 164,
-      "summary": "local connectors을(를) 목록 조회하는 비동기 함수입니다.",
+      "summary": "로컬 저장소 정보를 목록을 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -6579,13 +7908,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 118,
       "lineEnd": 129,
-      "summary": "owned connector을(를) 불러오기하는 비동기 함수입니다.",
+      "summary": "로컬 커넥터 정보를 불러옵니다",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -6602,13 +7934,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 55,
       "lineEnd": 84,
-      "summary": "local git sync verification을(를) 정규화하는 함수입니다.",
+      "summary": "로컬 저장소 · Git 상태 · 동기화 · 실행 결과 확인 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -6625,14 +7960,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 249,
       "lineEnd": 300,
-      "summary": "preview local git sync을(를) 처리하는 비동기 함수입니다.",
+      "summary": "실행 전 미리보기 · 로컬 저장소 · Git 상태 · 동기화에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -6649,14 +7987,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 205,
       "lineEnd": 247,
-      "summary": "local connector heartbeat을(를) 기록하는 비동기 함수입니다.",
+      "summary": "로컬 저장소 · 로컬 커넥터 · 연결 생존 신호 작업을 기록합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -6673,14 +8014,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 193,
       "lineEnd": 203,
-      "summary": "local connector token을(를) 확인하는 비동기 함수입니다.",
+      "summary": "로컬 저장소 · 로컬 커넥터 · 연결 토큰 상태나 허용 여부를 찾아 결정합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -6697,14 +8041,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 179,
       "lineEnd": 191,
-      "summary": "revoke local connector을(를) 처리하는 비동기 함수입니다.",
+      "summary": "로컬 저장소 · 로컬 커넥터 대상을 권한을 해제합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -6721,12 +8068,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 57,
       "lineEnd": 60,
-      "summary": "sha을(를) 처리하는 함수입니다.",
+      "summary": "Git 커밋 식별값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "arrow",
@@ -6743,12 +8093,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 39,
       "lineEnd": 45,
-      "summary": "stable을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “로컬 커넥터 등록, heartbeat, Git 동기화 계획과 실행 결과를 서버에 보관합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -6765,12 +8118,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 51,
       "lineEnd": 53,
-      "summary": "token hash을(를) 처리하는 함수입니다.",
+      "summary": "연결 토큰 · 변경 식별값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -6787,12 +8143,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sanitize.js",
       "parentId": "file:mcp/sanitize.js",
       "layer": "mcp",
+      "area": "security-privacy",
       "lineStart": 37,
       "lineEnd": 57,
-      "summary": "sanitize attrs을(를) 처리하는 함수입니다.",
+      "summary": "위험한 입력 제거에서 위험한 내용을 제거합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "mcp"
+        "mcp",
+        "security-privacy"
       ],
       "details": {
         "functionKind": "function",
@@ -6809,13 +8168,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sanitize.js",
       "parentId": "file:mcp/sanitize.js",
       "layer": "mcp",
+      "area": "security-privacy",
       "lineStart": 80,
       "lineEnd": 88,
-      "summary": "sanitize external url을(를) 처리하는 함수입니다.",
+      "summary": "외부 공개 자료 · 웹 주소에서 위험한 내용을 제거합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "security-privacy"
       ],
       "details": {
         "functionKind": "function",
@@ -6832,13 +8194,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sanitize.js",
       "parentId": "file:mcp/sanitize.js",
       "layer": "mcp",
+      "area": "security-privacy",
       "lineStart": 59,
       "lineEnd": 78,
-      "summary": "sanitize html을(를) 처리하는 함수입니다.",
+      "summary": "본문 HTML에서 위험한 내용을 제거합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "security-privacy"
       ],
       "details": {
         "functionKind": "function",
@@ -6855,13 +8220,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sanitize.js",
       "parentId": "file:mcp/sanitize.js",
       "layer": "mcp",
+      "area": "security-privacy",
       "lineStart": 91,
       "lineEnd": 113,
-      "summary": "sanitize text fields을(를) 처리하는 함수입니다.",
+      "summary": "텍스트에서 위험한 내용을 제거합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "security-privacy"
       ],
       "details": {
         "functionKind": "function",
@@ -6878,10 +8246,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/server.js",
       "parentId": "file:mcp/server.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 628,
       "lineEnd": 638,
-      "summary": "bearer을(를) 처리하는 함수입니다.",
+      "summary": "요청 인증에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "function",
         "mcp"
       ],
@@ -6900,10 +8271,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/server.js",
       "parentId": "file:mcp/server.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 206,
       "lineEnd": 626,
-      "summary": "server을(를) 구성하는 함수입니다.",
+      "summary": "트윈 구성 항목이나 구조를 구성합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "ai-integration",
         "exported",
         "function",
         "mcp"
@@ -6923,10 +8297,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/server.js",
       "parentId": "file:mcp/server.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 65,
       "lineEnd": 65,
-      "summary": "fail을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “AI에게 공개할 캔버스 도구의 이름, 입력 형식과 실행 함수를 등록합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "arrow",
         "mcp"
       ],
@@ -6945,10 +8322,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/server.js",
       "parentId": "file:mcp/server.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 211,
       "lineEnd": 211,
-      "summary": "g을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “AI에게 공개할 캔버스 도구의 이름, 입력 형식과 실행 함수를 등록합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "arrow",
         "mcp"
       ],
@@ -6967,10 +8347,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/server.js",
       "parentId": "file:mcp/server.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 69,
       "lineEnd": 82,
-      "summary": "guard을(를) 처리하는 함수입니다.",
+      "summary": "보호 규칙에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "arrow",
         "mcp"
       ],
@@ -6989,10 +8372,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/server.js",
       "parentId": "file:mcp/server.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 641,
       "lineEnd": 682,
-      "summary": "handler을(를) 처리하는 비동기 함수입니다.",
+      "summary": "이 서버 경로로 들어온 요청의 로그인과 입력을 확인하고 결과를 돌려줍니다. 이 요청은 다음 역할을 맡습니다: AI에게 공개할 캔버스 도구의 이름, 입력 형식과 실행 함수를 등록합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -7013,10 +8399,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/server.js",
       "parentId": "file:mcp/server.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 62,
       "lineEnd": 62,
-      "summary": "ok을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “AI에게 공개할 캔버스 도구의 이름, 입력 형식과 실행 함수를 등록합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "arrow",
         "mcp"
       ],
@@ -7035,10 +8424,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/server.js",
       "parentId": "file:mcp/server.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 64,
       "lineEnd": 64,
-      "summary": "okh을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “AI에게 공개할 캔버스 도구의 이름, 입력 형식과 실행 함수를 등록합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "arrow",
         "mcp"
       ],
@@ -7057,13 +8449,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
+      "area": "sharing-collaboration",
       "lineStart": 22,
       "lineEnd": 26,
-      "summary": "admin을(를) 처리하는 함수입니다.",
+      "summary": "서버에서만 허용된 Supabase 관리자 연결을 준비합니다. 브라우저에는 이 권한을 넘기지 않습니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -7080,13 +8475,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
+      "area": "sharing-collaboration",
       "lineStart": 275,
       "lineEnd": 379,
-      "summary": "shared canvas update을(를) 적용하는 함수입니다.",
+      "summary": "캔버스 · 변경 작업을 승인된 변경을 적용합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -7103,13 +8501,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
+      "area": "sharing-collaboration",
       "lineStart": 59,
       "lineEnd": 63,
-      "summary": "share access을(를) 비교하는 함수입니다.",
+      "summary": "공유 · 접근 권한 상태나 허용 여부를 서로 비교합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -7126,13 +8527,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
+      "area": "sharing-collaboration",
       "lineStart": 201,
       "lineEnd": 203,
-      "summary": "editable node id set을(를) 처리하는 함수입니다.",
+      "summary": "노드 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -7149,13 +8553,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
+      "area": "sharing-collaboration",
       "lineStart": 51,
       "lineEnd": 57,
-      "summary": "effective share grant을(를) 처리하는 함수입니다.",
+      "summary": "공유에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -7172,14 +8579,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
+      "area": "sharing-collaboration",
       "lineStart": 101,
       "lineEnd": 180,
-      "summary": "canvas participants을(를) 목록 조회하는 비동기 함수입니다.",
+      "summary": "캔버스 정보를 목록을 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -7196,12 +8606,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
+      "area": "sharing-collaboration",
       "lineStart": 292,
       "lineEnd": 292,
-      "summary": "may edit을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “MCP에서 공유 참여자 목록과 초대 범위를 계산하고 시야 제한을 적용합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "mcp"
+        "mcp",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "arrow",
@@ -7218,12 +8631,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
+      "area": "sharing-collaboration",
       "lineStart": 293,
       "lineEnd": 293,
-      "summary": "may edit structure을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “MCP에서 공유 참여자 목록과 초대 범위를 계산하고 시야 제한을 적용합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "mcp"
+        "mcp",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "arrow",
@@ -7240,14 +8656,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
+      "area": "sharing-collaboration",
       "lineStart": 34,
       "lineEnd": 49,
-      "summary": "my shares for을(를) 처리하는 비동기 함수입니다.",
+      "summary": "이 파일이 맡은 “MCP에서 공유 참여자 목록과 초대 범위를 계산하고 시야 제한을 적용합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -7264,13 +8683,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
+      "area": "sharing-collaboration",
       "lineStart": 65,
       "lineEnd": 67,
-      "summary": "pick best share access을(를) 처리하는 함수입니다.",
+      "summary": "공유 · 접근 권한에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -7287,12 +8709,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
+      "area": "sharing-collaboration",
       "lineStart": 88,
       "lineEnd": 97,
-      "summary": "public profile을(를) 처리하는 함수입니다.",
+      "summary": "프로필에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "mcp"
+        "mcp",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -7309,13 +8734,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
+      "area": "sharing-collaboration",
       "lineStart": 218,
       "lineEnd": 238,
-      "summary": "redact canvas을(를) 처리하는 함수입니다.",
+      "summary": "캔버스에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -7332,13 +8760,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
+      "area": "sharing-collaboration",
       "lineStart": 211,
       "lineEnd": 216,
-      "summary": "redact edge을(를) 처리하는 함수입니다.",
+      "summary": "연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -7355,13 +8786,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
+      "area": "sharing-collaboration",
       "lineStart": 205,
       "lineEnd": 209,
-      "summary": "redact node을(를) 처리하는 함수입니다.",
+      "summary": "노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -7378,14 +8812,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
+      "area": "sharing-collaboration",
       "lineStart": 28,
       "lineEnd": 32,
-      "summary": "browser user을(를) 확인하는 비동기 함수입니다.",
+      "summary": "브라우저 · 사용자 상태나 허용 여부를 찾아 결정합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -7402,14 +8839,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
+      "area": "sharing-collaboration",
       "lineStart": 69,
       "lineEnd": 86,
-      "summary": "shared canvas access을(를) 확인하는 비동기 함수입니다.",
+      "summary": "캔버스 · 접근 권한 상태나 허용 여부를 찾아 결정합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -7426,12 +8866,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
+      "area": "sharing-collaboration",
       "lineStart": 253,
       "lineEnd": 253,
-      "summary": "same을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “MCP에서 공유 참여자 목록과 초대 범위를 계산하고 시야 제한을 적용합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "mcp"
+        "mcp",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "arrow",
@@ -7448,12 +8891,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
+      "area": "sharing-collaboration",
       "lineStart": 269,
       "lineEnd": 273,
-      "summary": "sanitize edge을(를) 처리하는 함수입니다.",
+      "summary": "연결선에서 위험한 내용을 제거합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "mcp"
+        "mcp",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -7470,12 +8916,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
+      "area": "sharing-collaboration",
       "lineStart": 255,
       "lineEnd": 267,
-      "summary": "sanitize node을(를) 처리하는 함수입니다.",
+      "summary": "노드에서 위험한 내용을 제거합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "mcp"
+        "mcp",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -7492,14 +8941,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
+      "area": "sharing-collaboration",
       "lineStart": 182,
       "lineEnd": 199,
-      "summary": "canvas member view restriction을(를) 설정하는 비동기 함수입니다.",
+      "summary": "캔버스 · 화면 상태 대상을 설정합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -7516,12 +8968,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
+      "area": "sharing-collaboration",
       "lineStart": 240,
       "lineEnd": 251,
-      "summary": "stable value을(를) 처리하는 함수입니다.",
+      "summary": "값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "mcp"
+        "mcp",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -7538,12 +8993,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 29,
       "lineEnd": 34,
-      "summary": "source twin error constructor을(를) 처리하는 함수입니다.",
+      "summary": "소스 코드 · 디지털 트윈 · 오류에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "class-method",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "class-method",
@@ -7560,14 +9018,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 256,
       "lineEnd": 343,
-      "summary": "source twin snapshot operation을(를) 적용하는 비동기 함수입니다.",
+      "summary": "소스 코드 · 디지털 트윈 · 상태 스냅샷 · 실제 조작 작업을 승인된 변경을 적용합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -7584,12 +9045,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 60,
       "lineEnd": 66,
-      "summary": "as source twin error을(를) 처리하는 함수입니다.",
+      "summary": "소스 코드 · 디지털 트윈 · 오류에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -7606,14 +9070,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 370,
       "lineEnd": 373,
-      "summary": "stored source twin snapshots을(를) 비교하는 비동기 함수입니다.",
+      "summary": "소스 코드 · 디지털 트윈 상태나 허용 여부를 서로 비교합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -7630,14 +9097,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 146,
       "lineEnd": 162,
-      "summary": "current source twin state을(를) 처리하는 비동기 함수입니다.",
+      "summary": "현재 상태 · 소스 코드 · 디지털 트윈 · 상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -7654,12 +9124,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 104,
       "lineEnd": 113,
-      "summary": "declared database state을(를) 처리하는 함수입니다.",
+      "summary": "상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -7676,14 +9149,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 375,
       "lineEnd": 384,
-      "summary": "source twin events을(를) 목록 조회하는 비동기 함수입니다.",
+      "summary": "소스 코드 · 디지털 트윈 정보를 목록을 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -7700,14 +9176,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 345,
       "lineEnd": 357,
-      "summary": "source twin snapshots을(를) 목록 조회하는 비동기 함수입니다.",
+      "summary": "소스 코드 · 디지털 트윈 정보를 목록을 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -7724,13 +9203,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 359,
       "lineEnd": 368,
-      "summary": "snapshot을(를) 불러오기하는 비동기 함수입니다.",
+      "summary": "상태 스냅샷 정보를 불러옵니다",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -7747,12 +9229,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 68,
       "lineEnd": 72,
-      "summary": "metrics from operation row을(를) 처리하는 함수입니다.",
+      "summary": "운영 수치 · 실제 조작에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -7769,14 +9254,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 193,
       "lineEnd": 254,
-      "summary": "preview source twin snapshot operation을(를) 처리하는 비동기 함수입니다.",
+      "summary": "실행 전 미리보기 · 소스 코드 · 디지털 트윈 · 상태 스냅샷 · 실제 조작에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -7793,13 +9281,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 74,
       "lineEnd": 83,
-      "summary": "operational state을(를) 읽기하는 비동기 함수입니다.",
+      "summary": "상태 정보를 읽습니다",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -7816,13 +9307,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 85,
       "lineEnd": 102,
-      "summary": "runtime state을(를) 읽기하는 비동기 함수입니다.",
+      "summary": "실제 운영 상태 · 상태 정보를 읽습니다",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -7839,14 +9333,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 386,
       "lineEnd": 403,
-      "summary": "source twin push event을(를) 기록하는 비동기 함수입니다.",
+      "summary": "소스 코드 · 디지털 트윈 · 이벤트 작업을 기록합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -7863,13 +9360,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 37,
       "lineEnd": 41,
-      "summary": "require source twin owner을(를) 처리하는 함수입니다.",
+      "summary": "소스 코드 · 디지털 트윈에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -7886,12 +9386,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 175,
       "lineEnd": 191,
-      "summary": "snapshot from state을(를) 처리하는 함수입니다.",
+      "summary": "상태 스냅샷 · 상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -7908,12 +9411,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 115,
       "lineEnd": 127,
-      "summary": "snapshot row을(를) 처리하는 함수입니다.",
+      "summary": "상태 스냅샷에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -7930,12 +9436,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 129,
       "lineEnd": 144,
-      "summary": "snapshot summary을(를) 처리하는 함수입니다.",
+      "summary": "상태 스냅샷에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -7952,13 +9461,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 43,
       "lineEnd": 54,
-      "summary": "source twin deployment context을(를) 처리하는 함수입니다.",
+      "summary": "소스 코드 · 디지털 트윈 · 배포 · 실행 문맥에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -7975,13 +9487,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 164,
       "lineEnd": 173,
-      "summary": "source twin state fingerprint을(를) 처리하는 함수입니다.",
+      "summary": "소스 코드 · 디지털 트윈 · 상태 · 변경 식별값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -7998,12 +9513,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/sourceTwinStore.js",
       "parentId": "file:mcp/sourceTwinStore.js",
       "layer": "mcp",
+      "area": "source-code-twin",
       "lineStart": 56,
       "lineEnd": 58,
-      "summary": "unavailable을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “소스 트윈 상태 스냅샷의 미리보기·승인·저장·비교를 서버에서 수행합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "mcp"
+        "mcp",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -8020,10 +9538,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 45,
       "lineEnd": 49,
-      "summary": "admin을(를) 처리하는 함수입니다.",
+      "summary": "서버에서만 허용된 Supabase 관리자 연결을 준비합니다. 브라우저에는 이 권한을 넘기지 않습니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "function",
         "mcp"
       ],
@@ -8042,10 +9563,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 1436,
       "lineEnd": 1470,
-      "summary": "edge relation patch을(를) 적용하는 함수입니다.",
+      "summary": "연결선 · 관계 작업을 승인된 변경을 적용합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "ai-integration",
         "exported",
         "function",
         "mcp"
@@ -8065,10 +9589,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 1020,
       "lineEnd": 1052,
-      "summary": "patch을(를) 적용하는 함수입니다.",
+      "summary": "승인된 변경 적용 작업을 승인된 변경을 적용합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "function",
         "mcp"
       ],
@@ -8087,10 +9614,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 1592,
       "lineEnd": 1600,
-      "summary": "source twin snapshot을(를) 적용하는 비동기 함수입니다.",
+      "summary": "소스 코드 · 디지털 트윈 · 상태 스냅샷 작업을 승인된 변경을 적용합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -8111,10 +9641,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 339,
       "lineEnd": 341,
-      "summary": "assert owner을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 상태나 허용 여부를 허용 조건을 강제합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "function",
         "mcp"
       ],
@@ -8133,10 +9666,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 352,
       "lineEnd": 392,
-      "summary": "assert region edit을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 상태나 허용 여부를 허용 조건을 강제합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "ai-integration",
         "exported",
         "function",
         "mcp"
@@ -8156,10 +9692,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 68,
       "lineEnd": 76,
-      "summary": "assert stage type idx을(를) 처리하는 함수입니다.",
+      "summary": "단계 상태나 허용 여부를 허용 조건을 강제합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "function",
         "mcp"
       ],
@@ -8178,10 +9717,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 1189,
       "lineEnd": 1201,
-      "summary": "auto preset을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “AI 도구가 캔버스·노드·연결선을 읽고 바꿀 때 소유권과 공유 범위를 검사하고 Supabase에 반영합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "function",
         "mcp"
       ],
@@ -8200,10 +9742,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 1153,
       "lineEnd": 1184,
-      "summary": "edge을(를) 구성하는 함수입니다.",
+      "summary": "연결선 항목이나 구조를 구성합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "function",
         "mcp"
       ],
@@ -8222,10 +9767,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 641,
       "lineEnd": 646,
-      "summary": "can create workflow system map을(를) 처리하는 함수입니다.",
+      "summary": "새 항목 · 워크플로우 · 시스템 · 시스템 지도 상태나 허용 여부를 허용 가능한지 판단합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "ai-integration",
         "exported",
         "function",
         "mcp"
@@ -8245,10 +9793,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 100,
       "lineEnd": 124,
-      "summary": "check radial level mixing을(를) 처리하는 함수입니다.",
+      "summary": "방사형에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "ai-integration",
         "exported",
         "function",
         "mcp"
@@ -8268,10 +9819,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 146,
       "lineEnd": 152,
-      "summary": "clamp size을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “AI 도구가 캔버스·노드·연결선을 읽고 바꿀 때 소유권과 공유 범위를 검사하고 Supabase에 반영합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "arrow",
         "mcp"
       ],
@@ -8290,10 +9844,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 828,
       "lineEnd": 832,
-      "summary": "clear canvas을(를) 처리하는 비동기 함수입니다.",
+      "summary": "비우기 · 캔버스에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -8314,10 +9871,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 157,
       "lineEnd": 166,
-      "summary": "closest handles을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “AI 도구가 캔버스·노드·연결선을 읽고 바꿀 때 소유권과 공유 범위를 검사하고 Supabase에 반영합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "function",
         "mcp"
       ],
@@ -8336,10 +9896,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 1574,
       "lineEnd": 1584,
-      "summary": "source twin history을(를) 비교하는 비동기 함수입니다.",
+      "summary": "소스 코드 · 디지털 트윈 · 상태 이력 상태나 허용 여부를 서로 비교합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -8360,10 +9923,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 632,
       "lineEnd": 639,
-      "summary": "canvas을(를) 생성하는 비동기 함수입니다.",
+      "summary": "캔버스 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -8384,10 +9950,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 1123,
       "lineEnd": 1148,
-      "summary": "edge을(를) 생성하는 비동기 함수입니다.",
+      "summary": "연결선 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -8408,10 +9977,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 1204,
       "lineEnd": 1434,
-      "summary": "graph을(를) 생성하는 비동기 함수입니다.",
+      "summary": "노드·연결선 구조 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -8432,10 +10004,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 958,
       "lineEnd": 1017,
-      "summary": "node을(를) 생성하는 비동기 함수입니다.",
+      "summary": "노드 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -8456,10 +10031,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 407,
       "lineEnd": 420,
-      "summary": "stage type을(를) 생성하는 비동기 함수입니다.",
+      "summary": "단계 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -8480,10 +10058,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 648,
       "lineEnd": 678,
-      "summary": "workflow system map을(를) 생성하는 비동기 함수입니다.",
+      "summary": "워크플로우 · 시스템 · 시스템 지도 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -8504,10 +10085,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 873,
       "lineEnd": 891,
-      "summary": "canvas row을(를) 삭제하는 비동기 함수입니다.",
+      "summary": "캔버스 대상을 삭제합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -8528,10 +10112,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 1512,
       "lineEnd": 1521,
-      "summary": "edge을(를) 삭제하는 비동기 함수입니다.",
+      "summary": "연결선 대상을 삭제합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -8552,10 +10139,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 1092,
       "lineEnd": 1101,
-      "summary": "node을(를) 삭제하는 비동기 함수입니다.",
+      "summary": "노드 대상을 삭제합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -8576,10 +10166,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 1104,
       "lineEnd": 1120,
-      "summary": "nodes을(를) 삭제하는 비동기 함수입니다.",
+      "summary": "노드 대상을 삭제합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -8600,10 +10193,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 439,
       "lineEnd": 463,
-      "summary": "stage type을(를) 삭제하는 비동기 함수입니다.",
+      "summary": "단계 대상을 삭제합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -8624,10 +10220,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 355,
       "lineEnd": 355,
-      "summary": "deny을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “AI 도구가 캔버스·노드·연결선을 읽고 바꿀 때 소유권과 공유 범위를 검사하고 Supabase에 반영합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "arrow",
         "mcp"
       ],
@@ -8646,10 +10245,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 78,
       "lineEnd": 83,
-      "summary": "edge relation identity을(를) 처리하는 함수입니다.",
+      "summary": "연결선 · 관계에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "arrow",
         "mcp"
       ],
@@ -8668,10 +10270,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 345,
       "lineEnd": 347,
-      "summary": "editable node id set을(를) 처리하는 함수입니다.",
+      "summary": "노드 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "ai-integration",
         "exported",
         "function",
         "mcp"
@@ -8691,10 +10296,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 90,
       "lineEnd": 95,
-      "summary": "find duplicate edge을(를) 처리하는 함수입니다.",
+      "summary": "연결선 상태나 허용 여부를 대상을 찾습니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "arrow",
         "mcp"
       ],
@@ -8713,10 +10321,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 894,
       "lineEnd": 917,
-      "summary": "find free position을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 상태나 허용 여부를 대상을 찾습니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "function",
         "mcp"
       ],
@@ -8735,10 +10346,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 572,
       "lineEnd": 617,
-      "summary": "canvas을(를) 조회하는 비동기 함수입니다.",
+      "summary": "캔버스 정보를 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -8759,10 +10373,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 1562,
       "lineEnd": 1572,
-      "summary": "source twin history을(를) 조회하는 비동기 함수입니다.",
+      "summary": "소스 코드 · 디지털 트윈 · 상태 이력 정보를 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -8783,10 +10400,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 402,
       "lineEnd": 405,
-      "summary": "stage types을(를) 조회하는 비동기 함수입니다.",
+      "summary": "단계 정보를 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -8807,10 +10427,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 1523,
       "lineEnd": 1560,
-      "summary": "source twin을(를) 검사하는 비동기 함수입니다.",
+      "summary": "소스 코드 · 디지털 트윈 상태나 허용 여부를 실제 상태와 대조합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -8831,10 +10454,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 680,
       "lineEnd": 695,
-      "summary": "workflow system map을(를) 검사하는 비동기 함수입니다.",
+      "summary": "워크플로우 · 시스템 · 시스템 지도 상태나 허용 여부를 실제 상태와 대조합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -8855,10 +10481,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 189,
       "lineEnd": 252,
-      "summary": "canvases을(를) 목록 조회하는 비동기 함수입니다.",
+      "summary": "캔버스 목록 정보를 목록을 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -8879,10 +10508,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 834,
       "lineEnd": 842,
-      "summary": "prefs을(를) 불러오기하는 비동기 함수입니다.",
+      "summary": "이 기능 정보를 불러옵니다",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "function",
         "mcp"
@@ -8902,10 +10534,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 921,
       "lineEnd": 956,
-      "summary": "materialize node을(를) 처리하는 함수입니다.",
+      "summary": "노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "function",
         "mcp"
       ],
@@ -8924,10 +10559,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 260,
       "lineEnd": 281,
-      "summary": "my shares for을(를) 처리하는 비동기 함수입니다.",
+      "summary": "이 파일이 맡은 “AI 도구가 캔버스·노드·연결선을 읽고 바꿀 때 소유권과 공유 범위를 검사하고 Supabase에 반영합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "function",
         "mcp"
@@ -8947,10 +10585,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 53,
       "lineEnd": 53,
-      "summary": "new edge id을(를) 처리하는 함수입니다.",
+      "summary": "연결선 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "arrow",
         "mcp"
       ],
@@ -8969,10 +10610,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 52,
       "lineEnd": 52,
-      "summary": "new node id을(를) 처리하는 함수입니다.",
+      "summary": "노드 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "arrow",
         "mcp"
       ],
@@ -8991,10 +10635,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 61,
       "lineEnd": 64,
-      "summary": "next revision을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “AI 도구가 캔버스·노드·연결선을 읽고 바꿀 때 소유권과 공유 범위를 검사하고 Supabase에 반영합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "function",
         "mcp"
       ],
@@ -9013,10 +10660,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 1586,
       "lineEnd": 1590,
-      "summary": "preview source twin snapshot을(를) 처리하는 비동기 함수입니다.",
+      "summary": "실행 전 미리보기 · 소스 코드 · 디지털 트윈 · 상태 스냅샷에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -9037,10 +10687,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 745,
       "lineEnd": 766,
-      "summary": "preview workflow system map relation repair을(를) 처리하는 비동기 함수입니다.",
+      "summary": "실행 전 미리보기 · 워크플로우 · 시스템 · 시스템 지도 · 관계에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -9061,10 +10714,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 740,
       "lineEnd": 743,
-      "summary": "relation metadata guard ready을(를) 처리하는 비동기 함수입니다.",
+      "summary": "관계 · 설명 메타데이터 · 보호 규칙에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "function",
         "mcp"
@@ -9084,10 +10740,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 713,
       "lineEnd": 738,
-      "summary": "relation repair preview을(를) 처리하는 함수입니다.",
+      "summary": "관계 · 실행 전 미리보기에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "function",
         "mcp"
       ],
@@ -9106,10 +10765,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 853,
       "lineEnd": 871,
-      "summary": "rename canvas을(를) 처리하는 비동기 함수입니다.",
+      "summary": "캔버스에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -9130,10 +10792,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 422,
       "lineEnd": 437,
-      "summary": "rename stage type을(를) 처리하는 비동기 함수입니다.",
+      "summary": "단계에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -9154,10 +10819,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 768,
       "lineEnd": 826,
-      "summary": "repair workflow system map relations을(를) 처리하는 비동기 함수입니다.",
+      "summary": "워크플로우 · 시스템 · 시스템 지도에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -9178,10 +10846,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 286,
       "lineEnd": 337,
-      "summary": "canvas access을(를) 확인하는 비동기 함수입니다.",
+      "summary": "캔버스 · 접근 권한 상태나 허용 여부를 찾아 결정합니다",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "function",
         "mcp"
@@ -9201,10 +10872,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 169,
       "lineEnd": 184,
-      "summary": "user을(를) 확인하는 비동기 함수입니다.",
+      "summary": "사용자 상태나 허용 여부를 찾아 결정합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -9225,10 +10899,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 398,
       "lineEnd": 400,
-      "summary": "row stage types을(를) 처리하는 함수입니다.",
+      "summary": "단계에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "function",
         "mcp"
       ],
@@ -9247,10 +10924,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 619,
       "lineEnd": 630,
-      "summary": "save arrays을(를) 처리하는 비동기 함수입니다.",
+      "summary": "저장에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "function",
         "mcp"
@@ -9270,10 +10950,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 844,
       "lineEnd": 849,
-      "summary": "save prefs을(를) 처리하는 비동기 함수입니다.",
+      "summary": "저장에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "function",
         "mcp"
@@ -9293,10 +10976,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 465,
       "lineEnd": 477,
-      "summary": "stored absolute position을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “AI 도구가 캔버스·노드·연결선을 읽고 바꿀 때 소유권과 공유 범위를 검사하고 Supabase에 반영합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "function",
         "mcp"
       ],
@@ -9315,10 +11001,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 85,
       "lineEnd": 88,
-      "summary": "stored edge relation identity을(를) 처리하는 함수입니다.",
+      "summary": "연결선 · 관계에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "arrow",
         "mcp"
       ],
@@ -9337,10 +11026,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 186,
       "lineEnd": 186,
-      "summary": "to external을(를) 처리하는 함수입니다.",
+      "summary": "외부 공개 자료에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "arrow",
         "mcp"
       ],
@@ -9359,10 +11051,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 538,
       "lineEnd": 570,
-      "summary": "to external canvas edge을(를) 처리하는 함수입니다.",
+      "summary": "외부 공개 자료 · 캔버스 · 연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "ai-integration",
         "exported",
         "function",
         "mcp"
@@ -9382,10 +11077,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 479,
       "lineEnd": 536,
-      "summary": "to external canvas node을(를) 처리하는 함수입니다.",
+      "summary": "외부 공개 자료 · 캔버스 · 노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "ai-integration",
         "exported",
         "function",
         "mcp"
@@ -9405,10 +11103,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 51,
       "lineEnd": 51,
-      "summary": "uid을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “AI 도구가 캔버스·노드·연결선을 읽고 바꿀 때 소유권과 공유 범위를 검사하고 Supabase에 반영합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "arrow",
         "mcp"
       ],
@@ -9427,10 +11128,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 1472,
       "lineEnd": 1486,
-      "summary": "edge을(를) 수정하는 비동기 함수입니다.",
+      "summary": "연결선 대상을 변경합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -9451,10 +11155,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 1488,
       "lineEnd": 1510,
-      "summary": "edges을(를) 수정하는 비동기 함수입니다.",
+      "summary": "연결선 대상을 변경합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -9475,10 +11182,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 1054,
       "lineEnd": 1067,
-      "summary": "node을(를) 수정하는 비동기 함수입니다.",
+      "summary": "노드 대상을 변경합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -9499,10 +11209,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 1070,
       "lineEnd": 1090,
-      "summary": "nodes을(를) 수정하는 비동기 함수입니다.",
+      "summary": "노드 대상을 변경합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "function",
@@ -9523,10 +11236,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 697,
       "lineEnd": 711,
-      "summary": "workflow system map relation repair plan id을(를) 처리하는 함수입니다.",
+      "summary": "워크플로우 · 시스템 · 시스템 지도 · 관계 · 실행 계획 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "ai-integration",
         "exported",
         "function",
         "mcp"
@@ -9546,10 +11262,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
+      "area": "ai-integration",
       "lineStart": 55,
       "lineEnd": 59,
-      "summary": "write conflict을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “AI 도구가 캔버스·노드·연결선을 읽고 바꿀 때 소유권과 공유 범위를 검사하고 Supabase에 반영합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "ai-integration",
         "function",
         "mcp"
       ],
@@ -9568,12 +11287,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemOperationPlan.js",
       "parentId": "file:mcp/systemOperationPlan.js",
       "layer": "mcp",
+      "area": "security-privacy",
       "lineStart": 14,
       "lineEnd": 19,
-      "summary": "system operation plan error constructor을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 실제 조작 · 실행 계획 · 오류에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "class-method",
-        "mcp"
+        "mcp",
+        "security-privacy"
       ],
       "details": {
         "functionKind": "class-method",
@@ -9590,13 +11312,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemOperationPlan.js",
       "parentId": "file:mcp/systemOperationPlan.js",
       "layer": "mcp",
+      "area": "security-privacy",
       "lineStart": 96,
       "lineEnd": 139,
-      "summary": "signed system operation plan을(를) 생성하는 함수입니다.",
+      "summary": "시스템 · 실제 조작 · 실행 계획 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "security-privacy"
       ],
       "details": {
         "functionKind": "function",
@@ -9613,12 +11338,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemOperationPlan.js",
       "parentId": "file:mcp/systemOperationPlan.js",
       "layer": "mcp",
+      "area": "security-privacy",
       "lineStart": 55,
       "lineEnd": 90,
-      "summary": "operation contract을(를) 정규화하는 함수입니다.",
+      "summary": "실제 조작 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "mcp"
+        "mcp",
+        "security-privacy"
       ],
       "details": {
         "functionKind": "function",
@@ -9635,12 +11363,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemOperationPlan.js",
       "parentId": "file:mcp/systemOperationPlan.js",
       "layer": "mcp",
+      "area": "security-privacy",
       "lineStart": 45,
       "lineEnd": 47,
-      "summary": "operation id을(를) 처리하는 함수입니다.",
+      "summary": "실제 조작 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "mcp"
+        "mcp",
+        "security-privacy"
       ],
       "details": {
         "functionKind": "function",
@@ -9657,12 +11388,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemOperationPlan.js",
       "parentId": "file:mcp/systemOperationPlan.js",
       "layer": "mcp",
+      "area": "security-privacy",
       "lineStart": 49,
       "lineEnd": 53,
-      "summary": "timestamp을(를) 해석하는 함수입니다.",
+      "summary": "이 기능 자료의 구조를 읽어냅니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "mcp"
+        "mcp",
+        "security-privacy"
       ],
       "details": {
         "functionKind": "function",
@@ -9679,12 +11413,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemOperationPlan.js",
       "parentId": "file:mcp/systemOperationPlan.js",
       "layer": "mcp",
+      "area": "security-privacy",
       "lineStart": 22,
       "lineEnd": 28,
-      "summary": "required text을(를) 처리하는 함수입니다.",
+      "summary": "텍스트에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "mcp"
+        "mcp",
+        "security-privacy"
       ],
       "details": {
         "functionKind": "function",
@@ -9701,12 +11438,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemOperationPlan.js",
       "parentId": "file:mcp/systemOperationPlan.js",
       "layer": "mcp",
+      "area": "security-privacy",
       "lineStart": 38,
       "lineEnd": 43,
-      "summary": "signature을(를) 처리하는 함수입니다.",
+      "summary": "요청 서명에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "mcp"
+        "mcp",
+        "security-privacy"
       ],
       "details": {
         "functionKind": "function",
@@ -9723,12 +11463,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemOperationPlan.js",
       "parentId": "file:mcp/systemOperationPlan.js",
       "layer": "mcp",
+      "area": "security-privacy",
       "lineStart": 30,
       "lineEnd": 36,
-      "summary": "signing secret을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “실행 전에 대상·변경 범위·만료 시각을 고정한 계획에 서명하고 적용 시 같은 계획인지 검증합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "mcp"
+        "mcp",
+        "security-privacy"
       ],
       "details": {
         "functionKind": "function",
@@ -9745,13 +11488,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemOperationPlan.js",
       "parentId": "file:mcp/systemOperationPlan.js",
       "layer": "mcp",
+      "area": "security-privacy",
       "lineStart": 92,
       "lineEnd": 94,
-      "summary": "system operation signing secret을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 실제 조작에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "security-privacy"
       ],
       "details": {
         "functionKind": "function",
@@ -9768,13 +11514,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemOperationPlan.js",
       "parentId": "file:mcp/systemOperationPlan.js",
       "layer": "mcp",
+      "area": "security-privacy",
       "lineStart": 141,
       "lineEnd": 201,
-      "summary": "verify signed system operation plan을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 실제 조작 · 실행 계획 상태나 허용 여부를 결과가 맞는지 확인합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "mcp"
+        "mcp",
+        "security-privacy"
       ],
       "details": {
         "functionKind": "function",
@@ -9791,11 +11540,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemRuntime.js",
       "parentId": "file:mcp/systemRuntime.js",
       "layer": "mcp",
+      "area": "digital-twin-engine",
       "lineStart": 16,
       "lineEnd": 21,
-      "summary": "system runtime check error constructor을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 실제 운영 상태 · 오류에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "class-method",
+        "digital-twin-engine",
         "mcp"
       ],
       "details": {
@@ -9813,10 +11565,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemRuntime.js",
       "parentId": "file:mcp/systemRuntime.js",
       "layer": "mcp",
+      "area": "digital-twin-engine",
       "lineStart": 69,
       "lineEnd": 83,
-      "summary": "claim system runtime check을(를) 처리하는 함수입니다.",
+      "summary": "실행 권한 선점 · 시스템 · 실제 운영 상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "mcp"
@@ -9836,11 +11591,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemRuntime.js",
       "parentId": "file:mcp/systemRuntime.js",
       "layer": "mcp",
+      "area": "digital-twin-engine",
       "lineStart": 549,
       "lineEnd": 549,
-      "summary": "count을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “Vercel·Supabase·MCP 같은 시스템의 허용된 운영 지표를 수집하고 민감한 값을 제거합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "mcp"
       ],
       "details": {
@@ -9858,10 +11616,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemRuntime.js",
       "parentId": "file:mcp/systemRuntime.js",
       "layer": "mcp",
+      "area": "digital-twin-engine",
       "lineStart": 147,
       "lineEnd": 159,
-      "summary": "fixed runtime endpoint을(를) 처리하는 함수입니다.",
+      "summary": "실제 운영 상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "mcp"
       ],
@@ -9880,11 +11641,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemRuntime.js",
       "parentId": "file:mcp/systemRuntime.js",
       "layer": "mcp",
+      "area": "digital-twin-engine",
       "lineStart": 446,
       "lineEnd": 480,
-      "summary": "latest system runtime observations을(를) 불러오기하는 비동기 함수입니다.",
+      "summary": "시스템 · 실제 운영 상태 정보를 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
+        "digital-twin-engine",
         "exported",
         "function",
         "mcp"
@@ -9904,10 +11668,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemRuntime.js",
       "parentId": "file:mcp/systemRuntime.js",
       "layer": "mcp",
+      "area": "digital-twin-engine",
       "lineStart": 117,
       "lineEnd": 132,
-      "summary": "observation을(를) 처리하는 함수입니다.",
+      "summary": "운영 관측에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "mcp"
       ],
@@ -9926,10 +11693,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemRuntime.js",
       "parentId": "file:mcp/systemRuntime.js",
       "layer": "mcp",
+      "area": "digital-twin-engine",
       "lineStart": 412,
       "lineEnd": 414,
-      "summary": "observation store unavailable을(를) 처리하는 함수입니다.",
+      "summary": "운영 관측에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "mcp"
       ],
@@ -9948,11 +11718,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemRuntime.js",
       "parentId": "file:mcp/systemRuntime.js",
       "layer": "mcp",
+      "area": "digital-twin-engine",
       "lineStart": 416,
       "lineEnd": 444,
-      "summary": "system runtime observation을(를) 저장하는 비동기 함수입니다.",
+      "summary": "시스템 · 실제 운영 상태 · 운영 관측 작업을 저장합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
+        "digital-twin-engine",
         "exported",
         "function",
         "mcp"
@@ -9972,11 +11745,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemRuntime.js",
       "parentId": "file:mcp/systemRuntime.js",
       "layer": "mcp",
+      "area": "digital-twin-engine",
       "lineStart": 406,
       "lineEnd": 410,
-      "summary": "workflow system operations을(를) 읽기하는 비동기 함수입니다.",
+      "summary": "워크플로우 · 시스템 정보를 읽습니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
+        "digital-twin-engine",
         "exported",
         "function",
         "mcp"
@@ -9996,10 +11772,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemRuntime.js",
       "parentId": "file:mcp/systemRuntime.js",
       "layer": "mcp",
+      "area": "digital-twin-engine",
       "lineStart": 109,
       "lineEnd": 115,
-      "summary": "request headers을(를) 처리하는 함수입니다.",
+      "summary": "요청에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "mcp"
       ],
@@ -10018,10 +11797,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemRuntime.js",
       "parentId": "file:mcp/systemRuntime.js",
       "layer": "mcp",
+      "area": "digital-twin-engine",
       "lineStart": 58,
       "lineEnd": 67,
-      "summary": "require system runtime operator을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 실제 운영 상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "mcp"
@@ -10041,10 +11823,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemRuntime.js",
       "parentId": "file:mcp/systemRuntime.js",
       "layer": "mcp",
+      "area": "digital-twin-engine",
       "lineStart": 24,
       "lineEnd": 39,
-      "summary": "system runtime target을(를) 확인하는 함수입니다.",
+      "summary": "시스템 · 실제 운영 상태 · 대상 상태나 허용 여부를 찾아 결정합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "mcp"
@@ -10064,10 +11849,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemRuntime.js",
       "parentId": "file:mcp/systemRuntime.js",
       "layer": "mcp",
+      "area": "digital-twin-engine",
       "lineStart": 41,
       "lineEnd": 56,
-      "summary": "system runtime targets을(를) 확인하는 함수입니다.",
+      "summary": "시스템 · 실제 운영 상태 상태나 허용 여부를 찾아 결정합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "mcp"
@@ -10087,11 +11875,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemRuntime.js",
       "parentId": "file:mcp/systemRuntime.js",
       "layer": "mcp",
+      "area": "digital-twin-engine",
       "lineStart": 482,
       "lineEnd": 662,
-      "summary": "run canvas service operations read을(를) 처리하는 비동기 함수입니다.",
+      "summary": "캔버스 · 서버 기능에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
+        "digital-twin-engine",
         "function",
         "mcp"
       ],
@@ -10110,11 +11901,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemRuntime.js",
       "parentId": "file:mcp/systemRuntime.js",
       "layer": "mcp",
+      "area": "digital-twin-engine",
       "lineStart": 161,
       "lineEnd": 241,
-      "summary": "run fixed route check을(를) 처리하는 비동기 함수입니다.",
+      "summary": "서버 경로에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
+        "digital-twin-engine",
         "function",
         "mcp"
       ],
@@ -10133,11 +11927,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemRuntime.js",
       "parentId": "file:mcp/systemRuntime.js",
       "layer": "mcp",
+      "area": "digital-twin-engine",
       "lineStart": 243,
       "lineEnd": 281,
-      "summary": "run supabase auth session check을(를) 처리하는 비동기 함수입니다.",
+      "summary": "로그인 인증에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
+        "digital-twin-engine",
         "function",
         "mcp"
       ],
@@ -10156,11 +11953,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemRuntime.js",
       "parentId": "file:mcp/systemRuntime.js",
       "layer": "mcp",
+      "area": "digital-twin-engine",
       "lineStart": 324,
       "lineEnd": 402,
-      "summary": "run supabase health check을(를) 처리하는 비동기 함수입니다.",
+      "summary": "이 파일이 맡은 “Vercel·Supabase·MCP 같은 시스템의 허용된 운영 지표를 수집하고 민감한 값을 제거합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
+        "digital-twin-engine",
         "function",
         "mcp"
       ],
@@ -10179,11 +11979,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemRuntime.js",
       "parentId": "file:mcp/systemRuntime.js",
       "layer": "mcp",
+      "area": "digital-twin-engine",
       "lineStart": 664,
       "lineEnd": 737,
-      "summary": "run system runtime capability을(를) 처리하는 비동기 함수입니다.",
+      "summary": "시스템 · 실제 운영 상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
+        "digital-twin-engine",
         "exported",
         "function",
         "mcp"
@@ -10203,10 +12006,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemRuntime.js",
       "parentId": "file:mcp/systemRuntime.js",
       "layer": "mcp",
+      "area": "digital-twin-engine",
       "lineStart": 283,
       "lineEnd": 322,
-      "summary": "run vercel deployment check을(를) 처리하는 함수입니다.",
+      "summary": "배포에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "mcp"
       ],
@@ -10225,10 +12031,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemRuntime.js",
       "parentId": "file:mcp/systemRuntime.js",
       "layer": "mcp",
+      "area": "digital-twin-engine",
       "lineStart": 85,
       "lineEnd": 94,
-      "summary": "runtime resource id을(를) 처리하는 함수입니다.",
+      "summary": "실제 운영 상태 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "mcp"
       ],
@@ -10247,10 +12056,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemRuntime.js",
       "parentId": "file:mcp/systemRuntime.js",
       "layer": "mcp",
+      "area": "digital-twin-engine",
       "lineStart": 96,
       "lineEnd": 107,
-      "summary": "safe failure을(를) 처리하는 함수입니다.",
+      "summary": "허용 범위로 제한에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "mcp"
       ],
@@ -10269,10 +12081,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "mcp/systemRuntime.js",
       "parentId": "file:mcp/systemRuntime.js",
       "layer": "mcp",
+      "area": "digital-twin-engine",
       "lineStart": 134,
       "lineEnd": 145,
-      "summary": "unknown result을(를) 처리하는 함수입니다.",
+      "summary": "결과에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "mcp"
       ],
@@ -10291,12 +12106,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/generate-source-twin.mjs",
       "parentId": "file:scripts/generate-source-twin.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 39,
       "lineEnd": 43,
-      "summary": "diagnostic value을(를) 처리하는 함수입니다.",
+      "summary": "값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -10313,12 +12131,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/generate-source-twin.mjs",
       "parentId": "file:scripts/generate-source-twin.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 15,
       "lineEnd": 37,
-      "summary": "first difference을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “현재 저장소를 스캔해 배포에 포함할 소스 트윈 manifest를 생성하고 오래되지 않았는지 검사합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -10335,12 +12156,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/local-connector-agent.mjs",
       "parentId": "file:scripts/local-connector-agent.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 152,
       "lineEnd": 157,
-      "summary": "local connector request error constructor을(를) 처리하는 함수입니다.",
+      "summary": "로컬 저장소 · 로컬 커넥터 · 요청 · 오류에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "class-method",
-        "documentation"
+        "documentation",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "class-method",
@@ -10357,12 +12181,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/local-connector-agent.mjs",
       "parentId": "file:scripts/local-connector-agent.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 22,
       "lineEnd": 25,
-      "summary": "argument을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “사용자 Mac에서 허용된 저장소만 읽어 코드 구조와 Git 상태를 서버에 주기적으로 보고하고 승인된 동기화를 실행합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -10379,13 +12206,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/local-connector-agent.mjs",
       "parentId": "file:scripts/local-connector-agent.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 138,
       "lineEnd": 149,
-      "summary": "local connector manifest을(를) 구성하는 함수입니다.",
+      "summary": "로컬 저장소 · 로컬 커넥터 · 코드 구조 목록 항목이나 구조를 구성합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "documentation",
         "exported",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -10402,12 +12232,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/local-connector-agent.mjs",
       "parentId": "file:scripts/local-connector-agent.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 49,
       "lineEnd": 66,
-      "summary": "changed paths을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “사용자 Mac에서 허용된 저장소만 읽어 코드 구조와 Git 상태를 서버에 주기적으로 보고하고 승인된 동기화를 실행합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -10424,13 +12257,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/local-connector-agent.mjs",
       "parentId": "file:scripts/local-connector-agent.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 205,
       "lineEnd": 222,
-      "summary": "confirm git sync in terminal을(를) 처리하는 비동기 함수입니다.",
+      "summary": "Git 상태 · 동기화에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -10447,13 +12283,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/local-connector-agent.mjs",
       "parentId": "file:scripts/local-connector-agent.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 224,
       "lineEnd": 251,
-      "summary": "execute approved git sync을(를) 처리하는 함수입니다.",
+      "summary": "승인된 상태 · Git 상태 · 동기화에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "documentation",
         "exported",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -10470,12 +12309,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/local-connector-agent.mjs",
       "parentId": "file:scripts/local-connector-agent.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 27,
       "lineEnd": 35,
-      "summary": "git을(를) 처리하는 함수입니다.",
+      "summary": "Git 상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -10492,13 +12334,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/local-connector-agent.mjs",
       "parentId": "file:scripts/local-connector-agent.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 181,
       "lineEnd": 184,
-      "summary": "local connector authorization stopped을(를) 처리하는 함수입니다.",
+      "summary": "로컬 저장소 · 로컬 커넥터에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "documentation",
         "exported",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -10515,13 +12360,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/local-connector-agent.mjs",
       "parentId": "file:scripts/local-connector-agent.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 421,
       "lineEnd": 423,
-      "summary": "local connector state digest을(를) 처리하는 함수입니다.",
+      "summary": "로컬 저장소 · 로컬 커넥터 · 상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "documentation",
         "exported",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -10538,13 +12386,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/local-connector-agent.mjs",
       "parentId": "file:scripts/local-connector-agent.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 199,
       "lineEnd": 203,
-      "summary": "local git sync approval phrase을(를) 처리하는 함수입니다.",
+      "summary": "로컬 저장소 · Git 상태 · 동기화에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "documentation",
         "exported",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -10561,13 +12412,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/local-connector-agent.mjs",
       "parentId": "file:scripts/local-connector-agent.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 399,
       "lineEnd": 411,
-      "summary": "main을(를) 처리하는 비동기 함수입니다.",
+      "summary": "이 파일이 맡은 “사용자 Mac에서 허용된 저장소만 읽어 코드 구조와 Git 상태를 서버에 주기적으로 보고하고 승인된 동기화를 실행합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -10584,13 +12438,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/local-connector-agent.mjs",
       "parentId": "file:scripts/local-connector-agent.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 87,
       "lineEnd": 136,
-      "summary": "observe local git을(를) 처리하는 함수입니다.",
+      "summary": "로컬 저장소 · Git 상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "documentation",
         "exported",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -10607,12 +12464,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/local-connector-agent.mjs",
       "parentId": "file:scripts/local-connector-agent.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 77,
       "lineEnd": 85,
-      "summary": "pinned git hub origin을(를) 처리하는 함수입니다.",
+      "summary": "GitHub에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -10629,13 +12489,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/local-connector-agent.mjs",
       "parentId": "file:scripts/local-connector-agent.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 160,
       "lineEnd": 179,
-      "summary": "request을(를) 처리하는 비동기 함수입니다.",
+      "summary": "요청에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -10652,13 +12515,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/local-connector-agent.mjs",
       "parentId": "file:scripts/local-connector-agent.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 72,
       "lineEnd": 75,
-      "summary": "repository root을(를) 확인하는 함수입니다.",
+      "summary": "코드 저장소 상태나 허용 여부를 찾아 결정합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "documentation",
         "exported",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -10675,14 +12541,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/local-connector-agent.mjs",
       "parentId": "file:scripts/local-connector-agent.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 291,
       "lineEnd": 397,
-      "summary": "run local connector agent을(를) 처리하는 비동기 함수입니다.",
+      "summary": "로컬 저장소 · 로컬 커넥터 · 로컬 연결 프로그램에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "documentation",
         "exported",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -10699,12 +12568,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/local-connector-agent.mjs",
       "parentId": "file:scripts/local-connector-agent.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 37,
       "lineEnd": 47,
-      "summary": "safe server url을(를) 처리하는 함수입니다.",
+      "summary": "허용 범위로 제한 · 웹 주소에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -10721,12 +12593,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/local-connector-agent.mjs",
       "parentId": "file:scripts/local-connector-agent.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 68,
       "lineEnd": 70,
-      "summary": "sha을(를) 처리하는 함수입니다.",
+      "summary": "Git 커밋 식별값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -10743,12 +12618,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/local-connector-agent.mjs",
       "parentId": "file:scripts/local-connector-agent.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 186,
       "lineEnd": 197,
-      "summary": "state matches을(를) 처리하는 함수입니다.",
+      "summary": "상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -10765,12 +12643,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/local-connector-agent.mjs",
       "parentId": "file:scripts/local-connector-agent.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 304,
       "lineEnd": 304,
-      "summary": "stop을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “사용자 Mac에서 허용된 저장소만 읽어 코드 구조와 Git 상태를 서버에 주기적으로 보고하고 승인된 동기화를 실행합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "documentation"
+        "documentation",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "arrow",
@@ -10787,13 +12668,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/local-connector-agent.mjs",
       "parentId": "file:scripts/local-connector-agent.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 253,
       "lineEnd": 289,
-      "summary": "verify approved git sync을(를) 처리하는 함수입니다.",
+      "summary": "승인된 상태 · Git 상태 · 동기화 상태나 허용 여부를 결과가 맞는지 확인합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "documentation",
         "exported",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -10810,12 +12694,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 389,
-      "lineEnd": 395,
-      "summary": "entity을(를) 추가하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 354,
+      "lineEnd": 360,
+      "summary": "시스템 실체 항목이나 구조를 추가합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "documentation"
+        "documentation",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "arrow",
@@ -10832,12 +12719,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 174,
-      "lineEnd": 190,
-      "summary": "function을(를) 추가하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 137,
+      "lineEnd": 153,
+      "summary": "함수 항목이나 구조를 추가합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "documentation"
+        "documentation",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "arrow",
@@ -10854,12 +12744,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 396,
-      "lineEnd": 396,
-      "summary": "relation을(를) 추가하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 361,
+      "lineEnd": 361,
+      "summary": "관계 항목이나 구조를 추가합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "documentation"
+        "documentation",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "arrow",
@@ -10871,18 +12764,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:scripts/source-twin-scanner.mjs:buildSourceTwinManifest",
       "kind": "function",
       "label": "buildSourceTwinManifest",
-      "fingerprint": "0f6e8e87b23d29c06392",
+      "fingerprint": "3182132a39f3cbabb024",
       "name": "buildSourceTwinManifest",
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 351,
-      "lineEnd": 622,
-      "summary": "source twin manifest을(를) 구성하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 314,
+      "lineEnd": 619,
+      "summary": "소스 코드 · 디지털 트윈 · 코드 구조 목록 항목이나 구조를 구성합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "documentation",
         "exported",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -10899,13 +12795,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 49,
       "lineEnd": 53,
-      "summary": "source twin text을(를) 비교하는 함수입니다.",
+      "summary": "소스 코드 · 디지털 트윈 · 텍스트 상태나 허용 여부를 서로 비교합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "documentation",
         "exported",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -10922,34 +12821,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 302,
-      "lineEnd": 304,
-      "summary": "entity을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 265,
+      "lineEnd": 267,
+      "summary": "시스템 실체에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:scripts/source-twin-scanner.mjs:fileSummary",
-      "kind": "function",
-      "label": "fileSummary",
-      "fingerprint": "ed4ea6d9ba9d15f4040c",
-      "name": "fileSummary",
-      "path": "scripts/source-twin-scanner.mjs",
-      "parentId": "file:scripts/source-twin-scanner.mjs",
-      "layer": "documentation",
-      "lineStart": 117,
-      "lineEnd": 127,
-      "summary": "file summary을(를) 처리하는 함수입니다.",
-      "tags": [
-        "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -10966,34 +12846,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 632,
-      "lineEnd": 653,
-      "summary": "filesystem source twin paths을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 629,
+      "lineEnd": 650,
+      "summary": "소스 코드 · 디지털 트윈에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:scripts/source-twin-scanner.mjs:functionSummary",
-      "kind": "function",
-      "label": "functionSummary",
-      "fingerprint": "1788b44dc41501b4597b",
-      "name": "functionSummary",
-      "path": "scripts/source-twin-scanner.mjs",
-      "parentId": "file:scripts/source-twin-scanner.mjs",
-      "layer": "documentation",
-      "lineStart": 111,
-      "lineEnd": 115,
-      "summary": "function summary을(를) 처리하는 함수입니다.",
-      "tags": [
-        "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -11010,34 +12871,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 45,
       "lineEnd": 47,
-      "summary": "hash을(를) 처리하는 함수입니다.",
+      "summary": "변경 식별값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:scripts/source-twin-scanner.mjs:identifierWords",
-      "kind": "function",
-      "label": "identifierWords",
-      "fingerprint": "3446f84e79618c50bf2c",
-      "name": "identifierWords",
-      "path": "scripts/source-twin-scanner.mjs",
-      "parentId": "file:scripts/source-twin-scanner.mjs",
-      "layer": "documentation",
-      "lineStart": 90,
-      "lineEnd": 98,
-      "summary": "identifier words을(를) 처리하는 함수입니다.",
-      "tags": [
-        "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -11054,34 +12896,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 147,
-      "lineEnd": 153,
-      "summary": "imported names을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 110,
+      "lineEnd": 116,
+      "summary": "이 파일이 맡은 “저장소 파일을 AST로 읽어 파일·함수·API·DB·보안 참조를 증거 기반 소스 트윈으로 만듭니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:scripts/source-twin-scanner.mjs:koreanAction",
-      "kind": "function",
-      "label": "koreanAction",
-      "fingerprint": "d1edeae0373d42581080",
-      "name": "koreanAction",
-      "path": "scripts/source-twin-scanner.mjs",
-      "parentId": "file:scripts/source-twin-scanner.mjs",
-      "layer": "documentation",
-      "lineStart": 100,
-      "lineEnd": 109,
-      "summary": "korean action을(를) 처리하는 함수입니다.",
-      "tags": [
-        "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -11093,17 +12916,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:scripts/source-twin-scanner.mjs:languageForFile",
       "kind": "function",
       "label": "languageForFile",
-      "fingerprint": "67c4a99dd284986c631b",
+      "fingerprint": "987a233adb7e75e677eb",
       "name": "languageForFile",
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 82,
-      "lineEnd": 88,
-      "summary": "language for file을(를) 처리하는 함수입니다.",
+      "lineEnd": 90,
+      "summary": "파일에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -11120,12 +12946,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 71,
       "lineEnd": 80,
-      "summary": "layer for file을(를) 처리하는 함수입니다.",
+      "summary": "파일에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -11142,12 +12971,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 271,
-      "lineEnd": 273,
-      "summary": "line for을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 234,
+      "lineEnd": 236,
+      "summary": "이 파일이 맡은 “저장소 파일을 AST로 읽어 파일·함수·API·DB·보안 참조를 증거 기반 소스 트윈으로 만듭니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -11164,12 +12996,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 141,
-      "lineEnd": 145,
-      "summary": "member property을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 104,
+      "lineEnd": 108,
+      "summary": "이 파일이 맡은 “저장소 파일을 AST로 읽어 파일·함수·API·DB·보안 참조를 증거 기반 소스 트윈으로 만듭니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -11186,12 +13021,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 129,
-      "lineEnd": 135,
-      "summary": "node name을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 92,
+      "lineEnd": 98,
+      "summary": "노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -11208,12 +13046,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 35,
       "lineEnd": 37,
-      "summary": "normalized을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “저장소 파일을 AST로 읽어 파일·함수·API·DB·보안 참조를 증거 기반 소스 트윈으로 만듭니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -11230,12 +13071,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 624,
-      "lineEnd": 626,
-      "summary": "nul separated을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 621,
+      "lineEnd": 623,
+      "summary": "이 파일이 맡은 “저장소 파일을 AST로 읽어 파일·함수·API·DB·보안 참조를 증거 기반 소스 트윈으로 만듭니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -11252,13 +13096,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 708,
-      "lineEnd": 714,
-      "summary": "generated source twin을(를) 해석하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 705,
+      "lineEnd": 711,
+      "summary": "소스 코드 · 디지털 트윈 자료의 구조를 읽어냅니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "documentation",
         "exported",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -11275,12 +13122,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 155,
-      "lineEnd": 269,
-      "summary": "java script을(를) 해석하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 118,
+      "lineEnd": 232,
+      "summary": "이 기능 자료의 구조를 읽어냅니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -11297,12 +13147,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 275,
-      "lineEnd": 291,
-      "summary": "sql을(를) 해석하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 238,
+      "lineEnd": 254,
+      "summary": "이 기능 자료의 구조를 읽어냅니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -11319,12 +13172,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 551,
-      "lineEnd": 551,
-      "summary": "perspective을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 545,
+      "lineEnd": 545,
+      "summary": "이 파일이 맡은 “저장소 파일을 AST로 읽어 파일·함수·API·DB·보안 참조를 증거 기반 소스 트윈으로 만듭니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "documentation"
+        "documentation",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "arrow",
@@ -11341,13 +13197,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 322,
-      "lineEnd": 349,
-      "summary": "source repository metadata을(를) 읽기하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 285,
+      "lineEnd": 312,
+      "summary": "소스 코드 · 코드 저장소 · 설명 메타데이터 정보를 읽습니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "documentation",
         "exported",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -11364,13 +13223,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 693,
-      "lineEnd": 706,
-      "summary": "source twin working tree을(를) 읽기하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 690,
+      "lineEnd": 703,
+      "summary": "소스 코드 · 디지털 트윈 정보를 읽습니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "documentation",
         "exported",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -11387,12 +13249,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 39,
       "lineEnd": 43,
-      "summary": "redacted for fingerprint을(를) 처리하는 함수입니다.",
+      "summary": "변경 식별값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -11409,12 +13274,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 306,
-      "lineEnd": 308,
-      "summary": "relation을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 269,
+      "lineEnd": 271,
+      "summary": "관계에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -11431,12 +13299,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 310,
-      "lineEnd": 320,
-      "summary": "repository url을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 273,
+      "lineEnd": 283,
+      "summary": "코드 저장소 · 웹 주소에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -11453,12 +13324,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 293,
-      "lineEnd": 300,
-      "summary": "local import을(를) 확인하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 256,
+      "lineEnd": 263,
+      "summary": "로컬 저장소 · 코드 연결 상태나 허용 여부를 찾아 결정합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -11475,12 +13349,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 668,
-      "lineEnd": 691,
-      "summary": "safe source file을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 665,
+      "lineEnd": 688,
+      "summary": "허용 범위로 제한 · 소스 코드 · 파일에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -11497,12 +13374,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 63,
       "lineEnd": 65,
-      "summary": "semantic hash을(를) 처리하는 함수입니다.",
+      "summary": "변경 식별값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -11519,13 +13399,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 716,
-      "lineEnd": 724,
-      "summary": "source twin manifest을(를) 직렬화하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 713,
+      "lineEnd": 721,
+      "summary": "소스 코드 · 디지털 트윈 · 코드 구조 목록 자료를 저장 가능한 형식으로 바꿉니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "documentation",
         "exported",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -11537,17 +13420,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:scripts/source-twin-scanner.mjs:shouldInspect",
       "kind": "function",
       "label": "shouldInspect",
-      "fingerprint": "5d1c5021ada15928c500",
+      "fingerprint": "862927e320d7aa5dceb5",
       "name": "shouldInspect",
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 28,
       "lineEnd": 33,
-      "summary": "should inspect을(를) 처리하는 함수입니다.",
+      "summary": "시스템 검사에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -11564,13 +13450,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 655,
-      "lineEnd": 666,
-      "summary": "source twin file paths을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 652,
+      "lineEnd": 663,
+      "summary": "소스 코드 · 디지털 트윈 · 파일에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "documentation",
         "exported",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -11587,12 +13476,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 55,
       "lineEnd": 61,
-      "summary": "stable을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “저장소 파일을 AST로 읽어 파일·함수·API·DB·보안 참조를 증거 기반 소스 트윈으로 만듭니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -11609,12 +13501,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 137,
-      "lineEnd": 139,
-      "summary": "string argument을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 100,
+      "lineEnd": 102,
+      "summary": "이 파일이 맡은 “저장소 파일을 AST로 읽어 파일·함수·API·DB·보안 참조를 증거 기반 소스 트윈으로 만듭니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -11631,12 +13526,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
+      "area": "source-code-twin",
       "lineStart": 67,
       "lineEnd": 69,
-      "summary": "unique을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “저장소 파일을 AST로 읽어 파일·함수·API·DB·보안 참조를 증거 기반 소스 트윈으로 만듭니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "documentation",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -11653,12 +13551,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 192,
-      "lineEnd": 255,
-      "summary": "visit을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 155,
+      "lineEnd": 218,
+      "summary": "이 파일이 맡은 “저장소 파일을 AST로 읽어 파일·함수·API·DB·보안 참조를 증거 기반 소스 트윈으로 만듭니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "documentation"
+        "documentation",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "arrow",
@@ -11675,16 +13576,376 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/source-twin-scanner.mjs",
       "parentId": "file:scripts/source-twin-scanner.mjs",
       "layer": "documentation",
-      "lineStart": 634,
-      "lineEnd": 650,
-      "summary": "visit을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 631,
+      "lineEnd": 647,
+      "summary": "이 파일이 맡은 “저장소 파일을 AST로 읽어 파일·함수·API·DB·보안 참조를 증거 기반 소스 트윈으로 만듭니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "documentation"
+        "documentation",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "arrow",
         "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:scripts/source-twin-semantics.mjs:ROLE",
+      "kind": "function",
+      "label": "ROLE",
+      "fingerprint": "76359763292d9af338d7",
+      "name": "ROLE",
+      "path": "scripts/source-twin-semantics.mjs",
+      "parentId": "file:scripts/source-twin-semantics.mjs",
+      "layer": "documentation",
+      "area": "source-code-twin",
+      "lineStart": 1,
+      "lineEnd": 1,
+      "summary": "역할에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "tags": [
+        "arrow",
+        "documentation",
+        "source-code-twin"
+      ],
+      "details": {
+        "functionKind": "arrow",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:scripts/source-twin-semantics.mjs:areaForSourceResource",
+      "kind": "function",
+      "label": "areaForSourceResource",
+      "fingerprint": "a49926b0f67a2de34cc7",
+      "name": "areaForSourceResource",
+      "path": "scripts/source-twin-semantics.mjs",
+      "parentId": "file:scripts/source-twin-semantics.mjs",
+      "layer": "documentation",
+      "area": "source-code-twin",
+      "lineStart": 352,
+      "lineEnd": 362,
+      "summary": "소스 코드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "tags": [
+        "documentation",
+        "exported",
+        "function",
+        "source-code-twin"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:scripts/source-twin-semantics.mjs:baseName",
+      "kind": "function",
+      "label": "baseName",
+      "fingerprint": "890e558ba7fbc2969382",
+      "name": "baseName",
+      "path": "scripts/source-twin-semantics.mjs",
+      "parentId": "file:scripts/source-twin-semantics.mjs",
+      "layer": "documentation",
+      "area": "source-code-twin",
+      "lineStart": 216,
+      "lineEnd": 218,
+      "summary": "기준에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "tags": [
+        "documentation",
+        "function",
+        "source-code-twin"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:scripts/source-twin-semantics.mjs:conceptLabel",
+      "kind": "function",
+      "label": "conceptLabel",
+      "fingerprint": "81d1f430f49e6da1eb76",
+      "name": "conceptLabel",
+      "path": "scripts/source-twin-semantics.mjs",
+      "parentId": "file:scripts/source-twin-semantics.mjs",
+      "layer": "documentation",
+      "area": "source-code-twin",
+      "lineStart": 212,
+      "lineEnd": 214,
+      "summary": "화면 이름에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "tags": [
+        "documentation",
+        "function",
+        "source-code-twin"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:scripts/source-twin-semantics.mjs:explainDatabaseResource",
+      "kind": "function",
+      "label": "explainDatabaseResource",
+      "fingerprint": "5e209257e4310d1ce17f",
+      "name": "explainDatabaseResource",
+      "path": "scripts/source-twin-semantics.mjs",
+      "parentId": "file:scripts/source-twin-semantics.mjs",
+      "layer": "documentation",
+      "area": "source-code-twin",
+      "lineStart": 364,
+      "lineEnd": 369,
+      "summary": "이 파일이 맡은 “발견된 코드 증거를 비개발자가 이해할 역할 설명과 제품 영역으로 바꾸는 규칙을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "tags": [
+        "documentation",
+        "exported",
+        "function",
+        "source-code-twin"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:scripts/source-twin-semantics.mjs:explainEnvironmentVariable",
+      "kind": "function",
+      "label": "explainEnvironmentVariable",
+      "fingerprint": "c797622f68c0f61507bd",
+      "name": "explainEnvironmentVariable",
+      "path": "scripts/source-twin-semantics.mjs",
+      "parentId": "file:scripts/source-twin-semantics.mjs",
+      "layer": "documentation",
+      "area": "source-code-twin",
+      "lineStart": 371,
+      "lineEnd": 377,
+      "summary": "이 파일이 맡은 “발견된 코드 증거를 비개발자가 이해할 역할 설명과 제품 영역으로 바꾸는 규칙을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "tags": [
+        "documentation",
+        "exported",
+        "function",
+        "source-code-twin"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:scripts/source-twin-semantics.mjs:explainSourceFile",
+      "kind": "function",
+      "label": "explainSourceFile",
+      "fingerprint": "ca25344118424a5c45f1",
+      "name": "explainSourceFile",
+      "path": "scripts/source-twin-semantics.mjs",
+      "parentId": "file:scripts/source-twin-semantics.mjs",
+      "layer": "documentation",
+      "area": "source-code-twin",
+      "lineStart": 291,
+      "lineEnd": 300,
+      "summary": "소스 코드 · 파일에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "tags": [
+        "documentation",
+        "exported",
+        "function",
+        "source-code-twin"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:scripts/source-twin-semantics.mjs:explainSourceFunction",
+      "kind": "function",
+      "label": "explainSourceFunction",
+      "fingerprint": "504231bcebc64b2fb497",
+      "name": "explainSourceFunction",
+      "path": "scripts/source-twin-semantics.mjs",
+      "parentId": "file:scripts/source-twin-semantics.mjs",
+      "layer": "documentation",
+      "area": "source-code-twin",
+      "lineStart": 329,
+      "lineEnd": 350,
+      "summary": "소스 코드 · 함수에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "tags": [
+        "documentation",
+        "exported",
+        "function",
+        "source-code-twin"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:scripts/source-twin-semantics.mjs:functionActionSummary",
+      "kind": "function",
+      "label": "functionActionSummary",
+      "fingerprint": "3bde67345f590bb40090",
+      "name": "functionActionSummary",
+      "path": "scripts/source-twin-semantics.mjs",
+      "parentId": "file:scripts/source-twin-semantics.mjs",
+      "layer": "documentation",
+      "area": "source-code-twin",
+      "lineStart": 313,
+      "lineEnd": 327,
+      "summary": "함수에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "tags": [
+        "documentation",
+        "function",
+        "source-code-twin"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:scripts/source-twin-semantics.mjs:genericArea",
+      "kind": "function",
+      "label": "genericArea",
+      "fingerprint": "d925453d2eee82ce7bba",
+      "name": "genericArea",
+      "path": "scripts/source-twin-semantics.mjs",
+      "parentId": "file:scripts/source-twin-semantics.mjs",
+      "layer": "documentation",
+      "area": "source-code-twin",
+      "lineStart": 220,
+      "lineEnd": 236,
+      "summary": "이 파일이 맡은 “발견된 코드 증거를 비개발자가 이해할 역할 설명과 제품 영역으로 바꾸는 규칙을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "tags": [
+        "documentation",
+        "function",
+        "source-code-twin"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:scripts/source-twin-semantics.mjs:genericFileExplanation",
+      "kind": "function",
+      "label": "genericFileExplanation",
+      "fingerprint": "b4bf5bb46cb16328145a",
+      "name": "genericFileExplanation",
+      "path": "scripts/source-twin-semantics.mjs",
+      "parentId": "file:scripts/source-twin-semantics.mjs",
+      "layer": "documentation",
+      "area": "source-code-twin",
+      "lineStart": 238,
+      "lineEnd": 277,
+      "summary": "파일에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "tags": [
+        "documentation",
+        "function",
+        "source-code-twin"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:scripts/source-twin-semantics.mjs:identifierWords",
+      "kind": "function",
+      "label": "identifierWords",
+      "fingerprint": "228b809ddc386c645058",
+      "name": "identifierWords",
+      "path": "scripts/source-twin-semantics.mjs",
+      "parentId": "file:scripts/source-twin-semantics.mjs",
+      "layer": "documentation",
+      "area": "source-code-twin",
+      "lineStart": 192,
+      "lineEnd": 210,
+      "summary": "이 파일이 맡은 “발견된 코드 증거를 비개발자가 이해할 역할 설명과 제품 영역으로 바꾸는 규칙을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "tags": [
+        "documentation",
+        "function",
+        "source-code-twin"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:scripts/source-twin-semantics.mjs:sourceTwinProjectIdentity",
+      "kind": "function",
+      "label": "sourceTwinProjectIdentity",
+      "fingerprint": "216f6ed204db3f9c6f22",
+      "name": "sourceTwinProjectIdentity",
+      "path": "scripts/source-twin-semantics.mjs",
+      "parentId": "file:scripts/source-twin-semantics.mjs",
+      "layer": "documentation",
+      "area": "source-code-twin",
+      "lineStart": 279,
+      "lineEnd": 289,
+      "summary": "소스 코드 · 디지털 트윈에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "tags": [
+        "documentation",
+        "exported",
+        "function",
+        "source-code-twin"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:scripts/source-twin-semantics.mjs:sourceTwinTechnicalSummary",
+      "kind": "function",
+      "label": "sourceTwinTechnicalSummary",
+      "fingerprint": "f3ef9bae9d89882c5c79",
+      "name": "sourceTwinTechnicalSummary",
+      "path": "scripts/source-twin-semantics.mjs",
+      "parentId": "file:scripts/source-twin-semantics.mjs",
+      "layer": "documentation",
+      "area": "source-code-twin",
+      "lineStart": 302,
+      "lineEnd": 311,
+      "summary": "소스 코드 · 디지털 트윈에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "tags": [
+        "documentation",
+        "exported",
+        "function",
+        "source-code-twin"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
         "async": false
       }
     },
@@ -11697,11 +13958,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/system-discovery.mjs",
       "parentId": "file:scripts/system-discovery.mjs",
       "layer": "documentation",
+      "area": "digital-twin-engine",
       "lineStart": 201,
       "lineEnd": 208,
-      "summary": "table source을(를) 추가하는 함수입니다.",
+      "summary": "DB 테이블 · 소스 코드 항목이나 구조를 추가합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "documentation"
       ],
       "details": {
@@ -11719,10 +13983,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/system-discovery.mjs",
       "parentId": "file:scripts/system-discovery.mjs",
       "layer": "documentation",
+      "area": "digital-twin-engine",
       "lineStart": 88,
       "lineEnd": 393,
-      "summary": "discovery manifest을(를) 구성하는 함수입니다.",
+      "summary": "코드 구조 목록 항목이나 구조를 구성합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "documentation",
         "exported",
         "function"
@@ -11742,10 +14009,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/system-discovery.mjs",
       "parentId": "file:scripts/system-discovery.mjs",
       "layer": "documentation",
+      "area": "digital-twin-engine",
       "lineStart": 32,
       "lineEnd": 42,
-      "summary": "content for fingerprint을(를) 처리하는 함수입니다.",
+      "summary": "본문 · 변경 식별값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "documentation",
         "function"
       ],
@@ -11764,10 +14034,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/system-discovery.mjs",
       "parentId": "file:scripts/system-discovery.mjs",
       "layer": "documentation",
+      "area": "digital-twin-engine",
       "lineStart": 72,
       "lineEnd": 82,
-      "summary": "resource을(를) 생성하는 함수입니다.",
+      "summary": "새 항목 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "documentation",
         "function"
       ],
@@ -11786,10 +14059,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/system-discovery.mjs",
       "parentId": "file:scripts/system-discovery.mjs",
       "layer": "documentation",
+      "area": "digital-twin-engine",
       "lineStart": 84,
       "lineEnd": 86,
-      "summary": "file entries을(를) 처리하는 함수입니다.",
+      "summary": "파일에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "documentation",
         "function"
       ],
@@ -11808,10 +14084,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/system-discovery.mjs",
       "parentId": "file:scripts/system-discovery.mjs",
       "layer": "documentation",
+      "area": "digital-twin-engine",
       "lineStart": 44,
       "lineEnd": 46,
-      "summary": "fingerprint을(를) 처리하는 함수입니다.",
+      "summary": "변경 식별값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "documentation",
         "exported",
         "function"
@@ -11831,10 +14110,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/system-discovery.mjs",
       "parentId": "file:scripts/system-discovery.mjs",
       "layer": "documentation",
+      "area": "digital-twin-engine",
       "lineStart": 64,
       "lineEnd": 70,
-      "summary": "matches을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “코드·SQL·MCP 도구·환경변수 이름을 스캔해 Workflow Canvas 시스템 자원 목록을 만듭니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "documentation",
         "function"
       ],
@@ -11853,10 +14135,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/system-discovery.mjs",
       "parentId": "file:scripts/system-discovery.mjs",
       "layer": "documentation",
+      "area": "digital-twin-engine",
       "lineStart": 26,
       "lineEnd": 28,
-      "summary": "normalized content을(를) 처리하는 함수입니다.",
+      "summary": "본문에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "documentation",
         "function"
       ],
@@ -11875,10 +14160,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/system-discovery.mjs",
       "parentId": "file:scripts/system-discovery.mjs",
       "layer": "documentation",
+      "area": "digital-twin-engine",
       "lineStart": 395,
       "lineEnd": 397,
-      "summary": "nul separated을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “코드·SQL·MCP 도구·환경변수 이름을 스캔해 Workflow Canvas 시스템 자원 목록을 만듭니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "documentation",
         "function"
       ],
@@ -11897,10 +14185,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/system-discovery.mjs",
       "parentId": "file:scripts/system-discovery.mjs",
       "layer": "documentation",
+      "area": "digital-twin-engine",
       "lineStart": 426,
       "lineEnd": 432,
-      "summary": "generated manifest을(를) 해석하는 함수입니다.",
+      "summary": "코드 구조 목록 자료의 구조를 읽어냅니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "documentation",
         "exported",
         "function"
@@ -11920,10 +14211,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/system-discovery.mjs",
       "parentId": "file:scripts/system-discovery.mjs",
       "layer": "documentation",
+      "area": "digital-twin-engine",
       "lineStart": 414,
       "lineEnd": 424,
-      "summary": "git tree을(를) 읽기하는 함수입니다.",
+      "summary": "Git 상태 정보를 읽습니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "documentation",
         "exported",
         "function"
@@ -11943,10 +14237,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/system-discovery.mjs",
       "parentId": "file:scripts/system-discovery.mjs",
       "layer": "documentation",
+      "area": "digital-twin-engine",
       "lineStart": 399,
       "lineEnd": 412,
-      "summary": "working tree을(를) 읽기하는 함수입니다.",
+      "summary": "이 기능 정보를 읽습니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "documentation",
         "exported",
         "function"
@@ -11966,10 +14263,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/system-discovery.mjs",
       "parentId": "file:scripts/system-discovery.mjs",
       "layer": "documentation",
+      "area": "digital-twin-engine",
       "lineStart": 60,
       "lineEnd": 62,
-      "summary": "semantic fingerprint을(를) 처리하는 함수입니다.",
+      "summary": "변경 식별값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "documentation",
         "function"
       ],
@@ -11988,10 +14288,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/system-discovery.mjs",
       "parentId": "file:scripts/system-discovery.mjs",
       "layer": "documentation",
+      "area": "digital-twin-engine",
       "lineStart": 434,
       "lineEnd": 442,
-      "summary": "generated manifest을(를) 직렬화하는 함수입니다.",
+      "summary": "코드 구조 목록 자료를 저장 가능한 형식으로 바꿉니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "documentation",
         "exported",
         "function"
@@ -12011,10 +14314,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/system-discovery.mjs",
       "parentId": "file:scripts/system-discovery.mjs",
       "layer": "documentation",
+      "area": "digital-twin-engine",
       "lineStart": 18,
       "lineEnd": 24,
-      "summary": "should inspect을(를) 처리하는 함수입니다.",
+      "summary": "시스템 검사에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "documentation",
         "function"
       ],
@@ -12033,10 +14339,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/system-discovery.mjs",
       "parentId": "file:scripts/system-discovery.mjs",
       "layer": "documentation",
+      "area": "digital-twin-engine",
       "lineStart": 48,
       "lineEnd": 50,
-      "summary": "sorted unique을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “코드·SQL·MCP 도구·환경변수 이름을 스캔해 Workflow Canvas 시스템 자원 목록을 만듭니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "documentation",
         "function"
       ],
@@ -12055,10 +14364,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/system-discovery.mjs",
       "parentId": "file:scripts/system-discovery.mjs",
       "layer": "documentation",
+      "area": "digital-twin-engine",
       "lineStart": 52,
       "lineEnd": 58,
-      "summary": "stable value을(를) 처리하는 함수입니다.",
+      "summary": "값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "documentation",
         "function"
       ],
@@ -12077,12 +14389,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-local-connector-agent.mjs",
       "parentId": "file:scripts/test-local-connector-agent.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 23,
       "lineEnd": 26,
-      "summary": "configure repository을(를) 처리하는 함수입니다.",
+      "summary": "코드 저장소에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "function",
@@ -12099,12 +14414,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-local-connector-agent.mjs",
       "parentId": "file:scripts/test-local-connector-agent.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 15,
       "lineEnd": 21,
-      "summary": "git을(를) 처리하는 함수입니다.",
+      "summary": "Git 상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "function",
@@ -12121,12 +14439,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 3073,
       "lineEnd": 3073,
-      "summary": "big stage을(를) 처리하는 함수입니다.",
+      "summary": "단계에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "arrow",
@@ -12143,12 +14464,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 1040,
       "lineEnd": 1067,
-      "summary": "db abort signal을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "method",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "method",
@@ -12165,12 +14489,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 1037,
       "lineEnd": 1069,
-      "summary": "db rpc을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "method",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "method",
@@ -12187,12 +14514,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 1142,
       "lineEnd": 1144,
-      "summary": "denied write db from을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "method",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "method",
@@ -12209,12 +14539,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 160,
       "lineEnd": 160,
-      "summary": "edge을(를) 처리하는 함수입니다.",
+      "summary": "연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "arrow",
@@ -12231,12 +14564,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 3238,
       "lineEnd": 3249,
-      "summary": "fake element을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "function",
@@ -12253,12 +14589,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 3003,
       "lineEnd": 3009,
-      "summary": "rect을(를) 조회하는 함수입니다.",
+      "summary": "노드 경계 상자 정보를 불러옵니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "arrow",
@@ -12275,12 +14614,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 3097,
       "lineEnd": 3101,
-      "summary": "rect을(를) 조회하는 함수입니다.",
+      "summary": "노드 경계 상자 정보를 불러옵니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "arrow",
@@ -12297,12 +14639,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 158,
       "lineEnd": 158,
-      "summary": "memo을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "arrow",
@@ -12319,12 +14664,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 3040,
       "lineEnd": 3040,
-      "summary": "padded rect을(를) 처리하는 함수입니다.",
+      "summary": "노드 경계 상자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "arrow",
@@ -12341,12 +14689,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 3118,
       "lineEnd": 3118,
-      "summary": "padded rect을(를) 처리하는 함수입니다.",
+      "summary": "노드 경계 상자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "arrow",
@@ -12363,12 +14714,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 1125,
       "lineEnd": 1125,
-      "summary": "query eq을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "method",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "method",
@@ -12385,12 +14739,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 1177,
       "lineEnd": 1177,
-      "summary": "query eq을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "method",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "method",
@@ -12407,12 +14764,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 1198,
       "lineEnd": 1198,
-      "summary": "query eq을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "method",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "method",
@@ -12429,12 +14789,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 1179,
       "lineEnd": 1179,
-      "summary": "query limit을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "method",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "method",
@@ -12451,12 +14814,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 1200,
       "lineEnd": 1200,
-      "summary": "query limit을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "method",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "method",
@@ -12473,12 +14839,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 1126,
       "lineEnd": 1126,
-      "summary": "query lt을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "method",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "method",
@@ -12495,12 +14864,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 1178,
       "lineEnd": 1178,
-      "summary": "query order을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "method",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "method",
@@ -12517,12 +14889,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 1199,
       "lineEnd": 1199,
-      "summary": "query order을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "method",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "method",
@@ -12539,12 +14914,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 1176,
       "lineEnd": 1176,
-      "summary": "query select을(를) 처리하는 함수입니다.",
+      "summary": "선택에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "method",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "method",
@@ -12561,12 +14939,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 1197,
       "lineEnd": 1197,
-      "summary": "query select을(를) 처리하는 함수입니다.",
+      "summary": "선택에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "method",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "method",
@@ -12583,12 +14964,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 1173,
       "lineEnd": 1182,
-      "summary": "db from을(를) 읽기하는 함수입니다.",
+      "summary": "이 기능 정보를 읽습니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "method",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "method",
@@ -12605,12 +14989,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 934,
       "lineEnd": 934,
-      "summary": "result text을(를) 처리하는 함수입니다.",
+      "summary": "결과 · 텍스트에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "method",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "method",
@@ -12627,12 +15014,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 1506,
       "lineEnd": 1512,
-      "summary": "scan을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "arrow",
@@ -12649,12 +15039,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 157,
       "lineEnd": 157,
-      "summary": "stage을(를) 처리하는 함수입니다.",
+      "summary": "단계에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "arrow",
@@ -12671,12 +15064,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 159,
       "lineEnd": 159,
-      "summary": "system을(를) 처리하는 함수입니다.",
+      "summary": "시스템에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "arrow",
@@ -12693,12 +15089,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 147,
       "lineEnd": 150,
-      "summary": "t을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "function",
@@ -12715,13 +15114,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 152,
       "lineEnd": 155,
-      "summary": "ta을(를) 처리하는 비동기 함수입니다.",
+      "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "function",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "function",
@@ -12738,12 +15140,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 1195,
       "lineEnd": 1203,
-      "summary": "unavailable db from을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "method",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "method",
@@ -12760,12 +15165,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 1123,
       "lineEnd": 1129,
-      "summary": "write db delete을(를) 처리하는 함수입니다.",
+      "summary": "삭제에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "method",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "method",
@@ -12782,12 +15190,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 1116,
       "lineEnd": 1131,
-      "summary": "write db from을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "method",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "method",
@@ -12804,12 +15215,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 1119,
       "lineEnd": 1122,
-      "summary": "write db insert을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "method",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "method",
@@ -12826,12 +15240,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-operation-lifecycle.mjs",
       "parentId": "file:scripts/test-operation-lifecycle.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 175,
       "lineEnd": 182,
-      "summary": "plan for을(를) 처리하는 함수입니다.",
+      "summary": "실행 계획에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "arrow",
@@ -12848,12 +15265,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-source-twin.mjs",
       "parentId": "file:scripts/test-source-twin.mjs",
       "layer": "test",
-      "lineStart": 403,
-      "lineEnd": 433,
-      "summary": "local completion db을(를) 처리하는 함수입니다.",
+      "area": "testing-quality",
+      "lineStart": 434,
+      "lineEnd": 464,
+      "summary": "로컬 저장소에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "function",
@@ -12870,12 +15290,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-source-twin.mjs",
       "parentId": "file:scripts/test-source-twin.mjs",
       "layer": "test",
-      "lineStart": 407,
-      "lineEnd": 431,
-      "summary": "local completion db from을(를) 처리하는 함수입니다.",
+      "area": "testing-quality",
+      "lineStart": 438,
+      "lineEnd": 462,
+      "summary": "로컬 저장소에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "method",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "method",
@@ -12892,12 +15315,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-source-twin.mjs",
       "parentId": "file:scripts/test-source-twin.mjs",
       "layer": "test",
-      "lineStart": 340,
-      "lineEnd": 356,
-      "summary": "local connector db from을(를) 처리하는 함수입니다.",
+      "area": "testing-quality",
+      "lineStart": 371,
+      "lineEnd": 387,
+      "summary": "로컬 저장소 · 로컬 커넥터에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "method",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "method",
@@ -12914,12 +15340,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-source-twin.mjs",
       "parentId": "file:scripts/test-source-twin.mjs",
       "layer": "test",
-      "lineStart": 464,
-      "lineEnd": 472,
-      "summary": "result을(를) 읽기하는 함수입니다.",
+      "area": "testing-quality",
+      "lineStart": 495,
+      "lineEnd": 503,
+      "summary": "결과 정보를 읽습니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "arrow",
@@ -12936,12 +15365,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-sql-security.mjs",
       "parentId": "file:scripts/test-sql-security.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 4,
       "lineEnd": 4,
-      "summary": "read을(를) 읽기하는 함수입니다.",
+      "summary": "이 기능 정보를 읽습니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "arrow",
@@ -12958,12 +15390,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-twin-adapter-contract.mjs",
       "parentId": "file:scripts/test-twin-adapter-contract.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 65,
       "lineEnd": 68,
-      "summary": "fixture adapter inspect을(를) 처리하는 함수입니다.",
+      "summary": "시스템 검사에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "method",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "method",
@@ -12980,12 +15415,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "scripts/test-twin-adapter-contract.mjs",
       "parentId": "file:scripts/test-twin-adapter-contract.mjs",
       "layer": "test",
+      "area": "testing-quality",
       "lineStart": 71,
       "lineEnd": 82,
-      "summary": "reconciliation projection을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “twin adapter contract 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "test"
+        "test",
+        "testing-quality"
       ],
       "details": {
         "functionKind": "function",
@@ -13002,11 +15440,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinProposal.js",
       "parentId": "file:shared/digitalTwinProposal.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 10,
       "lineEnd": 14,
-      "summary": "digital twin proposal error constructor을(를) 처리하는 함수입니다.",
+      "summary": "디지털 트윈 · 수정 제안 · 오류에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "class-method",
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
@@ -13024,10 +15465,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinProposal.js",
       "parentId": "file:shared/digitalTwinProposal.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 464,
       "lineEnd": 524,
-      "summary": "digital twin graph proposal을(를) 적용하는 함수입니다.",
+      "summary": "디지털 트윈 · 노드·연결선 구조 · 수정 제안 작업을 승인된 변경을 적용합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -13047,10 +15491,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinProposal.js",
       "parentId": "file:shared/digitalTwinProposal.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 175,
       "lineEnd": 226,
-      "summary": "digital twin graph proposal을(를) 생성하는 함수입니다.",
+      "summary": "디지털 트윈 · 노드·연결선 구조 · 수정 제안 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -13070,10 +15517,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinProposal.js",
       "parentId": "file:shared/digitalTwinProposal.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 272,
       "lineEnd": 279,
-      "summary": "digital twin proposal auto fit key을(를) 처리하는 함수입니다.",
+      "summary": "디지털 트윈 · 수정 제안에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -13093,10 +15543,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinProposal.js",
       "parentId": "file:shared/digitalTwinProposal.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 102,
       "lineEnd": 104,
-      "summary": "digital twin proposal edge fingerprint을(를) 처리하는 함수입니다.",
+      "summary": "디지털 트윈 · 수정 제안 · 연결선 · 변경 식별값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -13116,10 +15569,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinProposal.js",
       "parentId": "file:shared/digitalTwinProposal.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 228,
       "lineEnd": 232,
-      "summary": "digital twin proposal matches item을(를) 처리하는 함수입니다.",
+      "summary": "디지털 트윈 · 수정 제안 · 검토 항목에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -13139,10 +15595,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinProposal.js",
       "parentId": "file:shared/digitalTwinProposal.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 234,
       "lineEnd": 247,
-      "summary": "digital twin proposal node changes을(를) 선별하는 함수입니다.",
+      "summary": "디지털 트윈 · 수정 제안 · 노드 · 변경 내역 상태나 허용 여부를 조건에 맞는 것만 고릅니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -13162,10 +15621,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinProposal.js",
       "parentId": "file:shared/digitalTwinProposal.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 35,
       "lineEnd": 38,
-      "summary": "finite number을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “검토가 승인된 디지털 트윈 변경만 캔버스 자료에 적용하고 충돌을 검사합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -13184,10 +15646,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinProposal.js",
       "parentId": "file:shared/digitalTwinProposal.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 291,
       "lineEnd": 296,
-      "summary": "matching applied edge을(를) 처리하는 함수입니다.",
+      "summary": "연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -13206,10 +15671,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinProposal.js",
       "parentId": "file:shared/digitalTwinProposal.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 281,
       "lineEnd": 289,
-      "summary": "matching applied node을(를) 처리하는 함수입니다.",
+      "summary": "노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -13228,10 +15696,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinProposal.js",
       "parentId": "file:shared/digitalTwinProposal.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 298,
       "lineEnd": 301,
-      "summary": "matching applied part을(를) 처리하는 함수입니다.",
+      "summary": "시스템 파츠에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -13250,10 +15721,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinProposal.js",
       "parentId": "file:shared/digitalTwinProposal.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 84,
       "lineEnd": 100,
-      "summary": "edge을(를) 정규화하는 함수입니다.",
+      "summary": "연결선 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -13272,10 +15746,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinProposal.js",
       "parentId": "file:shared/digitalTwinProposal.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 65,
       "lineEnd": 82,
-      "summary": "node을(를) 정규화하는 함수입니다.",
+      "summary": "노드 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -13294,10 +15771,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinProposal.js",
       "parentId": "file:shared/digitalTwinProposal.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 106,
       "lineEnd": 173,
-      "summary": "operation을(를) 정규화하는 함수입니다.",
+      "summary": "실제 조작 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -13316,10 +15796,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinProposal.js",
       "parentId": "file:shared/digitalTwinProposal.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 17,
       "lineEnd": 19,
-      "summary": "plain object을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “검토가 승인된 디지털 트윈 변경만 캔버스 자료에 적용하고 충돌을 검사합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -13338,10 +15821,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinProposal.js",
       "parentId": "file:shared/digitalTwinProposal.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 303,
       "lineEnd": 462,
-      "summary": "plan digital twin graph proposal을(를) 처리하는 함수입니다.",
+      "summary": "실행 계획 · 디지털 트윈 · 노드·연결선 구조 · 수정 제안에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -13361,10 +15847,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinProposal.js",
       "parentId": "file:shared/digitalTwinProposal.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 249,
       "lineEnd": 270,
-      "summary": "preview digital twin part changes을(를) 처리하는 함수입니다.",
+      "summary": "실행 전 미리보기 · 디지털 트윈 · 시스템 파츠 · 변경 내역에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -13384,10 +15873,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinProposal.js",
       "parentId": "file:shared/digitalTwinProposal.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 27,
       "lineEnd": 33,
-      "summary": "safe id을(를) 처리하는 함수입니다.",
+      "summary": "허용 범위로 제한 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -13406,10 +15898,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinProposal.js",
       "parentId": "file:shared/digitalTwinProposal.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 21,
       "lineEnd": 25,
-      "summary": "safe text을(를) 처리하는 함수입니다.",
+      "summary": "허용 범위로 제한 · 텍스트에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -13428,10 +15923,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinProposal.js",
       "parentId": "file:shared/digitalTwinProposal.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 40,
       "lineEnd": 63,
-      "summary": "serializable value을(를) 처리하는 함수입니다.",
+      "summary": "값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -13450,10 +15948,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinReview.js",
       "parentId": "file:shared/digitalTwinReview.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 193,
       "lineEnd": 206,
-      "summary": "clear digital twin review decision을(를) 처리하는 함수입니다.",
+      "summary": "비우기 · 디지털 트윈 · 검토 결정에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -13473,10 +15974,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinReview.js",
       "parentId": "file:shared/digitalTwinReview.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 56,
       "lineEnd": 69,
-      "summary": "compact evidence을(를) 처리하는 함수입니다.",
+      "summary": "필요한 정보만 남기기 · 근거에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -13495,10 +15999,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinReview.js",
       "parentId": "file:shared/digitalTwinReview.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 71,
       "lineEnd": 111,
-      "summary": "digital twin review item을(를) 생성하는 함수입니다.",
+      "summary": "디지털 트윈 · 검토 항목 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -13518,10 +16025,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinReview.js",
       "parentId": "file:shared/digitalTwinReview.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 147,
       "lineEnd": 149,
-      "summary": "digital twin review decision을(를) 처리하는 함수입니다.",
+      "summary": "디지털 트윈 · 검토 결정에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -13541,10 +16051,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinReview.js",
       "parentId": "file:shared/digitalTwinReview.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 42,
       "lineEnd": 54,
-      "summary": "digital twin review fingerprint을(를) 처리하는 함수입니다.",
+      "summary": "디지털 트윈 · 변경 식별값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -13564,10 +16077,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinReview.js",
       "parentId": "file:shared/digitalTwinReview.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 142,
       "lineEnd": 145,
-      "summary": "matching decision을(를) 처리하는 함수입니다.",
+      "summary": "검토 결정에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -13586,10 +16102,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinReview.js",
       "parentId": "file:shared/digitalTwinReview.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 113,
       "lineEnd": 123,
-      "summary": "decision을(를) 정규화하는 함수입니다.",
+      "summary": "검토 결정 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -13608,10 +16127,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinReview.js",
       "parentId": "file:shared/digitalTwinReview.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 125,
       "lineEnd": 140,
-      "summary": "digital twin review state을(를) 정규화하는 함수입니다.",
+      "summary": "디지털 트윈 · 상태 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -13631,10 +16153,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinReview.js",
       "parentId": "file:shared/digitalTwinReview.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 151,
       "lineEnd": 163,
-      "summary": "partition digital twin review items을(를) 처리하는 함수입니다.",
+      "summary": "디지털 트윈에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -13654,10 +16179,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinReview.js",
       "parentId": "file:shared/digitalTwinReview.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 10,
       "lineEnd": 12,
-      "summary": "plain object을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “트윈 변경안의 적용·무시·보류 결정을 저장하고 새 검사에서도 같은 결정을 찾습니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -13676,10 +16204,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinReview.js",
       "parentId": "file:shared/digitalTwinReview.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 14,
       "lineEnd": 17,
-      "summary": "safe key을(를) 처리하는 함수입니다.",
+      "summary": "허용 범위로 제한에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -13698,10 +16229,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinReview.js",
       "parentId": "file:shared/digitalTwinReview.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 165,
       "lineEnd": 191,
-      "summary": "digital twin review decision을(를) 설정하는 함수입니다.",
+      "summary": "디지털 트윈 · 검토 결정 대상을 설정합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -13721,10 +16255,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/digitalTwinReview.js",
       "parentId": "file:shared/digitalTwinReview.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 19,
       "lineEnd": 40,
-      "summary": "stable value을(를) 처리하는 함수입니다.",
+      "summary": "값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -13743,10 +16280,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/edgeOperation.js",
       "parentId": "file:shared/edgeOperation.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 27,
       "lineEnd": 29,
-      "summary": "edge operation is active을(를) 처리하는 함수입니다.",
+      "summary": "연결선 · 실제 조작 · 현재 선택에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -13766,10 +16306,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/edgeOperation.js",
       "parentId": "file:shared/edgeOperation.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 31,
       "lineEnd": 33,
-      "summary": "edge operation is terminal을(를) 처리하는 함수입니다.",
+      "summary": "연결선 · 실제 조작에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -13789,10 +16332,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/edgeOperation.js",
       "parentId": "file:shared/edgeOperation.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 23,
       "lineEnd": 25,
-      "summary": "edge operation status definition을(를) 처리하는 함수입니다.",
+      "summary": "연결선 · 실제 조작 · 상태 · 기능 정의에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -13812,13 +16358,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/localConnector.js",
       "parentId": "file:shared/localConnector.js",
       "layer": "shared",
-      "lineStart": 173,
-      "lineEnd": 195,
-      "summary": "local and deployed manifests을(를) 비교하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 196,
+      "lineEnd": 218,
+      "summary": "로컬 저장소 상태나 허용 여부를 서로 비교합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -13830,17 +16379,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:shared/localConnector.js:entityDetails",
       "kind": "function",
       "label": "entityDetails",
-      "fingerprint": "c34446a5cf3f92a6af51",
+      "fingerprint": "c7c07121449674f51b70",
       "name": "entityDetails",
       "path": "shared/localConnector.js",
       "parentId": "file:shared/localConnector.js",
       "layer": "shared",
+      "area": "source-code-twin",
       "lineStart": 74,
-      "lineEnd": 86,
-      "summary": "entity details을(를) 처리하는 함수입니다.",
+      "lineEnd": 93,
+      "summary": "시스템 실체에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -13857,12 +16409,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/localConnector.js",
       "parentId": "file:shared/localConnector.js",
       "layer": "shared",
+      "area": "source-code-twin",
       "lineStart": 27,
       "lineEnd": 30,
-      "summary": "integer을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “로컬 커넥터가 클라우드로 보낼 수 있는 코드 메타데이터와 Git 동기화 방향을 제한·판정합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -13879,13 +16434,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/localConnector.js",
       "parentId": "file:shared/localConnector.js",
       "layer": "shared",
-      "lineStart": 299,
-      "lineEnd": 302,
-      "summary": "local connector is online을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 322,
+      "lineEnd": 325,
+      "summary": "로컬 저장소 · 로컬 커넥터에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -13902,13 +16460,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/localConnector.js",
       "parentId": "file:shared/localConnector.js",
       "layer": "shared",
+      "area": "source-code-twin",
       "lineStart": 42,
       "lineEnd": 72,
-      "summary": "local connector shell command을(를) 처리하는 함수입니다.",
+      "summary": "로컬 저장소 · 로컬 커넥터에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -13925,13 +16486,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/localConnector.js",
       "parentId": "file:shared/localConnector.js",
       "layer": "shared",
-      "lineStart": 221,
-      "lineEnd": 255,
-      "summary": "local git sync decision을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 244,
+      "lineEnd": 278,
+      "summary": "로컬 저장소 · Git 상태 · 동기화 · 검토 결정에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -13948,13 +16512,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/localConnector.js",
       "parentId": "file:shared/localConnector.js",
       "layer": "shared",
-      "lineStart": 257,
-      "lineEnd": 297,
-      "summary": "local git sync edge presentation을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 280,
+      "lineEnd": 320,
+      "summary": "로컬 저장소 · Git 상태 · 동기화 · 연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -13971,13 +16538,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/localConnector.js",
       "parentId": "file:shared/localConnector.js",
       "layer": "shared",
-      "lineStart": 197,
-      "lineEnd": 219,
-      "summary": "local git state을(를) 정규화하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 220,
+      "lineEnd": 242,
+      "summary": "로컬 저장소 · Git 상태 · 상태 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -13989,18 +16559,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:shared/localConnector.js:normalizeLocalSourceManifest",
       "kind": "function",
       "label": "normalizeLocalSourceManifest",
-      "fingerprint": "a45c1438cdf9a4d950d4",
+      "fingerprint": "003e099d9bf411a10368",
       "name": "normalizeLocalSourceManifest",
       "path": "shared/localConnector.js",
       "parentId": "file:shared/localConnector.js",
       "layer": "shared",
-      "lineStart": 114,
-      "lineEnd": 171,
-      "summary": "local source manifest을(를) 정규화하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 123,
+      "lineEnd": 194,
+      "summary": "로컬 저장소 · 소스 코드 · 코드 구조 목록 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -14017,12 +16590,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/localConnector.js",
       "parentId": "file:shared/localConnector.js",
       "layer": "shared",
-      "lineStart": 130,
-      "lineEnd": 130,
-      "summary": "perspective을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 139,
+      "lineEnd": 139,
+      "summary": "이 파일이 맡은 “로컬 커넥터가 클라우드로 보낼 수 있는 코드 메타데이터와 Git 동기화 방향을 제한·판정합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "arrow",
@@ -14039,12 +16615,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/localConnector.js",
       "parentId": "file:shared/localConnector.js",
       "layer": "shared",
+      "area": "source-code-twin",
       "lineStart": 17,
       "lineEnd": 19,
-      "summary": "plain object을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “로컬 커넥터가 클라우드로 보낼 수 있는 코드 메타데이터와 Git 동기화 방향을 제한·판정합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -14061,12 +16640,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/localConnector.js",
       "parentId": "file:shared/localConnector.js",
       "layer": "shared",
+      "area": "source-code-twin",
       "lineStart": 38,
       "lineEnd": 40,
-      "summary": "shell single quote을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “로컬 커넥터가 클라우드로 보낼 수 있는 코드 메타데이터와 Git 동기화 방향을 제한·판정합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -14078,17 +16660,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:shared/localConnector.js:sourceEntity",
       "kind": "function",
       "label": "sourceEntity",
-      "fingerprint": "c92fedb810d319ff0874",
+      "fingerprint": "94e4cf226cf6acd53d9f",
       "name": "sourceEntity",
       "path": "shared/localConnector.js",
       "parentId": "file:shared/localConnector.js",
       "layer": "shared",
-      "lineStart": 88,
-      "lineEnd": 112,
-      "summary": "source entity을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 95,
+      "lineEnd": 121,
+      "summary": "소스 코드 · 시스템 실체에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -14105,12 +16690,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/localConnector.js",
       "parentId": "file:shared/localConnector.js",
       "layer": "shared",
+      "area": "source-code-twin",
       "lineStart": 32,
       "lineEnd": 36,
-      "summary": "string list을(를) 처리하는 함수입니다.",
+      "summary": "목록에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -14127,12 +16715,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/localConnector.js",
       "parentId": "file:shared/localConnector.js",
       "layer": "shared",
+      "area": "source-code-twin",
       "lineStart": 21,
       "lineEnd": 25,
-      "summary": "text을(를) 처리하는 함수입니다.",
+      "summary": "텍스트에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -14149,11 +16740,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 60,
       "lineEnd": 64,
-      "summary": "operation contract error constructor을(를) 처리하는 함수입니다.",
+      "summary": "실제 조작 · 오류에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "class-method",
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
@@ -14171,10 +16765,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 691,
       "lineEnd": 704,
-      "summary": "acknowledge operation cancellation을(를) 처리하는 함수입니다.",
+      "summary": "실제 조작에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -14194,10 +16791,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 464,
       "lineEnd": 487,
-      "summary": "append event을(를) 처리하는 함수입니다.",
+      "summary": "이벤트에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -14216,10 +16816,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 242,
       "lineEnd": 284,
-      "summary": "assert executable operation을(를) 처리하는 함수입니다.",
+      "summary": "실제 조작 상태나 허용 여부를 허용 조건을 강제합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -14238,10 +16841,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 489,
       "lineEnd": 493,
-      "summary": "assert state을(를) 처리하는 함수입니다.",
+      "summary": "상태 상태나 허용 여부를 허용 조건을 강제합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -14260,10 +16866,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 110,
       "lineEnd": 113,
-      "summary": "bounded integer을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “직접 클릭·자동화·미래 AI가 실행하는 조작을 계획, 승인, 실행, 확인, 감사, 복구 순서로 제한합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -14282,10 +16891,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 620,
       "lineEnd": 634,
-      "summary": "complete operation execution을(를) 처리하는 함수입니다.",
+      "summary": "실제 조작에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -14305,10 +16917,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 748,
       "lineEnd": 767,
-      "summary": "complete operation recovery을(를) 처리하는 함수입니다.",
+      "summary": "실제 조작에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -14328,10 +16943,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 636,
       "lineEnd": 659,
-      "summary": "complete operation verification을(를) 처리하는 함수입니다.",
+      "summary": "실제 조작 · 실행 결과 확인에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -14351,10 +16969,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 350,
       "lineEnd": 401,
-      "summary": "operation plan을(를) 생성하는 함수입니다.",
+      "summary": "실제 조작 · 실행 계획 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -14374,10 +16995,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 495,
       "lineEnd": 561,
-      "summary": "operation run을(를) 생성하는 함수입니다.",
+      "summary": "실제 조작 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -14397,10 +17021,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 141,
       "lineEnd": 146,
-      "summary": "deep freeze을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “직접 클릭·자동화·미래 AI가 실행하는 조작을 계획, 승인, 실행, 확인, 감사, 복구 순서로 제한합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -14419,10 +17046,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 236,
       "lineEnd": 240,
-      "summary": "default risk을(를) 처리하는 함수입니다.",
+      "summary": "기본값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -14441,10 +17071,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 230,
       "lineEnd": 234,
-      "summary": "default side effect을(를) 처리하는 함수입니다.",
+      "summary": "기본값 · 연결 방향에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -14463,10 +17096,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 661,
       "lineEnd": 673,
-      "summary": "fail operation run을(를) 처리하는 함수입니다.",
+      "summary": "실제 조작에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -14486,10 +17122,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 77,
       "lineEnd": 83,
-      "summary": "non secret text을(를) 처리하는 함수입니다.",
+      "summary": "텍스트에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -14508,10 +17147,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 426,
       "lineEnd": 434,
-      "summary": "actor을(를) 정규화하는 함수입니다.",
+      "summary": "안전한 공통 형식 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -14530,10 +17172,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 436,
       "lineEnd": 462,
-      "summary": "event detail을(를) 정규화하는 함수입니다.",
+      "summary": "이벤트 · 상세 정보 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -14552,10 +17197,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 187,
       "lineEnd": 194,
-      "summary": "execution을(를) 정규화하는 함수입니다.",
+      "summary": "안전한 공통 형식 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -14574,10 +17222,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 196,
       "lineEnd": 203,
-      "summary": "idempotency을(를) 정규화하는 함수입니다.",
+      "summary": "안전한 공통 형식 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -14596,10 +17247,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 324,
       "lineEnd": 333,
-      "summary": "initiator을(를) 정규화하는 함수입니다.",
+      "summary": "안전한 공통 형식 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -14618,10 +17272,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 159,
       "lineEnd": 165,
-      "summary": "input을(를) 정규화하는 함수입니다.",
+      "summary": "입력 자료 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -14640,10 +17297,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 286,
       "lineEnd": 322,
-      "summary": "operation definition을(를) 정규화하는 함수입니다.",
+      "summary": "실제 조작 · 기능 정의 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -14663,10 +17323,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 216,
       "lineEnd": 228,
-      "summary": "recovery을(를) 정규화하는 함수입니다.",
+      "summary": "안전한 공통 형식 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -14685,10 +17348,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 335,
       "lineEnd": 348,
-      "summary": "scope을(를) 정규화하는 함수입니다.",
+      "summary": "안전한 공통 형식 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -14707,10 +17373,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 152,
       "lineEnd": 157,
-      "summary": "target을(를) 정규화하는 함수입니다.",
+      "summary": "대상 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -14729,10 +17398,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 205,
       "lineEnd": 214,
-      "summary": "verification을(를) 정규화하는 함수입니다.",
+      "summary": "실행 결과 확인 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -14751,10 +17423,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 167,
       "lineEnd": 185,
-      "summary": "write set을(를) 정규화하는 함수입니다.",
+      "summary": "안전한 공통 형식 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -14773,10 +17448,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 769,
       "lineEnd": 771,
-      "summary": "operation run is active을(를) 처리하는 함수입니다.",
+      "summary": "실제 조작 · 현재 선택에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -14796,10 +17474,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 773,
       "lineEnd": 775,
-      "summary": "operation run is terminal을(를) 처리하는 함수입니다.",
+      "summary": "실제 조작에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -14819,10 +17500,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 67,
       "lineEnd": 69,
-      "summary": "plain object을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “직접 클릭·자동화·미래 AI가 실행하는 조작을 계획, 승인, 실행, 확인, 감사, 복구 순서로 제한합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -14841,10 +17525,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 590,
       "lineEnd": 599,
-      "summary": "queue operation run을(를) 처리하는 함수입니다.",
+      "summary": "실제 조작에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -14864,10 +17551,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 563,
       "lineEnd": 588,
-      "summary": "operation approval을(를) 기록하는 함수입니다.",
+      "summary": "실제 조작 작업을 기록합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -14887,10 +17577,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 675,
       "lineEnd": 689,
-      "summary": "request operation cancellation을(를) 처리하는 함수입니다.",
+      "summary": "요청 · 실제 조작에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -14910,10 +17603,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 723,
       "lineEnd": 735,
-      "summary": "request operation recovery을(를) 처리하는 함수입니다.",
+      "summary": "요청 · 실제 조작에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -14933,10 +17629,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 706,
       "lineEnd": 721,
-      "summary": "retry operation run을(를) 처리하는 함수입니다.",
+      "summary": "실제 조작에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -14956,10 +17655,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 93,
       "lineEnd": 99,
-      "summary": "safe fingerprint을(를) 처리하는 함수입니다.",
+      "summary": "허용 범위로 제한 · 변경 식별값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -14978,10 +17680,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 85,
       "lineEnd": 91,
-      "summary": "safe id을(를) 처리하는 함수입니다.",
+      "summary": "허용 범위로 제한 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -15000,10 +17705,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 71,
       "lineEnd": 75,
-      "summary": "safe text을(를) 처리하는 함수입니다.",
+      "summary": "허용 범위로 제한 · 텍스트에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -15022,10 +17730,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 101,
       "lineEnd": 108,
-      "summary": "safe timestamp을(를) 처리하는 함수입니다.",
+      "summary": "허용 범위로 제한에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -15044,10 +17755,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 737,
       "lineEnd": 746,
-      "summary": "start operation recovery을(를) 처리하는 함수입니다.",
+      "summary": "실제 조작에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -15067,10 +17781,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 601,
       "lineEnd": 618,
-      "summary": "start operation run을(를) 처리하는 함수입니다.",
+      "summary": "실제 조작에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -15090,10 +17807,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 115,
       "lineEnd": 126,
-      "summary": "unique ids을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “직접 클릭·자동화·미래 AI가 실행하는 조작을 계획, 승인, 실행, 확인, 감사, 복구 순서로 제한합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -15112,10 +17832,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 128,
       "lineEnd": 139,
-      "summary": "unique texts을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “직접 클릭·자동화·미래 AI가 실행하는 조작을 계획, 승인, 실행, 확인, 감사, 복구 순서로 제한합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -15134,10 +17857,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 777,
       "lineEnd": 802,
-      "summary": "verify operation event chain을(를) 처리하는 함수입니다.",
+      "summary": "실제 조작 · 이벤트 상태나 허용 여부를 결과가 맞는지 확인합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -15157,10 +17883,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 403,
       "lineEnd": 424,
-      "summary": "verify operation plan을(를) 처리하는 함수입니다.",
+      "summary": "실제 조작 · 실행 계획 상태나 허용 여부를 결과가 맞는지 확인합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -15180,11 +17909,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 443,
       "lineEnd": 460,
-      "summary": "visit을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “직접 클릭·자동화·미래 AI가 실행하는 조작을 계획, 승인, 실행, 확인, 감사, 복구 순서로 제한합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
@@ -15202,10 +17934,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/operationLifecycle.js",
       "parentId": "file:shared/operationLifecycle.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 148,
       "lineEnd": 150,
-      "summary": "with fingerprint을(를) 처리하는 함수입니다.",
+      "summary": "변경 식별값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -15224,12 +17959,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/privacyCapabilities.js",
       "parentId": "file:shared/privacyCapabilities.js",
       "layer": "shared",
+      "area": "security-privacy",
       "lineStart": 23,
       "lineEnd": 32,
-      "summary": "assert privacy release gate을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 상태나 허용 여부를 허용 조건을 강제합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
+        "security-privacy",
         "shared"
       ],
       "details": {
@@ -15247,10 +17985,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/relationOntology.js",
       "parentId": "file:shared/relationOntology.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 147,
       "lineEnd": 158,
-      "summary": "edge relation data을(를) 생성하는 함수입니다.",
+      "summary": "연결선 · 관계 · 데이터 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -15270,10 +18011,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/relationOntology.js",
       "parentId": "file:shared/relationOntology.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 191,
       "lineEnd": 205,
-      "summary": "edge relation info을(를) 처리하는 함수입니다.",
+      "summary": "연결선 · 관계에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -15293,10 +18037,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/relationOntology.js",
       "parentId": "file:shared/relationOntology.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 163,
       "lineEnd": 189,
-      "summary": "edge relation provenance을(를) 처리하는 함수입니다.",
+      "summary": "연결선 · 관계에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -15316,10 +18063,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/relationOntology.js",
       "parentId": "file:shared/relationOntology.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 115,
       "lineEnd": 145,
-      "summary": "edge relation data을(를) 정규화하는 함수입니다.",
+      "summary": "연결선 · 관계 · 데이터 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -15339,10 +18089,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/relationOntology.js",
       "parentId": "file:shared/relationOntology.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 103,
       "lineEnd": 110,
-      "summary": "relation plain text을(를) 정규화하는 함수입니다.",
+      "summary": "관계 · 텍스트 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -15362,10 +18115,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/relationOntology.js",
       "parentId": "file:shared/relationOntology.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 99,
       "lineEnd": 101,
-      "summary": "relation confidence definition을(를) 처리하는 함수입니다.",
+      "summary": "관계 · 기능 정의에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -15385,10 +18141,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/relationOntology.js",
       "parentId": "file:shared/relationOntology.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 91,
       "lineEnd": 93,
-      "summary": "relation definition을(를) 처리하는 함수입니다.",
+      "summary": "관계 · 기능 정의에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -15408,10 +18167,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/relationOntology.js",
       "parentId": "file:shared/relationOntology.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 87,
       "lineEnd": 89,
-      "summary": "relation family definition을(를) 처리하는 함수입니다.",
+      "summary": "관계 · 기능 정의에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -15431,10 +18193,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/relationOntology.js",
       "parentId": "file:shared/relationOntology.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 95,
       "lineEnd": 97,
-      "summary": "relation source definition을(를) 처리하는 함수입니다.",
+      "summary": "관계 · 소스 코드 · 기능 정의에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -15454,13 +18219,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/sharePermissions.js",
       "parentId": "file:shared/sharePermissions.js",
       "layer": "shared",
+      "area": "sharing-collaboration",
       "lineStart": 15,
       "lineEnd": 32,
-      "summary": "compose share permission을(를) 처리하는 함수입니다.",
+      "summary": "공유 · 권한에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "shared"
+        "shared",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -15477,13 +18245,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/sharePermissions.js",
       "parentId": "file:shared/sharePermissions.js",
       "layer": "shared",
+      "area": "sharing-collaboration",
       "lineStart": 46,
       "lineEnd": 51,
-      "summary": "editable group id set을(를) 처리하는 함수입니다.",
+      "summary": "그룹 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "shared"
+        "shared",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -15500,13 +18271,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/sharePermissions.js",
       "parentId": "file:shared/sharePermissions.js",
       "layer": "shared",
+      "area": "sharing-collaboration",
       "lineStart": 53,
       "lineEnd": 64,
-      "summary": "editable node id set for permission을(를) 처리하는 함수입니다.",
+      "summary": "노드 · 식별자 · 권한에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "shared"
+        "shared",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -15523,13 +18297,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/sharePermissions.js",
       "parentId": "file:shared/sharePermissions.js",
       "layer": "shared",
+      "area": "sharing-collaboration",
       "lineStart": 3,
       "lineEnd": 13,
-      "summary": "share grant을(를) 정규화하는 함수입니다.",
+      "summary": "공유 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "shared"
+        "shared",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -15546,13 +18323,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/sharePermissions.js",
       "parentId": "file:shared/sharePermissions.js",
       "layer": "shared",
+      "area": "sharing-collaboration",
       "lineStart": 88,
       "lineEnd": 92,
-      "summary": "permission can create in group을(를) 처리하는 함수입니다.",
+      "summary": "권한 · 새 항목 · 그룹에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "shared"
+        "shared",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -15569,13 +18349,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/sharePermissions.js",
       "parentId": "file:shared/sharePermissions.js",
       "layer": "shared",
+      "area": "sharing-collaboration",
       "lineStart": 94,
       "lineEnd": 99,
-      "summary": "permission can edit edge을(를) 처리하는 함수입니다.",
+      "summary": "권한 · 연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "shared"
+        "shared",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -15592,13 +18375,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/sharePermissions.js",
       "parentId": "file:shared/sharePermissions.js",
       "layer": "shared",
+      "area": "sharing-collaboration",
       "lineStart": 82,
       "lineEnd": 86,
-      "summary": "permission can edit node structure을(를) 처리하는 함수입니다.",
+      "summary": "권한 · 노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "shared"
+        "shared",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -15615,13 +18401,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/sharePermissions.js",
       "parentId": "file:shared/sharePermissions.js",
       "layer": "shared",
+      "area": "sharing-collaboration",
       "lineStart": 34,
       "lineEnd": 44,
-      "summary": "permission from access을(를) 처리하는 함수입니다.",
+      "summary": "권한 · 접근 권한에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "shared"
+        "shared",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -15638,13 +18427,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/sharePermissions.js",
       "parentId": "file:shared/sharePermissions.js",
       "layer": "shared",
+      "area": "sharing-collaboration",
       "lineStart": 66,
       "lineEnd": 80,
-      "summary": "visible node id set for permission을(를) 처리하는 함수입니다.",
+      "summary": "볼 수 있는 범위 · 노드 · 식별자 · 권한에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "shared"
+        "shared",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -15661,12 +18453,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/sourceTwin.js",
       "parentId": "file:shared/sourceTwin.js",
       "layer": "shared",
-      "lineStart": 158,
-      "lineEnd": 171,
-      "summary": "changed entities을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 167,
+      "lineEnd": 180,
+      "summary": "이 파일이 맡은 “코드 구조 관점, 검색, GitHub 코드 링크와 배포별 상태 스냅샷 형식을 정의합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -15683,12 +18478,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/sourceTwin.js",
       "parentId": "file:shared/sourceTwin.js",
       "layer": "shared",
-      "lineStart": 65,
-      "lineEnd": 73,
-      "summary": "compact entity fingerprints을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 74,
+      "lineEnd": 82,
+      "summary": "필요한 정보만 남기기 · 시스템 실체에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -15705,13 +18503,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/sourceTwin.js",
       "parentId": "file:shared/sourceTwin.js",
       "layer": "shared",
-      "lineStart": 182,
-      "lineEnd": 208,
-      "summary": "source twin snapshots을(를) 비교하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 191,
+      "lineEnd": 217,
+      "summary": "소스 코드 · 디지털 트윈 상태나 허용 여부를 서로 비교합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -15728,13 +18529,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/sourceTwin.js",
       "parentId": "file:shared/sourceTwin.js",
       "layer": "shared",
-      "lineStart": 82,
-      "lineEnd": 156,
-      "summary": "source twin snapshot을(를) 생성하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 91,
+      "lineEnd": 165,
+      "summary": "소스 코드 · 디지털 트윈 · 상태 스냅샷 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -15751,12 +18555,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/sourceTwin.js",
       "parentId": "file:shared/sourceTwin.js",
       "layer": "shared",
-      "lineStart": 173,
-      "lineEnd": 180,
-      "summary": "metric changes을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 182,
+      "lineEnd": 189,
+      "summary": "운영 수치 · 변경 내역에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -15773,12 +18580,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/sourceTwin.js",
       "parentId": "file:shared/sourceTwin.js",
       "layer": "shared",
-      "lineStart": 75,
-      "lineEnd": 80,
-      "summary": "metrics을(를) 정규화하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 84,
+      "lineEnd": 89,
+      "summary": "운영 수치 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -15795,12 +18605,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/sourceTwin.js",
       "parentId": "file:shared/sourceTwin.js",
       "layer": "shared",
+      "area": "source-code-twin",
       "lineStart": 19,
       "lineEnd": 21,
-      "summary": "plain object을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “코드 구조 관점, 검색, GitHub 코드 링크와 배포별 상태 스냅샷 형식을 정의합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -15817,12 +18630,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/sourceTwin.js",
       "parentId": "file:shared/sourceTwin.js",
       "layer": "shared",
-      "lineStart": 169,
-      "lineEnd": 169,
-      "summary": "sort을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 178,
+      "lineEnd": 178,
+      "summary": "이 파일이 맡은 “코드 구조 관점, 검색, GitHub 코드 링크와 배포별 상태 스냅샷 형식을 정의합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "arrow",
@@ -15839,13 +18655,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/sourceTwin.js",
       "parentId": "file:shared/sourceTwin.js",
       "layer": "shared",
-      "lineStart": 56,
-      "lineEnd": 63,
-      "summary": "source twin code url을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 65,
+      "lineEnd": 72,
+      "summary": "소스 코드 · 디지털 트윈 · 코드 · 웹 주소에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -15857,18 +18676,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:shared/sourceTwin.js:sourceTwinEntities",
       "kind": "function",
       "label": "sourceTwinEntities",
-      "fingerprint": "277c354b41178d4cfb40",
+      "fingerprint": "c23e5ba6682f540cf88d",
       "name": "sourceTwinEntities",
       "path": "shared/sourceTwin.js",
       "parentId": "file:shared/sourceTwin.js",
       "layer": "shared",
+      "area": "source-code-twin",
       "lineStart": 39,
-      "lineEnd": 54,
-      "summary": "source twin entities을(를) 처리하는 함수입니다.",
+      "lineEnd": 63,
+      "summary": "소스 코드 · 디지털 트윈에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -15885,13 +18707,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/sourceTwin.js",
       "parentId": "file:shared/sourceTwin.js",
       "layer": "shared",
+      "area": "source-code-twin",
       "lineStart": 35,
       "lineEnd": 37,
-      "summary": "source twin entity map을(를) 처리하는 함수입니다.",
+      "summary": "소스 코드 · 디지털 트윈 · 시스템 실체 · 시스템 지도에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -15908,13 +18733,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/sourceTwin.js",
       "parentId": "file:shared/sourceTwin.js",
       "layer": "shared",
+      "area": "source-code-twin",
       "lineStart": 31,
       "lineEnd": 33,
-      "summary": "source twin fingerprint을(를) 처리하는 함수입니다.",
+      "summary": "소스 코드 · 디지털 트윈 · 변경 식별값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -15931,12 +18759,144 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/sourceTwin.js",
       "parentId": "file:shared/sourceTwin.js",
       "layer": "shared",
+      "area": "source-code-twin",
       "lineStart": 23,
       "lineEnd": 29,
-      "summary": "stable value을(를) 처리하는 함수입니다.",
+      "summary": "값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/sourceTwinSemantics.js:groupSourceTwinEntitiesByArea",
+      "kind": "function",
+      "label": "groupSourceTwinEntitiesByArea",
+      "fingerprint": "7254ebd2a22f6add1c19",
+      "name": "groupSourceTwinEntitiesByArea",
+      "path": "shared/sourceTwinSemantics.js",
+      "parentId": "file:shared/sourceTwinSemantics.js",
+      "layer": "shared",
+      "area": "source-code-twin",
+      "lineStart": 122,
+      "lineEnd": 141,
+      "summary": "그룹 · 소스 코드 · 디지털 트윈에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "tags": [
+        "exported",
+        "function",
+        "shared",
+        "source-code-twin"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/sourceTwinSemantics.js:sourceTwinAreaCatalog",
+      "kind": "function",
+      "label": "sourceTwinAreaCatalog",
+      "fingerprint": "89b5545cf2436988d9b6",
+      "name": "sourceTwinAreaCatalog",
+      "path": "shared/sourceTwinSemantics.js",
+      "parentId": "file:shared/sourceTwinSemantics.js",
+      "layer": "shared",
+      "area": "source-code-twin",
+      "lineStart": 115,
+      "lineEnd": 120,
+      "summary": "소스 코드 · 디지털 트윈 · 조회 가능 정보 목록에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "tags": [
+        "exported",
+        "function",
+        "shared",
+        "source-code-twin"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/sourceTwinSemantics.js:sourceTwinAreaDefinition",
+      "kind": "function",
+      "label": "sourceTwinAreaDefinition",
+      "fingerprint": "21a5f5676589d5bff159",
+      "name": "sourceTwinAreaDefinition",
+      "path": "shared/sourceTwinSemantics.js",
+      "parentId": "file:shared/sourceTwinSemantics.js",
+      "layer": "shared",
+      "area": "source-code-twin",
+      "lineStart": 97,
+      "lineEnd": 113,
+      "summary": "소스 코드 · 디지털 트윈 · 기능 정의에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "tags": [
+        "exported",
+        "function",
+        "shared",
+        "source-code-twin"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/sourceTwinSemantics.js:sourceTwinAreaId",
+      "kind": "function",
+      "label": "sourceTwinAreaId",
+      "fingerprint": "1db0c84b69401ee597d6",
+      "name": "sourceTwinAreaId",
+      "path": "shared/sourceTwinSemantics.js",
+      "parentId": "file:shared/sourceTwinSemantics.js",
+      "layer": "shared",
+      "area": "source-code-twin",
+      "lineStart": 93,
+      "lineEnd": 95,
+      "summary": "소스 코드 · 디지털 트윈 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "tags": [
+        "exported",
+        "function",
+        "shared",
+        "source-code-twin"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/sourceTwinSemantics.js:text",
+      "kind": "function",
+      "label": "text",
+      "fingerprint": "3465b0866b4c1fd8eeb2",
+      "name": "text",
+      "path": "shared/sourceTwinSemantics.js",
+      "parentId": "file:shared/sourceTwinSemantics.js",
+      "layer": "shared",
+      "area": "source-code-twin",
+      "lineStart": 89,
+      "lineEnd": 91,
+      "summary": "텍스트에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "tags": [
+        "function",
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -15953,11 +18913,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemObservationCatalog.js",
       "parentId": "file:shared/systemObservationCatalog.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 71,
       "lineEnd": 75,
-      "summary": "connector field을(를) 처리하는 함수입니다.",
+      "summary": "로컬 커넥터에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
@@ -15975,10 +18938,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemObservationCatalog.js",
       "parentId": "file:shared/systemObservationCatalog.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 50,
       "lineEnd": 62,
-      "summary": "field을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “각 시스템 파츠에서 조회 가능한 운영 정보, 보호되는 정보와 추가 연결이 필요한 정보를 정의합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -15997,11 +18963,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemObservationCatalog.js",
       "parentId": "file:shared/systemObservationCatalog.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 64,
       "lineEnd": 69,
-      "summary": "protected field을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “각 시스템 파츠에서 조회 가능한 운영 정보, 보호되는 정보와 추가 연결이 필요한 정보를 정의합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
@@ -16019,10 +18988,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemObservationCatalog.js",
       "parentId": "file:shared/systemObservationCatalog.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 38,
       "lineEnd": 40,
-      "summary": "system observation availability definition을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 운영 관측 · 기능 정의에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -16042,10 +19014,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemObservationCatalog.js",
       "parentId": "file:shared/systemObservationCatalog.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 152,
       "lineEnd": 154,
-      "summary": "system observation catalog for capability을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 운영 관측 · 조회 가능 정보 목록에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -16065,10 +19040,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemObservationCatalog.js",
       "parentId": "file:shared/systemObservationCatalog.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 42,
       "lineEnd": 44,
-      "summary": "system observation category definition을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 운영 관측 · 기능 정의에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -16088,10 +19066,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemObservationCatalog.js",
       "parentId": "file:shared/systemObservationCatalog.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 46,
       "lineEnd": 48,
-      "summary": "system observation refresh definition을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 운영 관측 · 기능 정의에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -16111,10 +19092,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemOntology.js",
       "parentId": "file:shared/systemOntology.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 82,
       "lineEnd": 97,
-      "summary": "system node data을(를) 생성하는 함수입니다.",
+      "summary": "시스템 · 노드 · 데이터 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -16134,10 +19118,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemOntology.js",
       "parentId": "file:shared/systemOntology.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 63,
       "lineEnd": 80,
-      "summary": "system node data을(를) 정규화하는 함수입니다.",
+      "summary": "시스템 · 노드 · 데이터 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -16157,10 +19144,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemOntology.js",
       "parentId": "file:shared/systemOntology.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 54,
       "lineEnd": 61,
-      "summary": "system plain text을(를) 정규화하는 함수입니다.",
+      "summary": "시스템 · 텍스트 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -16180,10 +19170,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemOntology.js",
       "parentId": "file:shared/systemOntology.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 50,
       "lineEnd": 52,
-      "summary": "system kind definition을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 기능 정의에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -16203,10 +19196,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemOntology.js",
       "parentId": "file:shared/systemOntology.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 103,
       "lineEnd": 119,
-      "summary": "system node reality을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -16226,10 +19222,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemPartOntology.js",
       "parentId": "file:shared/systemPartOntology.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 127,
       "lineEnd": 129,
-      "summary": "detach system part bindings을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 시스템 파츠에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -16249,10 +19248,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemPartOntology.js",
       "parentId": "file:shared/systemPartOntology.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 55,
       "lineEnd": 71,
-      "summary": "digital twin binding을(를) 정규화하는 함수입니다.",
+      "summary": "디지털 트윈 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -16271,10 +19273,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemPartOntology.js",
       "parentId": "file:shared/systemPartOntology.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 95,
       "lineEnd": 112,
-      "summary": "system part을(를) 정규화하는 함수입니다.",
+      "summary": "시스템 · 시스템 파츠 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -16294,10 +19299,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemPartOntology.js",
       "parentId": "file:shared/systemPartOntology.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 114,
       "lineEnd": 125,
-      "summary": "system parts을(를) 정규화하는 함수입니다.",
+      "summary": "시스템 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -16317,10 +19325,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemPartOntology.js",
       "parentId": "file:shared/systemPartOntology.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 50,
       "lineEnd": 53,
-      "summary": "normalized id을(를) 처리하는 함수입니다.",
+      "summary": "식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -16339,10 +19350,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemPartOntology.js",
       "parentId": "file:shared/systemPartOntology.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 40,
       "lineEnd": 42,
-      "summary": "plain object을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “시스템 노드 파츠의 종류, 연결점과 운영 상태 필드를 공통 규칙으로 정의합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -16361,10 +19375,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemPartOntology.js",
       "parentId": "file:shared/systemPartOntology.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 44,
       "lineEnd": 48,
-      "summary": "plain text을(를) 처리하는 함수입니다.",
+      "summary": "텍스트에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -16383,10 +19400,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemPartOntology.js",
       "parentId": "file:shared/systemPartOntology.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 77,
       "lineEnd": 81,
-      "summary": "system part contains secret literal을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 시스템 파츠에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -16406,10 +19426,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemPartOntology.js",
       "parentId": "file:shared/systemPartOntology.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 73,
       "lineEnd": 75,
-      "summary": "system part kind definition을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 시스템 파츠 · 기능 정의에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -16429,10 +19452,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemPartOntology.js",
       "parentId": "file:shared/systemPartOntology.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 83,
       "lineEnd": 93,
-      "summary": "system part input을(를) 검증하는 함수입니다.",
+      "summary": "시스템 · 시스템 파츠 · 입력 자료 상태나 허용 여부를 규칙에 맞는지 검사합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -16452,11 +19478,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemRuntime.js",
       "parentId": "file:shared/systemRuntime.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 214,
       "lineEnd": 218,
-      "summary": "system runtime contract error constructor을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 실제 운영 상태 · 오류에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "class-method",
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
@@ -16474,11 +19503,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemRuntime.js",
       "parentId": "file:shared/systemRuntime.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 27,
       "lineEnd": 42,
-      "summary": "capability을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “운영 상태 검사 요청과 결과, 관측 신선도와 LIVE 판정 기준을 표준화합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
@@ -16496,10 +19528,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemRuntime.js",
       "parentId": "file:shared/systemRuntime.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 271,
       "lineEnd": 283,
-      "summary": "catalog field base을(를) 처리하는 함수입니다.",
+      "summary": "조회 가능 정보 목록 · 기준에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -16518,11 +19553,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemRuntime.js",
       "parentId": "file:shared/systemRuntime.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 439,
       "lineEnd": 442,
-      "summary": "count을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “운영 상태 검사 요청과 결과, 관측 신선도와 LIVE 판정 기준을 표준화합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
@@ -16540,10 +19578,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemRuntime.js",
       "parentId": "file:shared/systemRuntime.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 285,
       "lineEnd": 292,
-      "summary": "default catalog entry을(를) 처리하는 함수입니다.",
+      "summary": "기본값 · 조회 가능 정보 목록에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -16562,10 +19603,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemRuntime.js",
       "parentId": "file:shared/systemRuntime.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 496,
       "lineEnd": 507,
-      "summary": "failed system runtime result을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 실제 운영 상태 · 결과에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -16585,10 +19629,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemRuntime.js",
       "parentId": "file:shared/systemRuntime.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 312,
       "lineEnd": 326,
-      "summary": "metric group observations을(를) 처리하는 함수입니다.",
+      "summary": "운영 수치 · 그룹에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -16607,10 +19654,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemRuntime.js",
       "parentId": "file:shared/systemRuntime.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 197,
       "lineEnd": 203,
-      "summary": "non secret text을(를) 처리하는 함수입니다.",
+      "summary": "텍스트에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -16629,10 +19679,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemRuntime.js",
       "parentId": "file:shared/systemRuntime.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 328,
       "lineEnd": 368,
-      "summary": "observation catalog을(를) 정규화하는 함수입니다.",
+      "summary": "운영 관측 · 조회 가능 정보 목록 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -16651,10 +19704,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemRuntime.js",
       "parentId": "file:shared/systemRuntime.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 262,
       "lineEnd": 269,
-      "summary": "system runtime batch request을(를) 정규화하는 함수입니다.",
+      "summary": "시스템 · 실제 운영 상태 · 요청 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -16674,10 +19730,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemRuntime.js",
       "parentId": "file:shared/systemRuntime.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 253,
       "lineEnd": 260,
-      "summary": "system runtime canvas request을(를) 정규화하는 함수입니다.",
+      "summary": "시스템 · 실제 운영 상태 · 캔버스 · 요청 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -16697,10 +19756,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemRuntime.js",
       "parentId": "file:shared/systemRuntime.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 480,
       "lineEnd": 494,
-      "summary": "system runtime records을(를) 정규화하는 함수입니다.",
+      "summary": "시스템 · 실제 운영 상태 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -16720,10 +19782,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemRuntime.js",
       "parentId": "file:shared/systemRuntime.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 240,
       "lineEnd": 251,
-      "summary": "system runtime request을(를) 정규화하는 함수입니다.",
+      "summary": "시스템 · 실제 운영 상태 · 요청 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -16743,10 +19808,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemRuntime.js",
       "parentId": "file:shared/systemRuntime.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 377,
       "lineEnd": 478,
-      "summary": "system runtime result을(를) 정규화하는 함수입니다.",
+      "summary": "시스템 · 실제 운영 상태 · 결과 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -16766,10 +19834,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemRuntime.js",
       "parentId": "file:shared/systemRuntime.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 294,
       "lineEnd": 310,
-      "summary": "normalized observation value을(를) 처리하는 함수입니다.",
+      "summary": "운영 관측 · 값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -16788,10 +19859,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemRuntime.js",
       "parentId": "file:shared/systemRuntime.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 187,
       "lineEnd": 189,
-      "summary": "plain object을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “운영 상태 검사 요청과 결과, 관측 신선도와 LIVE 판정 기준을 표준화합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -16810,10 +19884,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemRuntime.js",
       "parentId": "file:shared/systemRuntime.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 191,
       "lineEnd": 195,
-      "summary": "plain text을(를) 처리하는 함수입니다.",
+      "summary": "텍스트에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -16832,10 +19909,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemRuntime.js",
       "parentId": "file:shared/systemRuntime.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 205,
       "lineEnd": 211,
-      "summary": "required id을(를) 처리하는 함수입니다.",
+      "summary": "식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -16854,10 +19934,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemRuntime.js",
       "parentId": "file:shared/systemRuntime.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 225,
       "lineEnd": 227,
-      "summary": "system capability operation definition을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 실제 조작 · 기능 정의에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -16877,10 +19960,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemRuntime.js",
       "parentId": "file:shared/systemRuntime.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 509,
       "lineEnd": 533,
-      "summary": "system part runtime reality을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 시스템 파츠 · 실제 운영 상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -16900,10 +19986,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemRuntime.js",
       "parentId": "file:shared/systemRuntime.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 221,
       "lineEnd": 223,
-      "summary": "system runtime capability definition을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 실제 운영 상태 · 기능 정의에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -16923,10 +20012,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemRuntime.js",
       "parentId": "file:shared/systemRuntime.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 229,
       "lineEnd": 238,
-      "summary": "system runtime capability for part을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 실제 운영 상태 · 시스템 파츠에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -16946,10 +20038,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemRuntime.js",
       "parentId": "file:shared/systemRuntime.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 370,
       "lineEnd": 375,
-      "summary": "system runtime catalog for result을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 실제 운영 상태 · 조회 가능 정보 목록 · 결과에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -16969,10 +20064,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/systemRuntime.js",
       "parentId": "file:shared/systemRuntime.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 535,
       "lineEnd": 537,
-      "summary": "system runtime path edge ids을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 실제 운영 상태 · 연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -16992,12 +20090,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/trustTopology.js",
       "parentId": "file:shared/trustTopology.js",
       "layer": "shared",
+      "area": "security-privacy",
       "lineStart": 112,
       "lineEnd": 163,
-      "summary": "analyze trust boundary을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “로컬·클라우드·외부 SaaS 같은 신뢰 영역과 그 경계를 통과하는 게이트웨이를 검사합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
+        "security-privacy",
         "shared"
       ],
       "details": {
@@ -17015,12 +20116,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/trustTopology.js",
       "parentId": "file:shared/trustTopology.js",
       "layer": "shared",
+      "area": "security-privacy",
       "lineStart": 87,
       "lineEnd": 110,
-      "summary": "trust gateway을(를) 정규화하는 함수입니다.",
+      "summary": "신뢰 경계 통로 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
+        "security-privacy",
         "shared"
       ],
       "details": {
@@ -17038,12 +20142,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/trustTopology.js",
       "parentId": "file:shared/trustTopology.js",
       "layer": "shared",
+      "area": "security-privacy",
       "lineStart": 73,
       "lineEnd": 85,
-      "summary": "trust zone을(를) 정규화하는 함수입니다.",
+      "summary": "신뢰 영역 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
+        "security-privacy",
         "shared"
       ],
       "details": {
@@ -17061,11 +20168,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/trustTopology.js",
       "parentId": "file:shared/trustTopology.js",
       "layer": "shared",
+      "area": "security-privacy",
       "lineStart": 50,
       "lineEnd": 52,
-      "summary": "plain object을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “로컬·클라우드·외부 SaaS 같은 신뢰 영역과 그 경계를 통과하는 게이트웨이를 검사합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
+        "security-privacy",
         "shared"
       ],
       "details": {
@@ -17083,11 +20193,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/trustTopology.js",
       "parentId": "file:shared/trustTopology.js",
       "layer": "shared",
+      "area": "security-privacy",
       "lineStart": 54,
       "lineEnd": 58,
-      "summary": "plain text을(를) 처리하는 함수입니다.",
+      "summary": "텍스트에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
+        "security-privacy",
         "shared"
       ],
       "details": {
@@ -17105,11 +20218,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/trustTopology.js",
       "parentId": "file:shared/trustTopology.js",
       "layer": "shared",
+      "area": "security-privacy",
       "lineStart": 60,
       "lineEnd": 63,
-      "summary": "safe id을(를) 처리하는 함수입니다.",
+      "summary": "허용 범위로 제한 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
+        "security-privacy",
         "shared"
       ],
       "details": {
@@ -17127,11 +20243,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/trustTopology.js",
       "parentId": "file:shared/trustTopology.js",
       "layer": "shared",
+      "area": "security-privacy",
       "lineStart": 65,
       "lineEnd": 71,
-      "summary": "unique text list을(를) 처리하는 함수입니다.",
+      "summary": "텍스트 · 목록에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "function",
+        "security-privacy",
         "shared"
       ],
       "details": {
@@ -17149,11 +20268,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinAdapterContract.js",
       "parentId": "file:shared/twinAdapterContract.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 29,
       "lineEnd": 33,
-      "summary": "twin adapter contract error constructor을(를) 처리하는 함수입니다.",
+      "summary": "디지털 트윈 · 오류에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "class-method",
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
@@ -17171,10 +20293,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinAdapterContract.js",
       "parentId": "file:shared/twinAdapterContract.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 46,
       "lineEnd": 52,
-      "summary": "adapter id을(를) 처리하는 함수입니다.",
+      "summary": "식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17193,10 +20318,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinAdapterContract.js",
       "parentId": "file:shared/twinAdapterContract.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 119,
       "lineEnd": 129,
-      "summary": "clone serializable을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “새 프로그램 종류를 연결하는 어댑터가 제공해야 할 발견·권한·조작 계약을 검증합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17215,10 +20343,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinAdapterContract.js",
       "parentId": "file:shared/twinAdapterContract.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 138,
       "lineEnd": 181,
-      "summary": "twin adapter descriptor을(를) 생성하는 함수입니다.",
+      "summary": "디지털 트윈 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -17238,10 +20369,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinAdapterContract.js",
       "parentId": "file:shared/twinAdapterContract.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 183,
       "lineEnd": 194,
-      "summary": "twin adapter registration을(를) 생성하는 함수입니다.",
+      "summary": "디지털 트윈 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -17261,10 +20395,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinAdapterContract.js",
       "parentId": "file:shared/twinAdapterContract.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 244,
       "lineEnd": 269,
-      "summary": "twin adapter registry을(를) 생성하는 함수입니다.",
+      "summary": "디지털 트윈 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -17284,11 +20421,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinAdapterContract.js",
       "parentId": "file:shared/twinAdapterContract.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 257,
       "lineEnd": 267,
-      "summary": "twin adapter registry inspect을(를) 생성하는 비동기 함수입니다.",
+      "summary": "디지털 트윈 · 시스템 검사 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
+        "digital-twin-engine",
         "method",
         "shared"
       ],
@@ -17307,10 +20447,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinAdapterContract.js",
       "parentId": "file:shared/twinAdapterContract.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 131,
       "lineEnd": 136,
-      "summary": "deep freeze을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “새 프로그램 종류를 연결하는 어댑터가 제공해야 할 발견·권한·조작 계약을 검증합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17329,10 +20472,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinAdapterContract.js",
       "parentId": "file:shared/twinAdapterContract.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 78,
       "lineEnd": 96,
-      "summary": "data classes을(를) 정규화하는 함수입니다.",
+      "summary": "데이터 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17351,10 +20497,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinAdapterContract.js",
       "parentId": "file:shared/twinAdapterContract.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 98,
       "lineEnd": 117,
-      "summary": "permissions을(를) 정규화하는 함수입니다.",
+      "summary": "안전한 공통 형식 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17373,10 +20522,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinAdapterContract.js",
       "parentId": "file:shared/twinAdapterContract.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 36,
       "lineEnd": 38,
-      "summary": "plain object을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “새 프로그램 종류를 연결하는 어댑터가 제공해야 할 발견·권한·조작 계약을 검증합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17395,10 +20547,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinAdapterContract.js",
       "parentId": "file:shared/twinAdapterContract.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 54,
       "lineEnd": 60,
-      "summary": "positive integer을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “새 프로그램 종류를 연결하는 어댑터가 제공해야 할 발견·권한·조작 계약을 검증합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17417,10 +20572,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinAdapterContract.js",
       "parentId": "file:shared/twinAdapterContract.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 40,
       "lineEnd": 44,
-      "summary": "safe text을(를) 처리하는 함수입니다.",
+      "summary": "허용 범위로 제한 · 텍스트에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17439,10 +20597,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinAdapterContract.js",
       "parentId": "file:shared/twinAdapterContract.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 62,
       "lineEnd": 76,
-      "summary": "unique ids을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “새 프로그램 종류를 연결하는 어댑터가 제공해야 할 발견·권한·조작 계약을 검증합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17461,10 +20622,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinAdapterContract.js",
       "parentId": "file:shared/twinAdapterContract.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 196,
       "lineEnd": 208,
-      "summary": "loaded adapter을(를) 검증하는 함수입니다.",
+      "summary": "유효성 검사 상태나 허용 여부를 규칙에 맞는지 검사합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17483,10 +20647,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinAdapterContract.js",
       "parentId": "file:shared/twinAdapterContract.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 210,
       "lineEnd": 242,
-      "summary": "twin adapter review을(를) 검증하는 함수입니다.",
+      "summary": "디지털 트윈 상태나 허용 여부를 규칙에 맞는지 검사합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -17506,11 +20673,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 55,
       "lineEnd": 59,
-      "summary": "twin build error constructor을(를) 처리하는 함수입니다.",
+      "summary": "디지털 트윈 · 트윈 구성 · 오류에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "class-method",
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
@@ -17528,10 +20698,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 638,
       "lineEnd": 681,
-      "summary": "twin build을(를) 생성하는 함수입니다.",
+      "summary": "디지털 트윈 · 트윈 구성 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -17551,10 +20724,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 123,
       "lineEnd": 128,
-      "summary": "deep freeze을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “서로 다른 앱에서 발견한 시스템을 엔티티·파츠·관계·신뢰 경계·증거라는 공통 형식으로 정규화합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17573,10 +20749,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 88,
       "lineEnd": 91,
-      "summary": "finite number을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “서로 다른 앱에서 발견한 시스템을 엔티티·파츠·관계·신뢰 경계·증거라는 공통 형식으로 정규화합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17595,10 +20774,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 683,
       "lineEnd": 736,
-      "summary": "migrate twin build을(를) 처리하는 함수입니다.",
+      "summary": "디지털 트윈 · 트윈 구성에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -17618,10 +20800,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 212,
       "lineEnd": 229,
-      "summary": "binding을(를) 정규화하는 함수입니다.",
+      "summary": "안전한 공통 형식 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17640,10 +20825,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 401,
       "lineEnd": 415,
-      "summary": "control을(를) 정규화하는 함수입니다.",
+      "summary": "안전한 공통 형식 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17662,10 +20850,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 326,
       "lineEnd": 338,
-      "summary": "data class을(를) 정규화하는 함수입니다.",
+      "summary": "데이터 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17684,10 +20875,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 255,
       "lineEnd": 261,
-      "summary": "endpoint을(를) 정규화하는 함수입니다.",
+      "summary": "안전한 공통 형식 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17706,10 +20900,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 189,
       "lineEnd": 210,
-      "summary": "entity을(를) 정규화하는 함수입니다.",
+      "summary": "시스템 실체 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17728,10 +20925,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 384,
       "lineEnd": 399,
-      "summary": "event을(를) 정규화하는 함수입니다.",
+      "summary": "이벤트 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17750,10 +20950,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 150,
       "lineEnd": 170,
-      "summary": "evidence을(를) 정규화하는 함수입니다.",
+      "summary": "근거 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17772,10 +20975,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 303,
       "lineEnd": 310,
-      "summary": "gateway을(를) 정규화하는 함수입니다.",
+      "summary": "신뢰 경계 통로 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17794,10 +21000,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 358,
       "lineEnd": 382,
-      "summary": "observation을(를) 정규화하는 함수입니다.",
+      "summary": "운영 관측 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17816,10 +21025,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 437,
       "lineEnd": 443,
-      "summary": "operation을(를) 정규화하는 함수입니다.",
+      "summary": "실제 조작 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17838,10 +21050,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 231,
       "lineEnd": 253,
-      "summary": "part을(를) 정규화하는 함수입니다.",
+      "summary": "시스템 파츠 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17860,10 +21075,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 172,
       "lineEnd": 187,
-      "summary": "placement을(를) 정규화하는 함수입니다.",
+      "summary": "안전한 공통 형식 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17882,10 +21100,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 340,
       "lineEnd": 356,
-      "summary": "policy을(를) 정규화하는 함수입니다.",
+      "summary": "안전한 공통 형식 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17904,10 +21125,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 312,
       "lineEnd": 317,
-      "summary": "record target을(를) 정규화하는 함수입니다.",
+      "summary": "대상 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17926,10 +21150,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 263,
       "lineEnd": 292,
-      "summary": "relation을(를) 정규화하는 함수입니다.",
+      "summary": "관계 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17948,10 +21175,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 130,
       "lineEnd": 148,
-      "summary": "source을(를) 정규화하는 함수입니다.",
+      "summary": "소스 코드 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17970,10 +21200,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 417,
       "lineEnd": 435,
-      "summary": "threat을(를) 정규화하는 함수입니다.",
+      "summary": "안전한 공통 형식 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -17992,10 +21225,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 319,
       "lineEnd": 324,
-      "summary": "timestamp을(를) 정규화하는 함수입니다.",
+      "summary": "안전한 공통 형식 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18014,10 +21250,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 294,
       "lineEnd": 301,
-      "summary": "zone을(를) 정규화하는 함수입니다.",
+      "summary": "신뢰 영역 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18036,10 +21275,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 62,
       "lineEnd": 64,
-      "summary": "plain object을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “서로 다른 앱에서 발견한 시스템을 엔티티·파츠·관계·신뢰 경계·증거라는 공통 형식으로 정규화합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18058,10 +21300,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 80,
       "lineEnd": 86,
-      "summary": "positive integer을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “서로 다른 앱에서 발견한 시스템을 엔티티·파츠·관계·신뢰 경계·증거라는 공통 형식으로 정규화합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18080,10 +21325,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 106,
       "lineEnd": 117,
-      "summary": "list을(를) 기록하는 함수입니다.",
+      "summary": "목록 작업을 기록합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18102,11 +21350,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 577,
       "lineEnd": 583,
-      "summary": "require data classes을(를) 처리하는 함수입니다.",
+      "summary": "데이터에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
@@ -18124,11 +21375,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 474,
       "lineEnd": 480,
-      "summary": "require evidence을(를) 처리하는 함수입니다.",
+      "summary": "근거에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
@@ -18146,10 +21400,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 445,
       "lineEnd": 636,
-      "summary": "require references을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “서로 다른 앱에서 발견한 시스템을 엔티티·파츠·관계·신뢰 경계·증거라는 공통 형식으로 정규화합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18168,11 +21425,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 572,
       "lineEnd": 576,
-      "summary": "require target을(를) 처리하는 함수입니다.",
+      "summary": "대상에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
@@ -18190,11 +21450,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 457,
       "lineEnd": 462,
-      "summary": "require unique placement을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “서로 다른 앱에서 발견한 시스템을 엔티티·파츠·관계·신뢰 경계·증거라는 공통 형식으로 정규화합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
@@ -18212,10 +21475,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 72,
       "lineEnd": 78,
-      "summary": "safe id을(를) 처리하는 함수입니다.",
+      "summary": "허용 범위로 제한 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18234,10 +21500,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 66,
       "lineEnd": 70,
-      "summary": "safe text을(를) 처리하는 함수입니다.",
+      "summary": "허용 범위로 제한 · 텍스트에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18256,10 +21525,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 93,
       "lineEnd": 104,
-      "summary": "unique ids을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “서로 다른 앱에서 발견한 시스템을 엔티티·파츠·관계·신뢰 경계·증거라는 공통 형식으로 정규화합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18278,10 +21550,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuild.js",
       "parentId": "file:shared/twinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 119,
       "lineEnd": 121,
-      "summary": "with fingerprint을(를) 처리하는 함수입니다.",
+      "summary": "변경 식별값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18300,11 +21575,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 28,
       "lineEnd": 37,
-      "summary": "add을(를) 추가하는 함수입니다.",
+      "summary": "이 기능 항목이나 구조를 추가합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
@@ -18322,10 +21600,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 42,
       "lineEnd": 54,
-      "summary": "binding from part을(를) 처리하는 함수입니다.",
+      "summary": "시스템 파츠에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18344,10 +21625,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 25,
       "lineEnd": 40,
-      "summary": "evidence registry을(를) 생성하는 함수입니다.",
+      "summary": "근거 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18366,10 +21650,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 61,
       "lineEnd": 204,
-      "summary": "twin build from canvas template을(를) 생성하는 함수입니다.",
+      "summary": "디지털 트윈 · 트윈 구성 · 캔버스 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -18389,10 +21676,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 294,
       "lineEnd": 299,
-      "summary": "endpoint handle을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “표준 트윈의 엔티티·파츠·관계를 실제 캔버스 노드와 연결선으로 바꾸고 다시 대응시킵니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18411,10 +21701,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 211,
       "lineEnd": 214,
-      "summary": "entity parent node id을(를) 처리하는 함수입니다.",
+      "summary": "시스템 실체 · 상위 항목 · 노드 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18433,10 +21726,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 216,
       "lineEnd": 219,
-      "summary": "entity trust zone을(를) 처리하는 함수입니다.",
+      "summary": "시스템 실체 · 신뢰 영역에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18455,10 +21751,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 20,
       "lineEnd": 23,
-      "summary": "evidence kind을(를) 처리하는 함수입니다.",
+      "summary": "근거에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18477,10 +21776,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 206,
       "lineEnd": 209,
-      "summary": "evidence refs을(를) 처리하는 함수입니다.",
+      "summary": "근거에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18499,10 +21801,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 371,
       "lineEnd": 379,
-      "summary": "find twin build entity node을(를) 처리하는 함수입니다.",
+      "summary": "디지털 트윈 · 트윈 구성 · 시스템 실체 · 노드 상태나 허용 여부를 대상을 찾습니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -18522,10 +21827,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 240,
       "lineEnd": 287,
-      "summary": "materialize twin build entity을(를) 처리하는 함수입니다.",
+      "summary": "디지털 트윈 · 트윈 구성 · 시스템 실체에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -18545,10 +21853,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 221,
       "lineEnd": 238,
-      "summary": "materialize twin build part을(를) 처리하는 함수입니다.",
+      "summary": "디지털 트윈 · 트윈 구성 · 시스템 파츠에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -18568,10 +21879,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 301,
       "lineEnd": 324,
-      "summary": "materialize twin build relation을(를) 처리하는 함수입니다.",
+      "summary": "디지털 트윈 · 트윈 구성 · 관계에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -18591,10 +21905,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 56,
       "lineEnd": 59,
-      "summary": "part id from handle을(를) 처리하는 함수입니다.",
+      "summary": "시스템 파츠 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18613,10 +21930,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 289,
       "lineEnd": 292,
-      "summary": "relation gateway을(를) 처리하는 함수입니다.",
+      "summary": "관계 · 신뢰 경계 통로에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18635,10 +21955,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 7,
       "lineEnd": 12,
-      "summary": "safe child id을(를) 처리하는 함수입니다.",
+      "summary": "허용 범위로 제한 · 하위 항목 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18657,10 +21980,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 326,
       "lineEnd": 369,
-      "summary": "twin build entity canvas projection을(를) 처리하는 함수입니다.",
+      "summary": "디지털 트윈 · 트윈 구성 · 시스템 실체 · 캔버스에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -18680,10 +22006,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildCanvas.js",
       "parentId": "file:shared/twinBuildCanvas.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 14,
       "lineEnd": 18,
-      "summary": "without derived fields을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “표준 트윈의 엔티티·파츠·관계를 실제 캔버스 노드와 연결선으로 바꾸고 다시 대응시킵니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18702,10 +22031,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildReconciler.js",
       "parentId": "file:shared/twinBuildReconciler.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 22,
       "lineEnd": 27,
-      "summary": "compact key을(를) 처리하는 함수입니다.",
+      "summary": "필요한 정보만 남기기에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18724,10 +22056,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildReconciler.js",
       "parentId": "file:shared/twinBuildReconciler.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 59,
       "lineEnd": 65,
-      "summary": "item을(를) 생성하는 함수입니다.",
+      "summary": "검토 항목 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18746,10 +22081,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildReconciler.js",
       "parentId": "file:shared/twinBuildReconciler.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 67,
       "lineEnd": 119,
-      "summary": "entity review을(를) 처리하는 함수입니다.",
+      "summary": "시스템 실체에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18768,10 +22106,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildReconciler.js",
       "parentId": "file:shared/twinBuildReconciler.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 29,
       "lineEnd": 32,
-      "summary": "evidence refs을(를) 처리하는 함수입니다.",
+      "summary": "근거에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18790,10 +22131,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildReconciler.js",
       "parentId": "file:shared/twinBuildReconciler.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 121,
       "lineEnd": 185,
-      "summary": "part review을(를) 처리하는 함수입니다.",
+      "summary": "시스템 파츠에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18812,10 +22156,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildReconciler.js",
       "parentId": "file:shared/twinBuildReconciler.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 273,
       "lineEnd": 321,
-      "summary": "reconcile twin build을(를) 처리하는 함수입니다.",
+      "summary": "디지털 트윈 · 트윈 구성에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -18835,10 +22182,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildReconciler.js",
       "parentId": "file:shared/twinBuildReconciler.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 187,
       "lineEnd": 271,
-      "summary": "relation review을(를) 처리하는 함수입니다.",
+      "summary": "관계에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18857,10 +22207,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildReconciler.js",
       "parentId": "file:shared/twinBuildReconciler.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 38,
       "lineEnd": 57,
-      "summary": "review source을(를) 처리하는 함수입니다.",
+      "summary": "소스 코드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18879,10 +22232,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/twinBuildReconciler.js",
       "parentId": "file:shared/twinBuildReconciler.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 34,
       "lineEnd": 36,
-      "summary": "severity rank을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “새로 발견한 디지털 트윈과 현재 캔버스를 비교해 추가·변경·삭제 검토안을 만듭니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18901,10 +22257,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowCanvasSystemMap.js",
       "parentId": "file:shared/workflowCanvasSystemMap.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 459,
       "lineEnd": 472,
-      "summary": "workflow canvas system map을(를) 생성하는 함수입니다.",
+      "summary": "워크플로우 · 캔버스 · 시스템 · 시스템 지도 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -18924,10 +22283,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowCanvasSystemMap.js",
       "parentId": "file:shared/workflowCanvasSystemMap.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 120,
       "lineEnd": 141,
-      "summary": "group node을(를) 처리하는 함수입니다.",
+      "summary": "그룹 · 노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18946,10 +22308,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowCanvasSystemMap.js",
       "parentId": "file:shared/workflowCanvasSystemMap.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 410,
       "lineEnd": 457,
-      "summary": "map edges을(를) 처리하는 함수입니다.",
+      "summary": "시스템 지도 · 연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18968,10 +22333,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowCanvasSystemMap.js",
       "parentId": "file:shared/workflowCanvasSystemMap.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 195,
       "lineEnd": 408,
-      "summary": "map nodes을(를) 처리하는 함수입니다.",
+      "summary": "시스템 지도 · 노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -18990,10 +22358,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowCanvasSystemMap.js",
       "parentId": "file:shared/workflowCanvasSystemMap.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 170,
       "lineEnd": 193,
-      "summary": "relation edge을(를) 처리하는 함수입니다.",
+      "summary": "관계 · 연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19012,10 +22383,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowCanvasSystemMap.js",
       "parentId": "file:shared/workflowCanvasSystemMap.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 16,
       "lineEnd": 34,
-      "summary": "runtime part을(를) 처리하는 함수입니다.",
+      "summary": "실제 운영 상태 · 시스템 파츠에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19034,10 +22408,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowCanvasSystemMap.js",
       "parentId": "file:shared/workflowCanvasSystemMap.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 44,
       "lineEnd": 54,
-      "summary": "source twin view part을(를) 처리하는 함수입니다.",
+      "summary": "소스 코드 · 디지털 트윈 · 화면 상태 · 시스템 파츠에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19056,10 +22433,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowCanvasSystemMap.js",
       "parentId": "file:shared/workflowCanvasSystemMap.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 143,
       "lineEnd": 168,
-      "summary": "system node을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19078,13 +22458,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSourceTwinCanvas.js",
       "parentId": "file:shared/workflowSourceTwinCanvas.js",
       "layer": "shared",
+      "area": "source-code-twin",
       "lineStart": 71,
       "lineEnd": 73,
-      "summary": "workflow source twin entry for edge operation을(를) 처리하는 함수입니다.",
+      "summary": "워크플로우 · 소스 코드 · 디지털 트윈 · 연결선 · 실제 조작에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -19101,13 +22484,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSourceTwinCanvas.js",
       "parentId": "file:shared/workflowSourceTwinCanvas.js",
       "layer": "shared",
+      "area": "source-code-twin",
       "lineStart": 61,
       "lineEnd": 63,
-      "summary": "workflow source twin entry for node을(를) 처리하는 함수입니다.",
+      "summary": "워크플로우 · 소스 코드 · 디지털 트윈 · 노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -19124,13 +22510,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSourceTwinCanvas.js",
       "parentId": "file:shared/workflowSourceTwinCanvas.js",
       "layer": "shared",
+      "area": "source-code-twin",
       "lineStart": 65,
       "lineEnd": 69,
-      "summary": "workflow source twin entry for part을(를) 처리하는 함수입니다.",
+      "summary": "워크플로우 · 소스 코드 · 디지털 트윈 · 시스템 파츠에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "function",
-        "shared"
+        "shared",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -19147,11 +22536,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemDiscovery.js",
       "parentId": "file:shared/workflowSystemDiscovery.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 156,
       "lineEnd": 163,
-      "summary": "binding을(를) 추가하는 함수입니다.",
+      "summary": "이 기능 항목이나 구조를 추가합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
@@ -19169,11 +22561,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemDiscovery.js",
       "parentId": "file:shared/workflowSystemDiscovery.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 167,
       "lineEnd": 172,
-      "summary": "digital twin binding을(를) 추가하는 함수입니다.",
+      "summary": "디지털 트윈 항목이나 구조를 추가합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
@@ -19191,10 +22586,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemDiscovery.js",
       "parentId": "file:shared/workflowSystemDiscovery.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 149,
       "lineEnd": 152,
-      "summary": "applied resource status을(를) 처리하는 함수입니다.",
+      "summary": "상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19213,10 +22611,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemDiscovery.js",
       "parentId": "file:shared/workflowSystemDiscovery.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 143,
       "lineEnd": 147,
-      "summary": "changed resource status을(를) 처리하는 함수입니다.",
+      "summary": "상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19235,10 +22636,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemDiscovery.js",
       "parentId": "file:shared/workflowSystemDiscovery.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 195,
       "lineEnd": 204,
-      "summary": "compact resource을(를) 처리하는 함수입니다.",
+      "summary": "필요한 정보만 남기기에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19257,10 +22661,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemDiscovery.js",
       "parentId": "file:shared/workflowSystemDiscovery.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 189,
       "lineEnd": 193,
-      "summary": "evidence files을(를) 처리하는 함수입니다.",
+      "summary": "근거에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19279,10 +22686,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemDiscovery.js",
       "parentId": "file:shared/workflowSystemDiscovery.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 218,
       "lineEnd": 402,
-      "summary": "workflow system map을(를) 검사하는 함수입니다.",
+      "summary": "워크플로우 · 시스템 · 시스템 지도 상태나 허용 여부를 실제 상태와 대조합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -19302,10 +22712,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemDiscovery.js",
       "parentId": "file:shared/workflowSystemDiscovery.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 138,
       "lineEnd": 141,
-      "summary": "node label을(를) 처리하는 함수입니다.",
+      "summary": "노드 · 화면 이름에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19324,10 +22737,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemDiscovery.js",
       "parentId": "file:shared/workflowSystemDiscovery.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 182,
       "lineEnd": 187,
-      "summary": "priority status을(를) 처리하는 함수입니다.",
+      "summary": "상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19346,10 +22762,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemDiscovery.js",
       "parentId": "file:shared/workflowSystemDiscovery.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 97,
       "lineEnd": 136,
-      "summary": "select workflow system map baseline을(를) 처리하는 함수입니다.",
+      "summary": "선택 · 워크플로우 · 시스템 · 시스템 지도에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -19369,10 +22788,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemDiscovery.js",
       "parentId": "file:shared/workflowSystemDiscovery.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 91,
       "lineEnd": 95,
-      "summary": "snapshot manifest id을(를) 처리하는 함수입니다.",
+      "summary": "상태 스냅샷 · 코드 구조 목록 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19391,10 +22813,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemDiscovery.js",
       "parentId": "file:shared/workflowSystemDiscovery.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 206,
       "lineEnd": 216,
-      "summary": "system part contract signature을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 시스템 파츠 · 요청 서명에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19413,10 +22838,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemDiscovery.js",
       "parentId": "file:shared/workflowSystemDiscovery.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 154,
       "lineEnd": 180,
-      "summary": "workflow resource bindings을(를) 처리하는 함수입니다.",
+      "summary": "워크플로우에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19435,10 +22863,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemMapRepair.js",
       "parentId": "file:shared/workflowSystemMapRepair.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 31,
       "lineEnd": 51,
-      "summary": "workflow system map relation을(를) 비교하는 함수입니다.",
+      "summary": "워크플로우 · 시스템 · 시스템 지도 · 관계 상태나 허용 여부를 서로 비교합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -19458,11 +22889,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemMapRepair.js",
       "parentId": "file:shared/workflowSystemMapRepair.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 14,
       "lineEnd": 14,
-      "summary": "has own을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 상태나 허용 여부를 해당 정보가 있는지 판단합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
@@ -19480,10 +22914,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemMapRepair.js",
       "parentId": "file:shared/workflowSystemMapRepair.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 16,
       "lineEnd": 18,
-      "summary": "has workflow relation metadata을(를) 처리하는 함수입니다.",
+      "summary": "워크플로우 · 관계 · 설명 메타데이터 상태나 허용 여부를 해당 정보가 있는지 판단합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -19503,10 +22940,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemMapRepair.js",
       "parentId": "file:shared/workflowSystemMapRepair.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 53,
       "lineEnd": 122,
-      "summary": "plan workflow system map relation repair을(를) 처리하는 함수입니다.",
+      "summary": "실행 계획 · 워크플로우 · 시스템 · 시스템 지도 · 관계에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -19526,10 +22966,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemMapRepair.js",
       "parentId": "file:shared/workflowSystemMapRepair.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 20,
       "lineEnd": 29,
-      "summary": "relation shape을(를) 처리하는 함수입니다.",
+      "summary": "관계에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19548,10 +22991,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemMapRepair.js",
       "parentId": "file:shared/workflowSystemMapRepair.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 124,
       "lineEnd": 146,
-      "summary": "restore missing workflow system map relations을(를) 처리하는 함수입니다.",
+      "summary": "워크플로우 · 시스템 · 시스템 지도에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -19571,10 +23017,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 138,
       "lineEnd": 154,
-      "summary": "absolute position을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “Workflow Canvas 자체를 디지털 트윈으로 검사해 현재 지도와 다른 점을 검토안으로 만듭니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19593,10 +23042,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 171,
       "lineEnd": 217,
-      "summary": "credential part proposal을(를) 처리하는 함수입니다.",
+      "summary": "비밀정보 참조 · 시스템 파츠 · 수정 제안에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19615,10 +23067,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 102,
       "lineEnd": 104,
-      "summary": "evidence for resources을(를) 처리하는 함수입니다.",
+      "summary": "근거에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19637,10 +23092,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 302,
       "lineEnd": 341,
-      "summary": "expected system part proposal을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 시스템 파츠 · 수정 제안에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19659,10 +23117,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 120,
       "lineEnd": 136,
-      "summary": "find open group position을(를) 처리하는 함수입니다.",
+      "summary": "그룹 상태나 허용 여부를 대상을 찾습니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19681,10 +23142,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 583,
       "lineEnd": 656,
-      "summary": "workflow system twin을(를) 검사하는 함수입니다.",
+      "summary": "워크플로우 · 시스템 · 디지털 트윈 상태나 허용 여부를 실제 상태와 대조합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -19704,10 +23168,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 440,
       "lineEnd": 484,
-      "summary": "node review item을(를) 처리하는 함수입니다.",
+      "summary": "노드 · 검토 항목에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19726,10 +23193,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 106,
       "lineEnd": 111,
-      "summary": "node size을(를) 처리하는 함수입니다.",
+      "summary": "노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19748,10 +23218,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 113,
       "lineEnd": 118,
-      "summary": "overlaps with margin을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “Workflow Canvas 자체를 디지털 트윈으로 검사해 현재 지도와 다른 점을 검토안으로 만듭니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19770,11 +23243,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 359,
       "lineEnd": 374,
-      "summary": "plan part을(를) 처리하는 함수입니다.",
+      "summary": "실행 계획 · 시스템 파츠에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
@@ -19792,10 +23268,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 156,
       "lineEnd": 169,
-      "summary": "relation handles을(를) 처리하는 함수입니다.",
+      "summary": "관계에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19814,10 +23293,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 486,
       "lineEnd": 555,
-      "summary": "relation review item을(를) 처리하는 함수입니다.",
+      "summary": "관계 · 검토 항목에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19836,10 +23318,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 94,
       "lineEnd": 100,
-      "summary": "resource observation을(를) 처리하는 함수입니다.",
+      "summary": "운영 관측에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19858,10 +23343,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 219,
       "lineEnd": 300,
-      "summary": "resource proposal을(를) 처리하는 함수입니다.",
+      "summary": "수정 제안에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19880,10 +23368,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 557,
       "lineEnd": 577,
-      "summary": "resource review item을(를) 처리하는 함수입니다.",
+      "summary": "검토 항목에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19902,11 +23393,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 375,
       "lineEnd": 385,
-      "summary": "retire part을(를) 처리하는 함수입니다.",
+      "summary": "시스템 파츠에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "shared"
       ],
       "details": {
@@ -19924,10 +23418,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 579,
       "lineEnd": 581,
-      "summary": "severity rank을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “Workflow Canvas 자체를 디지털 트윈으로 검사해 현재 지도와 다른 점을 검토안으로 만듭니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19946,10 +23443,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 83,
       "lineEnd": 85,
-      "summary": "unique을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “Workflow Canvas 자체를 디지털 트윈으로 검사해 현재 지도와 다른 점을 검토안으로 만듭니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19968,10 +23468,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 343,
       "lineEnd": 438,
-      "summary": "workflow code port migration item을(를) 처리하는 함수입니다.",
+      "summary": "워크플로우 · 코드 · 검토 항목에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -19990,10 +23493,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 87,
       "lineEnd": 92,
-      "summary": "workflow twin root을(를) 처리하는 함수입니다.",
+      "summary": "워크플로우 · 디지털 트윈에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "function",
         "shared"
       ],
@@ -20012,10 +23518,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapterDescriptor.js",
       "parentId": "file:shared/workflowSystemTwinAdapterDescriptor.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 61,
       "lineEnd": 65,
-      "summary": "can inspect workflow system canvas을(를) 처리하는 함수입니다.",
+      "summary": "시스템 검사 · 워크플로우 · 시스템 · 캔버스 상태나 허용 여부를 허용 가능한지 판단합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -20035,10 +23544,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinBuild.js",
       "parentId": "file:shared/workflowSystemTwinBuild.js",
       "layer": "shared",
+      "area": "digital-twin-engine",
       "lineStart": 24,
       "lineEnd": 195,
-      "summary": "workflow system twin build을(를) 생성하는 함수입니다.",
+      "summary": "워크플로우 · 시스템 · 디지털 트윈 · 트윈 구성 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "function",
         "shared"
@@ -20058,10 +23570,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 497,
       "lineEnd": 4733,
-      "summary": "app을(를) 처리하는 함수입니다.",
+      "summary": "App 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "canvas-interface",
         "exported",
         "frontend",
         "function"
@@ -20081,10 +23596,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 4736,
       "lineEnd": 4753,
-      "summary": "context item을(를) 처리하는 함수입니다.",
+      "summary": "실행 문맥 · 검토 항목 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -20103,10 +23621,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 4774,
       "lineEnd": 4790,
-      "summary": "icon btn을(를) 처리하는 함수입니다.",
+      "summary": "IconBtn 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -20125,10 +23646,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 4755,
       "lineEnd": 4772,
-      "summary": "type item을(를) 처리하는 함수입니다.",
+      "summary": "검토 항목 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -20147,11 +23671,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 918,
       "lineEnd": 926,
-      "summary": "abs pos을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -20169,12 +23696,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 1729,
       "lineEnd": 1805,
-      "summary": "after login을(를) 처리하는 비동기 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "arrow",
         "async",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -20192,10 +23722,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 249,
       "lineEnd": 269,
-      "summary": "aggregate system node runtime을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 노드 · 실제 운영 상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -20214,10 +23747,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 431,
       "lineEnd": 444,
-      "summary": "base edge style을(를) 처리하는 함수입니다.",
+      "summary": "기준 · 연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -20236,11 +23772,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 867,
       "lineEnd": 872,
-      "summary": "cancel edge lp을(를) 처리하는 함수입니다.",
+      "summary": "연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -20258,10 +23797,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 466,
       "lineEnd": 475,
-      "summary": "canvas snapshot을(를) 처리하는 함수입니다.",
+      "summary": "캔버스 · 상태 스냅샷에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -20280,10 +23822,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 380,
       "lineEnd": 389,
-      "summary": "center in frame을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -20302,11 +23847,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 842,
       "lineEnd": 847,
-      "summary": "cleanup을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -20324,11 +23872,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 3415,
       "lineEnd": 3415,
-      "summary": "close context을(를) 처리하는 함수입니다.",
+      "summary": "실행 문맥 작업을 화면을 닫습니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -20346,10 +23897,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 355,
       "lineEnd": 366,
-      "summary": "closest handles을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -20368,10 +23922,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 477,
       "lineEnd": 485,
-      "summary": "cloud row snapshot을(를) 처리하는 함수입니다.",
+      "summary": "상태 스냅샷에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -20390,11 +23947,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 3912,
       "lineEnd": 3915,
-      "summary": "commit rename을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -20412,10 +23972,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 318,
       "lineEnd": 325,
-      "summary": "dedupe participants을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -20434,10 +23997,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 455,
       "lineEnd": 459,
-      "summary": "detach digital twin binding을(를) 처리하는 함수입니다.",
+      "summary": "디지털 트윈에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -20456,11 +24022,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 356,
       "lineEnd": 356,
-      "summary": "dim을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -20478,11 +24047,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 3207,
       "lineEnd": 3207,
-      "summary": "dim을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -20500,11 +24072,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 3272,
       "lineEnd": 3272,
-      "summary": "dim을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -20522,11 +24097,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 1118,
       "lineEnd": 1118,
-      "summary": "dist of을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -20544,11 +24122,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 3208,
       "lineEnd": 3215,
-      "summary": "find axis snap을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 상태나 허용 여부를 대상을 찾습니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -20566,11 +24147,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 552,
       "lineEnd": 552,
-      "summary": "fn을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -20588,11 +24172,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 3437,
       "lineEnd": 3443,
-      "summary": "handle context add content을(를) 처리하는 함수입니다.",
+      "summary": "실행 문맥 · 본문 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -20610,11 +24197,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 3429,
       "lineEnd": 3435,
-      "summary": "handle context add group을(를) 처리하는 함수입니다.",
+      "summary": "실행 문맥 · 그룹 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -20632,11 +24222,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 3423,
       "lineEnd": 3427,
-      "summary": "handle context add memo을(를) 처리하는 함수입니다.",
+      "summary": "실행 문맥 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -20654,11 +24247,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 3417,
       "lineEnd": 3421,
-      "summary": "handle context add stage을(를) 처리하는 함수입니다.",
+      "summary": "실행 문맥 · 단계 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -20676,11 +24272,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 3445,
       "lineEnd": 3451,
-      "summary": "handle context add system을(를) 처리하는 함수입니다.",
+      "summary": "실행 문맥 · 시스템 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -20698,11 +24297,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 3505,
       "lineEnd": 3521,
-      "summary": "handle context cleanup edges을(를) 처리하는 함수입니다.",
+      "summary": "실행 문맥 · 연결선 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -20720,11 +24322,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 3473,
       "lineEnd": 3479,
-      "summary": "handle context delete edge을(를) 처리하는 함수입니다.",
+      "summary": "실행 문맥 · 삭제 · 연결선 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -20742,11 +24347,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 3463,
       "lineEnd": 3471,
-      "summary": "handle context delete node을(를) 처리하는 함수입니다.",
+      "summary": "실행 문맥 · 삭제 · 노드 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -20764,11 +24372,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 3494,
       "lineEnd": 3500,
-      "summary": "handle context group selection을(를) 처리하는 함수입니다.",
+      "summary": "실행 문맥 · 그룹 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -20786,11 +24397,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 3453,
       "lineEnd": 3461,
-      "summary": "handle context paste을(를) 처리하는 함수입니다.",
+      "summary": "실행 문맥 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -20808,11 +24422,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 3523,
       "lineEnd": 3528,
-      "summary": "handle context ungroup을(를) 처리하는 함수입니다.",
+      "summary": "실행 문맥 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -20830,11 +24447,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 3481,
       "lineEnd": 3492,
-      "summary": "handle context update edge relation을(를) 처리하는 함수입니다.",
+      "summary": "실행 문맥 · 변경 · 연결선 · 관계 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -20852,11 +24472,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 776,
       "lineEnd": 783,
-      "summary": "handler을(를) 처리하는 함수입니다.",
+      "summary": "이 서버 경로로 들어온 요청의 로그인과 입력을 확인하고 결과를 돌려줍니다. 이 요청은 다음 역할을 맡습니다: 캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -20874,12 +24497,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 1865,
       "lineEnd": 1934,
-      "summary": "handler을(를) 처리하는 비동기 함수입니다.",
+      "summary": "이 서버 경로로 들어온 요청의 로그인과 입력을 확인하고 결과를 돌려줍니다. 이 요청은 다음 역할을 맡습니다: 캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "arrow",
         "async",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -20897,11 +24523,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 3121,
       "lineEnd": 3131,
-      "summary": "handler을(를) 처리하는 함수입니다.",
+      "summary": "이 서버 경로로 들어온 요청의 로그인과 입력을 확인하고 결과를 돌려줍니다. 이 요청은 다음 역할을 맡습니다: 캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -20919,10 +24548,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 418,
       "lineEnd": 420,
-      "summary": "is part edge을(를) 처리하는 함수입니다.",
+      "summary": "시스템 파츠 · 연결선 상태나 허용 여부를 해당 상태인지 판단합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -20941,10 +24573,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 370,
       "lineEnd": 375,
-      "summary": "is typing target을(를) 처리하는 함수입니다.",
+      "summary": "대상 상태나 허용 여부를 해당 상태인지 판단합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -20963,10 +24598,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 178,
       "lineEnd": 180,
-      "summary": "max node id을(를) 처리하는 함수입니다.",
+      "summary": "노드 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -20985,11 +24623,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 1119,
       "lineEnd": 1119,
-      "summary": "mid of을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -21007,11 +24648,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 667,
       "lineEnd": 667,
-      "summary": "next id을(를) 처리하는 함수입니다.",
+      "summary": "식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -21029,10 +24673,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 182,
       "lineEnd": 196,
-      "summary": "node display name을(를) 처리하는 함수입니다.",
+      "summary": "노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -21051,10 +24698,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 171,
       "lineEnd": 176,
-      "summary": "edges을(를) 정규화하는 함수입니다.",
+      "summary": "연결선 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -21073,11 +24723,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 1027,
       "lineEnd": 1053,
-      "summary": "on click capture을(를) 처리하는 함수입니다.",
+      "summary": "상태 기록에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -21095,11 +24748,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 854,
       "lineEnd": 892,
-      "summary": "on down을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -21117,11 +24773,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 2599,
       "lineEnd": 2603,
-      "summary": "on down을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -21139,11 +24798,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 873,
       "lineEnd": 875,
-      "summary": "on edge lp move을(를) 처리하는 함수입니다.",
+      "summary": "연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -21161,11 +24823,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 1142,
       "lineEnd": 1142,
-      "summary": "on end을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -21183,11 +24848,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 1680,
       "lineEnd": 1682,
-      "summary": "on hash change을(를) 처리하는 함수입니다.",
+      "summary": "변경 식별값 · 변경에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -21205,11 +24873,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 2604,
       "lineEnd": 2604,
-      "summary": "on key을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -21227,11 +24898,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 1078,
       "lineEnd": 1102,
-      "summary": "on mouse down을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -21249,11 +24923,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 893,
       "lineEnd": 905,
-      "summary": "on move을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -21271,11 +24948,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 1133,
       "lineEnd": 1141,
-      "summary": "on move을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -21293,11 +24973,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 849,
       "lineEnd": 853,
-      "summary": "on second pointer을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -21315,11 +24998,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 1121,
       "lineEnd": 1132,
-      "summary": "on start을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -21337,11 +25023,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 697,
       "lineEnd": 697,
-      "summary": "on storage error을(를) 처리하는 함수입니다.",
+      "summary": "오류에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -21359,11 +25048,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 981,
       "lineEnd": 1006,
-      "summary": "on touch start을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -21381,11 +25073,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 906,
       "lineEnd": 956,
-      "summary": "on up을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -21403,10 +25098,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 203,
       "lineEnd": 209,
-      "summary": "shared id을(를) 해석하는 함수입니다.",
+      "summary": "식별자 자료의 구조를 읽어냅니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -21425,10 +25123,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 422,
       "lineEnd": 425,
-      "summary": "part id from handle을(를) 처리하는 함수입니다.",
+      "summary": "시스템 파츠 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -21447,10 +25148,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 314,
       "lineEnd": 316,
-      "summary": "participant key을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -21469,12 +25173,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 3662,
       "lineEnd": 3681,
-      "summary": "poll을(를) 처리하는 비동기 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "arrow",
         "async",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -21492,11 +25199,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 3924,
       "lineEnd": 3933,
-      "summary": "position menu을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -21514,12 +25224,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 3638,
       "lineEnd": 3649,
-      "summary": "refresh decision을(를) 처리하는 비동기 함수입니다.",
+      "summary": "검토 결정에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "arrow",
         "async",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -21537,11 +25250,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 3032,
       "lineEnd": 3038,
-      "summary": "remap part handle을(를) 처리하는 함수입니다.",
+      "summary": "시스템 파츠에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -21559,10 +25275,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 408,
       "lineEnd": 410,
-      "summary": "sanitize nodes을(를) 처리하는 함수입니다.",
+      "summary": "노드에서 위험한 내용을 제거합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -21581,10 +25300,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 412,
       "lineEnd": 414,
-      "summary": "sanitize notes을(를) 처리하는 함수입니다.",
+      "summary": "위험한 입력 제거에서 위험한 내용을 제거합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -21603,10 +25325,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 327,
       "lineEnd": 351,
-      "summary": "scoped participants을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -21625,10 +25350,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 202,
       "lineEnd": 202,
-      "summary": "shared canvas id을(를) 처리하는 함수입니다.",
+      "summary": "캔버스 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -21647,10 +25375,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 394,
       "lineEnd": 406,
-      "summary": "sort parents first을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -21669,11 +25400,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 461,
       "lineEnd": 464,
-      "summary": "strip edge을(를) 처리하는 함수입니다.",
+      "summary": "연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -21691,10 +25425,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 447,
       "lineEnd": 454,
-      "summary": "strip node을(를) 처리하는 함수입니다.",
+      "summary": "노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -21713,11 +25450,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 460,
       "lineEnd": 460,
-      "summary": "strip note을(를) 처리하는 함수입니다.",
+      "summary": "노트에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -21735,11 +25475,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 936,
       "lineEnd": 936,
-      "summary": "swallow을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -21757,11 +25500,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 945,
       "lineEnd": 945,
-      "summary": "swallow을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -21779,10 +25525,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 299,
       "lineEnd": 312,
-      "summary": "system runtime by edge을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 실제 운영 상태 · 연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -21801,10 +25550,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 271,
       "lineEnd": 297,
-      "summary": "system runtime dashboard summary을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 실제 운영 상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -21823,10 +25575,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 223,
       "lineEnd": 229,
-      "summary": "system runtime map from records을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 실제 운영 상태 · 시스템 지도에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -21845,10 +25600,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 231,
       "lineEnd": 238,
-      "summary": "system runtime persistence error을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 실제 운영 상태 · 오류에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -21867,10 +25625,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 211,
       "lineEnd": 221,
-      "summary": "system runtime targets for nodes을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 실제 운영 상태 · 노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -21889,11 +25650,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 398,
       "lineEnd": 403,
-      "summary": "visit을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -21911,13 +25675,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/AuthPanel.jsx",
       "parentId": "file:src/components/AuthPanel.jsx",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 42,
       "lineEnd": 546,
-      "summary": "auth panel을(를) 처리하는 함수입니다.",
+      "summary": "로그인 인증 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "function",
@@ -21934,13 +25701,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/AuthPanel.jsx",
       "parentId": "file:src/components/AuthPanel.jsx",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 20,
       "lineEnd": 40,
-      "summary": "avatar을(를) 처리하는 함수입니다.",
+      "summary": "아바타 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "function",
@@ -21957,12 +25727,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/AuthPanel.jsx",
       "parentId": "file:src/components/AuthPanel.jsx",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 253,
       "lineEnd": 257,
-      "summary": "begin profile edit을(를) 처리하는 함수입니다.",
+      "summary": "프로필에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "arrow",
@@ -21979,12 +25752,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/AuthPanel.jsx",
       "parentId": "file:src/components/AuthPanel.jsx",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 555,
       "lineEnd": 560,
-      "summary": "fill btn을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “로그인·회원가입·프로필 편집과 아바타 설정 화면을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "arrow",
@@ -22001,12 +25777,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/AuthPanel.jsx",
       "parentId": "file:src/components/AuthPanel.jsx",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 580,
       "lineEnd": 584,
-      "summary": "format date을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “로그인·회원가입·프로필 편집과 아바타 설정 화면을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "function",
@@ -22023,13 +25802,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/AuthPanel.jsx",
       "parentId": "file:src/components/AuthPanel.jsx",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 131,
       "lineEnd": 139,
-      "summary": "handle copy token을(를) 처리하는 비동기 함수입니다.",
+      "summary": "연결 토큰 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "arrow",
         "async",
-        "frontend"
+        "frontend",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "arrow",
@@ -22046,13 +25828,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/AuthPanel.jsx",
       "parentId": "file:src/components/AuthPanel.jsx",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 106,
       "lineEnd": 117,
-      "summary": "handle create token을(를) 처리하는 비동기 함수입니다.",
+      "summary": "새 항목 · 연결 토큰 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "arrow",
         "async",
-        "frontend"
+        "frontend",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "arrow",
@@ -22069,13 +25854,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/AuthPanel.jsx",
       "parentId": "file:src/components/AuthPanel.jsx",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 119,
       "lineEnd": 129,
-      "summary": "handle delete token을(를) 처리하는 비동기 함수입니다.",
+      "summary": "삭제 · 연결 토큰 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "arrow",
         "async",
-        "frontend"
+        "frontend",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "arrow",
@@ -22092,13 +25880,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/AuthPanel.jsx",
       "parentId": "file:src/components/AuthPanel.jsx",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 223,
       "lineEnd": 229,
-      "summary": "handle google을(를) 처리하는 비동기 함수입니다.",
+      "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "arrow",
         "async",
-        "frontend"
+        "frontend",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "arrow",
@@ -22115,13 +25906,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/AuthPanel.jsx",
       "parentId": "file:src/components/AuthPanel.jsx",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 231,
       "lineEnd": 234,
-      "summary": "handle logout을(를) 처리하는 비동기 함수입니다.",
+      "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "arrow",
         "async",
-        "frontend"
+        "frontend",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "arrow",
@@ -22138,13 +25932,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/AuthPanel.jsx",
       "parentId": "file:src/components/AuthPanel.jsx",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 236,
       "lineEnd": 251,
-      "summary": "handle save profile을(를) 처리하는 비동기 함수입니다.",
+      "summary": "저장 · 프로필 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "arrow",
         "async",
-        "frontend"
+        "frontend",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "arrow",
@@ -22161,13 +25958,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/AuthPanel.jsx",
       "parentId": "file:src/components/AuthPanel.jsx",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 207,
       "lineEnd": 221,
-      "summary": "handle submit을(를) 처리하는 비동기 함수입니다.",
+      "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "arrow",
         "async",
-        "frontend"
+        "frontend",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "arrow",
@@ -22184,13 +25984,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/AuthPanel.jsx",
       "parentId": "file:src/components/AuthPanel.jsx",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 92,
       "lineEnd": 104,
-      "summary": "tokens을(를) 불러오기하는 비동기 함수입니다.",
+      "summary": "이 기능 정보를 불러옵니다",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "arrow",
         "async",
-        "frontend"
+        "frontend",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "arrow",
@@ -22207,12 +26010,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/AuthPanel.jsx",
       "parentId": "file:src/components/AuthPanel.jsx",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 145,
       "lineEnd": 147,
-      "summary": "on down을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “로그인·회원가입·프로필 편집과 아바타 설정 화면을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "arrow",
@@ -22229,12 +26035,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/AuthPanel.jsx",
       "parentId": "file:src/components/AuthPanel.jsx",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 148,
       "lineEnd": 148,
-      "summary": "on key을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “로그인·회원가입·프로필 편집과 아바타 설정 화면을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "arrow",
@@ -22251,12 +26060,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/AuthPanel.jsx",
       "parentId": "file:src/components/AuthPanel.jsx",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 562,
       "lineEnd": 566,
-      "summary": "outline btn을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “로그인·회원가입·프로필 편집과 아바타 설정 화면을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "arrow",
@@ -22273,12 +26085,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/AuthPanel.jsx",
       "parentId": "file:src/components/AuthPanel.jsx",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 90,
       "lineEnd": 90,
-      "summary": "reset을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “로그인·회원가입·프로필 편집과 아바타 설정 화면을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "arrow",
@@ -22295,12 +26110,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/AuthPanel.jsx",
       "parentId": "file:src/components/AuthPanel.jsx",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 568,
       "lineEnd": 572,
-      "summary": "seg btn을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “로그인·회원가입·프로필 편집과 아바타 설정 화면을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "arrow",
@@ -22317,12 +26135,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/AuthPanel.jsx",
       "parentId": "file:src/components/AuthPanel.jsx",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 574,
       "lineEnd": 578,
-      "summary": "small btn을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “로그인·회원가입·프로필 편집과 아바타 설정 화면을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "arrow",
@@ -22339,12 +26160,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/AuthPanel.jsx",
       "parentId": "file:src/components/AuthPanel.jsx",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 70,
       "lineEnd": 80,
-      "summary": "settings을(를) 수정하는 함수입니다.",
+      "summary": "변경 대상을 변경합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "arrow",
@@ -22361,13 +26185,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/CanvasImage.jsx",
       "parentId": "file:src/components/CanvasImage.jsx",
       "layer": "frontend",
+      "area": "media-files",
       "lineStart": 4,
       "lineEnd": 33,
-      "summary": "canvas image을(를) 처리하는 함수입니다.",
+      "summary": "캔버스 · 이미지 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "media-files"
       ],
       "details": {
         "functionKind": "function",
@@ -22384,12 +26211,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/CanvasImage.jsx",
       "parentId": "file:src/components/CanvasImage.jsx",
       "layer": "frontend",
+      "area": "media-files",
       "lineStart": 14,
       "lineEnd": 23,
-      "summary": "refresh을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “저장된 이미지 주소를 안전하게 불러와 캔버스와 노트에 표시합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "media-files"
       ],
       "details": {
         "functionKind": "arrow",
@@ -22406,10 +26236,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/CanvasTabs.jsx",
       "parentId": "file:src/components/CanvasTabs.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 31,
       "lineEnd": 532,
-      "summary": "canvas tabs을(를) 처리하는 함수입니다.",
+      "summary": "캔버스 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "canvas-interface",
         "exported",
         "frontend",
         "function"
@@ -22429,11 +26262,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/CanvasTabs.jsx",
       "parentId": "file:src/components/CanvasTabs.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 119,
       "lineEnd": 133,
-      "summary": "avatar of을(를) 처리하는 함수입니다.",
+      "summary": "아바타에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -22451,11 +26287,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/CanvasTabs.jsx",
       "parentId": "file:src/components/CanvasTabs.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 101,
       "lineEnd": 104,
-      "summary": "commit을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “개인·공유 캔버스 목록과 현재 캔버스 전환 화면을 표시합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -22473,11 +26312,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/CanvasTabs.jsx",
       "parentId": "file:src/components/CanvasTabs.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 7,
       "lineEnd": 7,
-      "summary": "fmt을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “개인·공유 캔버스 목록과 현재 캔버스 전환 화면을 표시합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -22495,11 +26337,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/CanvasTabs.jsx",
       "parentId": "file:src/components/CanvasTabs.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 6,
       "lineEnd": 12,
-      "summary": "format count을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “개인·공유 캔버스 목록과 현재 캔버스 전환 화면을 표시합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -22517,11 +26362,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/CanvasTabs.jsx",
       "parentId": "file:src/components/CanvasTabs.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 135,
       "lineEnd": 139,
-      "summary": "grant label을(를) 처리하는 함수입니다.",
+      "summary": "화면 이름에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -22539,10 +26387,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/CanvasTabs.jsx",
       "parentId": "file:src/components/CanvasTabs.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 26,
       "lineEnd": 29,
-      "summary": "grants for을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “개인·공유 캔버스 목록과 현재 캔버스 전환 화면을 표시합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -22561,11 +26412,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/CanvasTabs.jsx",
       "parentId": "file:src/components/CanvasTabs.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 81,
       "lineEnd": 86,
-      "summary": "handler을(를) 처리하는 함수입니다.",
+      "summary": "이 서버 경로로 들어온 요청의 로그인과 입력을 확인하고 결과를 돌려줍니다. 이 요청은 다음 역할을 맡습니다: 개인·공유 캔버스 목록과 현재 캔버스 전환 화면을 표시합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -22583,11 +26437,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/CanvasTabs.jsx",
       "parentId": "file:src/components/CanvasTabs.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 95,
       "lineEnd": 95,
-      "summary": "handler을(를) 처리하는 함수입니다.",
+      "summary": "이 서버 경로로 들어온 요청의 로그인과 입력을 확인하고 결과를 돌려줍니다. 이 요청은 다음 역할을 맡습니다: 개인·공유 캔버스 목록과 현재 캔버스 전환 화면을 표시합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -22605,11 +26462,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/CanvasTabs.jsx",
       "parentId": "file:src/components/CanvasTabs.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 53,
       "lineEnd": 55,
-      "summary": "on down을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “개인·공유 캔버스 목록과 현재 캔버스 전환 화면을 표시합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -22627,11 +26487,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/CanvasTabs.jsx",
       "parentId": "file:src/components/CanvasTabs.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 56,
       "lineEnd": 56,
-      "summary": "on key을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “개인·공유 캔버스 목록과 현재 캔버스 전환 화면을 표시합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -22649,11 +26512,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/CanvasTabs.jsx",
       "parentId": "file:src/components/CanvasTabs.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 68,
       "lineEnd": 76,
-      "summary": "relative last seen을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “개인·공유 캔버스 목록과 현재 캔버스 전환 화면을 표시합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -22671,11 +26537,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/CanvasTabs.jsx",
       "parentId": "file:src/components/CanvasTabs.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 146,
       "lineEnd": 224,
-      "summary": "render own row을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “개인·공유 캔버스 목록과 현재 캔버스 전환 화면을 표시합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -22693,11 +26562,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/CanvasTabs.jsx",
       "parentId": "file:src/components/CanvasTabs.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 100,
       "lineEnd": 100,
-      "summary": "start rename을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “개인·공유 캔버스 목록과 현재 캔버스 전환 화면을 표시합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -22715,10 +26587,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/CanvasTabs.jsx",
       "parentId": "file:src/components/CanvasTabs.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 20,
       "lineEnd": 24,
-      "summary": "target name을(를) 처리하는 함수입니다.",
+      "summary": "대상에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -22737,10 +26612,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/CanvasTabs.jsx",
       "parentId": "file:src/components/CanvasTabs.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 14,
       "lineEnd": 18,
-      "summary": "text content을(를) 처리하는 함수입니다.",
+      "summary": "텍스트 · 본문에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -22759,10 +26637,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/DigitalTwinReviewPanel.jsx",
       "parentId": "file:src/components/DigitalTwinReviewPanel.jsx",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 163,
       "lineEnd": 318,
-      "summary": "digital twin review panel을(를) 처리하는 함수입니다.",
+      "summary": "디지털 트윈 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "frontend",
         "function"
@@ -22782,10 +26663,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/DigitalTwinReviewPanel.jsx",
       "parentId": "file:src/components/DigitalTwinReviewPanel.jsx",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 40,
       "lineEnd": 46,
-      "summary": "icon button을(를) 처리하는 함수입니다.",
+      "summary": "IconButton 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "frontend",
         "function"
       ],
@@ -22804,10 +26688,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/DigitalTwinReviewPanel.jsx",
       "parentId": "file:src/components/DigitalTwinReviewPanel.jsx",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 48,
       "lineEnd": 161,
-      "summary": "review row을(를) 처리하는 함수입니다.",
+      "summary": "ReviewRow 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "frontend",
         "function"
       ],
@@ -22826,11 +26713,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/DigitalTwinReviewPanel.jsx",
       "parentId": "file:src/components/DigitalTwinReviewPanel.jsx",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 202,
       "lineEnd": 209,
-      "summary": "on move을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “실제 시스템에서 발견한 변경안을 미리 보고 적용·무시·보류하도록 검토 목록을 보여줍니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "frontend"
       ],
       "details": {
@@ -22848,11 +26738,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/DigitalTwinReviewPanel.jsx",
       "parentId": "file:src/components/DigitalTwinReviewPanel.jsx",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 210,
       "lineEnd": 214,
-      "summary": "on up을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “실제 시스템에서 발견한 변경안을 미리 보고 적용·무시·보류하도록 검토 목록을 보여줍니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "frontend"
       ],
       "details": {
@@ -22870,10 +26763,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/EdgeRelationEditor.jsx",
       "parentId": "file:src/components/EdgeRelationEditor.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 23,
       "lineEnd": 177,
-      "summary": "edge relation editor을(를) 처리하는 함수입니다.",
+      "summary": "연결선 · 관계 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "canvas-interface",
         "exported",
         "frontend",
         "function"
@@ -22893,11 +26789,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/EdgeRelationEditor.jsx",
       "parentId": "file:src/components/EdgeRelationEditor.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 44,
       "lineEnd": 47,
-      "summary": "commit custom을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “연결선의 관계 종류, 방향, 근거와 표시 이름을 편집하는 화면을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -22915,11 +26814,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/EdgeRelationEditor.jsx",
       "parentId": "file:src/components/EdgeRelationEditor.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 49,
       "lineEnd": 51,
-      "summary": "commit evidence을(를) 처리하는 함수입니다.",
+      "summary": "근거에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -22937,11 +26839,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/EdgeRelationEditor.jsx",
       "parentId": "file:src/components/EdgeRelationEditor.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 35,
       "lineEnd": 42,
-      "summary": "select relation을(를) 처리하는 함수입니다.",
+      "summary": "선택 · 관계에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -22959,12 +26864,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/EditToolbar.jsx",
       "parentId": "file:src/components/EditToolbar.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 272,
       "lineEnd": 290,
-      "summary": "align buttons을(를) 처리하는 함수입니다.",
+      "summary": "AlignButtons 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -22981,12 +26889,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/EditToolbar.jsx",
       "parentId": "file:src/components/EditToolbar.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 105,
       "lineEnd": 154,
-      "summary": "block dropdown을(를) 처리하는 함수입니다.",
+      "summary": "BlockDropdown 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -23003,12 +26914,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/EditToolbar.jsx",
       "parentId": "file:src/components/EditToolbar.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 210,
       "lineEnd": 270,
-      "summary": "color picker을(를) 처리하는 함수입니다.",
+      "summary": "ColorPicker 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -23025,12 +26939,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/EditToolbar.jsx",
       "parentId": "file:src/components/EditToolbar.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 60,
       "lineEnd": 62,
-      "summary": "divider을(를) 처리하는 함수입니다.",
+      "summary": "Divider 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -23047,12 +26964,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/EditToolbar.jsx",
       "parentId": "file:src/components/EditToolbar.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 86,
       "lineEnd": 101,
-      "summary": "drop item을(를) 처리하는 함수입니다.",
+      "summary": "검토 항목 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -23069,12 +26989,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/EditToolbar.jsx",
       "parentId": "file:src/components/EditToolbar.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 66,
       "lineEnd": 84,
-      "summary": "drop panel을(를) 처리하는 함수입니다.",
+      "summary": "DropPanel 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -23091,13 +27014,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/EditToolbar.jsx",
       "parentId": "file:src/components/EditToolbar.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 303,
       "lineEnd": 481,
-      "summary": "edit toolbar을(를) 처리하는 함수입니다.",
+      "summary": "EditToolbar 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -23114,12 +27040,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/EditToolbar.jsx",
       "parentId": "file:src/components/EditToolbar.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 163,
       "lineEnd": 206,
-      "summary": "font size dropdown을(를) 처리하는 함수입니다.",
+      "summary": "FontSizeDropdown 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -23136,12 +27065,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/EditToolbar.jsx",
       "parentId": "file:src/components/EditToolbar.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 177,
       "lineEnd": 181,
-      "summary": "apply을(를) 적용하는 함수입니다.",
+      "summary": "승인된 변경 적용 작업을 승인된 변경을 적용합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -23158,12 +27090,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/EditToolbar.jsx",
       "parentId": "file:src/components/EditToolbar.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 224,
       "lineEnd": 229,
-      "summary": "color을(를) 적용하는 함수입니다.",
+      "summary": "승인된 변경 적용 작업을 승인된 변경을 적용합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -23180,12 +27115,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/EditToolbar.jsx",
       "parentId": "file:src/components/EditToolbar.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 273,
       "lineEnd": 282,
-      "summary": "btn을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “선택한 노드 본문의 글꼴, 정렬, 색과 이미지 삽입 도구를 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -23202,12 +27140,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/EditToolbar.jsx",
       "parentId": "file:src/components/EditToolbar.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 42,
       "lineEnd": 58,
-      "summary": "btn style을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “선택한 노드 본문의 글꼴, 정렬, 색과 이미지 삽입 도구를 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -23224,12 +27165,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/EditToolbar.jsx",
       "parentId": "file:src/components/EditToolbar.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 16,
       "lineEnd": 38,
-      "summary": "downscale and insert을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “선택한 노드 본문의 글꼴, 정렬, 색과 이미지 삽입 도구를 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -23246,12 +27190,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/EditToolbar.jsx",
       "parentId": "file:src/components/EditToolbar.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 6,
       "lineEnd": 12,
-      "summary": "layout을(를) 조회하는 함수입니다.",
+      "summary": "자동 배치 정보를 불러옵니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -23268,12 +27215,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/EditToolbar.jsx",
       "parentId": "file:src/components/EditToolbar.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 413,
       "lineEnd": 417,
-      "summary": "handle file change을(를) 처리하는 함수입니다.",
+      "summary": "파일 · 변경 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -23290,12 +27240,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/EditToolbar.jsx",
       "parentId": "file:src/components/EditToolbar.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 312,
       "lineEnd": 312,
-      "summary": "handler을(를) 처리하는 함수입니다.",
+      "summary": "이 서버 경로로 들어온 요청의 로그인과 입력을 확인하고 결과를 돌려줍니다. 이 요청은 다음 역할을 맡습니다: 선택한 노드 본문의 글꼴, 정렬, 색과 이미지 삽입 도구를 제공합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -23312,12 +27265,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/EditToolbar.jsx",
       "parentId": "file:src/components/EditToolbar.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 361,
       "lineEnd": 364,
-      "summary": "handler을(를) 처리하는 함수입니다.",
+      "summary": "이 서버 경로로 들어온 요청의 로그인과 입력을 확인하고 결과를 돌려줍니다. 이 요청은 다음 역할을 맡습니다: 선택한 노드 본문의 글꼴, 정렬, 색과 이미지 삽입 도구를 제공합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -23334,12 +27290,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/EditToolbar.jsx",
       "parentId": "file:src/components/EditToolbar.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 119,
       "lineEnd": 123,
-      "summary": "insert을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “선택한 노드 본문의 글꼴, 정렬, 색과 이미지 삽입 도구를 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -23356,12 +27315,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/EditToolbar.jsx",
       "parentId": "file:src/components/EditToolbar.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 110,
       "lineEnd": 117,
-      "summary": "toggle을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 작업을 켜거나 끕니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -23378,12 +27340,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/EditToolbar.jsx",
       "parentId": "file:src/components/EditToolbar.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 168,
       "lineEnd": 175,
-      "summary": "toggle을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 작업을 켜거나 끕니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -23400,12 +27365,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/EditToolbar.jsx",
       "parentId": "file:src/components/EditToolbar.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 215,
       "lineEnd": 222,
-      "summary": "toggle을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 작업을 켜거나 끕니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -23422,13 +27390,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/InvitePopover.jsx",
       "parentId": "file:src/components/InvitePopover.jsx",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 14,
       "lineEnd": 274,
-      "summary": "invite popover을(를) 처리하는 함수입니다.",
+      "summary": "초대 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -23445,12 +27416,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/InvitePopover.jsx",
       "parentId": "file:src/components/InvitePopover.jsx",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 81,
       "lineEnd": 86,
-      "summary": "handle copy을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "arrow",
@@ -23467,13 +27441,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/InvitePopover.jsx",
       "parentId": "file:src/components/InvitePopover.jsx",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 65,
       "lineEnd": 79,
-      "summary": "handle create link을(를) 처리하는 비동기 함수입니다.",
+      "summary": "새 항목 · 공유 링크 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "arrow",
         "async",
-        "frontend"
+        "frontend",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "arrow",
@@ -23490,13 +27467,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/InvitePopover.jsx",
       "parentId": "file:src/components/InvitePopover.jsx",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 88,
       "lineEnd": 101,
-      "summary": "handle delete을(를) 처리하는 비동기 함수입니다.",
+      "summary": "삭제 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "arrow",
         "async",
-        "frontend"
+        "frontend",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "arrow",
@@ -23513,13 +27493,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/InvitePopover.jsx",
       "parentId": "file:src/components/InvitePopover.jsx",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 48,
       "lineEnd": 63,
-      "summary": "handle invite을(를) 처리하는 비동기 함수입니다.",
+      "summary": "초대 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "arrow",
         "async",
-        "frontend"
+        "frontend",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "arrow",
@@ -23536,10 +27519,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NodePalette.jsx",
       "parentId": "file:src/components/NodePalette.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 21,
       "lineEnd": 104,
-      "summary": "node palette을(를) 처리하는 함수입니다.",
+      "summary": "노드 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "canvas-interface",
         "exported",
         "frontend",
         "function"
@@ -23559,11 +27545,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NodePalette.jsx",
       "parentId": "file:src/components/NodePalette.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 37,
       "lineEnd": 40,
-      "summary": "handle drag start을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -23581,11 +27570,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NodePalette.jsx",
       "parentId": "file:src/components/NodePalette.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 25,
       "lineEnd": 25,
-      "summary": "on down을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “새로 만들 수 있는 노드 종류를 보여주고 드래그해 캔버스에 놓을 자료를 준비합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -23603,11 +27595,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NodePalette.jsx",
       "parentId": "file:src/components/NodePalette.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 26,
       "lineEnd": 26,
-      "summary": "on key을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “새로 만들 수 있는 노드 종류를 보여주고 드래그해 캔버스에 놓을 자료를 준비합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -23625,11 +27620,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NodePalette.jsx",
       "parentId": "file:src/components/NodePalette.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 15,
       "lineEnd": 19,
-      "summary": "payload of을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “새로 만들 수 있는 노드 종류를 보여주고 드래그해 캔버스에 놓을 자료를 준비합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -23647,12 +27645,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NotesPanel.jsx",
       "parentId": "file:src/components/NotesPanel.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 64,
       "lineEnd": 80,
-      "summary": "icon btn을(를) 처리하는 함수입니다.",
+      "summary": "IconBtn 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -23669,12 +27670,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NotesPanel.jsx",
       "parentId": "file:src/components/NotesPanel.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 82,
       "lineEnd": 133,
-      "summary": "row을(를) 목록 조회하는 함수입니다.",
+      "summary": "목록 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -23691,12 +27695,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NotesPanel.jsx",
       "parentId": "file:src/components/NotesPanel.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 249,
       "lineEnd": 565,
-      "summary": "note page을(를) 처리하는 함수입니다.",
+      "summary": "노트 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -23713,13 +27720,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NotesPanel.jsx",
       "parentId": "file:src/components/NotesPanel.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 568,
       "lineEnd": 854,
-      "summary": "notes panel을(를) 처리하는 함수입니다.",
+      "summary": "NotesPanel 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -23736,12 +27746,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NotesPanel.jsx",
       "parentId": "file:src/components/NotesPanel.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 137,
       "lineEnd": 195,
-      "summary": "stage tree row을(를) 처리하는 함수입니다.",
+      "summary": "단계 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -23758,12 +27771,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NotesPanel.jsx",
       "parentId": "file:src/components/NotesPanel.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 198,
       "lineEnd": 244,
-      "summary": "sub note row을(를) 처리하는 함수입니다.",
+      "summary": "노트 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -23780,12 +27796,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NotesPanel.jsx",
       "parentId": "file:src/components/NotesPanel.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 45,
       "lineEnd": 56,
-      "summary": "body preview text을(를) 처리하는 함수입니다.",
+      "summary": "요청 본문 · 실행 전 미리보기 · 텍스트에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -23802,12 +27821,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NotesPanel.jsx",
       "parentId": "file:src/components/NotesPanel.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 606,
       "lineEnd": 606,
-      "summary": "close을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 작업을 화면을 닫습니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -23824,12 +27846,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NotesPanel.jsx",
       "parentId": "file:src/components/NotesPanel.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 391,
       "lineEnd": 391,
-      "summary": "commit을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스와 동등한 분할 창에서 노트를 만들고 계층·연결 관계를 문서 형태로 탐색합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -23846,12 +27871,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NotesPanel.jsx",
       "parentId": "file:src/components/NotesPanel.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 715,
       "lineEnd": 718,
-      "summary": "note을(를) 생성하는 함수입니다.",
+      "summary": "노트 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -23868,12 +27896,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NotesPanel.jsx",
       "parentId": "file:src/components/NotesPanel.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 284,
       "lineEnd": 284,
-      "summary": "flush을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스와 동등한 분할 창에서 노트를 만들고 계층·연결 관계를 문서 형태로 탐색합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -23890,12 +27921,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NotesPanel.jsx",
       "parentId": "file:src/components/NotesPanel.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 599,
       "lineEnd": 599,
-      "summary": "fn을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스와 동등한 분할 창에서 노트를 만들고 계층·연결 관계를 문서 형태로 탐색합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -23912,12 +27946,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NotesPanel.jsx",
       "parentId": "file:src/components/NotesPanel.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 709,
       "lineEnd": 709,
-      "summary": "handle back을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -23934,12 +27971,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NotesPanel.jsx",
       "parentId": "file:src/components/NotesPanel.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 59,
       "lineEnd": 61,
-      "summary": "is part edge을(를) 처리하는 함수입니다.",
+      "summary": "시스템 파츠 · 연결선 상태나 허용 여부를 해당 상태인지 판단합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -23956,12 +27996,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NotesPanel.jsx",
       "parentId": "file:src/components/NotesPanel.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 38,
       "lineEnd": 43,
-      "summary": "node badge을(를) 처리하는 함수입니다.",
+      "summary": "노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -23978,12 +28021,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NotesPanel.jsx",
       "parentId": "file:src/components/NotesPanel.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 29,
       "lineEnd": 36,
-      "summary": "node title을(를) 처리하는 함수입니다.",
+      "summary": "노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -24000,12 +28046,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NotesPanel.jsx",
       "parentId": "file:src/components/NotesPanel.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 607,
       "lineEnd": 607,
-      "summary": "on key down을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스와 동등한 분할 창에서 노트를 만들고 계층·연결 관계를 문서 형태로 탐색합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -24022,12 +28071,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NotesPanel.jsx",
       "parentId": "file:src/components/NotesPanel.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 687,
       "lineEnd": 694,
-      "summary": "on move을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스와 동등한 분할 창에서 노트를 만들고 계층·연결 관계를 문서 형태로 탐색합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -24044,12 +28096,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NotesPanel.jsx",
       "parentId": "file:src/components/NotesPanel.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 695,
       "lineEnd": 699,
-      "summary": "on up을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스와 동등한 분할 창에서 노트를 만들고 계층·연결 관계를 문서 형태로 탐색합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -24066,12 +28121,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NotesPanel.jsx",
       "parentId": "file:src/components/NotesPanel.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 298,
       "lineEnd": 307,
-      "summary": "schedule body save을(를) 처리하는 함수입니다.",
+      "summary": "요청 본문 · 저장에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -24088,12 +28146,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NotesPanel.jsx",
       "parentId": "file:src/components/NotesPanel.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 289,
       "lineEnd": 297,
-      "summary": "schedule title save을(를) 처리하는 함수입니다.",
+      "summary": "저장에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -24110,12 +28171,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NotesPanel.jsx",
       "parentId": "file:src/components/NotesPanel.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 22,
       "lineEnd": 27,
-      "summary": "strip html을(를) 처리하는 함수입니다.",
+      "summary": "본문 HTML에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -24132,13 +28196,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/NotesPanel.jsx",
       "parentId": "file:src/components/NotesPanel.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 312,
       "lineEnd": 331,
-      "summary": "upload image을(를) 처리하는 비동기 함수입니다.",
+      "summary": "이미지에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "arrow",
         "async",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -24155,13 +28222,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/OpenInNotesButton.jsx",
       "parentId": "file:src/components/OpenInNotesButton.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 1,
       "lineEnd": 18,
-      "summary": "open in notes button을(를) 처리하는 함수입니다.",
+      "summary": "OpenInNotesButton 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -24178,13 +28248,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/ParticipantAvatar.jsx",
       "parentId": "file:src/components/ParticipantAvatar.jsx",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 3,
       "lineEnd": 41,
-      "summary": "participant avatar을(를) 처리하는 함수입니다.",
+      "summary": "아바타 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -24201,13 +28274,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/ScopedParticipants.jsx",
       "parentId": "file:src/components/ScopedParticipants.jsx",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 19,
       "lineEnd": 178,
-      "summary": "scoped participants을(를) 처리하는 함수입니다.",
+      "summary": "ScopedParticipants 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -24224,12 +28300,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/ScopedParticipants.jsx",
       "parentId": "file:src/components/ScopedParticipants.jsx",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 49,
       "lineEnd": 56,
-      "summary": "avatar을(를) 처리하는 함수입니다.",
+      "summary": "아바타에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "arrow",
@@ -24246,12 +28325,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/ScopedParticipants.jsx",
       "parentId": "file:src/components/ScopedParticipants.jsx",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 40,
       "lineEnd": 40,
-      "summary": "on key down을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스·그룹·노드별 참여자를 초대된 위치와 권한 범위에 맞춰 보여줍니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "arrow",
@@ -24268,12 +28350,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/ScopedParticipants.jsx",
       "parentId": "file:src/components/ScopedParticipants.jsx",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 15,
       "lineEnd": 17,
-      "summary": "participant key을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스·그룹·노드별 참여자를 초대된 위치와 권한 범위에 맞춰 보여줍니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -24290,12 +28375,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/ScopedParticipants.jsx",
       "parentId": "file:src/components/ScopedParticipants.jsx",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 5,
       "lineEnd": 13,
-      "summary": "relative last seen을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “캔버스·그룹·노드별 참여자를 초대된 위치와 권한 범위에 맞춰 보여줍니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -24312,12 +28400,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 191,
-      "lineEnd": 211,
-      "summary": "change entity list을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 234,
+      "lineEnd": 254,
+      "summary": "변경 · 시스템 실체 · 목록 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -24334,12 +28425,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 213,
-      "lineEnd": 255,
-      "summary": "changes view을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 256,
+      "lineEnd": 298,
+      "summary": "변경 내역 · 화면 상태 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -24351,17 +28445,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/components/SourceTwinPanel.jsx:EntityDetail",
       "kind": "function",
       "label": "EntityDetail",
-      "fingerprint": "bfb205563ef072de29f1",
+      "fingerprint": "6a1d5bad227c5ce1f616",
       "name": "EntityDetail",
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 74,
-      "lineEnd": 99,
-      "summary": "entity detail을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 88,
+      "lineEnd": 130,
+      "summary": "시스템 실체 · 상세 정보 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -24378,12 +28475,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 101,
-      "lineEnd": 128,
-      "summary": "entity row을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 132,
+      "lineEnd": 159,
+      "summary": "시스템 실체 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -24400,12 +28500,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 481,
-      "lineEnd": 556,
-      "summary": "history view을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 524,
+      "lineEnd": 599,
+      "summary": "상태 이력 · 화면 상태 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -24422,12 +28525,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 66,
-      "lineEnd": 72,
-      "summary": "icon button을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 80,
+      "lineEnd": 86,
+      "summary": "IconButton 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -24444,12 +28550,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 288,
-      "lineEnd": 446,
-      "summary": "local repository view을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 331,
+      "lineEnd": 489,
+      "summary": "로컬 저장소 · 코드 저장소 · 화면 상태 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -24466,12 +28575,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 257,
-      "lineEnd": 286,
-      "summary": "local sync plan preview을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 300,
+      "lineEnd": 329,
+      "summary": "로컬 저장소 · 동기화 · 실행 계획 · 실행 전 미리보기 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -24488,12 +28600,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 448,
-      "lineEnd": 479,
-      "summary": "operation plan preview을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 491,
+      "lineEnd": 522,
+      "summary": "실제 조작 · 실행 계획 · 실행 전 미리보기 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -24510,13 +28625,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 558,
-      "lineEnd": 897,
-      "summary": "source twin panel을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 601,
+      "lineEnd": 940,
+      "summary": "소스 코드 · 디지털 트윈 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -24528,17 +28646,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/components/SourceTwinPanel.jsx:StructureView",
       "kind": "function",
       "label": "StructureView",
-      "fingerprint": "fb185b7eb09d52c1f696",
+      "fingerprint": "e2c8ecb9784e84e21506",
       "name": "StructureView",
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 130,
-      "lineEnd": 189,
-      "summary": "structure view을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 161,
+      "lineEnd": 232,
+      "summary": "화면 상태 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -24555,12 +28676,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 788,
-      "lineEnd": 793,
-      "summary": "on move을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 831,
+      "lineEnd": 836,
+      "summary": "이 파일이 맡은 “로컬·GitHub 코드의 역할별 구조, 변경 이력, Git 동기화와 상태 스냅샷을 한 창에서 보여줍니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "arrow",
@@ -24577,12 +28701,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 794,
-      "lineEnd": 798,
-      "summary": "on up을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 837,
+      "lineEnd": 841,
+      "summary": "이 파일이 맡은 “로컬·GitHub 코드의 역할별 구조, 변경 이력, Git 동기화와 상태 스냅샷을 한 창에서 보여줍니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "arrow",
@@ -24599,12 +28726,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/SourceTwinPanel.jsx",
       "parentId": "file:src/components/SourceTwinPanel.jsx",
       "layer": "frontend",
-      "lineStart": 162,
-      "lineEnd": 167,
-      "summary": "toggle을(를) 처리하는 함수입니다.",
+      "area": "source-code-twin",
+      "lineStart": 194,
+      "lineEnd": 199,
+      "summary": "이 기능 작업을 켜거나 끕니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "arrow",
@@ -24621,10 +28751,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/SystemObservationCatalog.jsx",
       "parentId": "file:src/components/SystemObservationCatalog.jsx",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 42,
       "lineEnd": 118,
-      "summary": "system observation catalog을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 운영 관측 · 조회 가능 정보 목록 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "frontend",
         "function"
@@ -24644,10 +28777,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/SystemObservationCatalog.jsx",
       "parentId": "file:src/components/SystemObservationCatalog.jsx",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 28,
       "lineEnd": 40,
-      "summary": "formatted value을(를) 처리하는 함수입니다.",
+      "summary": "값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "frontend",
         "function"
       ],
@@ -24666,10 +28802,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/Toolbar.jsx",
       "parentId": "file:src/components/Toolbar.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 321,
       "lineEnd": 344,
-      "summary": "mobile btn을(를) 처리하는 함수입니다.",
+      "summary": "MobileBtn 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -24688,10 +28827,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/Toolbar.jsx",
       "parentId": "file:src/components/Toolbar.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 346,
       "lineEnd": 382,
-      "summary": "runtime button을(를) 처리하는 함수입니다.",
+      "summary": "실제 운영 상태 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -24710,10 +28852,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/Toolbar.jsx",
       "parentId": "file:src/components/Toolbar.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 266,
       "lineEnd": 282,
-      "summary": "small icon을(를) 처리하는 함수입니다.",
+      "summary": "SmallIcon 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -24732,10 +28877,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/Toolbar.jsx",
       "parentId": "file:src/components/Toolbar.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 284,
       "lineEnd": 319,
-      "summary": "tool btn을(를) 처리하는 함수입니다.",
+      "summary": "ToolBtn 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -24754,10 +28902,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/Toolbar.jsx",
       "parentId": "file:src/components/Toolbar.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 4,
       "lineEnd": 80,
-      "summary": "toolbar을(를) 처리하는 함수입니다.",
+      "summary": "Toolbar 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "canvas-interface",
         "exported",
         "frontend",
         "function"
@@ -24777,10 +28928,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/Toolbar.jsx",
       "parentId": "file:src/components/Toolbar.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 85,
       "lineEnd": 255,
-      "summary": "view selector을(를) 처리하는 함수입니다.",
+      "summary": "화면 상태 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -24799,11 +28953,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/Toolbar.jsx",
       "parentId": "file:src/components/Toolbar.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 12,
       "lineEnd": 12,
-      "summary": "close palette을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 작업을 화면을 닫습니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -24821,11 +28978,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/Toolbar.jsx",
       "parentId": "file:src/components/Toolbar.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 104,
       "lineEnd": 104,
-      "summary": "commit rename을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “노드 추가, 전체 보기, 되돌리기 같은 캔버스의 주요 명령을 모아 보여줍니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -24843,11 +29003,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/Toolbar.jsx",
       "parentId": "file:src/components/Toolbar.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 13,
       "lineEnd": 13,
-      "summary": "handle pick을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -24865,11 +29028,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/Toolbar.jsx",
       "parentId": "file:src/components/Toolbar.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 97,
       "lineEnd": 97,
-      "summary": "on doc을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “노드 추가, 전체 보기, 되돌리기 같은 캔버스의 주요 명령을 모아 보여줍니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -24887,11 +29053,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/Toolbar.jsx",
       "parentId": "file:src/components/Toolbar.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 103,
       "lineEnd": 103,
-      "summary": "pick을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “노드 추가, 전체 보기, 되돌리기 같은 캔버스의 주요 명령을 모아 보여줍니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -24909,10 +29078,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/components/Toolbar.jsx",
       "parentId": "file:src/components/Toolbar.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 257,
       "lineEnd": 264,
-      "summary": "row btn을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “노드 추가, 전체 보기, 되돌리기 같은 캔버스의 주요 명령을 모아 보여줍니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -24931,11 +29103,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/demoCanvases.js",
       "parentId": "file:src/demoCanvases.js",
       "layer": "frontend",
+      "area": "canvas-model",
       "lineStart": 27,
       "lineEnd": 27,
-      "summary": "col x을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “개발과 초기 화면에서 사용할 수 있는 예시 캔버스 자료를 정의합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-model",
         "frontend"
       ],
       "details": {
@@ -24953,11 +29128,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/demoCanvases.js",
       "parentId": "file:src/demoCanvases.js",
       "layer": "frontend",
+      "area": "canvas-model",
       "lineStart": 21,
       "lineEnd": 21,
-      "summary": "flow을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “개발과 초기 화면에서 사용할 수 있는 예시 캔버스 자료를 정의합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-model",
         "frontend"
       ],
       "details": {
@@ -24975,11 +29153,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/demoCanvases.js",
       "parentId": "file:src/demoCanvases.js",
       "layer": "frontend",
+      "area": "canvas-model",
       "lineStart": 18,
       "lineEnd": 20,
-      "summary": "memo을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “개발과 초기 화면에서 사용할 수 있는 예시 캔버스 자료를 정의합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-model",
         "frontend"
       ],
       "details": {
@@ -24997,11 +29178,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/demoCanvases.js",
       "parentId": "file:src/demoCanvases.js",
       "layer": "frontend",
+      "area": "canvas-model",
       "lineStart": 22,
       "lineEnd": 22,
-      "summary": "note을(를) 처리하는 함수입니다.",
+      "summary": "노트에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-model",
         "frontend"
       ],
       "details": {
@@ -25019,11 +29203,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/demoCanvases.js",
       "parentId": "file:src/demoCanvases.js",
       "layer": "frontend",
+      "area": "canvas-model",
       "lineStart": 15,
       "lineEnd": 17,
-      "summary": "stage을(를) 처리하는 함수입니다.",
+      "summary": "단계에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-model",
         "frontend"
       ],
       "details": {
@@ -25041,10 +29228,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/edges/StubEdge.jsx",
       "parentId": "file:src/edges/StubEdge.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 10,
       "lineEnd": 127,
-      "summary": "stub edge을(를) 처리하는 함수입니다.",
+      "summary": "연결선 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "canvas-interface",
         "exported",
         "frontend",
         "function"
@@ -25064,10 +29254,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/edges/stubEdgeGeometry.js",
       "parentId": "file:src/edges/stubEdgeGeometry.js",
       "layer": "frontend",
+      "area": "canvas-model",
       "lineStart": 15,
       "lineEnd": 22,
-      "summary": "corrected anchor을(를) 처리하는 함수입니다.",
+      "summary": "연결점에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-model",
         "frontend",
         "function"
       ],
@@ -25086,11 +29279,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/edges/stubEdgeGeometry.js",
       "parentId": "file:src/edges/stubEdgeGeometry.js",
       "layer": "frontend",
+      "area": "canvas-model",
       "lineStart": 12,
       "lineEnd": 12,
-      "summary": "direction을(를) 처리하는 함수입니다.",
+      "summary": "방향에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-model",
         "frontend"
       ],
       "details": {
@@ -25108,10 +29304,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/edges/stubEdgeGeometry.js",
       "parentId": "file:src/edges/stubEdgeGeometry.js",
       "layer": "frontend",
+      "area": "canvas-model",
       "lineStart": 24,
       "lineEnd": 52,
-      "summary": "stub edge geometry을(를) 조회하는 함수입니다.",
+      "summary": "연결선 정보를 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "canvas-model",
         "exported",
         "frontend",
         "function"
@@ -25131,11 +29330,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/edges/stubEdgeGeometry.js",
       "parentId": "file:src/edges/stubEdgeGeometry.js",
       "layer": "frontend",
+      "area": "canvas-model",
       "lineStart": 13,
       "lineEnd": 13,
-      "summary": "is part handle을(를) 처리하는 함수입니다.",
+      "summary": "시스템 파츠 상태나 허용 여부를 해당 상태인지 판단합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-model",
         "frontend"
       ],
       "details": {
@@ -25153,10 +29355,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/canvasGeometry.js",
       "parentId": "file:src/lib/canvasGeometry.js",
       "layer": "frontend",
+      "area": "canvas-model",
       "lineStart": 1,
       "lineEnd": 14,
-      "summary": "absolute node position을(를) 처리하는 함수입니다.",
+      "summary": "노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "canvas-model",
         "exported",
         "frontend",
         "function"
@@ -25176,10 +29381,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/canvasGeometry.js",
       "parentId": "file:src/lib/canvasGeometry.js",
       "layer": "frontend",
+      "area": "canvas-model",
       "lineStart": 16,
       "lineEnd": 37,
-      "summary": "bounds for node ids을(를) 처리하는 함수입니다.",
+      "summary": "화면 범위 · 노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "canvas-model",
         "exported",
         "frontend",
         "function"
@@ -25199,10 +29407,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/canvasMerge.js",
       "parentId": "file:src/lib/canvasMerge.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 64,
       "lineEnd": 75,
-      "summary": "merge canvas snapshots을(를) 처리하는 함수입니다.",
+      "summary": "동시 변경 병합 · 캔버스에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "data-storage-sync",
         "exported",
         "frontend",
         "function"
@@ -25222,10 +29433,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/canvasMerge.js",
       "parentId": "file:src/lib/canvasMerge.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 44,
       "lineEnd": 62,
-      "summary": "merge items by id을(를) 처리하는 함수입니다.",
+      "summary": "동시 변경 병합 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "data-storage-sync",
         "frontend",
         "function"
       ],
@@ -25244,10 +29458,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/canvasMerge.js",
       "parentId": "file:src/lib/canvasMerge.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 12,
       "lineEnd": 42,
-      "summary": "merge value을(를) 처리하는 함수입니다.",
+      "summary": "동시 변경 병합 · 값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "data-storage-sync",
         "frontend",
         "function"
       ],
@@ -25266,11 +29483,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/canvasMerge.js",
       "parentId": "file:src/lib/canvasMerge.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 8,
       "lineEnd": 10,
-      "summary": "plain object을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “브라우저와 서버에서 각각 바뀐 캔버스 자료를 충돌 없이 합칠 기준을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "data-storage-sync",
         "frontend"
       ],
       "details": {
@@ -25288,11 +29508,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/canvasMerge.js",
       "parentId": "file:src/lib/canvasMerge.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 3,
       "lineEnd": 6,
-      "summary": "same을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “브라우저와 서버에서 각각 바뀐 캔버스 자료를 충돌 없이 합칠 기준을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "data-storage-sync",
         "frontend"
       ],
       "details": {
@@ -25310,10 +29533,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/canvasNavigation.js",
       "parentId": "file:src/lib/canvasNavigation.js",
       "layer": "frontend",
+      "area": "canvas-model",
       "lineStart": 25,
       "lineEnd": 31,
-      "summary": "choose own canvas to restore을(를) 처리하는 함수입니다.",
+      "summary": "캔버스에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "canvas-model",
         "exported",
         "frontend",
         "function"
@@ -25333,10 +29559,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/canvasNavigation.js",
       "parentId": "file:src/lib/canvasNavigation.js",
       "layer": "frontend",
+      "area": "canvas-model",
       "lineStart": 17,
       "lineEnd": 20,
-      "summary": "clear last opened canvas을(를) 처리하는 함수입니다.",
+      "summary": "비우기 · 캔버스에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "canvas-model",
         "exported",
         "frontend",
         "function"
@@ -25356,10 +29585,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/canvasNavigation.js",
       "parentId": "file:src/lib/canvasNavigation.js",
       "layer": "frontend",
+      "area": "canvas-model",
       "lineStart": 3,
       "lineEnd": 5,
-      "summary": "is shared canvas id을(를) 처리하는 함수입니다.",
+      "summary": "캔버스 · 식별자 상태나 허용 여부를 해당 상태인지 판단합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "canvas-model",
         "exported",
         "frontend",
         "function"
@@ -25379,10 +29611,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/canvasNavigation.js",
       "parentId": "file:src/lib/canvasNavigation.js",
       "layer": "frontend",
+      "area": "canvas-model",
       "lineStart": 7,
       "lineEnd": 10,
-      "summary": "last opened canvas을(를) 불러오기하는 함수입니다.",
+      "summary": "캔버스 정보를 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "canvas-model",
         "exported",
         "frontend",
         "function"
@@ -25402,10 +29637,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/canvasNavigation.js",
       "parentId": "file:src/lib/canvasNavigation.js",
       "layer": "frontend",
+      "area": "canvas-model",
       "lineStart": 12,
       "lineEnd": 15,
-      "summary": "save last opened canvas을(를) 처리하는 함수입니다.",
+      "summary": "저장 · 캔버스에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "canvas-model",
         "exported",
         "frontend",
         "function"
@@ -25425,10 +29663,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/canvasSchemaGuard.js",
       "parentId": "file:src/lib/canvasSchemaGuard.js",
       "layer": "frontend",
+      "area": "canvas-model",
       "lineStart": 4,
       "lineEnd": 8,
-      "summary": "canvas schema guard error constructor을(를) 처리하는 함수입니다.",
+      "summary": "캔버스 · 데이터 구조 · 보호 규칙 · 오류 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-model",
         "class-method",
         "frontend"
       ],
@@ -25447,10 +29688,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/canvasSchemaGuard.js",
       "parentId": "file:src/lib/canvasSchemaGuard.js",
       "layer": "frontend",
+      "area": "canvas-model",
       "lineStart": 11,
       "lineEnd": 14,
-      "summary": "canvas write error을(를) 처리하는 함수입니다.",
+      "summary": "캔버스 · 오류에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "canvas-model",
         "exported",
         "frontend",
         "function"
@@ -25470,10 +29714,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/canvasSync.js",
       "parentId": "file:src/lib/canvasSync.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 15,
       "lineEnd": 18,
-      "summary": "append history snapshot을(를) 처리하는 함수입니다.",
+      "summary": "상태 이력 · 상태 스냅샷에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "data-storage-sync",
         "exported",
         "frontend",
         "function"
@@ -25493,10 +29740,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/canvasSync.js",
       "parentId": "file:src/lib/canvasSync.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 1,
       "lineEnd": 9,
-      "summary": "canvas snapshot signature을(를) 처리하는 함수입니다.",
+      "summary": "캔버스 · 상태 스냅샷 · 요청 서명에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "data-storage-sync",
         "exported",
         "frontend",
         "function"
@@ -25516,10 +29766,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/canvasSync.js",
       "parentId": "file:src/lib/canvasSync.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 11,
       "lineEnd": 13,
-      "summary": "same canvas snapshot을(를) 처리하는 함수입니다.",
+      "summary": "캔버스 · 상태 스냅샷에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "data-storage-sync",
         "exported",
         "frontend",
         "function"
@@ -25539,11 +29792,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/cloudStorage.js",
       "parentId": "file:src/lib/cloudStorage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 5,
       "lineEnd": 9,
-      "summary": "canvas conflict error constructor을(를) 처리하는 함수입니다.",
+      "summary": "캔버스 · 오류 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "class-method",
+        "data-storage-sync",
         "frontend"
       ],
       "details": {
@@ -25561,11 +29817,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/cloudStorage.js",
       "parentId": "file:src/lib/cloudStorage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 70,
       "lineEnd": 74,
-      "summary": "canvas을(를) 삭제하는 비동기 함수입니다.",
+      "summary": "캔버스 대상을 삭제합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
+        "data-storage-sync",
         "exported",
         "frontend",
         "function"
@@ -25585,11 +29844,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/cloudStorage.js",
       "parentId": "file:src/lib/cloudStorage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 50,
       "lineEnd": 58,
-      "summary": "all canvases을(를) 불러오기하는 비동기 함수입니다.",
+      "summary": "전체 · 캔버스 목록 정보를 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
+        "data-storage-sync",
         "exported",
         "frontend",
         "function"
@@ -25609,11 +29871,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/cloudStorage.js",
       "parentId": "file:src/lib/cloudStorage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 60,
       "lineEnd": 68,
-      "summary": "canvas row을(를) 불러오기하는 비동기 함수입니다.",
+      "summary": "캔버스 정보를 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
+        "data-storage-sync",
         "exported",
         "frontend",
         "function"
@@ -25633,11 +29898,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/cloudStorage.js",
       "parentId": "file:src/lib/cloudStorage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 84,
       "lineEnd": 92,
-      "summary": "user prefs을(를) 불러오기하는 비동기 함수입니다.",
+      "summary": "사용자 정보를 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
+        "data-storage-sync",
         "exported",
         "frontend",
         "function"
@@ -25657,10 +29925,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/cloudStorage.js",
       "parentId": "file:src/lib/cloudStorage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 12,
       "lineEnd": 15,
-      "summary": "next revision을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “Supabase에서 캔버스 목록과 노드·연결선을 불러오고 저장·삭제합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "data-storage-sync",
         "frontend",
         "function"
       ],
@@ -25679,11 +29950,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/cloudStorage.js",
       "parentId": "file:src/lib/cloudStorage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 17,
       "lineEnd": 48,
-      "summary": "save canvas을(를) 처리하는 비동기 함수입니다.",
+      "summary": "저장 · 캔버스에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
+        "data-storage-sync",
         "exported",
         "frontend",
         "function"
@@ -25703,11 +29977,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/cloudStorage.js",
       "parentId": "file:src/lib/cloudStorage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 76,
       "lineEnd": 82,
-      "summary": "save user prefs을(를) 처리하는 비동기 함수입니다.",
+      "summary": "저장 · 사용자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
+        "data-storage-sync",
         "exported",
         "frontend",
         "function"
@@ -25727,11 +30004,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/digitalTwinAdapters.js",
       "parentId": "file:src/lib/digitalTwinAdapters.js",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 24,
       "lineEnd": 26,
-      "summary": "digital twin canvas을(를) 검사하는 비동기 함수입니다.",
+      "summary": "디지털 트윈 · 캔버스 상태나 허용 여부를 실제 상태와 대조합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
+        "digital-twin-engine",
         "exported",
         "frontend",
         "function"
@@ -25751,13 +30031,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/imageStorage.js",
       "parentId": "file:src/lib/imageStorage.js",
       "layer": "frontend",
+      "area": "media-files",
       "lineStart": 45,
       "lineEnd": 50,
-      "summary": "data url to blob을(를) 처리하는 함수입니다.",
+      "summary": "데이터 · 웹 주소에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "media-files"
       ],
       "details": {
         "functionKind": "function",
@@ -25774,14 +30057,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/imageStorage.js",
       "parentId": "file:src/lib/imageStorage.js",
       "layer": "frontend",
+      "area": "media-files",
       "lineStart": 12,
       "lineEnd": 16,
-      "summary": "canvas image url을(를) 조회하는 비동기 함수입니다.",
+      "summary": "캔버스 · 이미지 · 웹 주소 정보를 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "frontend",
-        "function"
+        "function",
+        "media-files"
       ],
       "details": {
         "functionKind": "function",
@@ -25798,12 +30084,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/imageStorage.js",
       "parentId": "file:src/lib/imageStorage.js",
       "layer": "frontend",
+      "area": "media-files",
       "lineStart": 5,
       "lineEnd": 10,
-      "summary": "safe segment을(를) 처리하는 함수입니다.",
+      "summary": "허용 범위로 제한에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "media-files"
       ],
       "details": {
         "functionKind": "function",
@@ -25820,14 +30109,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/imageStorage.js",
       "parentId": "file:src/lib/imageStorage.js",
       "layer": "frontend",
+      "area": "media-files",
       "lineStart": 18,
       "lineEnd": 43,
-      "summary": "upload canvas image을(를) 처리하는 비동기 함수입니다.",
+      "summary": "캔버스 · 이미지에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "frontend",
-        "function"
+        "function",
+        "media-files"
       ],
       "details": {
         "functionKind": "function",
@@ -25844,13 +30136,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/localConnectorApi.js",
       "parentId": "file:src/lib/localConnectorApi.js",
       "layer": "frontend",
+      "area": "source-code-twin",
       "lineStart": 43,
       "lineEnd": 45,
-      "summary": "local git sync을(를) 적용하는 함수입니다.",
+      "summary": "로컬 저장소 · Git 상태 · 동기화 작업을 승인된 변경을 적용합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -25867,13 +30162,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/localConnectorApi.js",
       "parentId": "file:src/lib/localConnectorApi.js",
       "layer": "frontend",
+      "area": "source-code-twin",
       "lineStart": 31,
       "lineEnd": 33,
-      "summary": "local connector을(를) 생성하는 함수입니다.",
+      "summary": "로컬 저장소 · 로컬 커넥터 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -25890,13 +30188,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/localConnectorApi.js",
       "parentId": "file:src/lib/localConnectorApi.js",
       "layer": "frontend",
+      "area": "source-code-twin",
       "lineStart": 27,
       "lineEnd": 29,
-      "summary": "local connectors을(를) 불러오기하는 함수입니다.",
+      "summary": "로컬 저장소 정보를 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -25913,13 +30214,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/localConnectorApi.js",
       "parentId": "file:src/lib/localConnectorApi.js",
       "layer": "frontend",
+      "area": "source-code-twin",
       "lineStart": 3,
       "lineEnd": 21,
-      "summary": "local connector request을(를) 처리하는 비동기 함수입니다.",
+      "summary": "로컬 저장소 · 로컬 커넥터 · 요청에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "frontend",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -25936,12 +30240,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/localConnectorApi.js",
       "parentId": "file:src/lib/localConnectorApi.js",
       "layer": "frontend",
+      "area": "source-code-twin",
       "lineStart": 23,
       "lineEnd": 25,
-      "summary": "post을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “브라우저에서 로컬 커넥터 생성·해제·상태 조회와 Git 동기화 계획 요청을 서버로 보냅니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -25958,13 +30265,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/localConnectorApi.js",
       "parentId": "file:src/lib/localConnectorApi.js",
       "layer": "frontend",
+      "area": "source-code-twin",
       "lineStart": 39,
       "lineEnd": 41,
-      "summary": "preview local git sync을(를) 처리하는 함수입니다.",
+      "summary": "실행 전 미리보기 · 로컬 저장소 · Git 상태 · 동기화에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -25981,13 +30291,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/localConnectorApi.js",
       "parentId": "file:src/lib/localConnectorApi.js",
       "layer": "frontend",
+      "area": "source-code-twin",
       "lineStart": 35,
       "lineEnd": 37,
-      "summary": "revoke local connector을(를) 처리하는 함수입니다.",
+      "summary": "로컬 저장소 · 로컬 커넥터 대상을 권한을 해제합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -26004,10 +30317,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/mcpTokens.js",
       "parentId": "file:src/lib/mcpTokens.js",
       "layer": "frontend",
+      "area": "ai-integration",
       "lineStart": 33,
       "lineEnd": 50,
-      "summary": "token을(를) 생성하는 비동기 함수입니다.",
+      "summary": "연결 토큰 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "frontend",
@@ -26028,10 +30344,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/mcpTokens.js",
       "parentId": "file:src/lib/mcpTokens.js",
       "layer": "frontend",
+      "area": "ai-integration",
       "lineStart": 7,
       "lineEnd": 11,
-      "summary": "current user id을(를) 처리하는 비동기 함수입니다.",
+      "summary": "현재 상태 · 사용자 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "frontend",
         "function"
@@ -26051,10 +30370,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/mcpTokens.js",
       "parentId": "file:src/lib/mcpTokens.js",
       "layer": "frontend",
+      "area": "ai-integration",
       "lineStart": 52,
       "lineEnd": 55,
-      "summary": "token을(를) 삭제하는 비동기 함수입니다.",
+      "summary": "연결 토큰 대상을 삭제합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "frontend",
@@ -26075,10 +30397,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/mcpTokens.js",
       "parentId": "file:src/lib/mcpTokens.js",
       "layer": "frontend",
+      "area": "ai-integration",
       "lineStart": 13,
       "lineEnd": 25,
-      "summary": "my tokens을(를) 목록 조회하는 비동기 함수입니다.",
+      "summary": "목록 정보를 목록을 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "exported",
         "frontend",
@@ -26099,10 +30424,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/mcpTokens.js",
       "parentId": "file:src/lib/mcpTokens.js",
       "layer": "frontend",
+      "area": "ai-integration",
       "lineStart": 27,
       "lineEnd": 31,
-      "summary": "sha256을(를) 처리하는 비동기 함수입니다.",
+      "summary": "이 파일이 맡은 “사용자가 AI 커넥터에 쓸 MCP 토큰을 발급·조회·폐기하도록 서버와 통신합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
+        "ai-integration",
         "async",
         "frontend",
         "function"
@@ -26122,13 +30450,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/presence.js",
       "parentId": "file:src/lib/presence.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 13,
       "lineEnd": 42,
-      "summary": "join canvas presence을(를) 처리하는 함수입니다.",
+      "summary": "캔버스에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -26145,12 +30476,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/presence.js",
       "parentId": "file:src/lib/presence.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 18,
       "lineEnd": 29,
-      "summary": "report을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “같은 캔버스에 접속 중인 참여자와 마지막 활동 상태를 실시간으로 교환합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "arrow",
@@ -26167,13 +30501,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/profiles.js",
       "parentId": "file:src/lib/profiles.js",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 7,
       "lineEnd": 11,
-      "summary": "current user id을(를) 처리하는 비동기 함수입니다.",
+      "summary": "현재 상태 · 사용자 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "frontend",
-        "function"
+        "function",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "function",
@@ -26190,14 +30527,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/profiles.js",
       "parentId": "file:src/lib/profiles.js",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 20,
       "lineEnd": 30,
-      "summary": "my profile을(를) 조회하는 비동기 함수입니다.",
+      "summary": "프로필 정보를 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "frontend",
-        "function"
+        "function",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "function",
@@ -26214,14 +30554,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/profiles.js",
       "parentId": "file:src/lib/profiles.js",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 64,
       "lineEnd": 75,
-      "summary": "profiles을(를) 조회하는 비동기 함수입니다.",
+      "summary": "이 기능 정보를 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "frontend",
-        "function"
+        "function",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "function",
@@ -26238,14 +30581,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/profiles.js",
       "parentId": "file:src/lib/profiles.js",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 87,
       "lineEnd": 93,
-      "summary": "my settings을(를) 불러오기하는 비동기 함수입니다.",
+      "summary": "이 기능 정보를 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "frontend",
-        "function"
+        "function",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "function",
@@ -26262,12 +30608,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/profiles.js",
       "parentId": "file:src/lib/profiles.js",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 14,
       "lineEnd": 18,
-      "summary": "sanitize glyph을(를) 처리하는 함수입니다.",
+      "summary": "위험한 입력 제거에서 위험한 내용을 제거합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "function",
@@ -26284,14 +30633,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/profiles.js",
       "parentId": "file:src/lib/profiles.js",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 78,
       "lineEnd": 85,
-      "summary": "save my settings을(를) 처리하는 비동기 함수입니다.",
+      "summary": "저장에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "frontend",
-        "function"
+        "function",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "function",
@@ -26308,14 +30660,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/profiles.js",
       "parentId": "file:src/lib/profiles.js",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 98,
       "lineEnd": 103,
-      "summary": "touch last seen을(를) 처리하는 비동기 함수입니다.",
+      "summary": "이 파일이 맡은 “사용자 프로필을 불러오고 이름·아바타·색상 변경을 저장합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "frontend",
-        "function"
+        "function",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "function",
@@ -26332,14 +30687,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/profiles.js",
       "parentId": "file:src/lib/profiles.js",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 46,
       "lineEnd": 61,
-      "summary": "upsert my email을(를) 처리하는 비동기 함수입니다.",
+      "summary": "이 파일이 맡은 “사용자 프로필을 불러오고 이름·아바타·색상 변경을 저장합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "frontend",
-        "function"
+        "function",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "function",
@@ -26356,14 +30714,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/profiles.js",
       "parentId": "file:src/lib/profiles.js",
       "layer": "frontend",
+      "area": "identity-profile",
       "lineStart": 32,
       "lineEnd": 40,
-      "summary": "upsert my profile을(를) 처리하는 비동기 함수입니다.",
+      "summary": "프로필에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "frontend",
-        "function"
+        "function",
+        "identity-profile"
       ],
       "details": {
         "functionKind": "function",
@@ -26380,12 +30741,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/sanitizeHtml.js",
       "parentId": "file:src/lib/sanitizeHtml.js",
       "layer": "frontend",
+      "area": "security-privacy",
       "lineStart": 20,
       "lineEnd": 38,
-      "summary": "sanitize attrs을(를) 처리하는 함수입니다.",
+      "summary": "위험한 입력 제거에서 위험한 내용을 제거합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "security-privacy"
       ],
       "details": {
         "functionKind": "function",
@@ -26402,13 +30766,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/sanitizeHtml.js",
       "parentId": "file:src/lib/sanitizeHtml.js",
       "layer": "frontend",
+      "area": "security-privacy",
       "lineStart": 57,
       "lineEnd": 65,
-      "summary": "sanitize external url을(를) 처리하는 함수입니다.",
+      "summary": "외부 공개 자료 · 웹 주소에서 위험한 내용을 제거합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "security-privacy"
       ],
       "details": {
         "functionKind": "function",
@@ -26425,13 +30792,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/sanitizeHtml.js",
       "parentId": "file:src/lib/sanitizeHtml.js",
       "layer": "frontend",
+      "area": "security-privacy",
       "lineStart": 40,
       "lineEnd": 55,
-      "summary": "sanitize html을(를) 처리하는 함수입니다.",
+      "summary": "본문 HTML에서 위험한 내용을 제거합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "security-privacy"
       ],
       "details": {
         "functionKind": "function",
@@ -26448,13 +30818,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/sanitizeHtml.js",
       "parentId": "file:src/lib/sanitizeHtml.js",
       "layer": "frontend",
+      "area": "security-privacy",
       "lineStart": 67,
       "lineEnd": 86,
-      "summary": "sanitize node data을(를) 처리하는 함수입니다.",
+      "summary": "노드 · 데이터에서 위험한 내용을 제거합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "security-privacy"
       ],
       "details": {
         "functionKind": "function",
@@ -26471,14 +30844,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/shareLaunchCoordinator.js",
       "parentId": "file:src/lib/shareLaunchCoordinator.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 44,
       "lineEnd": 65,
-      "summary": "claim share launch을(를) 처리하는 비동기 함수입니다.",
+      "summary": "실행 권한 선점 · 공유에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -26495,13 +30871,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/shareLaunchCoordinator.js",
       "parentId": "file:src/lib/shareLaunchCoordinator.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 15,
       "lineEnd": 42,
-      "summary": "claim share launch fallback을(를) 처리하는 함수입니다.",
+      "summary": "실행 권한 선점 · 공유에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -26518,12 +30897,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/shareLaunchCoordinator.js",
       "parentId": "file:src/lib/shareLaunchCoordinator.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 21,
       "lineEnd": 21,
-      "summary": "claim share launch fallback release을(를) 처리하는 함수입니다.",
+      "summary": "실행 권한 선점 · 공유에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "method"
+        "method",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "method",
@@ -26540,12 +30922,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/shareLaunchCoordinator.js",
       "parentId": "file:src/lib/shareLaunchCoordinator.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 30,
       "lineEnd": 37,
-      "summary": "claim share launch fallback release을(를) 처리하는 함수입니다.",
+      "summary": "실행 권한 선점 · 공유에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "method"
+        "method",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "method",
@@ -26562,12 +30947,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/shareLaunchCoordinator.js",
       "parentId": "file:src/lib/shareLaunchCoordinator.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 40,
       "lineEnd": 40,
-      "summary": "claim share launch fallback release을(를) 처리하는 함수입니다.",
+      "summary": "실행 권한 선점 · 공유에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "method"
+        "method",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "method",
@@ -26584,13 +30972,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/shareLaunchCoordinator.js",
       "parentId": "file:src/lib/shareLaunchCoordinator.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 4,
       "lineEnd": 13,
-      "summary": "share token fingerprint을(를) 처리하는 함수입니다.",
+      "summary": "공유 · 연결 토큰 · 변경 식별값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -26607,13 +30998,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/sharedCanvasApi.js",
       "parentId": "file:src/lib/sharedCanvasApi.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 33,
       "lineEnd": 35,
-      "summary": "shared canvas을(를) 조회하는 함수입니다.",
+      "summary": "캔버스 정보를 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -26630,13 +31024,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/sharedCanvasApi.js",
       "parentId": "file:src/lib/sharedCanvasApi.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 28,
       "lineEnd": 31,
-      "summary": "canvas participants을(를) 목록 조회하는 함수입니다.",
+      "summary": "캔버스 정보를 목록을 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -26653,13 +31050,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/sharedCanvasApi.js",
       "parentId": "file:src/lib/sharedCanvasApi.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 24,
       "lineEnd": 26,
-      "summary": "shared canvases을(를) 목록 조회하는 함수입니다.",
+      "summary": "캔버스 목록 정보를 목록을 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -26676,13 +31076,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/sharedCanvasApi.js",
       "parentId": "file:src/lib/sharedCanvasApi.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 5,
       "lineEnd": 22,
-      "summary": "request을(를) 처리하는 비동기 함수입니다.",
+      "summary": "요청에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -26699,13 +31102,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/sharedCanvasApi.js",
       "parentId": "file:src/lib/sharedCanvasApi.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 44,
       "lineEnd": 49,
-      "summary": "member view restriction을(를) 설정하는 함수입니다.",
+      "summary": "화면 상태 대상을 설정합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -26722,13 +31128,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/sharedCanvasApi.js",
       "parentId": "file:src/lib/sharedCanvasApi.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 37,
       "lineEnd": 42,
-      "summary": "shared canvas을(를) 수정하는 함수입니다.",
+      "summary": "캔버스 대상을 변경합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -26745,14 +31154,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/shares.js",
       "parentId": "file:src/lib/shares.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 152,
       "lineEnd": 156,
-      "summary": "claim email invite을(를) 처리하는 비동기 함수입니다.",
+      "summary": "실행 권한 선점 · 초대에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -26769,14 +31181,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/shares.js",
       "parentId": "file:src/lib/shares.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 128,
       "lineEnd": 132,
-      "summary": "claim share token을(를) 처리하는 비동기 함수입니다.",
+      "summary": "실행 권한 선점 · 공유 · 연결 토큰에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -26793,14 +31208,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/shares.js",
       "parentId": "file:src/lib/shares.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 27,
       "lineEnd": 40,
-      "summary": "link share을(를) 생성하는 비동기 함수입니다.",
+      "summary": "공유 링크 · 공유 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -26817,14 +31235,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/shares.js",
       "parentId": "file:src/lib/shares.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 13,
       "lineEnd": 25,
-      "summary": "share을(를) 생성하는 비동기 함수입니다.",
+      "summary": "공유 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -26841,13 +31262,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/shares.js",
       "parentId": "file:src/lib/shares.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 7,
       "lineEnd": 11,
-      "summary": "current user id을(를) 처리하는 비동기 함수입니다.",
+      "summary": "현재 상태 · 사용자 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -26864,14 +31288,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/shares.js",
       "parentId": "file:src/lib/shares.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 123,
       "lineEnd": 126,
-      "summary": "share을(를) 삭제하는 비동기 함수입니다.",
+      "summary": "공유 대상을 삭제합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -26888,14 +31315,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/shares.js",
       "parentId": "file:src/lib/shares.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 140,
       "lineEnd": 144,
-      "summary": "share link preview을(를) 조회하는 비동기 함수입니다.",
+      "summary": "공유 · 공유 링크 · 실행 전 미리보기 정보를 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -26912,14 +31342,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/shares.js",
       "parentId": "file:src/lib/shares.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 134,
       "lineEnd": 138,
-      "summary": "is share link active을(를) 처리하는 비동기 함수입니다.",
+      "summary": "공유 · 공유 링크 · 현재 선택 상태나 허용 여부를 해당 상태인지 판단합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -26936,14 +31369,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/shares.js",
       "parentId": "file:src/lib/shares.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 112,
       "lineEnd": 115,
-      "summary": "kick member을(를) 처리하는 비동기 함수입니다.",
+      "summary": "이 파일이 맡은 “초대, 공유 링크, 참여자 권한과 나가기·추방 요청을 서버와 주고받습니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -26960,14 +31396,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/shares.js",
       "parentId": "file:src/lib/shares.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 118,
       "lineEnd": 121,
-      "summary": "leave shared canvas을(를) 처리하는 비동기 함수입니다.",
+      "summary": "캔버스에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -26984,14 +31423,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/shares.js",
       "parentId": "file:src/lib/shares.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 146,
       "lineEnd": 150,
-      "summary": "pending email invites을(를) 목록 조회하는 비동기 함수입니다.",
+      "summary": "목록 정보를 목록을 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -27008,14 +31450,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/shares.js",
       "parentId": "file:src/lib/shares.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 73,
       "lineEnd": 101,
-      "summary": "share members을(를) 목록 조회하는 비동기 함수입니다.",
+      "summary": "공유 정보를 목록을 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -27032,14 +31477,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/shares.js",
       "parentId": "file:src/lib/shares.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 42,
       "lineEnd": 68,
-      "summary": "shares을(를) 목록 조회하는 비동기 함수입니다.",
+      "summary": "목록 정보를 목록을 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -27056,14 +31504,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/shares.js",
       "parentId": "file:src/lib/shares.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 158,
       "lineEnd": 161,
-      "summary": "revoke share member을(를) 처리하는 비동기 함수입니다.",
+      "summary": "공유 대상을 권한을 해제합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -27080,14 +31531,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/shares.js",
       "parentId": "file:src/lib/shares.js",
       "layer": "frontend",
+      "area": "sharing-collaboration",
       "lineStart": 103,
       "lineEnd": 110,
-      "summary": "member edit을(를) 설정하는 비동기 함수입니다.",
+      "summary": "이 기능 대상을 설정합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "exported",
         "frontend",
-        "function"
+        "function",
+        "sharing-collaboration"
       ],
       "details": {
         "functionKind": "function",
@@ -27104,13 +31558,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/sourceTwinApi.js",
       "parentId": "file:src/lib/sourceTwinApi.js",
       "layer": "frontend",
+      "area": "source-code-twin",
       "lineStart": 40,
       "lineEnd": 47,
-      "summary": "source twin history capture을(를) 적용하는 함수입니다.",
+      "summary": "소스 코드 · 디지털 트윈 · 상태 이력 · 상태 기록 작업을 승인된 변경을 적용합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "arrow",
         "exported",
-        "frontend"
+        "frontend",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "arrow",
@@ -27127,13 +31584,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/sourceTwinApi.js",
       "parentId": "file:src/lib/sourceTwinApi.js",
       "layer": "frontend",
+      "area": "source-code-twin",
       "lineStart": 31,
       "lineEnd": 33,
-      "summary": "source twin history을(를) 비교하는 함수입니다.",
+      "summary": "소스 코드 · 디지털 트윈 · 상태 이력 상태나 허용 여부를 서로 비교합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "arrow",
         "exported",
-        "frontend"
+        "frontend",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "arrow",
@@ -27150,13 +31610,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/sourceTwinApi.js",
       "parentId": "file:src/lib/sourceTwinApi.js",
       "layer": "frontend",
+      "area": "source-code-twin",
       "lineStart": 25,
       "lineEnd": 25,
-      "summary": "source twin current을(를) 불러오기하는 함수입니다.",
+      "summary": "소스 코드 · 디지털 트윈 · 현재 상태 정보를 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "arrow",
         "exported",
-        "frontend"
+        "frontend",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "arrow",
@@ -27173,13 +31636,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/sourceTwinApi.js",
       "parentId": "file:src/lib/sourceTwinApi.js",
       "layer": "frontend",
+      "area": "source-code-twin",
       "lineStart": 27,
       "lineEnd": 29,
-      "summary": "source twin history을(를) 불러오기하는 함수입니다.",
+      "summary": "소스 코드 · 디지털 트윈 · 상태 이력 정보를 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "arrow",
         "exported",
-        "frontend"
+        "frontend",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "arrow",
@@ -27196,13 +31662,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/sourceTwinApi.js",
       "parentId": "file:src/lib/sourceTwinApi.js",
       "layer": "frontend",
+      "area": "source-code-twin",
       "lineStart": 35,
       "lineEnd": 38,
-      "summary": "preview source twin history capture을(를) 처리하는 함수입니다.",
+      "summary": "실행 전 미리보기 · 소스 코드 · 디지털 트윈 · 상태 이력 · 상태 기록에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "arrow",
         "exported",
-        "frontend"
+        "frontend",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "arrow",
@@ -27219,13 +31688,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/sourceTwinApi.js",
       "parentId": "file:src/lib/sourceTwinApi.js",
       "layer": "frontend",
+      "area": "source-code-twin",
       "lineStart": 4,
       "lineEnd": 23,
-      "summary": "source twin request을(를) 처리하는 비동기 함수입니다.",
+      "summary": "소스 코드 · 디지털 트윈 · 요청에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
         "frontend",
-        "function"
+        "function",
+        "source-code-twin"
       ],
       "details": {
         "functionKind": "function",
@@ -27242,11 +31714,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/systemRuntimeApi.js",
       "parentId": "file:src/lib/systemRuntimeApi.js",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 5,
       "lineEnd": 9,
-      "summary": "system runtime api error constructor을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 실제 운영 상태 · 서버 기능 · 오류 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "class-method",
+        "digital-twin-engine",
         "frontend"
       ],
       "details": {
@@ -27264,11 +31739,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/systemRuntimeApi.js",
       "parentId": "file:src/lib/systemRuntimeApi.js",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 12,
       "lineEnd": 16,
-      "summary": "access token을(를) 처리하는 비동기 함수입니다.",
+      "summary": "접근 권한 · 연결 토큰에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
+        "digital-twin-engine",
         "frontend",
         "function"
       ],
@@ -27287,11 +31765,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/systemRuntimeApi.js",
       "parentId": "file:src/lib/systemRuntimeApi.js",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 64,
       "lineEnd": 77,
-      "summary": "check all system runtime을(를) 처리하는 비동기 함수입니다.",
+      "summary": "전체 · 시스템 · 실제 운영 상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
+        "digital-twin-engine",
         "exported",
         "frontend",
         "function"
@@ -27311,11 +31792,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/systemRuntimeApi.js",
       "parentId": "file:src/lib/systemRuntimeApi.js",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 49,
       "lineEnd": 62,
-      "summary": "check system part runtime을(를) 처리하는 비동기 함수입니다.",
+      "summary": "시스템 · 시스템 파츠 · 실제 운영 상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
+        "digital-twin-engine",
         "exported",
         "frontend",
         "function"
@@ -27335,11 +31819,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/systemRuntimeApi.js",
       "parentId": "file:src/lib/systemRuntimeApi.js",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 79,
       "lineEnd": 86,
-      "summary": "latest system runtime을(를) 불러오기하는 비동기 함수입니다.",
+      "summary": "시스템 · 실제 운영 상태 정보를 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
+        "digital-twin-engine",
         "exported",
         "frontend",
         "function"
@@ -27359,11 +31846,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/systemRuntimeApi.js",
       "parentId": "file:src/lib/systemRuntimeApi.js",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 18,
       "lineEnd": 47,
-      "summary": "runtime request을(를) 처리하는 비동기 함수입니다.",
+      "summary": "실제 운영 상태 · 요청에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "async",
+        "digital-twin-engine",
         "frontend",
         "function"
       ],
@@ -27382,10 +31872,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/wheelRouting.js",
       "parentId": "file:src/lib/wheelRouting.js",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 20,
       "lineEnd": 27,
-      "summary": "axis can scroll을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “트랙패드 스크롤을 선택한 노드·파츠 내부 스크롤과 캔버스 확대·이동 중 어디로 보낼지 결정합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -27404,10 +31897,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/wheelRouting.js",
       "parentId": "file:src/lib/wheelRouting.js",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 1,
       "lineEnd": 4,
-      "summary": "element from target을(를) 처리하는 함수입니다.",
+      "summary": "대상에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -27426,10 +31922,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/wheelRouting.js",
       "parentId": "file:src/lib/wheelRouting.js",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 6,
       "lineEnd": 8,
-      "summary": "has class을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 상태나 허용 여부를 해당 정보가 있는지 판단합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -27448,10 +31947,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/wheelRouting.js",
       "parentId": "file:src/lib/wheelRouting.js",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 33,
       "lineEnd": 49,
-      "summary": "native wheel scroll target을(를) 처리하는 함수입니다.",
+      "summary": "대상에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "canvas-interface",
         "exported",
         "frontend",
         "function"
@@ -27471,10 +31973,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/lib/wheelRouting.js",
       "parentId": "file:src/lib/wheelRouting.js",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 10,
       "lineEnd": 18,
-      "summary": "nearest class을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “트랙패드 스크롤을 선택한 노드·파츠 내부 스크롤과 캔버스 확대·이동 중 어디로 보낼지 결정합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -27493,13 +31998,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/ContentNode.jsx",
       "parentId": "file:src/nodes/ContentNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 92,
       "lineEnd": 447,
-      "summary": "content node을(를) 처리하는 함수입니다.",
+      "summary": "본문 · 노드 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -27516,12 +32024,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/ContentNode.jsx",
       "parentId": "file:src/nodes/ContentNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 61,
       "lineEnd": 68,
-      "summary": "caret at end을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “본문, 링크와 이미지를 담는 콘텐츠 노드를 그리고 직접 편집할 수 있게 합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -27538,12 +32049,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/ContentNode.jsx",
       "parentId": "file:src/nodes/ContentNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 221,
       "lineEnd": 226,
-      "summary": "commit url을(를) 처리하는 함수입니다.",
+      "summary": "웹 주소에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -27560,12 +32074,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/ContentNode.jsx",
       "parentId": "file:src/nodes/ContentNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 31,
       "lineEnd": 58,
-      "summary": "downscale image을(를) 처리하는 함수입니다.",
+      "summary": "이미지에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -27582,12 +32099,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/ContentNode.jsx",
       "parentId": "file:src/nodes/ContentNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 188,
       "lineEnd": 192,
-      "summary": "handle display click을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -27604,12 +32124,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/ContentNode.jsx",
       "parentId": "file:src/nodes/ContentNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 131,
       "lineEnd": 139,
-      "summary": "handle pointer down을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -27626,12 +32149,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/ContentNode.jsx",
       "parentId": "file:src/nodes/ContentNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 140,
       "lineEnd": 144,
-      "summary": "handle pointer move을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -27648,12 +32174,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/ContentNode.jsx",
       "parentId": "file:src/nodes/ContentNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 145,
       "lineEnd": 145,
-      "summary": "handle pointer up을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -27670,12 +32199,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/ContentNode.jsx",
       "parentId": "file:src/nodes/ContentNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 129,
       "lineEnd": 129,
-      "summary": "just selected을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “본문, 링크와 이미지를 담는 콘텐츠 노드를 그리고 직접 편집할 수 있게 합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -27692,12 +32224,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/ContentNode.jsx",
       "parentId": "file:src/nodes/ContentNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 171,
       "lineEnd": 171,
-      "summary": "on dim pointer cancel을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “본문, 링크와 이미지를 담는 콘텐츠 노드를 그리고 직접 편집할 수 있게 합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -27714,12 +32249,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/ContentNode.jsx",
       "parentId": "file:src/nodes/ContentNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 161,
       "lineEnd": 168,
-      "summary": "on dim pointer down을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “본문, 링크와 이미지를 담는 콘텐츠 노드를 그리고 직접 편집할 수 있게 합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -27736,12 +32274,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/ContentNode.jsx",
       "parentId": "file:src/nodes/ContentNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 170,
       "lineEnd": 170,
-      "summary": "on dim pointer leave을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “본문, 링크와 이미지를 담는 콘텐츠 노드를 그리고 직접 편집할 수 있게 합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -27758,12 +32299,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/ContentNode.jsx",
       "parentId": "file:src/nodes/ContentNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 169,
       "lineEnd": 169,
-      "summary": "on dim pointer up을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “본문, 링크와 이미지를 담는 콘텐츠 노드를 그리고 직접 편집할 수 있게 합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -27780,13 +32324,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/ContentNode.jsx",
       "parentId": "file:src/nodes/ContentNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 195,
       "lineEnd": 219,
-      "summary": "on file change을(를) 처리하는 비동기 함수입니다.",
+      "summary": "파일 · 변경에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "tags": [
         "arrow",
         "async",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -27803,12 +32350,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/ContentNode.jsx",
       "parentId": "file:src/nodes/ContentNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 194,
       "lineEnd": 194,
-      "summary": "on pick file을(를) 처리하는 함수입니다.",
+      "summary": "파일에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -27825,12 +32375,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/ContentNode.jsx",
       "parentId": "file:src/nodes/ContentNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 72,
       "lineEnd": 90,
-      "summary": "place caret at을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “본문, 링크와 이미지를 담는 콘텐츠 노드를 그리고 직접 편집할 수 있게 합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -27847,12 +32400,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/ContentNode.jsx",
       "parentId": "file:src/nodes/ContentNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 173,
       "lineEnd": 176,
-      "summary": "start edit을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “본문, 링크와 이미지를 담는 콘텐츠 노드를 그리고 직접 편집할 수 있게 합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -27869,12 +32425,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/ContentNode.jsx",
       "parentId": "file:src/nodes/ContentNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 178,
       "lineEnd": 186,
-      "summary": "stop edit을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “본문, 링크와 이미지를 담는 콘텐츠 노드를 그리고 직접 편집할 수 있게 합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -27891,10 +32450,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/GroupNode.jsx",
       "parentId": "file:src/nodes/GroupNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 12,
       "lineEnd": 182,
-      "summary": "group node을(를) 처리하는 함수입니다.",
+      "summary": "그룹 · 노드 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "canvas-interface",
         "exported",
         "frontend",
         "function"
@@ -27914,11 +32476,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/GroupNode.jsx",
       "parentId": "file:src/nodes/GroupNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 10,
       "lineEnd": 10,
-      "summary": "clamp을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “여러 노드를 묶는 그룹 상자와 그룹 편집 동작을 화면에 그립니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -27936,11 +32501,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/GroupNode.jsx",
       "parentId": "file:src/nodes/GroupNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 60,
       "lineEnd": 64,
-      "summary": "commit을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “여러 노드를 묶는 그룹 상자와 그룹 편집 동작을 화면에 그립니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -27958,11 +32526,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/GroupNode.jsx",
       "parentId": "file:src/nodes/GroupNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 71,
       "lineEnd": 74,
-      "summary": "handle label click을(를) 처리하는 함수입니다.",
+      "summary": "화면 이름 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -27980,11 +32551,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/GroupNode.jsx",
       "parentId": "file:src/nodes/GroupNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 44,
       "lineEnd": 52,
-      "summary": "handle pointer down을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -28002,11 +32576,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/GroupNode.jsx",
       "parentId": "file:src/nodes/GroupNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 53,
       "lineEnd": 57,
-      "summary": "handle pointer move을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -28024,11 +32601,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/GroupNode.jsx",
       "parentId": "file:src/nodes/GroupNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 58,
       "lineEnd": 58,
-      "summary": "handle pointer up을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -28046,10 +32626,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/GroupNode.jsx",
       "parentId": "file:src/nodes/GroupNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 6,
       "lineEnd": 9,
-      "summary": "map range을(를) 처리하는 함수입니다.",
+      "summary": "시스템 지도에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -28068,11 +32651,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/GroupNode.jsx",
       "parentId": "file:src/nodes/GroupNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 66,
       "lineEnd": 69,
-      "summary": "start editing을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “여러 노드를 묶는 그룹 상자와 그룹 편집 동작을 화면에 그립니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -28090,13 +32676,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/MemoNode.jsx",
       "parentId": "file:src/nodes/MemoNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 62,
       "lineEnd": 413,
-      "summary": "memo node을(를) 처리하는 함수입니다.",
+      "summary": "노드 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "exported",
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -28113,12 +32702,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/MemoNode.jsx",
       "parentId": "file:src/nodes/MemoNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 23,
       "lineEnd": 30,
-      "summary": "caret at end을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “짧은 참고 내용과 메모를 빠르게 적는 노드를 화면에 그립니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -28135,12 +32727,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/MemoNode.jsx",
       "parentId": "file:src/nodes/MemoNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 219,
       "lineEnd": 231,
-      "summary": "handle display click을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -28157,12 +32752,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/MemoNode.jsx",
       "parentId": "file:src/nodes/MemoNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 103,
       "lineEnd": 111,
-      "summary": "handle pointer down을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -28179,12 +32777,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/MemoNode.jsx",
       "parentId": "file:src/nodes/MemoNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 112,
       "lineEnd": 116,
-      "summary": "handle pointer move을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -28201,12 +32802,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/MemoNode.jsx",
       "parentId": "file:src/nodes/MemoNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 117,
       "lineEnd": 117,
-      "summary": "handle pointer up을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -28223,12 +32827,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/MemoNode.jsx",
       "parentId": "file:src/nodes/MemoNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 187,
       "lineEnd": 187,
-      "summary": "handle text mouse leave을(를) 처리하는 함수입니다.",
+      "summary": "텍스트 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -28245,12 +32852,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/MemoNode.jsx",
       "parentId": "file:src/nodes/MemoNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 173,
       "lineEnd": 186,
-      "summary": "handle text mouse move을(를) 처리하는 함수입니다.",
+      "summary": "텍스트 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -28267,12 +32877,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/MemoNode.jsx",
       "parentId": "file:src/nodes/MemoNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 101,
       "lineEnd": 101,
-      "summary": "just selected을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “짧은 참고 내용과 메모를 빠르게 적는 노드를 화면에 그립니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -28289,12 +32902,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/MemoNode.jsx",
       "parentId": "file:src/nodes/MemoNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 199,
       "lineEnd": 199,
-      "summary": "on dim pointer cancel을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “짧은 참고 내용과 메모를 빠르게 적는 노드를 화면에 그립니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -28311,12 +32927,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/MemoNode.jsx",
       "parentId": "file:src/nodes/MemoNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 189,
       "lineEnd": 196,
-      "summary": "on dim pointer down을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “짧은 참고 내용과 메모를 빠르게 적는 노드를 화면에 그립니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -28333,12 +32952,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/MemoNode.jsx",
       "parentId": "file:src/nodes/MemoNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 198,
       "lineEnd": 198,
-      "summary": "on dim pointer leave을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “짧은 참고 내용과 메모를 빠르게 적는 노드를 화면에 그립니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -28355,12 +32977,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/MemoNode.jsx",
       "parentId": "file:src/nodes/MemoNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 197,
       "lineEnd": 197,
-      "summary": "on dim pointer up을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “짧은 참고 내용과 메모를 빠르게 적는 노드를 화면에 그립니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -28377,12 +33002,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/MemoNode.jsx",
       "parentId": "file:src/nodes/MemoNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 34,
       "lineEnd": 52,
-      "summary": "place caret at을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “짧은 참고 내용과 메모를 빠르게 적는 노드를 화면에 그립니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -28399,12 +33027,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/MemoNode.jsx",
       "parentId": "file:src/nodes/MemoNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 201,
       "lineEnd": 204,
-      "summary": "start edit을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “짧은 참고 내용과 메모를 빠르게 적는 노드를 화면에 그립니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -28421,12 +33052,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/MemoNode.jsx",
       "parentId": "file:src/nodes/MemoNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 206,
       "lineEnd": 215,
-      "summary": "stop edit을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “짧은 참고 내용과 메모를 빠르게 적는 노드를 화면에 그립니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -28443,12 +33077,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/MemoNode.jsx",
       "parentId": "file:src/nodes/MemoNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 143,
       "lineEnd": 158,
-      "summary": "update을(를) 수정하는 함수입니다.",
+      "summary": "변경 대상을 변경합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
-        "frontend"
+        "frontend",
+        "notes-content"
       ],
       "details": {
         "functionKind": "arrow",
@@ -28465,12 +33102,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/MemoNode.jsx",
       "parentId": "file:src/nodes/MemoNode.jsx",
       "layer": "frontend",
+      "area": "notes-content",
       "lineStart": 56,
       "lineEnd": 60,
-      "summary": "wrap lines을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “짧은 참고 내용과 메모를 빠르게 적는 노드를 화면에 그립니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "frontend",
-        "function"
+        "function",
+        "notes-content"
       ],
       "details": {
         "functionKind": "function",
@@ -28487,11 +33127,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/StageNode.jsx",
       "parentId": "file:src/nodes/StageNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 18,
       "lineEnd": 21,
-      "summary": "handle style을(를) 처리하는 함수입니다.",
+      "summary": "HANDLE_STYLE 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -28509,10 +33152,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/StageNode.jsx",
       "parentId": "file:src/nodes/StageNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 69,
       "lineEnd": 497,
-      "summary": "stage node을(를) 처리하는 함수입니다.",
+      "summary": "단계 · 노드 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "canvas-interface",
         "exported",
         "frontend",
         "function"
@@ -28532,10 +33178,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/StageNode.jsx",
       "parentId": "file:src/nodes/StageNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 30,
       "lineEnd": 37,
-      "summary": "caret at end을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “단계와 계층을 나타내는 노드를 그리고 제목·본문 편집을 처리합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -28554,11 +33203,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/StageNode.jsx",
       "parentId": "file:src/nodes/StageNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 201,
       "lineEnd": 207,
-      "summary": "cycle color을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “단계와 계층을 나타내는 노드를 그리고 제목·본문 편집을 처리합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -28576,11 +33228,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/StageNode.jsx",
       "parentId": "file:src/nodes/StageNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 199,
       "lineEnd": 199,
-      "summary": "handle desc mouse leave을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -28598,11 +33253,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/StageNode.jsx",
       "parentId": "file:src/nodes/StageNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 185,
       "lineEnd": 198,
-      "summary": "handle desc mouse move을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -28620,11 +33278,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/StageNode.jsx",
       "parentId": "file:src/nodes/StageNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 242,
       "lineEnd": 254,
-      "summary": "handle display click을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -28642,11 +33303,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/StageNode.jsx",
       "parentId": "file:src/nodes/StageNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 115,
       "lineEnd": 123,
-      "summary": "handle pointer down을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -28664,11 +33328,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/StageNode.jsx",
       "parentId": "file:src/nodes/StageNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 124,
       "lineEnd": 128,
-      "summary": "handle pointer move을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -28686,11 +33353,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/StageNode.jsx",
       "parentId": "file:src/nodes/StageNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 129,
       "lineEnd": 129,
-      "summary": "handle pointer up을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -28708,11 +33378,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/StageNode.jsx",
       "parentId": "file:src/nodes/StageNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 113,
       "lineEnd": 113,
-      "summary": "just selected을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “단계와 계층을 나타내는 노드를 그리고 제목·본문 편집을 처리합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -28730,11 +33403,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/StageNode.jsx",
       "parentId": "file:src/nodes/StageNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 220,
       "lineEnd": 220,
-      "summary": "on dim pointer cancel을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “단계와 계층을 나타내는 노드를 그리고 제목·본문 편집을 처리합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -28752,11 +33428,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/StageNode.jsx",
       "parentId": "file:src/nodes/StageNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 209,
       "lineEnd": 217,
-      "summary": "on dim pointer down을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “단계와 계층을 나타내는 노드를 그리고 제목·본문 편집을 처리합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -28774,11 +33453,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/StageNode.jsx",
       "parentId": "file:src/nodes/StageNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 219,
       "lineEnd": 219,
-      "summary": "on dim pointer leave을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “단계와 계층을 나타내는 노드를 그리고 제목·본문 편집을 처리합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -28796,11 +33478,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/StageNode.jsx",
       "parentId": "file:src/nodes/StageNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 218,
       "lineEnd": 218,
-      "summary": "on dim pointer up을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “단계와 계층을 나타내는 노드를 그리고 제목·본문 편집을 처리합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -28818,10 +33503,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/StageNode.jsx",
       "parentId": "file:src/nodes/StageNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 41,
       "lineEnd": 59,
-      "summary": "place caret at을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “단계와 계층을 나타내는 노드를 그리고 제목·본문 편집을 처리합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -28840,11 +33528,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/StageNode.jsx",
       "parentId": "file:src/nodes/StageNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 222,
       "lineEnd": 227,
-      "summary": "start edit을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “단계와 계층을 나타내는 노드를 그리고 제목·본문 편집을 처리합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -28862,11 +33553,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/StageNode.jsx",
       "parentId": "file:src/nodes/StageNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 229,
       "lineEnd": 238,
-      "summary": "stop edit을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “단계와 계층을 나타내는 노드를 그리고 제목·본문 편집을 처리합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -28884,11 +33578,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/StageNode.jsx",
       "parentId": "file:src/nodes/StageNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 155,
       "lineEnd": 170,
-      "summary": "update을(를) 수정하는 함수입니다.",
+      "summary": "변경 대상을 변경합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "canvas-interface",
         "frontend"
       ],
       "details": {
@@ -28906,10 +33603,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/StageNode.jsx",
       "parentId": "file:src/nodes/StageNode.jsx",
       "layer": "frontend",
+      "area": "canvas-interface",
       "lineStart": 63,
       "lineEnd": 67,
-      "summary": "wrap lines을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “단계와 계층을 나타내는 노드를 그리고 제목·본문 편집을 처리합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "canvas-interface",
         "frontend",
         "function"
       ],
@@ -28928,10 +33628,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/SystemNode.jsx",
       "parentId": "file:src/nodes/SystemNode.jsx",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 81,
       "lineEnd": 669,
-      "summary": "system node을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 노드 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "digital-twin-engine",
         "exported",
         "frontend",
         "function"
@@ -28951,10 +33654,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/SystemNode.jsx",
       "parentId": "file:src/nodes/SystemNode.jsx",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 69,
       "lineEnd": 79,
-      "summary": "blank system part을(를) 처리하는 함수입니다.",
+      "summary": "시스템 · 시스템 파츠에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "frontend",
         "function"
       ],
@@ -28973,11 +33679,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/SystemNode.jsx",
       "parentId": "file:src/nodes/SystemNode.jsx",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 34,
       "lineEnd": 34,
-      "summary": "by id을(를) 처리하는 함수입니다.",
+      "summary": "식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "frontend"
       ],
       "details": {
@@ -28995,11 +33704,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/SystemNode.jsx",
       "parentId": "file:src/nodes/SystemNode.jsx",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 152,
       "lineEnd": 155,
-      "summary": "cancel dim press을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “앱·서버·DB 같은 실제 시스템 노드와 파츠, 운영 상태, 실행 가능한 기능을 화면에 표시합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "frontend"
       ],
       "details": {
@@ -29017,11 +33729,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/SystemNode.jsx",
       "parentId": "file:src/nodes/SystemNode.jsx",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 136,
       "lineEnd": 142,
-      "summary": "finish title edit을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “앱·서버·DB 같은 실제 시스템 노드와 파츠, 운영 상태, 실행 가능한 기능을 화면에 표시합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "frontend"
       ],
       "details": {
@@ -29039,11 +33754,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/SystemNode.jsx",
       "parentId": "file:src/nodes/SystemNode.jsx",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 108,
       "lineEnd": 116,
-      "summary": "handle pointer down을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "frontend"
       ],
       "details": {
@@ -29061,11 +33779,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/SystemNode.jsx",
       "parentId": "file:src/nodes/SystemNode.jsx",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 117,
       "lineEnd": 123,
-      "summary": "handle pointer move을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "frontend"
       ],
       "details": {
@@ -29083,11 +33804,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/SystemNode.jsx",
       "parentId": "file:src/nodes/SystemNode.jsx",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 124,
       "lineEnd": 128,
-      "summary": "handle pointer up을(를) 처리하는 함수입니다.",
+      "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "frontend"
       ],
       "details": {
@@ -29105,11 +33829,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/SystemNode.jsx",
       "parentId": "file:src/nodes/SystemNode.jsx",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 35,
       "lineEnd": 35,
-      "summary": "new part id을(를) 처리하는 함수입니다.",
+      "summary": "시스템 파츠 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "frontend"
       ],
       "details": {
@@ -29127,11 +33854,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/SystemNode.jsx",
       "parentId": "file:src/nodes/SystemNode.jsx",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 184,
       "lineEnd": 188,
-      "summary": "open part editor을(를) 처리하는 함수입니다.",
+      "summary": "시스템 파츠 작업을 화면을 엽니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "frontend"
       ],
       "details": {
@@ -29149,11 +33879,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/SystemNode.jsx",
       "parentId": "file:src/nodes/SystemNode.jsx",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 205,
       "lineEnd": 210,
-      "summary": "part을(를) 제거하는 함수입니다.",
+      "summary": "시스템 파츠 대상을 제거합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "frontend"
       ],
       "details": {
@@ -29171,10 +33904,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/SystemNode.jsx",
       "parentId": "file:src/nodes/SystemNode.jsx",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 37,
       "lineEnd": 42,
-      "summary": "runtime checked at label을(를) 처리하는 함수입니다.",
+      "summary": "실제 운영 상태 · 화면 이름에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "frontend",
         "function"
       ],
@@ -29193,10 +33929,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/SystemNode.jsx",
       "parentId": "file:src/nodes/SystemNode.jsx",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 62,
       "lineEnd": 67,
-      "summary": "runtime observation value을(를) 처리하는 함수입니다.",
+      "summary": "실제 운영 상태 · 운영 관측 · 값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "frontend",
         "function"
       ],
@@ -29215,10 +33954,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/SystemNode.jsx",
       "parentId": "file:src/nodes/SystemNode.jsx",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 53,
       "lineEnd": 60,
-      "summary": "runtime title을(를) 처리하는 함수입니다.",
+      "summary": "실제 운영 상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "frontend",
         "function"
       ],
@@ -29237,10 +33979,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/SystemNode.jsx",
       "parentId": "file:src/nodes/SystemNode.jsx",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 44,
       "lineEnd": 51,
-      "summary": "runtime updated at label을(를) 처리하는 함수입니다.",
+      "summary": "실제 운영 상태 · 화면 이름에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "digital-twin-engine",
         "frontend",
         "function"
       ],
@@ -29259,11 +34004,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/SystemNode.jsx",
       "parentId": "file:src/nodes/SystemNode.jsx",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 189,
       "lineEnd": 204,
-      "summary": "save part을(를) 처리하는 함수입니다.",
+      "summary": "저장 · 시스템 파츠에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "frontend"
       ],
       "details": {
@@ -29281,11 +34029,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/SystemNode.jsx",
       "parentId": "file:src/nodes/SystemNode.jsx",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 144,
       "lineEnd": 151,
-      "summary": "start dim press을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “앱·서버·DB 같은 실제 시스템 노드와 파츠, 운영 상태, 실행 가능한 기능을 화면에 표시합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "frontend"
       ],
       "details": {
@@ -29303,11 +34054,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/nodes/SystemNode.jsx",
       "parentId": "file:src/nodes/SystemNode.jsx",
       "layer": "frontend",
+      "area": "digital-twin-engine",
       "lineStart": 130,
       "lineEnd": 135,
-      "summary": "start title edit을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “앱·서버·DB 같은 실제 시스템 노드와 파츠, 운영 상태, 실행 가능한 기능을 화면에 표시합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "digital-twin-engine",
         "frontend"
       ],
       "details": {
@@ -29325,10 +34079,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/storage.js",
       "parentId": "file:src/storage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 51,
       "lineEnd": 61,
-      "summary": "clear canvas storage을(를) 처리하는 함수입니다.",
+      "summary": "비우기 · 캔버스에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "data-storage-sync",
         "exported",
         "frontend",
         "function"
@@ -29348,11 +34105,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/storage.js",
       "parentId": "file:src/storage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 11,
       "lineEnd": 11,
-      "summary": "data key을(를) 처리하는 함수입니다.",
+      "summary": "데이터에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
         "arrow",
+        "data-storage-sync",
         "frontend"
       ],
       "details": {
@@ -29370,10 +34130,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/storage.js",
       "parentId": "file:src/storage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 40,
       "lineEnd": 40,
-      "summary": "canvas data을(를) 삭제하는 함수입니다.",
+      "summary": "캔버스 · 데이터 대상을 삭제합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "data-storage-sync",
         "exported",
         "frontend",
         "function"
@@ -29393,10 +34156,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/storage.js",
       "parentId": "file:src/storage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 14,
       "lineEnd": 14,
-      "summary": "last storage error을(를) 조회하는 함수입니다.",
+      "summary": "오류 정보를 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "data-storage-sync",
         "exported",
         "frontend",
         "function"
@@ -29416,10 +34182,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/storage.js",
       "parentId": "file:src/storage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 79,
       "lineEnd": 111,
-      "summary": "init canvases을(를) 처리하는 함수입니다.",
+      "summary": "캔버스 목록에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "data-storage-sync",
         "exported",
         "frontend",
         "function"
@@ -29439,10 +34208,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/storage.js",
       "parentId": "file:src/storage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 44,
       "lineEnd": 44,
-      "summary": "active id을(를) 불러오기하는 함수입니다.",
+      "summary": "현재 선택 · 식별자 정보를 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "data-storage-sync",
         "exported",
         "frontend",
         "function"
@@ -29462,10 +34234,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/storage.js",
       "parentId": "file:src/storage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 38,
       "lineEnd": 38,
-      "summary": "canvas data을(를) 불러오기하는 함수입니다.",
+      "summary": "캔버스 · 데이터 정보를 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "data-storage-sync",
         "exported",
         "frontend",
         "function"
@@ -29485,10 +34260,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/storage.js",
       "parentId": "file:src/storage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 42,
       "lineEnd": 42,
-      "summary": "canvas list을(를) 불러오기하는 함수입니다.",
+      "summary": "캔버스 · 목록 정보를 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "data-storage-sync",
         "exported",
         "frontend",
         "function"
@@ -29508,10 +34286,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/storage.js",
       "parentId": "file:src/storage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 46,
       "lineEnd": 46,
-      "summary": "canvas storage owner을(를) 불러오기하는 함수입니다.",
+      "summary": "캔버스 정보를 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "data-storage-sync",
         "exported",
         "frontend",
         "function"
@@ -29531,10 +34312,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/storage.js",
       "parentId": "file:src/storage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 69,
       "lineEnd": 73,
-      "summary": "lod threshold을(를) 불러오기하는 함수입니다.",
+      "summary": "이 기능 정보를 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "data-storage-sync",
         "exported",
         "frontend",
         "function"
@@ -29554,10 +34338,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/storage.js",
       "parentId": "file:src/storage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 117,
       "lineEnd": 123,
-      "summary": "migrate legacy stage types을(를) 처리하는 함수입니다.",
+      "summary": "단계에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "data-storage-sync",
         "frontend",
         "function"
       ],
@@ -29576,10 +34363,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/storage.js",
       "parentId": "file:src/storage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 18,
       "lineEnd": 20,
-      "summary": "read을(를) 읽기하는 함수입니다.",
+      "summary": "이 기능 정보를 읽습니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "data-storage-sync",
         "frontend",
         "function"
       ],
@@ -29598,10 +34388,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/storage.js",
       "parentId": "file:src/storage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 34,
       "lineEnd": 36,
-      "summary": "remove을(를) 제거하는 함수입니다.",
+      "summary": "이 기능 대상을 제거합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "data-storage-sync",
         "frontend",
         "function"
       ],
@@ -29620,10 +34413,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/storage.js",
       "parentId": "file:src/storage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 63,
       "lineEnd": 66,
-      "summary": "reset canvas storage을(를) 처리하는 함수입니다.",
+      "summary": "캔버스에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "data-storage-sync",
         "exported",
         "frontend",
         "function"
@@ -29643,10 +34439,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/storage.js",
       "parentId": "file:src/storage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 45,
       "lineEnd": 45,
-      "summary": "save active id을(를) 처리하는 함수입니다.",
+      "summary": "저장 · 현재 선택 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "data-storage-sync",
         "exported",
         "frontend",
         "function"
@@ -29666,10 +34465,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/storage.js",
       "parentId": "file:src/storage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 39,
       "lineEnd": 39,
-      "summary": "save canvas data을(를) 처리하는 함수입니다.",
+      "summary": "저장 · 캔버스 · 데이터에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "data-storage-sync",
         "exported",
         "frontend",
         "function"
@@ -29689,10 +34491,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/storage.js",
       "parentId": "file:src/storage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 43,
       "lineEnd": 43,
-      "summary": "save canvas list을(를) 처리하는 함수입니다.",
+      "summary": "저장 · 캔버스 · 목록에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "data-storage-sync",
         "exported",
         "frontend",
         "function"
@@ -29712,10 +34517,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/storage.js",
       "parentId": "file:src/storage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 47,
       "lineEnd": 47,
-      "summary": "save canvas storage owner을(를) 처리하는 함수입니다.",
+      "summary": "저장 · 캔버스에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "data-storage-sync",
         "exported",
         "frontend",
         "function"
@@ -29735,10 +34543,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/storage.js",
       "parentId": "file:src/storage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 74,
       "lineEnd": 74,
-      "summary": "save lod threshold을(를) 처리하는 함수입니다.",
+      "summary": "저장에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
+        "data-storage-sync",
         "exported",
         "frontend",
         "function"
@@ -29758,11 +34569,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/storage.js",
       "parentId": "file:src/storage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 16,
       "lineEnd": 16,
-      "summary": "uid을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “로그인 전이나 네트워크 연결 전에도 캔버스 목록과 편집 상태를 브라우저에 보관하고, 오래된 저장 형식을 현재 형식으로 옮깁니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
       "tags": [
         "arrow",
+        "data-storage-sync",
         "exported",
         "frontend"
       ],
@@ -29781,10 +34595,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "src/storage.js",
       "parentId": "file:src/storage.js",
       "layer": "frontend",
+      "area": "data-storage-sync",
       "lineStart": 21,
       "lineEnd": 33,
-      "summary": "write을(를) 처리하는 함수입니다.",
+      "summary": "이 파일이 맡은 “로그인 전이나 네트워크 연결 전에도 캔버스 목록과 편집 상태를 브라우저에 보관하고, 오래된 저장 형식을 현재 형식으로 옮깁니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
       "tags": [
+        "data-storage-sync",
         "frontend",
         "function"
       ],
@@ -29803,9 +34620,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "package.json",
       "parentId": "file:package.json",
       "layer": "deployment",
-      "summary": "build 작업을 실행하는 프로젝트 명령입니다.",
+      "area": "deployment-operations",
+      "summary": "build 단계의 웹 빌드 또는 배포 확인을 실행하는 명령입니다.",
       "tags": [
         "deployment",
+        "deployment-operations",
         "npm"
       ]
     },
@@ -29818,9 +34637,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "package.json",
       "parentId": "file:package.json",
       "layer": "code",
-      "summary": "dev 작업을 실행하는 프로젝트 명령입니다.",
+      "area": "project-foundation",
+      "summary": "dev 개발 작업을 정해진 순서로 실행하는 프로젝트 명령입니다.",
       "tags": [
-        "npm"
+        "npm",
+        "project-foundation"
       ]
     },
     {
@@ -29832,10 +34653,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "package.json",
       "parentId": "file:package.json",
       "layer": "test",
-      "summary": "discover:check 작업을 실행하는 프로젝트 명령입니다.",
+      "area": "testing-quality",
+      "summary": "discover:check 검증 묶음을 실행해 코드와 보안 규칙의 회귀를 찾는 명령입니다.",
       "tags": [
         "npm",
-        "test"
+        "test",
+        "testing-quality"
       ]
     },
     {
@@ -29847,9 +34670,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "package.json",
       "parentId": "file:package.json",
       "layer": "code",
-      "summary": "discover:update 작업을 실행하는 프로젝트 명령입니다.",
+      "area": "project-foundation",
+      "summary": "discover:update 개발 작업을 정해진 순서로 실행하는 프로젝트 명령입니다.",
       "tags": [
-        "npm"
+        "npm",
+        "project-foundation"
       ]
     },
     {
@@ -29861,9 +34686,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "package.json",
       "parentId": "file:package.json",
       "layer": "code",
-      "summary": "local-connector 작업을 실행하는 프로젝트 명령입니다.",
+      "area": "project-foundation",
+      "summary": "local-connector 개발 작업을 정해진 순서로 실행하는 프로젝트 명령입니다.",
       "tags": [
-        "npm"
+        "npm",
+        "project-foundation"
       ]
     },
     {
@@ -29875,9 +34702,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "package.json",
       "parentId": "file:package.json",
       "layer": "deployment",
-      "summary": "preview 작업을 실행하는 프로젝트 명령입니다.",
+      "area": "deployment-operations",
+      "summary": "preview 단계의 웹 빌드 또는 배포 확인을 실행하는 명령입니다.",
       "tags": [
         "deployment",
+        "deployment-operations",
         "npm"
       ]
     },
@@ -29890,10 +34719,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "package.json",
       "parentId": "file:package.json",
       "layer": "test",
-      "summary": "privacy:check 작업을 실행하는 프로젝트 명령입니다.",
+      "area": "testing-quality",
+      "summary": "privacy:check 검증 묶음을 실행해 코드와 보안 규칙의 회귀를 찾는 명령입니다.",
       "tags": [
         "npm",
-        "test"
+        "test",
+        "testing-quality"
       ]
     },
     {
@@ -29905,10 +34736,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "package.json",
       "parentId": "file:package.json",
       "layer": "test",
-      "summary": "source-twin:check 작업을 실행하는 프로젝트 명령입니다.",
+      "area": "testing-quality",
+      "summary": "source-twin:check 검증 묶음을 실행해 코드와 보안 규칙의 회귀를 찾는 명령입니다.",
       "tags": [
         "npm",
-        "test"
+        "test",
+        "testing-quality"
       ]
     },
     {
@@ -29920,9 +34753,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "package.json",
       "parentId": "file:package.json",
       "layer": "code",
-      "summary": "source-twin:prepare 작업을 실행하는 프로젝트 명령입니다.",
+      "area": "project-foundation",
+      "summary": "source-twin:prepare 개발 작업을 정해진 순서로 실행하는 프로젝트 명령입니다.",
       "tags": [
-        "npm"
+        "npm",
+        "project-foundation"
       ]
     },
     {
@@ -29934,9 +34769,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "package.json",
       "parentId": "file:package.json",
       "layer": "code",
-      "summary": "source-twin:update 작업을 실행하는 프로젝트 명령입니다.",
+      "area": "project-foundation",
+      "summary": "source-twin:update 개발 작업을 정해진 순서로 실행하는 프로젝트 명령입니다.",
       "tags": [
-        "npm"
+        "npm",
+        "project-foundation"
       ]
     },
     {
@@ -29948,10 +34785,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "package.json",
       "parentId": "file:package.json",
       "layer": "test",
-      "summary": "test 작업을 실행하는 프로젝트 명령입니다.",
+      "area": "testing-quality",
+      "summary": "test 검증 묶음을 실행해 코드와 보안 규칙의 회귀를 찾는 명령입니다.",
       "tags": [
         "npm",
-        "test"
+        "test",
+        "testing-quality"
       ]
     },
     {
@@ -29963,13 +34802,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "supabase-shares.sql",
       "parentId": "file:supabase-shares.sql",
       "layer": "database",
+      "area": "sharing-collaboration",
       "lineStart": 56,
-      "summary": "canvas_shares 테이블의 행 접근 규칙입니다.",
+      "summary": "canvas_shares 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.",
       "tags": [
         "database",
         "security",
         "rls",
-        "canvas_shares"
+        "canvas_shares",
+        "sharing-collaboration"
       ],
       "details": {
         "table": "canvas_shares"
@@ -29984,13 +34825,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "supabase-shares.sql",
       "parentId": "file:supabase-shares.sql",
       "layer": "database",
+      "area": "sharing-collaboration",
       "lineStart": 50,
-      "summary": "canvas_shares 테이블의 행 접근 규칙입니다.",
+      "summary": "canvas_shares 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.",
       "tags": [
         "database",
         "security",
         "rls",
-        "canvas_shares"
+        "canvas_shares",
+        "sharing-collaboration"
       ],
       "details": {
         "table": "canvas_shares"
@@ -30005,13 +34848,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "supabase-shares.sql",
       "parentId": "file:supabase-shares.sql",
       "layer": "database",
+      "area": "sharing-collaboration",
       "lineStart": 76,
-      "summary": "canvases 테이블의 행 접근 규칙입니다.",
+      "summary": "canvases 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.",
       "tags": [
         "database",
         "security",
         "rls",
-        "canvases"
+        "canvases",
+        "sharing-collaboration"
       ],
       "details": {
         "table": "canvases"
@@ -30026,13 +34871,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "supabase-shares.sql",
       "parentId": "file:supabase-shares.sql",
       "layer": "database",
+      "area": "sharing-collaboration",
       "lineStart": 93,
-      "summary": "canvases 테이블의 행 접근 규칙입니다.",
+      "summary": "canvases 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.",
       "tags": [
         "database",
         "security",
         "rls",
-        "canvases"
+        "canvases",
+        "sharing-collaboration"
       ],
       "details": {
         "table": "canvases"
@@ -30047,13 +34894,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "supabase-schema.sql",
       "parentId": "file:supabase-schema.sql",
       "layer": "database",
+      "area": "canvas-model",
       "lineStart": 20,
-      "summary": "canvases 테이블의 행 접근 규칙입니다.",
+      "summary": "canvases 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.",
       "tags": [
         "database",
         "security",
         "rls",
-        "canvases"
+        "canvases",
+        "canvas-model"
       ],
       "details": {
         "table": "canvases"
@@ -30068,13 +34917,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "supabase-mcp-schema.sql",
       "parentId": "file:supabase-mcp-schema.sql",
       "layer": "database",
+      "area": "security-privacy",
       "lineStart": 38,
-      "summary": "mcp_tokens 테이블의 행 접근 규칙입니다.",
+      "summary": "mcp_tokens 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.",
       "tags": [
         "database",
         "security",
         "rls",
-        "mcp_tokens"
+        "mcp_tokens",
+        "security-privacy"
       ],
       "details": {
         "table": "mcp_tokens"
@@ -30089,13 +34940,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "supabase-mcp-schema.sql",
       "parentId": "file:supabase-mcp-schema.sql",
       "layer": "database",
+      "area": "security-privacy",
       "lineStart": 41,
-      "summary": "mcp_tokens 테이블의 행 접근 규칙입니다.",
+      "summary": "mcp_tokens 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.",
       "tags": [
         "database",
         "security",
         "rls",
-        "mcp_tokens"
+        "mcp_tokens",
+        "security-privacy"
       ],
       "details": {
         "table": "mcp_tokens"
@@ -30110,13 +34963,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "supabase-mcp-schema.sql",
       "parentId": "file:supabase-mcp-schema.sql",
       "layer": "database",
+      "area": "security-privacy",
       "lineStart": 35,
-      "summary": "mcp_tokens 테이블의 행 접근 규칙입니다.",
+      "summary": "mcp_tokens 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.",
       "tags": [
         "database",
         "security",
         "rls",
-        "mcp_tokens"
+        "mcp_tokens",
+        "security-privacy"
       ],
       "details": {
         "table": "mcp_tokens"
@@ -30131,13 +34986,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "supabase-profile-privacy.sql",
       "parentId": "file:supabase-profile-privacy.sql",
       "layer": "database",
+      "area": "sharing-collaboration",
       "lineStart": 51,
-      "summary": "profiles 테이블의 행 접근 규칙입니다.",
+      "summary": "profiles 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.",
       "tags": [
         "database",
         "security",
         "rls",
-        "profiles"
+        "profiles",
+        "sharing-collaboration"
       ],
       "details": {
         "table": "profiles"
@@ -30152,13 +35009,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "supabase-profiles.sql",
       "parentId": "file:supabase-profiles.sql",
       "layer": "database",
+      "area": "identity-profile",
       "lineStart": 13,
-      "summary": "profiles 테이블의 행 접근 규칙입니다.",
+      "summary": "profiles 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.",
       "tags": [
         "database",
         "security",
         "rls",
-        "profiles"
+        "profiles",
+        "identity-profile"
       ],
       "details": {
         "table": "profiles"
@@ -30173,13 +35032,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "supabase-profiles.sql",
       "parentId": "file:supabase-profiles.sql",
       "layer": "database",
+      "area": "identity-profile",
       "lineStart": 14,
-      "summary": "profiles 테이블의 행 접근 규칙입니다.",
+      "summary": "profiles 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.",
       "tags": [
         "database",
         "security",
         "rls",
-        "profiles"
+        "profiles",
+        "identity-profile"
       ],
       "details": {
         "table": "profiles"
@@ -30194,13 +35055,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "supabase-shares.sql",
       "parentId": "file:supabase-shares.sql",
       "layer": "database",
+      "area": "sharing-collaboration",
       "lineStart": 475,
-      "summary": "share_members 테이블의 행 접근 규칙입니다.",
+      "summary": "share_members 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.",
       "tags": [
         "database",
         "security",
         "rls",
-        "share_members"
+        "share_members",
+        "sharing-collaboration"
       ],
       "details": {
         "table": "share_members"
@@ -30215,13 +35078,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "supabase-shares.sql",
       "parentId": "file:supabase-shares.sql",
       "layer": "database",
+      "area": "sharing-collaboration",
       "lineStart": 468,
-      "summary": "share_members 테이블의 행 접근 규칙입니다.",
+      "summary": "share_members 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.",
       "tags": [
         "database",
         "security",
         "rls",
-        "share_members"
+        "share_members",
+        "sharing-collaboration"
       ],
       "details": {
         "table": "share_members"
@@ -30236,13 +35101,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "supabase-shares.sql",
       "parentId": "file:supabase-shares.sql",
       "layer": "database",
+      "area": "sharing-collaboration",
       "lineStart": 456,
-      "summary": "share_members 테이블의 행 접근 규칙입니다.",
+      "summary": "share_members 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.",
       "tags": [
         "database",
         "security",
         "rls",
-        "share_members"
+        "share_members",
+        "sharing-collaboration"
       ],
       "details": {
         "table": "share_members"
@@ -30257,13 +35124,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "supabase-shares.sql",
       "parentId": "file:supabase-shares.sql",
       "layer": "database",
+      "area": "sharing-collaboration",
       "lineStart": 462,
-      "summary": "share_members 테이블의 행 접근 규칙입니다.",
+      "summary": "share_members 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.",
       "tags": [
         "database",
         "security",
         "rls",
-        "share_members"
+        "share_members",
+        "sharing-collaboration"
       ],
       "details": {
         "table": "share_members"
@@ -30278,13 +35147,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "supabase-shares.sql",
       "parentId": "file:supabase-shares.sql",
       "layer": "database",
+      "area": "sharing-collaboration",
       "lineStart": 70,
-      "summary": "share_members 테이블의 행 접근 규칙입니다.",
+      "summary": "share_members 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.",
       "tags": [
         "database",
         "security",
         "rls",
-        "share_members"
+        "share_members",
+        "sharing-collaboration"
       ],
       "details": {
         "table": "share_members"
@@ -30299,13 +35170,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "supabase-canvas-images.sql",
       "parentId": "file:supabase-canvas-images.sql",
       "layer": "database",
+      "area": "sharing-collaboration",
       "lineStart": 100,
-      "summary": "storage 테이블의 행 접근 규칙입니다.",
+      "summary": "storage 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.",
       "tags": [
         "database",
         "security",
         "rls",
-        "storage"
+        "storage",
+        "sharing-collaboration"
       ],
       "details": {
         "table": "storage"
@@ -30320,13 +35193,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "supabase-canvas-images.sql",
       "parentId": "file:supabase-canvas-images.sql",
       "layer": "database",
+      "area": "sharing-collaboration",
       "lineStart": 86,
-      "summary": "storage 테이블의 행 접근 규칙입니다.",
+      "summary": "storage 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.",
       "tags": [
         "database",
         "security",
         "rls",
-        "storage"
+        "storage",
+        "sharing-collaboration"
       ],
       "details": {
         "table": "storage"
@@ -30341,13 +35216,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "supabase-canvas-images.sql",
       "parentId": "file:supabase-canvas-images.sql",
       "layer": "database",
+      "area": "sharing-collaboration",
       "lineStart": 80,
-      "summary": "storage 테이블의 행 접근 규칙입니다.",
+      "summary": "storage 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.",
       "tags": [
         "database",
         "security",
         "rls",
-        "storage"
+        "storage",
+        "sharing-collaboration"
       ],
       "details": {
         "table": "storage"
@@ -30362,13 +35239,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "supabase-canvas-images.sql",
       "parentId": "file:supabase-canvas-images.sql",
       "layer": "database",
+      "area": "sharing-collaboration",
       "lineStart": 92,
-      "summary": "storage 테이블의 행 접근 규칙입니다.",
+      "summary": "storage 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.",
       "tags": [
         "database",
         "security",
         "rls",
-        "storage"
+        "storage",
+        "sharing-collaboration"
       ],
       "details": {
         "table": "storage"
@@ -30383,13 +35262,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "supabase-schema.sql",
       "parentId": "file:supabase-schema.sql",
       "layer": "database",
+      "area": "identity-profile",
       "lineStart": 34,
-      "summary": "user_prefs 테이블의 행 접근 규칙입니다.",
+      "summary": "user_prefs 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.",
       "tags": [
         "database",
         "security",
         "rls",
-        "user_prefs"
+        "user_prefs",
+        "identity-profile"
       ],
       "details": {
         "table": "user_prefs"
@@ -31310,6 +36191,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ]
     },
     {
+      "id": "relation:142b0b7a34bee2f5",
+      "type": "imports",
+      "source": "file:src/components/SourceTwinPanel.jsx",
+      "target": "file:shared/sourceTwinSemantics.js",
+      "names": [
+        "groupSourceTwinEntitiesByArea",
+        "sourceTwinAreaDefinition",
+        "sourceTwinAreaId"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:142c8ed8f6e412cf",
       "type": "imports",
       "source": "file:shared/workflowSystemTwinBuild.js",
@@ -31468,6 +36361,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "operations": [
         "declares"
       ]
+    },
+    {
+      "id": "relation:1714b971e52c18d3",
+      "type": "contains",
+      "source": "file:shared/sourceTwinSemantics.js",
+      "target": "function:shared/sourceTwinSemantics.js:sourceTwinAreaId"
     },
     {
       "id": "relation:17361e73cc8cabdf",
@@ -31913,12 +36812,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/shareAccess.js:admin"
     },
     {
-      "id": "relation:1f6204cce20dcabb",
-      "type": "contains",
-      "source": "file:scripts/source-twin-scanner.mjs",
-      "target": "function:scripts/source-twin-scanner.mjs:identifierWords"
-    },
-    {
       "id": "relation:1f7a7f915e5a84dc",
       "type": "imports",
       "source": "file:shared/digitalTwinProposal.js",
@@ -31939,6 +36832,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "Avatar"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:1fe9d3fe7da0b905",
+      "type": "contains",
+      "source": "file:scripts/source-twin-semantics.mjs",
+      "target": "function:scripts/source-twin-semantics.mjs:sourceTwinTechnicalSummary"
     },
     {
       "id": "relation:20144a4d8a27b3c8",
@@ -32324,6 +37223,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "CanvasConflictError"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:277882198680d8d3",
+      "type": "contains",
+      "source": "file:scripts/source-twin-semantics.mjs",
+      "target": "function:scripts/source-twin-semantics.mjs:explainSourceFunction"
     },
     {
       "id": "relation:27883934b234c89a",
@@ -32916,6 +37821,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/systemRuntime.js",
       "target": "function:shared/systemRuntime.js:systemRuntimeCatalogForResult"
+    },
+    {
+      "id": "relation:36c224fc6a426507",
+      "type": "contains",
+      "source": "file:scripts/source-twin-semantics.mjs",
+      "target": "function:scripts/source-twin-semantics.mjs:explainSourceFile"
+    },
+    {
+      "id": "relation:36e37f5835444f0c",
+      "type": "contains",
+      "source": "file:scripts/source-twin-semantics.mjs",
+      "target": "function:scripts/source-twin-semantics.mjs:areaForSourceResource"
     },
     {
       "id": "relation:36f1f6b42a071a35",
@@ -33698,12 +38615,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/layout.js:key"
     },
     {
-      "id": "relation:48e72ec6a06b6ab6",
-      "type": "contains",
-      "source": "file:scripts/source-twin-scanner.mjs",
-      "target": "function:scripts/source-twin-scanner.mjs:koreanAction"
-    },
-    {
       "id": "relation:48ee916c0b41e1d5",
       "type": "contains",
       "source": "file:shared/workflowSystemDiscovery.js",
@@ -34063,6 +38974,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/lib/profiles.js:loadMySettings"
     },
     {
+      "id": "relation:4e619274864352df",
+      "type": "contains",
+      "source": "file:scripts/source-twin-semantics.mjs",
+      "target": "function:scripts/source-twin-semantics.mjs:identifierWords"
+    },
+    {
       "id": "relation:4e7b34935309fa66",
       "type": "imports",
       "source": "file:src/App.jsx",
@@ -34129,14 +39046,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:scripts/source-twin-scanner.mjs",
       "target": "function:scripts/source-twin-scanner.mjs:stringArgument"
-    },
-    {
-      "id": "relation:4fda47e9fa409e88",
-      "type": "imports",
-      "source": "file:src/main.jsx",
-      "target": "dependency:./index.css",
-      "names": [],
-      "dynamic": false
     },
     {
       "id": "relation:4feaa1d1cd79055c",
@@ -34977,6 +39886,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/sharePermissions.js:composeSharePermission"
     },
     {
+      "id": "relation:614dca8e0aebabbf",
+      "type": "contains",
+      "source": "file:scripts/source-twin-semantics.mjs",
+      "target": "function:scripts/source-twin-semantics.mjs:baseName"
+    },
+    {
       "id": "relation:61525e4ade02be89",
       "type": "contains",
       "source": "file:mcp/sourceTwinStore.js",
@@ -35221,6 +40136,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "operations": [
         "read"
       ]
+    },
+    {
+      "id": "relation:6801c09e21649f0c",
+      "type": "contains",
+      "source": "file:shared/sourceTwinSemantics.js",
+      "target": "function:shared/sourceTwinSemantics.js:sourceTwinAreaDefinition"
     },
     {
       "id": "relation:68036716ce220765",
@@ -35483,12 +40404,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "calls-db-function",
       "source": "file:src/lib/shares.js",
       "target": "db-function:share_link_preview"
-    },
-    {
-      "id": "relation:6dd39d88d0d485cd",
-      "type": "contains",
-      "source": "file:scripts/source-twin-scanner.mjs",
-      "target": "function:scripts/source-twin-scanner.mjs:functionSummary"
     },
     {
       "id": "relation:6ddd0cbdbfa430e4",
@@ -36301,6 +41216,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/operationLifecycle.js:normalizeActor"
     },
     {
+      "id": "relation:7c29582175451e94",
+      "type": "contains",
+      "source": "file:scripts/source-twin-semantics.mjs",
+      "target": "function:scripts/source-twin-semantics.mjs:ROLE"
+    },
+    {
       "id": "relation:7c789d13b090d25d",
       "type": "contains",
       "source": "file:mcp/layout.js",
@@ -36818,6 +41739,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:scripts/test-mcp-logic.mjs:writeDb.from"
     },
     {
+      "id": "relation:867df1e7e6c85151",
+      "type": "contains",
+      "source": "file:scripts/source-twin-semantics.mjs",
+      "target": "function:scripts/source-twin-semantics.mjs:functionActionSummary"
+    },
+    {
       "id": "relation:867e25793f6edaec",
       "type": "contains",
       "source": "file:mcp/systemRuntime.js",
@@ -37111,6 +42038,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/sourceTwin.js",
       "target": "function:shared/sourceTwin.js:stableValue"
+    },
+    {
+      "id": "relation:8d84d207f22bbd3d",
+      "type": "contains",
+      "source": "file:shared/sourceTwinSemantics.js",
+      "target": "function:shared/sourceTwinSemantics.js:text"
     },
     {
       "id": "relation:8d872ecf93f9cbc7",
@@ -37704,12 +42637,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/operationLifecycle.js:requestOperationRecovery"
     },
     {
-      "id": "relation:9a6c902c0a9cb21f",
-      "type": "contains",
-      "source": "file:scripts/source-twin-scanner.mjs",
-      "target": "function:scripts/source-twin-scanner.mjs:fileSummary"
-    },
-    {
       "id": "relation:9a84073509da5c29",
       "type": "contains",
       "source": "file:shared/operationLifecycle.js",
@@ -37989,6 +42916,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "db-function:disable_share_invitation"
     },
     {
+      "id": "relation:a0847a1213913d19",
+      "type": "imports",
+      "source": "file:scripts/source-twin-scanner.mjs",
+      "target": "file:scripts/source-twin-semantics.mjs",
+      "names": [
+        "areaForSourceResource",
+        "explainDatabaseResource",
+        "explainEnvironmentVariable",
+        "explainSourceFile",
+        "explainSourceFunction",
+        "sourceTwinProjectIdentity",
+        "sourceTwinTechnicalSummary"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:a0ad3ffd9eb71da0",
       "type": "contains",
       "source": "file:scripts/local-connector-agent.mjs",
@@ -38252,6 +43195,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/App.jsx",
       "target": "function:src/App.jsx:handleContextAddStage"
+    },
+    {
+      "id": "relation:a38df581e7923815",
+      "type": "contains",
+      "source": "file:scripts/source-twin-semantics.mjs",
+      "target": "function:scripts/source-twin-semantics.mjs:explainEnvironmentVariable"
     },
     {
       "id": "relation:a3ac67f6f4d4e85e",
@@ -39299,6 +44248,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "db-function:revoke_share_member"
     },
     {
+      "id": "relation:bce679038332fe99",
+      "type": "contains",
+      "source": "file:scripts/source-twin-semantics.mjs",
+      "target": "function:scripts/source-twin-semantics.mjs:sourceTwinProjectIdentity"
+    },
+    {
       "id": "relation:bd4751794c7055e1",
       "type": "imports",
       "source": "file:scripts/test-mcp-logic.mjs",
@@ -39790,6 +44745,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:c7f147effe25caef",
+      "type": "contains",
+      "source": "file:shared/sourceTwinSemantics.js",
+      "target": "function:shared/sourceTwinSemantics.js:sourceTwinAreaCatalog"
+    },
+    {
       "id": "relation:c804b4fc8d62ad51",
       "type": "imports",
       "source": "file:src/App.jsx",
@@ -40034,6 +44995,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "defines-policy",
       "source": "file:supabase-shares.sql",
       "target": "rls-policy:canvas_shares:invitee selects own invites"
+    },
+    {
+      "id": "relation:cc29625e47b52139",
+      "type": "imports",
+      "source": "file:scripts/test-source-twin.mjs",
+      "target": "file:shared/sourceTwinSemantics.js",
+      "names": [
+        "groupSourceTwinEntitiesByArea"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:cc5bc18fdbc0d2f1",
@@ -40316,6 +45287,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/lib/localConnectorApi.js",
       "target": "function:src/lib/localConnectorApi.js:applyLocalGitSync"
+    },
+    {
+      "id": "relation:d413adbb2993a6e1",
+      "type": "contains",
+      "source": "file:scripts/source-twin-semantics.mjs",
+      "target": "function:scripts/source-twin-semantics.mjs:conceptLabel"
     },
     {
       "id": "relation:d43b80e2b91061fb",
@@ -40774,6 +45751,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:dea9001a17b7da8f",
+      "type": "contains",
+      "source": "file:scripts/source-twin-semantics.mjs",
+      "target": "function:scripts/source-twin-semantics.mjs:genericFileExplanation"
+    },
+    {
       "id": "relation:deeb470155970fa4",
       "type": "contains",
       "source": "file:shared/edgeOperation.js",
@@ -40895,10 +45878,28 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/components/NotesPanel.jsx:NotesPanel"
     },
     {
+      "id": "relation:e0a60e62ef96cc4c",
+      "type": "imports",
+      "source": "file:src/main.jsx",
+      "target": "file:src/index.css",
+      "names": [],
+      "dynamic": false
+    },
+    {
       "id": "relation:e0b850cc4be227f0",
       "type": "contains",
       "source": "file:scripts/test-mcp-logic.mjs",
       "target": "function:scripts/test-mcp-logic.mjs:t"
+    },
+    {
+      "id": "relation:e0d2512dc19ba7f7",
+      "type": "imports",
+      "source": "file:scripts/source-twin-scanner.mjs",
+      "target": "file:shared/sourceTwinSemantics.js",
+      "names": [
+        "sourceTwinAreaCatalog"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:e0d28ad2e8b75fec",
@@ -41714,6 +46715,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/components/AuthPanel.jsx:updateSettings"
     },
     {
+      "id": "relation:f0f2362f22240a05",
+      "type": "contains",
+      "source": "file:scripts/source-twin-semantics.mjs",
+      "target": "function:scripts/source-twin-semantics.mjs:genericArea"
+    },
+    {
       "id": "relation:f10a7b0c1142e58b",
       "type": "contains",
       "source": "file:shared/systemRuntime.js",
@@ -42024,6 +47031,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:api/source-twin-webhook.js:send"
     },
     {
+      "id": "relation:f8234b14e25194a6",
+      "type": "contains",
+      "source": "file:shared/sourceTwinSemantics.js",
+      "target": "function:shared/sourceTwinSemantics.js:groupSourceTwinEntitiesByArea"
+    },
+    {
       "id": "relation:f87d7c9080602d17",
       "type": "contains",
       "source": "file:shared/twinBuild.js",
@@ -42063,6 +47076,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "normalizeSystemParts"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:f99745cce0d3120a",
+      "type": "contains",
+      "source": "file:scripts/source-twin-semantics.mjs",
+      "target": "function:scripts/source-twin-semantics.mjs:explainDatabaseResource"
     },
     {
       "id": "relation:f9ce0c0c8e0b9b97",
@@ -42328,6 +47347,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:shared/relationOntology.js",
       "file:shared/sharePermissions.js",
       "file:shared/sourceTwin.js",
+      "file:shared/sourceTwinSemantics.js",
       "file:shared/systemObservationCatalog.js",
       "file:shared/systemOntology.js",
       "file:shared/systemPartOntology.js",
@@ -42364,6 +47384,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:src/demoCanvases.js",
       "file:src/edges/StubEdge.jsx",
       "file:src/edges/stubEdgeGeometry.js",
+      "file:src/index.css",
       "file:src/lib/canvasGeometry.js",
       "file:src/lib/canvasMerge.js",
       "file:src/lib/canvasNavigation.js",
@@ -42654,13 +47675,9 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:scripts/source-twin-scanner.mjs:buildSourceTwinManifest",
       "function:scripts/source-twin-scanner.mjs:compareSourceTwinText",
       "function:scripts/source-twin-scanner.mjs:entity",
-      "function:scripts/source-twin-scanner.mjs:fileSummary",
       "function:scripts/source-twin-scanner.mjs:filesystemSourceTwinPaths",
-      "function:scripts/source-twin-scanner.mjs:functionSummary",
       "function:scripts/source-twin-scanner.mjs:hash",
-      "function:scripts/source-twin-scanner.mjs:identifierWords",
       "function:scripts/source-twin-scanner.mjs:importedNames",
-      "function:scripts/source-twin-scanner.mjs:koreanAction",
       "function:scripts/source-twin-scanner.mjs:languageForFile",
       "function:scripts/source-twin-scanner.mjs:layerForFile",
       "function:scripts/source-twin-scanner.mjs:lineFor",
@@ -42688,6 +47705,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:scripts/source-twin-scanner.mjs:unique",
       "function:scripts/source-twin-scanner.mjs:visit",
       "function:scripts/source-twin-scanner.mjs:visit#2",
+      "function:scripts/source-twin-semantics.mjs:ROLE",
+      "function:scripts/source-twin-semantics.mjs:areaForSourceResource",
+      "function:scripts/source-twin-semantics.mjs:baseName",
+      "function:scripts/source-twin-semantics.mjs:conceptLabel",
+      "function:scripts/source-twin-semantics.mjs:explainDatabaseResource",
+      "function:scripts/source-twin-semantics.mjs:explainEnvironmentVariable",
+      "function:scripts/source-twin-semantics.mjs:explainSourceFile",
+      "function:scripts/source-twin-semantics.mjs:explainSourceFunction",
+      "function:scripts/source-twin-semantics.mjs:functionActionSummary",
+      "function:scripts/source-twin-semantics.mjs:genericArea",
+      "function:scripts/source-twin-semantics.mjs:genericFileExplanation",
+      "function:scripts/source-twin-semantics.mjs:identifierWords",
+      "function:scripts/source-twin-semantics.mjs:sourceTwinProjectIdentity",
+      "function:scripts/source-twin-semantics.mjs:sourceTwinTechnicalSummary",
       "function:scripts/system-discovery.mjs:addTableSource",
       "function:scripts/system-discovery.mjs:buildDiscoveryManifest",
       "function:scripts/system-discovery.mjs:contentForFingerprint",
@@ -42878,6 +47909,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/sourceTwin.js:sourceTwinEntityMap",
       "function:shared/sourceTwin.js:sourceTwinFingerprint",
       "function:shared/sourceTwin.js:stableValue",
+      "function:shared/sourceTwinSemantics.js:groupSourceTwinEntitiesByArea",
+      "function:shared/sourceTwinSemantics.js:sourceTwinAreaCatalog",
+      "function:shared/sourceTwinSemantics.js:sourceTwinAreaDefinition",
+      "function:shared/sourceTwinSemantics.js:sourceTwinAreaId",
+      "function:shared/sourceTwinSemantics.js:text",
       "function:shared/systemObservationCatalog.js:connectorField",
       "function:shared/systemObservationCatalog.js:field",
       "function:shared/systemObservationCatalog.js:protectedField",
@@ -43501,7 +48537,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
     "code": [
       "dependency:../shared/sourceTwinManifest.js",
       "dependency:../shared/workflowSystemDiscoveryManifest.js",
-      "dependency:./index.css",
       "dependency:./workflowSystemDiscoveryManifest.js",
       "dependency:@babel/parser",
       "dependency:@modelcontextprotocol/sdk/server/mcp.js",
@@ -43533,6 +48568,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:api/source-twin-webhook.js",
       "file:api/source-twin.js",
       "file:api/system-runtime.js",
+      "file:index.html",
       "file:mcp/dataAccessAudit.js",
       "file:mcp/layout.js",
       "file:mcp/localConnectorStore.js",
@@ -43549,6 +48585,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:scripts/generate-system-discovery.mjs",
       "file:scripts/local-connector-agent.mjs",
       "file:scripts/source-twin-scanner.mjs",
+      "file:scripts/source-twin-semantics.mjs",
       "file:scripts/system-discovery.mjs",
       "file:scripts/test-local-connector-agent.mjs",
       "file:scripts/test-mcp-logic.mjs",
@@ -43566,6 +48603,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:shared/relationOntology.js",
       "file:shared/sharePermissions.js",
       "file:shared/sourceTwin.js",
+      "file:shared/sourceTwinSemantics.js",
       "file:shared/systemObservationCatalog.js",
       "file:shared/systemOntology.js",
       "file:shared/systemPartOntology.js",
@@ -43602,6 +48640,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:src/demoCanvases.js",
       "file:src/edges/StubEdge.jsx",
       "file:src/edges/stubEdgeGeometry.js",
+      "file:src/index.css",
       "file:src/lib/canvasGeometry.js",
       "file:src/lib/canvasMerge.js",
       "file:src/lib/canvasNavigation.js",
@@ -43910,13 +48949,9 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:scripts/source-twin-scanner.mjs:buildSourceTwinManifest",
       "function:scripts/source-twin-scanner.mjs:compareSourceTwinText",
       "function:scripts/source-twin-scanner.mjs:entity",
-      "function:scripts/source-twin-scanner.mjs:fileSummary",
       "function:scripts/source-twin-scanner.mjs:filesystemSourceTwinPaths",
-      "function:scripts/source-twin-scanner.mjs:functionSummary",
       "function:scripts/source-twin-scanner.mjs:hash",
-      "function:scripts/source-twin-scanner.mjs:identifierWords",
       "function:scripts/source-twin-scanner.mjs:importedNames",
-      "function:scripts/source-twin-scanner.mjs:koreanAction",
       "function:scripts/source-twin-scanner.mjs:languageForFile",
       "function:scripts/source-twin-scanner.mjs:layerForFile",
       "function:scripts/source-twin-scanner.mjs:lineFor",
@@ -43944,6 +48979,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:scripts/source-twin-scanner.mjs:unique",
       "function:scripts/source-twin-scanner.mjs:visit",
       "function:scripts/source-twin-scanner.mjs:visit#2",
+      "function:scripts/source-twin-semantics.mjs:ROLE",
+      "function:scripts/source-twin-semantics.mjs:areaForSourceResource",
+      "function:scripts/source-twin-semantics.mjs:baseName",
+      "function:scripts/source-twin-semantics.mjs:conceptLabel",
+      "function:scripts/source-twin-semantics.mjs:explainDatabaseResource",
+      "function:scripts/source-twin-semantics.mjs:explainEnvironmentVariable",
+      "function:scripts/source-twin-semantics.mjs:explainSourceFile",
+      "function:scripts/source-twin-semantics.mjs:explainSourceFunction",
+      "function:scripts/source-twin-semantics.mjs:functionActionSummary",
+      "function:scripts/source-twin-semantics.mjs:genericArea",
+      "function:scripts/source-twin-semantics.mjs:genericFileExplanation",
+      "function:scripts/source-twin-semantics.mjs:identifierWords",
+      "function:scripts/source-twin-semantics.mjs:sourceTwinProjectIdentity",
+      "function:scripts/source-twin-semantics.mjs:sourceTwinTechnicalSummary",
       "function:scripts/system-discovery.mjs:addTableSource",
       "function:scripts/system-discovery.mjs:buildDiscoveryManifest",
       "function:scripts/system-discovery.mjs:contentForFingerprint",
@@ -44134,6 +49183,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/sourceTwin.js:sourceTwinEntityMap",
       "function:shared/sourceTwin.js:sourceTwinFingerprint",
       "function:shared/sourceTwin.js:stableValue",
+      "function:shared/sourceTwinSemantics.js:groupSourceTwinEntitiesByArea",
+      "function:shared/sourceTwinSemantics.js:sourceTwinAreaCatalog",
+      "function:shared/sourceTwinSemantics.js:sourceTwinAreaDefinition",
+      "function:shared/sourceTwinSemantics.js:sourceTwinAreaId",
+      "function:shared/sourceTwinSemantics.js:text",
       "function:shared/systemObservationCatalog.js:connectorField",
       "function:shared/systemObservationCatalog.js:field",
       "function:shared/systemObservationCatalog.js:protectedField",
@@ -44920,16 +49974,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
     ]
   },
   "fingerprints": {
-    "code": "9a2b03a1b98c50ad72a0",
-    "database": "20d049a4ab3b0e670bd6",
+    "code": "09e4a46842789362ca95",
+    "database": "f79e0fd4da0d3b8b63be",
     "security": "05f140b1a53ff271565e",
     "deployment": "ae446f619a0e96953ba2"
   },
   "summary": {
-    "entities": 1346,
-    "files": 121,
-    "functions": 1106,
-    "imports": 375,
+    "entities": 1364,
+    "areas": 14,
+    "files": 125,
+    "functions": 1121,
+    "imports": 379,
     "apiRoutes": 6,
     "dbTables": 16,
     "dbFunctions": 24,
@@ -44941,30 +49996,74 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
     "parseFailures": 0
   },
   "changeSet": {
-    "baseManifestId": "source-twin-v1-295466c896df",
+    "baseManifestId": "source-twin-v1-5b4bc1883da2",
     "initialBaseline": false,
-    "added": [],
-    "changed": [
-      "file:scripts/test-twin-build.mjs",
-      "file:shared/twinBuildCanvas.js",
-      "file:shared/workflowCanvasSystemMap.js",
-      "file:src/nodes/SystemNode.jsx",
-      "function:shared/twinBuildCanvas.js:createTwinBuildFromCanvasTemplate",
-      "function:shared/workflowCanvasSystemMap.js:relationEdge",
-      "function:src/nodes/SystemNode.jsx:SystemNode"
+    "added": [
+      "file:index.html",
+      "file:scripts/source-twin-semantics.mjs",
+      "file:shared/sourceTwinSemantics.js",
+      "file:src/index.css",
+      "function:scripts/source-twin-semantics.mjs:ROLE",
+      "function:scripts/source-twin-semantics.mjs:areaForSourceResource",
+      "function:scripts/source-twin-semantics.mjs:baseName",
+      "function:scripts/source-twin-semantics.mjs:conceptLabel",
+      "function:scripts/source-twin-semantics.mjs:explainDatabaseResource",
+      "function:scripts/source-twin-semantics.mjs:explainEnvironmentVariable",
+      "function:scripts/source-twin-semantics.mjs:explainSourceFile",
+      "function:scripts/source-twin-semantics.mjs:explainSourceFunction",
+      "function:scripts/source-twin-semantics.mjs:functionActionSummary",
+      "function:scripts/source-twin-semantics.mjs:genericArea",
+      "function:scripts/source-twin-semantics.mjs:genericFileExplanation",
+      "function:scripts/source-twin-semantics.mjs:identifierWords",
+      "function:scripts/source-twin-semantics.mjs:sourceTwinProjectIdentity",
+      "function:scripts/source-twin-semantics.mjs:sourceTwinTechnicalSummary",
+      "function:shared/sourceTwinSemantics.js:groupSourceTwinEntitiesByArea",
+      "function:shared/sourceTwinSemantics.js:sourceTwinAreaCatalog",
+      "function:shared/sourceTwinSemantics.js:sourceTwinAreaDefinition",
+      "function:shared/sourceTwinSemantics.js:sourceTwinAreaId",
+      "function:shared/sourceTwinSemantics.js:text"
     ],
-    "removed": [],
+    "changed": [
+      "file:README.md",
+      "file:scripts/source-twin-scanner.mjs",
+      "file:scripts/test-source-twin.mjs",
+      "file:shared/localConnector.js",
+      "file:shared/sourceTwin.js",
+      "file:src/components/SourceTwinPanel.jsx",
+      "function:scripts/source-twin-scanner.mjs:buildSourceTwinManifest",
+      "function:scripts/source-twin-scanner.mjs:languageForFile",
+      "function:scripts/source-twin-scanner.mjs:shouldInspect",
+      "function:shared/localConnector.js:entityDetails",
+      "function:shared/localConnector.js:normalizeLocalSourceManifest",
+      "function:shared/localConnector.js:sourceEntity",
+      "function:shared/sourceTwin.js:sourceTwinEntities",
+      "function:src/components/SourceTwinPanel.jsx:EntityDetail",
+      "function:src/components/SourceTwinPanel.jsx:StructureView"
+    ],
+    "removed": [
+      "dependency:./index.css",
+      "function:scripts/source-twin-scanner.mjs:fileSummary",
+      "function:scripts/source-twin-scanner.mjs:functionSummary",
+      "function:scripts/source-twin-scanner.mjs:identifierWords",
+      "function:scripts/source-twin-scanner.mjs:koreanAction"
+    ],
     "changedPaths": [
-      "scripts/test-twin-build.mjs",
-      "shared/twinBuildCanvas.js",
-      "shared/workflowCanvasSystemMap.js",
-      "src/nodes/SystemNode.jsx"
+      "README.md",
+      "index.html",
+      "scripts/source-twin-scanner.mjs",
+      "scripts/source-twin-semantics.mjs",
+      "scripts/test-source-twin.mjs",
+      "shared/localConnector.js",
+      "shared/sourceTwin.js",
+      "shared/sourceTwinSemantics.js",
+      "src/components/SourceTwinPanel.jsx",
+      "src/index.css"
     ],
     "summary": {
-      "added": 0,
-      "changed": 7,
-      "removed": 0,
-      "paths": 4
+      "added": 23,
+      "changed": 15,
+      "removed": 5,
+      "paths": 10
     }
   }
 }

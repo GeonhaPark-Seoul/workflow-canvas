@@ -74,6 +74,8 @@ export function localConnectorShellCommand({
 function entityDetails(value) {
   if (!plainObject(value)) return undefined
   const result = {
+    functionCount: integer(value.functionCount, 0, 100_000),
+    importCount: integer(value.importCount, 0, 100_000),
     exports: stringList(value.exports),
     apiRoutes: stringList(value.apiRoutes),
     dbTables: stringList(value.dbTables),
@@ -81,8 +83,13 @@ function entityDetails(value) {
     environmentVariables: stringList(value.environmentVariables),
     securitySignals: stringList(value.securitySignals),
     parseStatus: text(value.parseStatus, 40),
+    functionKind: text(value.functionKind, 80),
+    exported: value.exported === true,
+    async: value.async === true,
+    credentialReference: value.credentialReference === true,
+    table: text(value.table, 180),
   }
-  return Object.values(result).some((item) => Array.isArray(item) ? item.length : item) ? result : undefined
+  return Object.values(result).some((item) => Array.isArray(item) ? item.length : item !== false && item !== 0 && item !== '') ? result : undefined
 }
 
 function sourceEntity(value) {
@@ -97,9 +104,11 @@ function sourceEntity(value) {
     label: text(value.label, 300) || id,
     fingerprint,
     summary: text(value.summary, 600),
+    userImpact: text(value.userImpact, 600),
+    technicalSummary: text(value.technicalSummary, 400),
     tags: stringList(value.tags, 40, 120),
   }
-  for (const key of ['path', 'layer', 'language', 'parentId']) {
+  for (const key of ['path', 'layer', 'language', 'parentId', 'area']) {
     const next = text(value[key], key === 'path' ? 500 : 180)
     if (next) normalized[key] = next
   }
@@ -142,6 +151,19 @@ export function normalizeLocalSourceManifest(value) {
       || entity.tags?.some((tag) => ['security', 'rls', 'credential-reference'].includes(tag))),
     deployment: perspective((entity) => entity.layer === 'deployment' || entity.kind === 'deployment'),
   }
+  const areaIds = new Set(entities.map((entity) => entity.area).filter(Boolean))
+  const areas = []
+  for (const raw of Array.isArray(value.areas) ? value.areas.slice(0, 80) : []) {
+    if (!plainObject(raw)) continue
+    const id = text(raw.id, 120)
+    if (!id || !areaIds.has(id) || areas.some((item) => item.id === id)) continue
+    areas.push({
+      id,
+      label: text(raw.label, 120) || id,
+      description: text(raw.description, 300),
+      order: integer(raw.order, 0, 10_000),
+    })
+  }
   return {
     schemaVersion: integer(value.schemaVersion, 1, 20),
     id: manifestId,
@@ -152,6 +174,7 @@ export function normalizeLocalSourceManifest(value) {
       repositoryUrl,
       defaultBranch: text(source.defaultBranch, 120) || 'main',
     },
+    areas,
     perspectives,
     summary: {
       files: entities.filter((entity) => entity.kind === 'file').length,

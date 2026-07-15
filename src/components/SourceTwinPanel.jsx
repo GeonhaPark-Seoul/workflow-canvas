@@ -6,6 +6,11 @@ import {
   sourceTwinEntityMap,
 } from '../../shared/sourceTwin.js'
 import {
+  groupSourceTwinEntitiesByArea,
+  sourceTwinAreaDefinition,
+  sourceTwinAreaId,
+} from '../../shared/sourceTwinSemantics.js'
+import {
   compareLocalAndDeployedManifests,
   localConnectorIsOnline,
   localConnectorShellCommand,
@@ -38,6 +43,15 @@ const LAYER_LABELS = {
   frontend: '사용자 화면', api: '웹 API', mcp: 'AI 연결', shared: '공통 규칙',
   database: '데이터베이스', test: '검증', deployment: '배포', documentation: '문서',
   security: '보안', code: '외부 의존',
+}
+const SECURITY_SIGNAL_LABELS = {
+  'dynamic-code-eval': '문자열을 코드로 실행하는 지점',
+  'dynamic-function-constructor': '실행 중 함수를 만드는 지점',
+  'raw-inner-html': 'HTML을 직접 넣는 지점',
+  'dangerously-set-inner-html': '검증된 HTML만 넣어야 하는 지점',
+  'row-level-security': '사용자별 DB 접근 제한 사용',
+  'security-definer-function': 'DB 함수 소유자 권한으로 실행',
+  'service-role-grant': '서버 관리자 권한 참조',
 }
 const OPERATION_SECTION_LABELS = {
   code: '코드 구조', database: 'DB 선언', deployment: '배포 상태',
@@ -74,24 +88,41 @@ function IconButton({ title, onClick, disabled = false, children }) {
 function EntityDetail({ manifest, entity, commitSha, onClose }) {
   if (!entity) return null
   const codeUrl = sourceTwinCodeUrl(manifest, entity, commitSha)
+  const area = sourceTwinAreaDefinition(sourceTwinAreaId(entity), manifest)
+  const details = entity.details ?? {}
+  const hasTechnicalFacts = !!entity.technicalSummary
+    || (details.apiRoutes?.length ?? 0) > 0
+    || (details.dbTables?.length ?? 0) > 0
+    || (details.environmentVariables?.length ?? 0) > 0
+    || (details.securitySignals?.length ?? 0) > 0
   return (
     <section className="source-twin-detail" aria-label="선택한 코드 실체">
       <div className="source-twin-detail-heading">
         <div>
           <strong>{entity.label}</strong>
-          <span>{KIND_LABELS[entity.kind] ?? entity.kind}</span>
+          <span>{area.label} · {KIND_LABELS[entity.kind] ?? entity.kind}</span>
         </div>
         <IconButton title="선택 해제" onClick={onClose}>✕</IconButton>
       </div>
-      <p>{entity.summary}</p>
-      {entity.path && <code>{entity.path}{entity.lineStart ? `:${entity.lineStart}` : ''}</code>}
-      {entity.details && (
-        <div className="source-twin-detail-facts">
-          {(entity.details.apiRoutes ?? []).map((value) => <span key={`api:${value}`}>{value}</span>)}
-          {(entity.details.dbTables ?? []).map((value) => <span key={`db:${value}`}>DB {value}</span>)}
-          {(entity.details.environmentVariables ?? []).map((value) => <span key={`env:${value}`}>{value}</span>)}
-          {(entity.details.securitySignals ?? []).map((value) => <span className="is-security" key={`security:${value}`}>{value}</span>)}
+      <p className="source-twin-role-summary">{entity.summary}</p>
+      {entity.userImpact && (
+        <div className="source-twin-user-impact">
+          <strong>사용자에게 미치는 영향</strong>
+          <p>{entity.userImpact}</p>
         </div>
+      )}
+      {entity.path && <code>{entity.path}{entity.lineStart ? `:${entity.lineStart}` : ''}</code>}
+      {hasTechnicalFacts && (
+        <details className="source-twin-technical-details">
+          <summary>개발 정보 보기</summary>
+          {entity.technicalSummary && <p>{entity.technicalSummary}</p>}
+          <div className="source-twin-detail-facts">
+            {(details.apiRoutes ?? []).map((value) => <span key={`api:${value}`}>{value}</span>)}
+            {(details.dbTables ?? []).map((value) => <span key={`db:${value}`}>DB {value}</span>)}
+            {(details.environmentVariables ?? []).map((value) => <span key={`env:${value}`}>{value}</span>)}
+            {(details.securitySignals ?? []).map((value) => <span className="is-security" key={`security:${value}`}>{SECURITY_SIGNAL_LABELS[value] ?? value}</span>)}
+          </div>
+        </details>
       )}
       {codeUrl && <a href={codeUrl} target="_blank" rel="noreferrer">GitHub에서 실제 코드 열기 ↗</a>}
     </section>
@@ -158,6 +189,7 @@ function StructureView({ current, perspective, setPerspective, query, setQuery, 
     }
     return result.sort((left, right) => `${left.layer}:${left.path ?? ''}:${left.label}`.localeCompare(`${right.layer}:${right.path ?? ''}:${right.label}`))
   }, [entityMap, filtered])
+  const areaGroups = useMemo(() => groupSourceTwinEntitiesByArea(manifest, roots), [manifest, roots])
   const selected = entityMap.get(selectedId)
   const toggle = (id) => setExpanded((currentSet) => {
     const next = new Set(currentSet)
@@ -179,10 +211,21 @@ function StructureView({ current, perspective, setPerspective, query, setQuery, 
       </div>
       <EntityDetail manifest={manifest} entity={selected} commitSha={current.deployment?.commitSha} onClose={() => setSelectedId('')} />
       <div className="source-twin-tree">
-        {roots.length === 0 ? <div className="twin-review-empty">일치하는 코드 실체 없음</div> : roots.map((entity) => {
-          const children = (childrenByParent.get(entity.id) ?? []).filter((child) => filteredIds.has(child.id))
-          return <EntityRow key={entity.id} entity={entity} children={children} expanded={expanded.has(entity.id) || !!query} selectedId={selectedId} onToggle={toggle} onSelect={(value) => setSelectedId(value.id)} />
-        })}
+        {roots.length === 0 ? <div className="twin-review-empty">일치하는 코드 실체 없음</div> : areaGroups.map((group) => (
+          <section className="source-twin-area-section" key={group.id}>
+            <header className="source-twin-area-heading">
+              <div>
+                <strong>{group.label}</strong>
+                <span>{group.description}</span>
+              </div>
+              <em>{group.entities.length}</em>
+            </header>
+            {group.entities.map((entity) => {
+              const children = (childrenByParent.get(entity.id) ?? []).filter((child) => filteredIds.has(child.id))
+              return <EntityRow key={entity.id} entity={entity} children={children} expanded={expanded.has(entity.id) || !!query} selectedId={selectedId} onToggle={toggle} onSelect={(value) => setSelectedId(value.id)} />
+            })}
+          </section>
+        ))}
       </div>
     </>
   )

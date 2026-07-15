@@ -19,6 +19,7 @@ import {
   sourceTwinCodeUrl,
   sourceTwinEntities,
 } from '../shared/sourceTwin.js'
+import { groupSourceTwinEntitiesByArea } from '../shared/sourceTwinSemantics.js'
 import {
   APPLY_SOURCE_TWIN_OPERATION_RPC,
   applySourceTwinSnapshotOperation,
@@ -128,6 +129,7 @@ assert.equal(manifest.id, reversed.id, 'file iteration order must not affect the
 assert.deepEqual(manifest.entities, reversed.entities, 'entities must be deterministic')
 assert.deepEqual(manifest.relations, reversed.relations, 'relations must be deterministic')
 assert.equal(manifest.summary.parseFailures, 0)
+assert.ok(manifest.areas.length > 0)
 assert.ok(manifest.entities.some((entity) => entity.id === 'function:api/example.js:handler'))
 assert.ok(manifest.entities.some((entity) => entity.id === 'api:/api/example'))
 assert.ok(manifest.entities.some((entity) => entity.id === 'db-table:source_events'))
@@ -140,6 +142,31 @@ assert.ok(manifest.relations.some((relation) => relation.type === 'accesses' && 
 assert.equal(manifest.source.contentIncluded, false)
 assert.equal(manifest.source.credentialValuesIncluded, false)
 assert.doesNotMatch(JSON.stringify(manifest), /literal-secret-must-not-appear/)
+const exampleFile = manifest.entities.find((entity) => entity.id === 'file:api/example.js')
+const exampleHandler = manifest.entities.find((entity) => entity.id === 'function:api/example.js:handler')
+assert.ok(exampleFile.area)
+assert.match(exampleFile.summary, /브라우저 요청|\/api\/example/)
+assert.match(exampleFile.userImpact, /권한|화면/)
+assert.match(exampleFile.technicalSummary, /함수 1개/)
+assert.doesNotMatch(exampleFile.summary, /함수 \d+개|모듈 \d+개/)
+assert.match(exampleHandler.summary, /로그인|입력/)
+assert.doesNotMatch(exampleHandler.summary, /handler을\(를\) 처리/)
+const groupedFixtureEntities = groupSourceTwinEntitiesByArea(manifest, sourceTwinEntities(manifest, { perspective: 'functionality' }))
+assert.ok(groupedFixtureEntities.length > 0)
+assert.ok(groupedFixtureEntities.every((group) => group.label && group.description && group.entities.length))
+
+const workflowCanvasSemanticManifest = buildSourceTwinManifest(new Map([
+  ['package.json', JSON.stringify({ name: 'workflow-canvas' })],
+  ['src/App.jsx', 'export default function App() { return null }\n'],
+  ['src/components/SourceTwinPanel.jsx', 'export function SourceTwinPanel() { return null }\n'],
+]))
+const appSemanticEntity = workflowCanvasSemanticManifest.entities.find((entity) => entity.id === 'file:src/App.jsx')
+const sourcePanelSemanticEntity = workflowCanvasSemanticManifest.entities.find((entity) => entity.id === 'file:src/components/SourceTwinPanel.jsx')
+assert.equal(appSemanticEntity.area, 'canvas-interface')
+assert.match(appSemanticEntity.summary, /노드·연결선 편집/)
+assert.equal(sourcePanelSemanticEntity.area, 'source-code-twin')
+assert.match(sourcePanelSemanticEntity.summary, /역할별 구조/)
+assert.match(sourcePanelSemanticEntity.userImpact, /비개발자/)
 
 const generated = serializeSourceTwinManifest(manifest)
 assert.deepEqual(parseGeneratedSourceTwin(generated), manifest, 'generated manifest must round-trip')
@@ -161,6 +188,10 @@ assert.ok(localManifest)
 assert.equal(localManifest.source.label, 'actual-local-repo')
 assert.doesNotMatch(JSON.stringify(localManifest), /source-body-must-not-survive/)
 assert.ok(localManifest.perspectives.code.length > 0)
+assert.equal(localManifest.entities.find((entity) => entity.id === exampleFile.id)?.area, exampleFile.area)
+assert.equal(localManifest.entities.find((entity) => entity.id === exampleFile.id)?.userImpact, exampleFile.userImpact)
+assert.match(localManifest.entities.find((entity) => entity.id === exampleFile.id)?.technicalSummary ?? '', /함수 1개/)
+assert.ok(localManifest.areas.some((area) => area.id === exampleFile.area))
 const localDifference = compareLocalAndDeployedManifests(manifest, localManifest)
 assert.ok(localDifference.summary.added + localDifference.summary.changed > 0)
 assert.equal(localDifference.inSync, false)

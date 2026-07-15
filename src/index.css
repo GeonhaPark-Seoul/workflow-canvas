@@ -1604,6 +1604,43 @@ body[data-theme='light'] .react-flow__node:hover .canvas-group-frame {
   overflow-y: auto;
   overscroll-behavior: contain;
 }
+.source-twin-area-section {
+  border-bottom: 1px solid #ffffff16;
+}
+.source-twin-area-heading {
+  min-height: 52px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #171d22;
+  border-bottom: 1px solid #ffffff12;
+  padding: 8px 12px;
+}
+.source-twin-area-heading > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.source-twin-area-heading strong {
+  color: #d8e0ea;
+  font-size: 10.5px;
+}
+.source-twin-area-heading span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #778195;
+  font-size: 8.5px;
+}
+.source-twin-area-heading em {
+  flex: 0 0 auto;
+  color: #67e8f9;
+  font-size: 9px;
+  font-style: normal;
+}
 .source-twin-entity-row,
 .source-twin-function-row {
   width: 100%;
@@ -1685,11 +1722,40 @@ body[data-theme='light'] .react-flow__node:hover .canvas-group-frame {
 }
 .source-twin-detail {
   flex: 0 0 auto;
-  max-height: 210px;
+  max-height: min(320px, 44vh);
   overflow-y: auto;
   border-bottom: 1px solid #06b6d433;
   background: #0f151a;
   padding: 9px 11px;
+}
+.source-twin-detail .source-twin-role-summary {
+  color: #c1cad6;
+  font-size: 10.5px;
+}
+.source-twin-user-impact {
+  margin: 8px 0;
+  border-left: 2px solid #06b6d466;
+  padding-left: 8px;
+}
+.source-twin-user-impact strong {
+  color: #9bdbe6;
+  font-size: 9px;
+}
+.source-twin-user-impact p {
+  margin: 3px 0 0;
+}
+.source-twin-technical-details {
+  margin-top: 8px;
+  border-top: 1px solid #ffffff12;
+  padding-top: 7px;
+}
+.source-twin-technical-details summary {
+  color: #8d99aa;
+  font-size: 9px;
+  cursor: pointer;
+}
+.source-twin-technical-details summary:hover {
+  color: #dbeafe;
 }
 .source-twin-detail-heading {
   display: flex;

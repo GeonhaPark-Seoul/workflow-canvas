@@ -4,7 +4,7 @@ export const WORKFLOW_SYSTEM_DISCOVERY = Object.freeze(
   "schemaVersion": 1,
   "current": {
     "schemaVersion": 1,
-    "id": "discovery-v1-0b8c1c1c8ded",
+    "id": "discovery-v1-add93b8a86b2",
     "resources": {
       "api:/api/local-connector": {
         "key": "api:/api/local-connector",
@@ -1079,7 +1079,7 @@ export const WORKFLOW_SYSTEM_DISCOVERY = Object.freeze(
         "key": "file:README.md",
         "kind": "file",
         "label": "README.md",
-        "fingerprint": "c5a197c37f6cdc0e9476",
+        "fingerprint": "e4f49412a7b82776a368",
         "sourceRefs": [
           "README.md"
         ]
@@ -1286,9 +1286,18 @@ export const WORKFLOW_SYSTEM_DISCOVERY = Object.freeze(
         "key": "file:scripts/source-twin-scanner.mjs",
         "kind": "file",
         "label": "scripts/source-twin-scanner.mjs",
-        "fingerprint": "5a8bf118aa0835da877e",
+        "fingerprint": "be8ed7869b0ead7a647d",
         "sourceRefs": [
           "scripts/source-twin-scanner.mjs"
+        ]
+      },
+      "file:scripts/source-twin-semantics.mjs": {
+        "key": "file:scripts/source-twin-semantics.mjs",
+        "kind": "file",
+        "label": "scripts/source-twin-semantics.mjs",
+        "fingerprint": "a2ec5f7073145a4d278b",
+        "sourceRefs": [
+          "scripts/source-twin-semantics.mjs"
         ]
       },
       "file:scripts/system-discovery.mjs": {
@@ -1331,7 +1340,7 @@ export const WORKFLOW_SYSTEM_DISCOVERY = Object.freeze(
         "key": "file:scripts/test-source-twin.mjs",
         "kind": "file",
         "label": "scripts/test-source-twin.mjs",
-        "fingerprint": "a9b0178bfb957e684d6f",
+        "fingerprint": "fa2a0c159a9ad43179ca",
         "sourceRefs": [
           "scripts/test-source-twin.mjs"
         ]
@@ -1394,7 +1403,7 @@ export const WORKFLOW_SYSTEM_DISCOVERY = Object.freeze(
         "key": "file:shared/localConnector.js",
         "kind": "file",
         "label": "shared/localConnector.js",
-        "fingerprint": "f809cde381442328dade",
+        "fingerprint": "a1dfd7a0f4a9d692f426",
         "sourceRefs": [
           "shared/localConnector.js"
         ]
@@ -1439,9 +1448,18 @@ export const WORKFLOW_SYSTEM_DISCOVERY = Object.freeze(
         "key": "file:shared/sourceTwin.js",
         "kind": "file",
         "label": "shared/sourceTwin.js",
-        "fingerprint": "45ccbd49dc31c5f016e9",
+        "fingerprint": "b12bd606f2c038619ff5",
         "sourceRefs": [
           "shared/sourceTwin.js"
+        ]
+      },
+      "file:shared/sourceTwinSemantics.js": {
+        "key": "file:shared/sourceTwinSemantics.js",
+        "kind": "file",
+        "label": "shared/sourceTwinSemantics.js",
+        "fingerprint": "38039997dafc2e309978",
+        "sourceRefs": [
+          "shared/sourceTwinSemantics.js"
         ]
       },
       "file:shared/systemObservationCatalog.js": {
@@ -1718,7 +1736,7 @@ export const WORKFLOW_SYSTEM_DISCOVERY = Object.freeze(
         "key": "file:src/components/SourceTwinPanel.jsx",
         "kind": "file",
         "label": "src/components/SourceTwinPanel.jsx",
-        "fingerprint": "abaef273ca7794f2fd67",
+        "fingerprint": "f043abea849a58f2e85a",
         "sourceRefs": [
           "src/components/SourceTwinPanel.jsx"
         ]
@@ -2539,7 +2557,7 @@ export const WORKFLOW_SYSTEM_DISCOVERY = Object.freeze(
     },
     "files": {
       "CLAUDE.md": "99fe14ef7137548bcd47",
-      "README.md": "924ff98b1b66c1f7fca7",
+      "README.md": "61df72450ada1c8dff64",
       "api/local-connector.js": "5c9f405515e5f4b6c3ed",
       "api/mcp.js": "c588a33164526c123310",
       "api/shared-canvas.js": "498f7dd517674be391bb",
@@ -2562,24 +2580,26 @@ export const WORKFLOW_SYSTEM_DISCOVERY = Object.freeze(
       "scripts/generate-source-twin.mjs": "64da3394e83721041e57",
       "scripts/generate-system-discovery.mjs": "749c18860105893730a3",
       "scripts/local-connector-agent.mjs": "7b294b5fea5e7d00ff5d",
-      "scripts/source-twin-scanner.mjs": "29af202e7890e65711be",
+      "scripts/source-twin-scanner.mjs": "7d5831d4f7b7cfe2b8b6",
+      "scripts/source-twin-semantics.mjs": "751dfff240ba90ab61c6",
       "scripts/system-discovery.mjs": "f9103e6ad338b4b1b669",
       "scripts/test-local-connector-agent.mjs": "476db494b127814d7fe6",
       "scripts/test-mcp-logic.mjs": "a80ad789cac806316fa3",
       "scripts/test-operation-lifecycle.mjs": "23dba54ae04630691a01",
-      "scripts/test-source-twin.mjs": "a53c7638d44c93452328",
+      "scripts/test-source-twin.mjs": "db5db2e35b22f5c5f8af",
       "scripts/test-sql-security.mjs": "c8eea0b2007ff7d4245f",
       "scripts/test-twin-adapter-contract.mjs": "1535bb720749a68791b3",
       "scripts/test-twin-build.mjs": "c281a732e9a3d383eaf8",
       "shared/digitalTwinProposal.js": "17f5598a72440e48fa30",
       "shared/digitalTwinReview.js": "ba6025ee7407452fc88b",
       "shared/edgeOperation.js": "184557badd9774b09415",
-      "shared/localConnector.js": "4253b24a5106028331a9",
+      "shared/localConnector.js": "8536aaefb2c74a14bba3",
       "shared/operationLifecycle.js": "072796be78f3c94f42cc",
       "shared/privacyCapabilities.js": "c7c401ec88ddea74aacd",
       "shared/relationOntology.js": "f48d2f919a6d74a3373f",
       "shared/sharePermissions.js": "15956d8e57857bd0249c",
-      "shared/sourceTwin.js": "faceee7c52048587bb8f",
+      "shared/sourceTwin.js": "8f92b80f93d635d59b8e",
+      "shared/sourceTwinSemantics.js": "dc6db3fe0edc9241f9c0",
       "shared/systemObservationCatalog.js": "79b6a6a3fb37be957250",
       "shared/systemOntology.js": "9dc5f063c1a7e5c90d34",
       "shared/systemPartOntology.js": "c71e6e90df31aa191399",
@@ -2610,7 +2630,7 @@ export const WORKFLOW_SYSTEM_DISCOVERY = Object.freeze(
       "src/components/OpenInNotesButton.jsx": "1266b6c60659430cafa0",
       "src/components/ParticipantAvatar.jsx": "9565fd5cde02b42f0b92",
       "src/components/ScopedParticipants.jsx": "913a3f211bec0858f918",
-      "src/components/SourceTwinPanel.jsx": "0ee72a203f080cadaff3",
+      "src/components/SourceTwinPanel.jsx": "e9106b23331934597807",
       "src/components/SystemObservationCatalog.jsx": "bcd4ac8cd57d104d62b2",
       "src/components/Toolbar.jsx": "4e919dc53a313959036b",
       "src/demoCanvases.js": "3b2d38ec1cc1d10e2322",
@@ -2663,8 +2683,8 @@ export const WORKFLOW_SYSTEM_DISCOVERY = Object.freeze(
       "vite.config.js": "d59936e4a891aa511d18"
     },
     "summary": {
-      "resources": 197,
-      "files": 123,
+      "resources": 199,
+      "files": 125,
       "apiRoutes": 6,
       "dbTables": 17,
       "mcpTools": 29,
@@ -4194,6 +4214,2679 @@ export const WORKFLOW_SYSTEM_DISCOVERY = Object.freeze(
         "dbFunctions": 18,
         "environmentVariableNames": 3,
         "credentialReferences": 1
+      }
+    },
+    "discovery-v1-0b8c1c1c8ded": {
+      "schemaVersion": 1,
+      "id": "discovery-v1-0b8c1c1c8ded",
+      "resources": {
+        "api:/api/local-connector": {
+          "key": "api:/api/local-connector",
+          "kind": "api",
+          "label": "/api/local-connector",
+          "fingerprint": "0b31bead443e7d7a9a78",
+          "sourceRefs": [
+            "api/local-connector.js"
+          ]
+        },
+        "api:/api/mcp": {
+          "key": "api:/api/mcp",
+          "kind": "api",
+          "label": "/api/mcp",
+          "fingerprint": "66a6bfaf265629886be8",
+          "sourceRefs": [
+            "api/mcp.js"
+          ]
+        },
+        "api:/api/shared-canvas": {
+          "key": "api:/api/shared-canvas",
+          "kind": "api",
+          "label": "/api/shared-canvas",
+          "fingerprint": "c235f2d397d45927bc3c",
+          "sourceRefs": [
+            "api/shared-canvas.js"
+          ]
+        },
+        "api:/api/source-twin": {
+          "key": "api:/api/source-twin",
+          "kind": "api",
+          "label": "/api/source-twin",
+          "fingerprint": "3ccd726903a93df0f0a7",
+          "sourceRefs": [
+            "api/source-twin.js"
+          ]
+        },
+        "api:/api/source-twin-webhook": {
+          "key": "api:/api/source-twin-webhook",
+          "kind": "api",
+          "label": "/api/source-twin-webhook",
+          "fingerprint": "e0bfd4db0356ef412a6d",
+          "sourceRefs": [
+            "api/source-twin-webhook.js"
+          ]
+        },
+        "api:/api/system-runtime": {
+          "key": "api:/api/system-runtime",
+          "kind": "api",
+          "label": "/api/system-runtime",
+          "fingerprint": "2f57afa956237380946c",
+          "sourceRefs": [
+            "api/system-runtime.js"
+          ]
+        },
+        "collection:api-routes": {
+          "key": "collection:api-routes",
+          "kind": "collection",
+          "label": "API 경로 목록",
+          "fingerprint": "42956d8a87d495977487",
+          "sourceRefs": [
+            "api/local-connector.js",
+            "api/mcp.js",
+            "api/shared-canvas.js",
+            "api/source-twin-webhook.js",
+            "api/source-twin.js",
+            "api/system-runtime.js"
+          ],
+          "details": {
+            "items": [
+              "/api/local-connector",
+              "/api/mcp",
+              "/api/shared-canvas",
+              "/api/source-twin",
+              "/api/source-twin-webhook",
+              "/api/system-runtime"
+            ]
+          }
+        },
+        "collection:db-functions": {
+          "key": "collection:db-functions",
+          "kind": "collection",
+          "label": "DB 함수 목록",
+          "fingerprint": "7f6070b4fccc30a2feac",
+          "sourceRefs": [
+            "supabase-canvas-images.sql",
+            "supabase-data-access-audit.sql",
+            "supabase-local-connectors.sql",
+            "supabase-profile-privacy.sql",
+            "supabase-profiles.sql",
+            "supabase-relation-metadata-guard.sql",
+            "supabase-runtime-read.sql",
+            "supabase-shares.sql",
+            "supabase-source-twin-history.sql"
+          ],
+          "details": {
+            "items": [
+              {
+                "name": "apply_source_twin_snapshot_operation",
+                "sourceRef": "supabase-source-twin-history.sql"
+              },
+              {
+                "name": "can_access_canvas",
+                "sourceRef": "supabase-shares.sql"
+              },
+              {
+                "name": "can_access_canvas_image",
+                "sourceRef": "supabase-canvas-images.sql"
+              },
+              {
+                "name": "can_view_profile",
+                "sourceRef": "supabase-profile-privacy.sql"
+              },
+              {
+                "name": "can_view_profile",
+                "sourceRef": "supabase-profiles.sql"
+              },
+              {
+                "name": "canvas_relation_metadata_guard_ready",
+                "sourceRef": "supabase-relation-metadata-guard.sql"
+              },
+              {
+                "name": "claim_email_invite",
+                "sourceRef": "supabase-shares.sql"
+              },
+              {
+                "name": "claim_email_invites",
+                "sourceRef": "supabase-shares.sql"
+              },
+              {
+                "name": "claim_share",
+                "sourceRef": "supabase-shares.sql"
+              },
+              {
+                "name": "disable_share_invitation",
+                "sourceRef": "supabase-shares.sql"
+              },
+              {
+                "name": "get_my_canvas_data_access_audit",
+                "sourceRef": "supabase-data-access-audit.sql"
+              },
+              {
+                "name": "get_workflow_system_operational_snapshot",
+                "sourceRef": "supabase-runtime-read.sql"
+              },
+              {
+                "name": "is_share_member",
+                "sourceRef": "supabase-shares.sql"
+              },
+              {
+                "name": "leave_shared_canvas",
+                "sourceRef": "supabase-shares.sql"
+              },
+              {
+                "name": "list_pending_email_invites",
+                "sourceRef": "supabase-shares.sql"
+              },
+              {
+                "name": "owns_share",
+                "sourceRef": "supabase-shares.sql"
+              },
+              {
+                "name": "prevent_canvas_relation_metadata_loss",
+                "sourceRef": "supabase-relation-metadata-guard.sql"
+              },
+              {
+                "name": "reject_local_connector_event_mutation",
+                "sourceRef": "supabase-local-connectors.sql"
+              },
+              {
+                "name": "reject_server_data_access_audit_mutation",
+                "sourceRef": "supabase-data-access-audit.sql"
+              },
+              {
+                "name": "reject_source_twin_history_mutation",
+                "sourceRef": "supabase-source-twin-history.sql"
+              },
+              {
+                "name": "reject_system_operation_audit_mutation",
+                "sourceRef": "supabase-source-twin-history.sql"
+              },
+              {
+                "name": "revoke_canvas_member",
+                "sourceRef": "supabase-shares.sql"
+              },
+              {
+                "name": "revoke_share_member",
+                "sourceRef": "supabase-shares.sql"
+              },
+              {
+                "name": "share_link_is_active",
+                "sourceRef": "supabase-shares.sql"
+              },
+              {
+                "name": "share_link_preview",
+                "sourceRef": "supabase-shares.sql"
+              }
+            ]
+          }
+        },
+        "collection:environment-variables": {
+          "key": "collection:environment-variables",
+          "kind": "collection",
+          "label": "환경변수 이름 목록",
+          "fingerprint": "d1cf5d617df20c1c128f",
+          "sourceRefs": [
+            "api/source-twin-webhook.js",
+            "api/source-twin.js",
+            "api/system-runtime.js",
+            "mcp/shareAccess.js",
+            "mcp/store.js",
+            "scripts/local-connector-agent.mjs",
+            "scripts/test-source-twin.mjs"
+          ],
+          "details": {
+            "items": [
+              "NODE_ENV",
+              "SUPABASE_SERVICE_ROLE_KEY",
+              "SUPABASE_URL",
+              "VERCEL",
+              "VERCEL_ENV",
+              "VERCEL_GIT_COMMIT_SHA",
+              "VERCEL_PROJECT_PRODUCTION_URL",
+              "VERCEL_REGION",
+              "VERCEL_URL",
+              "WORKFLOW_CANVAS_GITHUB_WEBHOOK_SECRET",
+              "WORKFLOW_CANVAS_LOCAL_CONNECTOR_TOKEN",
+              "WORKFLOW_CANVAS_OWNER_USER_ID",
+              "WORKFLOW_CANVAS_URL"
+            ]
+          }
+        },
+        "collection:mcp-tools": {
+          "key": "collection:mcp-tools",
+          "kind": "collection",
+          "label": "MCP 도구 목록",
+          "fingerprint": "0a56b44698780dde7581",
+          "sourceRefs": [
+            "mcp/server.js"
+          ],
+          "details": {
+            "items": [
+              "apply_source_twin_snapshot",
+              "clear_canvas",
+              "compare_source_twin_snapshots",
+              "create_canvas",
+              "create_edge",
+              "create_graph",
+              "create_node",
+              "create_stage_type",
+              "create_workflow_system_map",
+              "delete_canvas",
+              "delete_edge",
+              "delete_node",
+              "delete_nodes",
+              "delete_stage_type",
+              "get_canvas",
+              "get_canvases",
+              "get_stage_types",
+              "inspect_source_twin",
+              "inspect_workflow_system_map",
+              "list_source_twin_history",
+              "preview_source_twin_snapshot",
+              "preview_workflow_system_map_relation_repair",
+              "rename_canvas",
+              "rename_stage_type",
+              "repair_workflow_system_map_relations",
+              "update_edge",
+              "update_edges",
+              "update_node",
+              "update_nodes"
+            ]
+          }
+        },
+        "collection:rls-policies": {
+          "key": "collection:rls-policies",
+          "kind": "collection",
+          "label": "RLS 정책 목록",
+          "fingerprint": "ccd6b813dfaa4ec0e680",
+          "sourceRefs": [
+            "supabase-canvas-images.sql",
+            "supabase-mcp-schema.sql",
+            "supabase-profile-privacy.sql",
+            "supabase-profiles.sql",
+            "supabase-schema.sql",
+            "supabase-shares.sql"
+          ],
+          "details": {
+            "items": [
+              {
+                "name": "invitee selects own invites",
+                "sourceRef": "supabase-shares.sql",
+                "table": "canvas_shares"
+              },
+              {
+                "name": "invitee selects own invites",
+                "sourceRef": "supabase-shares.sql",
+                "table": "canvas_shares"
+              },
+              {
+                "name": "owner manages own shares",
+                "sourceRef": "supabase-shares.sql",
+                "table": "canvas_shares"
+              },
+              {
+                "name": "invitee selects shared canvases",
+                "sourceRef": "supabase-shares.sql",
+                "table": "canvases"
+              },
+              {
+                "name": "invitee selects shared canvases",
+                "sourceRef": "supabase-shares.sql",
+                "table": "canvases"
+              },
+              {
+                "name": "invitee updates shared canvases",
+                "sourceRef": "supabase-shares.sql",
+                "table": "canvases"
+              },
+              {
+                "name": "invitee updates shared canvases",
+                "sourceRef": "supabase-shares.sql",
+                "table": "canvases"
+              },
+              {
+                "name": "users manage own canvases",
+                "sourceRef": "supabase-schema.sql",
+                "table": "canvases"
+              },
+              {
+                "name": "user creates own tokens",
+                "sourceRef": "supabase-mcp-schema.sql",
+                "table": "mcp_tokens"
+              },
+              {
+                "name": "user deletes own tokens",
+                "sourceRef": "supabase-mcp-schema.sql",
+                "table": "mcp_tokens"
+              },
+              {
+                "name": "user reads own tokens",
+                "sourceRef": "supabase-mcp-schema.sql",
+                "table": "mcp_tokens"
+              },
+              {
+                "name": "profiles readable by canvas participants",
+                "sourceRef": "supabase-profile-privacy.sql",
+                "table": "profiles"
+              },
+              {
+                "name": "profiles readable by canvas participants",
+                "sourceRef": "supabase-profiles.sql",
+                "table": "profiles"
+              },
+              {
+                "name": "user manages own profile",
+                "sourceRef": "supabase-profiles.sql",
+                "table": "profiles"
+              },
+              {
+                "name": "user updates own profile",
+                "sourceRef": "supabase-profiles.sql",
+                "table": "profiles"
+              },
+              {
+                "name": "member leaves share",
+                "sourceRef": "supabase-shares.sql",
+                "table": "share_members"
+              },
+              {
+                "name": "owner deletes share members",
+                "sourceRef": "supabase-shares.sql",
+                "table": "share_members"
+              },
+              {
+                "name": "owner deletes share members",
+                "sourceRef": "supabase-shares.sql",
+                "table": "share_members"
+              },
+              {
+                "name": "owner selects share members",
+                "sourceRef": "supabase-shares.sql",
+                "table": "share_members"
+              },
+              {
+                "name": "owner selects share members",
+                "sourceRef": "supabase-shares.sql",
+                "table": "share_members"
+              },
+              {
+                "name": "owner updates share members",
+                "sourceRef": "supabase-shares.sql",
+                "table": "share_members"
+              },
+              {
+                "name": "owner updates share members",
+                "sourceRef": "supabase-shares.sql",
+                "table": "share_members"
+              },
+              {
+                "name": "user selects own memberships",
+                "sourceRef": "supabase-shares.sql",
+                "table": "share_members"
+              },
+              {
+                "name": "canvas image participants delete",
+                "sourceRef": "supabase-canvas-images.sql",
+                "table": "storage"
+              },
+              {
+                "name": "canvas image participants insert",
+                "sourceRef": "supabase-canvas-images.sql",
+                "table": "storage"
+              },
+              {
+                "name": "canvas image participants read",
+                "sourceRef": "supabase-canvas-images.sql",
+                "table": "storage"
+              },
+              {
+                "name": "canvas image participants update",
+                "sourceRef": "supabase-canvas-images.sql",
+                "table": "storage"
+              },
+              {
+                "name": "users manage own prefs",
+                "sourceRef": "supabase-schema.sql",
+                "table": "user_prefs"
+              }
+            ]
+          }
+        },
+        "credential-reference:SUPABASE_ANON_KEY": {
+          "key": "credential-reference:SUPABASE_ANON_KEY",
+          "kind": "credential-reference",
+          "label": "SUPABASE_ANON_KEY",
+          "fingerprint": "afedb2803c6c456872c7",
+          "sourceRefs": [
+            "src/lib/supabase.js"
+          ],
+          "details": {
+            "classification": "public-client-reference"
+          }
+        },
+        "db-table:canvas_shares": {
+          "key": "db-table:canvas_shares",
+          "kind": "db-table",
+          "label": "canvas_shares",
+          "fingerprint": "ea4245b5fd829c7229dd",
+          "sourceRefs": [
+            "mcp/shareAccess.js",
+            "mcp/store.js",
+            "src/App.jsx",
+            "src/lib/shares.js",
+            "supabase-shares.sql"
+          ],
+          "details": {
+            "definitions": [
+              "supabase-shares.sql"
+            ],
+            "references": [
+              "mcp/shareAccess.js",
+              "mcp/store.js",
+              "src/App.jsx",
+              "src/lib/shares.js",
+              "supabase-shares.sql"
+            ]
+          }
+        },
+        "db-table:canvases": {
+          "key": "db-table:canvases",
+          "kind": "db-table",
+          "label": "canvases",
+          "fingerprint": "a63e20bf26817d960884",
+          "sourceRefs": [
+            "api/shared-canvas.js",
+            "api/system-runtime.js",
+            "mcp/shareAccess.js",
+            "mcp/store.js",
+            "scripts/test-source-twin.mjs",
+            "src/App.jsx",
+            "src/lib/cloudStorage.js",
+            "supabase-schema.sql"
+          ],
+          "details": {
+            "definitions": [
+              "supabase-schema.sql"
+            ],
+            "references": [
+              "api/shared-canvas.js",
+              "api/system-runtime.js",
+              "mcp/shareAccess.js",
+              "mcp/store.js",
+              "scripts/test-source-twin.mjs",
+              "src/App.jsx",
+              "src/lib/cloudStorage.js",
+              "supabase-schema.sql"
+            ]
+          }
+        },
+        "db-table:local_connector_operation_events": {
+          "key": "db-table:local_connector_operation_events",
+          "kind": "db-table",
+          "label": "local_connector_operation_events",
+          "fingerprint": "44a84bd755596c77beb1",
+          "sourceRefs": [
+            "mcp/localConnectorStore.js",
+            "supabase-local-connectors.sql"
+          ],
+          "details": {
+            "definitions": [
+              "supabase-local-connectors.sql"
+            ],
+            "references": [
+              "mcp/localConnectorStore.js",
+              "supabase-local-connectors.sql"
+            ]
+          }
+        },
+        "db-table:local_connector_operations": {
+          "key": "db-table:local_connector_operations",
+          "kind": "db-table",
+          "label": "local_connector_operations",
+          "fingerprint": "44a84bd755596c77beb1",
+          "sourceRefs": [
+            "mcp/localConnectorStore.js",
+            "supabase-local-connectors.sql"
+          ],
+          "details": {
+            "definitions": [
+              "supabase-local-connectors.sql"
+            ],
+            "references": [
+              "mcp/localConnectorStore.js",
+              "supabase-local-connectors.sql"
+            ]
+          }
+        },
+        "db-table:local_connectors": {
+          "key": "db-table:local_connectors",
+          "kind": "db-table",
+          "label": "local_connectors",
+          "fingerprint": "44a84bd755596c77beb1",
+          "sourceRefs": [
+            "mcp/localConnectorStore.js",
+            "supabase-local-connectors.sql"
+          ],
+          "details": {
+            "definitions": [
+              "supabase-local-connectors.sql"
+            ],
+            "references": [
+              "mcp/localConnectorStore.js",
+              "supabase-local-connectors.sql"
+            ]
+          }
+        },
+        "db-table:mcp_tokens": {
+          "key": "db-table:mcp_tokens",
+          "kind": "db-table",
+          "label": "mcp_tokens",
+          "fingerprint": "6d6f6cb14bddd3c28d15",
+          "sourceRefs": [
+            "mcp/store.js",
+            "src/lib/mcpTokens.js",
+            "supabase-mcp-schema.sql"
+          ],
+          "details": {
+            "definitions": [
+              "supabase-mcp-schema.sql"
+            ],
+            "references": [
+              "mcp/store.js",
+              "src/lib/mcpTokens.js",
+              "supabase-mcp-schema.sql"
+            ]
+          }
+        },
+        "db-table:profiles": {
+          "key": "db-table:profiles",
+          "kind": "db-table",
+          "label": "profiles",
+          "fingerprint": "acfbfad615fc67ca1221",
+          "sourceRefs": [
+            "mcp/shareAccess.js",
+            "src/lib/profiles.js",
+            "supabase-profiles.sql"
+          ],
+          "details": {
+            "definitions": [
+              "supabase-profiles.sql"
+            ],
+            "references": [
+              "mcp/shareAccess.js",
+              "src/lib/profiles.js",
+              "supabase-profiles.sql"
+            ]
+          }
+        },
+        "db-table:real_table": {
+          "key": "db-table:real_table",
+          "kind": "db-table",
+          "label": "real_table",
+          "fingerprint": "52a2a7c68fe20a51f8e3",
+          "sourceRefs": [
+            "scripts/test-mcp-logic.mjs"
+          ],
+          "details": {
+            "definitions": [],
+            "references": [
+              "scripts/test-mcp-logic.mjs"
+            ]
+          }
+        },
+        "db-table:server_data_access_audit": {
+          "key": "db-table:server_data_access_audit",
+          "kind": "db-table",
+          "label": "server_data_access_audit",
+          "fingerprint": "e4d5956f29da055fe16e",
+          "sourceRefs": [
+            "mcp/dataAccessAudit.js",
+            "supabase-data-access-audit.sql"
+          ],
+          "details": {
+            "definitions": [
+              "supabase-data-access-audit.sql"
+            ],
+            "references": [
+              "mcp/dataAccessAudit.js",
+              "supabase-data-access-audit.sql"
+            ]
+          }
+        },
+        "db-table:share_members": {
+          "key": "db-table:share_members",
+          "kind": "db-table",
+          "label": "share_members",
+          "fingerprint": "ea4245b5fd829c7229dd",
+          "sourceRefs": [
+            "mcp/shareAccess.js",
+            "mcp/store.js",
+            "src/App.jsx",
+            "src/lib/shares.js",
+            "supabase-shares.sql"
+          ],
+          "details": {
+            "definitions": [
+              "supabase-shares.sql"
+            ],
+            "references": [
+              "mcp/shareAccess.js",
+              "mcp/store.js",
+              "src/App.jsx",
+              "src/lib/shares.js",
+              "supabase-shares.sql"
+            ]
+          }
+        },
+        "db-table:share_revocations": {
+          "key": "db-table:share_revocations",
+          "kind": "db-table",
+          "label": "share_revocations",
+          "fingerprint": "b28e58486f9a628c8070",
+          "sourceRefs": [
+            "supabase-shares.sql"
+          ],
+          "details": {
+            "definitions": [
+              "supabase-shares.sql"
+            ],
+            "references": [
+              "supabase-shares.sql"
+            ]
+          }
+        },
+        "db-table:source_events": {
+          "key": "db-table:source_events",
+          "kind": "db-table",
+          "label": "source_events",
+          "fingerprint": "04f1e892ec3023ceffcd",
+          "sourceRefs": [
+            "scripts/test-source-twin.mjs"
+          ],
+          "details": {
+            "definitions": [],
+            "references": [
+              "scripts/test-source-twin.mjs"
+            ]
+          }
+        },
+        "db-table:source_twin_events": {
+          "key": "db-table:source_twin_events",
+          "kind": "db-table",
+          "label": "source_twin_events",
+          "fingerprint": "71432585a3002d108999",
+          "sourceRefs": [
+            "supabase-source-twin-history.sql"
+          ],
+          "details": {
+            "definitions": [
+              "supabase-source-twin-history.sql"
+            ],
+            "references": [
+              "supabase-source-twin-history.sql"
+            ]
+          }
+        },
+        "db-table:source_twin_snapshots": {
+          "key": "db-table:source_twin_snapshots",
+          "kind": "db-table",
+          "label": "source_twin_snapshots",
+          "fingerprint": "71432585a3002d108999",
+          "sourceRefs": [
+            "supabase-source-twin-history.sql"
+          ],
+          "details": {
+            "definitions": [
+              "supabase-source-twin-history.sql"
+            ],
+            "references": [
+              "supabase-source-twin-history.sql"
+            ]
+          }
+        },
+        "db-table:system_operation_audit": {
+          "key": "db-table:system_operation_audit",
+          "kind": "db-table",
+          "label": "system_operation_audit",
+          "fingerprint": "71432585a3002d108999",
+          "sourceRefs": [
+            "supabase-source-twin-history.sql"
+          ],
+          "details": {
+            "definitions": [
+              "supabase-source-twin-history.sql"
+            ],
+            "references": [
+              "supabase-source-twin-history.sql"
+            ]
+          }
+        },
+        "db-table:system_runtime_observations": {
+          "key": "db-table:system_runtime_observations",
+          "kind": "db-table",
+          "label": "system_runtime_observations",
+          "fingerprint": "2150deb40b369d9fc983",
+          "sourceRefs": [
+            "mcp/sourceTwinStore.js",
+            "supabase-runtime-observations.sql"
+          ],
+          "details": {
+            "definitions": [
+              "supabase-runtime-observations.sql"
+            ],
+            "references": [
+              "mcp/sourceTwinStore.js",
+              "supabase-runtime-observations.sql"
+            ]
+          }
+        },
+        "db-table:user_prefs": {
+          "key": "db-table:user_prefs",
+          "kind": "db-table",
+          "label": "user_prefs",
+          "fingerprint": "3421f7fd2e366b8cb27a",
+          "sourceRefs": [
+            "mcp/store.js",
+            "src/lib/cloudStorage.js",
+            "src/lib/profiles.js",
+            "supabase-schema.sql"
+          ],
+          "details": {
+            "definitions": [
+              "supabase-schema.sql"
+            ],
+            "references": [
+              "mcp/store.js",
+              "src/lib/cloudStorage.js",
+              "src/lib/profiles.js",
+              "supabase-schema.sql"
+            ]
+          }
+        },
+        "dependency:@babel/parser": {
+          "key": "dependency:@babel/parser",
+          "kind": "dependency",
+          "label": "@babel/parser",
+          "fingerprint": "d9bbcba1af10ec64a7bd",
+          "sourceRefs": [
+            "package.json"
+          ],
+          "details": {
+            "version": "^7.29.7"
+          }
+        },
+        "dependency:@modelcontextprotocol/sdk": {
+          "key": "dependency:@modelcontextprotocol/sdk",
+          "kind": "dependency",
+          "label": "@modelcontextprotocol/sdk",
+          "fingerprint": "be18d9c7216f9b0a8698",
+          "sourceRefs": [
+            "package.json"
+          ],
+          "details": {
+            "version": "^1.29.0"
+          }
+        },
+        "dependency:@supabase/supabase-js": {
+          "key": "dependency:@supabase/supabase-js",
+          "kind": "dependency",
+          "label": "@supabase/supabase-js",
+          "fingerprint": "7f3f89d5644821c12e49",
+          "sourceRefs": [
+            "package.json"
+          ],
+          "details": {
+            "version": "^2.108.2"
+          }
+        },
+        "dependency:@types/react": {
+          "key": "dependency:@types/react",
+          "kind": "dependency",
+          "label": "@types/react",
+          "fingerprint": "2f757c71272fda903427",
+          "sourceRefs": [
+            "package.json"
+          ],
+          "details": {
+            "version": "^18.3.1"
+          }
+        },
+        "dependency:@types/react-dom": {
+          "key": "dependency:@types/react-dom",
+          "kind": "dependency",
+          "label": "@types/react-dom",
+          "fingerprint": "2f757c71272fda903427",
+          "sourceRefs": [
+            "package.json"
+          ],
+          "details": {
+            "version": "^18.3.1"
+          }
+        },
+        "dependency:@vitejs/plugin-react": {
+          "key": "dependency:@vitejs/plugin-react",
+          "kind": "dependency",
+          "label": "@vitejs/plugin-react",
+          "fingerprint": "30c6dbcfa1262734061a",
+          "sourceRefs": [
+            "package.json"
+          ],
+          "details": {
+            "version": "^4.3.1"
+          }
+        },
+        "dependency:@xyflow/react": {
+          "key": "dependency:@xyflow/react",
+          "kind": "dependency",
+          "label": "@xyflow/react",
+          "fingerprint": "b47b3eecdc1047005379",
+          "sourceRefs": [
+            "package.json"
+          ],
+          "details": {
+            "version": "^12.3.0"
+          }
+        },
+        "dependency:react": {
+          "key": "dependency:react",
+          "kind": "dependency",
+          "label": "react",
+          "fingerprint": "2f757c71272fda903427",
+          "sourceRefs": [
+            "package.json"
+          ],
+          "details": {
+            "version": "^18.3.1"
+          }
+        },
+        "dependency:react-dom": {
+          "key": "dependency:react-dom",
+          "kind": "dependency",
+          "label": "react-dom",
+          "fingerprint": "2f757c71272fda903427",
+          "sourceRefs": [
+            "package.json"
+          ],
+          "details": {
+            "version": "^18.3.1"
+          }
+        },
+        "dependency:sharp": {
+          "key": "dependency:sharp",
+          "kind": "dependency",
+          "label": "sharp",
+          "fingerprint": "c059e49658f9cac0f2d1",
+          "sourceRefs": [
+            "package.json"
+          ],
+          "details": {
+            "version": "^0.35.2"
+          }
+        },
+        "dependency:vite": {
+          "key": "dependency:vite",
+          "kind": "dependency",
+          "label": "vite",
+          "fingerprint": "e111e3c4acaa71968869",
+          "sourceRefs": [
+            "package.json"
+          ],
+          "details": {
+            "version": "^6.0.0"
+          }
+        },
+        "dependency:vite-plugin-pwa": {
+          "key": "dependency:vite-plugin-pwa",
+          "kind": "dependency",
+          "label": "vite-plugin-pwa",
+          "fingerprint": "1c5f71b35d566a85700c",
+          "sourceRefs": [
+            "package.json"
+          ],
+          "details": {
+            "version": "^1.3.0"
+          }
+        },
+        "dependency:zod": {
+          "key": "dependency:zod",
+          "kind": "dependency",
+          "label": "zod",
+          "fingerprint": "ececc273b6372abb6789",
+          "sourceRefs": [
+            "package.json"
+          ],
+          "details": {
+            "version": "^4.4.3"
+          }
+        },
+        "env:NODE_ENV": {
+          "key": "env:NODE_ENV",
+          "kind": "environment-variable",
+          "label": "NODE_ENV",
+          "fingerprint": "325f3e43f1518fab672b",
+          "sourceRefs": [
+            "api/system-runtime.js"
+          ]
+        },
+        "env:SUPABASE_SERVICE_ROLE_KEY": {
+          "key": "env:SUPABASE_SERVICE_ROLE_KEY",
+          "kind": "environment-variable",
+          "label": "SUPABASE_SERVICE_ROLE_KEY",
+          "fingerprint": "1894a0efc1e05c59c592",
+          "sourceRefs": [
+            "mcp/shareAccess.js",
+            "mcp/store.js",
+            "scripts/test-source-twin.mjs"
+          ]
+        },
+        "env:SUPABASE_URL": {
+          "key": "env:SUPABASE_URL",
+          "kind": "environment-variable",
+          "label": "SUPABASE_URL",
+          "fingerprint": "d9c6268f8c5a2a8fab92",
+          "sourceRefs": [
+            "mcp/shareAccess.js",
+            "mcp/store.js"
+          ]
+        },
+        "env:VERCEL": {
+          "key": "env:VERCEL",
+          "kind": "environment-variable",
+          "label": "VERCEL",
+          "fingerprint": "9e7dca5e605273dc5175",
+          "sourceRefs": [
+            "api/system-runtime.js"
+          ]
+        },
+        "env:VERCEL_ENV": {
+          "key": "env:VERCEL_ENV",
+          "kind": "environment-variable",
+          "label": "VERCEL_ENV",
+          "fingerprint": "66b390b51dadd737169b",
+          "sourceRefs": [
+            "api/system-runtime.js"
+          ]
+        },
+        "env:VERCEL_GIT_COMMIT_SHA": {
+          "key": "env:VERCEL_GIT_COMMIT_SHA",
+          "kind": "environment-variable",
+          "label": "VERCEL_GIT_COMMIT_SHA",
+          "fingerprint": "1cf8355725eb749ee55d",
+          "sourceRefs": [
+            "api/system-runtime.js"
+          ]
+        },
+        "env:VERCEL_PROJECT_PRODUCTION_URL": {
+          "key": "env:VERCEL_PROJECT_PRODUCTION_URL",
+          "kind": "environment-variable",
+          "label": "VERCEL_PROJECT_PRODUCTION_URL",
+          "fingerprint": "c173e507afb4b8f73a44",
+          "sourceRefs": [
+            "api/system-runtime.js"
+          ]
+        },
+        "env:VERCEL_REGION": {
+          "key": "env:VERCEL_REGION",
+          "kind": "environment-variable",
+          "label": "VERCEL_REGION",
+          "fingerprint": "4c391355902f82142a9b",
+          "sourceRefs": [
+            "api/system-runtime.js"
+          ]
+        },
+        "env:VERCEL_URL": {
+          "key": "env:VERCEL_URL",
+          "kind": "environment-variable",
+          "label": "VERCEL_URL",
+          "fingerprint": "a7f53eab26b6bae794e5",
+          "sourceRefs": [
+            "api/system-runtime.js"
+          ]
+        },
+        "env:WORKFLOW_CANVAS_GITHUB_WEBHOOK_SECRET": {
+          "key": "env:WORKFLOW_CANVAS_GITHUB_WEBHOOK_SECRET",
+          "kind": "environment-variable",
+          "label": "WORKFLOW_CANVAS_GITHUB_WEBHOOK_SECRET",
+          "fingerprint": "dc32f7d2e008b352bbaf",
+          "sourceRefs": [
+            "api/source-twin-webhook.js"
+          ]
+        },
+        "env:WORKFLOW_CANVAS_LOCAL_CONNECTOR_TOKEN": {
+          "key": "env:WORKFLOW_CANVAS_LOCAL_CONNECTOR_TOKEN",
+          "kind": "environment-variable",
+          "label": "WORKFLOW_CANVAS_LOCAL_CONNECTOR_TOKEN",
+          "fingerprint": "11ee54b0c0e70babd52e",
+          "sourceRefs": [
+            "scripts/local-connector-agent.mjs"
+          ]
+        },
+        "env:WORKFLOW_CANVAS_OWNER_USER_ID": {
+          "key": "env:WORKFLOW_CANVAS_OWNER_USER_ID",
+          "kind": "environment-variable",
+          "label": "WORKFLOW_CANVAS_OWNER_USER_ID",
+          "fingerprint": "42178f3f68edc70e580a",
+          "sourceRefs": [
+            "api/source-twin.js",
+            "api/system-runtime.js",
+            "mcp/store.js"
+          ]
+        },
+        "env:WORKFLOW_CANVAS_URL": {
+          "key": "env:WORKFLOW_CANVAS_URL",
+          "kind": "environment-variable",
+          "label": "WORKFLOW_CANVAS_URL",
+          "fingerprint": "07072e70050bb61ca92f",
+          "sourceRefs": [
+            "scripts/local-connector-agent.mjs"
+          ]
+        },
+        "file:CLAUDE.md": {
+          "key": "file:CLAUDE.md",
+          "kind": "file",
+          "label": "CLAUDE.md",
+          "fingerprint": "07ab540e29907589a575",
+          "sourceRefs": [
+            "CLAUDE.md"
+          ]
+        },
+        "file:README.md": {
+          "key": "file:README.md",
+          "kind": "file",
+          "label": "README.md",
+          "fingerprint": "c5a197c37f6cdc0e9476",
+          "sourceRefs": [
+            "README.md"
+          ]
+        },
+        "file:api/local-connector.js": {
+          "key": "file:api/local-connector.js",
+          "kind": "file",
+          "label": "api/local-connector.js",
+          "fingerprint": "0b31bead443e7d7a9a78",
+          "sourceRefs": [
+            "api/local-connector.js"
+          ]
+        },
+        "file:api/mcp.js": {
+          "key": "file:api/mcp.js",
+          "kind": "file",
+          "label": "api/mcp.js",
+          "fingerprint": "66a6bfaf265629886be8",
+          "sourceRefs": [
+            "api/mcp.js"
+          ]
+        },
+        "file:api/shared-canvas.js": {
+          "key": "file:api/shared-canvas.js",
+          "kind": "file",
+          "label": "api/shared-canvas.js",
+          "fingerprint": "c235f2d397d45927bc3c",
+          "sourceRefs": [
+            "api/shared-canvas.js"
+          ]
+        },
+        "file:api/source-twin-webhook.js": {
+          "key": "file:api/source-twin-webhook.js",
+          "kind": "file",
+          "label": "api/source-twin-webhook.js",
+          "fingerprint": "e0bfd4db0356ef412a6d",
+          "sourceRefs": [
+            "api/source-twin-webhook.js"
+          ]
+        },
+        "file:api/source-twin.js": {
+          "key": "file:api/source-twin.js",
+          "kind": "file",
+          "label": "api/source-twin.js",
+          "fingerprint": "3ccd726903a93df0f0a7",
+          "sourceRefs": [
+            "api/source-twin.js"
+          ]
+        },
+        "file:api/system-runtime.js": {
+          "key": "file:api/system-runtime.js",
+          "kind": "file",
+          "label": "api/system-runtime.js",
+          "fingerprint": "2f57afa956237380946c",
+          "sourceRefs": [
+            "api/system-runtime.js"
+          ]
+        },
+        "file:index.html": {
+          "key": "file:index.html",
+          "kind": "file",
+          "label": "index.html",
+          "fingerprint": "29a9f1ea8831fe69f40d",
+          "sourceRefs": [
+            "index.html"
+          ]
+        },
+        "file:mcp/dataAccessAudit.js": {
+          "key": "file:mcp/dataAccessAudit.js",
+          "kind": "file",
+          "label": "mcp/dataAccessAudit.js",
+          "fingerprint": "a55465835b1b65e19833",
+          "sourceRefs": [
+            "mcp/dataAccessAudit.js"
+          ]
+        },
+        "file:mcp/layout.js": {
+          "key": "file:mcp/layout.js",
+          "kind": "file",
+          "label": "mcp/layout.js",
+          "fingerprint": "2536face12e00167ee86",
+          "sourceRefs": [
+            "mcp/layout.js"
+          ]
+        },
+        "file:mcp/localConnectorStore.js": {
+          "key": "file:mcp/localConnectorStore.js",
+          "kind": "file",
+          "label": "mcp/localConnectorStore.js",
+          "fingerprint": "58ff59cb5d9c7ed6a4b8",
+          "sourceRefs": [
+            "mcp/localConnectorStore.js"
+          ]
+        },
+        "file:mcp/sanitize.js": {
+          "key": "file:mcp/sanitize.js",
+          "kind": "file",
+          "label": "mcp/sanitize.js",
+          "fingerprint": "bca9bc868832d8161774",
+          "sourceRefs": [
+            "mcp/sanitize.js"
+          ]
+        },
+        "file:mcp/server.js": {
+          "key": "file:mcp/server.js",
+          "kind": "file",
+          "label": "mcp/server.js",
+          "fingerprint": "0ba60c83d4047ed1cd27",
+          "sourceRefs": [
+            "mcp/server.js"
+          ]
+        },
+        "file:mcp/shareAccess.js": {
+          "key": "file:mcp/shareAccess.js",
+          "kind": "file",
+          "label": "mcp/shareAccess.js",
+          "fingerprint": "5db3ac995c4d37c38069",
+          "sourceRefs": [
+            "mcp/shareAccess.js"
+          ]
+        },
+        "file:mcp/sourceTwinStore.js": {
+          "key": "file:mcp/sourceTwinStore.js",
+          "kind": "file",
+          "label": "mcp/sourceTwinStore.js",
+          "fingerprint": "d38198adfaaf88de145a",
+          "sourceRefs": [
+            "mcp/sourceTwinStore.js"
+          ]
+        },
+        "file:mcp/store.js": {
+          "key": "file:mcp/store.js",
+          "kind": "file",
+          "label": "mcp/store.js",
+          "fingerprint": "22ebaad1ba909e51d618",
+          "sourceRefs": [
+            "mcp/store.js"
+          ]
+        },
+        "file:mcp/systemOperationPlan.js": {
+          "key": "file:mcp/systemOperationPlan.js",
+          "kind": "file",
+          "label": "mcp/systemOperationPlan.js",
+          "fingerprint": "c2ba612a73ad973b4807",
+          "sourceRefs": [
+            "mcp/systemOperationPlan.js"
+          ]
+        },
+        "file:mcp/systemRuntime.js": {
+          "key": "file:mcp/systemRuntime.js",
+          "kind": "file",
+          "label": "mcp/systemRuntime.js",
+          "fingerprint": "8d07519e0ba7ec6d06ea",
+          "sourceRefs": [
+            "mcp/systemRuntime.js"
+          ]
+        },
+        "file:package.json": {
+          "key": "file:package.json",
+          "kind": "file",
+          "label": "package.json",
+          "fingerprint": "c0e95f8c4010539bc38b",
+          "sourceRefs": [
+            "package.json"
+          ]
+        },
+        "file:scripts/check-privacy-release.mjs": {
+          "key": "file:scripts/check-privacy-release.mjs",
+          "kind": "file",
+          "label": "scripts/check-privacy-release.mjs",
+          "fingerprint": "375d2d908fa87eef4d96",
+          "sourceRefs": [
+            "scripts/check-privacy-release.mjs"
+          ]
+        },
+        "file:scripts/generate-source-twin.mjs": {
+          "key": "file:scripts/generate-source-twin.mjs",
+          "kind": "file",
+          "label": "scripts/generate-source-twin.mjs",
+          "fingerprint": "cedb4d8c6d5485bffbfa",
+          "sourceRefs": [
+            "scripts/generate-source-twin.mjs"
+          ]
+        },
+        "file:scripts/generate-system-discovery.mjs": {
+          "key": "file:scripts/generate-system-discovery.mjs",
+          "kind": "file",
+          "label": "scripts/generate-system-discovery.mjs",
+          "fingerprint": "18301272bf832cdd988b",
+          "sourceRefs": [
+            "scripts/generate-system-discovery.mjs"
+          ]
+        },
+        "file:scripts/local-connector-agent.mjs": {
+          "key": "file:scripts/local-connector-agent.mjs",
+          "kind": "file",
+          "label": "scripts/local-connector-agent.mjs",
+          "fingerprint": "c865ea970ebd752142ca",
+          "sourceRefs": [
+            "scripts/local-connector-agent.mjs"
+          ]
+        },
+        "file:scripts/source-twin-scanner.mjs": {
+          "key": "file:scripts/source-twin-scanner.mjs",
+          "kind": "file",
+          "label": "scripts/source-twin-scanner.mjs",
+          "fingerprint": "5a8bf118aa0835da877e",
+          "sourceRefs": [
+            "scripts/source-twin-scanner.mjs"
+          ]
+        },
+        "file:scripts/system-discovery.mjs": {
+          "key": "file:scripts/system-discovery.mjs",
+          "kind": "file",
+          "label": "scripts/system-discovery.mjs",
+          "fingerprint": "7debf11dda9460aa9941",
+          "sourceRefs": [
+            "scripts/system-discovery.mjs"
+          ]
+        },
+        "file:scripts/test-local-connector-agent.mjs": {
+          "key": "file:scripts/test-local-connector-agent.mjs",
+          "kind": "file",
+          "label": "scripts/test-local-connector-agent.mjs",
+          "fingerprint": "b7453eb289feb216f700",
+          "sourceRefs": [
+            "scripts/test-local-connector-agent.mjs"
+          ]
+        },
+        "file:scripts/test-mcp-logic.mjs": {
+          "key": "file:scripts/test-mcp-logic.mjs",
+          "kind": "file",
+          "label": "scripts/test-mcp-logic.mjs",
+          "fingerprint": "f08b0c2e68bd651f2f8c",
+          "sourceRefs": [
+            "scripts/test-mcp-logic.mjs"
+          ]
+        },
+        "file:scripts/test-operation-lifecycle.mjs": {
+          "key": "file:scripts/test-operation-lifecycle.mjs",
+          "kind": "file",
+          "label": "scripts/test-operation-lifecycle.mjs",
+          "fingerprint": "5bedd53150ecb28ac2d5",
+          "sourceRefs": [
+            "scripts/test-operation-lifecycle.mjs"
+          ]
+        },
+        "file:scripts/test-source-twin.mjs": {
+          "key": "file:scripts/test-source-twin.mjs",
+          "kind": "file",
+          "label": "scripts/test-source-twin.mjs",
+          "fingerprint": "a9b0178bfb957e684d6f",
+          "sourceRefs": [
+            "scripts/test-source-twin.mjs"
+          ]
+        },
+        "file:scripts/test-sql-security.mjs": {
+          "key": "file:scripts/test-sql-security.mjs",
+          "kind": "file",
+          "label": "scripts/test-sql-security.mjs",
+          "fingerprint": "bcf84f83b8db03f4be80",
+          "sourceRefs": [
+            "scripts/test-sql-security.mjs"
+          ]
+        },
+        "file:scripts/test-twin-adapter-contract.mjs": {
+          "key": "file:scripts/test-twin-adapter-contract.mjs",
+          "kind": "file",
+          "label": "scripts/test-twin-adapter-contract.mjs",
+          "fingerprint": "8e64d6c03769803a0317",
+          "sourceRefs": [
+            "scripts/test-twin-adapter-contract.mjs"
+          ]
+        },
+        "file:scripts/test-twin-build.mjs": {
+          "key": "file:scripts/test-twin-build.mjs",
+          "kind": "file",
+          "label": "scripts/test-twin-build.mjs",
+          "fingerprint": "af40051b19535dfb807a",
+          "sourceRefs": [
+            "scripts/test-twin-build.mjs"
+          ]
+        },
+        "file:shared/digitalTwinProposal.js": {
+          "key": "file:shared/digitalTwinProposal.js",
+          "kind": "file",
+          "label": "shared/digitalTwinProposal.js",
+          "fingerprint": "350ede1ba16e7ce26e6f",
+          "sourceRefs": [
+            "shared/digitalTwinProposal.js"
+          ]
+        },
+        "file:shared/digitalTwinReview.js": {
+          "key": "file:shared/digitalTwinReview.js",
+          "kind": "file",
+          "label": "shared/digitalTwinReview.js",
+          "fingerprint": "a4f3f90f1df5ddefcbbd",
+          "sourceRefs": [
+            "shared/digitalTwinReview.js"
+          ]
+        },
+        "file:shared/edgeOperation.js": {
+          "key": "file:shared/edgeOperation.js",
+          "kind": "file",
+          "label": "shared/edgeOperation.js",
+          "fingerprint": "5d913c424b9021185daa",
+          "sourceRefs": [
+            "shared/edgeOperation.js"
+          ]
+        },
+        "file:shared/localConnector.js": {
+          "key": "file:shared/localConnector.js",
+          "kind": "file",
+          "label": "shared/localConnector.js",
+          "fingerprint": "f809cde381442328dade",
+          "sourceRefs": [
+            "shared/localConnector.js"
+          ]
+        },
+        "file:shared/operationLifecycle.js": {
+          "key": "file:shared/operationLifecycle.js",
+          "kind": "file",
+          "label": "shared/operationLifecycle.js",
+          "fingerprint": "a19879f2536bb4b41a44",
+          "sourceRefs": [
+            "shared/operationLifecycle.js"
+          ]
+        },
+        "file:shared/privacyCapabilities.js": {
+          "key": "file:shared/privacyCapabilities.js",
+          "kind": "file",
+          "label": "shared/privacyCapabilities.js",
+          "fingerprint": "8f6a4c444feffd519d73",
+          "sourceRefs": [
+            "shared/privacyCapabilities.js"
+          ]
+        },
+        "file:shared/relationOntology.js": {
+          "key": "file:shared/relationOntology.js",
+          "kind": "file",
+          "label": "shared/relationOntology.js",
+          "fingerprint": "09bce6491e878523798b",
+          "sourceRefs": [
+            "shared/relationOntology.js"
+          ]
+        },
+        "file:shared/sharePermissions.js": {
+          "key": "file:shared/sharePermissions.js",
+          "kind": "file",
+          "label": "shared/sharePermissions.js",
+          "fingerprint": "7a0c0a56c3595a2156c7",
+          "sourceRefs": [
+            "shared/sharePermissions.js"
+          ]
+        },
+        "file:shared/sourceTwin.js": {
+          "key": "file:shared/sourceTwin.js",
+          "kind": "file",
+          "label": "shared/sourceTwin.js",
+          "fingerprint": "45ccbd49dc31c5f016e9",
+          "sourceRefs": [
+            "shared/sourceTwin.js"
+          ]
+        },
+        "file:shared/systemObservationCatalog.js": {
+          "key": "file:shared/systemObservationCatalog.js",
+          "kind": "file",
+          "label": "shared/systemObservationCatalog.js",
+          "fingerprint": "99ba6df217c0f94434d2",
+          "sourceRefs": [
+            "shared/systemObservationCatalog.js"
+          ]
+        },
+        "file:shared/systemOntology.js": {
+          "key": "file:shared/systemOntology.js",
+          "kind": "file",
+          "label": "shared/systemOntology.js",
+          "fingerprint": "105e0574ffd343f63622",
+          "sourceRefs": [
+            "shared/systemOntology.js"
+          ]
+        },
+        "file:shared/systemPartOntology.js": {
+          "key": "file:shared/systemPartOntology.js",
+          "kind": "file",
+          "label": "shared/systemPartOntology.js",
+          "fingerprint": "1bfbf8a464bf2cf23f90",
+          "sourceRefs": [
+            "shared/systemPartOntology.js"
+          ]
+        },
+        "file:shared/systemRuntime.js": {
+          "key": "file:shared/systemRuntime.js",
+          "kind": "file",
+          "label": "shared/systemRuntime.js",
+          "fingerprint": "9343218c52e5e0e8eb24",
+          "sourceRefs": [
+            "shared/systemRuntime.js"
+          ]
+        },
+        "file:shared/trustTopology.js": {
+          "key": "file:shared/trustTopology.js",
+          "kind": "file",
+          "label": "shared/trustTopology.js",
+          "fingerprint": "4f881d475eea055caa38",
+          "sourceRefs": [
+            "shared/trustTopology.js"
+          ]
+        },
+        "file:shared/twinAdapterContract.js": {
+          "key": "file:shared/twinAdapterContract.js",
+          "kind": "file",
+          "label": "shared/twinAdapterContract.js",
+          "fingerprint": "5f53a06949be1b7db45a",
+          "sourceRefs": [
+            "shared/twinAdapterContract.js"
+          ]
+        },
+        "file:shared/twinBuild.js": {
+          "key": "file:shared/twinBuild.js",
+          "kind": "file",
+          "label": "shared/twinBuild.js",
+          "fingerprint": "62de7d5c8028bddd3fbb",
+          "sourceRefs": [
+            "shared/twinBuild.js"
+          ]
+        },
+        "file:shared/twinBuildCanvas.js": {
+          "key": "file:shared/twinBuildCanvas.js",
+          "kind": "file",
+          "label": "shared/twinBuildCanvas.js",
+          "fingerprint": "87f8b4b3fe87fe0e7ea2",
+          "sourceRefs": [
+            "shared/twinBuildCanvas.js"
+          ]
+        },
+        "file:shared/twinBuildReconciler.js": {
+          "key": "file:shared/twinBuildReconciler.js",
+          "kind": "file",
+          "label": "shared/twinBuildReconciler.js",
+          "fingerprint": "a8095eba0c60acff33e6",
+          "sourceRefs": [
+            "shared/twinBuildReconciler.js"
+          ]
+        },
+        "file:shared/workflowCanvasSystemMap.js": {
+          "key": "file:shared/workflowCanvasSystemMap.js",
+          "kind": "file",
+          "label": "shared/workflowCanvasSystemMap.js",
+          "fingerprint": "22760bf2ff696f737cfc",
+          "sourceRefs": [
+            "shared/workflowCanvasSystemMap.js"
+          ]
+        },
+        "file:shared/workflowOperationDefinitions.js": {
+          "key": "file:shared/workflowOperationDefinitions.js",
+          "kind": "file",
+          "label": "shared/workflowOperationDefinitions.js",
+          "fingerprint": "f4e418656ff780aeb7dc",
+          "sourceRefs": [
+            "shared/workflowOperationDefinitions.js"
+          ]
+        },
+        "file:shared/workflowSourceTwinCanvas.js": {
+          "key": "file:shared/workflowSourceTwinCanvas.js",
+          "kind": "file",
+          "label": "shared/workflowSourceTwinCanvas.js",
+          "fingerprint": "6a8d77415838a4d79cf8",
+          "sourceRefs": [
+            "shared/workflowSourceTwinCanvas.js"
+          ]
+        },
+        "file:shared/workflowSystemDiscovery.js": {
+          "key": "file:shared/workflowSystemDiscovery.js",
+          "kind": "file",
+          "label": "shared/workflowSystemDiscovery.js",
+          "fingerprint": "6db49d57ce847a040889",
+          "sourceRefs": [
+            "shared/workflowSystemDiscovery.js"
+          ]
+        },
+        "file:shared/workflowSystemMapRepair.js": {
+          "key": "file:shared/workflowSystemMapRepair.js",
+          "kind": "file",
+          "label": "shared/workflowSystemMapRepair.js",
+          "fingerprint": "93cacc64706c16fdba3e",
+          "sourceRefs": [
+            "shared/workflowSystemMapRepair.js"
+          ]
+        },
+        "file:shared/workflowSystemTwinAdapter.js": {
+          "key": "file:shared/workflowSystemTwinAdapter.js",
+          "kind": "file",
+          "label": "shared/workflowSystemTwinAdapter.js",
+          "fingerprint": "6d3fcb1b20fd76d6023e",
+          "sourceRefs": [
+            "shared/workflowSystemTwinAdapter.js"
+          ]
+        },
+        "file:shared/workflowSystemTwinAdapterDescriptor.js": {
+          "key": "file:shared/workflowSystemTwinAdapterDescriptor.js",
+          "kind": "file",
+          "label": "shared/workflowSystemTwinAdapterDescriptor.js",
+          "fingerprint": "75fb3ed6ed961adf04f7",
+          "sourceRefs": [
+            "shared/workflowSystemTwinAdapterDescriptor.js"
+          ]
+        },
+        "file:shared/workflowSystemTwinBuild.js": {
+          "key": "file:shared/workflowSystemTwinBuild.js",
+          "kind": "file",
+          "label": "shared/workflowSystemTwinBuild.js",
+          "fingerprint": "c27dffe655178b02597a",
+          "sourceRefs": [
+            "shared/workflowSystemTwinBuild.js"
+          ]
+        },
+        "file:src/App.jsx": {
+          "key": "file:src/App.jsx",
+          "kind": "file",
+          "label": "src/App.jsx",
+          "fingerprint": "31e932b82110cda5600f",
+          "sourceRefs": [
+            "src/App.jsx"
+          ]
+        },
+        "file:src/components/AuthPanel.jsx": {
+          "key": "file:src/components/AuthPanel.jsx",
+          "kind": "file",
+          "label": "src/components/AuthPanel.jsx",
+          "fingerprint": "9cd71e6d1522e6f46c77",
+          "sourceRefs": [
+            "src/components/AuthPanel.jsx"
+          ]
+        },
+        "file:src/components/CanvasImage.jsx": {
+          "key": "file:src/components/CanvasImage.jsx",
+          "kind": "file",
+          "label": "src/components/CanvasImage.jsx",
+          "fingerprint": "cfc33915c26e0b4b7965",
+          "sourceRefs": [
+            "src/components/CanvasImage.jsx"
+          ]
+        },
+        "file:src/components/CanvasTabs.jsx": {
+          "key": "file:src/components/CanvasTabs.jsx",
+          "kind": "file",
+          "label": "src/components/CanvasTabs.jsx",
+          "fingerprint": "5dad70e30a5108157465",
+          "sourceRefs": [
+            "src/components/CanvasTabs.jsx"
+          ]
+        },
+        "file:src/components/DigitalTwinReviewPanel.jsx": {
+          "key": "file:src/components/DigitalTwinReviewPanel.jsx",
+          "kind": "file",
+          "label": "src/components/DigitalTwinReviewPanel.jsx",
+          "fingerprint": "3df305265c60da989b57",
+          "sourceRefs": [
+            "src/components/DigitalTwinReviewPanel.jsx"
+          ]
+        },
+        "file:src/components/EdgeRelationEditor.jsx": {
+          "key": "file:src/components/EdgeRelationEditor.jsx",
+          "kind": "file",
+          "label": "src/components/EdgeRelationEditor.jsx",
+          "fingerprint": "2da09cbbea0d46a99034",
+          "sourceRefs": [
+            "src/components/EdgeRelationEditor.jsx"
+          ]
+        },
+        "file:src/components/EditToolbar.jsx": {
+          "key": "file:src/components/EditToolbar.jsx",
+          "kind": "file",
+          "label": "src/components/EditToolbar.jsx",
+          "fingerprint": "6346661f30990fcf5dd1",
+          "sourceRefs": [
+            "src/components/EditToolbar.jsx"
+          ]
+        },
+        "file:src/components/InvitePopover.jsx": {
+          "key": "file:src/components/InvitePopover.jsx",
+          "kind": "file",
+          "label": "src/components/InvitePopover.jsx",
+          "fingerprint": "68e4e74d3d368c7b30dd",
+          "sourceRefs": [
+            "src/components/InvitePopover.jsx"
+          ]
+        },
+        "file:src/components/NodePalette.jsx": {
+          "key": "file:src/components/NodePalette.jsx",
+          "kind": "file",
+          "label": "src/components/NodePalette.jsx",
+          "fingerprint": "987db62628d3b0b60764",
+          "sourceRefs": [
+            "src/components/NodePalette.jsx"
+          ]
+        },
+        "file:src/components/NotesPanel.jsx": {
+          "key": "file:src/components/NotesPanel.jsx",
+          "kind": "file",
+          "label": "src/components/NotesPanel.jsx",
+          "fingerprint": "e15b537189012a3cc8bb",
+          "sourceRefs": [
+            "src/components/NotesPanel.jsx"
+          ]
+        },
+        "file:src/components/OpenInNotesButton.jsx": {
+          "key": "file:src/components/OpenInNotesButton.jsx",
+          "kind": "file",
+          "label": "src/components/OpenInNotesButton.jsx",
+          "fingerprint": "1c8dd96b150b63131ca6",
+          "sourceRefs": [
+            "src/components/OpenInNotesButton.jsx"
+          ]
+        },
+        "file:src/components/ParticipantAvatar.jsx": {
+          "key": "file:src/components/ParticipantAvatar.jsx",
+          "kind": "file",
+          "label": "src/components/ParticipantAvatar.jsx",
+          "fingerprint": "491c24be2af4e3d50bbc",
+          "sourceRefs": [
+            "src/components/ParticipantAvatar.jsx"
+          ]
+        },
+        "file:src/components/ScopedParticipants.jsx": {
+          "key": "file:src/components/ScopedParticipants.jsx",
+          "kind": "file",
+          "label": "src/components/ScopedParticipants.jsx",
+          "fingerprint": "690c3124c6c72d1e66c3",
+          "sourceRefs": [
+            "src/components/ScopedParticipants.jsx"
+          ]
+        },
+        "file:src/components/SourceTwinPanel.jsx": {
+          "key": "file:src/components/SourceTwinPanel.jsx",
+          "kind": "file",
+          "label": "src/components/SourceTwinPanel.jsx",
+          "fingerprint": "abaef273ca7794f2fd67",
+          "sourceRefs": [
+            "src/components/SourceTwinPanel.jsx"
+          ]
+        },
+        "file:src/components/SystemObservationCatalog.jsx": {
+          "key": "file:src/components/SystemObservationCatalog.jsx",
+          "kind": "file",
+          "label": "src/components/SystemObservationCatalog.jsx",
+          "fingerprint": "fb16eb7a65b80fce0ce5",
+          "sourceRefs": [
+            "src/components/SystemObservationCatalog.jsx"
+          ]
+        },
+        "file:src/components/Toolbar.jsx": {
+          "key": "file:src/components/Toolbar.jsx",
+          "kind": "file",
+          "label": "src/components/Toolbar.jsx",
+          "fingerprint": "f3fdbe74992bfdc513b5",
+          "sourceRefs": [
+            "src/components/Toolbar.jsx"
+          ]
+        },
+        "file:src/demoCanvases.js": {
+          "key": "file:src/demoCanvases.js",
+          "kind": "file",
+          "label": "src/demoCanvases.js",
+          "fingerprint": "8382622e978ad59ad544",
+          "sourceRefs": [
+            "src/demoCanvases.js"
+          ]
+        },
+        "file:src/edges/StubEdge.jsx": {
+          "key": "file:src/edges/StubEdge.jsx",
+          "kind": "file",
+          "label": "src/edges/StubEdge.jsx",
+          "fingerprint": "1196c442040d3840af1a",
+          "sourceRefs": [
+            "src/edges/StubEdge.jsx"
+          ]
+        },
+        "file:src/edges/stubEdgeGeometry.js": {
+          "key": "file:src/edges/stubEdgeGeometry.js",
+          "kind": "file",
+          "label": "src/edges/stubEdgeGeometry.js",
+          "fingerprint": "34c1ca31db051e914871",
+          "sourceRefs": [
+            "src/edges/stubEdgeGeometry.js"
+          ]
+        },
+        "file:src/lib/canvasGeometry.js": {
+          "key": "file:src/lib/canvasGeometry.js",
+          "kind": "file",
+          "label": "src/lib/canvasGeometry.js",
+          "fingerprint": "648f68d6ecacb93b2f88",
+          "sourceRefs": [
+            "src/lib/canvasGeometry.js"
+          ]
+        },
+        "file:src/lib/canvasMerge.js": {
+          "key": "file:src/lib/canvasMerge.js",
+          "kind": "file",
+          "label": "src/lib/canvasMerge.js",
+          "fingerprint": "d6f45b351f6cf879ee6a",
+          "sourceRefs": [
+            "src/lib/canvasMerge.js"
+          ]
+        },
+        "file:src/lib/canvasNavigation.js": {
+          "key": "file:src/lib/canvasNavigation.js",
+          "kind": "file",
+          "label": "src/lib/canvasNavigation.js",
+          "fingerprint": "6fb4429ee72c353c2465",
+          "sourceRefs": [
+            "src/lib/canvasNavigation.js"
+          ]
+        },
+        "file:src/lib/canvasSchemaGuard.js": {
+          "key": "file:src/lib/canvasSchemaGuard.js",
+          "kind": "file",
+          "label": "src/lib/canvasSchemaGuard.js",
+          "fingerprint": "5ede465efdc214c0bd67",
+          "sourceRefs": [
+            "src/lib/canvasSchemaGuard.js"
+          ]
+        },
+        "file:src/lib/canvasSync.js": {
+          "key": "file:src/lib/canvasSync.js",
+          "kind": "file",
+          "label": "src/lib/canvasSync.js",
+          "fingerprint": "4a32cfbfadbca278af6e",
+          "sourceRefs": [
+            "src/lib/canvasSync.js"
+          ]
+        },
+        "file:src/lib/cloudStorage.js": {
+          "key": "file:src/lib/cloudStorage.js",
+          "kind": "file",
+          "label": "src/lib/cloudStorage.js",
+          "fingerprint": "39d40d052ca3f735d66d",
+          "sourceRefs": [
+            "src/lib/cloudStorage.js"
+          ]
+        },
+        "file:src/lib/digitalTwinAdapters.js": {
+          "key": "file:src/lib/digitalTwinAdapters.js",
+          "kind": "file",
+          "label": "src/lib/digitalTwinAdapters.js",
+          "fingerprint": "31b8b5a001a34024976f",
+          "sourceRefs": [
+            "src/lib/digitalTwinAdapters.js"
+          ]
+        },
+        "file:src/lib/imageStorage.js": {
+          "key": "file:src/lib/imageStorage.js",
+          "kind": "file",
+          "label": "src/lib/imageStorage.js",
+          "fingerprint": "f74e24ec69e1fb34e322",
+          "sourceRefs": [
+            "src/lib/imageStorage.js"
+          ]
+        },
+        "file:src/lib/localConnectorApi.js": {
+          "key": "file:src/lib/localConnectorApi.js",
+          "kind": "file",
+          "label": "src/lib/localConnectorApi.js",
+          "fingerprint": "4e5f56443c964cd2e956",
+          "sourceRefs": [
+            "src/lib/localConnectorApi.js"
+          ]
+        },
+        "file:src/lib/mcpTokens.js": {
+          "key": "file:src/lib/mcpTokens.js",
+          "kind": "file",
+          "label": "src/lib/mcpTokens.js",
+          "fingerprint": "228cb98f44b1db5711e8",
+          "sourceRefs": [
+            "src/lib/mcpTokens.js"
+          ]
+        },
+        "file:src/lib/presence.js": {
+          "key": "file:src/lib/presence.js",
+          "kind": "file",
+          "label": "src/lib/presence.js",
+          "fingerprint": "105db7f14e76cbb0ba39",
+          "sourceRefs": [
+            "src/lib/presence.js"
+          ]
+        },
+        "file:src/lib/profiles.js": {
+          "key": "file:src/lib/profiles.js",
+          "kind": "file",
+          "label": "src/lib/profiles.js",
+          "fingerprint": "775b54e124187211ddb6",
+          "sourceRefs": [
+            "src/lib/profiles.js"
+          ]
+        },
+        "file:src/lib/sanitizeHtml.js": {
+          "key": "file:src/lib/sanitizeHtml.js",
+          "kind": "file",
+          "label": "src/lib/sanitizeHtml.js",
+          "fingerprint": "b53d1f17ff1225ca30a0",
+          "sourceRefs": [
+            "src/lib/sanitizeHtml.js"
+          ]
+        },
+        "file:src/lib/shareLaunchCoordinator.js": {
+          "key": "file:src/lib/shareLaunchCoordinator.js",
+          "kind": "file",
+          "label": "src/lib/shareLaunchCoordinator.js",
+          "fingerprint": "9f962b906e1479ca790b",
+          "sourceRefs": [
+            "src/lib/shareLaunchCoordinator.js"
+          ]
+        },
+        "file:src/lib/sharedCanvasApi.js": {
+          "key": "file:src/lib/sharedCanvasApi.js",
+          "kind": "file",
+          "label": "src/lib/sharedCanvasApi.js",
+          "fingerprint": "41e6d82098aba7f60539",
+          "sourceRefs": [
+            "src/lib/sharedCanvasApi.js"
+          ]
+        },
+        "file:src/lib/shares.js": {
+          "key": "file:src/lib/shares.js",
+          "kind": "file",
+          "label": "src/lib/shares.js",
+          "fingerprint": "29f652dc7242188ddca0",
+          "sourceRefs": [
+            "src/lib/shares.js"
+          ]
+        },
+        "file:src/lib/sourceTwinApi.js": {
+          "key": "file:src/lib/sourceTwinApi.js",
+          "kind": "file",
+          "label": "src/lib/sourceTwinApi.js",
+          "fingerprint": "7f08778d3aca242bf185",
+          "sourceRefs": [
+            "src/lib/sourceTwinApi.js"
+          ]
+        },
+        "file:src/lib/supabase.js": {
+          "key": "file:src/lib/supabase.js",
+          "kind": "file",
+          "label": "src/lib/supabase.js",
+          "fingerprint": "fcd030089aa734fe200f",
+          "sourceRefs": [
+            "src/lib/supabase.js"
+          ]
+        },
+        "file:src/lib/systemRuntimeApi.js": {
+          "key": "file:src/lib/systemRuntimeApi.js",
+          "kind": "file",
+          "label": "src/lib/systemRuntimeApi.js",
+          "fingerprint": "9bfc8736d02e08eacfed",
+          "sourceRefs": [
+            "src/lib/systemRuntimeApi.js"
+          ]
+        },
+        "file:src/lib/wheelRouting.js": {
+          "key": "file:src/lib/wheelRouting.js",
+          "kind": "file",
+          "label": "src/lib/wheelRouting.js",
+          "fingerprint": "694d45583c91d9f3549a",
+          "sourceRefs": [
+            "src/lib/wheelRouting.js"
+          ]
+        },
+        "file:src/main.jsx": {
+          "key": "file:src/main.jsx",
+          "kind": "file",
+          "label": "src/main.jsx",
+          "fingerprint": "59e332367d0562ea7a8b",
+          "sourceRefs": [
+            "src/main.jsx"
+          ]
+        },
+        "file:src/nodes/ContentNode.jsx": {
+          "key": "file:src/nodes/ContentNode.jsx",
+          "kind": "file",
+          "label": "src/nodes/ContentNode.jsx",
+          "fingerprint": "8d5093dff75b56dbe29d",
+          "sourceRefs": [
+            "src/nodes/ContentNode.jsx"
+          ]
+        },
+        "file:src/nodes/GroupNode.jsx": {
+          "key": "file:src/nodes/GroupNode.jsx",
+          "kind": "file",
+          "label": "src/nodes/GroupNode.jsx",
+          "fingerprint": "5f3209ff7bf30e6a8501",
+          "sourceRefs": [
+            "src/nodes/GroupNode.jsx"
+          ]
+        },
+        "file:src/nodes/MemoNode.jsx": {
+          "key": "file:src/nodes/MemoNode.jsx",
+          "kind": "file",
+          "label": "src/nodes/MemoNode.jsx",
+          "fingerprint": "e02c307202525289ec43",
+          "sourceRefs": [
+            "src/nodes/MemoNode.jsx"
+          ]
+        },
+        "file:src/nodes/StageNode.jsx": {
+          "key": "file:src/nodes/StageNode.jsx",
+          "kind": "file",
+          "label": "src/nodes/StageNode.jsx",
+          "fingerprint": "432daa035236e5b19c0c",
+          "sourceRefs": [
+            "src/nodes/StageNode.jsx"
+          ]
+        },
+        "file:src/nodes/SystemNode.jsx": {
+          "key": "file:src/nodes/SystemNode.jsx",
+          "kind": "file",
+          "label": "src/nodes/SystemNode.jsx",
+          "fingerprint": "af9c940fd50b2e24ac71",
+          "sourceRefs": [
+            "src/nodes/SystemNode.jsx"
+          ]
+        },
+        "file:src/storage.js": {
+          "key": "file:src/storage.js",
+          "kind": "file",
+          "label": "src/storage.js",
+          "fingerprint": "0bed8610ad3a87658d14",
+          "sourceRefs": [
+            "src/storage.js"
+          ]
+        },
+        "file:supabase-canvas-images.sql": {
+          "key": "file:supabase-canvas-images.sql",
+          "kind": "file",
+          "label": "supabase-canvas-images.sql",
+          "fingerprint": "565115bad13b0f90e3d7",
+          "sourceRefs": [
+            "supabase-canvas-images.sql"
+          ]
+        },
+        "file:supabase-canvas-notes.sql": {
+          "key": "file:supabase-canvas-notes.sql",
+          "kind": "file",
+          "label": "supabase-canvas-notes.sql",
+          "fingerprint": "e737080ce81f2acfe757",
+          "sourceRefs": [
+            "supabase-canvas-notes.sql"
+          ]
+        },
+        "file:supabase-canvas-stage-types.sql": {
+          "key": "file:supabase-canvas-stage-types.sql",
+          "kind": "file",
+          "label": "supabase-canvas-stage-types.sql",
+          "fingerprint": "3fa39ce7087c2fabd757",
+          "sourceRefs": [
+            "supabase-canvas-stage-types.sql"
+          ]
+        },
+        "file:supabase-canvas-views.sql": {
+          "key": "file:supabase-canvas-views.sql",
+          "kind": "file",
+          "label": "supabase-canvas-views.sql",
+          "fingerprint": "6231797545dde9d20cd4",
+          "sourceRefs": [
+            "supabase-canvas-views.sql"
+          ]
+        },
+        "file:supabase-data-access-audit.sql": {
+          "key": "file:supabase-data-access-audit.sql",
+          "kind": "file",
+          "label": "supabase-data-access-audit.sql",
+          "fingerprint": "b3a674ce4de769c3a9d3",
+          "sourceRefs": [
+            "supabase-data-access-audit.sql"
+          ]
+        },
+        "file:supabase-local-connectors.sql": {
+          "key": "file:supabase-local-connectors.sql",
+          "kind": "file",
+          "label": "supabase-local-connectors.sql",
+          "fingerprint": "67bd9d542f621cd7000a",
+          "sourceRefs": [
+            "supabase-local-connectors.sql"
+          ]
+        },
+        "file:supabase-mcp-schema.sql": {
+          "key": "file:supabase-mcp-schema.sql",
+          "kind": "file",
+          "label": "supabase-mcp-schema.sql",
+          "fingerprint": "7e53f742bb4e078007c1",
+          "sourceRefs": [
+            "supabase-mcp-schema.sql"
+          ]
+        },
+        "file:supabase-profile-privacy.sql": {
+          "key": "file:supabase-profile-privacy.sql",
+          "kind": "file",
+          "label": "supabase-profile-privacy.sql",
+          "fingerprint": "c8573a15f2af5d3dc9f0",
+          "sourceRefs": [
+            "supabase-profile-privacy.sql"
+          ]
+        },
+        "file:supabase-profiles.sql": {
+          "key": "file:supabase-profiles.sql",
+          "kind": "file",
+          "label": "supabase-profiles.sql",
+          "fingerprint": "c781c60838a237917f23",
+          "sourceRefs": [
+            "supabase-profiles.sql"
+          ]
+        },
+        "file:supabase-realtime.sql": {
+          "key": "file:supabase-realtime.sql",
+          "kind": "file",
+          "label": "supabase-realtime.sql",
+          "fingerprint": "3385b1dfa4386147d1bf",
+          "sourceRefs": [
+            "supabase-realtime.sql"
+          ]
+        },
+        "file:supabase-relation-metadata-guard.sql": {
+          "key": "file:supabase-relation-metadata-guard.sql",
+          "kind": "file",
+          "label": "supabase-relation-metadata-guard.sql",
+          "fingerprint": "c96163df8721b78a830c",
+          "sourceRefs": [
+            "supabase-relation-metadata-guard.sql"
+          ]
+        },
+        "file:supabase-runtime-observations.sql": {
+          "key": "file:supabase-runtime-observations.sql",
+          "kind": "file",
+          "label": "supabase-runtime-observations.sql",
+          "fingerprint": "da08cfb4e1839567a70b",
+          "sourceRefs": [
+            "supabase-runtime-observations.sql"
+          ]
+        },
+        "file:supabase-runtime-read.sql": {
+          "key": "file:supabase-runtime-read.sql",
+          "kind": "file",
+          "label": "supabase-runtime-read.sql",
+          "fingerprint": "63d31350cfc2a9f2c0f9",
+          "sourceRefs": [
+            "supabase-runtime-read.sql"
+          ]
+        },
+        "file:supabase-schema.sql": {
+          "key": "file:supabase-schema.sql",
+          "kind": "file",
+          "label": "supabase-schema.sql",
+          "fingerprint": "fb5dbd347278122ff0d2",
+          "sourceRefs": [
+            "supabase-schema.sql"
+          ]
+        },
+        "file:supabase-shares.sql": {
+          "key": "file:supabase-shares.sql",
+          "kind": "file",
+          "label": "supabase-shares.sql",
+          "fingerprint": "45ed63995e5ad274d1bd",
+          "sourceRefs": [
+            "supabase-shares.sql"
+          ]
+        },
+        "file:supabase-source-twin-history.sql": {
+          "key": "file:supabase-source-twin-history.sql",
+          "kind": "file",
+          "label": "supabase-source-twin-history.sql",
+          "fingerprint": "bae02d01b569c2d7cb8e",
+          "sourceRefs": [
+            "supabase-source-twin-history.sql"
+          ]
+        },
+        "file:vercel.json": {
+          "key": "file:vercel.json",
+          "kind": "file",
+          "label": "vercel.json",
+          "fingerprint": "0566ce59c1e3d7b2caa1",
+          "sourceRefs": [
+            "vercel.json"
+          ]
+        },
+        "file:vite.config.js": {
+          "key": "file:vite.config.js",
+          "kind": "file",
+          "label": "vite.config.js",
+          "fingerprint": "274dadeb7721293e766d",
+          "sourceRefs": [
+            "vite.config.js"
+          ]
+        },
+        "npm-script:build": {
+          "key": "npm-script:build",
+          "kind": "npm-script",
+          "label": "npm run build",
+          "fingerprint": "9b2f1a42f7f6c02cd792",
+          "sourceRefs": [
+            "package.json"
+          ]
+        },
+        "npm-script:dev": {
+          "key": "npm-script:dev",
+          "kind": "npm-script",
+          "label": "npm run dev",
+          "fingerprint": "b430444aa62385a4bb10",
+          "sourceRefs": [
+            "package.json"
+          ]
+        },
+        "npm-script:discover:check": {
+          "key": "npm-script:discover:check",
+          "kind": "npm-script",
+          "label": "npm run discover:check",
+          "fingerprint": "26d53034ef13784affa9",
+          "sourceRefs": [
+            "package.json"
+          ]
+        },
+        "npm-script:discover:update": {
+          "key": "npm-script:discover:update",
+          "kind": "npm-script",
+          "label": "npm run discover:update",
+          "fingerprint": "b74eb3ca0a45e3f3160a",
+          "sourceRefs": [
+            "package.json"
+          ]
+        },
+        "npm-script:local-connector": {
+          "key": "npm-script:local-connector",
+          "kind": "npm-script",
+          "label": "npm run local-connector",
+          "fingerprint": "289c27acc41b8e2b4118",
+          "sourceRefs": [
+            "package.json"
+          ]
+        },
+        "npm-script:preview": {
+          "key": "npm-script:preview",
+          "kind": "npm-script",
+          "label": "npm run preview",
+          "fingerprint": "762e35364614c455353e",
+          "sourceRefs": [
+            "package.json"
+          ]
+        },
+        "npm-script:privacy:check": {
+          "key": "npm-script:privacy:check",
+          "kind": "npm-script",
+          "label": "npm run privacy:check",
+          "fingerprint": "a58fb7dabca7b9245418",
+          "sourceRefs": [
+            "package.json"
+          ]
+        },
+        "npm-script:source-twin:check": {
+          "key": "npm-script:source-twin:check",
+          "kind": "npm-script",
+          "label": "npm run source-twin:check",
+          "fingerprint": "d71a27b7462a6b933348",
+          "sourceRefs": [
+            "package.json"
+          ]
+        },
+        "npm-script:source-twin:prepare": {
+          "key": "npm-script:source-twin:prepare",
+          "kind": "npm-script",
+          "label": "npm run source-twin:prepare",
+          "fingerprint": "a46c87d968457f182f73",
+          "sourceRefs": [
+            "package.json"
+          ]
+        },
+        "npm-script:source-twin:update": {
+          "key": "npm-script:source-twin:update",
+          "kind": "npm-script",
+          "label": "npm run source-twin:update",
+          "fingerprint": "5d81ccd4ab7d2a081409",
+          "sourceRefs": [
+            "package.json"
+          ]
+        },
+        "npm-script:test": {
+          "key": "npm-script:test",
+          "kind": "npm-script",
+          "label": "npm run test",
+          "fingerprint": "9a5af4bae9f47c423eca",
+          "sourceRefs": [
+            "package.json"
+          ]
+        },
+        "realtime-table:canvases": {
+          "key": "realtime-table:canvases",
+          "kind": "realtime-table",
+          "label": "canvases",
+          "fingerprint": "75b7ffa87a4fc083206f",
+          "sourceRefs": [
+            "supabase-realtime.sql"
+          ]
+        },
+        "runtime-capability:workflow.api.mcp.route": {
+          "key": "runtime-capability:workflow.api.mcp.route",
+          "kind": "runtime-capability",
+          "label": "MCP 배포 경로 상태",
+          "fingerprint": "89385d69342ce2053fd1",
+          "sourceRefs": [
+            "api/mcp.js",
+            "api/system-runtime.js",
+            "mcp/server.js",
+            "mcp/systemRuntime.js",
+            "shared/systemObservationCatalog.js",
+            "shared/systemRuntime.js",
+            "src/lib/systemRuntimeApi.js",
+            "src/nodes/SystemNode.jsx"
+          ],
+          "details": {
+            "authorization": "system_operator",
+            "catalogFieldCount": 8,
+            "catalogFieldIds": [
+              "route",
+              "request-method",
+              "http-status",
+              "allowed-method",
+              "coverage",
+              "tools-list",
+              "tool-invocation",
+              "response-body"
+            ],
+            "dataScope": "route_metadata",
+            "freshnessMs": 900000,
+            "operation": "validate",
+            "pathEdgeIds": [
+              "map-edge-vercel-mcp"
+            ],
+            "resultKind": "observations",
+            "risk": "low",
+            "sideEffect": "none",
+            "targetNodeId": "map-mcp-api"
+          }
+        },
+        "runtime-capability:workflow.api.shared-canvas.health": {
+          "key": "runtime-capability:workflow.api.shared-canvas.health",
+          "kind": "runtime-capability",
+          "label": "공유 캔버스 API 상태",
+          "fingerprint": "6a698da218479dfd80c4",
+          "sourceRefs": [
+            "api/shared-canvas.js",
+            "api/system-runtime.js",
+            "mcp/systemRuntime.js",
+            "shared/systemObservationCatalog.js",
+            "shared/systemRuntime.js",
+            "src/lib/systemRuntimeApi.js",
+            "src/nodes/SystemNode.jsx"
+          ],
+          "details": {
+            "authorization": "system_operator",
+            "catalogFieldCount": 6,
+            "catalogFieldIds": [
+              "route",
+              "request-method",
+              "http-status",
+              "authentication",
+              "coverage",
+              "response-body"
+            ],
+            "dataScope": "route_metadata",
+            "freshnessMs": 900000,
+            "operation": "validate",
+            "pathEdgeIds": [
+              "map-edge-vercel-shared"
+            ],
+            "resultKind": "observations",
+            "risk": "low",
+            "sideEffect": "none",
+            "targetNodeId": "map-shared-api"
+          }
+        },
+        "runtime-capability:workflow.supabase.auth.session": {
+          "key": "runtime-capability:workflow.supabase.auth.session",
+          "kind": "runtime-capability",
+          "label": "Supabase Auth 세션 검증",
+          "fingerprint": "90af3f8811e451508fa0",
+          "sourceRefs": [
+            "api/system-runtime.js",
+            "mcp/shareAccess.js",
+            "mcp/systemRuntime.js",
+            "shared/systemObservationCatalog.js",
+            "shared/systemRuntime.js",
+            "src/lib/systemRuntimeApi.js",
+            "src/nodes/SystemNode.jsx"
+          ],
+          "details": {
+            "authorization": "system_operator",
+            "catalogFieldCount": 4,
+            "catalogFieldIds": [
+              "session-valid",
+              "identity-match",
+              "identity-payload",
+              "access-token"
+            ],
+            "dataScope": "operator_session",
+            "freshnessMs": 900000,
+            "operation": "validate",
+            "pathEdgeIds": [
+              "map-edge-app-auth",
+              "map-edge-auth-user"
+            ],
+            "resultKind": "observations",
+            "risk": "low",
+            "sideEffect": "none",
+            "targetNodeId": "map-supabase-auth"
+          }
+        },
+        "runtime-capability:workflow.supabase.canvas-service.operations": {
+          "key": "runtime-capability:workflow.supabase.canvas-service.operations",
+          "kind": "runtime-capability",
+          "label": "캔버스 서비스 운영 현황",
+          "fingerprint": "b882ceee0228c893c53d",
+          "sourceRefs": [
+            "api/system-runtime.js",
+            "mcp/shareAccess.js",
+            "mcp/systemRuntime.js",
+            "shared/systemObservationCatalog.js",
+            "shared/systemRuntime.js",
+            "src/lib/systemRuntimeApi.js",
+            "src/nodes/SystemNode.jsx",
+            "supabase-runtime-read.sql"
+          ],
+          "details": {
+            "authorization": "system_operator",
+            "catalogFieldCount": 27,
+            "catalogFieldIds": [
+              "accounts",
+              "canvases",
+              "nodes",
+              "edges",
+              "notes",
+              "canvases-24h",
+              "accounts-24h",
+              "canvases-7d",
+              "accounts-7d",
+              "latest-update",
+              "active-invitations",
+              "active-email-invitations",
+              "active-link-invitations",
+              "active-memberships",
+              "revoked-memberships",
+              "canvas-scope-shares",
+              "group-scope-shares",
+              "node-scope-shares",
+              "invalid-documents",
+              "operator-blind",
+              "end-to-end-encryption",
+              "server-access-audit",
+              "direct-db-audit-coverage",
+              "privacy-release-gate",
+              "canvas-bodies",
+              "user-identities",
+              "database-size"
+            ],
+            "dataScope": "application_aggregate",
+            "freshnessMs": 900000,
+            "operation": "read",
+            "pathEdgeIds": [],
+            "resultKind": "metric_groups",
+            "risk": "low",
+            "sideEffect": "none",
+            "targetNodeId": "map-canvases-table"
+          }
+        },
+        "runtime-capability:workflow.supabase.user-canvases.read": {
+          "key": "runtime-capability:workflow.supabase.user-canvases.read",
+          "kind": "runtime-capability",
+          "label": "브라우저 RLS 읽기 경로",
+          "fingerprint": "1f6abcdb570e75e438f4",
+          "sourceRefs": [
+            "api/system-runtime.js",
+            "mcp/systemRuntime.js",
+            "shared/systemObservationCatalog.js",
+            "shared/systemRuntime.js",
+            "src/lib/supabase.js",
+            "src/lib/systemRuntimeApi.js",
+            "src/nodes/SystemNode.jsx"
+          ],
+          "details": {
+            "authorization": "system_operator",
+            "catalogFieldCount": 8,
+            "catalogFieldIds": [
+              "endpoint",
+              "request-method",
+              "http-status",
+              "authenticated",
+              "rls-path",
+              "policy-name",
+              "row-body",
+              "credential-value"
+            ],
+            "dataScope": "operator_canary",
+            "freshnessMs": 900000,
+            "operation": "validate",
+            "pathEdgeIds": [
+              "map-edge-app-canvases-read",
+              "map-edge-rls-canvases"
+            ],
+            "resultKind": "health",
+            "risk": "low",
+            "sideEffect": "none",
+            "targetNodeId": "map-web-app"
+          }
+        },
+        "runtime-capability:workflow.vercel.deployment.runtime": {
+          "key": "runtime-capability:workflow.vercel.deployment.runtime",
+          "kind": "runtime-capability",
+          "label": "Vercel 프로덕션 운영 상태",
+          "fingerprint": "d68e8687be76a2887a04",
+          "sourceRefs": [
+            "api/system-runtime.js",
+            "mcp/systemRuntime.js",
+            "shared/systemObservationCatalog.js",
+            "shared/systemRuntime.js",
+            "src/lib/systemRuntimeApi.js",
+            "src/nodes/SystemNode.jsx",
+            "vercel.json"
+          ],
+          "details": {
+            "authorization": "system_operator",
+            "catalogFieldCount": 7,
+            "catalogFieldIds": [
+              "runtime-active",
+              "environment",
+              "region",
+              "commit",
+              "host",
+              "deployment-history",
+              "build-logs"
+            ],
+            "dataScope": "application_metadata",
+            "freshnessMs": 900000,
+            "operation": "observe",
+            "pathEdgeIds": [],
+            "resultKind": "observations",
+            "risk": "none",
+            "sideEffect": "none",
+            "targetNodeId": "map-vercel"
+          }
+        },
+        "storage-bucket:canvas-images": {
+          "key": "storage-bucket:canvas-images",
+          "kind": "storage-bucket",
+          "label": "canvas-images",
+          "fingerprint": "13ca1c2699c36bae294e",
+          "sourceRefs": [
+            "supabase-canvas-images.sql"
+          ]
+        }
+      },
+      "files": {
+        "CLAUDE.md": "99fe14ef7137548bcd47",
+        "README.md": "924ff98b1b66c1f7fca7",
+        "api/local-connector.js": "5c9f405515e5f4b6c3ed",
+        "api/mcp.js": "c588a33164526c123310",
+        "api/shared-canvas.js": "498f7dd517674be391bb",
+        "api/source-twin-webhook.js": "ec021669ff5e4c768141",
+        "api/source-twin.js": "16c787425caecca47ee3",
+        "api/system-runtime.js": "4435fb0f53b996c661d7",
+        "index.html": "093cb8feece3994550d3",
+        "mcp/dataAccessAudit.js": "74ca949418a3ee5f3b92",
+        "mcp/layout.js": "375a14dee350f98c10e1",
+        "mcp/localConnectorStore.js": "d1a17913de51c9fa9ce5",
+        "mcp/sanitize.js": "e081662ffecf35dcda54",
+        "mcp/server.js": "53263748896c9d6a6e27",
+        "mcp/shareAccess.js": "b34cb77267b9b48f41e9",
+        "mcp/sourceTwinStore.js": "6b67b11c4e6b8cc66a2e",
+        "mcp/store.js": "8e48b2f2542761c3b162",
+        "mcp/systemOperationPlan.js": "a74f24ab19b8663f3f7f",
+        "mcp/systemRuntime.js": "86c8f476d528d0166305",
+        "package.json": "ab08ba5636706014a44d",
+        "scripts/check-privacy-release.mjs": "386d9338631cf48638e6",
+        "scripts/generate-source-twin.mjs": "64da3394e83721041e57",
+        "scripts/generate-system-discovery.mjs": "749c18860105893730a3",
+        "scripts/local-connector-agent.mjs": "7b294b5fea5e7d00ff5d",
+        "scripts/source-twin-scanner.mjs": "29af202e7890e65711be",
+        "scripts/system-discovery.mjs": "f9103e6ad338b4b1b669",
+        "scripts/test-local-connector-agent.mjs": "476db494b127814d7fe6",
+        "scripts/test-mcp-logic.mjs": "a80ad789cac806316fa3",
+        "scripts/test-operation-lifecycle.mjs": "23dba54ae04630691a01",
+        "scripts/test-source-twin.mjs": "a53c7638d44c93452328",
+        "scripts/test-sql-security.mjs": "c8eea0b2007ff7d4245f",
+        "scripts/test-twin-adapter-contract.mjs": "1535bb720749a68791b3",
+        "scripts/test-twin-build.mjs": "c281a732e9a3d383eaf8",
+        "shared/digitalTwinProposal.js": "17f5598a72440e48fa30",
+        "shared/digitalTwinReview.js": "ba6025ee7407452fc88b",
+        "shared/edgeOperation.js": "184557badd9774b09415",
+        "shared/localConnector.js": "4253b24a5106028331a9",
+        "shared/operationLifecycle.js": "072796be78f3c94f42cc",
+        "shared/privacyCapabilities.js": "c7c401ec88ddea74aacd",
+        "shared/relationOntology.js": "f48d2f919a6d74a3373f",
+        "shared/sharePermissions.js": "15956d8e57857bd0249c",
+        "shared/sourceTwin.js": "faceee7c52048587bb8f",
+        "shared/systemObservationCatalog.js": "79b6a6a3fb37be957250",
+        "shared/systemOntology.js": "9dc5f063c1a7e5c90d34",
+        "shared/systemPartOntology.js": "c71e6e90df31aa191399",
+        "shared/systemRuntime.js": "b5974a3ccf1f8681e34f",
+        "shared/trustTopology.js": "08f30479900055431f2a",
+        "shared/twinAdapterContract.js": "a34e0669d4ab1ffad5c6",
+        "shared/twinBuild.js": "f537eb6e48f0624f1fa0",
+        "shared/twinBuildCanvas.js": "b8b11cd839bb12c2fd5b",
+        "shared/twinBuildReconciler.js": "415bd6d74199e0986802",
+        "shared/workflowCanvasSystemMap.js": "f8f9c79f0799a6c34aa9",
+        "shared/workflowOperationDefinitions.js": "ab4b5646a779993427af",
+        "shared/workflowSourceTwinCanvas.js": "655c7a317512cd60f576",
+        "shared/workflowSystemDiscovery.js": "c91651c8fe35abf847ca",
+        "shared/workflowSystemMapRepair.js": "ea4c480dd004984cb87a",
+        "shared/workflowSystemTwinAdapter.js": "927f40fe20bf941ea286",
+        "shared/workflowSystemTwinAdapterDescriptor.js": "368fe4dbcfbb82e50df5",
+        "shared/workflowSystemTwinBuild.js": "56e1db89d9434e227e36",
+        "src/App.jsx": "1884ea682f6bcfe6400d",
+        "src/components/AuthPanel.jsx": "8ee1a3c608db54b1c419",
+        "src/components/CanvasImage.jsx": "874e5b725e30f30873e8",
+        "src/components/CanvasTabs.jsx": "4dc04866a0637564f13e",
+        "src/components/DigitalTwinReviewPanel.jsx": "83ec241d1c2bb3b56bd6",
+        "src/components/EdgeRelationEditor.jsx": "dbb0f9b5387be396ff0f",
+        "src/components/EditToolbar.jsx": "bcd3449c19903c18a0ac",
+        "src/components/InvitePopover.jsx": "49206bc9ba1d21f58950",
+        "src/components/NodePalette.jsx": "41d41273d2097452eb77",
+        "src/components/NotesPanel.jsx": "3db0b0ecfadcf4f3776e",
+        "src/components/OpenInNotesButton.jsx": "1266b6c60659430cafa0",
+        "src/components/ParticipantAvatar.jsx": "9565fd5cde02b42f0b92",
+        "src/components/ScopedParticipants.jsx": "913a3f211bec0858f918",
+        "src/components/SourceTwinPanel.jsx": "0ee72a203f080cadaff3",
+        "src/components/SystemObservationCatalog.jsx": "bcd4ac8cd57d104d62b2",
+        "src/components/Toolbar.jsx": "4e919dc53a313959036b",
+        "src/demoCanvases.js": "3b2d38ec1cc1d10e2322",
+        "src/edges/StubEdge.jsx": "d7ba836228368a8e9949",
+        "src/edges/stubEdgeGeometry.js": "4126d6ef02dc92870a31",
+        "src/lib/canvasGeometry.js": "c5e96fdae97fa22f921a",
+        "src/lib/canvasMerge.js": "2cbf1eb34addec87faf0",
+        "src/lib/canvasNavigation.js": "fe0ce93827a2a4374bca",
+        "src/lib/canvasSchemaGuard.js": "767c5b34345d7194f5a0",
+        "src/lib/canvasSync.js": "67ea416a03ca77750d67",
+        "src/lib/cloudStorage.js": "37fd92b0cc28fa435512",
+        "src/lib/digitalTwinAdapters.js": "b6c275d81e80e4e913a4",
+        "src/lib/imageStorage.js": "4c4da9626df402b048a8",
+        "src/lib/localConnectorApi.js": "a0236363ba5f9bb4a87e",
+        "src/lib/mcpTokens.js": "6056eabd3beca62b5af8",
+        "src/lib/presence.js": "9595862c9f266b0953e6",
+        "src/lib/profiles.js": "3b445d4c6884a7ec8a26",
+        "src/lib/sanitizeHtml.js": "6868f46c682587d540a3",
+        "src/lib/shareLaunchCoordinator.js": "a9118d4ce77f8e9169dc",
+        "src/lib/sharedCanvasApi.js": "78a2ff5bfb63f19b36b0",
+        "src/lib/shares.js": "baa0f91c1ae8f140d8d3",
+        "src/lib/sourceTwinApi.js": "d7b76d654383b37d43a6",
+        "src/lib/supabase.js": "07d48cdbaeb3c30d631c",
+        "src/lib/systemRuntimeApi.js": "8c5cdb6663aa90c728ad",
+        "src/lib/wheelRouting.js": "678eb0ba20d614ee7834",
+        "src/main.jsx": "4b4b864dbe45253425d0",
+        "src/nodes/ContentNode.jsx": "40e23972f3a20b365ca2",
+        "src/nodes/GroupNode.jsx": "36e857254f07e54963b7",
+        "src/nodes/MemoNode.jsx": "a59c82a2fa0c7f8fe604",
+        "src/nodes/StageNode.jsx": "9329430584ced7229e00",
+        "src/nodes/SystemNode.jsx": "2ab3afb7ea20090eae6d",
+        "src/storage.js": "cc4ada42d93647652f6b",
+        "supabase-canvas-images.sql": "d9aafbd8cf7754ce4455",
+        "supabase-canvas-notes.sql": "1f0adb5a842f4e24a492",
+        "supabase-canvas-stage-types.sql": "3fe7b097368695b67c9a",
+        "supabase-canvas-views.sql": "a14167db0b882311876d",
+        "supabase-data-access-audit.sql": "bd97351aca0e2261b982",
+        "supabase-local-connectors.sql": "edc3dfcba62c55d87d88",
+        "supabase-mcp-schema.sql": "78ed8e9f3ab86e4cc230",
+        "supabase-profile-privacy.sql": "7fb47b9c41b193b2b588",
+        "supabase-profiles.sql": "aa35edf5fb96923b1060",
+        "supabase-realtime.sql": "33485c25dcc627a6d7d5",
+        "supabase-relation-metadata-guard.sql": "899ce77ef78f2090a941",
+        "supabase-runtime-observations.sql": "a91903ca94a624f721aa",
+        "supabase-runtime-read.sql": "37395187fa278d957fc7",
+        "supabase-schema.sql": "7e31469eeec243eb0955",
+        "supabase-shares.sql": "6596b5ba2597e1933207",
+        "supabase-source-twin-history.sql": "78cbbb19f0079ec2a328",
+        "vercel.json": "10b3591a1d54a4e2331e",
+        "vite.config.js": "d59936e4a891aa511d18"
+      },
+      "summary": {
+        "resources": 197,
+        "files": 123,
+        "apiRoutes": 6,
+        "dbTables": 17,
+        "mcpTools": 29,
+        "rlsPolicies": 28,
+        "dbFunctions": 25,
+        "environmentVariableNames": 13,
+        "credentialReferences": 1,
+        "runtimeCapabilities": 6
       }
     },
     "discovery-v1-276ee39d38cc": {

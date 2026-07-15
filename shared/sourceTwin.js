@@ -7,11 +7,11 @@ export const SOURCE_TWIN_OPERATION_CONFIRMATION = 'CREATE_SOURCE_TWIN_SNAPSHOT'
 
 export const SOURCE_TWIN_PERSPECTIVES = Object.freeze({
   all: '전체',
-  functionality: '기능',
-  code: '코드',
-  database: 'DB',
-  security: '보안',
-  deployment: '배포',
+  functionality: '제품 기능',
+  code: '코드 전체',
+  database: 'DB·저장',
+  security: '보안·권한',
+  deployment: '배포·운영',
 })
 
 const VALID_PERSPECTIVES = new Set(Object.keys(SOURCE_TWIN_PERSPECTIVES))
@@ -46,7 +46,16 @@ export function sourceTwinEntities(manifest, { perspective = 'all', query = '', 
     .filter((entity) => !allowed || allowed.has(entity.id))
     .filter((entity) => {
       if (!normalizedQuery) return true
-      return [entity.label, entity.path, entity.name, entity.summary, ...(entity.tags ?? [])]
+      return [
+        entity.label,
+        entity.path,
+        entity.name,
+        entity.summary,
+        entity.userImpact,
+        entity.technicalSummary,
+        entity.area,
+        ...(entity.tags ?? []),
+      ]
         .filter(Boolean)
         .some((value) => String(value).toLocaleLowerCase().includes(normalizedQuery))
     })

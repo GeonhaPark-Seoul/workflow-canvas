@@ -202,8 +202,9 @@ This is the durable ledger for security, reliability, commercialization, and arc
 
 - Severity: medium
 - Gate: product-v1
-- Status: open
-- Required work: easy and developer explanation modes over one canonical fact model; AI may draft explanations but cannot invent topology, permissions, or runtime truth.
+- Status: in progress
+- Current evidence: the JavaScript source scanner now separates plain-language role, user impact, product area, and technical counts. The repository view groups code by product areas such as canvas UI, collaboration, digital-twin engine, source-code twin, security, and deployment. Workflow Canvas uses a deterministic semantic profile; unknown repositories fall back to evidence-bound path, API, DB, import, and layer rules. Local connector sanitization preserves these semantic fields without sending source bodies or credential values.
+- Required work: add an explicit easy/developer display switch; attach explanation-basis references to each generated sentence; add golden explanation fixtures for a second non-Workflow-Canvas repository and more languages; measure unclear/fallback explanations; later allow AI to draft improved wording from explicitly granted source context while keeping every claim tied to deterministic evidence. AI may not invent topology, permissions, or runtime truth.
 - Exit criteria: every explanation links to evidence and can reveal the technical source without changing the underlying twin.
 
 ### ENG-005 - Review queue usability and proposal lifecycle

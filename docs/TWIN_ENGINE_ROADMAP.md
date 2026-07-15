@@ -138,6 +138,19 @@ One canonical fact graph supports two presentation modes selected by the user, n
 
 AI may translate canonical facts and suggest groupings. It may not create verified edges, security claims, or permissions without evidence. Hypotheses remain visibly marked as hypotheses.
 
+### Current source-code explanation baseline
+
+The source-code twin now uses deterministic explanations before active AI integration:
+
+- the main sentence states what a file does in the product rather than reporting function or import counts
+- a separate user-impact sentence explains what changes for the person using the product
+- technical counts, paths, API routes, DB references, and security signals remain available as secondary facts
+- product-area classification groups functionality into canvas UI, canvas model, notes/content, collaboration, identity, digital-twin engine, source-code twin, AI/MCP, storage/sync, media, security/privacy, deployment/operations, testing, and project foundation
+- the Workflow Canvas semantic profile contains product-specific roles while the scanner keeps a generic evidence-based fallback for a different repository
+- local connector payloads preserve explanations and classifications but continue to exclude source bodies and credential values
+
+This is the deterministic easy-mode baseline, not the completed semantic engine. A later version must attach sentence-level evidence, validate a second software stack, support additional languages, measure fallback quality, and expose an explicit easy/developer mode. AI can improve wording only after the user grants the necessary source scope; its output remains an explanation artifact rather than verified system truth.
+
 ## Operation initiators
 
 Direct interface control is a first-class product path, not a temporary substitute for AI. A person clicks a node part or an edge control, reviews the plan, approves it, and sees the verified result in the canvas. Deterministic automation and a future AI agent are additional initiators of the same operation; neither receives a separate bypass.
