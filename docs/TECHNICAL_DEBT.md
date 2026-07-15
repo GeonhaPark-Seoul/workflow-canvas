@@ -202,6 +202,57 @@ This is the durable ledger for security, reliability, commercialization, and arc
 - Required work: distinguish `apply to map`, `acknowledge`, `ignore this evidence`, `obsolete proposal`, and `security review`; expire proposals on engine/schema changes and support safe batch review.
 - Exit criteria: a non-developer can decide each item without external guidance and no stale proposal can be applied.
 
+## AI orchestration and automation
+
+### AI-001 - Provider-neutral agent and run schema
+
+- Severity: high
+- Gate: AI phase 1
+- Status: open
+- Required work: version `AgentDefinition`, `Trigger`, `ExecutionPolicy`, `CapabilityGrant`, `ContextSnapshot`, `AgentRun`, `Budget`, `Artifact`, `MemoryReference`, and `Handoff` without coupling the engine to one AI vendor.
+- Exit criteria: the same bounded one-shot task runs through two provider adapters without changing twin, review, permission, or operation records.
+
+### AI-002 - External AI data gateway and consent
+
+- Severity: critical
+- Gate: release-blocker for AI features
+- Status: open
+- Context: prompts and context sent to an AI provider cross into an external SaaS trust zone and may contain personal, business, source, or credential-adjacent data.
+- Required work: per-data-class consent, redaction, provider/model disclosure, retention controls, regional handling, outbound preview, and an auditable gateway record.
+- Exit criteria: contract tests prove that a run cannot send undeclared data classes or credential values and the user can see what left the product.
+
+### AI-003 - Durable bounded job control plane
+
+- Severity: critical
+- Gate: scheduled or event-driven AI
+- Status: open
+- Required work: durable queue, scheduler, event ingestion, isolated workers, idempotency, retries, dead-letter handling, timeouts, per-run credentials, independent verification, and append-only run audit.
+- Exit criteria: interrupted and duplicate deliveries cannot duplicate a mutation, and every run reaches a terminal or explicitly recoverable state.
+
+### AI-004 - Continuous agent leases and emergency stop
+
+- Severity: critical
+- Gate: 24-hour agents
+- Status: open
+- Required work: renewable leases, heartbeats, single-run ownership, stale-worker fencing, budget exhaustion, rate limits, maintenance mode, user kill switch, and operator incident controls.
+- Exit criteria: a disconnected, duplicated, compromised, over-budget, or revoked worker loses authority before it can continue operating.
+
+### AI-005 - Agent memory and data lifecycle
+
+- Severity: critical
+- Gate: persistent AI memory
+- Status: open
+- Required work: tenant-scoped memory, provenance, purpose limitation, expiry, export, deletion, poisoning defenses, encryption strategy, and explicit rules separating user records from model/provider retention.
+- Exit criteria: memory can be traced to source evidence, selectively revoked, fully exported, and deleted without leaving an active retrieval path.
+
+### AI-006 - Cost, capability, and autonomy budgets
+
+- Severity: high
+- Gate: AI phase 1
+- Status: open
+- Required work: enforce token, currency, time, API-call, mutation, concurrency, and data-volume limits per run, agent, tenant, and billing plan; define escalation and safe-stop behavior.
+- Exit criteria: tests show that no AI or worker can exceed a hard budget through retries, parallel runs, provider failover, or stale leases.
+
 ### UX-001 - Parts as capabilities and edge-centered operations
 
 - Severity: medium

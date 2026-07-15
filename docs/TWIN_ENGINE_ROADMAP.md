@@ -184,6 +184,81 @@ AI may translate canonical facts and suggest groupings. It may not create verifi
 
 Freedom grows by adding typed capabilities, not by exposing arbitrary code execution. High-risk operations always remain more constrained than observation and explanation.
 
+## AI-ready orchestration model
+
+Active AI integration is intentionally deferred until deterministic twin reconciliation, trust boundaries, and the operation contract are reliable. The engine must still reserve the following execution model now so a future AI layer does not force a rewrite of the graph or security model.
+
+### Execution modes
+
+- **Interactive**: a person and AI work in one visible session; every material action remains previewable.
+- **One-shot**: an AI wakes for one bounded request, produces a result, verifies it, and stops.
+- **Scheduled**: a durable scheduler starts a bounded run at an approved time or interval.
+- **Event-driven**: a webhook, queue event, data change, threshold, or device signal starts a bounded run. This is the default form of practical real-time automation; the AI does not remain continuously active while idle.
+- **Continuous**: an explicitly approved long-running agent holds a renewable lease and heartbeat. It is reserved for work that truly needs ongoing observation or coordination.
+- **Human/manual**: a person performs or confirms the step. Human transfer is modeled as a real gateway rather than an invisible exception.
+
+These are execution policies over the same entity, capability, event, and operation graph. They must not become unrelated node types with incompatible safety rules.
+
+### Canonical AI orchestration records
+
+The future schema must support stable, provider-neutral records for:
+
+- `AgentDefinition`: purpose, owner, model requirements, allowed capabilities, and version
+- `Trigger`: manual, schedule, event, threshold, webhook, or upstream operation
+- `ExecutionPolicy`: mode, concurrency, timeout, approval policy, retry, and recovery
+- `CapabilityGrant`: short-lived, least-privilege permissions issued for one run
+- `ContextSnapshot`: exact twin revision, evidence, and redacted data supplied to the AI
+- `AgentRun`: immutable run identity, state transitions, inputs, outputs, and verification
+- `Lease` and `Heartbeat`: exclusive ownership and liveness for continuous workers
+- `Budget`: token, money, time, API-call, and mutation limits with a kill switch
+- `Artifact`: plans, reports, code patches, decisions, and other durable run outputs
+- `MemoryReference`: scoped, retained knowledge with provenance, expiry, and deletion rules
+- `Handoff`: a typed transfer between AI, automation, and people
+
+Prompts and model output are proposals or run artifacts, not system truth. Only deterministic evidence and independently verified operation results may promote a twin fact to runtime-verified status.
+
+### AI run lifecycle
+
+1. Accept an approved trigger and bind it to a tenant, system, and twin revision.
+2. Capture a minimum, redacted context snapshot.
+3. Issue short-lived capability grants; never expose arbitrary shell, database, or URL access.
+4. Ask the AI for a typed plan or bounded result.
+5. Apply risk policy and request human or multi-party approval where required.
+6. Execute through the same universal operation contract used by non-AI automation.
+7. Verify postconditions independently of the AI's own claim.
+8. Append events, cost, evidence, and audit results.
+9. Release the lease and credentials, then stop or sleep according to policy.
+10. Retain or delete artifacts and memory according to the data lifecycle policy.
+
+### Runtime architecture for scheduled, real-time, and 24-hour work
+
+The browser and an ordinary serverless request are not the long-running agent runtime. Later AI phases require a separate control plane and worker plane:
+
+- durable queue and scheduler
+- event bus and webhook ingestion
+- isolated workers with tenant and capability boundaries
+- leases, heartbeats, retries, idempotency, and dead-letter handling
+- per-run secrets, budgets, rate limits, and emergency stop
+- append-only run and operation audit
+- provider adapters for user-selected AI services
+
+Deterministic automation should remain available without AI. AI is used where interpretation, planning, synthesis, or exception handling adds value; ordinary timers, filters, routing, and fixed API calls should use cheaper deterministic workers.
+
+An external AI provider is an `external-saas` trust zone. Every context transfer to it requires an explicit gateway that records which data classes leave the product, the user's consent, retention assumptions, encryption, and the provider/model used.
+
+### AI activation gates
+
+Do not begin active AI execution until the engine has versioned twin identities, trustworthy reconciliation, gateway-aware data boundaries, the universal operation contract, event/run audit, tenant isolation, and budget enforcement. Then open capability in this order:
+
+1. one-shot read and explanation
+2. one-shot proposal generation
+3. one-shot approved operations
+4. scheduled bounded runs
+5. event-driven bounded runs
+6. continuous leased agents
+
+This ordering preserves the commercial goal that users can eventually connect their own AI while avoiding an early architecture that assumes one vendor, one model, or unlimited authority.
+
 ## Reference implementation sequence
 
 ### Phase A - Secure Workflow Canvas reference twin
@@ -216,6 +291,14 @@ Use a materially different stack, such as Python/FastAPI + PostgreSQL + containe
 ### Phase E - AI-assisted onboarding
 
 The user states intent in natural language. AI selects adapters, proposes scopes, explains permissions, and interprets deterministic findings. It does not receive broader source access than the user explicitly grants and cannot skip review gates.
+
+### Phase F - Bounded AI operations
+
+Add provider-neutral one-shot runs first, followed by scheduled and event-driven runs. Every AI request uses a context snapshot, short-lived capability grant, budget, typed output, independent verification, and the universal operation contract.
+
+### Phase G - Continuous agent control plane
+
+Add durable queues, isolated workers, leases, heartbeats, dead-letter handling, emergency stop, and scoped memory before allowing 24-hour agents. Continuous execution is an explicit high-cost policy, not the default meaning of automation or real time.
 
 ## Visualization rules
 
