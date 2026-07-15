@@ -25,10 +25,12 @@ import {
 } from './workflowSystemDiscovery.js'
 import { WORKFLOW_SYSTEM_DISCOVERY } from './workflowSystemDiscoveryManifest.js'
 import { TWIN_ENGINE_SCHEMA_VERSION } from './twinAdapterContract.js'
+import { reconcileTwinBuild } from './twinBuildReconciler.js'
 import {
   canInspectWorkflowSystemCanvas,
   WORKFLOW_SYSTEM_TWIN_ADAPTER_DESCRIPTOR,
 } from './workflowSystemTwinAdapterDescriptor.js'
+import { WORKFLOW_SYSTEM_TWIN_BUILD } from './workflowSystemTwinBuild.js'
 
 export const WORKFLOW_SYSTEM_TWIN_SOURCE_ID = WORKFLOW_SYSTEM_DISCOVERY_SOURCE_ID
 
@@ -581,6 +583,7 @@ function severityRank(severity) {
 export function inspectWorkflowSystemTwin(canvas) {
   if (!canInspectWorkflowSystemCanvas(canvas)) return null
   const root = workflowTwinRoot(canvas)
+  const buildReview = reconcileTwinBuild({ build: WORKFLOW_SYSTEM_TWIN_BUILD, canvas })
   const report = inspectWorkflowSystemMap({
     canvas,
     expectedMap: EXPECTED_MAP,
@@ -593,15 +596,22 @@ export function inspectWorkflowSystemTwin(canvas) {
   ])
   const items = [
     ...(codePortMigration ? [codePortMigration] : []),
+    ...buildReview.items.filter((item) => (
+      item.category !== 'runtime'
+      && !(codePortMigration && item.itemKey.includes('map-edge-repo-github'))
+    )),
     ...report.node_findings
-      .filter((finding) => !(
-        codePortMigration
-        && ['map-local-repo', 'map-github'].includes(finding.node_id)
-        && migratedPartIds.has(finding.expected_part?.id)
+      .filter((finding) => (
+        (Array.isArray(finding.resources) || !!finding.expected_part)
+        && !(
+          codePortMigration
+          && ['map-local-repo', 'map-github'].includes(finding.node_id)
+          && migratedPartIds.has(finding.expected_part?.id)
+        )
       ))
       .map((finding) => nodeReviewItem(finding, canvas)),
     ...report.relation_findings
-      .filter((finding) => !(codePortMigration && finding.edge_id === WORKFLOW_GIT_SYNC_EDGE_ID))
+      .filter((finding) => ['source_missing', 'needs_review'].includes(finding.status))
       .map((finding) => relationReviewItem(finding, canvas)),
     ...report.unmodeled_resources.map((resource) => resourceReviewItem(resource, canvas)),
   ].sort((left, right) => (
@@ -627,10 +637,21 @@ export function inspectWorkflowSystemTwin(canvas) {
       runtimeVerified: false,
       runtimeLabel: '실행 확인 아님',
       rootNodeId: root?.id ?? null,
+      buildSchemaVersion: WORKFLOW_SYSTEM_TWIN_BUILD.schemaVersion,
+      buildId: WORKFLOW_SYSTEM_TWIN_BUILD.id,
+      buildFingerprint: WORKFLOW_SYSTEM_TWIN_BUILD.fingerprint,
     },
-    summary: report.summary,
+    summary: {
+      ...report.summary,
+      twin_build_findings: buildReview.summary.pending,
+      twin_build_actionable: buildReview.summary.actionable,
+      twin_build_blocked: buildReview.summary.blocked,
+    },
     items,
-    report,
+    report: {
+      ...report,
+      twin_build_reconciliation: buildReview.report,
+    },
   }
 }
 
@@ -638,5 +659,7 @@ export const workflowSystemTwinAdapter = Object.freeze({
   id: WORKFLOW_SYSTEM_TWIN_ADAPTER_DESCRIPTOR.id,
   describe: () => WORKFLOW_SYSTEM_TWIN_ADAPTER_DESCRIPTOR,
   canInspect: canInspectWorkflowSystemCanvas,
+  normalize: () => WORKFLOW_SYSTEM_TWIN_BUILD,
+  reconcile: (canvas, build = WORKFLOW_SYSTEM_TWIN_BUILD) => reconcileTwinBuild({ build, canvas }),
   inspect: inspectWorkflowSystemTwin,
 })

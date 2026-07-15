@@ -286,7 +286,7 @@ This ordering preserves the commercial goal that users can eventually connect th
 
 ### Phase C - Extract the engine core
 
-Current progress: C1 establishes adapter contract v1, a provider-neutral registry, lazy-module identity checks, declared permission/data boundaries, and golden tests proving a second software adapter can use the same review path while manual layout and review decisions survive rescans.
+Current progress: C1 establishes adapter contract v1 and a provider-neutral registry. C2 adds `TwinBuild v1`, deterministic normalization, reference and trust-boundary validation, v0-to-v1 migration, and a common reconciliation engine. Workflow Canvas is normalized as 28 entities, 9 parts, 38 relations, and one operation declaration. A second order-service fixture reaches zero findings through staged common proposals while manual layout, notes, extra parts, and review decisions survive rescans.
 
 - move Workflow Canvas-specific knowledge behind the first adapter
 - create versioned canonical records and migrations

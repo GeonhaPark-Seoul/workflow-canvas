@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 
+import { applyDigitalTwinGraphProposal } from '../shared/digitalTwinProposal.js'
 import {
   createTwinAdapterDescriptor,
   createTwinAdapterRegistration,
@@ -13,6 +14,8 @@ import {
   digitalTwinReviewDecision,
   setDigitalTwinReviewDecision,
 } from '../shared/digitalTwinReview.js'
+import { createTwinBuild } from '../shared/twinBuild.js'
+import { reconcileTwinBuild } from '../shared/twinBuildReconciler.js'
 import { createWorkflowCanvasSystemMap } from '../shared/workflowCanvasSystemMap.js'
 import { workflowSystemTwinAdapter } from '../shared/workflowSystemTwinAdapter.js'
 import {
@@ -22,19 +25,20 @@ import {
 
 const fixtureUrl = new URL('./fixtures/twin-adapter-contract/', import.meta.url)
 const fixtureCanvas = JSON.parse(await readFile(new URL('order-service-canvas.json', fixtureUrl), 'utf8'))
-const fixtureReview = JSON.parse(await readFile(new URL('order-service-review.json', fixtureUrl), 'utf8'))
+const fixtureBuild = createTwinBuild(JSON.parse(await readFile(new URL('order-service-build.json', fixtureUrl), 'utf8')))
+const fixtureReconciliation = JSON.parse(await readFile(new URL('order-service-reconciliation.json', fixtureUrl), 'utf8'))
 
 const fixtureDescriptor = createTwinAdapterDescriptor({
   id: 'fixture-order-system',
   contractVersion: TWIN_ADAPTER_CONTRACT_VERSION,
-  adapterVersion: '1.0.0',
+  adapterVersion: '1.1.0',
   minimumEngineSchemaVersion: TWIN_ENGINE_SCHEMA_VERSION,
   maximumEngineSchemaVersion: TWIN_ENGINE_SCHEMA_VERSION,
   label: '주문 서비스 픽스처',
   description: '범용 레지스트리에 두 번째 소프트웨어 어댑터를 꽂는 골든 테스트입니다.',
   systemKinds: ['order-service'],
-  interfaces: ['describe', 'canInspect', 'inspect'],
-  features: ['golden-review'],
+  interfaces: ['describe', 'canInspect', 'inspect', 'normalize', 'reconcile'],
+  features: ['canonical-twin-build', 'common-reconciliation', 'golden-review'],
   dataClasses: [{
     id: 'order-topology',
     label: '주문 서비스 구조',
@@ -56,11 +60,26 @@ let inspectedFrozenCanvas = false
 const fixtureAdapter = Object.freeze({
   describe: () => fixtureDescriptor,
   canInspect: (canvas) => canvas?.nodes?.some((node) => node.data?.fixtureSystem === 'order-service'),
+  normalize: () => fixtureBuild,
+  reconcile: (canvas, build = fixtureBuild) => reconcileTwinBuild({ build, canvas }),
   inspect(canvas) {
     inspectedFrozenCanvas = Object.isFrozen(canvas) && Object.isFrozen(canvas.nodes) && Object.isFrozen(canvas.nodes[0].data)
-    return structuredClone(fixtureReview)
+    return reconcileTwinBuild({ build: fixtureBuild, canvas })
   },
 })
+
+function reconciliationProjection(review) {
+  return {
+    pending: review.summary.pending,
+    actionable: review.summary.actionable,
+    blocked: review.summary.blocked,
+    items: review.items.map((item) => ({
+      itemKey: item.itemKey,
+      status: item.status,
+      action: item.proposal?.operations?.[0]?.action ?? null,
+    })).sort((left, right) => left.itemKey.localeCompare(right.itemKey)),
+  }
+}
 
 const registry = createTwinAdapterRegistry([
   createTwinAdapterRegistration({
@@ -89,7 +108,29 @@ const fixtureBefore = structuredClone(fixtureCanvas)
 const fixtureResult = await registry.inspect(fixtureCanvas)
 assert.deepEqual(fixtureCanvas, fixtureBefore, '어댑터 검사는 원본 캔버스를 바꾸면 안 됩니다.')
 assert.equal(inspectedFrozenCanvas, true, '어댑터에는 읽기 전용 스냅샷을 전달해야 합니다.')
-assert.deepEqual(fixtureResult, fixtureReview)
+assert.deepEqual(reconciliationProjection(fixtureResult), fixtureReconciliation.first)
+
+let reconciledFixture = structuredClone(fixtureCanvas)
+for (const item of fixtureResult.items.filter((candidate) => candidate.proposal)) {
+  const applied = applyDigitalTwinGraphProposal(reconciledFixture, item.proposal)
+  reconciledFixture = { nodes: applied.nodes, edges: applied.edges }
+}
+const secondFixtureResult = await registry.inspect(reconciledFixture)
+assert.deepEqual(reconciliationProjection(secondFixtureResult), fixtureReconciliation.second)
+const relationApplied = applyDigitalTwinGraphProposal(reconciledFixture, secondFixtureResult.items[0].proposal)
+reconciledFixture = { nodes: relationApplied.nodes, edges: relationApplied.edges }
+const completedFixtureResult = await registry.inspect(reconciledFixture)
+assert.deepEqual(reconciliationProjection(completedFixtureResult), fixtureReconciliation.complete)
+const preservedFixtureApi = reconciledFixture.nodes.find((node) => node.id === 'fixture-orders-api')
+assert.deepEqual(preservedFixtureApi.position, fixtureCanvas.nodes[0].position)
+assert.equal(preservedFixtureApi.width, fixtureCanvas.nodes[0].width)
+assert.equal(preservedFixtureApi.height, fixtureCanvas.nodes[0].height)
+assert.equal(preservedFixtureApi.data.manualAnnotation, fixtureCanvas.nodes[0].data.manualAnnotation)
+assert.equal(preservedFixtureApi.data.systemParts.some((part) => part.id === 'user-manual-note'), true)
+const fixtureGatewayEdge = reconciledFixture.edges.find((edge) => edge.id === 'fixture-edge-orders-api-db')
+assert.equal(fixtureGatewayEdge.sourceHandle, 'p-fixture-orders-route-r')
+assert.equal(fixtureGatewayEdge.targetHandle, 'p-fixture-orders-records-l')
+assert.equal(fixtureGatewayEdge.data.trustGateway.id, 'gateway:order-database')
 
 const workflowCanvas = createWorkflowCanvasSystemMap()
 const workflowRoot = workflowCanvas.nodes.find((node) => node.id === 'map-group-experience')
@@ -167,7 +208,10 @@ await assert.rejects(
 
 const invalidReviewAdapter = {
   ...fixtureAdapter,
-  inspect: () => ({ ...structuredClone(fixtureReview), source: { ...fixtureReview.source, adapterId: 'wrong-adapter' } }),
+  inspect: (canvas) => {
+    const review = reconcileTwinBuild({ build: fixtureBuild, canvas })
+    return { ...review, source: { ...review.source, adapterId: 'wrong-adapter' } }
+  },
 }
 const invalidReviewRegistry = createTwinAdapterRegistry([{
   descriptor: fixtureDescriptor,

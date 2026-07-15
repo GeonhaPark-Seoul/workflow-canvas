@@ -3,14 +3,20 @@ import { createTwinAdapterDescriptor } from './twinAdapterContract.js'
 export const WORKFLOW_SYSTEM_TWIN_ADAPTER_DESCRIPTOR = createTwinAdapterDescriptor({
   id: 'workflow-system-discovery',
   contractVersion: 1,
-  adapterVersion: '1.0.0',
+  adapterVersion: '1.1.0',
   minimumEngineSchemaVersion: 1,
   maximumEngineSchemaVersion: 1,
   label: 'Workflow Canvas 시스템 어댑터',
   description: '배포 빌드의 소스·DB·보안·운영 manifest를 현재 시스템 지도와 대조합니다.',
   systemKinds: ['software-application'],
-  interfaces: ['describe', 'canInspect', 'inspect'],
-  features: ['deterministic-discovery', 'evidence-review', 'fingerprinted-proposals'],
+  interfaces: ['describe', 'canInspect', 'inspect', 'normalize', 'reconcile'],
+  features: [
+    'canonical-twin-build',
+    'common-reconciliation',
+    'deterministic-discovery',
+    'evidence-review',
+    'fingerprinted-proposals',
+  ],
   dataClasses: [
     {
       id: 'canvas-graph',

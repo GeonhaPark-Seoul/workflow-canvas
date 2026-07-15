@@ -2,7 +2,7 @@
 export const SOURCE_TWIN_MANIFEST = Object.freeze(
 {
   "schemaVersion": 1,
-  "id": "source-twin-v1-38ddd57bc5e4",
+  "id": "source-twin-v1-cc3d46887dec",
   "source": {
     "id": "workflow-canvas:self-source",
     "label": "Workflow Canvas 소스 코드",
@@ -957,7 +957,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "deployment:vercel-web",
       "kind": "deployment",
       "label": "Vercel 웹 배포",
-      "fingerprint": "4fbdb4484f6532afeffe",
+      "fingerprint": "bdc607aafedf537b9292",
       "layer": "deployment",
       "summary": "Vite 빌드 결과를 Vercel에 배포하는 경로입니다.",
       "tags": [
@@ -1820,7 +1820,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:package.json",
       "kind": "file",
       "label": "package.json",
-      "fingerprint": "8e7d54839130473561ff",
+      "fingerprint": "2c92fcdd28d2c1b156c7",
       "path": "package.json",
       "layer": "deployment",
       "language": "json",
@@ -2119,13 +2119,37 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:scripts/test-twin-adapter-contract.mjs",
       "kind": "file",
       "label": "scripts/test-twin-adapter-contract.mjs",
-      "fingerprint": "3f17af95e22eca9d587f",
+      "fingerprint": "45ca08bb6c8ce555f1be",
       "path": "scripts/test-twin-adapter-contract.mjs",
       "layer": "test",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 183,
-      "summary": "검증에서 함수 1개 정의 · 모듈 7개 연결을 담당합니다.",
+      "lineEnd": 227,
+      "summary": "검증에서 함수 2개 정의 · 모듈 10개 연결을 담당합니다.",
+      "tags": [
+        "test"
+      ],
+      "details": {
+        "exports": [],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "parseStatus": "parsed"
+      }
+    },
+    {
+      "id": "file:scripts/test-twin-build.mjs",
+      "kind": "file",
+      "label": "scripts/test-twin-build.mjs",
+      "fingerprint": "ee8ea620e6f11f352082",
+      "path": "scripts/test-twin-build.mjs",
+      "layer": "test",
+      "language": "javascript",
+      "lineStart": 1,
+      "lineEnd": 147,
+      "summary": "검증에서 모듈 6개 연결을 담당합니다.",
       "tags": [
         "test"
       ],
@@ -2621,6 +2645,93 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "file:shared/twinBuild.js",
+      "kind": "file",
+      "label": "shared/twinBuild.js",
+      "fingerprint": "7808be12a8c59d09c791",
+      "path": "shared/twinBuild.js",
+      "layer": "shared",
+      "language": "javascript",
+      "lineStart": 1,
+      "lineEnd": 484,
+      "summary": "공통 도메인 규칙에서 함수 26개 정의 · 모듈 5개 연결을 담당합니다.",
+      "tags": [
+        "shared"
+      ],
+      "details": {
+        "exports": [
+          "TWIN_BUILD_SCHEMA_VERSION",
+          "TwinBuildError",
+          "createTwinBuild",
+          "migrateTwinBuild"
+        ],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "parseStatus": "parsed"
+      }
+    },
+    {
+      "id": "file:shared/twinBuildCanvas.js",
+      "kind": "file",
+      "label": "shared/twinBuildCanvas.js",
+      "fingerprint": "dfd8eb0a84a1f1604ca3",
+      "path": "shared/twinBuildCanvas.js",
+      "layer": "shared",
+      "language": "javascript",
+      "lineStart": 1,
+      "lineEnd": 366,
+      "summary": "공통 도메인 규칙에서 함수 18개 정의 · 모듈 5개 연결을 담당합니다.",
+      "tags": [
+        "shared"
+      ],
+      "details": {
+        "exports": [
+          "createTwinBuildFromCanvasTemplate",
+          "findTwinBuildEntityNode",
+          "materializeTwinBuildEntity",
+          "materializeTwinBuildPart",
+          "materializeTwinBuildRelation",
+          "twinBuildEntityCanvasProjection"
+        ],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "parseStatus": "parsed"
+      }
+    },
+    {
+      "id": "file:shared/twinBuildReconciler.js",
+      "kind": "file",
+      "label": "shared/twinBuildReconciler.js",
+      "fingerprint": "415bd6d74199e0986802",
+      "path": "shared/twinBuildReconciler.js",
+      "layer": "shared",
+      "language": "javascript",
+      "lineStart": 1,
+      "lineEnd": 322,
+      "summary": "공통 도메인 규칙에서 함수 9개 정의 · 모듈 5개 연결을 담당합니다.",
+      "tags": [
+        "shared"
+      ],
+      "details": {
+        "exports": [
+          "TWIN_BUILD_RECONCILIATION_SCHEMA_VERSION",
+          "reconcileTwinBuild"
+        ],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "parseStatus": "parsed"
+      }
+    },
+    {
       "id": "file:shared/workflowCanvasSystemMap.js",
       "kind": "file",
       "label": "shared/workflowCanvasSystemMap.js",
@@ -2743,13 +2854,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:shared/workflowSystemTwinAdapter.js",
       "kind": "file",
       "label": "shared/workflowSystemTwinAdapter.js",
-      "fingerprint": "36ffb3f018fae0828a01",
+      "fingerprint": "927f40fe20bf941ea286",
       "path": "shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 643,
-      "summary": "공통 도메인 규칙에서 함수 20개 정의 · 모듈 12개 연결을 담당합니다.",
+      "lineEnd": 666,
+      "summary": "공통 도메인 규칙에서 함수 20개 정의 · 모듈 14개 연결을 담당합니다.",
       "tags": [
         "shared"
       ],
@@ -2771,12 +2882,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:shared/workflowSystemTwinAdapterDescriptor.js",
       "kind": "file",
       "label": "shared/workflowSystemTwinAdapterDescriptor.js",
-      "fingerprint": "0f864f6b76d56734c579",
+      "fingerprint": "f36be2bd24132de83abe",
       "path": "shared/workflowSystemTwinAdapterDescriptor.js",
       "layer": "shared",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 58,
+      "lineEnd": 64,
       "summary": "공통 도메인 규칙에서 함수 1개 정의 · 모듈 1개 연결을 담당합니다.",
       "tags": [
         "shared"
@@ -2785,6 +2896,33 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "exports": [
           "WORKFLOW_SYSTEM_TWIN_ADAPTER_DESCRIPTOR",
           "canInspectWorkflowSystemCanvas"
+        ],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "parseStatus": "parsed"
+      }
+    },
+    {
+      "id": "file:shared/workflowSystemTwinBuild.js",
+      "kind": "file",
+      "label": "shared/workflowSystemTwinBuild.js",
+      "fingerprint": "b6184505a6b872c01a99",
+      "path": "shared/workflowSystemTwinBuild.js",
+      "layer": "shared",
+      "language": "javascript",
+      "lineStart": 1,
+      "lineEnd": 48,
+      "summary": "공통 도메인 규칙에서 함수 1개 정의 · 모듈 6개 연결을 담당합니다.",
+      "tags": [
+        "shared"
+      ],
+      "details": {
+        "exports": [
+          "WORKFLOW_SYSTEM_TWIN_BUILD",
+          "createWorkflowSystemTwinBuild"
         ],
         "apiRoutes": [],
         "dbTables": [],
@@ -12545,13 +12683,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:scripts/test-twin-adapter-contract.mjs:fixtureAdapter.inspect",
       "kind": "function",
       "label": "fixtureAdapter.inspect",
-      "fingerprint": "0f474d616ab185c87abb",
+      "fingerprint": "35eca50713db5164cf10",
       "name": "fixtureAdapter.inspect",
       "path": "scripts/test-twin-adapter-contract.mjs",
       "parentId": "file:scripts/test-twin-adapter-contract.mjs",
       "layer": "test",
-      "lineStart": 59,
-      "lineEnd": 62,
+      "lineStart": 65,
+      "lineEnd": 68,
       "summary": "fixture adapter inspect을(를) 처리하는 함수입니다.",
       "tags": [
         "method",
@@ -12559,6 +12697,28 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "functionKind": "method",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:scripts/test-twin-adapter-contract.mjs:reconciliationProjection",
+      "kind": "function",
+      "label": "reconciliationProjection",
+      "fingerprint": "f13004509a5f9f8bda7d",
+      "name": "reconciliationProjection",
+      "path": "scripts/test-twin-adapter-contract.mjs",
+      "parentId": "file:scripts/test-twin-adapter-contract.mjs",
+      "layer": "test",
+      "lineStart": 71,
+      "lineEnd": 82,
+      "summary": "reconciliation projection을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "test"
+      ],
+      "details": {
+        "functionKind": "function",
         "exported": false,
         "async": false
       }
@@ -15993,6 +16153,1181 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:shared/twinBuild.js:TwinBuildError.constructor",
+      "kind": "function",
+      "label": "TwinBuildError.constructor",
+      "fingerprint": "0f002f38877c10bea01d",
+      "name": "TwinBuildError.constructor",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 40,
+      "lineEnd": 44,
+      "summary": "twin build error constructor을(를) 처리하는 함수입니다.",
+      "tags": [
+        "class-method",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "class-method",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:createTwinBuild",
+      "kind": "function",
+      "label": "createTwinBuild",
+      "fingerprint": "f48159f7db58d6f31330",
+      "name": "createTwinBuild",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 432,
+      "lineEnd": 463,
+      "summary": "twin build을(를) 생성하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:deepFreeze",
+      "kind": "function",
+      "label": "deepFreeze",
+      "fingerprint": "28d401f7ffed42e1cb54",
+      "name": "deepFreeze",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 108,
+      "lineEnd": 113,
+      "summary": "deep freeze을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:finiteNumber",
+      "kind": "function",
+      "label": "finiteNumber",
+      "fingerprint": "639d4b9fcd9325ea94ba",
+      "name": "finiteNumber",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 73,
+      "lineEnd": 76,
+      "summary": "finite number을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:migrateTwinBuild",
+      "kind": "function",
+      "label": "migrateTwinBuild",
+      "fingerprint": "d906cb4f06425b76a102",
+      "name": "migrateTwinBuild",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 465,
+      "lineEnd": 483,
+      "summary": "migrate twin build을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:normalizeBinding",
+      "kind": "function",
+      "label": "normalizeBinding",
+      "fingerprint": "6c07a6587f77334fc644",
+      "name": "normalizeBinding",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 197,
+      "lineEnd": 214,
+      "summary": "binding을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:normalizeEndpoint",
+      "kind": "function",
+      "label": "normalizeEndpoint",
+      "fingerprint": "afcb1422bcc73c7d8364",
+      "name": "normalizeEndpoint",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 240,
+      "lineEnd": 246,
+      "summary": "endpoint을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:normalizeEntity",
+      "kind": "function",
+      "label": "normalizeEntity",
+      "fingerprint": "55c942aa6d0b4d4ea47a",
+      "name": "normalizeEntity",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 174,
+      "lineEnd": 195,
+      "summary": "entity을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:normalizeEvidence",
+      "kind": "function",
+      "label": "normalizeEvidence",
+      "fingerprint": "ab386ec377d09c362771",
+      "name": "normalizeEvidence",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 135,
+      "lineEnd": 155,
+      "summary": "evidence을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:normalizeGateway",
+      "kind": "function",
+      "label": "normalizeGateway",
+      "fingerprint": "f6dcc762d72974792a53",
+      "name": "normalizeGateway",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 288,
+      "lineEnd": 295,
+      "summary": "gateway을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:normalizeOperation",
+      "kind": "function",
+      "label": "normalizeOperation",
+      "fingerprint": "319b5803649d025f8cf1",
+      "name": "normalizeOperation",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 297,
+      "lineEnd": 317,
+      "summary": "operation을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:normalizePart",
+      "kind": "function",
+      "label": "normalizePart",
+      "fingerprint": "68e3d11015c87706168a",
+      "name": "normalizePart",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 216,
+      "lineEnd": 238,
+      "summary": "part을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:normalizePlacement",
+      "kind": "function",
+      "label": "normalizePlacement",
+      "fingerprint": "420cbde77671a5c0bf43",
+      "name": "normalizePlacement",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 157,
+      "lineEnd": 172,
+      "summary": "placement을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:normalizeRelation",
+      "kind": "function",
+      "label": "normalizeRelation",
+      "fingerprint": "d3e5976f34555e9196a9",
+      "name": "normalizeRelation",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 248,
+      "lineEnd": 277,
+      "summary": "relation을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:normalizeSource",
+      "kind": "function",
+      "label": "normalizeSource",
+      "fingerprint": "121ee20197a1da2e6e99",
+      "name": "normalizeSource",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 115,
+      "lineEnd": 133,
+      "summary": "source을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:normalizeZone",
+      "kind": "function",
+      "label": "normalizeZone",
+      "fingerprint": "623af55e482508dc0f7a",
+      "name": "normalizeZone",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 279,
+      "lineEnd": 286,
+      "summary": "zone을(를) 정규화하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:plainObject",
+      "kind": "function",
+      "label": "plainObject",
+      "fingerprint": "d7e1a654b1d1b1b9a066",
+      "name": "plainObject",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 47,
+      "lineEnd": 49,
+      "summary": "plain object을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:positiveInteger",
+      "kind": "function",
+      "label": "positiveInteger",
+      "fingerprint": "77f0c79118f9f2489bbe",
+      "name": "positiveInteger",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 65,
+      "lineEnd": 71,
+      "summary": "positive integer을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:recordList",
+      "kind": "function",
+      "label": "recordList",
+      "fingerprint": "ff0590930c8753373944",
+      "name": "recordList",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 91,
+      "lineEnd": 102,
+      "summary": "list을(를) 기록하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:requireEvidence",
+      "kind": "function",
+      "label": "requireEvidence",
+      "fingerprint": "dafce4bd1dd7b5155108",
+      "name": "requireEvidence",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 345,
+      "lineEnd": 351,
+      "summary": "require evidence을(를) 처리하는 함수입니다.",
+      "tags": [
+        "arrow",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "arrow",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:requireReferences",
+      "kind": "function",
+      "label": "requireReferences",
+      "fingerprint": "a79e851f7fe8db08e599",
+      "name": "requireReferences",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 319,
+      "lineEnd": 430,
+      "summary": "require references을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:requireUniquePlacement",
+      "kind": "function",
+      "label": "requireUniquePlacement",
+      "fingerprint": "6732aadd0d1599663abb",
+      "name": "requireUniquePlacement",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 328,
+      "lineEnd": 333,
+      "summary": "require unique placement을(를) 처리하는 함수입니다.",
+      "tags": [
+        "arrow",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "arrow",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:safeId",
+      "kind": "function",
+      "label": "safeId",
+      "fingerprint": "8509c75222c4dcadf41d",
+      "name": "safeId",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 57,
+      "lineEnd": 63,
+      "summary": "safe id을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:safeText",
+      "kind": "function",
+      "label": "safeText",
+      "fingerprint": "2698e96eadba4deef11c",
+      "name": "safeText",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 51,
+      "lineEnd": 55,
+      "summary": "safe text을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:uniqueIds",
+      "kind": "function",
+      "label": "uniqueIds",
+      "fingerprint": "2bc3bee2f9292c04875a",
+      "name": "uniqueIds",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 78,
+      "lineEnd": 89,
+      "summary": "unique ids을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuild.js:withFingerprint",
+      "kind": "function",
+      "label": "withFingerprint",
+      "fingerprint": "1c78007431e42a360411",
+      "name": "withFingerprint",
+      "path": "shared/twinBuild.js",
+      "parentId": "file:shared/twinBuild.js",
+      "layer": "shared",
+      "lineStart": 104,
+      "lineEnd": 106,
+      "summary": "with fingerprint을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuildCanvas.js:add",
+      "kind": "function",
+      "label": "add",
+      "fingerprint": "7e615302b323fa2c200d",
+      "name": "add",
+      "path": "shared/twinBuildCanvas.js",
+      "parentId": "file:shared/twinBuildCanvas.js",
+      "layer": "shared",
+      "lineStart": 28,
+      "lineEnd": 37,
+      "summary": "add을(를) 추가하는 함수입니다.",
+      "tags": [
+        "arrow",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "arrow",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuildCanvas.js:bindingFromPart",
+      "kind": "function",
+      "label": "bindingFromPart",
+      "fingerprint": "147fd0d330526787ad80",
+      "name": "bindingFromPart",
+      "path": "shared/twinBuildCanvas.js",
+      "parentId": "file:shared/twinBuildCanvas.js",
+      "layer": "shared",
+      "lineStart": 42,
+      "lineEnd": 54,
+      "summary": "binding from part을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuildCanvas.js:createEvidenceRegistry",
+      "kind": "function",
+      "label": "createEvidenceRegistry",
+      "fingerprint": "8bc3042bdc7bbf9c9730",
+      "name": "createEvidenceRegistry",
+      "path": "shared/twinBuildCanvas.js",
+      "parentId": "file:shared/twinBuildCanvas.js",
+      "layer": "shared",
+      "lineStart": 25,
+      "lineEnd": 40,
+      "summary": "evidence registry을(를) 생성하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuildCanvas.js:createTwinBuildFromCanvasTemplate",
+      "kind": "function",
+      "label": "createTwinBuildFromCanvasTemplate",
+      "fingerprint": "c765afdb7b5a829a314b",
+      "name": "createTwinBuildFromCanvasTemplate",
+      "path": "shared/twinBuildCanvas.js",
+      "parentId": "file:shared/twinBuildCanvas.js",
+      "layer": "shared",
+      "lineStart": 61,
+      "lineEnd": 190,
+      "summary": "twin build from canvas template을(를) 생성하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuildCanvas.js:endpointHandle",
+      "kind": "function",
+      "label": "endpointHandle",
+      "fingerprint": "0af5f1ff0d8a2736782c",
+      "name": "endpointHandle",
+      "path": "shared/twinBuildCanvas.js",
+      "parentId": "file:shared/twinBuildCanvas.js",
+      "layer": "shared",
+      "lineStart": 280,
+      "lineEnd": 285,
+      "summary": "endpoint handle을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuildCanvas.js:entityParentNodeId",
+      "kind": "function",
+      "label": "entityParentNodeId",
+      "fingerprint": "1959991e271003771941",
+      "name": "entityParentNodeId",
+      "path": "shared/twinBuildCanvas.js",
+      "parentId": "file:shared/twinBuildCanvas.js",
+      "layer": "shared",
+      "lineStart": 197,
+      "lineEnd": 200,
+      "summary": "entity parent node id을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuildCanvas.js:entityTrustZone",
+      "kind": "function",
+      "label": "entityTrustZone",
+      "fingerprint": "9c4d4c1d8f6873a4c572",
+      "name": "entityTrustZone",
+      "path": "shared/twinBuildCanvas.js",
+      "parentId": "file:shared/twinBuildCanvas.js",
+      "layer": "shared",
+      "lineStart": 202,
+      "lineEnd": 205,
+      "summary": "entity trust zone을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuildCanvas.js:evidenceKind",
+      "kind": "function",
+      "label": "evidenceKind",
+      "fingerprint": "112b8e970d318d3cb624",
+      "name": "evidenceKind",
+      "path": "shared/twinBuildCanvas.js",
+      "parentId": "file:shared/twinBuildCanvas.js",
+      "layer": "shared",
+      "lineStart": 20,
+      "lineEnd": 23,
+      "summary": "evidence kind을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuildCanvas.js:evidenceRefs",
+      "kind": "function",
+      "label": "evidenceRefs",
+      "fingerprint": "c7239680f05c14a62009",
+      "name": "evidenceRefs",
+      "path": "shared/twinBuildCanvas.js",
+      "parentId": "file:shared/twinBuildCanvas.js",
+      "layer": "shared",
+      "lineStart": 192,
+      "lineEnd": 195,
+      "summary": "evidence refs을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuildCanvas.js:findTwinBuildEntityNode",
+      "kind": "function",
+      "label": "findTwinBuildEntityNode",
+      "fingerprint": "c2a0ac3c5ec563f41005",
+      "name": "findTwinBuildEntityNode",
+      "path": "shared/twinBuildCanvas.js",
+      "parentId": "file:shared/twinBuildCanvas.js",
+      "layer": "shared",
+      "lineStart": 357,
+      "lineEnd": 365,
+      "summary": "find twin build entity node을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuildCanvas.js:materializeTwinBuildEntity",
+      "kind": "function",
+      "label": "materializeTwinBuildEntity",
+      "fingerprint": "3a3e029af40f9983cba2",
+      "name": "materializeTwinBuildEntity",
+      "path": "shared/twinBuildCanvas.js",
+      "parentId": "file:shared/twinBuildCanvas.js",
+      "layer": "shared",
+      "lineStart": 226,
+      "lineEnd": 273,
+      "summary": "materialize twin build entity을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuildCanvas.js:materializeTwinBuildPart",
+      "kind": "function",
+      "label": "materializeTwinBuildPart",
+      "fingerprint": "6c688e6b4797ae9ecca6",
+      "name": "materializeTwinBuildPart",
+      "path": "shared/twinBuildCanvas.js",
+      "parentId": "file:shared/twinBuildCanvas.js",
+      "layer": "shared",
+      "lineStart": 207,
+      "lineEnd": 224,
+      "summary": "materialize twin build part을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuildCanvas.js:materializeTwinBuildRelation",
+      "kind": "function",
+      "label": "materializeTwinBuildRelation",
+      "fingerprint": "bad349d071f5edbc577c",
+      "name": "materializeTwinBuildRelation",
+      "path": "shared/twinBuildCanvas.js",
+      "parentId": "file:shared/twinBuildCanvas.js",
+      "layer": "shared",
+      "lineStart": 287,
+      "lineEnd": 310,
+      "summary": "materialize twin build relation을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuildCanvas.js:partIdFromHandle",
+      "kind": "function",
+      "label": "partIdFromHandle",
+      "fingerprint": "c7be8e34cf7898e6ca36",
+      "name": "partIdFromHandle",
+      "path": "shared/twinBuildCanvas.js",
+      "parentId": "file:shared/twinBuildCanvas.js",
+      "layer": "shared",
+      "lineStart": 56,
+      "lineEnd": 59,
+      "summary": "part id from handle을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuildCanvas.js:relationGateway",
+      "kind": "function",
+      "label": "relationGateway",
+      "fingerprint": "2a9ae8063870479b5500",
+      "name": "relationGateway",
+      "path": "shared/twinBuildCanvas.js",
+      "parentId": "file:shared/twinBuildCanvas.js",
+      "layer": "shared",
+      "lineStart": 275,
+      "lineEnd": 278,
+      "summary": "relation gateway을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuildCanvas.js:safeChildId",
+      "kind": "function",
+      "label": "safeChildId",
+      "fingerprint": "67474b323f259e70683e",
+      "name": "safeChildId",
+      "path": "shared/twinBuildCanvas.js",
+      "parentId": "file:shared/twinBuildCanvas.js",
+      "layer": "shared",
+      "lineStart": 7,
+      "lineEnd": 12,
+      "summary": "safe child id을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuildCanvas.js:twinBuildEntityCanvasProjection",
+      "kind": "function",
+      "label": "twinBuildEntityCanvasProjection",
+      "fingerprint": "3ad784ff4445fa7b0ddd",
+      "name": "twinBuildEntityCanvasProjection",
+      "path": "shared/twinBuildCanvas.js",
+      "parentId": "file:shared/twinBuildCanvas.js",
+      "layer": "shared",
+      "lineStart": 312,
+      "lineEnd": 355,
+      "summary": "twin build entity canvas projection을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuildCanvas.js:withoutDerivedFields",
+      "kind": "function",
+      "label": "withoutDerivedFields",
+      "fingerprint": "78750948890668c36ef9",
+      "name": "withoutDerivedFields",
+      "path": "shared/twinBuildCanvas.js",
+      "parentId": "file:shared/twinBuildCanvas.js",
+      "layer": "shared",
+      "lineStart": 14,
+      "lineEnd": 18,
+      "summary": "without derived fields을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuildReconciler.js:compactKey",
+      "kind": "function",
+      "label": "compactKey",
+      "fingerprint": "c22ce5bdc04b86c87764",
+      "name": "compactKey",
+      "path": "shared/twinBuildReconciler.js",
+      "parentId": "file:shared/twinBuildReconciler.js",
+      "layer": "shared",
+      "lineStart": 22,
+      "lineEnd": 27,
+      "summary": "compact key을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuildReconciler.js:createItem",
+      "kind": "function",
+      "label": "createItem",
+      "fingerprint": "fc1bd656e1e808239bfa",
+      "name": "createItem",
+      "path": "shared/twinBuildReconciler.js",
+      "parentId": "file:shared/twinBuildReconciler.js",
+      "layer": "shared",
+      "lineStart": 59,
+      "lineEnd": 65,
+      "summary": "item을(를) 생성하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuildReconciler.js:entityReview",
+      "kind": "function",
+      "label": "entityReview",
+      "fingerprint": "f53709ee8fb84dbb37b0",
+      "name": "entityReview",
+      "path": "shared/twinBuildReconciler.js",
+      "parentId": "file:shared/twinBuildReconciler.js",
+      "layer": "shared",
+      "lineStart": 67,
+      "lineEnd": 119,
+      "summary": "entity review을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuildReconciler.js:evidenceRefs",
+      "kind": "function",
+      "label": "evidenceRefs",
+      "fingerprint": "433919ef5eaf6b0f84fb",
+      "name": "evidenceRefs",
+      "path": "shared/twinBuildReconciler.js",
+      "parentId": "file:shared/twinBuildReconciler.js",
+      "layer": "shared",
+      "lineStart": 29,
+      "lineEnd": 32,
+      "summary": "evidence refs을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuildReconciler.js:partReview",
+      "kind": "function",
+      "label": "partReview",
+      "fingerprint": "15088304d1f9fd876895",
+      "name": "partReview",
+      "path": "shared/twinBuildReconciler.js",
+      "parentId": "file:shared/twinBuildReconciler.js",
+      "layer": "shared",
+      "lineStart": 121,
+      "lineEnd": 185,
+      "summary": "part review을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuildReconciler.js:reconcileTwinBuild",
+      "kind": "function",
+      "label": "reconcileTwinBuild",
+      "fingerprint": "4a76bbccd6732fde38a2",
+      "name": "reconcileTwinBuild",
+      "path": "shared/twinBuildReconciler.js",
+      "parentId": "file:shared/twinBuildReconciler.js",
+      "layer": "shared",
+      "lineStart": 273,
+      "lineEnd": 321,
+      "summary": "reconcile twin build을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuildReconciler.js:relationReview",
+      "kind": "function",
+      "label": "relationReview",
+      "fingerprint": "193327a7e50b00b191b5",
+      "name": "relationReview",
+      "path": "shared/twinBuildReconciler.js",
+      "parentId": "file:shared/twinBuildReconciler.js",
+      "layer": "shared",
+      "lineStart": 187,
+      "lineEnd": 271,
+      "summary": "relation review을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuildReconciler.js:reviewSource",
+      "kind": "function",
+      "label": "reviewSource",
+      "fingerprint": "5ed503f38b4e5b2bd1ff",
+      "name": "reviewSource",
+      "path": "shared/twinBuildReconciler.js",
+      "parentId": "file:shared/twinBuildReconciler.js",
+      "layer": "shared",
+      "lineStart": 38,
+      "lineEnd": 57,
+      "summary": "review source을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/twinBuildReconciler.js:severityRank",
+      "kind": "function",
+      "label": "severityRank",
+      "fingerprint": "453ec04603f80afcc7f5",
+      "name": "severityRank",
+      "path": "shared/twinBuildReconciler.js",
+      "parentId": "file:shared/twinBuildReconciler.js",
+      "layer": "shared",
+      "lineStart": 34,
+      "lineEnd": 36,
+      "summary": "severity rank을(를) 처리하는 함수입니다.",
+      "tags": [
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
       "id": "function:shared/workflowCanvasSystemMap.js:createWorkflowCanvasSystemMap",
       "kind": "function",
       "label": "createWorkflowCanvasSystemMap",
@@ -16671,8 +18006,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
-      "lineStart": 136,
-      "lineEnd": 152,
+      "lineStart": 138,
+      "lineEnd": 154,
       "summary": "absolute position을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -16693,8 +18028,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
-      "lineStart": 169,
-      "lineEnd": 215,
+      "lineStart": 171,
+      "lineEnd": 217,
       "summary": "credential part proposal을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -16715,8 +18050,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
-      "lineStart": 100,
-      "lineEnd": 102,
+      "lineStart": 102,
+      "lineEnd": 104,
       "summary": "evidence for resources을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -16737,8 +18072,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
-      "lineStart": 300,
-      "lineEnd": 339,
+      "lineStart": 302,
+      "lineEnd": 341,
       "summary": "expected system part proposal을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -16759,8 +18094,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
-      "lineStart": 118,
-      "lineEnd": 134,
+      "lineStart": 120,
+      "lineEnd": 136,
       "summary": "find open group position을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -16776,13 +18111,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:shared/workflowSystemTwinAdapter.js:inspectWorkflowSystemTwin",
       "kind": "function",
       "label": "inspectWorkflowSystemTwin",
-      "fingerprint": "7a12b2ef925385ec2c24",
+      "fingerprint": "2569baeee85df2cf2558",
       "name": "inspectWorkflowSystemTwin",
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
-      "lineStart": 581,
-      "lineEnd": 635,
+      "lineStart": 583,
+      "lineEnd": 656,
       "summary": "workflow system twin을(를) 검사하는 함수입니다.",
       "tags": [
         "exported",
@@ -16804,8 +18139,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
-      "lineStart": 438,
-      "lineEnd": 482,
+      "lineStart": 440,
+      "lineEnd": 484,
       "summary": "node review item을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -16826,8 +18161,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
-      "lineStart": 104,
-      "lineEnd": 109,
+      "lineStart": 106,
+      "lineEnd": 111,
       "summary": "node size을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -16848,8 +18183,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
-      "lineStart": 111,
-      "lineEnd": 116,
+      "lineStart": 113,
+      "lineEnd": 118,
       "summary": "overlaps with margin을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -16870,8 +18205,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
-      "lineStart": 357,
-      "lineEnd": 372,
+      "lineStart": 359,
+      "lineEnd": 374,
       "summary": "plan part을(를) 처리하는 함수입니다.",
       "tags": [
         "arrow",
@@ -16892,8 +18227,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
-      "lineStart": 154,
-      "lineEnd": 167,
+      "lineStart": 156,
+      "lineEnd": 169,
       "summary": "relation handles을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -16914,8 +18249,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
-      "lineStart": 484,
-      "lineEnd": 553,
+      "lineStart": 486,
+      "lineEnd": 555,
       "summary": "relation review item을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -16936,8 +18271,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
-      "lineStart": 92,
-      "lineEnd": 98,
+      "lineStart": 94,
+      "lineEnd": 100,
       "summary": "resource observation을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -16958,8 +18293,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
-      "lineStart": 217,
-      "lineEnd": 298,
+      "lineStart": 219,
+      "lineEnd": 300,
       "summary": "resource proposal을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -16980,8 +18315,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
-      "lineStart": 555,
-      "lineEnd": 575,
+      "lineStart": 557,
+      "lineEnd": 577,
       "summary": "resource review item을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -17002,8 +18337,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
-      "lineStart": 373,
-      "lineEnd": 383,
+      "lineStart": 375,
+      "lineEnd": 385,
       "summary": "retire part을(를) 처리하는 함수입니다.",
       "tags": [
         "arrow",
@@ -17024,8 +18359,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
-      "lineStart": 577,
-      "lineEnd": 579,
+      "lineStart": 579,
+      "lineEnd": 581,
       "summary": "severity rank을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -17046,8 +18381,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
-      "lineStart": 81,
-      "lineEnd": 83,
+      "lineStart": 83,
+      "lineEnd": 85,
       "summary": "unique을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -17068,8 +18403,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
-      "lineStart": 341,
-      "lineEnd": 436,
+      "lineStart": 343,
+      "lineEnd": 438,
       "summary": "workflow code port migration item을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -17090,8 +18425,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapter.js",
       "parentId": "file:shared/workflowSystemTwinAdapter.js",
       "layer": "shared",
-      "lineStart": 85,
-      "lineEnd": 90,
+      "lineStart": 87,
+      "lineEnd": 92,
       "summary": "workflow twin root을(를) 처리하는 함수입니다.",
       "tags": [
         "function",
@@ -17112,9 +18447,32 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "path": "shared/workflowSystemTwinAdapterDescriptor.js",
       "parentId": "file:shared/workflowSystemTwinAdapterDescriptor.js",
       "layer": "shared",
-      "lineStart": 53,
-      "lineEnd": 57,
+      "lineStart": 59,
+      "lineEnd": 63,
       "summary": "can inspect workflow system canvas을(를) 처리하는 함수입니다.",
+      "tags": [
+        "exported",
+        "function",
+        "shared"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/workflowSystemTwinBuild.js:createWorkflowSystemTwinBuild",
+      "kind": "function",
+      "label": "createWorkflowSystemTwinBuild",
+      "fingerprint": "224794462670259e3044",
+      "name": "createWorkflowSystemTwinBuild",
+      "path": "shared/workflowSystemTwinBuild.js",
+      "parentId": "file:shared/workflowSystemTwinBuild.js",
+      "layer": "shared",
+      "lineStart": 10,
+      "lineEnd": 45,
+      "summary": "workflow system twin build을(를) 생성하는 함수입니다.",
       "tags": [
         "exported",
         "function",
@@ -27020,7 +28378,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "npm-script:test",
       "kind": "npm-script",
       "label": "npm run test",
-      "fingerprint": "728a5198730f73858ff7",
+      "fingerprint": "715f9db4bf448f02f71e",
       "name": "test",
       "path": "package.json",
       "parentId": "file:package.json",
@@ -27475,6 +28833,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
   ],
   "relations": [
     {
+      "id": "relation:0027ae2369924bf7",
+      "type": "imports",
+      "source": "file:scripts/test-twin-adapter-contract.mjs",
+      "target": "file:shared/twinBuildReconciler.js",
+      "names": [
+        "reconcileTwinBuild"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:006cfd5f4abf45bb",
       "type": "contains",
       "source": "file:shared/sharePermissions.js",
@@ -27884,6 +29252,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:09a7cba7a718951a",
+      "type": "contains",
+      "source": "file:shared/twinBuildCanvas.js",
+      "target": "function:shared/twinBuildCanvas.js:bindingFromPart"
+    },
+    {
       "id": "relation:09a80ed0035645eb",
       "type": "imports",
       "source": "file:src/App.jsx",
@@ -27914,6 +29288,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "pathToFileURL"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:0b10970bb448f4c3",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:normalizeOperation"
     },
     {
       "id": "relation:0b1b292b290a6e53",
@@ -27948,6 +29328,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/App.jsx",
       "target": "function:src/App.jsx:closeContext"
+    },
+    {
+      "id": "relation:0c7f1009e255decf",
+      "type": "contains",
+      "source": "file:shared/twinBuildCanvas.js",
+      "target": "function:shared/twinBuildCanvas.js:safeChildId"
     },
     {
       "id": "relation:0cd90bafef4342d4",
@@ -28131,10 +29517,33 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/nodes/ContentNode.jsx:stopEdit"
     },
     {
+      "id": "relation:108566701d6757a4",
+      "type": "imports",
+      "source": "file:shared/twinBuildReconciler.js",
+      "target": "file:shared/digitalTwinReview.js",
+      "names": [
+        "DIGITAL_TWIN_REVIEW_SCHEMA_VERSION",
+        "createDigitalTwinReviewItem",
+        "digitalTwinReviewFingerprint"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:10de06055ceb18ce",
       "type": "contains",
       "source": "file:mcp/systemOperationPlan.js",
       "target": "function:mcp/systemOperationPlan.js:verifySignedSystemOperationPlan"
+    },
+    {
+      "id": "relation:10e24875fc3572d4",
+      "type": "imports",
+      "source": "file:shared/twinBuildReconciler.js",
+      "target": "file:shared/digitalTwinProposal.js",
+      "names": [
+        "createDigitalTwinGraphProposal",
+        "digitalTwinProposalEdgeFingerprint"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:10e909a60183addf",
@@ -28197,6 +29606,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/components/AuthPanel.jsx",
       "target": "function:src/components/AuthPanel.jsx:reset"
+    },
+    {
+      "id": "relation:12bd93b8140f9ea4",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:requireReferences"
     },
     {
       "id": "relation:12bfb012942219b3",
@@ -28336,6 +29751,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/store.js:updateEdges"
     },
     {
+      "id": "relation:15d73ac2b5d22cfd",
+      "type": "contains",
+      "source": "file:scripts/test-twin-adapter-contract.mjs",
+      "target": "function:scripts/test-twin-adapter-contract.mjs:reconciliationProjection"
+    },
+    {
       "id": "relation:15d912470698f75c",
       "type": "contains",
       "source": "file:src/App.jsx",
@@ -28417,6 +29838,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:scripts/test-mcp-logic.mjs:query.eq#3"
     },
     {
+      "id": "relation:17e0f6d0f9c0a809",
+      "type": "contains",
+      "source": "file:shared/twinBuildReconciler.js",
+      "target": "function:shared/twinBuildReconciler.js:severityRank"
+    },
+    {
       "id": "relation:17e9043ab162b95c",
       "type": "imports",
       "source": "file:scripts/test-mcp-logic.mjs",
@@ -28447,6 +29874,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/App.jsx:handleContextUpdateEdgeRelation"
     },
     {
+      "id": "relation:18971ecee8d5011a",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:uniqueIds"
+    },
+    {
       "id": "relation:1897efd74ddf1e38",
       "type": "imports",
       "source": "file:scripts/local-connector-agent.mjs",
@@ -28466,6 +29899,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "sameCanvasSnapshot"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:18b5cb241c29737b",
+      "type": "contains",
+      "source": "file:shared/twinBuildCanvas.js",
+      "target": "function:shared/twinBuildCanvas.js:createEvidenceRegistry"
     },
     {
       "id": "relation:18eaf93e951b0879",
@@ -28546,6 +29985,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:1abae9eed09f2823",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:normalizePart"
+    },
+    {
       "id": "relation:1accc74493a83c1e",
       "type": "contains",
       "source": "file:package.json",
@@ -28592,6 +30037,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:1b7af2d6644cb049",
+      "type": "imports",
+      "source": "file:shared/workflowSystemTwinBuild.js",
+      "target": "file:shared/twinBuildCanvas.js",
+      "names": [
+        "createTwinBuildFromCanvasTemplate"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:1babef4ec9d4a74a",
       "type": "contains",
       "source": "file:shared/workflowSystemMapRepair.js",
@@ -28614,6 +30069,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/trustTopology.js",
       "target": "function:shared/trustTopology.js:safeId"
+    },
+    {
+      "id": "relation:1c7ad3002da85947",
+      "type": "contains",
+      "source": "file:shared/twinBuildCanvas.js",
+      "target": "function:shared/twinBuildCanvas.js:add"
     },
     {
       "id": "relation:1c8a728156622abe",
@@ -28693,6 +30154,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:1d99f9243ca1d88f",
+      "type": "contains",
+      "source": "file:shared/twinBuildCanvas.js",
+      "target": "function:shared/twinBuildCanvas.js:entityTrustZone"
+    },
+    {
       "id": "relation:1da5e76f20679213",
       "type": "contains",
       "source": "file:src/nodes/MemoNode.jsx",
@@ -28703,6 +30170,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/components/CanvasTabs.jsx",
       "target": "function:src/components/CanvasTabs.jsx:targetName"
+    },
+    {
+      "id": "relation:1dda8bc6456d37ca",
+      "type": "contains",
+      "source": "file:shared/twinBuildReconciler.js",
+      "target": "function:shared/twinBuildReconciler.js:reconcileTwinBuild"
     },
     {
       "id": "relation:1e058b4cf5e61e17",
@@ -28736,6 +30209,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "defines-policy",
       "source": "file:supabase-profiles.sql",
       "target": "rls-policy:profiles:user updates own profile"
+    },
+    {
+      "id": "relation:1f1ba70affe250d0",
+      "type": "contains",
+      "source": "file:shared/twinBuildCanvas.js",
+      "target": "function:shared/twinBuildCanvas.js:materializeTwinBuildRelation"
     },
     {
       "id": "relation:1f421652b7878a55",
@@ -28832,6 +30311,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/shareAccess.js",
       "target": "function:mcp/shareAccess.js:same"
+    },
+    {
+      "id": "relation:2109c63818212935",
+      "type": "imports",
+      "source": "file:shared/twinBuild.js",
+      "target": "file:shared/digitalTwinReview.js",
+      "names": [
+        "digitalTwinReviewFingerprint"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:210e4470bbe30ded",
@@ -28960,6 +30449,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/lib/systemRuntimeApi.js",
       "target": "function:src/lib/systemRuntimeApi.js:accessToken"
+    },
+    {
+      "id": "relation:23869e7522597710",
+      "type": "imports",
+      "source": "file:shared/twinBuild.js",
+      "target": "file:shared/trustTopology.js",
+      "names": [
+        "analyzeTrustBoundary",
+        "normalizeTrustGateway",
+        "normalizeTrustZone"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:23a0407b5c02d0c3",
@@ -29134,6 +30635,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/components/ScopedParticipants.jsx",
       "target": "function:src/components/ScopedParticipants.jsx:participantKey"
+    },
+    {
+      "id": "relation:27fbabfce1086eba",
+      "type": "imports",
+      "source": "file:shared/twinBuildCanvas.js",
+      "target": "file:shared/digitalTwinReview.js",
+      "names": [
+        "digitalTwinReviewFingerprint"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:280500065ab180e9",
@@ -29451,6 +30962,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/trustTopology.js:plainText"
     },
     {
+      "id": "relation:30b4c5f0cbcce5e9",
+      "type": "imports",
+      "source": "file:shared/workflowSystemTwinBuild.js",
+      "target": "dependency:./workflowSystemDiscoveryManifest.js",
+      "names": [
+        "WORKFLOW_SYSTEM_DISCOVERY"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:30ff06650e92e4ab",
       "type": "contains",
       "source": "file:src/App.jsx",
@@ -29692,6 +31213,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/storage.js:remove"
     },
     {
+      "id": "relation:3721dc2cd5e60582",
+      "type": "contains",
+      "source": "file:shared/twinBuildCanvas.js",
+      "target": "function:shared/twinBuildCanvas.js:evidenceKind"
+    },
+    {
       "id": "relation:373e486e6149f042",
       "type": "accesses",
       "source": "file:supabase-runtime-observations.sql",
@@ -29742,6 +31269,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "names": [
         "normalizeSystemRuntimeRecords",
         "normalizeSystemRuntimeResult"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "relation:382e77ac5800ea7e",
+      "type": "imports",
+      "source": "file:shared/workflowSystemTwinAdapter.js",
+      "target": "file:shared/twinBuildReconciler.js",
+      "names": [
+        "reconcileTwinBuild"
       ],
       "dynamic": false
     },
@@ -29901,6 +31438,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/lib/presence.js",
       "target": "function:src/lib/presence.js:joinCanvasPresence"
+    },
+    {
+      "id": "relation:3cb0b0a4007b1b35",
+      "type": "contains",
+      "source": "file:shared/twinBuildCanvas.js",
+      "target": "function:shared/twinBuildCanvas.js:evidenceRefs"
     },
     {
       "id": "relation:3cdf86e65b1c9fd4",
@@ -30259,6 +31802,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/localConnector.js:compareLocalAndDeployedManifests"
     },
     {
+      "id": "relation:4443b3bf945cf5e8",
+      "type": "imports",
+      "source": "file:shared/workflowSystemTwinBuild.js",
+      "target": "file:shared/workflowCanvasSystemMap.js",
+      "names": [
+        "createWorkflowCanvasSystemMap"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:44736c1572e75235",
       "type": "imports",
       "source": "file:api/source-twin.js",
@@ -30411,6 +31964,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/lib/sanitizeHtml.js:sanitizeNodeData"
     },
     {
+      "id": "relation:494d0dc223104f14",
+      "type": "contains",
+      "source": "file:shared/twinBuildCanvas.js",
+      "target": "function:shared/twinBuildCanvas.js:entityParentNodeId"
+    },
+    {
       "id": "relation:4958e9a47fcdbe8a",
       "type": "reads-env",
       "source": "file:api/system-runtime.js",
@@ -30446,6 +32005,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "visibleNodeIdSetForPermission"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:49e9d59ea6d40302",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:normalizeEndpoint"
     },
     {
       "id": "relation:4a1c6eb3e537ec17",
@@ -30571,6 +32136,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/components/Toolbar.jsx",
       "target": "function:src/components/Toolbar.jsx:Toolbar"
+    },
+    {
+      "id": "relation:4be6353a27cf3060",
+      "type": "imports",
+      "source": "file:scripts/test-twin-adapter-contract.mjs",
+      "target": "file:shared/digitalTwinProposal.js",
+      "names": [
+        "applyDigitalTwinGraphProposal"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:4c018a4562d65b65",
@@ -30753,6 +32328,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/layout.js",
       "target": "function:mcp/layout.js:avoidEdgeCrossings"
+    },
+    {
+      "id": "relation:4f815ff0793cd8dd",
+      "type": "imports",
+      "source": "file:scripts/test-twin-build.mjs",
+      "target": "file:shared/twinBuild.js",
+      "names": [
+        "TWIN_BUILD_SCHEMA_VERSION",
+        "TwinBuildError",
+        "createTwinBuild",
+        "migrateTwinBuild"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:4faf28058acc939e",
@@ -31046,6 +32634,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/sourceTwin.js:normalizeMetrics"
     },
     {
+      "id": "relation:55e0d6e33671b47b",
+      "type": "imports",
+      "source": "file:shared/twinBuildCanvas.js",
+      "target": "file:shared/systemOntology.js",
+      "names": [
+        "createSystemNodeData",
+        "normalizeSystemNodeData"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:56173293214d4bf4",
       "type": "contains",
       "source": "file:src/App.jsx",
@@ -31122,6 +32721,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/store.js",
       "target": "function:mcp/store.js:applyPatch"
+    },
+    {
+      "id": "relation:58e8801bbaa6ae40",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:normalizeBinding"
     },
     {
       "id": "relation:5907977e5c28422e",
@@ -31260,6 +32865,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/components/CanvasTabs.jsx:commit"
     },
     {
+      "id": "relation:5aee384cae3e717d",
+      "type": "imports",
+      "source": "file:shared/twinBuild.js",
+      "target": "file:shared/systemOntology.js",
+      "names": [
+        "SYSTEM_ENVIRONMENT_DEFS",
+        "SYSTEM_SOURCE_DEFS"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:5af4db4aa516e1a5",
       "type": "contains",
       "source": "file:src/nodes/ContentNode.jsx",
@@ -31317,10 +32933,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:scripts/source-twin-scanner.mjs:normalized"
     },
     {
+      "id": "relation:5c2b9c9147c113a9",
+      "type": "contains",
+      "source": "file:shared/twinBuildReconciler.js",
+      "target": "function:shared/twinBuildReconciler.js:evidenceRefs"
+    },
+    {
       "id": "relation:5c3025eb5d3bad79",
       "type": "contains",
       "source": "file:scripts/test-mcp-logic.mjs",
       "target": "function:scripts/test-mcp-logic.mjs:result.text"
+    },
+    {
+      "id": "relation:5c3f1fbb21ee37f9",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:normalizeGateway"
     },
     {
       "id": "relation:5c57204a7ad04213",
@@ -31623,6 +33251,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/storage.js:saveCanvasList"
     },
     {
+      "id": "relation:6276dc8dfde7e9ab",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:safeId"
+    },
+    {
       "id": "relation:62bbc5350702f4f1",
       "type": "contains",
       "source": "file:shared/systemOntology.js",
@@ -31703,6 +33337,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/workflowSystemDiscovery.js",
       "target": "function:shared/workflowSystemDiscovery.js:compactResource"
+    },
+    {
+      "id": "relation:64872b8e77ebcaa4",
+      "type": "contains",
+      "source": "file:shared/twinBuildReconciler.js",
+      "target": "function:shared/twinBuildReconciler.js:createItem"
     },
     {
       "id": "relation:64d7a49b06f85373",
@@ -31799,6 +33439,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/store.js",
       "target": "function:mcp/store.js:applySourceTwinSnapshot"
+    },
+    {
+      "id": "relation:68d24f01d41b34d6",
+      "type": "imports",
+      "source": "file:shared/workflowSystemTwinAdapter.js",
+      "target": "file:shared/workflowSystemTwinBuild.js",
+      "names": [
+        "WORKFLOW_SYSTEM_TWIN_BUILD"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:68eabbce5b517dcf",
@@ -32078,6 +33728,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/trustTopology.js:uniqueTextList"
     },
     {
+      "id": "relation:6ec250cf46b7b3d1",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:createTwinBuild"
+    },
+    {
       "id": "relation:6ed167c867146279",
       "type": "contains",
       "source": "file:shared/workflowSystemTwinAdapter.js",
@@ -32223,6 +33879,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "normalizeEdgeRelationData"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:71dea26cce31f3be",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:migrateTwinBuild"
     },
     {
       "id": "relation:72141edad97abd98",
@@ -32492,6 +34154,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:768e691751a5377e",
+      "type": "imports",
+      "source": "file:shared/twinBuildReconciler.js",
+      "target": "file:shared/twinBuildCanvas.js",
+      "names": [
+        "findTwinBuildEntityNode",
+        "materializeTwinBuildEntity",
+        "materializeTwinBuildPart",
+        "materializeTwinBuildRelation",
+        "twinBuildEntityCanvasProjection"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:76a1e1661386df19",
       "type": "contains",
       "source": "file:api/shared-canvas.js",
@@ -32550,6 +34226,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "redactCanvas"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:77767d5b623f9df2",
+      "type": "contains",
+      "source": "file:shared/twinBuildCanvas.js",
+      "target": "function:shared/twinBuildCanvas.js:createTwinBuildFromCanvasTemplate"
+    },
+    {
+      "id": "relation:77cc415e7391fcb4",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:safeText"
     },
     {
       "id": "relation:77e3f8f322d4468b",
@@ -32774,6 +34462,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/lib/canvasNavigation.js",
       "target": "function:src/lib/canvasNavigation.js:chooseOwnCanvasToRestore"
+    },
+    {
+      "id": "relation:7cd120d9ca36d383",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:normalizeEvidence"
     },
     {
       "id": "relation:7cf544d8b39daf66",
@@ -33117,6 +34811,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/relationOntology.js:createEdgeRelationData"
     },
     {
+      "id": "relation:84718bbf11d5c430",
+      "type": "contains",
+      "source": "file:shared/twinBuildCanvas.js",
+      "target": "function:shared/twinBuildCanvas.js:findTwinBuildEntityNode"
+    },
+    {
       "id": "relation:84b78229a61e3494",
       "type": "contains",
       "source": "file:src/components/Toolbar.jsx",
@@ -33201,6 +34901,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "validateSystemPartInput"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:859ddfb639deee84",
+      "type": "contains",
+      "source": "file:shared/twinBuildReconciler.js",
+      "target": "function:shared/twinBuildReconciler.js:partReview"
     },
     {
       "id": "relation:85cc2691c6514770",
@@ -33349,6 +35055,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/components/NodePalette.jsx",
       "target": "function:src/components/NodePalette.jsx:onDown"
+    },
+    {
+      "id": "relation:88fd932277e6ffea",
+      "type": "contains",
+      "source": "file:shared/twinBuildReconciler.js",
+      "target": "function:shared/twinBuildReconciler.js:relationReview"
+    },
+    {
+      "id": "relation:898d891e967610f6",
+      "type": "imports",
+      "source": "file:scripts/test-twin-build.mjs",
+      "target": "file:shared/workflowSystemTwinBuild.js",
+      "names": [
+        "WORKFLOW_SYSTEM_TWIN_BUILD"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:89d97e347de850ad",
@@ -33697,6 +35419,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/systemPartOntology.js:systemPartContainsSecretLiteral"
     },
     {
+      "id": "relation:9170cc8bf40cf663",
+      "type": "imports",
+      "source": "file:scripts/test-twin-build.mjs",
+      "target": "file:shared/workflowCanvasSystemMap.js",
+      "names": [
+        "createWorkflowCanvasSystemMap"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:918f43c7b17b55d4",
       "type": "contains",
       "source": "file:shared/digitalTwinReview.js",
@@ -33829,6 +35561,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/store.js:edgeRelationIdentity"
     },
     {
+      "id": "relation:953d2cdea5a55564",
+      "type": "imports",
+      "source": "file:shared/twinBuild.js",
+      "target": "file:shared/systemPartOntology.js",
+      "names": [
+        "SYSTEM_PART_EXPOSURE_DEFS",
+        "SYSTEM_PART_KIND_DEFS",
+        "SYSTEM_PART_SOURCE_DEFS",
+        "systemPartContainsSecretLiteral"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:957dae9bb06d18ff",
       "type": "contains",
       "source": "file:mcp/systemRuntime.js",
@@ -33909,6 +35654,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:97938c94136d6de9",
+      "type": "contains",
+      "source": "file:shared/twinBuildCanvas.js",
+      "target": "function:shared/twinBuildCanvas.js:twinBuildEntityCanvasProjection"
+    },
+    {
       "id": "relation:97c0d5758918e0a1",
       "type": "contains",
       "source": "file:mcp/store.js",
@@ -33919,6 +35670,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/components/NotesPanel.jsx",
       "target": "function:src/components/NotesPanel.jsx:nodeTitle"
+    },
+    {
+      "id": "relation:97e4e05a3d52306e",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:normalizePlacement"
     },
     {
       "id": "relation:97eff0a85894a98e",
@@ -33943,6 +35700,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/layout.js",
       "target": "function:mcp/layout.js:findNonOverlapping"
+    },
+    {
+      "id": "relation:987eff09c639c123",
+      "type": "imports",
+      "source": "file:shared/twinBuildCanvas.js",
+      "target": "file:shared/twinBuild.js",
+      "names": [
+        "createTwinBuild"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:9886802c65254e27",
@@ -34090,6 +35857,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/workflowSystemDiscovery.js:addBinding"
     },
     {
+      "id": "relation:9c5ea6df709e5046",
+      "type": "imports",
+      "source": "file:shared/twinBuildReconciler.js",
+      "target": "file:shared/systemPartOntology.js",
+      "names": [
+        "normalizeSystemPart",
+        "normalizeSystemParts"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:9c5f97ffae09ee9b",
       "type": "imports",
       "source": "file:src/nodes/SystemNode.jsx",
@@ -34100,6 +35878,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "systemRuntimeCatalogForResult"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:9c69ca8741bcaa2d",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:withFingerprint"
+    },
+    {
+      "id": "relation:9c6c92bbbe0cca71",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:requireEvidence"
     },
     {
       "id": "relation:9c798b6d7b16aa6a",
@@ -34152,6 +35942,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:9d2fe748073ec7e0",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:plainObject"
+    },
+    {
       "id": "relation:9d319bafc13f9eda",
       "type": "contains",
       "source": "file:shared/relationOntology.js",
@@ -34184,6 +35980,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/localConnectorStore.js",
       "target": "function:mcp/localConnectorStore.js:createLocalConnector"
+    },
+    {
+      "id": "relation:9d9d681d49525c8a",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:normalizeZone"
     },
     {
       "id": "relation:9e077a05e3ab4436",
@@ -34262,6 +36064,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/edgeOperation.js",
       "target": "function:shared/edgeOperation.js:edgeOperationStatusDefinition"
+    },
+    {
+      "id": "relation:a03f7128017fe355",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:normalizeRelation"
     },
     {
       "id": "relation:a0612b2a7c7e4e2a",
@@ -34344,6 +36152,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:a12be360c9baeb2a",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:requireUniquePlacement"
+    },
+    {
       "id": "relation:a1316da30fc55bef",
       "type": "contains",
       "source": "file:src/App.jsx",
@@ -34411,6 +36225,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/lib/canvasNavigation.js",
       "target": "function:src/lib/canvasNavigation.js:clearLastOpenedCanvas"
+    },
+    {
+      "id": "relation:a1e92cf96a3f6005",
+      "type": "contains",
+      "source": "file:shared/twinBuildCanvas.js",
+      "target": "function:shared/twinBuildCanvas.js:materializeTwinBuildPart"
+    },
+    {
+      "id": "relation:a1ec21e533175417",
+      "type": "contains",
+      "source": "file:shared/twinBuildCanvas.js",
+      "target": "function:shared/twinBuildCanvas.js:endpointHandle"
     },
     {
       "id": "relation:a1fd33c82d1c77bc",
@@ -34653,6 +36479,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/nodes/MemoNode.jsx:handleTextMouseLeave"
     },
     {
+      "id": "relation:a860cdbf7125229d",
+      "type": "contains",
+      "source": "file:shared/twinBuildCanvas.js",
+      "target": "function:shared/twinBuildCanvas.js:partIdFromHandle"
+    },
+    {
       "id": "relation:a94a2bcef73c01cd",
       "type": "contains",
       "source": "file:api/system-runtime.js",
@@ -34705,6 +36537,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/store.js:createCanvas"
     },
     {
+      "id": "relation:aa7f44226427a18f",
+      "type": "imports",
+      "source": "file:scripts/test-twin-build.mjs",
+      "target": "dependency:node:fs/promises",
+      "names": [
+        "readFile"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:aaa18cb3b35faf45",
       "type": "contains",
       "source": "file:shared/localConnector.js",
@@ -34728,6 +36570,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "names": [
         "createHash",
         "randomBytes"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "relation:ab4f4b304cadbece",
+      "type": "imports",
+      "source": "file:shared/twinBuildReconciler.js",
+      "target": "file:shared/twinBuild.js",
+      "names": [
+        "createTwinBuild"
       ],
       "dynamic": false
     },
@@ -34816,6 +36668,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:scripts/test-mcp-logic.mjs",
       "target": "function:scripts/test-mcp-logic.mjs:query.order"
+    },
+    {
+      "id": "relation:ad44927571e3ecf1",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:deepFreeze"
     },
     {
       "id": "relation:ad4c28391a255bb1",
@@ -34907,6 +36765,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/nodes/SystemNode.jsx",
       "target": "function:src/nodes/SystemNode.jsx:handlePointerDown"
+    },
+    {
+      "id": "relation:af2b9af794fccaec",
+      "type": "contains",
+      "source": "file:shared/twinBuildReconciler.js",
+      "target": "function:shared/twinBuildReconciler.js:reviewSource"
     },
     {
       "id": "relation:af49959b58b0a307",
@@ -35143,6 +37007,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:scripts/test-mcp-logic.mjs:getRect#2"
     },
     {
+      "id": "relation:b4b50b86e488fad4",
+      "type": "contains",
+      "source": "file:shared/twinBuildCanvas.js",
+      "target": "function:shared/twinBuildCanvas.js:relationGateway"
+    },
+    {
       "id": "relation:b55033d52e296b0c",
       "type": "contains",
       "source": "file:src/components/EditToolbar.jsx",
@@ -35273,6 +37143,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/sourceTwinStore.js",
       "target": "function:mcp/sourceTwinStore.js:snapshotSummary"
+    },
+    {
+      "id": "relation:b9576e7f6e751824",
+      "type": "contains",
+      "source": "file:shared/twinBuildReconciler.js",
+      "target": "function:shared/twinBuildReconciler.js:entityReview"
     },
     {
       "id": "relation:b98f128c5aa1ff3d",
@@ -35488,6 +37364,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:be1324753b6189bf",
+      "type": "imports",
+      "source": "file:scripts/test-twin-build.mjs",
+      "target": "file:shared/twinBuildReconciler.js",
+      "names": [
+        "reconcileTwinBuild"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:bed46c7171876f5d",
       "type": "imports",
       "source": "file:scripts/test-mcp-logic.mjs",
@@ -35559,6 +37445,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "file:src/components/ScopedParticipants.jsx",
       "names": [
         "default"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "relation:c112214407ad0be2",
+      "type": "imports",
+      "source": "file:shared/workflowSystemTwinBuild.js",
+      "target": "file:shared/workflowSystemTwinAdapterDescriptor.js",
+      "names": [
+        "WORKFLOW_SYSTEM_TWIN_ADAPTER_DESCRIPTOR"
       ],
       "dynamic": false
     },
@@ -35832,6 +37728,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/layout.js:subtreeSize"
     },
     {
+      "id": "relation:c6966c1374c95aeb",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:normalizeSource"
+    },
+    {
       "id": "relation:c69a530cb663357b",
       "type": "contains",
       "source": "file:shared/digitalTwinReview.js",
@@ -35918,6 +37820,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ]
     },
     {
+      "id": "relation:c827cd0bd33b1aad",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:normalizeEntity"
+    },
+    {
+      "id": "relation:c877428adf3f0929",
+      "type": "imports",
+      "source": "file:scripts/test-twin-adapter-contract.mjs",
+      "target": "file:shared/twinBuild.js",
+      "names": [
+        "createTwinBuild"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:c88a23ab781073b5",
       "type": "contains",
       "source": "file:shared/systemPartOntology.js",
@@ -35928,6 +37846,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "calls-db-function",
       "source": "file:src/lib/shares.js",
       "target": "db-function:leave_shared_canvas"
+    },
+    {
+      "id": "relation:c8e8f29d86438d47",
+      "type": "imports",
+      "source": "file:shared/twinBuild.js",
+      "target": "file:shared/relationOntology.js",
+      "names": [
+        "RELATION_TYPE_IDS",
+        "relationDefinition"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:c8f017ae307fe964",
@@ -35952,6 +37881,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:scripts/local-connector-agent.mjs",
       "target": "function:scripts/local-connector-agent.mjs:LocalConnectorRequestError.constructor"
+    },
+    {
+      "id": "relation:c98360d3498befb6",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:finiteNumber"
     },
     {
       "id": "relation:c9a7e166385994ec",
@@ -36488,6 +38423,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/store.js:applyEdgeRelationPatch"
     },
     {
+      "id": "relation:d735bd997c4d0f6d",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:recordList"
+    },
+    {
       "id": "relation:d77aa71a47a189d0",
       "type": "contains",
       "source": "file:src/components/Toolbar.jsx",
@@ -36526,6 +38467,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:scripts/source-twin-scanner.mjs",
       "target": "function:scripts/source-twin-scanner.mjs:hash"
+    },
+    {
+      "id": "relation:d8dbb6eb9ffccc8a",
+      "type": "imports",
+      "source": "file:shared/workflowSystemTwinBuild.js",
+      "target": "file:shared/workflowSystemDiscovery.js",
+      "names": [
+        "WORKFLOW_SYSTEM_DISCOVERY_SOURCE_ID"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:d8f3ca15b1108a93",
@@ -36587,6 +38538,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "calls-db-function",
       "source": "file:src/lib/shares.js",
       "target": "db-function:revoke_canvas_member"
+    },
+    {
+      "id": "relation:db13f6f21c8ed745",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:TwinBuildError.constructor"
     },
     {
       "id": "relation:db36b54409f6a921",
@@ -37022,6 +38979,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:api/shared-canvas.js:currentUser"
     },
     {
+      "id": "relation:e35c0d2e6855a22c",
+      "type": "contains",
+      "source": "file:shared/workflowSystemTwinBuild.js",
+      "target": "function:shared/workflowSystemTwinBuild.js:createWorkflowSystemTwinBuild"
+    },
+    {
       "id": "relation:e3ad64e8299c0b94",
       "type": "contains",
       "source": "file:src/components/SystemObservationCatalog.jsx",
@@ -37051,6 +39014,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "file:src/components/ScopedParticipants.jsx",
       "names": [
         "default"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "relation:e460804d29eef191",
+      "type": "imports",
+      "source": "file:shared/workflowSystemTwinBuild.js",
+      "target": "file:shared/twinAdapterContract.js",
+      "names": [
+        "TWIN_ENGINE_SCHEMA_VERSION"
       ],
       "dynamic": false
     },
@@ -37194,6 +39167,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:e7a6fbf92b361d67",
+      "type": "contains",
+      "source": "file:shared/twinBuildCanvas.js",
+      "target": "function:shared/twinBuildCanvas.js:materializeTwinBuildEntity"
+    },
+    {
       "id": "relation:e7c2391eb9ac74cc",
       "type": "contains",
       "source": "file:src/components/CanvasImage.jsx",
@@ -37248,6 +39227,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:e8b731f4bd3c1682",
+      "type": "imports",
+      "source": "file:scripts/test-twin-build.mjs",
+      "target": "dependency:node:assert/strict",
+      "names": [
+        "default"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:e8ba58a5f37fb280",
       "type": "imports",
       "source": "file:src/lib/shares.js",
@@ -37268,6 +39257,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/lib/canvasSchemaGuard.js",
       "target": "function:src/lib/canvasSchemaGuard.js:CanvasSchemaGuardError.constructor"
+    },
+    {
+      "id": "relation:e91fc07828c115a5",
+      "type": "imports",
+      "source": "file:shared/twinBuildCanvas.js",
+      "target": "file:shared/relationOntology.js",
+      "names": [
+        "createEdgeRelationData",
+        "edgeRelationInfo"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:e94a3770fc89a46f",
@@ -37432,6 +39432,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/digitalTwinProposal.js:DigitalTwinProposalError.constructor"
     },
     {
+      "id": "relation:ec7d55fae757a6d7",
+      "type": "contains",
+      "source": "file:shared/twinBuildCanvas.js",
+      "target": "function:shared/twinBuildCanvas.js:withoutDerivedFields"
+    },
+    {
       "id": "relation:ec86bdc89c3d519d",
       "type": "contains",
       "source": "file:src/nodes/ContentNode.jsx",
@@ -37474,6 +39480,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/lib/sharedCanvasApi.js",
       "target": "function:src/lib/sharedCanvasApi.js:updateSharedCanvas"
+    },
+    {
+      "id": "relation:ed412b1638a53ad0",
+      "type": "imports",
+      "source": "file:shared/twinBuildCanvas.js",
+      "target": "file:shared/systemPartOntology.js",
+      "names": [
+        "normalizeSystemPart",
+        "normalizeSystemParts"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:ed7b88bf36242dd5",
@@ -37561,6 +39578,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/lib/shareLaunchCoordinator.js",
       "target": "function:src/lib/shareLaunchCoordinator.js:shareTokenFingerprint"
+    },
+    {
+      "id": "relation:ef02addaa0d1e9e8",
+      "type": "contains",
+      "source": "file:shared/twinBuildReconciler.js",
+      "target": "function:shared/twinBuildReconciler.js:compactKey"
     },
     {
       "id": "relation:ef6f600472d4d5ae",
@@ -37879,6 +39902,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/store.js:closestHandles"
     },
     {
+      "id": "relation:f6c17049a9dbea08",
+      "type": "contains",
+      "source": "file:shared/twinBuild.js",
+      "target": "function:shared/twinBuild.js:positiveInteger"
+    },
+    {
       "id": "relation:f710204e640cd88a",
       "type": "contains",
       "source": "file:shared/digitalTwinProposal.js",
@@ -38188,12 +40217,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:shared/systemRuntime.js",
       "file:shared/trustTopology.js",
       "file:shared/twinAdapterContract.js",
+      "file:shared/twinBuild.js",
+      "file:shared/twinBuildCanvas.js",
+      "file:shared/twinBuildReconciler.js",
       "file:shared/workflowCanvasSystemMap.js",
       "file:shared/workflowSourceTwinCanvas.js",
       "file:shared/workflowSystemDiscovery.js",
       "file:shared/workflowSystemMapRepair.js",
       "file:shared/workflowSystemTwinAdapter.js",
       "file:shared/workflowSystemTwinAdapterDescriptor.js",
+      "file:shared/workflowSystemTwinBuild.js",
       "file:src/App.jsx",
       "file:src/components/AuthPanel.jsx",
       "file:src/components/CanvasImage.jsx",
@@ -38588,6 +40621,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:scripts/test-source-twin.mjs:readResult",
       "function:scripts/test-sql-security.mjs:read",
       "function:scripts/test-twin-adapter-contract.mjs:fixtureAdapter.inspect",
+      "function:scripts/test-twin-adapter-contract.mjs:reconciliationProjection",
       "function:shared/digitalTwinProposal.js:DigitalTwinProposalError.constructor",
       "function:shared/digitalTwinProposal.js:applyDigitalTwinGraphProposal",
       "function:shared/digitalTwinProposal.js:createDigitalTwinGraphProposal",
@@ -38740,6 +40774,59 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/twinAdapterContract.js:uniqueIds",
       "function:shared/twinAdapterContract.js:validateLoadedAdapter",
       "function:shared/twinAdapterContract.js:validateTwinAdapterReview",
+      "function:shared/twinBuild.js:TwinBuildError.constructor",
+      "function:shared/twinBuild.js:createTwinBuild",
+      "function:shared/twinBuild.js:deepFreeze",
+      "function:shared/twinBuild.js:finiteNumber",
+      "function:shared/twinBuild.js:migrateTwinBuild",
+      "function:shared/twinBuild.js:normalizeBinding",
+      "function:shared/twinBuild.js:normalizeEndpoint",
+      "function:shared/twinBuild.js:normalizeEntity",
+      "function:shared/twinBuild.js:normalizeEvidence",
+      "function:shared/twinBuild.js:normalizeGateway",
+      "function:shared/twinBuild.js:normalizeOperation",
+      "function:shared/twinBuild.js:normalizePart",
+      "function:shared/twinBuild.js:normalizePlacement",
+      "function:shared/twinBuild.js:normalizeRelation",
+      "function:shared/twinBuild.js:normalizeSource",
+      "function:shared/twinBuild.js:normalizeZone",
+      "function:shared/twinBuild.js:plainObject",
+      "function:shared/twinBuild.js:positiveInteger",
+      "function:shared/twinBuild.js:recordList",
+      "function:shared/twinBuild.js:requireEvidence",
+      "function:shared/twinBuild.js:requireReferences",
+      "function:shared/twinBuild.js:requireUniquePlacement",
+      "function:shared/twinBuild.js:safeId",
+      "function:shared/twinBuild.js:safeText",
+      "function:shared/twinBuild.js:uniqueIds",
+      "function:shared/twinBuild.js:withFingerprint",
+      "function:shared/twinBuildCanvas.js:add",
+      "function:shared/twinBuildCanvas.js:bindingFromPart",
+      "function:shared/twinBuildCanvas.js:createEvidenceRegistry",
+      "function:shared/twinBuildCanvas.js:createTwinBuildFromCanvasTemplate",
+      "function:shared/twinBuildCanvas.js:endpointHandle",
+      "function:shared/twinBuildCanvas.js:entityParentNodeId",
+      "function:shared/twinBuildCanvas.js:entityTrustZone",
+      "function:shared/twinBuildCanvas.js:evidenceKind",
+      "function:shared/twinBuildCanvas.js:evidenceRefs",
+      "function:shared/twinBuildCanvas.js:findTwinBuildEntityNode",
+      "function:shared/twinBuildCanvas.js:materializeTwinBuildEntity",
+      "function:shared/twinBuildCanvas.js:materializeTwinBuildPart",
+      "function:shared/twinBuildCanvas.js:materializeTwinBuildRelation",
+      "function:shared/twinBuildCanvas.js:partIdFromHandle",
+      "function:shared/twinBuildCanvas.js:relationGateway",
+      "function:shared/twinBuildCanvas.js:safeChildId",
+      "function:shared/twinBuildCanvas.js:twinBuildEntityCanvasProjection",
+      "function:shared/twinBuildCanvas.js:withoutDerivedFields",
+      "function:shared/twinBuildReconciler.js:compactKey",
+      "function:shared/twinBuildReconciler.js:createItem",
+      "function:shared/twinBuildReconciler.js:entityReview",
+      "function:shared/twinBuildReconciler.js:evidenceRefs",
+      "function:shared/twinBuildReconciler.js:partReview",
+      "function:shared/twinBuildReconciler.js:reconcileTwinBuild",
+      "function:shared/twinBuildReconciler.js:relationReview",
+      "function:shared/twinBuildReconciler.js:reviewSource",
+      "function:shared/twinBuildReconciler.js:severityRank",
       "function:shared/workflowCanvasSystemMap.js:createWorkflowCanvasSystemMap",
       "function:shared/workflowCanvasSystemMap.js:groupNode",
       "function:shared/workflowCanvasSystemMap.js:mapEdges",
@@ -38791,6 +40878,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/workflowSystemTwinAdapter.js:workflowCodePortMigrationItem",
       "function:shared/workflowSystemTwinAdapter.js:workflowTwinRoot",
       "function:shared/workflowSystemTwinAdapterDescriptor.js:canInspectWorkflowSystemCanvas",
+      "function:shared/workflowSystemTwinBuild.js:createWorkflowSystemTwinBuild",
       "function:src/App.jsx:App",
       "function:src/App.jsx:ContextItem",
       "function:src/App.jsx:IconBtn",
@@ -39284,6 +41372,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:scripts/test-source-twin.mjs",
       "file:scripts/test-sql-security.mjs",
       "file:scripts/test-twin-adapter-contract.mjs",
+      "file:scripts/test-twin-build.mjs",
       "file:shared/digitalTwinProposal.js",
       "file:shared/digitalTwinReview.js",
       "file:shared/edgeOperation.js",
@@ -39298,12 +41387,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:shared/systemRuntime.js",
       "file:shared/trustTopology.js",
       "file:shared/twinAdapterContract.js",
+      "file:shared/twinBuild.js",
+      "file:shared/twinBuildCanvas.js",
+      "file:shared/twinBuildReconciler.js",
       "file:shared/workflowCanvasSystemMap.js",
       "file:shared/workflowSourceTwinCanvas.js",
       "file:shared/workflowSystemDiscovery.js",
       "file:shared/workflowSystemMapRepair.js",
       "file:shared/workflowSystemTwinAdapter.js",
       "file:shared/workflowSystemTwinAdapterDescriptor.js",
+      "file:shared/workflowSystemTwinBuild.js",
       "file:src/App.jsx",
       "file:src/components/AuthPanel.jsx",
       "file:src/components/CanvasImage.jsx",
@@ -39716,6 +41809,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:scripts/test-source-twin.mjs:readResult",
       "function:scripts/test-sql-security.mjs:read",
       "function:scripts/test-twin-adapter-contract.mjs:fixtureAdapter.inspect",
+      "function:scripts/test-twin-adapter-contract.mjs:reconciliationProjection",
       "function:shared/digitalTwinProposal.js:DigitalTwinProposalError.constructor",
       "function:shared/digitalTwinProposal.js:applyDigitalTwinGraphProposal",
       "function:shared/digitalTwinProposal.js:createDigitalTwinGraphProposal",
@@ -39868,6 +41962,59 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/twinAdapterContract.js:uniqueIds",
       "function:shared/twinAdapterContract.js:validateLoadedAdapter",
       "function:shared/twinAdapterContract.js:validateTwinAdapterReview",
+      "function:shared/twinBuild.js:TwinBuildError.constructor",
+      "function:shared/twinBuild.js:createTwinBuild",
+      "function:shared/twinBuild.js:deepFreeze",
+      "function:shared/twinBuild.js:finiteNumber",
+      "function:shared/twinBuild.js:migrateTwinBuild",
+      "function:shared/twinBuild.js:normalizeBinding",
+      "function:shared/twinBuild.js:normalizeEndpoint",
+      "function:shared/twinBuild.js:normalizeEntity",
+      "function:shared/twinBuild.js:normalizeEvidence",
+      "function:shared/twinBuild.js:normalizeGateway",
+      "function:shared/twinBuild.js:normalizeOperation",
+      "function:shared/twinBuild.js:normalizePart",
+      "function:shared/twinBuild.js:normalizePlacement",
+      "function:shared/twinBuild.js:normalizeRelation",
+      "function:shared/twinBuild.js:normalizeSource",
+      "function:shared/twinBuild.js:normalizeZone",
+      "function:shared/twinBuild.js:plainObject",
+      "function:shared/twinBuild.js:positiveInteger",
+      "function:shared/twinBuild.js:recordList",
+      "function:shared/twinBuild.js:requireEvidence",
+      "function:shared/twinBuild.js:requireReferences",
+      "function:shared/twinBuild.js:requireUniquePlacement",
+      "function:shared/twinBuild.js:safeId",
+      "function:shared/twinBuild.js:safeText",
+      "function:shared/twinBuild.js:uniqueIds",
+      "function:shared/twinBuild.js:withFingerprint",
+      "function:shared/twinBuildCanvas.js:add",
+      "function:shared/twinBuildCanvas.js:bindingFromPart",
+      "function:shared/twinBuildCanvas.js:createEvidenceRegistry",
+      "function:shared/twinBuildCanvas.js:createTwinBuildFromCanvasTemplate",
+      "function:shared/twinBuildCanvas.js:endpointHandle",
+      "function:shared/twinBuildCanvas.js:entityParentNodeId",
+      "function:shared/twinBuildCanvas.js:entityTrustZone",
+      "function:shared/twinBuildCanvas.js:evidenceKind",
+      "function:shared/twinBuildCanvas.js:evidenceRefs",
+      "function:shared/twinBuildCanvas.js:findTwinBuildEntityNode",
+      "function:shared/twinBuildCanvas.js:materializeTwinBuildEntity",
+      "function:shared/twinBuildCanvas.js:materializeTwinBuildPart",
+      "function:shared/twinBuildCanvas.js:materializeTwinBuildRelation",
+      "function:shared/twinBuildCanvas.js:partIdFromHandle",
+      "function:shared/twinBuildCanvas.js:relationGateway",
+      "function:shared/twinBuildCanvas.js:safeChildId",
+      "function:shared/twinBuildCanvas.js:twinBuildEntityCanvasProjection",
+      "function:shared/twinBuildCanvas.js:withoutDerivedFields",
+      "function:shared/twinBuildReconciler.js:compactKey",
+      "function:shared/twinBuildReconciler.js:createItem",
+      "function:shared/twinBuildReconciler.js:entityReview",
+      "function:shared/twinBuildReconciler.js:evidenceRefs",
+      "function:shared/twinBuildReconciler.js:partReview",
+      "function:shared/twinBuildReconciler.js:reconcileTwinBuild",
+      "function:shared/twinBuildReconciler.js:relationReview",
+      "function:shared/twinBuildReconciler.js:reviewSource",
+      "function:shared/twinBuildReconciler.js:severityRank",
       "function:shared/workflowCanvasSystemMap.js:createWorkflowCanvasSystemMap",
       "function:shared/workflowCanvasSystemMap.js:groupNode",
       "function:shared/workflowCanvasSystemMap.js:mapEdges",
@@ -39919,6 +42066,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/workflowSystemTwinAdapter.js:workflowCodePortMigrationItem",
       "function:shared/workflowSystemTwinAdapter.js:workflowTwinRoot",
       "function:shared/workflowSystemTwinAdapterDescriptor.js:canInspectWorkflowSystemCanvas",
+      "function:shared/workflowSystemTwinBuild.js:createWorkflowSystemTwinBuild",
       "function:src/App.jsx:App",
       "function:src/App.jsx:ContextItem",
       "function:src/App.jsx:IconBtn",
@@ -40521,22 +42669,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
     ]
   },
   "fingerprints": {
-    "code": "d3936559d5136a541c51",
+    "code": "1de0a877fc2cf06d6783",
     "database": "3d68fa3a9125bca19e6b",
     "security": "75d8806a671225b1662d",
-    "deployment": "ad34e0fc4380d7595efb"
+    "deployment": "90ce3564aeb5c7c1cb12"
   },
   "summary": {
-    "entities": 1218,
-    "files": 113,
-    "functions": 986,
-    "imports": 331,
+    "entities": 1278,
+    "files": 118,
+    "functions": 1041,
+    "imports": 363,
     "apiRoutes": 6,
     "dbTables": 16,
     "dbFunctions": 24,
     "rlsPolicies": 21,
     "environmentVariables": 13,
-    "testFiles": 5,
+    "testFiles": 6,
     "deploymentEntities": 16,
     "securityEntities": 41,
     "parseFailures": 0

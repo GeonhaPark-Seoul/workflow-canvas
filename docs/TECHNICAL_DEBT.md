@@ -168,7 +168,7 @@ This is the durable ledger for security, reliability, commercialization, and arc
 - Severity: high
 - Gate: engine-v1
 - Status: in-progress
-- Current evidence: adapter contract, review, proposal, system-part, relation, and trust-topology records now carry explicit schema or contract versions. Fingerprint-guarded part/edge migrations exist, but one canonical provider-neutral `TwinBuild` graph and forward migration chain do not yet exist.
+- Current evidence: `TwinBuild v1` now normalizes entities, parts, relations, trust zones, gateways, evidence references, and operation declarations with stable IDs, deterministic fingerprints, reference integrity, secret-reference rejection, and a tested v0-to-v1 forward migration. Policies, events, threats, execution observations, compatibility windows, and a multi-version migration chain remain.
 - Required work: stable IDs and schemas for entities, capabilities, relations, trust zones, gateways, evidence, observations, operations, policies, events, and threats; provide forward migrations and compatibility windows.
 - Exit criteria: an older twin upgrades without losing manual layout, annotations, decisions, or evidence links.
 
@@ -177,7 +177,7 @@ This is the durable ledger for security, reliability, commercialization, and arc
 - Severity: high
 - Gate: engine-v1
 - Status: in-progress
-- Current evidence: `shared/twinAdapterContract.js` validates version compatibility, declared interfaces, data classes, permissions, operation capability IDs, lazy module identity, and review output. The browser uses a generic registry, Workflow Canvas is the first registered adapter, and a second order-service fixture plugs in without changing registry or review code.
+- Current evidence: `shared/twinAdapterContract.js` validates version compatibility, declared interfaces, data classes, permissions, operation capability IDs, lazy module identity, and review output. Workflow Canvas implements `normalize` and `reconcile`; a second order-service adapter creates actionable entity, part, and gateway-aware relation proposals through the same registry and common reconciliation engine without changing core code. A real second-language repository adapter and packaged SDK remain.
 - Required work: a versioned adapter contract for discovery, identity resolution, evidence, operation capabilities, and verification. Workflow Canvas remains the reference adapter, not a hard-coded special case in the engine core.
 - Exit criteria: a second software stack can be onboarded without changing the core graph/review/execution engine.
 

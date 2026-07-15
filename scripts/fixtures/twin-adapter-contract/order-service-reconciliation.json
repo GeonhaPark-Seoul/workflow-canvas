@@ -1,0 +1,26 @@
+{
+  "first": {
+    "pending": 3,
+    "actionable": 2,
+    "blocked": 1,
+    "items": [
+      { "itemKey": "build-entity:fixture-orders-db", "status": "missing_on_canvas", "action": "add_node" },
+      { "itemKey": "build-part:part:orders-api:route", "status": "system_part_missing", "action": "add_part" },
+      { "itemKey": "build-relation-blocked:relation:orders-api-writes-db", "status": "blocked_dependency", "action": null }
+    ]
+  },
+  "second": {
+    "pending": 1,
+    "actionable": 1,
+    "blocked": 0,
+    "items": [
+      { "itemKey": "build-relation:relation:orders-api-writes-db", "status": "missing_on_canvas", "action": "add_edge" }
+    ]
+  },
+  "complete": {
+    "pending": 0,
+    "actionable": 0,
+    "blocked": 0,
+    "items": []
+  }
+}

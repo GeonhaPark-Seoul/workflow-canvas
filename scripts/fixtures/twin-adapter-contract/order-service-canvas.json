@@ -3,12 +3,42 @@
     {
       "id": "fixture-orders-api",
       "type": "system",
-      "position": { "x": 140, "y": 90 },
-      "width": 260,
-      "height": 150,
+      "position": { "x": 777, "y": 333 },
+      "width": 319,
+      "height": 177,
       "data": {
         "label": "주문 API",
-        "fixtureSystem": "order-service"
+        "fixtureSystem": "order-service",
+        "manualAnnotation": "사용자가 옮긴 위치와 메모는 엔진이 소유하지 않습니다.",
+        "description": "주문 생성과 조회 요청을 받습니다.",
+        "purpose": "외부 주문 요청을 검증해 저장 계층으로 전달합니다.",
+        "responsibility": "주문 API 계약과 입력 검증",
+        "constraints": "인증된 요청만 처리",
+        "evidence": "services/orders/api.js",
+        "systemKind": "api",
+        "environment": "production",
+        "sourceKind": "code",
+        "provider": "Fixture Cloud",
+        "externalRef": "services/orders/api.js",
+        "trustZone": {
+          "schemaVersion": 1,
+          "id": "zone:order-public-cloud",
+          "kind": "public-cloud",
+          "label": "주문 공개 클라우드",
+          "controlOwner": "Order Team",
+          "evidenceRef": "infra/order-api.yml"
+        },
+        "systemParts": [
+          {
+            "id": "user-manual-note",
+            "kind": "view",
+            "label": "사용자 메모 보기",
+            "ref": "manual.order-note",
+            "exposure": "internal",
+            "sourceKind": "manual",
+            "evidenceRef": "사용자가 직접 추가"
+          }
+        ]
       }
     }
   ],
