@@ -174,6 +174,9 @@ function relationEdge(id, source, target, relationType, evidenceRef, evidence, h
     relationEvidence: evidence,
     relationEvidenceRef: evidenceRef,
   })
+  const sourceHandle = handles.sourceHandle ?? 'right'
+  const targetHandle = handles.targetHandle ?? 'left'
+  if (sourceHandle.startsWith('p-') && targetHandle.startsWith('p-')) data.partsLink = true
   const relation = edgeRelationInfo(data)
   const style = { stroke: relation.color, strokeWidth: 3 }
   return {
@@ -181,8 +184,8 @@ function relationEdge(id, source, target, relationType, evidenceRef, evidence, h
     source,
     target,
     type: 'stub',
-    sourceHandle: handles.sourceHandle ?? 'right',
-    targetHandle: handles.targetHandle ?? 'left',
+    sourceHandle,
+    targetHandle,
     data,
     style,
     markerEnd: relation.directed ? { type: 'arrowclosed', color: relation.color } : undefined,

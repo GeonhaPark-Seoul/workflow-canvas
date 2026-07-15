@@ -147,6 +147,8 @@ export function createTwinBuildFromCanvasTemplate({
   const relations = edges.map((edge) => {
     const sourcePartId = partIdFromHandle(edge.sourceHandle)
     const targetPartId = partIdFromHandle(edge.targetHandle)
+    const sourceBuildPartId = sourcePartId ? partByCanvasIdentity.get(`${edge.source}:${sourcePartId}`) : null
+    const targetBuildPartId = targetPartId ? partByCanvasIdentity.get(`${edge.target}:${targetPartId}`) : null
     const relationEvidenceId = registry.add({
       ref: edge.data?.relationEvidenceRef || `canvas-edge:${edge.id}`,
       kind: evidenceKind(edge.data?.relationSourceKind),
@@ -159,11 +161,11 @@ export function createTwinBuildFromCanvasTemplate({
       id: edge.id,
       source: {
         entityId: edge.source,
-        partId: sourcePartId ? partByCanvasIdentity.get(`${edge.source}:${sourcePartId}`) : null,
+        partId: sourceBuildPartId,
       },
       target: {
         entityId: edge.target,
-        partId: targetPartId ? partByCanvasIdentity.get(`${edge.target}:${targetPartId}`) : null,
+        partId: targetBuildPartId,
       },
       relationType: edge.data?.relationType ?? 'flows_to',
       relationLabel: edge.data?.relationLabel,
@@ -172,7 +174,7 @@ export function createTwinBuildFromCanvasTemplate({
       summary: edge.data?.relationEvidence,
       evidenceIds: relationEvidenceId ? [relationEvidenceId] : [],
       gatewayId: gateway?.id ?? null,
-      partsLink: edge.data?.partsLink === true,
+      partsLink: edge.data?.partsLink === true || (!!sourceBuildPartId && !!targetBuildPartId),
       placement: {
         edgeId: edge.id,
         sourceHandle: edge.sourceHandle,

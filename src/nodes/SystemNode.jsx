@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { Handle, NodeResizer, NodeToolbar, Position, useStore, useUpdateNodeInternals } from '@xyflow/react'
 import OpenInNotesButton from '../components/OpenInNotesButton'
 import ScopedParticipants from '../components/ScopedParticipants'
@@ -179,7 +179,7 @@ export default function SystemNode({ data, selected, id }) {
   useEffect(() => {
     const frame = requestAnimationFrame(() => updateNodeInternals(id))
     return () => cancelAnimationFrame(frame)
-  }, [id, systemPartLayoutKey, updateNodeInternals])
+  }, [abstract, id, shapeOnly, systemPartLayoutKey, updateNodeInternals])
 
   const openPartEditor = (part = null) => {
     if (partEditingLocked) return
@@ -292,6 +292,43 @@ export default function SystemNode({ data, selected, id }) {
       {PORTS.map((port) => (
         <Handle key={port.id} type="source" id={port.id} position={port.position} style={handleStyle} />
       ))}
+
+      {abstract && systemParts.map((part, index) => {
+        const partKind = systemPartKindDefinition(part.kind)
+        const top = `${((index + 1) / (systemParts.length + 1)) * 100}%`
+        const leftHandleId = `p-${part.id}-l`
+        const rightHandleId = `p-${part.id}-r`
+        const compactSocketStyle = {
+          width: 8,
+          height: 11,
+          borderRadius: 2,
+          border: `1px solid ${partKind.color}`,
+          background: '#0f1117',
+          opacity: linkedPartHandles.has(leftHandleId) || linkedPartHandles.has(rightHandleId) ? 0.95 : 0.45,
+          pointerEvents: 'none',
+          zIndex: 6,
+        }
+        return (
+          <Fragment key={part.id}>
+            <Handle
+              type="source"
+              position={Position.Left}
+              id={leftHandleId}
+              className={`part-socket is-compact${linkedPartHandles.has(leftHandleId) ? ' is-linked' : ''}`}
+              isConnectable={false}
+              style={{ ...compactSocketStyle, left: 0, top, transform: 'translate(-50%, -50%)' }}
+            />
+            <Handle
+              type="source"
+              position={Position.Right}
+              id={rightHandleId}
+              className={`part-socket is-compact${linkedPartHandles.has(rightHandleId) ? ' is-linked' : ''}`}
+              isConnectable={false}
+              style={{ ...compactSocketStyle, right: 0, top, transform: 'translate(50%, -50%)' }}
+            />
+          </Fragment>
+        )
+      })}
 
       {!shapeOnly && (
         <div style={{ padding: abstract ? '10px 14px' : '10px 12px 8px', minWidth: 0 }}>
