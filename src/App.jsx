@@ -72,6 +72,7 @@ import {
 } from './lib/shares'
 import { getMyProfile, loadMySettings, upsertMyEmail, touchLastSeen } from './lib/profiles'
 import { createSystemNodeData } from '../shared/systemOntology.js'
+import { workflowSourceTwinEntryForNode } from '../shared/workflowSourceTwinCanvas.js'
 import { detachSystemPartBindings, normalizeSystemParts } from '../shared/systemPartOntology.js'
 import {
   failedSystemRuntimeResult,
@@ -483,7 +484,7 @@ export default function App() {
   const [renamingTypeIdx, setRenamingTypeIdx] = useState(null)
   const [notesPanel, setNotesPanel] = useState(null) // { type: 'stage'|'memo'|'content'|'system' } | null
   const [twinReviewOpen, setTwinReviewOpen] = useState(false)
-  const [sourceTwinOpen, setSourceTwinOpen] = useState(false)
+  const [sourceTwinEntry, setSourceTwinEntry] = useState(null)
   const [digitalTwinReview, setDigitalTwinReview] = useState(null)
   const [twinProposalPreview, setTwinProposalPreview] = useState(null) // { itemId, itemFingerprint } | null
   const [twinProposalStatus, setTwinProposalStatus] = useState(null) // { type, message } | null
@@ -2315,7 +2316,7 @@ export default function App() {
 
   useEffect(() => {
     setDigitalTwinReview(null)
-    setSourceTwinOpen(false)
+    setSourceTwinEntry(null)
     setTwinProposalPreview(null)
     setTwinProposalStatus(null)
   }, [activeCanvasId])
@@ -3519,7 +3520,7 @@ export default function App() {
   }, [edges, focusNode, nodes, rfInstance, setEdges])
 
   const openNotesPanel = useCallback((type) => {
-    setSourceTwinOpen(false)
+    setSourceTwinEntry(null)
     setTwinReviewOpen(false)
     setTwinProposalPreview(null)
     setTwinProposalStatus(null)
@@ -3528,7 +3529,7 @@ export default function App() {
   }, [])
 
   const openNodeInNotes = useCallback((nodeId, type) => {
-    setSourceTwinOpen(false)
+    setSourceTwinEntry(null)
     if (!['stage', 'memo', 'content', 'system'].includes(type)) return
     setTwinReviewOpen(false)
     setTwinProposalPreview(null)
@@ -3538,7 +3539,7 @@ export default function App() {
   }, [])
 
   const toggleDigitalTwinReview = useCallback(() => {
-    setSourceTwinOpen(false)
+    setSourceTwinEntry(null)
     setNotesPanel(null)
     setNotesSelectedId(null)
     setTwinProposalPreview(null)
@@ -3546,13 +3547,14 @@ export default function App() {
     setTwinReviewOpen((open) => !open)
   }, [])
 
-  const toggleSourceTwin = useCallback(() => {
+  const openSourceTwinFromNode = useCallback((entry) => {
+    if (!entry) return
     setNotesPanel(null)
     setNotesSelectedId(null)
     setTwinReviewOpen(false)
     setTwinProposalPreview(null)
     setTwinProposalStatus(null)
-    setSourceTwinOpen((open) => !open)
+    setSourceTwinEntry(entry)
   }, [])
 
   // ── Saved views ───────────────────────────────────────────────────────────
@@ -4104,6 +4106,9 @@ export default function App() {
           const scopedPermission = !isOwner && !viewOnly && !canEditFullCanvas
           const editable = scopedPermission ? isNodeEditable(n.id) : !viewOnly
           const structureEditable = scopedPermission ? isNodeStructureEditable(n.id) : !viewOnly
+          const nodeSourceTwinEntry = n.type === 'system' && isOwner && digitalTwinReview
+            ? workflowSourceTwinEntryForNode(n.id)
+            : null
           const overrides = viewOnly
             ? { draggable: false, deletable: false, selectable: true }
             : scopedPermission
@@ -4132,6 +4137,8 @@ export default function App() {
                 : undefined,
               canRunSystemChecks: isOwner && !!user,
               onCheckSystemPart: isOwner ? runSystemPartRuntimeCheck : undefined,
+              sourceTwinEntry: nodeSourceTwinEntry,
+              onOpenSourceTwin: nodeSourceTwinEntry ? openSourceTwinFromNode : undefined,
               onSelectForPart: () => {
                 setNodes((currentNodes) => currentNodes.map((candidate) => ({
                   ...candidate,
@@ -4223,27 +4230,6 @@ export default function App() {
           borderRadius: notesSide === 'right' ? '10px 0 0 10px' : '0 10px 10px 0', padding: 5,
         }}
       >
-        {digitalTwinReview && perm.role === 'owner' && (
-          <>
-            <button
-              type="button"
-              className="notes-rail-button source-twin-rail-button"
-              data-tooltip="소스 코드 트리와 상태 이력"
-              title="소스 코드 트리와 상태 이력"
-              aria-label="소스 코드 트리와 상태 이력"
-              onClick={toggleSourceTwin}
-              style={{
-                background: sourceTwinOpen ? '#06b6d433' : 'transparent',
-                border: 'none', borderRadius: 6, color: sourceTwinOpen ? '#67e8f9' : '#ccc',
-                width: 32, height: 32, fontSize: 9, fontWeight: 800, padding: 0, cursor: 'pointer',
-                display: 'grid', placeItems: 'center', fontFamily: 'inherit',
-              }}
-            >
-              코드
-            </button>
-            <div style={{ height: 1, background: '#ffffff18', margin: '2px 3px' }} />
-          </>
-        )}
         {digitalTwinReview && (
           <>
             <button
@@ -4557,11 +4543,12 @@ export default function App() {
           onApplyProposal={applyDigitalTwinProposal}
         />
       )}
-      {sourceTwinOpen && digitalTwinReview && perm.role === 'owner' && (
+      {sourceTwinEntry && digitalTwinReview && perm.role === 'owner' && (
         <SourceTwinPanel
+          entry={sourceTwinEntry}
           side={notesSide}
           onSideChange={setNotesSide}
-          onClose={() => setSourceTwinOpen(false)}
+          onClose={() => setSourceTwinEntry(null)}
         />
       )}
     </div>

@@ -25,7 +25,7 @@ try {
   committed = parseGeneratedManifest(execFileSync(
     'git',
     ['show', `HEAD:${DISCOVERY_MANIFEST_PATH}`],
-    { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] },
+    { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 20 * 1024 * 1024 },
   ))
 } catch {}
 const baselines = { ...(committed?.baselines ?? {}) }

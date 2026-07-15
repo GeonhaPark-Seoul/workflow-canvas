@@ -63,3 +63,12 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+
+## 5. Canvas Spatial UX
+
+**Keep actions attached to the system entity they operate on.**
+
+- Open repository code from repository nodes, deployment state from deployment nodes, and database operations from database nodes or their connected parts.
+- Do not add an entity-specific feature to a global rail, toolbar, or right-side tab unless the user explicitly approves that placement.
+- Do not move or replace an existing menu, toggle, or icon without asking first.
+- A side pane may present details after a contextual node action opens it; the global pane launcher is the part to avoid.

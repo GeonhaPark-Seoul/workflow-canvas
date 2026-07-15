@@ -755,7 +755,8 @@ t('application metric groups preserve aggregate counts only and discard user or 
   assert.equal(Object.hasOwn(result.items[0], 'ownerEmail'), false)
   assert.equal(Object.hasOwn(result.items[0], 'userIds'), false)
   assert.equal(Object.hasOwn(result, 'arbitrarySql'), false)
-  assert.equal(systemPartRuntimeReality(result).label, '운영 조회')
+  const checkedAt = Date.parse(result.checkedAt)
+  assert.equal(systemPartRuntimeReality(result, checkedAt + 1_000).label, '운영 조회')
 })
 
 t('generic observation catalogs keep allowlisted scalars, explain missing fields and block credentials', () => {
@@ -1428,12 +1429,14 @@ t('discovery accepts SQL declarations only from SQL files and ignores test-sourc
 
 t('generated discovery manifest covers current API, DB, storage, realtime and MCP surfaces', () => {
   const resources = WORKFLOW_SYSTEM_DISCOVERY.current.resources
+  assert.ok(Object.keys(WORKFLOW_SYSTEM_DISCOVERY.baselines).length > 1, 'generated discovery must preserve committed baselines')
   for (const key of [
     'api:/api/mcp',
     'api:/api/shared-canvas',
     'db-table:canvases',
     'db-table:share_revocations',
     'db-table:system_runtime_observations',
+    'db-table:system_operation_audit',
     'storage-bucket:canvas-images',
     'realtime-table:canvases',
     'credential-reference:SUPABASE_ANON_KEY',
@@ -1458,6 +1461,8 @@ t('generated discovery manifest covers current API, DB, storage, realtime and MC
     'inspect_source_twin',
     'list_source_twin_history',
     'compare_source_twin_snapshots',
+    'preview_source_twin_snapshot',
+    'apply_source_twin_snapshot',
     'preview_workflow_system_map_relation_repair',
     'repair_workflow_system_map_relations',
   ]) assert.ok(resources['collection:mcp-tools'].details.items.includes(tool), `missing MCP tool: ${tool}`)

@@ -125,7 +125,7 @@ assert.match(dataAccessAudit, /where audit\.owner_user_id = auth\.uid\(\)/i)
 assert.match(dataAccessAudit, /revoke execute on function public\.get_my_canvas_data_access_audit\(text, integer\) from public, anon;/i)
 assert.match(dataAccessAudit, /grant execute on function public\.get_my_canvas_data_access_audit\(text, integer\) to authenticated;/i)
 
-for (const table of ['source_twin_snapshots', 'source_twin_events']) {
+for (const table of ['source_twin_snapshots', 'source_twin_events', 'system_operation_audit']) {
   assert.match(sourceTwinHistory, new RegExp(`create table if not exists public\\.${table}`, 'i'))
   assert.match(sourceTwinHistory, new RegExp(`alter table public\\.${table} enable row level security`, 'i'))
 }
@@ -136,5 +136,20 @@ assert.match(sourceTwinHistory, /before update or delete on public\.source_twin_
 assert.match(sourceTwinHistory, /before update or delete on public\.source_twin_events/i)
 assert.match(sourceTwinHistory, /raise exception 'source twin history is append-only'/i)
 assert.match(sourceTwinHistory, /revoke execute on function public\.reject_source_twin_history_mutation\(\) from public, anon, authenticated;/i)
+assert.match(sourceTwinHistory, /revoke all on table public\.system_operation_audit from public, anon, authenticated;/i)
+assert.match(sourceTwinHistory, /grant select, insert on table public\.system_operation_audit to service_role;/i)
+assert.doesNotMatch(sourceTwinHistory, /grant [^;]*(?:update|delete)[^;]*system_operation_audit/i)
+assert.match(sourceTwinHistory, /before update or delete on public\.system_operation_audit/i)
+assert.match(sourceTwinHistory, /raise exception 'system operation audit is append-only'/i)
+assert.match(sourceTwinHistory, /octet_length\(result::text\) <= 50000/i)
+assert.match(sourceTwinHistory, /create or replace function public\.apply_source_twin_snapshot_operation\(/i)
+assert.match(sourceTwinHistory, /language plpgsql\s+security invoker/i)
+assert.match(sourceTwinHistory, /p_operation_type <> 'source-twin\.snapshot\.create'/i)
+assert.match(sourceTwinHistory, /p_snapshot ->> 'operationId' is distinct from p_operation_id/i)
+assert.match(sourceTwinHistory, /p_snapshot ->> 'snapshotKey' is distinct from p_snapshot_key/i)
+assert.match(sourceTwinHistory, /p_audit_result ->> 'snapshotId' is distinct from p_snapshot_id/i)
+assert.match(sourceTwinHistory, /insert into public\.system_operation_audit[\s\S]*insert into public\.source_twin_snapshots/i)
+assert.match(sourceTwinHistory, /revoke execute on function public\.apply_source_twin_snapshot_operation\([\s\S]*\) from public, anon, authenticated;/i)
+assert.match(sourceTwinHistory, /grant execute on function public\.apply_source_twin_snapshot_operation\([\s\S]*\) to service_role;/i)
 
 console.log('SQL security checks passed')

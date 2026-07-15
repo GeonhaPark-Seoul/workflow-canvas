@@ -33,20 +33,25 @@
 
 ### 소스 코드 디지털 트윈과 통합 상태 이력
 
-제품 소유자는 Workflow Canvas 시스템 지도에서 `코드` 레일을 열어 배포에 포함된 소스 구조를
-읽을 수 있습니다. 빌드 시 Babel AST와 SQL 선언을 결정적으로 분석해 파일, 함수, import,
-API 경로, DB 테이블·함수·RLS, 환경변수 **이름**, 테스트, 배포 설정을 자연어 코드 트리로
-만듭니다. 기능·코드·DB·보안·배포 관점과 검색을 지원하며, 각 항목은 GitHub의 실제 코드
-줄로 이동할 수 있습니다.
+제품 소유자는 Workflow Canvas 시스템 지도에서 관련 실체를 선택해 그 실체의 근거를 엽니다.
+`로컬 코드 저장소` 노드는 배포 빌드에 포함된 checkout의 코드 구조를, `GitHub 저장소` 노드는
+manifest 변경분과 push 신호를, `Vercel` 노드는 배포·운영 상태 이력을 보여줍니다. 전역 코드
+레일은 사용하지 않습니다. 빌드 시 Babel AST와 SQL 선언을 결정적으로 분석해 파일, 함수,
+import, API 경로, DB 테이블·함수·RLS, 환경변수 **이름**, 테스트, 배포 설정을 자연어 코드
+트리로 만들며, 각 항목은 GitHub의 실제 코드 줄로 이동할 수 있습니다. 브라우저가 Mac의
+미커밋 작업 폴더를 직접 읽는 것은 아니므로 실제 로컬 LIVE 상태는 향후 로컬 커넥터가 필요합니다.
 
 GitHub push webhook은 서명과 저장소를 모두 확인한 뒤 commit SHA, branch, 변경 경로만
 append-only 이벤트 이력에 기록합니다. 소스 본문, 커밋 메시지, 환경변수 값, 키·토큰 값은
 저장하지 않습니다. push는 `배포 전 변경` 신호이고, 해당 SHA를 포함한 새 Vercel 배포가
 열려야 AST 코드 트리의 운영 기준이 바뀝니다.
 
-`이력` 탭은 코드 manifest, DB 선언, Vercel 배포 식별자, 집계 운영 지표, 런타임 검증 상태,
-개인정보 기능 선언을 한 시점으로 묶어 비교합니다. 이 표는 코드·DB·배포를 조작하지 않는
-내부 운영 기록입니다. 외부 공증이나 프로젝트 관리자도 위조할 수 없는 투명성 증명은 아닙니다.
+`Vercel` 노드의 상태 이력은 코드 manifest, DB 선언, Vercel 배포 식별자, 집계 운영 지표,
+런타임 검증 상태, 개인정보 기능 선언을 한 시점으로 묶어 비교합니다. 새 상태 기록은 먼저
+읽기 전용 계획에서 범위·최대 쓰기·제외 정보·만료 시각을 보여주고, 소유자가 승인해야만
+스냅샷 1건과 감사 기록 1건을 같은 DB 트랜잭션으로 생성합니다. 계획은 사용자와 현재 상태에
+묶이고 만료되며 재실행할 수 없습니다. 이 이력은 내부 운영 기록이며 외부 공증이나 프로젝트
+관리자도 위조할 수 없는 투명성 증명은 아닙니다.
 
 - AST 추출기: [`scripts/source-twin-scanner.mjs`](scripts/source-twin-scanner.mjs)
 - 공통 모델: [`shared/sourceTwin.js`](shared/sourceTwin.js)
@@ -85,6 +90,8 @@ Supabase 데이터베이스를 기반으로 동작합니다.
 | `inspect_source_twin` | 제품 소유자 전용 AST 코드 트리·변경·운영 상태 읽기 (소스 본문·비밀값 제외) |
 | `list_source_twin_history` | 제품 소유자 전용 통합 상태 스냅샷 목록 (읽기 전용) |
 | `compare_source_twin_snapshots` | 두 통합 상태 스냅샷의 코드·DB·배포·운영 차이 비교 (읽기 전용) |
+| `preview_source_twin_snapshot` | 첫 실제 조작의 범위·쓰기·제외 정보·만료 시각 미리보기 (쓰기 없음) |
+| `apply_source_twin_snapshot` | 소유자가 승인한 미만료 계획을 1회 실행해 스냅샷과 감사 기록을 원자적으로 추가 |
 | `preview_workflow_system_map_relation_repair` | 제품 소유자 전용 관계 복구 미리보기 (revision 고정 plan 생성, 쓰기 없음) |
 | `repair_workflow_system_map_relations` | 승인된 plan에서 메타데이터가 완전히 없는 관계만 제한적으로 복구 |
 | `rename_canvas` | 캔버스 이름 변경 (탭에 반영) |
@@ -164,6 +171,7 @@ Vercel 프로젝트 → Settings → Environment Variables에 추가:
 | `SUPABASE_URL` | 선택 | 기본값은 앱의 Supabase 프로젝트 URL |
 | `WORKFLOW_CANVAS_OWNER_USER_ID` | 선택 | 내부 시스템 지도와 소스 트윈 조회·이력을 허용할 제품 소유자의 Supabase Auth 사용자 UUID. 미설정 시 관련 도구는 비활성화됨 |
 | `WORKFLOW_CANVAS_GITHUB_WEBHOOK_SECRET` | 선택 | GitHub push 서명 검증용 임의의 긴 비밀값. 미설정 시 배포 manifest 비교만 사용 |
+| `WORKFLOW_CANVAS_OPERATION_SIGNING_SECRET` | 선택 | 승인 계획 전용 HMAC 비밀값(32자 이상). 미설정 시 서버 전용 `SUPABASE_SERVICE_ROLE_KEY`를 사용하므로 별도 설정 없이 동작 |
 
 ### 4) 배포
 

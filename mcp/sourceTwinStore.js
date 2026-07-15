@@ -2,14 +2,25 @@ import { SOURCE_TWIN_MANIFEST } from '../shared/sourceTwinManifest.js'
 import {
   compareSourceTwinSnapshots,
   createSourceTwinSnapshot,
+  SOURCE_TWIN_OPERATION_CONFIRMATION,
+  SOURCE_TWIN_SNAPSHOT_OPERATION,
   SOURCE_TWIN_SOURCE_ID,
+  sourceTwinFingerprint,
   sourceTwinEntities,
 } from '../shared/sourceTwin.js'
 import { CANVAS_PRIVACY_CAPABILITIES } from '../shared/privacyCapabilities.js'
 import { WORKFLOW_SYSTEM_OPERATIONS_RPC } from './systemRuntime.js'
+import {
+  createSignedSystemOperationPlan,
+  SystemOperationPlanError,
+  systemOperationSigningSecret,
+  verifySignedSystemOperationPlan,
+} from './systemOperationPlan.js'
 
 export const SOURCE_TWIN_SNAPSHOT_TABLE = 'source_twin_snapshots'
 export const SOURCE_TWIN_EVENT_TABLE = 'source_twin_events'
+export const SYSTEM_OPERATION_AUDIT_TABLE = 'system_operation_audit'
+export const APPLY_SOURCE_TWIN_OPERATION_RPC = 'apply_source_twin_snapshot_operation'
 
 const SNAPSHOT_SELECT = 'snapshot_id, snapshot_key, manifest_id, commit_sha, captured_at, reason, snapshot'
 
@@ -42,7 +53,15 @@ export function sourceTwinDeploymentContext(env = process.env) {
 }
 
 function unavailable(error) {
-  return ['42P01', 'PGRST202', 'PGRST205'].includes(String(error?.code ?? ''))
+  return ['42P01', '42883', 'PGRST202', 'PGRST205'].includes(String(error?.code ?? ''))
+}
+
+function asSourceTwinError(error) {
+  if (error instanceof SourceTwinError) return error
+  if (error instanceof SystemOperationPlanError) {
+    return new SourceTwinError(error.status, error.code, error.message)
+  }
+  return error
 }
 
 function metricsFromOperationRow(row) {
@@ -116,6 +135,7 @@ function snapshotSummary(row) {
     commitSha: snapshot.commitSha,
     capturedAt: snapshot.capturedAt,
     reason: snapshot.reason,
+    operationId: snapshot.operationId ?? '',
     codeSummary: snapshot.sections?.code?.summary ?? {},
     operationalMetrics: snapshot.sections?.operations?.metrics ?? {},
     sectionFingerprints: Object.fromEntries(Object.entries(snapshot.sections ?? {}).map(([key, section]) => [key, section.fingerprint ?? ''])),
@@ -140,37 +160,166 @@ export async function currentSourceTwinState(db, env = process.env) {
   }
 }
 
-export async function captureSourceTwinSnapshot(db, { reason = 'manual', env = process.env } = {}) {
-  const state = await currentSourceTwinState(db, env)
-  const snapshot = createSourceTwinSnapshot({
+export function sourceTwinStateFingerprint(state) {
+  return sourceTwinFingerprint({
+    manifestId: state?.manifest?.id ?? '',
+    deployment: state?.deployment ?? {},
+    database: state?.database ?? {},
+    operations: state?.operations ?? {},
+    runtime: state?.runtime ?? {},
+    privacy: state?.privacy ?? {},
+  })
+}
+
+function snapshotFromState(state, {
+  reason = 'manual',
+  capturedAt,
+  operationId = '',
+} = {}) {
+  return createSourceTwinSnapshot({
     manifest: state.manifest,
+    capturedAt,
     reason,
+    operationId,
     deployment: state.deployment,
     database: state.database,
     operations: state.operations,
     runtime: state.runtime,
     privacy: state.privacy,
   })
-  const row = {
-    source_id: SOURCE_TWIN_SOURCE_ID,
-    snapshot_id: snapshot.id,
-    snapshot_key: snapshot.snapshotKey,
-    manifest_id: snapshot.manifestId,
-    commit_sha: snapshot.commitSha || null,
-    captured_at: snapshot.capturedAt,
-    reason: snapshot.reason,
-    snapshot,
+}
+
+export async function previewSourceTwinSnapshotOperation(db, {
+  actorUserId,
+  env = process.env,
+  now = new Date(),
+  secret,
+} = {}) {
+  const state = await currentSourceTwinState(db, env)
+  let signed
+  try {
+    signed = createSignedSystemOperationPlan({
+      operation: SOURCE_TWIN_SNAPSHOT_OPERATION,
+      actorId: actorUserId,
+      targetKey: SOURCE_TWIN_SOURCE_ID,
+      stateFingerprint: sourceTwinStateFingerprint(state),
+      confirmation: SOURCE_TWIN_OPERATION_CONFIRMATION,
+      scope: {
+        label: 'Workflow Canvas 통합 상태 스냅샷',
+        sections: ['code', 'database', 'deployment', 'operations', 'runtime', 'security'],
+        dataClass: 'system-metadata-and-aggregate-metrics',
+      },
+      writeSet: [
+        { resource: SOURCE_TWIN_SNAPSHOT_TABLE, operation: 'insert', maximumRows: 1 },
+        { resource: SYSTEM_OPERATION_AUDIT_TABLE, operation: 'insert', maximumRows: 1 },
+      ],
+      excludes: ['source-content', 'canvas-body', 'user-email', 'credential-values'],
+      recovery: {
+        strategy: 'append-only-evidence',
+        destructiveRollback: false,
+        note: '기존 시스템 상태를 변경하지 않으며 생성 기록은 감사 무결성을 위해 수정·삭제하지 않습니다.',
+      },
+    }, secret ?? systemOperationSigningSecret(env), { now })
+  } catch (error) {
+    throw asSourceTwinError(error)
   }
-  const { data, error } = await db.from(SOURCE_TWIN_SNAPSHOT_TABLE).insert(row).select(SNAPSHOT_SELECT).maybeSingle()
-  if (!error) return { snapshot: snapshotRow(data), created: true, state }
-  if (String(error.code ?? '') === '23505') {
-    const { data: existing, error: readError } = await db.from(SOURCE_TWIN_SNAPSHOT_TABLE)
-      .select(SNAPSHOT_SELECT).eq('source_id', SOURCE_TWIN_SOURCE_ID).eq('snapshot_key', snapshot.snapshotKey).maybeSingle()
-    if (readError || !existing) throw new SourceTwinError(500, 'SOURCE_TWIN_HISTORY_READ_FAILED', '기존 상태 스냅샷을 불러오지 못했습니다.')
-    return { snapshot: snapshotRow(existing), created: false, state }
+  return {
+    mode: 'operation-plan-preview',
+    writes_performed: false,
+    plan_record_written: false,
+    plan: signed.publicPlan,
+    plan_token: signed.token,
+    current: {
+      manifestId: state.manifest.id,
+      commitSha: state.deployment?.commitSha ?? '',
+      summary: state.manifest.summary,
+    },
   }
-  if (unavailable(error)) throw new SourceTwinError(503, 'SOURCE_TWIN_HISTORY_UNAVAILABLE', '소스 트윈 이력 SQL이 아직 적용되지 않았습니다.')
-  throw new SourceTwinError(500, 'SOURCE_TWIN_CAPTURE_FAILED', '통합 상태 스냅샷을 기록하지 못했습니다.')
+}
+
+export async function applySourceTwinSnapshotOperation(db, {
+  actorUserId,
+  planToken,
+  confirmation,
+  env = process.env,
+  now = new Date(),
+  secret,
+} = {}) {
+  let verified
+  try {
+    verified = verifySignedSystemOperationPlan(planToken, secret ?? systemOperationSigningSecret(env), {
+      actorId: actorUserId,
+      operation: SOURCE_TWIN_SNAPSHOT_OPERATION,
+      confirmation,
+      now,
+    })
+  } catch (error) {
+    throw asSourceTwinError(error)
+  }
+  const state = await currentSourceTwinState(db, env)
+  const currentFingerprint = sourceTwinStateFingerprint(state)
+  if (verified.payload.stateFingerprint !== currentFingerprint) {
+    throw new SourceTwinError(409, 'OPERATION_PLAN_STALE', '미리보기 이후 시스템 상태가 달라졌습니다. 최신 상태로 다시 미리보세요.')
+  }
+  const snapshot = snapshotFromState(state, {
+    reason: 'manual',
+    capturedAt: verified.payload.issuedAt,
+    operationId: verified.id,
+  })
+  const auditResult = {
+    snapshotId: snapshot.id,
+    manifestId: snapshot.manifestId,
+    commitSha: snapshot.commitSha,
+    capturedAt: snapshot.capturedAt,
+    writes: [SOURCE_TWIN_SNAPSHOT_TABLE, SYSTEM_OPERATION_AUDIT_TABLE],
+  }
+  const { data, error } = await db.rpc(APPLY_SOURCE_TWIN_OPERATION_RPC, {
+    p_operation_id: verified.id,
+    p_actor_user_id: actorUserId,
+    p_operation_type: SOURCE_TWIN_SNAPSHOT_OPERATION,
+    p_target_key: SOURCE_TWIN_SOURCE_ID,
+    p_state_fingerprint: currentFingerprint,
+    p_source_id: SOURCE_TWIN_SOURCE_ID,
+    p_snapshot_id: snapshot.id,
+    p_snapshot_key: snapshot.snapshotKey,
+    p_manifest_id: snapshot.manifestId,
+    p_commit_sha: snapshot.commitSha || null,
+    p_captured_at: snapshot.capturedAt,
+    p_reason: snapshot.reason,
+    p_snapshot: snapshot,
+    p_audit_result: auditResult,
+  })
+  if (error) {
+    if (unavailable(error)) throw new SourceTwinError(503, 'SYSTEM_OPERATION_AUDIT_UNAVAILABLE', '8번 조작·감사 SQL이 아직 적용되지 않았습니다.')
+    if (String(error.code ?? '') === '23505') throw new SourceTwinError(409, 'OPERATION_ALREADY_APPLIED', '이 승인 계획은 이미 실행되었습니다.')
+    throw new SourceTwinError(500, 'SOURCE_TWIN_OPERATION_FAILED', '승인된 상태 기록을 원자적으로 생성하지 못했습니다.')
+  }
+  const row = Array.isArray(data) ? data[0] : data
+  const resultCommitSha = row?.result_commit_sha ?? ''
+  if (
+    row?.result_snapshot_id !== snapshot.id
+    || row?.result_manifest_id !== snapshot.manifestId
+    || resultCommitSha !== snapshot.commitSha
+    || row?.result_reason !== snapshot.reason
+  ) {
+    throw new SourceTwinError(500, 'SOURCE_TWIN_OPERATION_RESULT_MISMATCH', '상태 기록 결과가 승인된 계획과 일치하지 않습니다.')
+  }
+  return {
+    mode: 'approved-operation-result',
+    writes_performed: true,
+    audit_recorded: true,
+    operation_id: verified.id,
+    state_fingerprint: currentFingerprint,
+    created: !!row.result_created,
+    snapshot: {
+      id: row.result_snapshot_id,
+      snapshotKey: snapshot.snapshotKey,
+      manifestId: row.result_manifest_id,
+      commitSha: row.result_commit_sha ?? '',
+      capturedAt: row.result_captured_at,
+      reason: row.result_reason,
+    },
+  }
 }
 
 export async function listSourceTwinSnapshots(db, limit = 30) {

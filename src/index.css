@@ -820,6 +820,31 @@ body[data-theme='light'] .react-flow__node:hover .canvas-group-frame {
   transform: translateY(-1px);
 }
 
+.node-open-source-twin {
+  position: absolute;
+  top: -30px;
+  right: 32px;
+  height: 24px;
+  border: 1px solid #06b6d466;
+  border-radius: 5px;
+  background: #1a1a22;
+  color: #67e8f9;
+  padding: 0 8px;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 750;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.12s, background 0.12s, border-color 0.12s, transform 0.12s;
+  z-index: 20;
+}
+.node-open-source-twin:hover {
+  color: #fff;
+  background: #0e7490;
+  border-color: #67e8f9;
+  transform: translateY(-1px);
+}
+
 .notes-pane {
   border-color: #ffffff18;
   border-style: solid;
@@ -954,18 +979,6 @@ body[data-theme='light'] .react-flow__node:hover .canvas-group-frame {
   line-height: 1;
 }
 
-.source-twin-rail-button {
-  transition: color 0.12s, background-color 0.12s, transform 0.12s;
-}
-.source-twin-rail-button:hover {
-  color: #fff !important;
-  background: #06b6d433 !important;
-  transform: translateX(-1px);
-}
-.notes-rail-left .source-twin-rail-button:hover {
-  transform: translateX(1px);
-}
-
 .twin-review-pane {
   position: relative;
   height: 100%;
@@ -1003,18 +1016,18 @@ body[data-theme='light'] .react-flow__node:hover .canvas-group-frame {
   background: #06b6d418;
   color: #67e8f9;
 }
+.source-twin-context-description {
+  margin: 6px 0 0;
+  color: #8e99aa;
+  font-size: 10.5px;
+  line-height: 1.45;
+}
 .source-twin-counts {
   gap: 12px;
 }
-.source-twin-tabs,
 .source-twin-perspectives {
   display: grid;
   border-bottom: 1px solid #ffffff12;
-}
-.source-twin-tabs {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  padding: 7px 10px;
-  gap: 4px;
 }
 .source-twin-perspectives {
   grid-template-columns: repeat(6, minmax(58px, 1fr));
@@ -1022,7 +1035,6 @@ body[data-theme='light'] .react-flow__node:hover .canvas-group-frame {
   padding: 7px 10px;
   gap: 3px;
 }
-.source-twin-tabs button,
 .source-twin-perspectives button {
   min-width: 0;
   height: 30px;
@@ -1038,12 +1050,10 @@ body[data-theme='light'] .react-flow__node:hover .canvas-group-frame {
   font-size: 10px;
   cursor: pointer;
 }
-.source-twin-tabs button:hover,
 .source-twin-perspectives button:hover {
   border-color: #06b6d455;
   color: #dbeafe;
 }
-.source-twin-tabs button.is-active,
 .source-twin-perspectives button.is-active {
   border-color: #06b6d477;
   background: #06b6d41c;
@@ -1250,6 +1260,18 @@ body[data-theme='light'] .react-flow__node:hover .canvas-group-frame {
   border-bottom: 1px solid #ffffff12;
   padding: 10px 12px;
 }
+.source-twin-repository-link {
+  display: block;
+  border-bottom: 1px solid #ffffff12;
+  color: #67e8f9;
+  padding: 10px 12px;
+  font-size: 10px;
+  text-decoration: none;
+}
+.source-twin-repository-link:hover {
+  background: #06b6d40e;
+  color: #cffafe;
+}
 .source-twin-change-section h3,
 .source-twin-event-section h3 {
   display: flex;
@@ -1276,12 +1298,21 @@ body[data-theme='light'] .react-flow__node:hover .canvas-group-frame {
   font-size: 9px;
 }
 .source-twin-change-section strong,
+.source-twin-change-section a,
 .source-twin-comparison strong,
 .source-twin-snapshot-list strong {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.source-twin-change-section a {
+  color: #b7c3d4;
+  text-decoration: none;
+}
+.source-twin-change-section a:hover {
+  color: #67e8f9;
+  text-decoration: underline;
 }
 .source-twin-change-section code,
 .source-twin-comparison code,
@@ -1358,6 +1389,122 @@ body[data-theme='light'] .react-flow__node:hover .canvas-group-frame {
 .source-twin-history-actions span {
   color: #64748b;
   font-size: 9px;
+}
+.source-twin-history-actions button:hover:not(:disabled),
+.source-twin-compare-controls button:hover:not(:disabled),
+.source-twin-operation-buttons button:hover:not(:disabled) {
+  border-color: #22d3ee;
+  background: #06b6d42b;
+  color: #cffafe;
+}
+.source-twin-operation-plan {
+  border-bottom: 1px solid #06b6d444;
+  background: #10171c;
+  padding: 11px 10px;
+}
+.source-twin-operation-plan > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.source-twin-operation-plan > header > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.source-twin-operation-plan > header strong {
+  color: #cffafe;
+  font-size: 11px;
+}
+.source-twin-operation-plan > header span,
+.source-twin-operation-plan > header code {
+  color: #6f7c8e;
+  font-size: 8px;
+}
+.source-twin-operation-scope,
+.source-twin-operation-writes,
+.source-twin-operation-excludes {
+  margin-top: 10px;
+}
+.source-twin-operation-scope > strong,
+.source-twin-operation-writes > strong,
+.source-twin-operation-excludes > strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #9aa7b8;
+  font-size: 9px;
+}
+.source-twin-operation-scope > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.source-twin-operation-scope span {
+  border: 1px solid #06b6d43d;
+  border-radius: 3px;
+  color: #8ddce7;
+  padding: 2px 5px;
+  font-size: 8px;
+}
+.source-twin-operation-writes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.source-twin-operation-writes span,
+.source-twin-operation-excludes p,
+.source-twin-operation-expiry,
+.source-twin-operation-recovery {
+  margin: 0;
+  color: #7f8b9c;
+  font-size: 9px;
+  line-height: 1.5;
+}
+.source-twin-operation-writes span::before {
+  content: '+ ';
+  color: #22c55e;
+}
+.source-twin-operation-expiry {
+  margin-top: 9px;
+  color: #fbbf24;
+}
+.source-twin-operation-recovery {
+  margin-top: 5px;
+}
+.source-twin-operation-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 10px;
+}
+.source-twin-operation-buttons button {
+  min-height: 30px;
+  border: 1px solid #06b6d466;
+  border-radius: 4px;
+  background: #06b6d418;
+  color: #67e8f9;
+  padding: 0 9px;
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+}
+.source-twin-operation-buttons button.is-secondary {
+  border-color: #ffffff24;
+  background: transparent;
+  color: #96a1b1;
+}
+.source-twin-operation-buttons button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.source-twin-operation-status {
+  border-bottom: 1px solid #ffffff12;
+  color: #86efac;
+  padding: 9px 10px;
+  font-size: 9px;
+  line-height: 1.5;
 }
 .source-twin-compare-controls select {
   min-width: 0;

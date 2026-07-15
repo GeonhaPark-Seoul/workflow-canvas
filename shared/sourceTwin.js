@@ -2,6 +2,8 @@ import { digitalTwinReviewFingerprint } from './digitalTwinReview.js'
 
 export const SOURCE_TWIN_SCHEMA_VERSION = 1
 export const SOURCE_TWIN_SOURCE_ID = 'workflow-canvas:self-source'
+export const SOURCE_TWIN_SNAPSHOT_OPERATION = 'source-twin.snapshot.create'
+export const SOURCE_TWIN_OPERATION_CONFIRMATION = 'CREATE_SOURCE_TWIN_SNAPSHOT'
 
 export const SOURCE_TWIN_PERSPECTIVES = Object.freeze({
   all: '전체',
@@ -81,6 +83,7 @@ export function createSourceTwinSnapshot({
   manifest,
   capturedAt = new Date().toISOString(),
   reason = 'manual',
+  operationId = '',
   deployment = {},
   database = {},
   operations = {},
@@ -92,6 +95,7 @@ export function createSourceTwinSnapshot({
   }
   const parsedAt = Date.parse(capturedAt)
   const safeCapturedAt = Number.isFinite(parsedAt) ? new Date(parsedAt).toISOString() : new Date().toISOString()
+  const safeOperationId = /^op-[a-f0-9]{64}$/i.test(operationId) ? operationId.toLocaleLowerCase() : ''
   const entityFingerprints = compactEntityFingerprints(manifest)
   const sections = {
     code: {
@@ -133,6 +137,7 @@ export function createSourceTwinSnapshot({
         manifestId: manifest.id,
         commitSha: deployment.commitSha ?? '',
         reason: 'manual',
+        operationId: safeOperationId,
         capturedAt: safeCapturedAt,
         sections: Object.fromEntries(Object.entries(sections).map(([key, section]) => [key, section.fingerprint])),
       })
@@ -144,6 +149,7 @@ export function createSourceTwinSnapshot({
     manifestId: manifest.id,
     capturedAt: safeCapturedAt,
     reason: reason === 'deployment' ? 'deployment' : 'manual',
+    ...(safeOperationId ? { operationId: safeOperationId } : {}),
     commitSha: String(deployment.commitSha ?? '').slice(0, 64),
     sections,
   }

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Handle, NodeResizer, NodeToolbar, Position, useStore } from '@xyflow/react'
 import OpenInNotesButton from '../components/OpenInNotesButton'
+import OpenSourceTwinButton from '../components/OpenSourceTwinButton'
 import ScopedParticipants from '../components/ScopedParticipants'
 import SystemObservationCatalog from '../components/SystemObservationCatalog'
 import { sanitizeHtml } from '../lib/sanitizeHtml'
@@ -262,6 +263,11 @@ export default function SystemNode({ data, selected, id }) {
       onPointerCancel={handlePointerUp}
     >
       <OpenInNotesButton visible={selected && !shapeOnly} onOpen={data.onOpenInNotes} />
+      <OpenSourceTwinButton
+        visible={selected && !shapeOnly}
+        entry={data.sourceTwinEntry}
+        onOpen={data.onOpenSourceTwin}
+      />
       <NodeResizer
         isVisible={selected && !data.readOnly}
         minWidth={200}

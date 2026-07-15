@@ -51,7 +51,7 @@ try {
   previous = parseGeneratedSourceTwin(execFileSync(
     'git',
     ['show', `HEAD:${SOURCE_TWIN_MANIFEST_PATH}`],
-    { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] },
+    { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 20 * 1024 * 1024 },
   ))
 } catch {}
 

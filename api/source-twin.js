@@ -1,9 +1,10 @@
 import { admin, resolveBrowserUser } from '../mcp/shareAccess.js'
 import {
-  captureSourceTwinSnapshot,
+  applySourceTwinSnapshotOperation,
   compareStoredSourceTwinSnapshots,
   currentSourceTwinState,
   listSourceTwinSnapshots,
+  previewSourceTwinSnapshotOperation,
   requireSourceTwinOwner,
   SourceTwinError,
 } from '../mcp/sourceTwinStore.js'
@@ -33,19 +34,16 @@ export default async function handler(req, res) {
       return send(res, 200, { comparison: await compareStoredSourceTwinSnapshots(db, req.query.from, req.query.to) })
     }
     if (req.method === 'GET') return send(res, 200, await currentSourceTwinState(db))
-    if (req.body?.action === 'capture') {
-      const reason = req.body.reason === 'deployment' ? 'deployment' : 'manual'
-      const result = await captureSourceTwinSnapshot(db, { reason })
-      return send(res, result.created ? 201 : 200, {
-        created: result.created,
-        snapshot: {
-          id: result.snapshot.id,
-          manifestId: result.snapshot.manifestId,
-          commitSha: result.snapshot.commitSha,
-          capturedAt: result.snapshot.capturedAt,
-          reason: result.snapshot.reason,
-        },
+    if (req.body?.action === 'preview_capture') {
+      return send(res, 200, await previewSourceTwinSnapshotOperation(db, { actorUserId: user.id }))
+    }
+    if (req.body?.action === 'apply_capture') {
+      const result = await applySourceTwinSnapshotOperation(db, {
+        actorUserId: user.id,
+        planToken: req.body.plan_token,
+        confirmation: req.body.confirmation,
       })
+      return send(res, result.created ? 201 : 200, result)
     }
     return send(res, 400, { error: '지원하지 않는 소스 트윈 작업입니다.', code: 'INVALID_ACTION' })
   } catch (error) {

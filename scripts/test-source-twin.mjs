@@ -13,23 +13,44 @@ import {
 import {
   compareSourceTwinSnapshots,
   createSourceTwinSnapshot,
+  SOURCE_TWIN_OPERATION_CONFIRMATION,
+  SOURCE_TWIN_SNAPSHOT_OPERATION,
   sourceTwinCodeUrl,
   sourceTwinEntities,
 } from '../shared/sourceTwin.js'
 import {
+  APPLY_SOURCE_TWIN_OPERATION_RPC,
+  applySourceTwinSnapshotOperation,
+  previewSourceTwinSnapshotOperation,
   requireSourceTwinOwner,
   sourceTwinDeploymentContext,
 } from '../mcp/sourceTwinStore.js'
+import {
+  createSignedSystemOperationPlan,
+  verifySignedSystemOperationPlan,
+} from '../mcp/systemOperationPlan.js'
 import {
   compactGitHubPush,
   sourceTwinRepositoryName,
   validGitHubSignature,
 } from '../api/source-twin-webhook.js'
+import {
+  workflowSourceTwinEntryForNode,
+  WORKFLOW_SOURCE_TWIN_NODE_IDS,
+} from '../shared/workflowSourceTwinCanvas.js'
+import { SOURCE_TWIN_MANIFEST } from '../shared/sourceTwinManifest.js'
 
 const repository = {
   repositoryUrl: 'https://github.com/example/workflow-canvas',
   defaultBranch: 'main',
 }
+
+assert.deepEqual(WORKFLOW_SOURCE_TWIN_NODE_IDS, ['map-local-repo', 'map-github', 'map-vercel'])
+assert.equal(workflowSourceTwinEntryForNode('map-local-repo').view, 'structure')
+assert.equal(workflowSourceTwinEntryForNode('map-github').view, 'changes')
+assert.equal(workflowSourceTwinEntryForNode('map-vercel').view, 'history')
+assert.equal(workflowSourceTwinEntryForNode('map-web-app'), null)
+assert.equal(SOURCE_TWIN_MANIFEST.changeSet.initialBaseline, false, 'generated source history must keep the committed parent manifest')
 
 const fixtureEntries = [
   ['package.json', JSON.stringify({ scripts: { build: 'vite build', test: 'node scripts/test-sample.mjs' } }, null, 2)],
@@ -130,6 +151,154 @@ assert.ok(comparison.summary.addedEntities >= 1)
 assert.deepEqual(comparison.metrics.find((item) => item.key === 'canvasCount'), {
   key: 'canvasCount', before: 2, after: 4, delta: 2,
 })
+
+const operationIdA = `op-${'1'.repeat(64)}`
+const operationIdB = `op-${'2'.repeat(64)}`
+const approvedSnapshotA = createSourceTwinSnapshot({
+  manifest,
+  capturedAt: '2026-07-15T03:30:00.000Z',
+  reason: 'manual',
+  operationId: operationIdA,
+  deployment: { commitSha: 'b'.repeat(40), environment: 'production' },
+})
+const approvedSnapshotB = createSourceTwinSnapshot({
+  manifest,
+  capturedAt: '2026-07-15T03:30:00.000Z',
+  reason: 'manual',
+  operationId: operationIdB,
+  deployment: { commitSha: 'b'.repeat(40), environment: 'production' },
+})
+assert.equal(approvedSnapshotA.operationId, operationIdA)
+assert.notEqual(approvedSnapshotA.snapshotKey, approvedSnapshotB.snapshotKey, 'each approved operation needs its own snapshot key')
+
+const operationSecret = 'operation-test-secret-'.repeat(3)
+const operationNow = new Date('2026-07-15T04:00:00.000Z')
+const operationDefinition = {
+  operation: SOURCE_TWIN_SNAPSHOT_OPERATION,
+  actorId: 'owner-user-id',
+  targetKey: 'workflow-canvas:self-source',
+  stateFingerprint: 'a'.repeat(64),
+  confirmation: SOURCE_TWIN_OPERATION_CONFIRMATION,
+  scope: { sections: ['code', 'database'] },
+  writeSet: [{ resource: 'source_twin_snapshots', operation: 'insert', maximumRows: 1 }],
+  excludes: ['source-content', 'credential-values'],
+  recovery: { strategy: 'append-only-evidence' },
+}
+const signedOperation = createSignedSystemOperationPlan(operationDefinition, operationSecret, { now: operationNow })
+assert.match(signedOperation.publicPlan.id, /^op-[a-f0-9]{64}$/)
+assert.equal(signedOperation.publicPlan.confirmation, SOURCE_TWIN_OPERATION_CONFIRMATION)
+assert.deepEqual(signedOperation.publicPlan.writeSet, operationDefinition.writeSet)
+assert.equal(verifySignedSystemOperationPlan(signedOperation.token, operationSecret, {
+  actorId: 'owner-user-id',
+  operation: SOURCE_TWIN_SNAPSHOT_OPERATION,
+  confirmation: SOURCE_TWIN_OPERATION_CONFIRMATION,
+  now: new Date('2026-07-15T04:01:00.000Z'),
+}).id, signedOperation.publicPlan.id)
+const [encodedPlan, planSignature] = signedOperation.token.split('.')
+const changedSignature = `${planSignature[0] === 'a' ? 'b' : 'a'}${planSignature.slice(1)}`
+assert.throws(() => verifySignedSystemOperationPlan(`${encodedPlan}.${changedSignature}`, operationSecret, {
+  actorId: 'owner-user-id',
+  operation: SOURCE_TWIN_SNAPSHOT_OPERATION,
+  confirmation: SOURCE_TWIN_OPERATION_CONFIRMATION,
+  now: operationNow,
+}), (error) => error.code === 'OPERATION_PLAN_TAMPERED')
+assert.throws(() => verifySignedSystemOperationPlan(signedOperation.token, operationSecret, {
+  actorId: 'different-user-id',
+  operation: SOURCE_TWIN_SNAPSHOT_OPERATION,
+  confirmation: SOURCE_TWIN_OPERATION_CONFIRMATION,
+  now: operationNow,
+}), (error) => error.code === 'OPERATION_ACTOR_MISMATCH')
+assert.throws(() => verifySignedSystemOperationPlan(signedOperation.token, operationSecret, {
+  actorId: 'owner-user-id',
+  operation: SOURCE_TWIN_SNAPSHOT_OPERATION,
+  confirmation: 'UNAPPROVED',
+  now: operationNow,
+}), (error) => error.code === 'OPERATION_CONFIRMATION_REQUIRED')
+assert.throws(() => verifySignedSystemOperationPlan(signedOperation.token, operationSecret, {
+  actorId: 'owner-user-id',
+  operation: SOURCE_TWIN_SNAPSHOT_OPERATION,
+  confirmation: SOURCE_TWIN_OPERATION_CONFIRMATION,
+  now: new Date('2026-07-15T04:06:00.000Z'),
+}), (error) => error.code === 'OPERATION_PLAN_EXPIRED')
+
+let operationalCanvasCount = 2
+let appliedOperation = null
+const readResult = (data = []) => {
+  const builder = {
+    select: () => builder,
+    eq: () => builder,
+    order: () => builder,
+    limit: async () => ({ data, error: null }),
+  }
+  return builder
+}
+const operationDb = {
+  from: () => readResult([]),
+  rpc: async (name, args) => {
+    if (name === APPLY_SOURCE_TWIN_OPERATION_RPC) {
+      appliedOperation = args
+      return {
+        data: [{
+          result_created: true,
+          result_snapshot_id: args.p_snapshot_id,
+          result_manifest_id: args.p_manifest_id,
+          result_commit_sha: args.p_commit_sha,
+          result_captured_at: args.p_captured_at,
+          result_reason: args.p_reason,
+        }],
+        error: null,
+      }
+    }
+    return { data: [{ canvas_count: operationalCanvasCount }], error: null }
+  },
+}
+const operationEnvironment = {
+  VERCEL: '1',
+  VERCEL_ENV: 'production',
+  VERCEL_GIT_COMMIT_SHA: 'f'.repeat(40),
+  VERCEL_PROJECT_PRODUCTION_URL: 'canvas.example.com',
+}
+const operationPreview = await previewSourceTwinSnapshotOperation(operationDb, {
+  actorUserId: 'owner-user-id',
+  env: operationEnvironment,
+  now: operationNow,
+  secret: operationSecret,
+})
+assert.equal(operationPreview.writes_performed, false)
+assert.equal(operationPreview.plan_record_written, false)
+assert.equal(appliedOperation, null, 'preview must not call the write RPC')
+assert.deepEqual(operationPreview.plan.writeSet.map((write) => write.maximumRows), [1, 1])
+const appliedSnapshot = await applySourceTwinSnapshotOperation(operationDb, {
+  actorUserId: 'owner-user-id',
+  planToken: operationPreview.plan_token,
+  confirmation: SOURCE_TWIN_OPERATION_CONFIRMATION,
+  env: operationEnvironment,
+  now: new Date('2026-07-15T04:01:00.000Z'),
+  secret: operationSecret,
+})
+assert.equal(appliedSnapshot.writes_performed, true)
+assert.equal(appliedSnapshot.audit_recorded, true)
+assert.equal(appliedOperation.p_operation_id, operationPreview.plan.id)
+assert.equal(appliedOperation.p_snapshot.operationId, operationPreview.plan.id)
+assert.equal(appliedOperation.p_actor_user_id, 'owner-user-id')
+
+const stalePreview = await previewSourceTwinSnapshotOperation(operationDb, {
+  actorUserId: 'owner-user-id',
+  env: operationEnvironment,
+  now: operationNow,
+  secret: operationSecret,
+})
+operationalCanvasCount = 3
+appliedOperation = null
+await assert.rejects(() => applySourceTwinSnapshotOperation(operationDb, {
+  actorUserId: 'owner-user-id',
+  planToken: stalePreview.plan_token,
+  confirmation: SOURCE_TWIN_OPERATION_CONFIRMATION,
+  env: operationEnvironment,
+  now: new Date('2026-07-15T04:01:00.000Z'),
+  secret: operationSecret,
+}), (error) => error.code === 'OPERATION_PLAN_STALE')
+assert.equal(appliedOperation, null, 'stale plans must fail before the write RPC')
 
 assert.equal(requireSourceTwinOwner('owner', 'owner'), 'owner')
 assert.throws(() => requireSourceTwinOwner('viewer', 'owner'), /제품 소유자만/)

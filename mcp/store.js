@@ -1582,3 +1582,19 @@ export async function compareSourceTwinHistory(userId, fromSnapshotId, toSnapsho
     external_immutability_proof: false,
   }
 }
+
+export async function previewSourceTwinSnapshot(userId) {
+  const { previewSourceTwinSnapshotOperation, requireSourceTwinOwner } = await import('./sourceTwinStore.js')
+  requireSourceTwinOwner(userId, process.env.WORKFLOW_CANVAS_OWNER_USER_ID)
+  return previewSourceTwinSnapshotOperation(admin(), { actorUserId: userId })
+}
+
+export async function applySourceTwinSnapshot(userId, planToken, confirmation) {
+  const { applySourceTwinSnapshotOperation, requireSourceTwinOwner } = await import('./sourceTwinStore.js')
+  requireSourceTwinOwner(userId, process.env.WORKFLOW_CANVAS_OWNER_USER_ID)
+  return applySourceTwinSnapshotOperation(admin(), {
+    actorUserId: userId,
+    planToken,
+    confirmation,
+  })
+}

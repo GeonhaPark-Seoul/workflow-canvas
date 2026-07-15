@@ -6,10 +6,11 @@ import {
   sourceTwinEntityMap,
 } from '../../shared/sourceTwin.js'
 import {
-  captureSourceTwinHistory,
+  applySourceTwinHistoryCapture,
   compareSourceTwinHistory,
   loadSourceTwinCurrent,
   loadSourceTwinHistory,
+  previewSourceTwinHistoryCapture,
 } from '../lib/sourceTwinApi.js'
 
 const MIN_PANE_WIDTH = 380
@@ -24,6 +25,20 @@ const LAYER_LABELS = {
   frontend: '사용자 화면', api: '웹 API', mcp: 'AI 연결', shared: '공통 규칙',
   database: '데이터베이스', test: '검증', deployment: '배포', documentation: '문서',
   security: '보안', code: '외부 의존',
+}
+const OPERATION_SECTION_LABELS = {
+  code: '코드 구조', database: 'DB 선언', deployment: '배포 상태',
+  operations: '운영 집계', runtime: '런타임 증거', security: '보안 선언',
+}
+const OPERATION_RESOURCE_LABELS = {
+  source_twin_snapshots: '통합 상태 스냅샷',
+  system_operation_audit: '조작 감사 기록',
+}
+const OPERATION_EXCLUSION_LABELS = {
+  'source-content': '소스 코드 본문',
+  'canvas-body': '사용자 캔버스 본문',
+  'user-email': '사용자 이메일',
+  'credential-values': '키·토큰 실제 값',
 }
 
 function IconButton({ title, onClick, disabled = false, children }) {
@@ -151,14 +166,22 @@ function StructureView({ current, perspective, setPerspective, query, setQuery, 
   )
 }
 
-function ChangeEntityList({ title, ids, entityMap }) {
+function ChangeEntityList({ title, ids, entityMap, manifest, commitSha }) {
   if (!ids?.length) return null
   return (
     <section className="source-twin-change-section">
       <h3>{title}<span>{ids.length}</span></h3>
       {ids.slice(0, 100).map((id) => {
         const item = entityMap.get(id)
-        return <div key={id}><strong>{item?.label ?? id}</strong><code>{item?.path ?? ''}</code></div>
+        const codeUrl = sourceTwinCodeUrl(manifest, item, commitSha)
+        return (
+          <div key={id}>
+            {codeUrl
+              ? <a href={codeUrl} target="_blank" rel="noreferrer" title="GitHub에서 실제 코드 열기">{item?.label ?? id}</a>
+              : <strong>{item?.label ?? id}</strong>}
+            <code>{item?.path ?? ''}</code>
+          </div>
+        )
       })}
       {ids.length > 100 && <p>나머지 {ids.length - 100}개는 검색에서 확인할 수 있습니다.</p>}
     </section>
@@ -170,17 +193,21 @@ function ChangesView({ current }) {
   const changes = manifest.changeSet
   const entityMap = sourceTwinEntityMap(manifest)
   const pendingEvents = current.events?.events ?? []
+  const repositoryUrl = /^https:\/\/github\.com\/[\w.-]+\/[\w.-]+$/i.test(manifest.source?.repositoryUrl ?? '')
+    ? manifest.source.repositoryUrl
+    : ''
   return (
     <div className="source-twin-change-list">
+      {repositoryUrl && <a className="source-twin-repository-link" href={repositoryUrl} target="_blank" rel="noreferrer">GitHub 저장소에서 전체 코드 열기 ↗</a>}
       {changes.initialBaseline ? (
         <div className="source-twin-baseline">첫 소스 기준선입니다. 다음 커밋부터 변경분만 표시됩니다.</div>
       ) : changes.summary.added + changes.summary.changed + changes.summary.removed === 0 ? (
         <div className="twin-review-empty">직전 manifest 이후 소스 변경 없음</div>
       ) : (
         <>
-          <ChangeEntityList title="추가" ids={changes.added} entityMap={entityMap} />
-          <ChangeEntityList title="변경" ids={changes.changed} entityMap={entityMap} />
-          <ChangeEntityList title="삭제" ids={changes.removed} entityMap={entityMap} />
+          <ChangeEntityList title="추가" ids={changes.added} entityMap={entityMap} manifest={manifest} commitSha={current.deployment?.commitSha} />
+          <ChangeEntityList title="변경" ids={changes.changed} entityMap={entityMap} manifest={manifest} commitSha={current.deployment?.commitSha} />
+          <ChangeEntityList title="삭제" ids={changes.removed} entityMap={entityMap} manifest={manifest} commitSha={current.deployment?.commitSha} />
         </>
       )}
       <section className="source-twin-event-section">
@@ -205,7 +232,52 @@ function ChangesView({ current }) {
   )
 }
 
-function HistoryView({ history, historyError, captureBusy, onCapture, comparison, compareBusy, onCompare }) {
+function OperationPlanPreview({ preview, busy, onApprove, onCancel }) {
+  const plan = preview?.plan
+  if (!plan) return null
+  return (
+    <section className="source-twin-operation-plan" aria-label="상태 기록 조작 계획">
+      <header>
+        <div><strong>실행 전 미리보기</strong><span>아직 DB에 기록하지 않았습니다</span></div>
+        <code title={plan.id}>{plan.id.slice(0, 15)}…</code>
+      </header>
+      <div className="source-twin-operation-scope">
+        <strong>{plan.scope?.label}</strong>
+        <div>{(plan.scope?.sections ?? []).map((section) => <span key={section}>{OPERATION_SECTION_LABELS[section] ?? section}</span>)}</div>
+      </div>
+      <div className="source-twin-operation-writes">
+        <strong>승인 시 새로 생성</strong>
+        {(plan.writeSet ?? []).map((write) => (
+          <span key={write.resource}>{OPERATION_RESOURCE_LABELS[write.resource] ?? write.resource} · 최대 {write.maximumRows}건</span>
+        ))}
+      </div>
+      <div className="source-twin-operation-excludes">
+        <strong>수집하지 않음</strong>
+        <p>{(plan.excludes ?? []).map((item) => OPERATION_EXCLUSION_LABELS[item] ?? item).join(' · ')}</p>
+      </div>
+      <p className="source-twin-operation-expiry">승인 가능 기한 {new Date(plan.expiresAt).toLocaleString()}</p>
+      <p className="source-twin-operation-recovery">{plan.recovery?.note}</p>
+      <div className="source-twin-operation-buttons">
+        <button type="button" className="is-secondary" onClick={onCancel} disabled={busy}>취소</button>
+        <button type="button" onClick={onApprove} disabled={busy}>{busy ? '실행 중…' : '승인하고 기록'}</button>
+      </div>
+    </section>
+  )
+}
+
+function HistoryView({
+  history,
+  historyError,
+  captureBusy,
+  capturePlan,
+  captureStatus,
+  onPreviewCapture,
+  onApplyCapture,
+  onCancelCapture,
+  comparison,
+  compareBusy,
+  onCompare,
+}) {
   const snapshots = history?.snapshots ?? []
   const [fromId, setFromId] = useState('')
   const [toId, setToId] = useState('')
@@ -217,12 +289,14 @@ function HistoryView({ history, historyError, captureBusy, onCapture, comparison
   return (
     <div className="source-twin-history">
       <p className="source-twin-evidence-scope">
-        내부 변경 추적 기록입니다. 상태 기록과 비교는 앱 코드·DB 구조·배포를 수정하지 않으며, 외부 공증 기록은 아닙니다.
+        내부 변경 추적 기록입니다. 상태 기록은 아래 이력·감사 행만 새로 만들며 앱 코드, 운영 DB 구조, 배포, 사용자 본문은 바꾸지 않습니다. 외부 공증 기록은 아닙니다.
       </p>
       <div className="source-twin-history-actions">
-        <button type="button" onClick={onCapture} disabled={captureBusy}>{captureBusy ? '기록 중…' : '현재 상태 기록'}</button>
-        <span>코드·DB·배포·운영을 함께 저장</span>
+        <button type="button" onClick={onPreviewCapture} disabled={captureBusy || !!capturePlan}>{captureBusy && !capturePlan ? '계획 생성 중…' : '기록 계획 보기'}</button>
+        <span>범위 확인과 승인 뒤에만 기록</span>
       </div>
+      <OperationPlanPreview preview={capturePlan} busy={captureBusy} onApprove={onApplyCapture} onCancel={onCancelCapture} />
+      {captureStatus && <div className="source-twin-operation-status">{captureStatus}</div>}
       {historyError && <div className="source-twin-error">{historyError}</div>}
       {snapshots.length === 0 ? <div className="twin-review-empty">기록된 상태 없음</div> : (
         <>
@@ -256,8 +330,9 @@ function HistoryView({ history, historyError, captureBusy, onCapture, comparison
             {snapshots.map((snapshot) => (
               <div key={snapshot.id}>
                 <strong>{new Date(snapshot.capturedAt).toLocaleString()}</strong>
-                <span>{snapshot.reason === 'deployment' ? '배포 기준' : '수동 기록'} · {snapshot.commitSha?.slice(0, 8) || 'local'}</span>
+                <span>{snapshot.reason === 'deployment' ? '배포 기준' : '승인 기록'} · {snapshot.commitSha?.slice(0, 8) || 'local'}</span>
                 <code>{snapshot.manifestId}</code>
+                {snapshot.operationId && <code title={snapshot.operationId}>감사 {snapshot.operationId.slice(0, 15)}…</code>}
               </div>
             ))}
           </div>
@@ -267,9 +342,8 @@ function HistoryView({ history, historyError, captureBusy, onCapture, comparison
   )
 }
 
-export default function SourceTwinPanel({ side = 'right', onSideChange, onClose }) {
+export default function SourceTwinPanel({ entry, side = 'right', onSideChange, onClose }) {
   const [paneWidth, setPaneWidth] = useState(500)
-  const [tab, setTab] = useState('structure')
   const [perspective, setPerspective] = useState('functionality')
   const [query, setQuery] = useState('')
   const [selectedId, setSelectedId] = useState('')
@@ -278,10 +352,20 @@ export default function SourceTwinPanel({ side = 'right', onSideChange, onClose 
   const [comparison, setComparison] = useState(null)
   const [loading, setLoading] = useState(true)
   const [captureBusy, setCaptureBusy] = useState(false)
+  const [capturePlan, setCapturePlan] = useState(null)
+  const [captureStatus, setCaptureStatus] = useState('')
   const [compareBusy, setCompareBusy] = useState(false)
   const [error, setError] = useState('')
   const [historyError, setHistoryError] = useState('')
   const dragRef = useRef(null)
+  const view = entry?.view ?? 'structure'
+
+  useEffect(() => {
+    setSelectedId('')
+    setComparison(null)
+    setCapturePlan(null)
+    setCaptureStatus('')
+  }, [view])
 
   const refreshHistory = useCallback(async () => {
     const next = await loadSourceTwinHistory(40)
@@ -300,14 +384,6 @@ export default function SourceTwinPanel({ side = 'right', onSideChange, onClose 
     let cancelled = false
     setLoading(true)
     Promise.all([refreshCurrent(), refreshHistory()])
-      .then(async () => {
-        try {
-          const result = await captureSourceTwinHistory('deployment')
-          if (!cancelled && result?.snapshot) await refreshHistory()
-        } catch (captureError) {
-          if (!cancelled && captureError.code !== 'SOURCE_TWIN_HISTORY_UNAVAILABLE') setHistoryError(captureError.message)
-        }
-      })
       .catch((loadError) => { if (!cancelled) setError(loadError.message) })
       .finally(() => { if (!cancelled) setLoading(false) })
     const timer = setInterval(() => {
@@ -316,18 +392,39 @@ export default function SourceTwinPanel({ side = 'right', onSideChange, onClose 
     return () => { cancelled = true; clearInterval(timer) }
   }, [refreshCurrent, refreshHistory])
 
-  const capture = useCallback(async () => {
+  const previewCapture = useCallback(async () => {
     setCaptureBusy(true)
     setHistoryError('')
+    setCaptureStatus('')
     try {
-      await captureSourceTwinHistory('manual')
-      await refreshHistory()
+      const preview = await previewSourceTwinHistoryCapture()
+      setCapturePlan(preview)
     } catch (captureError) {
       setHistoryError(captureError.message)
     } finally {
       setCaptureBusy(false)
     }
-  }, [refreshHistory])
+  }, [])
+
+  const applyCapture = useCallback(async () => {
+    if (!capturePlan?.plan_token) return
+    setCaptureBusy(true)
+    setHistoryError('')
+    setCaptureStatus('')
+    try {
+      const result = await applySourceTwinHistoryCapture(capturePlan.plan_token)
+      setCapturePlan(null)
+      setCaptureStatus(`승인된 상태 기록과 감사 로그를 생성했습니다 · ${result.operation_id.slice(0, 15)}…`)
+      await refreshHistory()
+    } catch (captureError) {
+      if (['OPERATION_PLAN_STALE', 'OPERATION_PLAN_EXPIRED', 'OPERATION_ALREADY_APPLIED'].includes(captureError.code)) {
+        setCapturePlan(null)
+      }
+      setHistoryError(captureError.message)
+    } finally {
+      setCaptureBusy(false)
+    }
+  }, [capturePlan, refreshHistory])
 
   const compare = useCallback(async (from, to) => {
     setCompareBusy(true)
@@ -368,13 +465,14 @@ export default function SourceTwinPanel({ side = 'right', onSideChange, onClose 
       {side === 'right' && splitter}
       <div className="twin-review-content">
         <header className="twin-review-header source-twin-header">
-          <div className="twin-review-header-title"><strong>소스 트윈</strong>{manifest && <span>{manifest.summary.files}</span>}</div>
+          <div className="twin-review-header-title"><strong>{entry?.panelTitle ?? '소스 트윈'}</strong>{manifest && <span>{manifest.summary.files}</span>}</div>
           <div className="twin-review-header-actions">
             <IconButton title="소스 트윈 새로고침" onClick={() => { setLoading(true); Promise.all([refreshCurrent(), refreshHistory()]).catch((loadError) => setError(loadError.message)).finally(() => setLoading(false)) }}>↻</IconButton>
             <IconButton title={side === 'right' ? '코드 트리 창을 왼쪽으로 이동' : '코드 트리 창을 오른쪽으로 이동'} onClick={() => onSideChange(side === 'right' ? 'left' : 'right')}>{side === 'right' ? '←' : '→'}</IconButton>
             <IconButton title="코드 트리 닫기" onClick={onClose}>✕</IconButton>
           </div>
-          <div className="twin-review-source-name">{manifest?.source?.label ?? 'Workflow Canvas 소스 코드'}</div>
+          <div className="twin-review-source-name">{entry?.actionLabel ?? manifest?.source?.label ?? 'Workflow Canvas 소스 코드'}</div>
+          {entry?.description && <p className="source-twin-context-description">{entry.description}</p>}
           <code className="twin-review-snapshot" title="소스 manifest ID">{manifest?.id ?? ''}</code>
         </header>
         {manifest && (
@@ -385,17 +483,24 @@ export default function SourceTwinPanel({ side = 'right', onSideChange, onClose 
             <span>커밋 <strong>{current.deployment?.commitSha?.slice(0, 7) || 'local'}</strong></span>
           </div>
         )}
-        <div className="source-twin-tabs" role="tablist" aria-label="소스 트윈 보기">
-          {[['structure', '구조'], ['changes', '변경'], ['history', '이력']].map(([value, label]) => (
-            <button type="button" role="tab" aria-selected={tab === value} className={tab === value ? 'is-active' : ''} key={value} onClick={() => setTab(value)}>{label}</button>
-          ))}
-        </div>
         {loading && !current ? <div className="twin-review-empty">소스 트윈 불러오는 중…</div> : error ? <div className="source-twin-error">{error}</div> : current && (
-          tab === 'structure'
+          view === 'structure'
             ? <StructureView current={current} perspective={perspective} setPerspective={setPerspective} query={query} setQuery={setQuery} selectedId={selectedId} setSelectedId={setSelectedId} />
-            : tab === 'changes'
+            : view === 'changes'
               ? <ChangesView current={current} />
-              : <HistoryView history={history} historyError={historyError} captureBusy={captureBusy} onCapture={capture} comparison={comparison} compareBusy={compareBusy} onCompare={compare} />
+              : <HistoryView
+                  history={history}
+                  historyError={historyError}
+                  captureBusy={captureBusy}
+                  capturePlan={capturePlan}
+                  captureStatus={captureStatus}
+                  onPreviewCapture={previewCapture}
+                  onApplyCapture={applyCapture}
+                  onCancelCapture={() => { setCapturePlan(null); setHistoryError('') }}
+                  comparison={comparison}
+                  compareBusy={compareBusy}
+                  onCompare={compare}
+                />
         )}
       </div>
       {side === 'left' && splitter}

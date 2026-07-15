@@ -1,4 +1,5 @@
 import { supabase } from './supabase.js'
+import { SOURCE_TWIN_OPERATION_CONFIRMATION } from '../../shared/sourceTwin.js'
 
 async function sourceTwinRequest(path = '', options = {}) {
   const { data: { session } } = await supabase.auth.getSession()
@@ -31,7 +32,16 @@ export const compareSourceTwinHistory = (from, to) => (
   sourceTwinRequest(`?mode=compare&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`)
 )
 
-export const captureSourceTwinHistory = (reason = 'manual') => sourceTwinRequest('', {
+export const previewSourceTwinHistoryCapture = () => sourceTwinRequest('', {
   method: 'POST',
-  body: JSON.stringify({ action: 'capture', reason }),
+  body: JSON.stringify({ action: 'preview_capture' }),
+})
+
+export const applySourceTwinHistoryCapture = (planToken) => sourceTwinRequest('', {
+  method: 'POST',
+  body: JSON.stringify({
+    action: 'apply_capture',
+    plan_token: planToken,
+    confirmation: SOURCE_TWIN_OPERATION_CONFIRMATION,
+  }),
 })

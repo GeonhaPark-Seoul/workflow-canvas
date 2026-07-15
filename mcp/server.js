@@ -19,7 +19,10 @@ import {
   RELATION_TYPE_IDS,
 } from '../shared/relationOntology.js'
 import { WORKFLOW_RELATION_REPAIR_CONFIRMATION } from '../shared/workflowSystemMapRepair.js'
-import { SOURCE_TWIN_PERSPECTIVES } from '../shared/sourceTwin.js'
+import {
+  SOURCE_TWIN_OPERATION_CONFIRMATION,
+  SOURCE_TWIN_PERSPECTIVES,
+} from '../shared/sourceTwin.js'
 
 const SYSTEM_KIND_IDS = SYSTEM_KIND_DEFS.map(({ id }) => id)
 const SYSTEM_ENVIRONMENT_IDS = SYSTEM_ENVIRONMENT_DEFS.map(({ id }) => id)
@@ -175,7 +178,10 @@ sourceHandle/targetHandle은 생략 가능 — 생략하면 실제 좌표 기반
 - 소스 본문과 환경변수·키·토큰의 실제 값은 수집하거나 반환하지 않습니다. 실제 코드는 반환된 경로와 GitHub 링크에서 사용자가 별도로 확인합니다.
 - change_set과 GitHub push 이벤트는 변경 신호이며, 배포 성공이나 런타임 동작을 단독으로 증명하지 않습니다.
 - list_source_twin_history와 compare_source_twin_snapshots는 코드·DB 선언·배포·운영 상태의 내부 append-only 이력을 읽습니다. 외부 공증이나 운영자도 위조할 수 없는 증명으로 표현하지 마세요.
-- 세 도구는 모두 읽기 전용입니다. 응답의 writes_performed=false를 확인하고 코드·DB·배포를 자동 수정하지 마세요.
+- inspect_source_twin, list_source_twin_history, compare_source_twin_snapshots는 읽기 전용입니다. 응답의 writes_performed=false를 확인하세요.
+- preview_source_twin_snapshot은 서명된 일회성 계획만 만들며 DB에 쓰지 않습니다. write_set, excludes, 만료 시각을 사용자에게 먼저 설명하세요.
+- apply_source_twin_snapshot은 사용자가 그 미리보기 결과를 보고 명확히 승인한 경우에만 호출하세요. AI가 승인 문구를 스스로 만들거나 미리보기와 적용을 연속 자동 실행하면 안 됩니다.
+- 승인 계획은 사용자·현재 상태·작업 종류에 묶이고 만료되며 한 번만 실행됩니다. 상태가 달라지거나 만료되면 새 미리보기부터 다시 시작하세요.
 
 ### 시스템 지도 관계 복구
 - preview_workflow_system_map_relation_repair는 읽기 전용입니다. 먼저 실행해 repairable, protected, blockers와 plan_id를 사용자에게 그대로 설명하세요.
@@ -545,6 +551,30 @@ export function buildServer(getUserId) {
     userId,
     a.from_snapshot_id,
     a.to_snapshot_id,
+  ))))
+
+  server.registerTool('preview_source_twin_snapshot', {
+    description:
+      '제품 소유자 전용 읽기 전용 계획: 현재 코드·DB 선언·배포·운영·런타임·보안 상태를 내부 스냅샷으로 ' +
+      '생성할 범위, 최대 쓰기 행, 제외 정보, 복구 성격, 만료 시각을 보여주고 서명된 일회성 plan_token을 발급합니다. ' +
+      '이 단계에서는 DB·코드·캔버스·배포를 수정하지 않습니다.',
+    inputSchema: {},
+  }, g(async (userId) => ok(await store.previewSourceTwinSnapshot(userId))))
+
+  server.registerTool('apply_source_twin_snapshot', {
+    description:
+      '제품 소유자 전용 제한적 쓰기: 사용자가 preview_source_twin_snapshot 결과를 직접 검토하고 명확히 승인한 뒤에만 ' +
+      '현재 상태와 일치하는 미만료 계획을 한 번 실행합니다. 상태 스냅샷 1건과 조작 감사 기록 1건을 같은 DB 트랜잭션으로 ' +
+      '추가하며 앱 코드·운영 DB 구조·배포·캔버스 본문은 변경하지 않습니다.',
+    inputSchema: {
+      plan_token: z.string().min(1).max(16000).describe('직전 미리보기에서 받은 서명된 일회성 plan_token'),
+      confirmation: z.literal(SOURCE_TWIN_OPERATION_CONFIRMATION).describe(
+        `사용자가 미리보기 범위를 승인한 경우에만 ${SOURCE_TWIN_OPERATION_CONFIRMATION}`),
+    },
+  }, g(async (userId, a) => ok(await store.applySourceTwinSnapshot(
+    userId,
+    a.plan_token,
+    a.confirmation,
   ))))
 
   server.registerTool('preview_workflow_system_map_relation_repair', {
