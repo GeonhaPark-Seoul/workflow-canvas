@@ -573,10 +573,9 @@ body[data-theme='light'] .react-flow__edge.wfc-edge.selected .wfc-relation-label
   overflow-y: auto;
   overscroll-behavior: contain;
 }
-/* A selected React Flow node normally sits below the minimap stacking layer. */
-.react-flow__node:has(.system-part-editor),
-.react-flow__node:has(.work-intent-picker) {
-  z-index: 10 !important;
+/* Keep canvas controls below the selected-node toolbar when their bounds meet. */
+.react-flow__minimap {
+  z-index: 3 !important;
 }
 .system-part-editor.has-runtime-data {
   width: min(460px, calc(100vw - 24px));

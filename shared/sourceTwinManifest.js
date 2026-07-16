@@ -2,7 +2,7 @@
 export const SOURCE_TWIN_MANIFEST = Object.freeze(
 {
   "schemaVersion": 1,
-  "id": "source-twin-v1-d9bd7bf328f7",
+  "id": "source-twin-v1-094bc0521315",
   "source": {
     "id": "workflow-canvas:self-source",
     "label": "Workflow Canvas 소스 코드",
@@ -7480,23 +7480,23 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:src/index.css",
       "kind": "file",
       "label": "src/index.css",
-      "fingerprint": "82cab17a17a3b3b2f696",
-      "explanationFingerprint": "fd7394b3b0e9eb1b721a",
+      "fingerprint": "63ffccb819a77b82a78e",
+      "explanationFingerprint": "714b30bdcfedcf268f94",
       "path": "src/index.css",
       "layer": "frontend",
       "language": "css",
       "lineStart": 1,
-      "lineEnd": 3409,
+      "lineEnd": 3408,
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
       "summary": "캔버스, 노드, 연결선, 패널과 팝업의 크기·색·배치·반응형 모양을 결정합니다.",
       "userImpact": "화면이 읽기 쉽고 모바일과 데스크톱에서 겹치지 않게 보이는 방식을 바꿉니다.",
-      "technicalSummary": "3409줄의 css 파일 · 현재 분석 지원 범위 밖",
+      "technicalSummary": "3408줄의 css 파일 · 현재 분석 지원 범위 밖",
       "explanationBasis": {
         "method": "curated-product-profile",
         "refs": [
           "profile:workflow-canvas@0.2.0",
-          "source:src/index.css#L1-L3409"
+          "source:src/index.css#L1-L3408"
         ]
       },
       "tags": [
@@ -74407,11 +74407,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
     ]
   },
   "fingerprints": {
-    "code": "4df8d1acd284e63ad322",
+    "code": "4b24c088ce1c291a575c",
     "database": "5b15956c4a97a35a0a4c",
     "security": "a63fa88e27d72f7aa081",
     "deployment": "cf4c1e3c2abe81b732bc",
-    "explanations": "5b22e3877a31a9046d99"
+    "explanations": "e8dc06d45d59078a3120"
   },
   "summary": {
     "entities": 1578,
@@ -74432,7 +74432,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
     "structureOnlyFiles": 0
   },
   "changeSet": {
-    "baseManifestId": "source-twin-v1-cb532da3903b",
+    "baseManifestId": "source-twin-v1-d9bd7bf328f7",
     "initialBaseline": false,
     "added": [],
     "changed": [
