@@ -10,12 +10,14 @@ const NODE_DEFS = [
   { key: 'content-database', nodeType: 'content', contentKind: 'database', label: '컨텐츠 - 데이터베이스', desc: '구조화된 데이터', icon: '🗄', border: '#a855f7', borderStyle: 'solid', badge: '준비 중' },
   { key: 'content-browser', nodeType: 'content', contentKind: 'browser', label: '컨텐츠 - 브라우저', desc: '웹 페이지 임베드', icon: '🌐', border: '#06b6d4', borderStyle: 'solid' },
   { key: 'system', section: '시스템 모델', nodeType: 'system', systemKind: 'service', label: '시스템 실체', desc: '앱·API·DB 등 실제 자원을 모델링', icon: '◆', border: '#06b6d4', borderStyle: 'solid', badge: '설계' },
+  { key: 'intent', section: '의도 자산', nodeType: 'intent', intentKind: 'intent', label: 'Intent 노드', desc: '사람·AI가 읽는 버전 관리형 의도', icon: '◇', border: '#ef6c8f', borderStyle: 'solid' },
 ]
 
 const payloadOf = (def) => ({
   nodeType: def.nodeType,
   ...(def.contentKind ? { contentKind: def.contentKind } : {}),
   ...(def.systemKind ? { systemKind: def.systemKind } : {}),
+  ...(def.intentKind ? { intentKind: def.intentKind } : {}),
 })
 
 export default function NodePalette({ onClose, onPick, mobile }) {

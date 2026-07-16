@@ -17,6 +17,7 @@ import MemoNode from './nodes/MemoNode'
 import GroupNode from './nodes/GroupNode'
 import ContentNode from './nodes/ContentNode'
 import SystemNode from './nodes/SystemNode'
+import IntentNode from './nodes/IntentNode'
 import StubEdge from './edges/StubEdge'
 import Toolbar from './components/Toolbar'
 import CanvasTabs from './components/CanvasTabs'
@@ -79,6 +80,7 @@ import {
 } from './lib/shares'
 import { getMyProfile, loadMySettings, upsertMyEmail, touchLastSeen } from './lib/profiles'
 import { createSystemNodeData } from '../shared/systemOntology.js'
+import { createIntentNodeData, recordIntentVersion } from '../shared/intentOntology.js'
 import {
   WORKFLOW_GIT_SYNC_EDGE_ID,
   workflowSourceTwinEntryForEdgeOperation,
@@ -130,7 +132,7 @@ import {
   visibleNodeIdSetForPermission,
 } from '../shared/sharePermissions.js'
 
-const nodeTypes = { stage: StageNode, memo: MemoNode, group: GroupNode, content: ContentNode, system: SystemNode }
+const nodeTypes = { stage: StageNode, memo: MemoNode, group: GroupNode, content: ContentNode, system: SystemNode, intent: IntentNode }
 const edgeTypes = { stub: StubEdge }
 
 const defaultEdgeOptions = {
@@ -198,6 +200,7 @@ function nodeDisplayName(node) {
   if (node.type === 'memo') return '메모'
   if (node.type === 'content') return '콘텐츠'
   if (node.type === 'system') return '시스템 실체'
+  if (node.type === 'intent') return '의도'
   if (node.type === 'group') return '그룹'
   return '단계 노드'
 }
@@ -518,7 +521,7 @@ export default function App() {
   const [stageTypes, setStageTypes] = useState(() => initData.stageTypes ?? DEFAULT_STAGE_TYPES)
   const [contextMenu, setContextMenu] = useState(null)
   const [renamingTypeIdx, setRenamingTypeIdx] = useState(null)
-  const [notesPanel, setNotesPanel] = useState(null) // { type: 'stage'|'memo'|'content'|'system' } | null
+  const [notesPanel, setNotesPanel] = useState(null) // { type: 'stage'|'memo'|'content'|'system'|'intent' } | null
   const [twinReviewOpen, setTwinReviewOpen] = useState(false)
   const [sourceTwinEntry, setSourceTwinEntry] = useState(null)
   const [gitSyncEdgeOperation, setGitSyncEdgeOperation] = useState(IDLE_GIT_SYNC_EDGE_OPERATION)
@@ -2759,6 +2762,14 @@ export default function App() {
     }
   }, [setEdges, setNodes])
 
+  const recordIntentNodeVersion = useCallback((id, pendingPatch = {}) => {
+    setNodes((items) => items.map((node) => {
+      if (node.id !== id || node.type !== 'intent') return node
+      const current = sanitizeNodeData({ ...node.data, ...pendingPatch })
+      return { ...node, data: recordIntentVersion(current) }
+    }))
+  }, [setNodes])
+
   const runSystemPartRuntimeCheck = useCallback(async (nodeId, part) => {
     const canvasId = latestRef.current.activeCanvasId
     const capability = systemRuntimeCapabilityForPart(part, nodeId)
@@ -3037,6 +3048,14 @@ export default function App() {
       const id = nextId()
       setNodes((nds) => {
         const node = { id, type: 'system', position: creationPosition(frame, nds, pos, 240, 130), data: createSystemNodeData(payload.systemKind) }
+        return sortParentsFirst([...nds, forceFrame ? { ...node, parentId: frame.id } : node])
+      })
+      return
+    }
+    if (payload.nodeType === 'intent') {
+      const id = nextId()
+      setNodes((nds) => {
+        const node = { id, type: 'intent', position: creationPosition(frame, nds, pos, 240, 140), data: createIntentNodeData(payload.intentKind) }
         return sortParentsFirst([...nds, forceFrame ? { ...node, parentId: frame.id } : node])
       })
       return
@@ -3555,6 +3574,13 @@ export default function App() {
     closeContext()
   }
 
+  const handleContextAddIntent = () => {
+    if (!rfInstance || !contextMenu) return
+    const pos = rfInstance.screenToFlowPosition({ x: contextMenu.flowX, y: contextMenu.flowY })
+    addFromPalette({ nodeType: 'intent' }, pos)
+    closeContext()
+  }
+
   const handleContextPaste = () => {
     if (!contextMenu) return
     if (contextMenu.flowX != null && rfInstance) {
@@ -3676,7 +3702,7 @@ export default function App() {
 
   const openNodeInNotes = useCallback((nodeId, type) => {
     setSourceTwinEntry(null)
-    if (!['stage', 'memo', 'content', 'system'].includes(type)) return
+    if (!['stage', 'memo', 'content', 'system', 'intent'].includes(type)) return
     setTwinReviewOpen(false)
     setTwinProposalPreview(null)
     setTwinProposalStatus(null)
@@ -4510,7 +4536,7 @@ export default function App() {
         {!mobile && <Controls style={{ background: '#1a1a22', border: '1px solid #ffffff18', borderRadius: 8 }} />}
         {!mobile && (
           <MiniMap
-            nodeColor={(n) => (n.type === 'memo' ? '#f59e0b88' : n.type === 'group' ? '#8b94a733' : n.type === 'system' ? '#06b6d488' : '#3b82f688')}
+            nodeColor={(n) => (n.type === 'memo' ? '#f59e0b88' : n.type === 'group' ? '#8b94a733' : n.type === 'system' ? '#06b6d488' : n.type === 'intent' ? '#ef6c8f88' : '#3b82f688')}
             maskColor="#0f0f1388"
             style={{ background: '#1a1a22', border: '1px solid #ffffff18', borderRadius: 8 }}
           />
@@ -4562,6 +4588,7 @@ export default function App() {
           ['memo', '참고·메모 노트', '※'],
           ['content', '콘텐츠 노트', '▣'],
           ['system', '시스템·트윈 노트', '⌬'],
+          ['intent', '의도 자산', '◇'],
         ].map(([t, label, icon]) => (
           <button
             key={t}
@@ -4652,6 +4679,10 @@ export default function App() {
                 시스템 모델
               </div>
               <ContextItem icon="◆" label="시스템 실체" color="#06b6d4" indent onClick={handleContextAddSystem} />
+              <div style={{ padding: '6px 12px 2px', color: '#555', fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
+                의도 자산
+              </div>
+              <ContextItem icon="◇" label="Intent 노드" color="#ef6c8f" indent onClick={handleContextAddIntent} />
               <div style={{ padding: '6px 12px 2px', color: '#555', fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
                 컨텐츠 추가
               </div>
@@ -4796,6 +4827,11 @@ export default function App() {
           {contextMenu.nodeId && contextMenu.nodeType === 'system' && ctxCanDelete && (
             <ContextItem icon="🗑" label={ctxMulti ? '전체 삭제' : '노드 삭제'} color="#ef4444" onClick={handleContextDeleteNode} />
           )}
+
+          {/* Intent node: editing and version history live in the notes panel. */}
+          {contextMenu.nodeId && contextMenu.nodeType === 'intent' && ctxCanDelete && (
+            <ContextItem icon="🗑" label={ctxMulti ? '전체 삭제' : '노드 삭제'} color="#ef4444" onClick={handleContextDeleteNode} />
+          )}
         </div>
       )}
       </div>
@@ -4811,6 +4847,7 @@ export default function App() {
           onClose={() => { setNotesPanel(null); setNotesSelectedId(null) }}
           onFocusNode={focusNode}
           onUpdateNode={updateNodeData}
+          onRecordIntentVersion={recordIntentNodeVersion}
           onUpdateNote={updateNoteData}
           onCreateNote={createNote}
           onPromoteNote={promoteNoteToCenter}

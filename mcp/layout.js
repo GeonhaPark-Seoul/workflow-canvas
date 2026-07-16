@@ -11,6 +11,7 @@ export const SIZE = {
   memo:  { w: 180, h: 90, minW: 160, minH: 80 },
   content: { w: 220, h: 140, minW: 160, minH: 100 },
   system: { w: 240, h: 130, minW: 200, minH: 110 },
+  intent: { w: 240, h: 140, minW: 220, minH: 120 },
   group: { w: 320, h: 220, minW: 240, minH: 160 },
 }
 

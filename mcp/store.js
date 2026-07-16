@@ -13,6 +13,7 @@ import {
   isStructuralNode, layoutGraph, validateGraphInput, radialLevels,
 } from './layout.js'
 import { createSystemNodeData, normalizeSystemNodeData } from '../shared/systemOntology.js'
+import { intentVersionState, normalizeIntentNodeData } from '../shared/intentOntology.js'
 import {
   createEdgeRelationData,
   edgeRelationInfo,
@@ -494,6 +495,22 @@ export function toExternalCanvasNode(node, byId, hidden = false) {
       ...(data.externalRef ? { external_ref: data.externalRef } : {}),
       ...(data.systemParts?.length ? { system_parts: data.systemParts } : {}),
       reality: 'declared',
+    }
+  }
+  if (node.type === 'intent') {
+    const data = normalizeIntentNodeData(node.data)
+    const version = intentVersionState(data)
+    return {
+      ...shape,
+      label: data.label,
+      statement: data.statement,
+      intent_kind: data.intentKind,
+      intent_status: data.intentStatus,
+      current_version: version.currentVersion,
+      version_state: version.dirty ? 'draft_changed' : 'recorded',
+      ...(version.latestRecordedAt ? { latest_recorded_at: version.latestRecordedAt } : {}),
+      intent_versions: data.intentVersions,
+      executable: false,
     }
   }
   return {

@@ -373,6 +373,35 @@ This is the durable ledger for security, reliability, commercialization, and arc
 - Required work: validate the Source Lens 0.2 and Twin Core 0.3 contract-sync proposal in production, add per-engine release ownership, and prove parsed evidence plus a real adapter on a materially different second software stack. Avoid folder-first refactors; introduce explicit engine entry points only where they improve a real compatibility boundary.
 - Exit criteria: a non-developer can identify every shipped engine, its purpose, maturity, version, evidence, inputs, outputs, owner, and compatibility from the map; a second adapter adds its engine-facing components without changing the mapper or canvas UI.
 
+## Intent assets and planning
+
+### INT-001 - Conversation and document to Intent extraction engine
+
+- Severity: medium
+- Gate: intent-intelligence
+- Status: deferred
+- Current boundary: Intent nodes are created and edited explicitly by a person. The product does not claim that a conversation, meeting, or document has been interpreted into an adopted intent.
+- Required work: define a versioned extraction engine using ontology, evidence-bound GraphRAG, and first-principles decomposition; retain source references and confidence; separate quoted facts, interpretation, assumptions, alternatives, and final decisions; require human confirmation before an extracted draft becomes an active Intent Asset.
+- Exit criteria: the same source set produces traceable draft intents, every statement points to authorized evidence, contradictory sources remain visible, and AI cannot silently create or activate organizational intent.
+
+### INT-002 - Intent application to Work and Workflow
+
+- Severity: high
+- Gate: intent-governance
+- Status: deferred
+- Current boundary: an Intent node can be connected visually and read by a human or AI, but the connection does not grant authority or automatically change Work, Workflow, policy, or execution.
+- Required work: define typed application relations, scope, precedence, conflict resolution, version pinning, supersession, stale-intent behavior, agent interpretation rules, approval boundaries, and audit records. Distinguish guidance, constraint, objective, requirement, and executable policy.
+- Exit criteria: every Work or Workflow can identify exactly which Intent version applies and why, conflicting intents cannot be resolved invisibly, and no agent or interface treats a visual edge as mutation authority.
+
+### INT-003 - Durable append-only Intent version ledger
+
+- Severity: medium
+- Gate: multi-user intent governance
+- Status: deferred
+- Current limitation: the MVP keeps at most 25 explicit snapshots inside the canvas node JSON. This gives useful local version history but is not an immutable organizational ledger and does not record the actor independently from the canvas document.
+- Required work: move versions to tenant-scoped append-only records with actor identity, optimistic concurrency, signatures or tamper evidence, access control, supersession links, export, retention, restoration, and canvas-node projections. Preserve the current explicit-recording interaction and migrate embedded snapshots without loss.
+- Exit criteria: concurrent editors cannot overwrite intent history, every version has attributable provenance, retained versions cannot be silently rewritten by normal canvas saves, and a node can be reconstructed from the ledger.
+
 ## AI orchestration and automation
 
 ### AI-001 - Provider-neutral agent and run schema

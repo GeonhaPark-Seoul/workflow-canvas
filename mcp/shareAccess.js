@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { sanitizeHtml, sanitizeTextFields } from './sanitize.js'
 import { normalizeEdgeRelationData } from '../shared/relationOntology.js'
 import { normalizeSystemParts } from '../shared/systemPartOntology.js'
+import { normalizeIntentNodeData } from '../shared/intentOntology.js'
 import {
   composeSharePermission,
   editableNodeIdSetForPermission,
@@ -456,11 +457,14 @@ function sanitizeNode(node) {
   delete storedData.systemPartRuntime
   delete storedData.canRunSystemChecks
   delete storedData.onCheckSystemPart
-  const data = sanitizeTextFields({ ...storedData })
+  let data = sanitizeTextFields({ ...storedData })
   if (Array.isArray(data.parts)) {
     data.parts = data.parts.map((part) => ({ ...part, text: typeof part.text === 'string' ? sanitizeHtml(part.text) : part.text }))
   }
   if (Array.isArray(data.systemParts)) data.systemParts = normalizeSystemParts(data.systemParts)
+  if (node.type === 'intent' || data.intentSchemaVersion != null || data.intentKind != null || data.statement != null) {
+    data = normalizeIntentNodeData(data)
+  }
   return { ...node, data }
 }
 

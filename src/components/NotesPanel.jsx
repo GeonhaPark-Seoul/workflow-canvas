@@ -10,13 +10,20 @@ import {
   systemNodeReality,
   systemNodeTwinLink,
 } from '../../shared/systemOntology.js'
+import {
+  INTENT_KIND_DEFS,
+  INTENT_STATUS_DEFS,
+  intentKindDefinition,
+  intentStatusDefinition,
+  intentVersionState,
+} from '../../shared/intentOntology.js'
 
 // ── Notes-app-style split pane ───────────────────────────────────────────────
 // LIST column (node titles, tree for stage / flat for memo & content) +
 // resizable PAGE column (full note editor for the selected node).
 // The pane can be resized and moved to either side of the canvas.
 
-const TYPE_LABEL = { stage: '단계', memo: '메모', content: '컨텐츠', system: '시스템' }
+const TYPE_LABEL = { stage: '단계', memo: '메모', content: '컨텐츠', system: '시스템', intent: '의도' }
 const CONTENT_KIND_LABEL = { photo: '사진', database: '데이터베이스', browser: '브라우저' }
 const NO_TITLE = '(제목 없음)'
 
@@ -33,6 +40,7 @@ function nodeTitle(node) {
   if (node.type === 'memo') return stripHtml(node.data?.header) || NO_TITLE
   if (node.type === 'content') return stripHtml(node.data?.header) || CONTENT_KIND_LABEL[node.data?.kind] || '컨텐츠'
   if (node.type === 'system') return stripHtml(node.data?.label) || NO_TITLE
+  if (node.type === 'intent') return stripHtml(node.data?.label) || NO_TITLE
   return NO_TITLE
 }
 
@@ -40,6 +48,7 @@ function nodeBadge(node) {
   if (!node) return ''
   if (node.type === 'content') return `컨텐츠 · ${CONTENT_KIND_LABEL[node.data?.kind] ?? ''}`
   if (node.type === 'system') return `시스템 · ${systemKindDefinition(node.data?.systemKind).label}`
+  if (node.type === 'intent') return `의도 · ${intentKindDefinition(node.data?.intentKind).label}`
   return TYPE_LABEL[node.type] ?? node.type
 }
 
@@ -53,6 +62,7 @@ function bodyPreviewText(node) {
     if (node.data?.kind === 'database') return '데이터베이스 (준비 중)'
   }
   if (node.type === 'system') return stripHtml(node.data?.purpose || node.data?.description)
+  if (node.type === 'intent') return node.data?.statement ?? ''
   return ''
 }
 
@@ -247,7 +257,7 @@ function SubNoteRow({ id, depth, byId, relationMap, expanded, onToggle, onFocusN
 // ── Page column: full note editor for the selected node ────────────────────
 // Keyed by node.id at the call site so switching pages remounts this fresh
 // (simplest way to reset all local editing state).
-function NotePage({ node, byId, inMap, outMap, isEditable, onUpdateNode, onFocusNode, onOpen, onBack, onClose, imageContext }) {
+function NotePage({ node, byId, inMap, outMap, isEditable, onUpdateNode, onRecordIntentVersion, onFocusNode, onOpen, onBack, onClose, imageContext }) {
   const titleSaveTimer = useRef(null)
   const bodySaveTimer = useRef(null)
   const pendingTitle = useRef(null)
@@ -264,8 +274,14 @@ function NotePage({ node, byId, inMap, outMap, isEditable, onUpdateNode, onFocus
     })
   }, [])
 
-  const titleField = node.type === 'stage' || node.type === 'system' ? 'label' : 'header'
-  const bodyField = node.type === 'stage' || node.type === 'system' ? 'description' : node.type === 'memo' ? 'text' : null
+  const titleField = node.type === 'stage' || node.type === 'system' || node.type === 'intent' ? 'label' : 'header'
+  const bodyField = node.type === 'stage' || node.type === 'system'
+    ? 'description'
+    : node.type === 'memo'
+      ? 'text'
+      : node.type === 'intent'
+        ? 'statement'
+        : null
 
   const flushPending = useCallback(() => {
     clearTimeout(titleSaveTimer.current)
@@ -305,6 +321,18 @@ function NotePage({ node, byId, inMap, outMap, isEditable, onUpdateNode, onFocus
       onUpdateNode(node.id, { [bodyField]: pendingBody.current })
       pendingBody.current = null
     }, 400)
+  }
+
+  const recordCurrentIntentVersion = () => {
+    if (node.type !== 'intent' || !isEditable || !onRecordIntentVersion) return
+    clearTimeout(titleSaveTimer.current)
+    clearTimeout(bodySaveTimer.current)
+    const pendingPatch = {}
+    if (pendingTitle.current !== null) pendingPatch[titleField] = pendingTitle.current
+    if (pendingBody.current !== null) pendingPatch[bodyField] = pendingBody.current
+    pendingTitle.current = null
+    pendingBody.current = null
+    onRecordIntentVersion(node.id, pendingPatch)
   }
 
   const parents = inMap.get(node.id) ?? []
@@ -381,6 +409,105 @@ function NotePage({ node, byId, inMap, outMap, isEditable, onUpdateNode, onFocus
             }}
           />
         )}
+
+        {node.type === 'intent' && (
+          <textarea
+            key={`body-${node.id}`}
+            defaultValue={node.data?.statement ?? ''}
+            disabled={!isEditable}
+            maxLength={4000}
+            onChange={(event) => scheduleBodySave(event.target.value)}
+            placeholder="이 의도가 무엇을 지향하고, 무엇을 지키려는지 적으세요."
+            rows={9}
+            style={{
+              width: '100%', minHeight: 180, boxSizing: 'border-box', resize: 'vertical',
+              background: '#12121a', border: '1px solid #ffffff18', borderRadius: 6,
+              color: '#d8dae0', fontSize: 13, lineHeight: 1.6, padding: '10px 12px',
+              outline: 'none', fontFamily: 'inherit', whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+            }}
+          />
+        )}
+
+        {node.type === 'intent' && (() => {
+          const version = intentVersionState(node.data)
+          const kind = intentKindDefinition(node.data?.intentKind)
+          const status = intentStatusDefinition(node.data?.intentStatus)
+          const fieldStyle = {
+            width: '100%', boxSizing: 'border-box', background: '#12121a',
+            border: '1px solid #ffffff18', borderRadius: 6, color: '#d8dae0',
+            fontSize: 12, padding: '7px 9px', outline: 'none', fontFamily: 'inherit',
+          }
+          const versions = [...(node.data?.intentVersions ?? [])].reverse()
+          return (
+            <div style={{ marginTop: 16, borderTop: '1px solid #ffffff18', paddingTop: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10 }}>
+                <label style={{ display: 'grid', gap: 5, minWidth: 0 }}>
+                  <span style={{ color: '#777f90', fontSize: 10, fontWeight: 700 }}>의도 종류</span>
+                  <select
+                    disabled={!isEditable}
+                    value={kind.id}
+                    onChange={(event) => onUpdateNode(node.id, { intentKind: event.target.value })}
+                    style={fieldStyle}
+                  >
+                    {INTENT_KIND_DEFS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
+                  </select>
+                </label>
+                <label style={{ display: 'grid', gap: 5, minWidth: 0 }}>
+                  <span style={{ color: '#777f90', fontSize: 10, fontWeight: 700 }}>상태</span>
+                  <select
+                    disabled={!isEditable}
+                    value={status.id}
+                    onChange={(event) => onUpdateNode(node.id, { intentStatus: event.target.value })}
+                    style={fieldStyle}
+                  >
+                    {INTENT_STATUS_DEFS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
+                  </select>
+                </label>
+              </div>
+
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 9, marginTop: 12,
+                padding: '9px 10px', border: '1px solid #ffffff18', borderRadius: 6, background: '#171720',
+              }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ color: version.dirty ? '#f59e0b' : '#22c55e', fontSize: 11, fontWeight: 800 }}>{version.label}</div>
+                  <div style={{ color: '#747b8b', fontSize: 10, marginTop: 2 }}>
+                    편집 내용은 초안이며, 버튼을 눌러야 새 버전으로 남습니다.
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  disabled={!isEditable || !version.dirty}
+                  onClick={recordCurrentIntentVersion}
+                  title="현재 제목·내용·종류·상태를 변경 불가능한 버전 스냅샷으로 기록"
+                  style={{
+                    border: '1px solid #ef6c8f88', borderRadius: 6, padding: '7px 10px',
+                    background: version.dirty ? '#ef6c8f22' : '#ffffff0a',
+                    color: version.dirty ? '#f59ab3' : '#666', fontSize: 11, fontWeight: 750,
+                    cursor: isEditable && version.dirty ? 'pointer' : 'default', fontFamily: 'inherit',
+                  }}
+                >
+                  현재 내용을 버전으로 기록
+                </button>
+              </div>
+
+              <div style={{ marginTop: 14 }}>
+                <div style={{ color: '#777f90', fontSize: 10, fontWeight: 800, letterSpacing: 0.7, marginBottom: 6 }}>버전 이력</div>
+                {versions.length === 0 ? (
+                  <div style={{ color: '#666', fontSize: 11.5, padding: '8px 2px' }}>아직 기록된 버전이 없습니다.</div>
+                ) : versions.map((item) => (
+                  <details key={item.version} style={{ borderTop: '1px solid #ffffff12', padding: '7px 2px' }}>
+                    <summary style={{ color: '#c8ccd6', fontSize: 11.5, cursor: 'pointer' }}>
+                      v{item.version} · {intentKindDefinition(item.intentKind).label} · {intentStatusDefinition(item.intentStatus).label} · {new Date(item.recordedAt).toLocaleString('ko-KR')}
+                    </summary>
+                    <div style={{ color: '#f0f0f0', fontSize: 12, fontWeight: 700, marginTop: 7 }}>{item.label || '(제목 없음)'}</div>
+                    <div style={{ color: '#9ba1af', fontSize: 11.5, lineHeight: 1.55, whiteSpace: 'pre-wrap', marginTop: 4 }}>{item.statement || '(내용 없음)'}</div>
+                  </details>
+                ))}
+              </div>
+            </div>
+          )
+        })()}
 
         {node.type === 'system' && (() => {
           const reality = systemNodeReality(node.data)
@@ -594,6 +721,7 @@ export default function NotesPanel({
   onClose,
   onFocusNode,
   onUpdateNode,
+  onRecordIntentVersion,
   onUpdateNote,
   onCreateNote,
   onPromoteNote,
@@ -650,7 +778,7 @@ export default function NotesPanel({
   const byId = useMemo(() => new Map(entries.map((n) => [n.id, n])), [entries])
 
   const typeNodes = useMemo(() => entries.filter((n) => n.type === type), [entries, type])
-  const canCreateStandaloneNote = canCreateNotes && type !== 'system'
+  const canCreateStandaloneNote = canCreateNotes && !['system', 'intent'].includes(type)
 
   // Stage hierarchy: source→target edges between two stage nodes (excluding part links).
   const stageIds = useMemo(() => new Set(entries.filter((n) => n.type === 'stage').map((n) => n.id)), [entries])
@@ -842,6 +970,7 @@ export default function NotesPanel({
             outMap={outMap}
             isEditable={selectedNode.noteOnly ? !!isNoteEditable?.(selectedNode.id) : (isNodeEditable ? isNodeEditable(selectedNode.id) : true)}
             onUpdateNode={selectedNode.noteOnly ? onUpdateNote : onUpdateNode}
+            onRecordIntentVersion={selectedNode.noteOnly ? null : onRecordIntentVersion}
             onFocusNode={onFocusNode}
             onOpen={onSelect}
             onBack={handleBack}

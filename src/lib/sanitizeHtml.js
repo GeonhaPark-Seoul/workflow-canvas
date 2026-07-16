@@ -1,4 +1,5 @@
 import { normalizeSystemNodeData, SYSTEM_ONTOLOGY_TEXT_FIELDS } from '../../shared/systemOntology.js'
+import { normalizeIntentNodeData } from '../../shared/intentOntology.js'
 import { normalizeSystemParts } from '../../shared/systemPartOntology.js'
 import { sanitizeRichTextHtml } from '../../shared/richTextSanitizer.js'
 
@@ -33,6 +34,9 @@ export function sanitizeNodeData(data) {
   if (Array.isArray(next.systemParts)) next.systemParts = normalizeSystemParts(next.systemParts)
   if (next.systemKind != null || next.sourceKind != null || next.externalRef != null || next.trustZone != null) {
     next = normalizeSystemNodeData(next)
+  }
+  if (next.intentSchemaVersion != null || next.intentKind != null || next.statement != null || next.intentVersions != null) {
+    next = normalizeIntentNodeData(next)
   }
   return next
 }
