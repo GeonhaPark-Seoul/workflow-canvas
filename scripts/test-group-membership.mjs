@@ -41,6 +41,11 @@ assert.deepEqual(
 
 assert.equal(findGroupDropTarget(nodes, 'group-a'), null, '그룹 프레임 자체를 다른 그룹의 자식으로 만들지 않습니다.')
 assert.deepEqual(nodeDimensions({ type: 'intent' }), { width: 220, height: 120 })
+assert.deepEqual(
+  nodeDimensions({ type: 'system', measured: { width: 200, height: 110 }, width: 240, height: 130 }),
+  { width: 240, height: 130 },
+  '저장된 안정 크기가 오래된 측정값보다 크면 배치 계산도 안정 크기를 사용해야 합니다.',
+)
 
 const placementNodes = [
   { id: 'work', type: 'system', position: { x: 100, y: 100 }, width: 240, height: 130 },

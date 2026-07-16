@@ -12,14 +12,15 @@ const DEFAULT_NODE_DIMENSIONS = Object.freeze({
 })
 
 function positiveDimension(...values) {
-  return values.find((value) => Number.isFinite(value) && value > 0) ?? 0
+  const positive = values.filter((value) => Number.isFinite(value) && value > 0)
+  return positive.length ? Math.max(...positive) : 0
 }
 
 export function nodeDimensions(node) {
   const fallback = DEFAULT_NODE_DIMENSIONS[node?.type] ?? { width: 160, height: 80 }
   return {
-    width: positiveDimension(node?.measured?.width, node?.width, fallback.width),
-    height: positiveDimension(node?.measured?.height, node?.height, fallback.height),
+    width: positiveDimension(node?.measured?.width, node?.width) || fallback.width,
+    height: positiveDimension(node?.measured?.height, node?.height) || fallback.height,
   }
 }
 

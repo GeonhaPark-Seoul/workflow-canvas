@@ -3061,7 +3061,14 @@ export default function App() {
     if (payload.nodeType === 'system') {
       const id = nextId()
       setNodes((nds) => {
-        const node = { id, type: 'system', position: creationPosition(frame, nds, pos, 240, 130), data: createSystemNodeData(payload.systemKind) }
+        const node = {
+          id,
+          type: 'system',
+          position: creationPosition(frame, nds, pos, 240, 130),
+          width: 240,
+          height: 130,
+          data: createSystemNodeData(payload.systemKind),
+        }
         return sortParentsFirst([...nds, forceFrame ? { ...node, parentId: frame.id } : node])
       })
       return
@@ -3069,7 +3076,14 @@ export default function App() {
     if (payload.nodeType === 'intent') {
       const id = nextId()
       setNodes((nds) => {
-        const node = { id, type: 'intent', position: creationPosition(frame, nds, pos, 240, 140), data: createIntentNodeData(payload.intentKind) }
+        const node = {
+          id,
+          type: 'intent',
+          position: creationPosition(frame, nds, pos, 240, 140),
+          width: 240,
+          height: 140,
+          data: createIntentNodeData(payload.intentKind),
+        }
         return sortParentsFirst([...nds, forceFrame ? { ...node, parentId: frame.id } : node])
       })
       return
@@ -3783,8 +3797,9 @@ export default function App() {
     })
     const byId = new Map(nodes.map((node) => [node.id, node]))
     const sourceAbsolute = absoluteNodePosition(sourceNode, byId)
+    const sourceSize = nodeDimensions(sourceNode)
     const desiredAbsolute = {
-      x: sourceAbsolute.x + (sourceNode.measured?.width ?? sourceNode.width ?? 240) + 36,
+      x: sourceAbsolute.x + sourceSize.width + 36,
       y: sourceAbsolute.y,
     }
     const intentSize = { width: 240, height: 140 }
@@ -3806,6 +3821,7 @@ export default function App() {
       id: intentNodeId,
       type: 'intent',
       position,
+      ...intentSize,
       ...(sourceNode.parentId ? { parentId: sourceNode.parentId } : {}),
       data: intentData,
     }
