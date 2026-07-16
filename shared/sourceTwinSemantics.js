@@ -89,6 +89,7 @@ export const SOURCE_TWIN_SUBSYSTEM_DEFINITIONS = Object.freeze([
   { id: 'twin-runtime', area: 'digital-twin-engine', label: '운영 상태 관측', description: '실제 시스템 상태, 관측 시각과 LIVE·stale 판정' },
   { id: 'twin-workflow-adapter', area: 'digital-twin-engine', label: 'Workflow Canvas 어댑터', description: '현재 앱을 범용 트윈 엔진 계약에 연결하는 번역층' },
   { id: 'twin-operations', area: 'digital-twin-engine', label: '조작·검증 수명주기', description: '미리보기, 승인, 실행, 확인, 감사와 복구의 공통 절차' },
+  { id: 'work-intent-governance', area: 'digital-twin-engine', label: 'Work·Intent 엔진', description: '투입·처리·결과 Work 계약과 원문·조문·버전형 Intent 통제' },
   { id: 'source-analysis', area: 'source-code-twin', label: '코드 발견·설명 생성', description: '소스 구조를 읽고 역할·영역·근거 manifest를 생성' },
   { id: 'source-browser-history', area: 'source-code-twin', label: '코드 탐색·상태 이력', description: '로컬·GitHub 코드 보기, 검색, 변경과 배포별 비교' },
   { id: 'local-connector', area: 'source-code-twin', label: '로컬 커넥터', description: 'Mac 저장소의 제한된 메타데이터와 Git 상태 연결' },

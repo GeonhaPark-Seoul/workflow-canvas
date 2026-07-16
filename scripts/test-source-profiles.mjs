@@ -20,6 +20,7 @@ const workflowFiles = new Map([
 ])
 const workflowSelection = registeredSourceProfile({ project: { name: 'workflow-canvas' }, files: workflowFiles })
 assert.equal(workflowSelection.profile.id, 'workflow-canvas')
+assert.equal(workflowSelection.profile.version, '0.2.0')
 assert.deepEqual(workflowSelection.matchEvidence, ['package:workflow-canvas'])
 
 const genericFiles = new Map([

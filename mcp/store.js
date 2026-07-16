@@ -500,6 +500,21 @@ export function toExternalCanvasNode(node, byId, hidden = false) {
   if (node.type === 'intent') {
     const data = normalizeIntentNodeData(node.data)
     const version = intentVersionState(data)
+    const latestRecorded = data.intentVersions.at(-1) ?? null
+    const externalClause = (clause) => ({
+      id: clause.id,
+      clause_kind: clause.clauseKind,
+      enforcement: clause.enforcement,
+      text: clause.text,
+    })
+    const externalVersions = data.intentVersions.map(({ intentClauses, ...snapshot }) => ({
+      ...snapshot,
+      intent_clauses: intentClauses.map(externalClause),
+    }))
+    const clauseCounts = data.intentClauses.reduce((counts, clause) => ({
+      ...counts,
+      [clause.status]: (counts[clause.status] ?? 0) + 1,
+    }), { candidate: 0, approved: 0, rejected: 0 })
     return {
       ...shape,
       label: data.label,
@@ -509,7 +524,10 @@ export function toExternalCanvasNode(node, byId, hidden = false) {
       current_version: version.currentVersion,
       version_state: version.dirty ? 'draft_changed' : 'recorded',
       ...(version.latestRecordedAt ? { latest_recorded_at: version.latestRecordedAt } : {}),
-      intent_versions: data.intentVersions,
+      source_count: data.intentSources.length,
+      clause_counts: clauseCounts,
+      approved_clauses: latestRecorded?.intentClauses.map(externalClause) ?? [],
+      intent_versions: externalVersions,
       executable: false,
     }
   }

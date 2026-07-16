@@ -201,9 +201,11 @@ const workflowCanvasSemanticManifest = buildSourceTwinManifest(new Map([
   ['shared/twinBuildCanvas.js', 'export function materializeTwinBuildEntity() { return null }\n'],
   ['shared/systemRuntime.js', 'export function normalizeSystemRuntimeResult() { return null }\n'],
   ['shared/workflowSystemTwinAdapter.js', 'export function inspectWorkflowSystemTwin() { return null }\n'],
+  ['shared/workOntology.js', 'export function normalizeWorkDefinition() { return null }\n'],
+  ['src/components/IntentWorkspace.jsx', 'export default function IntentWorkspace() { return null }\n'],
 ]))
 assert.equal(workflowCanvasSemanticManifest.source.profile.id, 'workflow-canvas')
-assert.equal(workflowCanvasSemanticManifest.source.profile.version, '0.1.0')
+assert.equal(workflowCanvasSemanticManifest.source.profile.version, '0.2.0')
 const appSemanticEntity = workflowCanvasSemanticManifest.entities.find((entity) => entity.id === 'file:src/App.jsx')
 const sourcePanelSemanticEntity = workflowCanvasSemanticManifest.entities.find((entity) => entity.id === 'file:src/components/SourceTwinPanel.jsx')
 assert.equal(appSemanticEntity.area, 'canvas-interface')
@@ -220,8 +222,12 @@ assert.deepEqual(workflowEngineSubsystems.map((group) => group.id), [
   'twin-materialization',
   'twin-runtime',
   'twin-workflow-adapter',
+  'work-intent-governance',
 ])
-assert.ok(workflowEngineSubsystems.every((group) => group.label && group.description && group.entities.length === 1))
+assert.ok(workflowEngineSubsystems.every((group) => group.label && group.description && group.entities.length >= 1))
+const workIntentSubsystem = workflowEngineSubsystems.find((group) => group.id === 'work-intent-governance')
+assert.equal(workIntentSubsystem.entities.length, 2)
+assert.ok(workIntentSubsystem.entities.every((entity) => entity.explanationBasis.method === 'curated-product-profile'))
 
 const generated = serializeSourceTwinManifest(manifest)
 assert.deepEqual(parseGeneratedSourceTwin(generated), manifest, 'generated manifest must round-trip')

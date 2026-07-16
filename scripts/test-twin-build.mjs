@@ -299,7 +299,7 @@ const fullSystemMap = createWorkflowCanvasSystemMap()
 
 const firstEngineStage = inspectWorkflowSystemTwin(legacySystemMap).items
   .find((item) => item.status === 'engine_layer_missing')
-assert.deepEqual(firstEngineStage.proposal.counts, { nodes: 8, edges: 0, parts: 0 })
+assert.deepEqual(firstEngineStage.proposal.counts, { nodes: topEngineNodeIds.size + 1, edges: 0, parts: 0 })
 
 legacySystemMap.nodes.push(...structuredClone(fullSystemMap.nodes.filter((node) => (
   node.id === ENGINE_CAPABILITY_MAP_GROUP_ID || topEngineNodeIds.has(node.id)

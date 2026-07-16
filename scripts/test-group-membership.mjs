@@ -5,6 +5,7 @@ import { absoluteNodePosition } from '../src/lib/canvasGeometry.js'
 import {
   findGroupAtPoint,
   findGroupDropTarget,
+  nodeDimensions,
   positionInsideGroup,
   reparentNodePreservingPosition,
 } from '../src/lib/groupMembership.js'
@@ -38,6 +39,7 @@ assert.deepEqual(
 )
 
 assert.equal(findGroupDropTarget(nodes, 'group-a'), null, '그룹 프레임 자체를 다른 그룹의 자식으로 만들지 않습니다.')
+assert.deepEqual(nodeDimensions({ type: 'intent' }), { width: 220, height: 120 })
 
 const engineNode = {
   id: 'engine-a', type: 'system', position: { x: 150, y: 150 }, width: 240, height: 130,

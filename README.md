@@ -79,7 +79,7 @@ append-only 이벤트 이력에 기록합니다. 소스 본문, 커밋 메시지
 
 Workflow Canvas 시스템 지도에는 서버·DB·저장소 같은 실제 운영 자원과 별도로
 `제품·엔진 구성층 (논리)`이 있습니다. `Twin Core`, `Create Graph`, `Source Lens`,
-`Trust Map`, `LiveOps`, `Safe Operations`, `Connector Bridge`와 내부 구성요소를 보여주며,
+`Trust Map`, `LiveOps`, `Safe Operations`, `Work Core`, `Intent Engine`, `Connector Bridge`와 내부 구성요소를 보여주며,
 각 노드에는 제품·기술 버전, 성숙도, 입력·출력, 코드·테스트 근거와 담당 Maintainer
 Agent 상태가 표시됩니다. 이 노드들은 중요한 코드 기능을 눈으로 설명하기 위한 논리
 구성요소이며 독립 서버나 실행 프로세스가 아니므로 `LIVE` 대신 `논리 구성`으로 표시됩니다.

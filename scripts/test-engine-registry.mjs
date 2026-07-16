@@ -33,6 +33,16 @@ assert.equal(systemNodeReality({
   },
 }).id, 'logical')
 
+const workCore = map.nodes.find((node) => node.data.logicalComponent?.id === 'engine-work-core')
+const intentEngine = map.nodes.find((node) => node.data.logicalComponent?.id === 'engine-intent-core')
+assert.equal(workCore.data.label, 'Work Core')
+assert.equal(workCore.data.logicalComponent.technicalVersion, '0.1.0-alpha.0')
+assert.match(workCore.data.description, /실행기가 아니라/)
+assert.equal(intentEngine.data.label, 'Intent Engine')
+assert.equal(intentEngine.data.logicalComponent.technicalVersion, '0.2.0-alpha.0')
+assert.match(intentEngine.data.description, /AI 하네스 집행은 포함하지 않습니다/)
+assert.ok(map.nodes.some((node) => node.data.logicalComponent?.id === 'component-intent-clause-extractor'))
+
 for (const node of map.nodes) {
   assert.equal(node.type, 'system')
   assert.equal(node.parentId, ENGINE_CAPABILITY_MAP_GROUP_ID)

@@ -369,7 +369,7 @@ This is the durable ledger for security, reliability, commercialization, and arc
 - Severity: medium
 - Gate: product-v1
 - Status: in-progress
-- Current evidence: Engine Registry v1 defines seven top-level product engines and eighteen internal components with independent technical versions, maturity, inputs, outputs, compatibility, and code/test evidence. Capability Mapper materializes them as a logical system-map layer, and `TwinBuild v3` preserves the metadata. Existing maps receive three bounded capability proposals instead of forty-three individual approvals. Twin Core 0.2 separately displays logical/declared identity, CODE snapshot binding, and server-verified LIVE observation. Its fingerprint-guarded `bind_node` operation migrates up to 24 legacy nodes per review without changing layout, descriptions, notes, parts, or edges. Twin Core 0.3 additionally detects stale Engine Registry contracts and produces fingerprint-guarded `sync_logical_component` proposals that update only version, maturity, inputs, outputs, compatibility and code/test evidence. Source Lens 0.2 adds Source Profile Contract v1, a separate Workflow Canvas profile and a FastAPI reference profile without changing the mapper or canvas component model.
+- Current evidence: Engine Registry v1 defines nine top-level product engines and twenty-three internal components with independent technical versions, maturity, inputs, outputs, compatibility, and code/test evidence. Capability Mapper materializes them as a logical system-map layer, and `TwinBuild v3` preserves the metadata. Existing maps receive bounded capability proposals instead of individual manual reconstruction. Twin Core 0.2 separately displays logical/declared identity, CODE snapshot binding, and server-verified LIVE observation. Its fingerprint-guarded `bind_node` operation migrates up to 24 legacy nodes per review without changing layout, descriptions, notes, parts, or edges. Twin Core 0.3 additionally detects stale Engine Registry contracts and produces fingerprint-guarded `sync_logical_component` proposals that update only version, maturity, inputs, outputs, compatibility and code/test evidence. Source Lens 0.2 adds Source Profile Contract v1, while Work Core 0.1 and Intent Engine 0.2 expose the Work contract, version-pinned Intent assembly, evidence-bound clause drafting and explicit approval boundary without claiming a live executor or AI harness.
 - Required work: validate the Source Lens 0.2 and Twin Core 0.3 contract-sync proposal in production, add per-engine release ownership, and prove parsed evidence plus a real adapter on a materially different second software stack. Avoid folder-first refactors; introduce explicit engine entry points only where they improve a real compatibility boundary.
 - Exit criteria: a non-developer can identify every shipped engine, its purpose, maturity, version, evidence, inputs, outputs, owner, and compatibility from the map; a second adapter adds its engine-facing components without changing the mapper or canvas UI.
 
@@ -379,19 +379,28 @@ This is the durable ledger for security, reliability, commercialization, and arc
 
 - Severity: medium
 - Gate: intent-intelligence
-- Status: deferred
-- Current boundary: Intent nodes are created and edited explicitly by a person. The product does not claim that a conversation, meeting, or document has been interpreted into an adopted intent.
-- Required work: define a versioned extraction engine using ontology, evidence-bound GraphRAG, and first-principles decomposition; retain source references and confidence; separate quoted facts, interpretation, assumptions, alternatives, and final decisions; require human confirmation before an extracted draft becomes an active Intent Asset.
+- Status: in-progress
+- Current evidence: Intent Engine 0.2 stores up to ten bounded meeting, AI-conversation, document, summary, or manual sources; a deterministic extractor creates evidence-linked clause candidates for purpose, direction, requirement, prohibition, success, priority, exception, decision, assumption, and open question. It never auto-approves a candidate, and only explicitly approved clauses enter a recorded Intent version. This is a transparent drafting aid, not a claim that AI understood or adopted organizational intent.
+- Required work: add a versioned provider-neutral semantic extraction path using ontology, authorized evidence retrieval and first-principles decomposition; distinguish quoted facts, interpretation, assumptions, alternatives, conflicts, supersession and final decisions; add evaluation fixtures, precision/recall targets, model/prompt provenance, outbound AI consent and human confirmation before any extracted draft becomes active.
 - Exit criteria: the same source set produces traceable draft intents, every statement points to authorized evidence, contradictory sources remain visible, and AI cannot silently create or activate organizational intent.
 
 ### INT-002 - Intent application to Work and Workflow
 
 - Severity: high
 - Gate: intent-governance
-- Status: deferred
-- Current boundary: an Intent node can be connected visually and read by a human or AI, but the connection does not grant authority or automatically change Work, Workflow, policy, or execution.
-- Required work: define typed application relations, scope, precedence, conflict resolution, version pinning, supersession, stale-intent behavior, agent interpretation rules, approval boundaries, and audit records. Distinguish guidance, constraint, objective, requirement, and executable policy.
+- Status: in-progress
+- Current evidence: Work Core 0.1 introduces a distinct Work part with required input, process, and output fields. A Work can attach up to sixteen recorded Intent assets through typed references that pin the chosen version, preserve the old version when the Intent changes, and expose missing or newer-version state. General parts cannot retain Work or Intent payloads. This binding remains descriptive and does not itself grant mutation or execution authority.
+- Required work: extend typed application to Workflow and groups; define scope, precedence, conflict resolution, supersession, stale and deleted Intent behavior, agent interpretation rules, result validation, approval boundaries, audit records and explicit adoption or update actions. Distinguish guidance, constraint, objective, requirement and executable policy without turning a visual connection into authority.
 - Exit criteria: every Work or Workflow can identify exactly which Intent version applies and why, conflicting intents cannot be resolved invisibly, and no agent or interface treats a visual edge as mutation authority.
+
+### WORK-001 - Executable Work lifecycle and efficiency evidence
+
+- Severity: high
+- Gate: work-execution
+- Status: open
+- Current limitation: Work Core 0.1 defines and validates Work plus its Intent bindings, but it does not run the work, bind real input/output artifacts, measure resource use, or prove that a person, AI, service, or automation followed the attached clauses.
+- Required work: define versioned trigger, executor, input artifact, process step, output artifact, success metric, time/cost/resource measurement, clause evaluation, approval, cancellation, retry, recovery and audit contracts. Reuse Safe Operations for mutations and the future provider-neutral Agent Run schema for AI execution. Keep manual human Work representable without pretending it is automatically observed.
+- Exit criteria: supported Work types produce attributable input-to-output run records, efficiency can be calculated from declared and observed evidence, Intent violations are surfaced without invisible resolution, and failed or interrupted mutations follow the universal operation lifecycle.
 
 ### INT-003 - Durable append-only Intent version ledger
 

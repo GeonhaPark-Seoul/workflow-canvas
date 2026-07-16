@@ -1,3 +1,8 @@
+import {
+  normalizeWorkDefinition,
+  validateWorkDefinition,
+} from './workOntology.js'
+
 export const SYSTEM_PART_KIND_DEFS = Object.freeze([
   { id: 'code', label: '코드', icon: '</>', color: '#14b8a6' },
   { id: 'trigger', label: '트리거', icon: '▶', color: '#f97316' },
@@ -8,6 +13,7 @@ export const SYSTEM_PART_KIND_DEFS = Object.freeze([
   { id: 'connection', label: '연결', icon: '↔', color: '#06b6d4' },
   { id: 'view', label: '보기', icon: '▤', color: '#38bdf8' },
   { id: 'credential_ref', label: '키 참조', icon: '✦', color: '#a855f7' },
+  { id: 'work', label: 'Work', icon: '▷', color: '#4f9cf9' },
 ])
 
 export const SYSTEM_PART_EXPOSURE_DEFS = Object.freeze([
@@ -77,7 +83,9 @@ export function systemPartKindDefinition(id) {
 export function systemPartContainsSecretLiteral(value) {
   if (typeof value !== 'string') return false
   const text = value.trim()
-  return SECRET_LITERAL_PATTERNS.some((pattern) => pattern.test(text))
+  const candidates = [text, ...text.split(/[\s'"`=,:;()[\]{}]+/).filter(Boolean)]
+    .map((candidate) => candidate.replace(/^[<>]+|[.!?<>]+$/g, ''))
+  return candidates.some((candidate) => SECRET_LITERAL_PATTERNS.some((pattern) => pattern.test(candidate)))
 }
 
 export function validateSystemPartInput(value) {
@@ -87,6 +95,16 @@ export function validateSystemPartInput(value) {
   for (const field of ['label', 'ref', 'evidenceRef']) {
     if (systemPartContainsSecretLiteral(value[field])) {
       return '실제 키나 토큰 값 대신 참조 이름만 입력해 주세요.'
+    }
+  }
+  if (value.kind === 'work') {
+    const workError = validateWorkDefinition(value.work)
+    if (workError) return workError
+    const work = normalizeWorkDefinition(value.work)
+    for (const field of ['executor', 'input', 'process', 'output', 'successCriteria']) {
+      if (systemPartContainsSecretLiteral(work[field])) {
+        return 'Work 설명에는 실제 키나 토큰 값을 입력할 수 없습니다.'
+      }
     }
   }
   return null
@@ -108,6 +126,7 @@ export function normalizeSystemPart(value) {
   }
   const digitalTwinBinding = normalizeDigitalTwinBinding(value.digitalTwinBinding)
   if (digitalTwinBinding) normalized.digitalTwinBinding = digitalTwinBinding
+  if (kind === 'work') normalized.work = normalizeWorkDefinition(value.work)
   return normalized
 }
 

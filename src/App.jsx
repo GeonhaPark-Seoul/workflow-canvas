@@ -82,6 +82,10 @@ import { getMyProfile, loadMySettings, upsertMyEmail, touchLastSeen } from './li
 import { createSystemNodeData } from '../shared/systemOntology.js'
 import { createIntentNodeData, recordIntentVersion } from '../shared/intentOntology.js'
 import {
+  workIntentBindingFromNode,
+  workIntentOptionFromNode,
+} from '../shared/workOntology.js'
+import {
   WORKFLOW_GIT_SYNC_EDGE_ID,
   workflowSourceTwinEntryForEdgeOperation,
   workflowSourceTwinEntryForPart,
@@ -464,6 +468,7 @@ function stripNode(n) {
   const {
     onUpdate, onEditStart, onEditEnd, onOpenInNotes, onCheckSystemPart,
     onSelectForPart, stageTypes, imageContext, twinRuntime, systemPartRuntime, canRunSystemChecks,
+    intentLibrary, onCreateIntentForWork, onOpenIntentFromWork,
     groupDropTarget, ...data
   } = n.data ?? {}
   const { selected, ...rest } = n
@@ -2742,6 +2747,13 @@ export default function App() {
     return new Set(nodes.filter((n) => !visible.has(n.id)).map((n) => n.id))
   }, [perm, nodes])
 
+  // Work 파츠에는 원문 자료가 아니라 기록된 Intent의 최소 선택 정보만
+  // 전달한다. 시야 제한으로 가려진 Intent는 목록에도 나타나지 않는다.
+  const workIntentLibrary = useMemo(() => nodes
+    .filter((node) => node.type === 'intent' && !forceShapeOnlySet?.has(node.id))
+    .map(workIntentOptionFromNode)
+    .filter(Boolean), [forceShapeOnlySet, nodes])
+
   // ── Node data ────────────────────────────────────────────────────────────
   const updateNodeData = useCallback((id, patch) => {
     setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: sanitizeNodeData({ ...n.data, ...patch }) } : n))
@@ -3189,7 +3201,19 @@ export default function App() {
       const parts = n.data?.parts ? n.data.parts.map((p) => ({ ...p, id: partIdMap.get(p.id) ?? p.id })) : undefined
       const copiedData = detachDigitalTwinBinding(n.data)
       const systemParts = copiedData.systemParts
-        ? copiedData.systemParts.map((part) => ({ ...part, id: partIdMap.get(part.id) ?? part.id }))
+        ? copiedData.systemParts.map((part) => ({
+            ...part,
+            id: partIdMap.get(part.id) ?? part.id,
+            ...(part.kind === 'work' && part.work ? {
+              work: {
+                ...part.work,
+                intentBindings: (part.work.intentBindings ?? []).map((binding) => ({
+                  ...binding,
+                  intentNodeId: idMap.get(binding.intentNodeId) ?? binding.intentNodeId,
+                })),
+              },
+            } : {}),
+          }))
         : undefined
       const { parentId: _drop, ...rest } = n
       const nextData = {
@@ -3709,6 +3733,71 @@ export default function App() {
     setNotesPanel({ type })
     setNotesSelectedId(nodeId)
   }, [])
+
+  const openIntentFromWork = useCallback((intentNodeId) => {
+    if (!nodes.some((node) => node.id === intentNodeId && node.type === 'intent')) return
+    setNodes((currentNodes) => currentNodes.map((node) => ({
+      ...node,
+      selected: node.id === intentNodeId,
+    })))
+    setEdges((currentEdges) => currentEdges.map((edge) => ({ ...edge, selected: false })))
+    openNodeInNotes(intentNodeId, 'intent')
+    focusNode(intentNodeId)
+  }, [focusNode, nodes, openNodeInNotes, setEdges, setNodes])
+
+  const createIntentForWork = useCallback((systemNodeId, draft) => {
+    const sourceNode = nodes.find((node) => node.id === systemNodeId && node.type === 'system')
+    const label = typeof draft?.label === 'string' ? draft.label.trim().slice(0, 180) : ''
+    const statement = typeof draft?.statement === 'string' ? draft.statement.trim().slice(0, 4000) : ''
+    if (!sourceNode || !label || !statement) return null
+
+    const intentNodeId = nextId()
+    const sourceId = `is-${uid()}`
+    const clauseId = `ic-${uid()}`
+    const createdAt = new Date().toISOString()
+    const intentData = recordIntentVersion({
+      ...createIntentNodeData(draft.intentKind),
+      label,
+      statement,
+      intentStatus: 'active',
+      intentSources: [{
+        id: sourceId,
+        sourceKind: 'manual',
+        title: 'Work에서 직접 작성',
+        text: statement,
+        sourceRef: `work:${systemNodeId}`,
+        addedAt: createdAt,
+      }],
+      intentClauses: [{
+        id: clauseId,
+        clauseKind: 'direction',
+        status: 'approved',
+        enforcement: 'guidance',
+        text: statement,
+        sourceId,
+        sourceExcerpt: statement.slice(0, 500),
+        confidence: 'high',
+      }],
+    })
+    const byId = new Map(nodes.map((node) => [node.id, node]))
+    const sourceAbsolute = absoluteNodePosition(sourceNode, byId)
+    const desiredAbsolute = {
+      x: sourceAbsolute.x + (sourceNode.measured?.width ?? sourceNode.width ?? 240) + 36,
+      y: sourceAbsolute.y,
+    }
+    const position = sourceNode.parentId
+      ? positionInsideGroup(nodes, sourceNode.parentId, desiredAbsolute, { width: 240, height: 140 })
+      : desiredAbsolute
+    const intentNode = {
+      id: intentNodeId,
+      type: 'intent',
+      position,
+      ...(sourceNode.parentId ? { parentId: sourceNode.parentId } : {}),
+      data: intentData,
+    }
+    setNodes((currentNodes) => sortParentsFirst([...currentNodes, intentNode]))
+    return workIntentBindingFromNode(intentNode)
+  }, [nodes, setNodes])
 
   const toggleDigitalTwinReview = useCallback(() => {
     setSourceTwinEntry(null)
@@ -4453,6 +4542,11 @@ export default function App() {
               scopedParticipants: nodeScopedParticipants,
               systemPartRuntime: systemPartRuntimeByNode[n.id] ?? {},
               linkedSystemPartHandles,
+              intentLibrary: n.type === 'system' ? workIntentLibrary : undefined,
+              onOpenIntentFromWork: n.type === 'system' ? openIntentFromWork : undefined,
+              onCreateIntentForWork: n.type === 'system' && structureEditable
+                ? (draft) => createIntentForWork(n.id, draft)
+                : undefined,
               twinRuntime: n.type === 'system'
                 ? aggregateSystemNodeRuntime(n, systemPartRuntimeByNode[n.id] ?? {}, systemRuntimeNow)
                 : undefined,

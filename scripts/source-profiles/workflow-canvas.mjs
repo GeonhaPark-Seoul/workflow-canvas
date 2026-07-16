@@ -44,6 +44,7 @@ export const WORKFLOW_CANVAS_FILE_ROLES = Object.freeze({
   'src/nodes/ContentNode.jsx': ROLE('notes-content', '본문, 링크와 이미지를 담는 콘텐츠 노드를 그리고 직접 편집할 수 있게 합니다.', '사용자가 자료와 긴 내용을 캔버스 안에서 작성하고 볼 수 있게 합니다.'),
   'src/nodes/StageNode.jsx': ROLE('canvas-interface', '단계와 계층을 나타내는 노드를 그리고 제목·본문 편집을 처리합니다.', '절차와 상하위 구조를 캔버스에서 정리하는 방식에 영향을 줍니다.'),
   'src/nodes/SystemNode.jsx': ROLE('digital-twin-engine', '앱·서버·DB 같은 실제 시스템 노드와 파츠, 운영 상태, 실행 가능한 기능을 화면에 표시합니다.', '정보성 도형과 실제 시스템에 연결된 디지털 트윈을 구분하고 조작하게 합니다.'),
+  'src/nodes/IntentNode.jsx': ROLE('digital-twin-engine', '의도, 목표, 원칙과 전략을 버전이 있는 Intent 자산 노드로 표시합니다.', 'Work가 따라야 할 방향과 현재 기록 버전을 캔버스에서 식별하게 합니다.', 'work-intent-governance'),
   'src/nodes/MemoNode.jsx': ROLE('notes-content', '짧은 참고 내용과 메모를 빠르게 적는 노드를 화면에 그립니다.', '캔버스 흐름을 방해하지 않고 간단한 설명을 남기게 합니다.'),
 
   'src/components/Toolbar.jsx': ROLE('canvas-interface', '노드 추가, 전체 보기, 되돌리기 같은 캔버스의 주요 명령을 모아 보여줍니다.', '반복해서 쓰는 편집 기능을 빠르게 실행하게 합니다.'),
@@ -61,6 +62,8 @@ export const WORKFLOW_CANVAS_FILE_ROLES = Object.freeze({
   'src/components/DigitalTwinReviewPanel.jsx': ROLE('digital-twin-engine', '실제 시스템에서 발견한 변경안을 미리 보고 적용·무시·보류하도록 검토 목록을 보여줍니다.', '엔진이 캔버스를 마음대로 바꾸지 못하게 하고 사람이 변경을 승인하게 합니다.'),
   'src/components/SystemObservationCatalog.jsx': ROLE('digital-twin-engine', '시스템 파츠에서 현재 확인할 수 있는 운영 정보와 아직 알 수 없는 정보를 목록으로 보여줍니다.', 'LIVE 표시가 무엇을 근거로 하는지, 추가 연결이 필요한 정보는 무엇인지 알게 합니다.'),
   'src/components/SourceTwinPanel.jsx': ROLE('source-code-twin', '로컬·GitHub 코드의 역할별 구조, 변경 이력, Git 동기화와 상태 스냅샷을 한 창에서 보여줍니다.', '비개발자도 앱의 어느 부분이 어떤 일을 하는지 보고 실제 코드와 변경 내역까지 따라가게 합니다.'),
+  'src/components/WorkIntentPicker.jsx': ROLE('digital-twin-engine', 'Work에 적용할 기록된 Intent 버전을 찾거나 새 Intent를 작성해 여러 개 조립합니다.', '사람이 Work마다 어떤 규칙을 적용할지 선택하고 버전을 고정하게 합니다.', 'work-intent-governance'),
+  'src/components/IntentWorkspace.jsx': ROLE('digital-twin-engine', '회의·AI 대화·문서 원문과 근거가 연결된 조문 후보를 나란히 편집하고 승인합니다.', '원문에서 나온 규칙을 확인한 뒤 사람의 판단으로 확정하게 합니다.', 'work-intent-governance'),
 
   'src/lib/canvasGeometry.js': ROLE('canvas-model', '중첩된 노드의 실제 화면 위치와 여러 노드가 차지하는 범위를 계산합니다.', '선택 영역, 시점 이동과 자동 배치가 정확한 위치를 사용하게 합니다.'),
   'src/lib/canvasNavigation.js': ROLE('canvas-model', '현재 캔버스 ID와 주소를 맞추고 새로고침 뒤에도 같은 캔버스로 돌아오게 합니다.', '새로고침할 때 다른 캔버스로 튀는 일을 막습니다.'),
@@ -114,6 +117,8 @@ export const WORKFLOW_CANVAS_FILE_ROLES = Object.freeze({
   'shared/workflowCanvasSystemMap.js': ROLE('digital-twin-engine', 'Workflow Canvas 앱의 브라우저·서버·DB·저장소·배포 구조를 나타내는 기준 시스템 지도를 정의합니다.', '앱 자체를 캔버스에서 개발·점검할 출발 지도를 만듭니다.'),
   'shared/systemOntology.js': ROLE('digital-twin-engine', '앱·서버·DB·사람 같은 시스템 노드 종류와 실재성 표시 규칙을 정의합니다.', '정보성 노드와 실제 시스템에 연결된 노드를 구분하게 합니다.'),
   'shared/systemPartOntology.js': ROLE('digital-twin-engine', '시스템 노드 파츠의 종류, 연결점과 운영 상태 필드를 공통 규칙으로 정의합니다.', '파츠가 단순 장식이 아니라 확인·입출력·조작 능력을 뜻하게 합니다.'),
+  'shared/workOntology.js': ROLE('digital-twin-engine', 'Work의 투입·처리·결과와 기록된 Intent 버전 장착 형식을 검증하고 정규화합니다.', '일반 파츠와 실제 Work를 구별하고 어떤 Intent 버전을 따르는지 일관되게 보존합니다.', 'work-intent-governance'),
+  'shared/intentOntology.js': ROLE('digital-twin-engine', 'Intent 원문, 조문, 상태와 명시적 버전 기록을 정의하고 근거가 있는 조문 후보를 만듭니다.', '전략 대화와 문서가 근거 없는 규칙으로 바뀌지 않게 하고 승인된 조문만 Work에 적용하게 합니다.', 'work-intent-governance'),
   'shared/relationOntology.js': ROLE('digital-twin-engine', '연결선이 호출·읽기·쓰기·동기화 중 무엇인지와 근거·신뢰도를 정의합니다.', '같아 보이는 연결선도 실제 관계와 방향을 명확히 구분하게 합니다.'),
   'shared/trustTopology.js': ROLE('security-privacy', '로컬·클라우드·외부 SaaS 같은 신뢰 영역과 그 경계를 통과하는 게이트웨이를 검사합니다.', '외부에서 로컬이나 개인정보로 들어올 수 있는 경로와 설명되지 않은 보안 구멍을 표시하게 합니다.'),
   'shared/systemRuntime.js': ROLE('digital-twin-engine', '운영 상태 검사 요청과 결과, 관측 신선도와 LIVE 판정 기준을 표준화합니다.', '오래된 결과가 계속 살아 있는 것처럼 표시되지 않게 합니다.'),
@@ -145,6 +150,8 @@ export const WORKFLOW_CANVAS_FILE_ROLES = Object.freeze({
   'scripts/check-privacy-release.mjs': ROLE('testing-quality', '배포 전에 개인정보 감사 설정과 사용자 본문 접근 경로의 필수 보호 장치를 검사합니다.', '개인정보 보호 조건이 빠진 빌드가 출시되는 것을 차단합니다.'),
   'scripts/check-governance.mjs': ROLE('testing-quality', '직접 의존성, 잠금 버전, 라이선스와 제3자 고지가 승인된 레지스트리와 일치하는지 검사합니다.', '검토되지 않은 라이브러리나 고지가 빠진 빌드가 출시되는 것을 막습니다.'),
   'scripts/test-engine-registry.mjs': ROLE('testing-quality', '제품 엔진 레지스트리의 필수 정보, 코드·테스트 근거, 지도 변환과 논리 구성 표시를 자동 검사합니다.', '엔진 이름이나 버전이 지도와 어긋나거나 논리 구성요소가 LIVE로 잘못 표시되는 배포를 막습니다.'),
+  'scripts/test-intent-node.mjs': ROLE('testing-quality', 'Intent 원문·조문 후보·승인·버전 기록과 MCP 원문 비공개 경계를 검사합니다.', 'Intent 규칙의 근거가 사라지거나 승인 전 후보가 Work에 적용되는 회귀를 막습니다.', 'engine-tests'),
+  'scripts/test-work-intent-parts.mjs': ROLE('testing-quality', 'Work 필수 계약, 다중 Intent 장착, 버전 고정과 일반 파츠·비밀값 경계를 검사합니다.', 'Work와 Intent 조립이 저장·복사·편집 중 다른 의미로 바뀌는 회귀를 막습니다.', 'engine-tests'),
 
   'supabase-schema.sql': ROLE('data-storage-sync', '캔버스, 노드, 연결선과 사용자 설정의 기본 테이블·권한·저장 함수를 만듭니다.', '로그인한 사용자의 핵심 캔버스 자료가 Supabase에 저장되는 구조를 결정합니다.'),
   'supabase-shares.sql': ROLE('sharing-collaboration', '이메일·링크 초대, 참여자, 취소와 시야 제한을 저장하고 공유 범위별 접근 규칙을 만듭니다.', '초대 수락·거절·나가기·추방과 제한된 본문 공개가 실제 DB 권한으로 작동하게 합니다.'),
@@ -167,7 +174,7 @@ export const WORKFLOW_CANVAS_FILE_ROLES = Object.freeze({
 export const WORKFLOW_CANVAS_SOURCE_PROFILE = defineSourceProfile({
   contractVersion: SOURCE_PROFILE_CONTRACT_VERSION,
   id: 'workflow-canvas',
-  version: '0.1.0',
+  version: '0.2.0',
   sourceId: 'workflow-canvas:self-source',
   label: 'Workflow Canvas Source Profile',
   projectLabel: 'Workflow Canvas',
@@ -199,6 +206,7 @@ export const WORKFLOW_CANVAS_SOURCE_PROFILE = defineSourceProfile({
     { area: 'digital-twin-engine', subsystem: 'twin-core', pathPattern: 'twinadaptercontract|twinbuild\.js|sourceprofilecontract' },
     { area: 'digital-twin-engine', subsystem: 'twin-workflow-adapter', pathPattern: 'workflow(system)?twinadapter|workflow-system-twin-adapter|digitaltwinadapters|workflowsystemtwinbuild' },
     { area: 'digital-twin-engine', subsystem: 'twin-operations', pathPattern: 'operationlifecycle|workflowoperation|edgeoperation' },
+    { area: 'digital-twin-engine', subsystem: 'work-intent-governance', pathPattern: 'intent|workontology|work-intent' },
     { area: 'digital-twin-engine', subsystem: 'twin-materialization', pathPattern: 'twinbuildcanvas|workflowcanvassystemmap|systemmaprepair' },
     { area: 'digital-twin-engine', subsystem: 'twin-reconciliation', pathPattern: 'reconcil|digitaltwinreview|digitaltwinproposal' },
     { area: 'digital-twin-engine', subsystem: 'twin-discovery', pathPattern: 'discovery|system-discovery' },

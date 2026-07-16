@@ -7,6 +7,7 @@ const DEFAULT_NODE_DIMENSIONS = Object.freeze({
   memo: { width: 160, height: 80 },
   content: { width: 220, height: 140 },
   system: { width: 240, height: 130 },
+  intent: { width: 220, height: 120 },
   group: { width: 320, height: 220 },
 })
 

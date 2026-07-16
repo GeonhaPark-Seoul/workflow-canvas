@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { sanitizeExternalUrl, sanitizeHtml } from '../lib/sanitizeHtml'
 import { uploadCanvasImage } from '../lib/imageStorage'
 import CanvasImage from './CanvasImage'
+import IntentWorkspace from './IntentWorkspace'
 import {
   SYSTEM_ENVIRONMENT_DEFS,
   SYSTEM_KIND_DEFS,
@@ -11,6 +12,7 @@ import {
   systemNodeTwinLink,
 } from '../../shared/systemOntology.js'
 import {
+  INTENT_CLAUSE_KIND_DEFS,
   INTENT_KIND_DEFS,
   INTENT_STATUS_DEFS,
   intentKindDefinition,
@@ -325,6 +327,7 @@ function NotePage({ node, byId, inMap, outMap, isEditable, onUpdateNode, onRecor
 
   const recordCurrentIntentVersion = () => {
     if (node.type !== 'intent' || !isEditable || !onRecordIntentVersion) return
+    window.dispatchEvent(new Event('wfc:flush-note-edits'))
     clearTimeout(titleSaveTimer.current)
     clearTimeout(bodySaveTimer.current)
     const pendingPatch = {}
@@ -411,21 +414,26 @@ function NotePage({ node, byId, inMap, outMap, isEditable, onUpdateNode, onRecor
         )}
 
         {node.type === 'intent' && (
-          <textarea
-            key={`body-${node.id}`}
-            defaultValue={node.data?.statement ?? ''}
-            disabled={!isEditable}
-            maxLength={4000}
-            onChange={(event) => scheduleBodySave(event.target.value)}
-            placeholder="이 의도가 무엇을 지향하고, 무엇을 지키려는지 적으세요."
-            rows={9}
-            style={{
-              width: '100%', minHeight: 180, boxSizing: 'border-box', resize: 'vertical',
-              background: '#12121a', border: '1px solid #ffffff18', borderRadius: 6,
-              color: '#d8dae0', fontSize: 13, lineHeight: 1.6, padding: '10px 12px',
-              outline: 'none', fontFamily: 'inherit', whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-            }}
-          />
+          <>
+            <label className="intent-summary-editor">
+              <span>Intent 요약</span>
+              <textarea
+                key={`body-${node.id}`}
+                defaultValue={node.data?.statement ?? ''}
+                disabled={!isEditable}
+                maxLength={4000}
+                onChange={(event) => scheduleBodySave(event.target.value)}
+                placeholder="이 Intent가 지향하는 방향과 지켜야 할 원칙을 요약하세요."
+                rows={5}
+              />
+            </label>
+            <IntentWorkspace
+              key={`intent-workspace-${node.id}`}
+              node={node}
+              isEditable={isEditable}
+              onUpdateNode={onUpdateNode}
+            />
+          </>
         )}
 
         {node.type === 'intent' && (() => {
@@ -502,6 +510,17 @@ function NotePage({ node, byId, inMap, outMap, isEditable, onUpdateNode, onRecor
                     </summary>
                     <div style={{ color: '#f0f0f0', fontSize: 12, fontWeight: 700, marginTop: 7 }}>{item.label || '(제목 없음)'}</div>
                     <div style={{ color: '#9ba1af', fontSize: 11.5, lineHeight: 1.55, whiteSpace: 'pre-wrap', marginTop: 4 }}>{item.statement || '(내용 없음)'}</div>
+                    {(item.intentClauses ?? []).length > 0 && (
+                      <div className="intent-version-clauses">
+                        <strong>확정 조문 {item.intentClauses.length}개</strong>
+                        {item.intentClauses.map((clause) => (
+                          <div key={clause.id}>
+                            <span>{INTENT_CLAUSE_KIND_DEFS.find((entry) => entry.id === clause.clauseKind)?.label ?? '조문'}</span>
+                            {clause.text}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </details>
                 ))}
               </div>

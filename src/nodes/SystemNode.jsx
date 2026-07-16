@@ -3,7 +3,9 @@ import { Handle, NodeResizer, NodeToolbar, Position, useStore, useUpdateNodeInte
 import OpenInNotesButton from '../components/OpenInNotesButton'
 import ScopedParticipants from '../components/ScopedParticipants'
 import SystemObservationCatalog from '../components/SystemObservationCatalog'
+import WorkIntentPicker from '../components/WorkIntentPicker'
 import { sanitizeHtml } from '../lib/sanitizeHtml'
+import { intentKindDefinition } from '../../shared/intentOntology.js'
 import {
   SYSTEM_COMPONENT_KIND_DEFS,
   SYSTEM_COMPONENT_MATURITY_DEFS,
@@ -26,6 +28,11 @@ import {
   systemRuntimeCatalogForResult,
   systemRuntimeCapabilityForPart,
 } from '../../shared/systemRuntime.js'
+import {
+  createWorkDefinition,
+  normalizeWorkIntentBindings,
+  WORK_TRIGGER_DEFS,
+} from '../../shared/workOntology.js'
 
 const PORTS = [
   { id: 'left', position: Position.Left },
@@ -187,16 +194,20 @@ export default function SystemNode({ data, selected, id }) {
   const purpose = data.purpose || data.description || ''
   const systemParts = normalizeSystemParts(data.systemParts)
   const linkedPartHandles = new Set(Array.isArray(data.linkedSystemPartHandles) ? data.linkedSystemPartHandles : [])
-  const systemPartLayoutKey = systemParts.map((part) => part.id).join('|')
+  const systemPartLayoutKey = systemParts.map((part) => (
+    `${part.id}:${(part.work?.intentBindings ?? []).map((binding) => `${binding.intentNodeId}@${binding.version}`).join(',')}`
+  )).join('|')
   const previewPartIds = new Set(data.digitalTwinProposalPreviewPartIds ?? [])
   const partEditingLocked = data.readOnly || componentManaged || previewPartIds.size > 0
   const [partDraft, setPartDraft] = useState(null)
   const [partError, setPartError] = useState('')
+  const [intentPickerPartId, setIntentPickerPartId] = useState(null)
 
   useEffect(() => {
     if (!selected || partEditingLocked) {
       setPartDraft(null)
       setPartError('')
+      setIntentPickerPartId(null)
     }
   }, [selected, partEditingLocked])
 
@@ -207,7 +218,18 @@ export default function SystemNode({ data, selected, id }) {
 
   const openPartEditor = (part = null) => {
     if (partEditingLocked) return
-    setPartDraft(part ? { ...part } : blankSystemPart())
+    setIntentPickerPartId(null)
+    setPartDraft(part
+      ? {
+          ...part,
+          ...(part.work ? {
+            work: {
+              ...part.work,
+              intentBindings: [...(part.work.intentBindings ?? [])],
+            },
+          } : {}),
+        }
+      : blankSystemPart())
     setPartError('')
   }
   const savePart = () => {
@@ -232,6 +254,35 @@ export default function SystemNode({ data, selected, id }) {
     setPartDraft(null)
     setPartError('')
   }
+  const updateWorkIntentBindings = (partId, updater) => {
+    if (partEditingLocked) return
+    data.onUpdate?.({
+      systemParts: systemParts.map((part) => {
+        if (part.id !== partId || part.kind !== 'work') return part
+        const currentBindings = part.work?.intentBindings ?? []
+        return normalizeSystemPart({
+          ...part,
+          work: {
+            ...part.work,
+            intentBindings: normalizeWorkIntentBindings(updater(currentBindings)),
+          },
+        }) ?? part
+      }),
+    })
+  }
+  const attachIntentToWork = (partId, binding) => {
+    updateWorkIntentBindings(partId, (bindings) => [
+      ...bindings.filter((item) => item.intentNodeId !== binding.intentNodeId),
+      binding,
+    ])
+  }
+  const removeIntentFromWork = (partId, intentNodeId) => {
+    updateWorkIntentBindings(partId, (bindings) => (
+      bindings.filter((item) => item.intentNodeId !== intentNodeId)
+    ))
+  }
+  const intentPickerPart = systemParts.find((part) => part.id === intentPickerPartId && part.kind === 'work') ?? null
+  const intentOptionByNode = new Map((data.intentLibrary ?? []).map((option) => [option.nodeId, option]))
   const persistedPartDraft = partDraft
     ? systemParts.find((part) => part.id === partDraft.id) ?? null
     : null
@@ -508,45 +559,109 @@ export default function SystemNode({ data, selected, id }) {
                       border: `1.5px solid ${partKind.color}`,
                       background: '#0f1117',
                     }
+                    const intentBindings = part.kind === 'work' ? part.work?.intentBindings ?? [] : []
                     return (
-                      <div
-                        key={part.id}
-                        className={`system-part-chip${preview ? ' is-preview' : ''}${runtimeReality ? ` is-runtime-${runtimeReality.id}` : ''}`}
-                        style={{ '--part-color': partKind.color }}
-                        title={`${partKind.label} · ${part.label}${part.ref ? ` · ${part.ref}` : ''}${preview ? ' · 미리보기' : ''}${runtimeReality ? ` · ${runtimeTitle(runtime, runtimeReality)}` : ''}`}
-                        onClick={(event) => {
-                          event.stopPropagation()
-                          if (preview) return
-                          data.onSelectForPart?.()
-                          if (data.onOpenSystemPart?.(part) === true) return
-                          openPartEditor(part)
-                        }}
-                      >
-                        <Handle
-                          type="source"
-                          position={Position.Left}
-                          id={`p-${part.id}-l`}
-                          className={`part-socket${linkedPartHandles.has(`p-${part.id}-l`) ? ' is-linked' : ''}`}
-                          isConnectable={!partEditingLocked && !preview}
-                          style={{ ...socketStyle, left: 0, top: '50%', transform: 'translate(-50%, -50%)' }}
-                        />
-                        {runtimeReality && (
-                          <span
-                            className="system-part-runtime-dot"
-                            style={{ '--runtime-color': runtimeReality.color }}
-                            aria-label={runtimeReality.label}
+                      <div key={part.id} className={`system-part-assembly${part.kind === 'work' ? ' is-work' : ''}`}>
+                        <div
+                          className={`system-part-chip${part.kind === 'work' ? ' is-work' : ''}${preview ? ' is-preview' : ''}${runtimeReality ? ` is-runtime-${runtimeReality.id}` : ''}`}
+                          style={{ '--part-color': partKind.color }}
+                          title={`${partKind.label} · ${part.label}${part.ref ? ` · ${part.ref}` : ''}${preview ? ' · 미리보기' : ''}${runtimeReality ? ` · ${runtimeTitle(runtime, runtimeReality)}` : ''}`}
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            if (preview) return
+                            data.onSelectForPart?.()
+                            if (data.onOpenSystemPart?.(part) === true) return
+                            openPartEditor(part)
+                          }}
+                        >
+                          <Handle
+                            type="source"
+                            position={Position.Left}
+                            id={`p-${part.id}-l`}
+                            className={`part-socket${linkedPartHandles.has(`p-${part.id}-l`) ? ' is-linked' : ''}`}
+                            isConnectable={!partEditingLocked && !preview}
+                            style={{ ...socketStyle, left: 0, top: '50%', transform: 'translate(-50%, -50%)' }}
                           />
+                          {runtimeReality && (
+                            <span
+                              className="system-part-runtime-dot"
+                              style={{ '--runtime-color': runtimeReality.color }}
+                              aria-label={runtimeReality.label}
+                            />
+                          )}
+                          <span aria-hidden="true">{partKind.icon}</span>
+                          <span>{part.label}</span>
+                          <Handle
+                            type="source"
+                            position={Position.Right}
+                            id={`p-${part.id}-r`}
+                            className={`part-socket${linkedPartHandles.has(`p-${part.id}-r`) ? ' is-linked' : ''}`}
+                            isConnectable={!partEditingLocked && !preview}
+                            style={{ ...socketStyle, right: 0, top: '50%', transform: 'translate(50%, -50%)' }}
+                          />
+                        </div>
+                        {part.kind === 'work' && (
+                          <div className="work-intent-rail" aria-label={`${part.label}에 장착된 Intent`}>
+                            {intentBindings.map((binding) => {
+                              const option = intentOptionByNode.get(binding.intentNodeId)
+                              const kindDef = intentKindDefinition(binding.intentKind)
+                              const missing = !option
+                              const updateAvailable = !!option && option.version > binding.version
+                              return (
+                                <div
+                                  key={binding.intentNodeId}
+                                  className={`work-intent-module${missing ? ' is-missing' : ''}${updateAvailable ? ' has-update' : ''}`}
+                                  style={{ '--intent-color': kindDef.color }}
+                                  title={missing
+                                    ? `${binding.label} v${binding.version} · 원본 Intent를 찾을 수 없음`
+                                    : updateAvailable
+                                      ? `${binding.label} v${binding.version} · 최신 v${option.version} 있음`
+                                      : `${binding.label} v${binding.version} · 조문 ${binding.clauseCount}개`}
+                                >
+                                  <button
+                                    type="button"
+                                    className="work-intent-module-open"
+                                    disabled={missing}
+                                    onClick={(event) => {
+                                      event.stopPropagation()
+                                      data.onOpenIntentFromWork?.(binding.intentNodeId)
+                                    }}
+                                  >
+                                    <span aria-hidden="true">◇</span>
+                                    <span>{binding.label}</span>
+                                    <small>v{binding.version}</small>
+                                  </button>
+                                  {!partEditingLocked && !preview && (
+                                    <button
+                                      type="button"
+                                      className="work-intent-module-remove"
+                                      title={`${binding.label} 분리`}
+                                      aria-label={`${binding.label} 분리`}
+                                      onClick={(event) => {
+                                        event.stopPropagation()
+                                        removeIntentFromWork(part.id, binding.intentNodeId)
+                                      }}
+                                    >×</button>
+                                  )}
+                                </div>
+                              )
+                            })}
+                            {!partEditingLocked && !preview && (
+                              <button
+                                type="button"
+                                className="work-intent-attach"
+                                title="기존 Intent를 선택하거나 새로 작성해 이 Work에 장착"
+                                aria-label={`${part.label}에 Intent 장착`}
+                                onClick={(event) => {
+                                  event.stopPropagation()
+                                  data.onSelectForPart?.()
+                                  setPartDraft(null)
+                                  setIntentPickerPartId(part.id)
+                                }}
+                              >＋ Intent</button>
+                            )}
+                          </div>
                         )}
-                        <span aria-hidden="true">{partKind.icon}</span>
-                        <span>{part.label}</span>
-                        <Handle
-                          type="source"
-                          position={Position.Right}
-                          id={`p-${part.id}-r`}
-                          className={`part-socket${linkedPartHandles.has(`p-${part.id}-r`) ? ' is-linked' : ''}`}
-                          isConnectable={!partEditingLocked && !preview}
-                          style={{ ...socketStyle, right: 0, top: '50%', transform: 'translate(50%, -50%)' }}
-                        />
                       </div>
                     )
                   })}
@@ -593,7 +708,18 @@ export default function SystemNode({ data, selected, id }) {
             </div>
             <label>
               <span>종류</span>
-              <select value={partDraft.kind} onChange={(event) => setPartDraft({ ...partDraft, kind: event.target.value })}>
+              <select
+                value={partDraft.kind}
+                onChange={(event) => {
+                  const nextKind = event.target.value
+                  setPartDraft({
+                    ...partDraft,
+                    kind: nextKind,
+                    ...(nextKind === 'work' ? { work: partDraft.work ?? createWorkDefinition() } : {}),
+                  })
+                  setPartError('')
+                }}
+              >
                 {SYSTEM_PART_KIND_DEFS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
               </select>
             </label>
@@ -616,6 +742,76 @@ export default function SystemNode({ data, selected, id }) {
                 {SYSTEM_PART_EXPOSURE_DEFS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
               </select>
             </label>
+            {partDraft.kind === 'work' && (() => {
+              const work = partDraft.work ?? createWorkDefinition()
+              const updateWork = (patch) => setPartDraft({ ...partDraft, work: { ...work, ...patch } })
+              return (
+                <div className="system-work-editor">
+                  <div className="system-work-editor-heading">
+                    <strong>Work 계약</strong>
+                    <span>투입 → 처리 → 결과</span>
+                  </div>
+                  <label>
+                    <span>시작 방식</span>
+                    <select value={work.trigger} onChange={(event) => updateWork({ trigger: event.target.value })}>
+                      {WORK_TRIGGER_DEFS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
+                    </select>
+                  </label>
+                  <label>
+                    <span>수행 주체</span>
+                    <input
+                      value={work.executor}
+                      maxLength={180}
+                      placeholder="사람, AI, 서비스 또는 팀"
+                      onChange={(event) => updateWork({ executor: event.target.value })}
+                    />
+                  </label>
+                  <label className="is-stacked">
+                    <span>투입</span>
+                    <textarea
+                      value={work.input}
+                      maxLength={600}
+                      rows={2}
+                      placeholder="이 일을 시작할 때 필요한 정보와 자원"
+                      onChange={(event) => updateWork({ input: event.target.value })}
+                    />
+                  </label>
+                  <label className="is-stacked">
+                    <span>처리 과정</span>
+                    <textarea
+                      value={work.process}
+                      maxLength={1200}
+                      rows={3}
+                      placeholder="실제로 수행하는 일"
+                      onChange={(event) => updateWork({ process: event.target.value })}
+                    />
+                  </label>
+                  <label className="is-stacked">
+                    <span>결과</span>
+                    <textarea
+                      value={work.output}
+                      maxLength={600}
+                      rows={2}
+                      placeholder="완료되면 남아야 하는 결과"
+                      onChange={(event) => updateWork({ output: event.target.value })}
+                    />
+                  </label>
+                  <label className="is-stacked">
+                    <span>성공 기준</span>
+                    <textarea
+                      value={work.successCriteria}
+                      maxLength={600}
+                      rows={2}
+                      placeholder="선택 사항: 결과가 충분한지 판단하는 기준"
+                      onChange={(event) => updateWork({ successCriteria: event.target.value })}
+                    />
+                  </label>
+                  <div className="system-work-editor-note">
+                    Intent 조문은 Work를 저장한 뒤 파츠 옆의 <b>＋ Intent</b>에서 장착합니다.
+                  </div>
+                </div>
+              )
+            })()}
             {partDraftRuntimeCapability && partDraftRuntimeReality && (
               <>
                 <div
@@ -722,6 +918,25 @@ export default function SystemNode({ data, selected, id }) {
               <button type="button" className="is-save" onClick={savePart}>저장</button>
             </div>
           </div>
+        </NodeToolbar>
+      )}
+
+      {intentPickerPart && selected && !partEditingLocked && (
+        <NodeToolbar
+          nodeId={id}
+          isVisible
+          position={Position.Right}
+          align="start"
+          offset={12}
+          style={{ zIndex: 2004, pointerEvents: 'all' }}
+        >
+          <WorkIntentPicker
+            workPart={intentPickerPart}
+            intentOptions={data.intentLibrary ?? []}
+            onAttach={(binding) => attachIntentToWork(intentPickerPart.id, binding)}
+            onCreate={data.onCreateIntentForWork}
+            onClose={() => setIntentPickerPartId(null)}
+          />
         </NodeToolbar>
       )}
     </div>

@@ -57,6 +57,12 @@
 - JavaScript/JSX·SQL 분석과 `structure-only`·`unsupported` 상태를 구별한다.
 - 새 parser 의존성은 추가하지 않았다.
 
+## Workflow Canvas Source Profile 0.2.0 - 2026-07-16
+
+- Work Core와 Intent Engine 코드를 `Work·Intent 엔진` 하위 시스템으로 묶었다.
+- Work 계약, Intent 원문·조문 작업공간과 관련 회귀 테스트에 비개발자용 역할 설명을 추가했다.
+- 공통 Source Lens 스캐너나 다른 소프트웨어의 Source Profile은 변경하지 않았다.
+
 ## Trust Map 0.1.0-alpha.0 - 2026-07-16
 
 - Trust Topology v1, Gateway 정규화와 `unknown-gap` 판정을 첫 엔진 버전으로 기록했다.
@@ -76,6 +82,22 @@
 
 - UI, 결정적 자동화와 미래 AI가 같은 상태 전이와 승인 경계를 사용하도록 등록했다.
 - 지속 실행 Worker와 독립 검증기는 아직 구현하지 않았다.
+
+## Work Core 0.1.0-alpha.0 - 2026-07-16
+
+- 시스템 파츠와 별도로 `Work` 파츠를 추가하고 투입, 처리와 결과를 필수 계약으로 만들었다.
+- 하나의 Work에 기록된 Intent를 여러 개 장착하며 선택한 버전을 고정한다.
+- 기존 Intent 선택, Work 안에서 새 Intent 작성·v1 기록·즉시 장착, 누락·새 버전 표시와 분리를 추가했다.
+- 일반 파츠에 주입된 Work·Intent 데이터는 정규화 과정에서 제거하며, Work 설명의 비밀값 형태는 거부한다.
+- 현재 버전은 Work를 실제 실행하거나 효율을 측정하지 않는다.
+
+## Intent Engine 0.2.0-alpha.0 - 2026-07-16
+
+- 회의, AI 대화, 문서와 요약본을 Intent 원문 자료로 보존하고 조문과 나란히 편집하는 작업공간을 추가했다.
+- 결정적 문장 분류로 목적, 준수, 금지, 성공 기준 등의 조문 후보와 원문 근거를 만든다.
+- 후보는 자동 확정하지 않으며 사용자가 확정한 조문만 명시적 Intent 버전에 포함한다.
+- MCP에는 원문 본문을 보내지 않고 원문·조문 개수와 기록된 확정 조문만 제공한다.
+- AI 의미 추출, 조문 충돌 해결과 AI 하네스 집행은 아직 구현하지 않았다.
 
 ## Connector Bridge 0.1.0-alpha.0 - 2026-07-16
 

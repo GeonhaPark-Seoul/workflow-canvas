@@ -21,6 +21,8 @@
 | `engine-trust-map` | Trust Map | 0.1.0-alpha.0 | Trust Topology Schema v1 |
 | `engine-liveops` | LiveOps | 0.1.0-alpha.0 | System Runtime Schema v3 |
 | `engine-safe-operations` | Safe Operations | 0.1.0-alpha.0 | Operation Contract v1 |
+| `engine-work-core` | Work Core | 0.1.0-alpha.0 | Work Schema v1, Intent Schema v1 |
+| `engine-intent-core` | Intent Engine | 0.2.0-alpha.0 | Intent Schema v1, Work Schema v1 |
 | `engine-connector-bridge` | Connector Bridge | 0.1.0-alpha.0 | Adapter Contract v1, Local Connector Schema v1 |
 
 각 엔진의 입력, 출력, 코드와 테스트 근거는 manifest와 캔버스 노드에 함께 기록한다. 같은 정보를 문서와 코드에 따로 복사해 서로 어긋나게 만들지 않는다.
@@ -44,6 +46,18 @@
 | Source Profile Registry | Manifest | 저장소와 일치하는 버전형 제품 의미 사전 선택 |
 
 Workflow Canvas 프로필과 FastAPI 참조 프로필은 Source Lens를 별도 제품으로 복제하지 않는다. 같은 스캐너 계약에 연결되는 제품별 manifest이며, 실제 DB·배포·운영 조작 연결은 별도 Twin Adapter의 책임이다.
+
+## Work Core와 Intent Engine
+
+| 표시 이름 | 내부 종류 | 책임 |
+|---|---|---|
+| Work Part Contract | Contract | Work의 투입·처리·결과 필수 계약과 일반 파츠 경계 강제 |
+| Work Intent Assembly | Resolver | 기록된 Intent 버전의 다중 장착, 고정, 누락·업데이트 판정 |
+| Intent Asset Contract | Contract | 원문, 조문, 상태와 명시적 버전 스냅샷 정규화 |
+| Intent Clause Extractor | Engine | 원문 근거를 보존한 조문 후보 생성, 자동 확정 금지 |
+| Intent Work Resolver | Resolver | Work에 노출할 최소 Intent 선택 정보와 버전 참조 계산 |
+
+Work Core는 현재 실행기가 아니다. Intent Engine 역시 외부 AI가 전략을 이해하거나 Work 수행을 강제하는 하네스가 아니다. 지도에는 이 범위를 입력·출력과 설명에 명시해 논리 구조를 실제 실행 자원으로 오인하지 않게 한다.
 
 ## 코드 경계 원칙
 

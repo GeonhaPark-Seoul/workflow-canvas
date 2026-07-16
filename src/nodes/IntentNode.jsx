@@ -22,6 +22,10 @@ export default function IntentNode({ data, selected, id }) {
   const kind = intentKindDefinition(data.intentKind)
   const status = intentStatusDefinition(data.intentStatus)
   const version = intentVersionState(data)
+  const sourceCount = Array.isArray(data.intentSources) ? data.intentSources.length : 0
+  const approvedClauseCount = Array.isArray(data.intentClauses)
+    ? data.intentClauses.filter((clause) => clause.status === 'approved').length
+    : 0
   const filled = data.nodeFill !== false
   const darkText = data.theme === 'light' && !filled
   const titleColor = darkText ? '#17191f' : '#f4f1f3'
@@ -179,13 +183,19 @@ export default function IntentNode({ data, selected, id }) {
           </div>
 
           {!abstract && (
-            <div style={{
-              marginTop: 7, color: bodyColor, fontSize: 11.5, lineHeight: 1.45,
-              display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical',
-              overflow: 'hidden', whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-            }}>
-              {data.statement || '의도 내용을 노트 창에서 작성하세요.'}
-            </div>
+            <>
+              <div style={{
+                marginTop: 7, color: bodyColor, fontSize: 11.5, lineHeight: 1.45,
+                display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical',
+                overflow: 'hidden', whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+              }}>
+                {data.statement || '의도 내용을 노트 창에서 작성하세요.'}
+              </div>
+              <div className="intent-node-evidence-counts">
+                <span>원문 {sourceCount}</span>
+                <span>확정 조문 {approvedClauseCount}</span>
+              </div>
+            </>
           )}
         </div>
       )}
