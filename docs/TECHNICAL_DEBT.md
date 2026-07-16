@@ -498,6 +498,40 @@ This is the durable ledger for security, reliability, commercialization, and arc
 - Required work: define adapter-neutral input/output compatibility and direction rules, reject invalid part-to-part contracts before save, distinguish available ports from proven live bindings, and design overflow behavior for nodes with many parts without hiding sockets or moving persisted layout unexpectedly.
 - Exit criteria: incompatible ports cannot be connected, every linked socket resolves to a persisted evidence-backed relation, and 1-20 parts remain usable at supported zoom and viewport sizes.
 
+## Code quality and replacement candidates
+
+Quality items follow the same ledger rules. Most carry `Gate: none` (not a
+release blocker). They exist so an audit day (see `docs/AUDIT_PLAYBOOK.md`)
+starts from a real list instead of archaeology. Record shortcuts, duplication,
+oversized files, untested behavior, and replace-with-standard candidates at
+the moment they are created or discovered.
+
+### QUAL-001 - App.jsx monolith
+
+- Severity: medium
+- Gate: none
+- Status: open
+- Context: `src/App.jsx` exceeds 5,000 lines and owns canvas state, sharing,
+  sync, layers, twin review wiring, and toolbar composition. Every batch
+  touches it, raising merge risk and review cost.
+- Exit criteria: extract at least layer projection state, share/session state,
+  and twin review wiring into modules with their current behavior pinned by
+  tests first; App.jsx under ~2,500 lines without behavior change.
+
+### QUAL-002 - Feature-activation conditions must be tested
+
+- Severity: medium
+- Gate: none
+- Status: open
+- Context: the batch A layer switcher shipped with an activation predicate
+  (`canvasSupportsSystemLayers`) that no test covered, and it failed on the
+  real production canvas (metadata field newer than the canvas). The failure
+  mode generalizes: any "is this feature on for this data?" gate can silently
+  never fire.
+- Exit criteria: every user-visible feature gate has a regression test using
+  realistic production-shaped data (not only template-shaped data); audit
+  checklist includes a sweep for untested gates.
+
 ## Deferred product horizons
 
 - AI-assisted system onboarding and orchestration after deterministic twin reconciliation is reliable.

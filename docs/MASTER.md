@@ -7,7 +7,7 @@
 
 | 항목 | 값 |
 |---|---|
-| 문서 버전 | **0.2.2** |
+| 문서 버전 | **0.3.0** |
 | 최종 수정일 | 2026-07-17 |
 | 제품 버전 | 0.1.0-alpha.0 (내부 알파) |
 | 관리 규칙 | 이 문서 맨 아래 §13 |
@@ -87,9 +87,15 @@ Workflow Canvas OS는 **세상에서 관리할 가치가 있는 모든 대상을
 
 ### 2.4 표현 문법: 층(Layer)과 오버레이(Overlay)
 
-시스템 지도는 서로 다른 관점을 한 평면에 섞지 않는다. 축을 둘로 나눈다.
+캔버스는 서로 다른 관점을 한 평면에 섞지 않는다. 축을 둘로 나눈다.
 
-**층(Layer) = 추상화 깊이.** 소프트웨어 시스템 지도의 표준 4층 (위→아래):
+**층은 모든 캔버스의 일반 기능이다.** 어떤 캔버스든 사용자가 층을 만들고,
+이름 짓고, 순서를 정하고, 노드를 배정할 수 있다. 자기 지도 전용 기능이 아니다 —
+사용자 입장에서 필요한 것을 만든다. 시스템 지도에서는 아래 L1~L4가 기본
+프리셋으로 제공되며(보호됨), 그 외 층은 사용자 정의다.
+
+**층(Layer) = 한 캔버스에서 사용자가 정한 하나의 분리 축.** 시스템 지도의
+기본 축은 추상화 깊이이고, 표준 4층 (위→아래):
 
 | 층 | 이름 | 담는 것 | 답하는 질문 |
 |---|---|---|---|
@@ -390,6 +396,9 @@ Agent Skill/Agent Policy/Hard Guardrail/Connector/Manifest를 구별한다
 ### 다음 제품 순서 (단기, 확정)
 1. ~~**층 공식화**~~ ✅ 완료 (배치 A, 커밋 `9e84e2a`) — L1~L4 층 뷰 + 층 전환기,
    결정적 기본 층 유도, layerOverride, redaction-안전 수직 포털.
+1-2. **층 일반화 (배치 A2)** — 층을 모든 캔버스의 사용자 기능으로: 층 생성·이름·
+   순서·삭제, 시스템 지도의 L1~L4는 보호된 기본 프리셋. 배치 A가 자기 지도
+   전용으로 좁게 나간 것의 교정.
 2. **기능 층 생성** — 제품 영역·하위 시스템 분류를 L1 기능 Asset으로 승격하는
    Proposal (Twin Core 대조 경로 그대로).
 3. **보안 오버레이** — 신뢰영역·게이트웨이·unknown-gap 캔버스 시각화 (기존 부채).
@@ -450,7 +459,7 @@ Reality Lens, Decision Lens → 물류·ERP·사업·개인 생활 Lens.
 |---|---|---|
 | **0 필수** | `CLAUDE.md` (행동 규칙), **`docs/MASTER.md` (이 문서)** | 모든 작업 시작 전. MASTER는 §2 용어 + §4 원칙 + 작업 관련 절만 읽어도 된다 |
 | **1 계약** | `docs/TWIN_ADAPTER_CONTRACT.md` · `docs/TWIN_BUILD_SCHEMA.md` · `docs/OPERATION_LIFECYCLE_CONTRACT.md` · `docs/architecture/SOURCE_PROFILE_CONTRACT.md` | 해당 계약을 구현·변경할 때만 |
-| **2 장부** | `docs/TECHNICAL_DEBT.md` (해당 ID만) · `docs/product/ENGINE_CHANGELOG.md` · `docs/architecture/DEPENDENCY_DECISIONS.md` + `dependency-registry.json` | 부채 등록/해소, 엔진 버전 변경, 의존성 추가 시만 |
+| **2 장부** | `docs/TECHNICAL_DEBT.md` (해당 ID만) · `docs/AUDIT_PLAYBOOK.md` · `docs/product/ENGINE_CHANGELOG.md` · `docs/architecture/DEPENDENCY_DECISIONS.md` + `dependency-registry.json` | 부채 등록/해소, 점검일, 엔진 버전 변경, 의존성 추가 시만 |
 | **3 부록** | `docs/product/PRODUCT_CATALOG.md` · `docs/TWIN_ENGINE_ROADMAP.md` · `docs/product/ENGINE_AGENT_REGISTRY.md` · `docs/architecture/OPEN_SOURCE_POLICY.md` | 그 영역의 세부가 필요할 때만. **방향·용어가 이 문서와 충돌하면 이 문서가 이긴다** |
 
 작업 유형별 최소 읽기:
@@ -470,19 +479,29 @@ Reality Lens, Decision Lens → 물류·ERP·사업·개인 생활 Lens.
 
 이 프로젝트는 사람 1명 + AI 2종이 고정된 역할로 일한다:
 
+**현재 편성 (2026-07-17~, Codex는 토큰 한도로 당분간 휴무):**
+
 | 역할 | 담당 | 하는 일 |
 |---|---|---|
-| **기획·계획** | 사용자 + Claude Code | 방향·용어·우선순위 결정, MASTER.md 관리, Codex에 보낼 **설계의뢰서** 작성 |
-| **설계·구현** | Codex | 의뢰서를 받아 설계·구현·자체 검증, 패치 + 전달 문서 작성 (기준 커밋, SHA-256, 검증 결과 포함 — 기존 관행 유지) |
-| **검수·배포** | Claude Code | 패치 검증(테스트·빌드·보안 표면 재검토), 커밋, GitHub push, Vercel 배포, SQL 실행 안내, **MASTER.md 버전 갱신** |
+| **기획·계획** | 사용자 + Claude Code | 방향·용어·우선순위 결정, MASTER.md 관리 |
+| **설계·구현·검수·배포** | Claude Code | 설계, 구현, 테스트·빌드·보안 표면 검증, 커밋, GitHub push, Vercel 배포, SQL 실행 안내, MASTER.md 버전 갱신 |
 | **최종 확인** | 사용자 | 배포 후 실제 화면·E2E 수동 확인, SQL 실행 |
 
-규칙:
-- Codex는 커밋·push·배포·운영 DB 실행을 하지 않는다 (기존 관행).
-- Claude Code는 검수 시 핸드오프의 주장을 그대로 믿지 않고 기준 커밋·지문·테스트를
-  재확인한다.
-- 기능·용어·로드맵이 바뀌는 배치는 배포와 함께 MASTER.md 버전을 올린다.
-- 설계의뢰서와 전달 문서 교환 위치는 `/private/tmp/` 를 기본으로 한다.
+구현자와 검수자가 같아진 만큼 다음을 강제한다:
+- 검증 게이트(테스트·빌드·보안 경계·manifest 정합) 없이 배포하지 않는다.
+- 구현 중 택한 지름길·중복·사각지대는 그 자리에서 `TECHNICAL_DEBT.md`의
+  QUAL 항목으로 기록한다 (`docs/AUDIT_PLAYBOOK.md` 상시 규칙).
+- 사용자가 요청하면 언제든 점검일 절차를 실행한다 (AUDIT_PLAYBOOK §2).
+
+Codex가 복귀하면 이전 편성(기획: 사용자+Claude / 구현: Codex / 검수·배포:
+Claude)으로 되돌릴 수 있으며, 그때도 전달 문서 관행(기준 커밋, SHA-256,
+검증 결과)은 유지한다.
+
+**시스템 지도 최신성 규칙:** 배치가 시스템 지도 템플릿·모델을 바꾸면 배포 후
+기존 지도를 항상 최신 패치 기준 최선의 상태로 갱신한다 — 그대로 두고 추가만
+하는 게 아니라 바꿀 것은 바꾼다. 갱신은 검토(Proposal) 경로 또는 사용자 동의된
+직접 갱신으로 하되, **사용자의 노드 배치·메모·검토 결정은 항상 보존**한다
+(사용자가 배치를 직접 다듬는다는 전제).
 
 ---
 
@@ -503,6 +522,7 @@ Reality Lens, Decision Lens → 물류·ERP·사업·개인 생활 Lens.
 
 | 버전 | 날짜 | 변경 |
 |---|---|---|
+| 0.3.0 | 2026-07-17 | 층 문법 교정: 층은 자기 지도 전용이 아니라 **모든 캔버스의 사용자 기능**(생성·이름·순서·삭제), L1~L4는 시스템 지도 기본 프리셋 — 배치 A2로 구현. 역할 편성 변경: Codex 휴무, 구현·검수·배포 모두 Claude Code + 자기검수 보완 장치. 시스템 지도 최신성 규칙(§12). 점검 제도 신설: AUDIT_PLAYBOOK.md + QUAL 품질 장부. |
 | 0.2.2 | 2026-07-17 | 배치 A 배포 완료 기록: 시스템 지도 L1~L4 층 공식화(층 전환기, 결정적 기본 층, layerOverride, redaction-안전 포털). 로드맵 §9-1 완료 표시, 기능 목록 갱신. |
 | 0.2.1 | 2026-07-17 | Node 정의 명확화: Asset 바인딩 있는 노드만 Asset의 표현, 자유 작성 노드는 캔버스 주석(승격 가능). 배치 A 층 저장 설계 확정 기록(layerOverride 수동 지정만 저장, 기본값 결정적 계산, 포털 개수는 redaction 이후 계산). |
 | 0.2.0 | 2026-07-16 | 시스템 지도 = 온보딩 결과물로 재정의. 층·오버레이 표현 문법(§2.4, 4층+Z축=추상화 깊이, 2.5D 먼저), 기능 판정 3등급, 온보딩 파이프라인 엔진 역할 분담 + 온보딩=Workflow Run(§2A), 보안 시각화 정직한 범위, 로드맵 단기 순서 개편(§9), 문서 지도 4등급 + 읽기 프로토콜(§11), 협업 프로세스 역할 분담(§12). |
