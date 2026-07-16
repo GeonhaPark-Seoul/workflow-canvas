@@ -109,11 +109,22 @@ export function ensureSystemLayerViews(views = []) {
   return missing.length ? [...current, ...missing] : current
 }
 
+// Stable group ids from the self system map template (present since the map
+// template's first commit, well before systemMapSnapshot metadata existed).
+// A map created before that metadata field shipped still carries these ids,
+// so detection must not depend on systemMapSnapshot alone.
+const LEGACY_SYSTEM_MAP_GROUP_IDS = new Set([
+  'map-group-experience', 'map-group-runtime', 'map-group-data', 'map-group-development',
+])
+
 export function canvasSupportsSystemLayers(nodes = [], views = []) {
   if ((views ?? []).some(isSystemLayerView)) return true
   return (nodes ?? []).some((node) => (
     node?.data?.redacted !== true
-    && node?.data?.systemMapSnapshot?.source === 'server-template'
+    && (
+      node?.data?.systemMapSnapshot?.source === 'server-template'
+      || LEGACY_SYSTEM_MAP_GROUP_IDS.has(node?.id)
+    )
   ))
 }
 

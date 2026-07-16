@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 
 import {
   annotationDataForSystemLayer,
+  canvasSupportsSystemLayers,
   createSystemLayerProjection,
   createSystemLayerViews,
   deriveDefaultSystemLayer,
@@ -97,5 +98,21 @@ const layerTwo = createSystemLayerProjection(graphNodes, graphEdges, 'L2')
 assert.equal(layerTwo.visibleNodeIds.has('app'), true)
 assert.equal(layerTwo.visibleNodeIds.has('group'), true, '보이는 자식의 기존 공간 그룹은 문맥으로 남아야 합니다.')
 assert.equal(layerTwo.portalsByNode.get('app')[0].targetLayer, 'L1')
+
+// Regression: a self system map created before the `systemMapSnapshot`
+// metadata field existed (e.g. the production canvas c-mrjix1ks-vhdpfn) has
+// no such field on map-group-experience and no system-layer saved views yet.
+// Detection must still recognize it via the template's stable group ids.
+const legacyMapNodes = [
+  { id: 'map-group-experience', type: 'group', data: {} },
+  { id: 'map-group-runtime', type: 'group', data: {} },
+  { id: 'map-web-app', type: 'system', parentId: 'map-group-experience', data: { systemKind: 'frontend' } },
+]
+assert.equal(canvasSupportsSystemLayers(legacyMapNodes, []), true,
+  'systemMapSnapshot 메타데이터가 없는 기존 자기 시스템 지도도 안정적인 그룹 id로 인식해야 합니다.')
+assert.equal(canvasSupportsSystemLayers([{ id: 'map-group-experience', type: 'group', data: { redacted: true } }], []), false,
+  'redacted 표시가 있으면 legacy 그룹 id도 활성화 근거로 쓰지 않아야 합니다.')
+assert.equal(canvasSupportsSystemLayers([{ id: 'random-node', type: 'stage', data: {} }], []), false,
+  '일반 사용자 캔버스는 층 기능이 활성화되지 않아야 합니다.')
 
 console.log('System layer derivation, saved views and redaction-safe portal checks passed')
