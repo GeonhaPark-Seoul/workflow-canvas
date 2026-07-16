@@ -2,7 +2,7 @@
 export const SOURCE_TWIN_MANIFEST = Object.freeze(
 {
   "schemaVersion": 1,
-  "id": "source-twin-v1-094bc0521315",
+  "id": "source-twin-v1-a0a1b98ebdd3",
   "source": {
     "id": "workflow-canvas:self-source",
     "label": "Workflow Canvas 소스 코드",
@@ -1913,7 +1913,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "dependency",
       "label": "@vitejs/plugin-react",
       "fingerprint": "4fbd55eb768161e5ff18",
-      "explanationFingerprint": "de86e9d62b2b05e703e7",
+      "explanationFingerprint": "64797598a2e535c73c39",
       "name": "@vitejs/plugin-react",
       "layer": "code",
       "area": "project-foundation",
@@ -1923,7 +1923,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "dependency-reference",
         "refs": [
           "dependency:@vitejs/plugin-react",
-          "source:vite.config.js#L1-L44"
+          "source:vite.config.js#L1-L48"
         ]
       },
       "tags": [
@@ -1936,7 +1936,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "dependency",
       "label": "@xyflow/react",
       "fingerprint": "b9b7bd59bafb20c578e9",
-      "explanationFingerprint": "9f33d661327d637d3712",
+      "explanationFingerprint": "c316a84518ffd1b71e13",
       "name": "@xyflow/react",
       "layer": "code",
       "area": "project-foundation",
@@ -1946,7 +1946,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "dependency-reference",
         "refs": [
           "dependency:@xyflow/react",
-          "source:src/App.jsx#L1-L5047"
+          "source:src/App.jsx#L1-L5068"
         ]
       },
       "tags": [
@@ -1959,7 +1959,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "dependency",
       "label": "@xyflow/react/dist/style.css",
       "fingerprint": "792b45b3b431554457ad",
-      "explanationFingerprint": "b8eab540daf6df09d2a5",
+      "explanationFingerprint": "625c5574f86a53d33035",
       "name": "@xyflow/react/dist/style.css",
       "layer": "code",
       "area": "project-foundation",
@@ -1969,7 +1969,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "dependency-reference",
         "refs": [
           "dependency:@xyflow/react/dist/style.css",
-          "source:src/App.jsx#L1-L5047"
+          "source:src/App.jsx#L1-L5068"
         ]
       },
       "tags": [
@@ -2212,7 +2212,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "dependency",
       "label": "react",
       "fingerprint": "5bb5f79b5812a3a75b62",
-      "explanationFingerprint": "cce2179b9b270ed27cd8",
+      "explanationFingerprint": "0c567c58bdf88e7ef897",
       "name": "react",
       "layer": "code",
       "area": "project-foundation",
@@ -2222,7 +2222,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "dependency-reference",
         "refs": [
           "dependency:react",
-          "source:src/App.jsx#L1-L5047"
+          "source:src/App.jsx#L1-L5068"
         ]
       },
       "tags": [
@@ -2281,7 +2281,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "dependency",
       "label": "vite",
       "fingerprint": "bcfc99e6cc3ecf9796b0",
-      "explanationFingerprint": "55d4fd0353e5ab5b0f1b",
+      "explanationFingerprint": "e2f2d3778f27d995bc04",
       "name": "vite",
       "layer": "code",
       "area": "project-foundation",
@@ -2291,7 +2291,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "dependency-reference",
         "refs": [
           "dependency:vite",
-          "source:vite.config.js#L1-L44"
+          "source:vite.config.js#L1-L48"
         ]
       },
       "tags": [
@@ -2304,7 +2304,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "dependency",
       "label": "vite-plugin-pwa",
       "fingerprint": "c8f2a56c5355440f8fbf",
-      "explanationFingerprint": "84a556a320480f377179",
+      "explanationFingerprint": "452a697661aa08cb19f4",
       "name": "vite-plugin-pwa",
       "layer": "code",
       "area": "project-foundation",
@@ -2314,7 +2314,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "dependency-reference",
         "refs": [
           "dependency:vite-plugin-pwa",
-          "source:vite.config.js#L1-L44"
+          "source:vite.config.js#L1-L48"
         ]
       },
       "tags": [
@@ -2349,7 +2349,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "deployment:vercel-web",
       "kind": "deployment",
       "label": "Vercel 웹 배포",
-      "fingerprint": "04cf540facd3764e0007",
+      "fingerprint": "3377547674d951cc0fa1",
       "explanationFingerprint": "725aed4771e9de5ae614",
       "layer": "deployment",
       "area": "deployment-operations",
@@ -4390,13 +4390,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:scripts/test-group-membership.mjs",
       "kind": "file",
       "label": "scripts/test-group-membership.mjs",
-      "fingerprint": "1813e2a703287bb67590",
-      "explanationFingerprint": "34e631fb59bc9eb4b055",
+      "fingerprint": "13a32b2ebf954d7f21fc",
+      "explanationFingerprint": "2e7ff9d7a892ea96bda6",
       "path": "scripts/test-group-membership.mjs",
       "layer": "test",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 61,
+      "lineEnd": 72,
       "area": "testing-quality",
       "subsystem": "app-tests",
       "summary": "group membership 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.",
@@ -4406,7 +4406,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "test-file-rule",
         "refs": [
           "profile:workflow-canvas@0.2.0",
-          "source:scripts/test-group-membership.mjs#L1-L61"
+          "source:scripts/test-group-membership.mjs#L1-L72"
         ]
       },
       "tags": [
@@ -4590,13 +4590,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:scripts/test-performance-boundaries.mjs",
       "kind": "file",
       "label": "scripts/test-performance-boundaries.mjs",
-      "fingerprint": "ef7c02c8e1eb85561f15",
-      "explanationFingerprint": "a7d247169bf67c02efbd",
+      "fingerprint": "abd8c34c91bb37a07d78",
+      "explanationFingerprint": "354cd122af8857164c78",
       "path": "scripts/test-performance-boundaries.mjs",
       "layer": "test",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 38,
+      "lineEnd": 41,
       "area": "testing-quality",
       "subsystem": "app-tests",
       "summary": "performance boundaries 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.",
@@ -4606,7 +4606,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "test-file-rule",
         "refs": [
           "profile:workflow-canvas@0.2.0",
-          "source:scripts/test-performance-boundaries.mjs#L1-L38"
+          "source:scripts/test-performance-boundaries.mjs#L1-L41"
         ]
       },
       "tags": [
@@ -6544,13 +6544,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:src/App.jsx",
       "kind": "file",
       "label": "src/App.jsx",
-      "fingerprint": "f0d53bffc78c92534298",
-      "explanationFingerprint": "51b67a67a651d3f05746",
+      "fingerprint": "ce8e12a372dca70daaa9",
+      "explanationFingerprint": "74f43498e79b8d30ed58",
       "path": "src/App.jsx",
       "layer": "frontend",
       "language": "jsx",
       "lineStart": 1,
-      "lineEnd": 5047,
+      "lineEnd": 5068,
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
       "summary": "캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.",
@@ -6561,7 +6561,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "refs": [
           "db-table:canvases",
           "profile:workflow-canvas@0.2.0",
-          "source:src/App.jsx#L1-L5047"
+          "source:src/App.jsx#L1-L5068"
         ]
       },
       "tags": [
@@ -7894,23 +7894,23 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:src/lib/groupMembership.js",
       "kind": "file",
       "label": "src/lib/groupMembership.js",
-      "fingerprint": "dd659485099dc05ae338",
-      "explanationFingerprint": "7938c7b10e432106a4f4",
+      "fingerprint": "e1fef9655943d9a087a9",
+      "explanationFingerprint": "8a427ae3464152987d71",
       "path": "src/lib/groupMembership.js",
       "layer": "frontend",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 136,
+      "lineEnd": 174,
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
       "summary": "그룹 기능을 화면의 여러 부분에서 다시 쓸 수 있게 제공합니다.",
       "userImpact": "사용자가 화면에서 해당 기능을 보고 조작하는 방식에 영향을 줍니다.",
-      "technicalSummary": "함수 9개 · 코드 연결 1개",
+      "technicalSummary": "함수 11개 · 코드 연결 1개",
       "explanationBasis": {
         "method": "deterministic-source-rule",
         "refs": [
           "profile:workflow-canvas@0.2.0",
-          "source:src/lib/groupMembership.js#L1-L136"
+          "source:src/lib/groupMembership.js#L1-L174"
         ]
       },
       "tags": [
@@ -7919,12 +7919,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "frontend"
       ],
       "details": {
-        "functionCount": 9,
+        "functionCount": 11,
         "importCount": 1,
         "exports": [
           "GROUP_MEMBERSHIP_OVERLAP_THRESHOLD",
           "findGroupAtPoint",
           "findGroupDropTarget",
+          "findNonOverlappingAbsolutePosition",
           "nodeAbsoluteRect",
           "nodeDimensions",
           "positionInsideGroup",
@@ -9923,13 +9924,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:vite.config.js",
       "kind": "file",
       "label": "vite.config.js",
-      "fingerprint": "d59936e4a891aa511d18",
-      "explanationFingerprint": "4676d5c20e8015e872d3",
+      "fingerprint": "5412a34b8e92865f4b7e",
+      "explanationFingerprint": "828aba555d01722d9b8f",
       "path": "vite.config.js",
       "layer": "deployment",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 44,
+      "lineEnd": 48,
       "area": "deployment-operations",
       "subsystem": "build-release",
       "summary": "개발 코드를 검사·빌드해 실제 웹 서비스로 실행할 설정과 명령을 정의합니다.",
@@ -9939,7 +9940,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "deterministic-source-rule",
         "refs": [
           "profile:workflow-canvas@0.2.0",
-          "source:vite.config.js#L1-L44"
+          "source:vite.config.js#L1-L48"
         ]
       },
       "tags": [
@@ -38656,22 +38657,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/App.jsx:App",
       "kind": "function",
       "label": "App",
-      "fingerprint": "d5986e3c3f2fd4f89330",
-      "explanationFingerprint": "43125fb4f48b480cfae3",
+      "fingerprint": "542d4a6ddc8693d8e80b",
+      "explanationFingerprint": "285839a6309e41b85b38",
       "name": "App",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 519,
-      "lineEnd": 4989,
+      "lineStart": 521,
+      "lineEnd": 5010,
       "summary": "App 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L519-L4989",
+          "source:src/App.jsx#L521-L5010",
           "symbol:App"
         ]
       },
@@ -38693,21 +38694,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "ContextItem",
       "fingerprint": "fdeb31b728e83fc3238e",
-      "explanationFingerprint": "b770af9ee01bb67c4b03",
+      "explanationFingerprint": "0d24280377adbb7800c2",
       "name": "ContextItem",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 4992,
-      "lineEnd": 5009,
+      "lineStart": 5013,
+      "lineEnd": 5030,
       "summary": "실행 문맥 · 검토 항목 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L4992-L5009",
+          "source:src/App.jsx#L5013-L5030",
           "symbol:ContextItem"
         ]
       },
@@ -38728,21 +38729,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "IconBtn",
       "fingerprint": "2e991772b227d303be7d",
-      "explanationFingerprint": "8a0b94b1dbae4fe4538a",
+      "explanationFingerprint": "ebcd8444e13d5a0245d1",
       "name": "IconBtn",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 5030,
-      "lineEnd": 5046,
+      "lineStart": 5051,
+      "lineEnd": 5067,
       "summary": "IconBtn 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L5030-L5046",
+          "source:src/App.jsx#L5051-L5067",
           "symbol:IconBtn"
         ]
       },
@@ -38763,21 +38764,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "TypeItem",
       "fingerprint": "68abc0d7712f461ab54e",
-      "explanationFingerprint": "48edc8dfaa70448b92c8",
+      "explanationFingerprint": "42398283435dddf12b85",
       "name": "TypeItem",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 5011,
-      "lineEnd": 5028,
+      "lineStart": 5032,
+      "lineEnd": 5049,
       "summary": "검토 항목 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L5011-L5028",
+          "source:src/App.jsx#L5032-L5049",
           "symbol:TypeItem"
         ]
       },
@@ -38798,21 +38799,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "absPos",
       "fingerprint": "852c89de5c9f5c0fae52",
-      "explanationFingerprint": "2a35ec2094ca53e62327",
+      "explanationFingerprint": "d30d2901ec61c00c8338",
       "name": "absPos",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 943,
-      "lineEnd": 951,
+      "lineStart": 945,
+      "lineEnd": 953,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L943-L951",
+          "source:src/App.jsx#L945-L953",
           "symbol:absPos"
         ]
       },
@@ -38833,21 +38834,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "afterLogin",
       "fingerprint": "360d192738561adcf439",
-      "explanationFingerprint": "7da5c0c6fa46a7ac0543",
+      "explanationFingerprint": "26b91619efffa7b6c21f",
       "name": "afterLogin",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1789,
-      "lineEnd": 1865,
+      "lineStart": 1791,
+      "lineEnd": 1867,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1789-L1865",
+          "source:src/App.jsx#L1791-L1867",
           "symbol:afterLogin"
         ]
       },
@@ -38869,21 +38870,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "aggregateSystemNodeRuntime",
       "fingerprint": "4a97f3c722535e66a833",
-      "explanationFingerprint": "c64ff14b3e977eb8f37d",
+      "explanationFingerprint": "1ffac888a4a81e06213b",
       "name": "aggregateSystemNodeRuntime",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 263,
-      "lineEnd": 283,
+      "lineStart": 265,
+      "lineEnd": 285,
       "summary": "시스템 · 노드 · 실제 운영 상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L263-L283",
+          "source:src/App.jsx#L265-L285",
           "symbol:aggregateSystemNodeRuntime"
         ]
       },
@@ -38904,21 +38905,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "baseEdgeStyle",
       "fingerprint": "19b657c4aac656ff1af3",
-      "explanationFingerprint": "83d0931ac3c137962cc0",
+      "explanationFingerprint": "95ccb1ba20d4f6e1814b",
       "name": "baseEdgeStyle",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 451,
-      "lineEnd": 464,
+      "lineStart": 453,
+      "lineEnd": 466,
       "summary": "기준 · 연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L451-L464",
+          "source:src/App.jsx#L453-L466",
           "symbol:baseEdgeStyle"
         ]
       },
@@ -38939,21 +38940,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "cancelEdgeLp",
       "fingerprint": "8e18e0733ba6830c8bcb",
-      "explanationFingerprint": "7344b62e4b0a8caa2b07",
+      "explanationFingerprint": "353f2b8f09f57359f6a0",
       "name": "cancelEdgeLp",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 892,
-      "lineEnd": 897,
+      "lineStart": 894,
+      "lineEnd": 899,
       "summary": "연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L892-L897",
+          "source:src/App.jsx#L894-L899",
           "symbol:cancelEdgeLp"
         ]
       },
@@ -38974,21 +38975,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "canvasSnapshot",
       "fingerprint": "7f60b40a530076b0c3f0",
-      "explanationFingerprint": "3fbf5507e0f26720ba38",
+      "explanationFingerprint": "20725a5fc59207f35ab9",
       "name": "canvasSnapshot",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 488,
-      "lineEnd": 497,
+      "lineStart": 490,
+      "lineEnd": 499,
       "summary": "캔버스 · 상태 스냅샷에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L488-L497",
+          "source:src/App.jsx#L490-L499",
           "symbol:canvasSnapshot"
         ]
       },
@@ -39009,21 +39010,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "centerInFrame",
       "fingerprint": "e037693af7f729d0d8b3",
-      "explanationFingerprint": "80568d76b4ed3058dde4",
+      "explanationFingerprint": "477d94fee878339771d7",
       "name": "centerInFrame",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 394,
-      "lineEnd": 403,
+      "lineStart": 396,
+      "lineEnd": 405,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L394-L403",
+          "source:src/App.jsx#L396-L405",
           "symbol:centerInFrame"
         ]
       },
@@ -39044,21 +39045,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "cleanup",
       "fingerprint": "31dded95ae2501741162",
-      "explanationFingerprint": "0d4fce311b9e29890a2e",
+      "explanationFingerprint": "66a7469e8b56437d6590",
       "name": "cleanup",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 867,
-      "lineEnd": 872,
+      "lineStart": 869,
+      "lineEnd": 874,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L867-L872",
+          "source:src/App.jsx#L869-L874",
           "symbol:cleanup"
         ]
       },
@@ -39079,21 +39080,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "closeContext",
       "fingerprint": "2a59e32f45d65c4e1805",
-      "explanationFingerprint": "6e71d686e6fc69df63d2",
+      "explanationFingerprint": "fa535a03d7acea59701a",
       "name": "closeContext",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3565,
-      "lineEnd": 3565,
+      "lineStart": 3567,
+      "lineEnd": 3567,
       "summary": "실행 문맥 작업을 화면을 닫습니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3565",
+          "source:src/App.jsx#L3567",
           "symbol:closeContext"
         ]
       },
@@ -39114,21 +39115,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "closestHandles",
       "fingerprint": "b55b25d4e13346a56ddf",
-      "explanationFingerprint": "3f60b9ea4a058dba1a39",
+      "explanationFingerprint": "e47c22be0dd6165d2f5b",
       "name": "closestHandles",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 369,
-      "lineEnd": 380,
+      "lineStart": 371,
+      "lineEnd": 382,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L369-L380",
+          "source:src/App.jsx#L371-L382",
           "symbol:closestHandles"
         ]
       },
@@ -39149,21 +39150,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "cloudRowSnapshot",
       "fingerprint": "9f581b5158d168c04a4e",
-      "explanationFingerprint": "697a9eb622fa33c412fb",
+      "explanationFingerprint": "b9efbdc270564edb7f41",
       "name": "cloudRowSnapshot",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 499,
-      "lineEnd": 507,
+      "lineStart": 501,
+      "lineEnd": 509,
       "summary": "상태 스냅샷에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L499-L507",
+          "source:src/App.jsx#L501-L509",
           "symbol:cloudRowSnapshot"
         ]
       },
@@ -39184,21 +39185,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "commitRename",
       "fingerprint": "a506679eab2e3d727289",
-      "explanationFingerprint": "fe2d1e7b48b3126422ef",
+      "explanationFingerprint": "dec0f6d8428a9e01c44e",
       "name": "commitRename",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 4146,
-      "lineEnd": 4149,
+      "lineStart": 4167,
+      "lineEnd": 4170,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L4146-L4149",
+          "source:src/App.jsx#L4167-L4170",
           "symbol:commitRename"
         ]
       },
@@ -39219,21 +39220,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "creationPosition",
       "fingerprint": "811ea535ee667311bd1e",
-      "explanationFingerprint": "4d86077873f46c54cafd",
+      "explanationFingerprint": "434daca9b516709dfa53",
       "name": "creationPosition",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 405,
-      "lineEnd": 409,
+      "lineStart": 407,
+      "lineEnd": 411,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L405-L409",
+          "source:src/App.jsx#L407-L411",
           "symbol:creationPosition"
         ]
       },
@@ -39254,21 +39255,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "dedupeParticipants",
       "fingerprint": "90aee76075c1a61798e0",
-      "explanationFingerprint": "82d1fc787e61060bc2dd",
+      "explanationFingerprint": "1cfd5be899b9da9ed6a5",
       "name": "dedupeParticipants",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 332,
-      "lineEnd": 339,
+      "lineStart": 334,
+      "lineEnd": 341,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L332-L339",
+          "source:src/App.jsx#L334-L341",
           "symbol:dedupeParticipants"
         ]
       },
@@ -39289,21 +39290,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "detachDigitalTwinBinding",
       "fingerprint": "dcc646ae07b6701cce09",
-      "explanationFingerprint": "0bae6c27a51a487e24c3",
+      "explanationFingerprint": "a6d50267f79551c3e8f1",
       "name": "detachDigitalTwinBinding",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 477,
-      "lineEnd": 481,
+      "lineStart": 479,
+      "lineEnd": 483,
       "summary": "디지털 트윈에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L477-L481",
+          "source:src/App.jsx#L479-L483",
           "symbol:detachDigitalTwinBinding"
         ]
       },
@@ -39324,21 +39325,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "dim",
       "fingerprint": "e95e6e2a04b81f8c9cb5",
-      "explanationFingerprint": "1c8eb5177b7f1e50277e",
+      "explanationFingerprint": "acf6f14be701ca7950ef",
       "name": "dim",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 370,
-      "lineEnd": 370,
+      "lineStart": 372,
+      "lineEnd": 372,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L370",
+          "source:src/App.jsx#L372",
           "symbol:dim"
         ]
       },
@@ -39359,21 +39360,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "dim",
       "fingerprint": "ac0af8f60af0838a0fcc",
-      "explanationFingerprint": "dcffebb2cf4150af495c",
+      "explanationFingerprint": "313715efcdc261315d82",
       "name": "dim",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3336,
-      "lineEnd": 3336,
+      "lineStart": 3338,
+      "lineEnd": 3338,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3336",
+          "source:src/App.jsx#L3338",
           "symbol:dim"
         ]
       },
@@ -39394,21 +39395,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "dim",
       "fingerprint": "ac0af8f60af0838a0fcc",
-      "explanationFingerprint": "f61c454706452cc8aaec",
+      "explanationFingerprint": "e8fd8aec7bca3843dc1e",
       "name": "dim",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3422,
-      "lineEnd": 3422,
+      "lineStart": 3424,
+      "lineEnd": 3424,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3422",
+          "source:src/App.jsx#L3424",
           "symbol:dim"
         ]
       },
@@ -39429,21 +39430,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "distOf",
       "fingerprint": "9381f300575ebbdf1c0d",
-      "explanationFingerprint": "71c0959f2a26aa48d360",
+      "explanationFingerprint": "3c7e5668bc108de9bc26",
       "name": "distOf",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1143,
-      "lineEnd": 1143,
+      "lineStart": 1145,
+      "lineEnd": 1145,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1143",
+          "source:src/App.jsx#L1145",
           "symbol:distOf"
         ]
       },
@@ -39464,21 +39465,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "findAxisSnap",
       "fingerprint": "1147a6a4ab14ba649dba",
-      "explanationFingerprint": "de1ddbc074217e49a122",
+      "explanationFingerprint": "e4bbef1c1f9463f0e9bd",
       "name": "findAxisSnap",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3337,
-      "lineEnd": 3344,
+      "lineStart": 3339,
+      "lineEnd": 3346,
       "summary": "이 기능 상태나 허용 여부를 대상을 찾습니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3337-L3344",
+          "source:src/App.jsx#L3339-L3346",
           "symbol:findAxisSnap"
         ]
       },
@@ -39499,21 +39500,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "fn",
       "fingerprint": "7d317f1663f5bd6de241",
-      "explanationFingerprint": "11b2893d1f0b4da141a0",
+      "explanationFingerprint": "ab6baecb81894170037a",
       "name": "fn",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 575,
-      "lineEnd": 575,
+      "lineStart": 577,
+      "lineEnd": 577,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L575",
+          "source:src/App.jsx#L577",
           "symbol:fn"
         ]
       },
@@ -39534,21 +39535,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handleContextAddContent",
       "fingerprint": "d2dbe62d39b97b9d733d",
-      "explanationFingerprint": "b83f4c14bfd89ed86a91",
+      "explanationFingerprint": "a6dc4d60eb690b1d30a3",
       "name": "handleContextAddContent",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3587,
-      "lineEnd": 3592,
+      "lineStart": 3589,
+      "lineEnd": 3594,
       "summary": "실행 문맥 · 본문 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3587-L3592",
+          "source:src/App.jsx#L3589-L3594",
           "symbol:handleContextAddContent"
         ]
       },
@@ -39569,21 +39570,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handleContextAddGroup",
       "fingerprint": "2e1421494787d73f679a",
-      "explanationFingerprint": "481ee56dbac1073880d4",
+      "explanationFingerprint": "da1e9f4c0d52edad2002",
       "name": "handleContextAddGroup",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3579,
-      "lineEnd": 3585,
+      "lineStart": 3581,
+      "lineEnd": 3587,
       "summary": "실행 문맥 · 그룹 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3579-L3585",
+          "source:src/App.jsx#L3581-L3587",
           "symbol:handleContextAddGroup"
         ]
       },
@@ -39604,21 +39605,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handleContextAddIntent",
       "fingerprint": "54f7592f83d3ed95ff65",
-      "explanationFingerprint": "1d5e9c326735eef382b3",
+      "explanationFingerprint": "95f3d1dea29144a903c5",
       "name": "handleContextAddIntent",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3601,
-      "lineEnd": 3606,
+      "lineStart": 3603,
+      "lineEnd": 3608,
       "summary": "실행 문맥 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3601-L3606",
+          "source:src/App.jsx#L3603-L3608",
           "symbol:handleContextAddIntent"
         ]
       },
@@ -39639,21 +39640,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handleContextAddMemo",
       "fingerprint": "e0001baacb407bdb396b",
-      "explanationFingerprint": "3dc4fc30842022b2f3eb",
+      "explanationFingerprint": "15eaec1925c5600c4659",
       "name": "handleContextAddMemo",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3573,
-      "lineEnd": 3577,
+      "lineStart": 3575,
+      "lineEnd": 3579,
       "summary": "실행 문맥 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3573-L3577",
+          "source:src/App.jsx#L3575-L3579",
           "symbol:handleContextAddMemo"
         ]
       },
@@ -39674,21 +39675,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handleContextAddStage",
       "fingerprint": "6a90426944cdb78075b4",
-      "explanationFingerprint": "666172f275221d4c1fea",
+      "explanationFingerprint": "598c18e04bd0484d511c",
       "name": "handleContextAddStage",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3567,
-      "lineEnd": 3571,
+      "lineStart": 3569,
+      "lineEnd": 3573,
       "summary": "실행 문맥 · 단계 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3567-L3571",
+          "source:src/App.jsx#L3569-L3573",
           "symbol:handleContextAddStage"
         ]
       },
@@ -39709,21 +39710,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handleContextAddSystem",
       "fingerprint": "5b18ad0040bef1488f25",
-      "explanationFingerprint": "808adcfc44edb68a9423",
+      "explanationFingerprint": "38b4b9bfe150a018d16e",
       "name": "handleContextAddSystem",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3594,
-      "lineEnd": 3599,
+      "lineStart": 3596,
+      "lineEnd": 3601,
       "summary": "실행 문맥 · 시스템 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3594-L3599",
+          "source:src/App.jsx#L3596-L3601",
           "symbol:handleContextAddSystem"
         ]
       },
@@ -39744,21 +39745,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handleContextCleanupEdges",
       "fingerprint": "ddd2b97b3b2964b42d85",
-      "explanationFingerprint": "ee1ec0fca5550545d804",
+      "explanationFingerprint": "78a37d743b1434fab242",
       "name": "handleContextCleanupEdges",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3660,
-      "lineEnd": 3676,
+      "lineStart": 3662,
+      "lineEnd": 3678,
       "summary": "실행 문맥 · 연결선 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3660-L3676",
+          "source:src/App.jsx#L3662-L3678",
           "symbol:handleContextCleanupEdges"
         ]
       },
@@ -39779,21 +39780,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handleContextDeleteEdge",
       "fingerprint": "1236d107787239951c65",
-      "explanationFingerprint": "00e4c110a65fde77fa94",
+      "explanationFingerprint": "868dd0f62615a5ed3b6b",
       "name": "handleContextDeleteEdge",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3628,
-      "lineEnd": 3634,
+      "lineStart": 3630,
+      "lineEnd": 3636,
       "summary": "실행 문맥 · 삭제 · 연결선 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3628-L3634",
+          "source:src/App.jsx#L3630-L3636",
           "symbol:handleContextDeleteEdge"
         ]
       },
@@ -39814,21 +39815,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handleContextDeleteNode",
       "fingerprint": "c40f2104b46f827da76e",
-      "explanationFingerprint": "fe90a141e53aa1e347d7",
+      "explanationFingerprint": "43bdcc6698ee6fc62414",
       "name": "handleContextDeleteNode",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3618,
-      "lineEnd": 3626,
+      "lineStart": 3620,
+      "lineEnd": 3628,
       "summary": "실행 문맥 · 삭제 · 노드 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3618-L3626",
+          "source:src/App.jsx#L3620-L3628",
           "symbol:handleContextDeleteNode"
         ]
       },
@@ -39849,21 +39850,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handleContextGroupSelection",
       "fingerprint": "37c3c5b81e3053212b15",
-      "explanationFingerprint": "90796dd133cd22b79ae1",
+      "explanationFingerprint": "4cc9e8d113da96f6758e",
       "name": "handleContextGroupSelection",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3649,
-      "lineEnd": 3655,
+      "lineStart": 3651,
+      "lineEnd": 3657,
       "summary": "실행 문맥 · 그룹 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3649-L3655",
+          "source:src/App.jsx#L3651-L3657",
           "symbol:handleContextGroupSelection"
         ]
       },
@@ -39884,21 +39885,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handleContextPaste",
       "fingerprint": "50cb94187db65bf4ca6f",
-      "explanationFingerprint": "4fdb17f874984861f57c",
+      "explanationFingerprint": "f2567ab44549656b7130",
       "name": "handleContextPaste",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3608,
-      "lineEnd": 3616,
+      "lineStart": 3610,
+      "lineEnd": 3618,
       "summary": "실행 문맥 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3608-L3616",
+          "source:src/App.jsx#L3610-L3618",
           "symbol:handleContextPaste"
         ]
       },
@@ -39919,21 +39920,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handleContextUngroup",
       "fingerprint": "ec5959c4960ca9e36788",
-      "explanationFingerprint": "1a131bcb5e881481fbae",
+      "explanationFingerprint": "d015cb6dbecb2b71210f",
       "name": "handleContextUngroup",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3678,
-      "lineEnd": 3683,
+      "lineStart": 3680,
+      "lineEnd": 3685,
       "summary": "실행 문맥 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3678-L3683",
+          "source:src/App.jsx#L3680-L3685",
           "symbol:handleContextUngroup"
         ]
       },
@@ -39954,21 +39955,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handleContextUpdateEdgeRelation",
       "fingerprint": "34a1d59fe7f511fb1cac",
-      "explanationFingerprint": "4fbaf463a6dd869b96dd",
+      "explanationFingerprint": "ea2a41c949948938f0c7",
       "name": "handleContextUpdateEdgeRelation",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3636,
-      "lineEnd": 3647,
+      "lineStart": 3638,
+      "lineEnd": 3649,
       "summary": "실행 문맥 · 변경 · 연결선 · 관계 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3636-L3647",
+          "source:src/App.jsx#L3638-L3649",
           "symbol:handleContextUpdateEdgeRelation"
         ]
       },
@@ -39989,21 +39990,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handler",
       "fingerprint": "29018ca7bde2ce517231",
-      "explanationFingerprint": "f117b9d8fd96072ff4bc",
+      "explanationFingerprint": "4a171b56830d86272f20",
       "name": "handler",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 801,
-      "lineEnd": 808,
+      "lineStart": 803,
+      "lineEnd": 810,
       "summary": "이 서버 경로로 들어온 요청의 로그인과 입력을 확인하고 결과를 돌려줍니다. 이 요청은 다음 역할을 맡습니다: 캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L801-L808",
+          "source:src/App.jsx#L803-L810",
           "symbol:handler"
         ]
       },
@@ -40024,21 +40025,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handler",
       "fingerprint": "8e4941c0c81a4fb770cd",
-      "explanationFingerprint": "c2e10f5769282cc12ac5",
+      "explanationFingerprint": "1ff99df2dc92e47b15ce",
       "name": "handler",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1926,
-      "lineEnd": 1999,
+      "lineStart": 1928,
+      "lineEnd": 2001,
       "summary": "이 서버 경로로 들어온 요청의 로그인과 입력을 확인하고 결과를 돌려줍니다. 이 요청은 다음 역할을 맡습니다: 캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1926-L1999",
+          "source:src/App.jsx#L1928-L2001",
           "symbol:handler"
         ]
       },
@@ -40060,21 +40061,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handler",
       "fingerprint": "01364bf7f0b1454f6d73",
-      "explanationFingerprint": "d782ddee1b8a771909e4",
+      "explanationFingerprint": "32e449dc2fefb7b78c1a",
       "name": "handler",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3250,
-      "lineEnd": 3260,
+      "lineStart": 3252,
+      "lineEnd": 3262,
       "summary": "이 서버 경로로 들어온 요청의 로그인과 입력을 확인하고 결과를 돌려줍니다. 이 요청은 다음 역할을 맡습니다: 캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3250-L3260",
+          "source:src/App.jsx#L3252-L3262",
           "symbol:handler"
         ]
       },
@@ -40095,21 +40096,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "isPartEdge",
       "fingerprint": "2906822e4e5bf89fb1eb",
-      "explanationFingerprint": "524de1b174414e4471f9",
+      "explanationFingerprint": "1783b1db7a59fe516bbb",
       "name": "isPartEdge",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 438,
-      "lineEnd": 440,
+      "lineStart": 440,
+      "lineEnd": 442,
       "summary": "시스템 파츠 · 연결선 상태나 허용 여부를 해당 상태인지 판단합니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L438-L440",
+          "source:src/App.jsx#L440-L442",
           "symbol:isPartEdge"
         ]
       },
@@ -40130,21 +40131,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "isTypingTarget",
       "fingerprint": "8c9fd8a51d49bf6611b4",
-      "explanationFingerprint": "fdb34bca93672ea5d8d7",
+      "explanationFingerprint": "95efd6d33414f1b24e5a",
       "name": "isTypingTarget",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 384,
-      "lineEnd": 389,
+      "lineStart": 386,
+      "lineEnd": 391,
       "summary": "대상 상태나 허용 여부를 해당 상태인지 판단합니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L384-L389",
+          "source:src/App.jsx#L386-L391",
           "symbol:isTypingTarget"
         ]
       },
@@ -40165,21 +40166,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "maxNodeId",
       "fingerprint": "31ac3e378c02147d4652",
-      "explanationFingerprint": "8eb8828614c16d51c94c",
+      "explanationFingerprint": "2699e76f9176fd080e81",
       "name": "maxNodeId",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 191,
-      "lineEnd": 193,
+      "lineStart": 193,
+      "lineEnd": 195,
       "summary": "노드 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L191-L193",
+          "source:src/App.jsx#L193-L195",
           "symbol:maxNodeId"
         ]
       },
@@ -40200,21 +40201,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "midOf",
       "fingerprint": "6fd54bf55fd65dc8d4ed",
-      "explanationFingerprint": "2888f2d5853d8a9cf430",
+      "explanationFingerprint": "4592e3f8f74e41de990f",
       "name": "midOf",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1144,
-      "lineEnd": 1144,
+      "lineStart": 1146,
+      "lineEnd": 1146,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1144",
+          "source:src/App.jsx#L1146",
           "symbol:midOf"
         ]
       },
@@ -40235,21 +40236,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "nextId",
       "fingerprint": "2bc694efc53d29c83803",
-      "explanationFingerprint": "eb0367fea7cca2230f03",
+      "explanationFingerprint": "45eb96337fbb837b5b96",
       "name": "nextId",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 692,
-      "lineEnd": 692,
+      "lineStart": 694,
+      "lineEnd": 694,
       "summary": "식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L692",
+          "source:src/App.jsx#L694",
           "symbol:nextId"
         ]
       },
@@ -40270,21 +40271,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "nodeDisplayName",
       "fingerprint": "0c147433175e5d6c1a2a",
-      "explanationFingerprint": "66ce7ab4de72292071ea",
+      "explanationFingerprint": "e507c39d4e8979ad90e5",
       "name": "nodeDisplayName",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 195,
-      "lineEnd": 210,
+      "lineStart": 197,
+      "lineEnd": 212,
       "summary": "노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L195-L210",
+          "source:src/App.jsx#L197-L212",
           "symbol:nodeDisplayName"
         ]
       },
@@ -40305,21 +40306,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "normalizeEdges",
       "fingerprint": "fd0da109757d11e4b74c",
-      "explanationFingerprint": "a7f85407a6485311174e",
+      "explanationFingerprint": "e5bca2cbc1d8b87a645f",
       "name": "normalizeEdges",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 184,
-      "lineEnd": 189,
+      "lineStart": 186,
+      "lineEnd": 191,
       "summary": "연결선 자료를 안전한 공통 형식으로 정리합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L184-L189",
+          "source:src/App.jsx#L186-L191",
           "symbol:normalizeEdges"
         ]
       },
@@ -40340,21 +40341,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onClickCapture",
       "fingerprint": "5cc27122a144f356ca8a",
-      "explanationFingerprint": "62440eec8d01cf5566d3",
+      "explanationFingerprint": "7d501a0a56e2af83c62e",
       "name": "onClickCapture",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1052,
-      "lineEnd": 1078,
+      "lineStart": 1054,
+      "lineEnd": 1080,
       "summary": "상태 기록에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1052-L1078",
+          "source:src/App.jsx#L1054-L1080",
           "symbol:onClickCapture"
         ]
       },
@@ -40375,21 +40376,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onDown",
       "fingerprint": "5df7cec80842793707aa",
-      "explanationFingerprint": "0c0613d4d71620a78763",
+      "explanationFingerprint": "6a6454c72f3264c611a5",
       "name": "onDown",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 879,
-      "lineEnd": 917,
+      "lineStart": 881,
+      "lineEnd": 919,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L879-L917",
+          "source:src/App.jsx#L881-L919",
           "symbol:onDown"
         ]
       },
@@ -40410,21 +40411,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onDown",
       "fingerprint": "6bfdc06d728dcf70d34f",
-      "explanationFingerprint": "3610800730daeccb4686",
+      "explanationFingerprint": "27e033bb3bc8b4fbd1d4",
       "name": "onDown",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 2682,
-      "lineEnd": 2686,
+      "lineStart": 2684,
+      "lineEnd": 2688,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L2682-L2686",
+          "source:src/App.jsx#L2684-L2688",
           "symbol:onDown"
         ]
       },
@@ -40445,21 +40446,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onEdgeLpMove",
       "fingerprint": "4393c599a492086a5bbb",
-      "explanationFingerprint": "d8c7506c3859caf1ce4e",
+      "explanationFingerprint": "85120129847dd75215bc",
       "name": "onEdgeLpMove",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 898,
-      "lineEnd": 900,
+      "lineStart": 900,
+      "lineEnd": 902,
       "summary": "연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L898-L900",
+          "source:src/App.jsx#L900-L902",
           "symbol:onEdgeLpMove"
         ]
       },
@@ -40480,21 +40481,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onEnd",
       "fingerprint": "300b3548269d1b04140d",
-      "explanationFingerprint": "c91df6ed2ace5b3d7e71",
+      "explanationFingerprint": "ece76b565aa2af0fde1b",
       "name": "onEnd",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1167,
-      "lineEnd": 1167,
+      "lineStart": 1169,
+      "lineEnd": 1169,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1167",
+          "source:src/App.jsx#L1169",
           "symbol:onEnd"
         ]
       },
@@ -40515,21 +40516,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onHashChange",
       "fingerprint": "1209b241f91052ace185",
-      "explanationFingerprint": "f51fbc7f528a48211b14",
+      "explanationFingerprint": "33da9e7476050ed4e05d",
       "name": "onHashChange",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1740,
-      "lineEnd": 1742,
+      "lineStart": 1742,
+      "lineEnd": 1744,
       "summary": "변경 식별값 · 변경에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1740-L1742",
+          "source:src/App.jsx#L1742-L1744",
           "symbol:onHashChange"
         ]
       },
@@ -40550,21 +40551,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onKey",
       "fingerprint": "ae703cc818d7e55ce461",
-      "explanationFingerprint": "40c15aabe94c31127cd1",
+      "explanationFingerprint": "4cb833c437e22faa1bbd",
       "name": "onKey",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 2687,
-      "lineEnd": 2687,
+      "lineStart": 2689,
+      "lineEnd": 2689,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L2687",
+          "source:src/App.jsx#L2689",
           "symbol:onKey"
         ]
       },
@@ -40585,21 +40586,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onMouseDown",
       "fingerprint": "52fbc5f0664e2ad8f081",
-      "explanationFingerprint": "08bb431ecc99cd26f3ef",
+      "explanationFingerprint": "56283af89e655c09c878",
       "name": "onMouseDown",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1103,
-      "lineEnd": 1127,
+      "lineStart": 1105,
+      "lineEnd": 1129,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1103-L1127",
+          "source:src/App.jsx#L1105-L1129",
           "symbol:onMouseDown"
         ]
       },
@@ -40620,21 +40621,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onMove",
       "fingerprint": "f1127e9b71a8b7462c38",
-      "explanationFingerprint": "b73bca3d6b3df08adcd3",
+      "explanationFingerprint": "55446e3b8f9f074e8c00",
       "name": "onMove",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 918,
-      "lineEnd": 930,
+      "lineStart": 920,
+      "lineEnd": 932,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L918-L930",
+          "source:src/App.jsx#L920-L932",
           "symbol:onMove"
         ]
       },
@@ -40655,21 +40656,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onMove",
       "fingerprint": "c665198e647d0e0b2fba",
-      "explanationFingerprint": "b8dc849ed1161c4d3046",
+      "explanationFingerprint": "f36d33bda64cd99d1c0b",
       "name": "onMove",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1158,
-      "lineEnd": 1166,
+      "lineStart": 1160,
+      "lineEnd": 1168,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1158-L1166",
+          "source:src/App.jsx#L1160-L1168",
           "symbol:onMove"
         ]
       },
@@ -40690,21 +40691,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onSecondPointer",
       "fingerprint": "42c7eca6dfc7ef76d053",
-      "explanationFingerprint": "c62e4c060d3e6393ade7",
+      "explanationFingerprint": "903b775b48c6ecba6f40",
       "name": "onSecondPointer",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 874,
-      "lineEnd": 878,
+      "lineStart": 876,
+      "lineEnd": 880,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L874-L878",
+          "source:src/App.jsx#L876-L880",
           "symbol:onSecondPointer"
         ]
       },
@@ -40725,21 +40726,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onStart",
       "fingerprint": "04946cc7b4db4aca064b",
-      "explanationFingerprint": "619a103bcfd0b0211274",
+      "explanationFingerprint": "2a92975aaa635367f022",
       "name": "onStart",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1146,
-      "lineEnd": 1157,
+      "lineStart": 1148,
+      "lineEnd": 1159,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1146-L1157",
+          "source:src/App.jsx#L1148-L1159",
           "symbol:onStart"
         ]
       },
@@ -40760,21 +40761,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onStorageError",
       "fingerprint": "5e43e999ca2d2c95c4a0",
-      "explanationFingerprint": "93a17308c5336c4605f0",
+      "explanationFingerprint": "8f7e7b8c8c476ff21c20",
       "name": "onStorageError",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 722,
-      "lineEnd": 722,
+      "lineStart": 724,
+      "lineEnd": 724,
       "summary": "오류에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L722",
+          "source:src/App.jsx#L724",
           "symbol:onStorageError"
         ]
       },
@@ -40795,21 +40796,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onTouchStart",
       "fingerprint": "43cde29e4db05eeddf1f",
-      "explanationFingerprint": "a65b3bd77a0799a53bec",
+      "explanationFingerprint": "3a86f10e85dae6576676",
       "name": "onTouchStart",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1006,
-      "lineEnd": 1031,
+      "lineStart": 1008,
+      "lineEnd": 1033,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1006-L1031",
+          "source:src/App.jsx#L1008-L1033",
           "symbol:onTouchStart"
         ]
       },
@@ -40830,21 +40831,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onUp",
       "fingerprint": "50f93ca91521024d41d4",
-      "explanationFingerprint": "92184a8862022ffbf4c1",
+      "explanationFingerprint": "bc713e85afbc5f24945c",
       "name": "onUp",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 931,
-      "lineEnd": 981,
+      "lineStart": 933,
+      "lineEnd": 983,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L931-L981",
+          "source:src/App.jsx#L933-L983",
           "symbol:onUp"
         ]
       },
@@ -40865,21 +40866,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "parseSharedId",
       "fingerprint": "b1cffa4f158a45a120cb",
-      "explanationFingerprint": "fa09991c82bdc142f030",
+      "explanationFingerprint": "6c905dab3d10eaa138b8",
       "name": "parseSharedId",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 217,
-      "lineEnd": 223,
+      "lineStart": 219,
+      "lineEnd": 225,
       "summary": "식별자 자료의 구조를 읽어냅니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L217-L223",
+          "source:src/App.jsx#L219-L225",
           "symbol:parseSharedId"
         ]
       },
@@ -40900,21 +40901,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "partIdFromHandle",
       "fingerprint": "4181a437b8481df32df0",
-      "explanationFingerprint": "174eda26c030e3a1c887",
+      "explanationFingerprint": "9b6167e95a369c4b65a6",
       "name": "partIdFromHandle",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 442,
-      "lineEnd": 445,
+      "lineStart": 444,
+      "lineEnd": 447,
       "summary": "시스템 파츠 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L442-L445",
+          "source:src/App.jsx#L444-L447",
           "symbol:partIdFromHandle"
         ]
       },
@@ -40935,21 +40936,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "participantKey",
       "fingerprint": "c8aa9b0f25cec8e68b39",
-      "explanationFingerprint": "036b527ef899f287606f",
+      "explanationFingerprint": "5682ae203a983c3f12f8",
       "name": "participantKey",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 328,
-      "lineEnd": 330,
+      "lineStart": 330,
+      "lineEnd": 332,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L328-L330",
+          "source:src/App.jsx#L330-L332",
           "symbol:participantKey"
         ]
       },
@@ -40970,21 +40971,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "poll",
       "fingerprint": "c57f30c13b5b3d70dad4",
-      "explanationFingerprint": "72f679fe4534ef007de2",
+      "explanationFingerprint": "f648f6708b49b74fc6e2",
       "name": "poll",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3882,
-      "lineEnd": 3901,
+      "lineStart": 3903,
+      "lineEnd": 3922,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3882-L3901",
+          "source:src/App.jsx#L3903-L3922",
           "symbol:poll"
         ]
       },
@@ -41006,21 +41007,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "positionMenu",
       "fingerprint": "0a35e9a1e46189535290",
-      "explanationFingerprint": "a38b8df47403de185794",
+      "explanationFingerprint": "2eb73d2ad53732adf8bc",
       "name": "positionMenu",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 4158,
-      "lineEnd": 4167,
+      "lineStart": 4179,
+      "lineEnd": 4188,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L4158-L4167",
+          "source:src/App.jsx#L4179-L4188",
           "symbol:positionMenu"
         ]
       },
@@ -41041,21 +41042,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "refreshDecision",
       "fingerprint": "40d5642e646662427b3e",
-      "explanationFingerprint": "3aa812ba1f1e2be5d5cb",
+      "explanationFingerprint": "c728135039ace4b2acae",
       "name": "refreshDecision",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3858,
-      "lineEnd": 3869,
+      "lineStart": 3879,
+      "lineEnd": 3890,
       "summary": "검토 결정에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3858-L3869",
+          "source:src/App.jsx#L3879-L3890",
           "symbol:refreshDecision"
         ]
       },
@@ -41077,21 +41078,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "remapPartHandle",
       "fingerprint": "2d5b143a1d0a28bec0f7",
-      "explanationFingerprint": "a4b0f2afc62a20d41a97",
+      "explanationFingerprint": "5ef9597a52b26c2d97d1",
       "name": "remapPartHandle",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3149,
-      "lineEnd": 3155,
+      "lineStart": 3151,
+      "lineEnd": 3157,
       "summary": "시스템 파츠에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3149-L3155",
+          "source:src/App.jsx#L3151-L3157",
           "symbol:remapPartHandle"
         ]
       },
@@ -41112,21 +41113,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "sanitizeNodes",
       "fingerprint": "e023cc6334fec514ae9f",
-      "explanationFingerprint": "ee220cc72f465c9a3d17",
+      "explanationFingerprint": "6f5c01b393a8fcb239e1",
       "name": "sanitizeNodes",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 428,
-      "lineEnd": 430,
+      "lineStart": 430,
+      "lineEnd": 432,
       "summary": "노드에서 위험한 내용을 제거합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L428-L430",
+          "source:src/App.jsx#L430-L432",
           "symbol:sanitizeNodes"
         ]
       },
@@ -41147,21 +41148,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "sanitizeNotes",
       "fingerprint": "60858a3d183b49b1f544",
-      "explanationFingerprint": "320eafd83d61808d88c3",
+      "explanationFingerprint": "c32900fcab790f976e31",
       "name": "sanitizeNotes",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 432,
-      "lineEnd": 434,
+      "lineStart": 434,
+      "lineEnd": 436,
       "summary": "위험한 입력 제거에서 위험한 내용을 제거합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L432-L434",
+          "source:src/App.jsx#L434-L436",
           "symbol:sanitizeNotes"
         ]
       },
@@ -41182,21 +41183,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "scopedParticipants",
       "fingerprint": "b5cffd9f2da133a4a472",
-      "explanationFingerprint": "c0022062cb99b4fcea8d",
+      "explanationFingerprint": "b2075996c4bc4eba462b",
       "name": "scopedParticipants",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 341,
-      "lineEnd": 365,
+      "lineStart": 343,
+      "lineEnd": 367,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L341-L365",
+          "source:src/App.jsx#L343-L367",
           "symbol:scopedParticipants"
         ]
       },
@@ -41217,21 +41218,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "sharedCanvasId",
       "fingerprint": "731d8ec8a267334c4cbc",
-      "explanationFingerprint": "396644690c73a6858863",
+      "explanationFingerprint": "fa8734969fda1672c134",
       "name": "sharedCanvasId",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 216,
-      "lineEnd": 216,
+      "lineStart": 218,
+      "lineEnd": 218,
       "summary": "캔버스 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L216",
+          "source:src/App.jsx#L218",
           "symbol:sharedCanvasId"
         ]
       },
@@ -41252,21 +41253,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "sortParentsFirst",
       "fingerprint": "208fc381926a17d201ac",
-      "explanationFingerprint": "7b6222abafe9e3bbff4c",
+      "explanationFingerprint": "62de113b7d9dd73c0b19",
       "name": "sortParentsFirst",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 414,
-      "lineEnd": 426,
+      "lineStart": 416,
+      "lineEnd": 428,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L414-L426",
+          "source:src/App.jsx#L416-L428",
           "symbol:sortParentsFirst"
         ]
       },
@@ -41287,21 +41288,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "stripEdge",
       "fingerprint": "f0160f2b894de58713a1",
-      "explanationFingerprint": "7ef8e7cc75b86e448bd1",
+      "explanationFingerprint": "9573088f8e33db70d33b",
       "name": "stripEdge",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 483,
-      "lineEnd": 486,
+      "lineStart": 485,
+      "lineEnd": 488,
       "summary": "연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L483-L486",
+          "source:src/App.jsx#L485-L488",
           "symbol:stripEdge"
         ]
       },
@@ -41322,21 +41323,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "stripNode",
       "fingerprint": "fbfb578abf9aefc4f40c",
-      "explanationFingerprint": "fe5e6c3afac13b407df6",
+      "explanationFingerprint": "51f9fc348f8e57dd760e",
       "name": "stripNode",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 467,
-      "lineEnd": 476,
+      "lineStart": 469,
+      "lineEnd": 478,
       "summary": "노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L467-L476",
+          "source:src/App.jsx#L469-L478",
           "symbol:stripNode"
         ]
       },
@@ -41357,21 +41358,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "stripNote",
       "fingerprint": "158d18f1acc1ddb82994",
-      "explanationFingerprint": "46536b11a8dfbaebef5f",
+      "explanationFingerprint": "385dced2fcf3e67223be",
       "name": "stripNote",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 482,
-      "lineEnd": 482,
+      "lineStart": 484,
+      "lineEnd": 484,
       "summary": "노트에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L482",
+          "source:src/App.jsx#L484",
           "symbol:stripNote"
         ]
       },
@@ -41392,21 +41393,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "swallow",
       "fingerprint": "c568e29a032066a1adc0",
-      "explanationFingerprint": "b010605acfbc2d494fb4",
+      "explanationFingerprint": "dbf9d14cf5dac14f0254",
       "name": "swallow",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 961,
-      "lineEnd": 961,
+      "lineStart": 963,
+      "lineEnd": 963,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L961",
+          "source:src/App.jsx#L963",
           "symbol:swallow"
         ]
       },
@@ -41427,21 +41428,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "swallow",
       "fingerprint": "c568e29a032066a1adc0",
-      "explanationFingerprint": "866b00774b9e155b6fa9",
+      "explanationFingerprint": "70ab38149ce3f0e6f117",
       "name": "swallow",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 970,
-      "lineEnd": 970,
+      "lineStart": 972,
+      "lineEnd": 972,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L970",
+          "source:src/App.jsx#L972",
           "symbol:swallow"
         ]
       },
@@ -41462,21 +41463,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "systemRuntimeByEdge",
       "fingerprint": "a014cb3eed3d0c181aea",
-      "explanationFingerprint": "6f5588dc134f95e41124",
+      "explanationFingerprint": "8629041fc161a5a93cce",
       "name": "systemRuntimeByEdge",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 313,
-      "lineEnd": 326,
+      "lineStart": 315,
+      "lineEnd": 328,
       "summary": "시스템 · 실제 운영 상태 · 연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L313-L326",
+          "source:src/App.jsx#L315-L328",
           "symbol:systemRuntimeByEdge"
         ]
       },
@@ -41497,21 +41498,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "systemRuntimeDashboardSummary",
       "fingerprint": "9477c1831c9ea5ebf65c",
-      "explanationFingerprint": "088cb769a36621a6a27a",
+      "explanationFingerprint": "428c191b2c3ae7fe6bcd",
       "name": "systemRuntimeDashboardSummary",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 285,
-      "lineEnd": 311,
+      "lineStart": 287,
+      "lineEnd": 313,
       "summary": "시스템 · 실제 운영 상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L285-L311",
+          "source:src/App.jsx#L287-L313",
           "symbol:systemRuntimeDashboardSummary"
         ]
       },
@@ -41532,21 +41533,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "systemRuntimeMapFromRecords",
       "fingerprint": "6d2f353c52ce44cbda78",
-      "explanationFingerprint": "0b072d97f0d2a2848cc8",
+      "explanationFingerprint": "bcd590d0b68b9a9cf87f",
       "name": "systemRuntimeMapFromRecords",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 237,
-      "lineEnd": 243,
+      "lineStart": 239,
+      "lineEnd": 245,
       "summary": "시스템 · 실제 운영 상태 · 시스템 지도에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L237-L243",
+          "source:src/App.jsx#L239-L245",
           "symbol:systemRuntimeMapFromRecords"
         ]
       },
@@ -41567,21 +41568,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "systemRuntimePersistenceError",
       "fingerprint": "173e8d3dacadba70951d",
-      "explanationFingerprint": "aaac91e04b3c96c545ff",
+      "explanationFingerprint": "b9a9ff0f497f5edf2a3b",
       "name": "systemRuntimePersistenceError",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 245,
-      "lineEnd": 252,
+      "lineStart": 247,
+      "lineEnd": 254,
       "summary": "시스템 · 실제 운영 상태 · 오류에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L245-L252",
+          "source:src/App.jsx#L247-L254",
           "symbol:systemRuntimePersistenceError"
         ]
       },
@@ -41602,21 +41603,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "systemRuntimeTargetsForNodes",
       "fingerprint": "d5303106a4f1752c2bd1",
-      "explanationFingerprint": "3e4230da686a323756b9",
+      "explanationFingerprint": "dbb95a4826a4af85264b",
       "name": "systemRuntimeTargetsForNodes",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 225,
-      "lineEnd": 235,
+      "lineStart": 227,
+      "lineEnd": 237,
       "summary": "시스템 · 실제 운영 상태 · 노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L225-L235",
+          "source:src/App.jsx#L227-L237",
           "symbol:systemRuntimeTargetsForNodes"
         ]
       },
@@ -41637,21 +41638,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "visit",
       "fingerprint": "6dc3fe3727f9ee0df825",
-      "explanationFingerprint": "a6eae36ac800e97a9832",
+      "explanationFingerprint": "91698b85aed0797f1039",
       "name": "visit",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 418,
-      "lineEnd": 423,
+      "lineStart": 420,
+      "lineEnd": 425,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L418-L423",
+          "source:src/App.jsx#L420-L425",
           "symbol:visit"
         ]
       },
@@ -48846,21 +48847,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "findGroupAtPoint",
       "fingerprint": "b3abf07006228eb8a97c",
-      "explanationFingerprint": "9a427aae3a4fa9332c74",
+      "explanationFingerprint": "f8b9a8b93ec2c406078b",
       "name": "findGroupAtPoint",
       "path": "src/lib/groupMembership.js",
       "parentId": "file:src/lib/groupMembership.js",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 47,
-      "lineEnd": 59,
+      "lineStart": 85,
+      "lineEnd": 97,
       "summary": "그룹 상태나 허용 여부를 대상을 찾습니다",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/groupMembership.js#L47-L59",
+          "source:src/lib/groupMembership.js#L85-L97",
           "symbol:findGroupAtPoint"
         ]
       },
@@ -48882,22 +48883,58 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "findGroupDropTarget",
       "fingerprint": "bda2ecff8ce911b11fc5",
-      "explanationFingerprint": "c74234d9ba82dc2b7cb2",
+      "explanationFingerprint": "0b0767426b6b116d67b1",
       "name": "findGroupDropTarget",
       "path": "src/lib/groupMembership.js",
       "parentId": "file:src/lib/groupMembership.js",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 61,
-      "lineEnd": 88,
+      "lineStart": 99,
+      "lineEnd": 126,
       "summary": "그룹 · 대상 상태나 허용 여부를 대상을 찾습니다",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/groupMembership.js#L61-L88",
+          "source:src/lib/groupMembership.js#L99-L126",
           "symbol:findGroupDropTarget"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/lib/groupMembership.js:findNonOverlappingAbsolutePosition",
+      "kind": "function",
+      "label": "findNonOverlappingAbsolutePosition",
+      "fingerprint": "4070bc91293d3266d873",
+      "explanationFingerprint": "f1d75084e6b06ee355db",
+      "name": "findNonOverlappingAbsolutePosition",
+      "path": "src/lib/groupMembership.js",
+      "parentId": "file:src/lib/groupMembership.js",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 39,
+      "lineEnd": 68,
+      "summary": "이 기능 상태나 허용 여부를 대상을 찾습니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/lib/groupMembership.js#L39-L68",
+          "symbol:findNonOverlappingAbsolutePosition"
         ]
       },
       "tags": [
@@ -48918,21 +48955,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "groupCandidates",
       "fingerprint": "81efb526b0d6ef72c6ee",
-      "explanationFingerprint": "e1999fcdd100c2a337dc",
+      "explanationFingerprint": "62ff1b3673ec004819f0",
       "name": "groupCandidates",
       "path": "src/lib/groupMembership.js",
       "parentId": "file:src/lib/groupMembership.js",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 38,
-      "lineEnd": 45,
+      "lineStart": 76,
+      "lineEnd": 83,
       "summary": "그룹에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/groupMembership.js#L38-L45",
+          "source:src/lib/groupMembership.js#L76-L83",
           "symbol:groupCandidates"
         ]
       },
@@ -49025,22 +49062,57 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "overlapArea",
       "fingerprint": "915c8769677881b56c62",
-      "explanationFingerprint": "be335475841b7f469b2e",
+      "explanationFingerprint": "dbef40b0ef198875be19",
       "name": "overlapArea",
       "path": "src/lib/groupMembership.js",
       "parentId": "file:src/lib/groupMembership.js",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 32,
-      "lineEnd": 36,
+      "lineStart": 70,
+      "lineEnd": 74,
       "summary": "이 파일이 맡은 “그룹 기능을 화면의 여러 부분에서 다시 쓸 수 있게 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/groupMembership.js#L32-L36",
+          "source:src/lib/groupMembership.js#L70-L74",
           "symbol:overlapArea"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/lib/groupMembership.js:overlapsWithGap",
+      "kind": "function",
+      "label": "overlapsWithGap",
+      "fingerprint": "c194e6153948541ca634",
+      "explanationFingerprint": "fccd9c3590a1154fe68e",
+      "name": "overlapsWithGap",
+      "path": "src/lib/groupMembership.js",
+      "parentId": "file:src/lib/groupMembership.js",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 32,
+      "lineEnd": 37,
+      "summary": "이 파일이 맡은 “그룹 기능을 화면의 여러 부분에서 다시 쓸 수 있게 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/lib/groupMembership.js#L32-L37",
+          "symbol:overlapsWithGap"
         ]
       },
       "tags": [
@@ -49060,21 +49132,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "positionInsideGroup",
       "fingerprint": "580f5168704a044e5349",
-      "explanationFingerprint": "ccdf78878842e9e15d3b",
+      "explanationFingerprint": "03fda0deb120261e29db",
       "name": "positionInsideGroup",
       "path": "src/lib/groupMembership.js",
       "parentId": "file:src/lib/groupMembership.js",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 90,
-      "lineEnd": 107,
+      "lineStart": 128,
+      "lineEnd": 145,
       "summary": "그룹에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/groupMembership.js#L90-L107",
+          "source:src/lib/groupMembership.js#L128-L145",
           "symbol:positionInsideGroup"
         ]
       },
@@ -49131,21 +49203,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "reparentNodePreservingPosition",
       "fingerprint": "e5f5a28624e789388987",
-      "explanationFingerprint": "c489244720218f3bf28f",
+      "explanationFingerprint": "e2624b4ddbe663a42d77",
       "name": "reparentNodePreservingPosition",
       "path": "src/lib/groupMembership.js",
       "parentId": "file:src/lib/groupMembership.js",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 109,
-      "lineEnd": 135,
+      "lineStart": 147,
+      "lineEnd": 173,
       "summary": "노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/groupMembership.js#L109-L135",
+          "source:src/lib/groupMembership.js#L147-L173",
           "symbol:reparentNodePreservingPosition"
         ]
       },
@@ -57639,19 +57711,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/operationLifecycle.js:startOperationRecovery"
     },
     {
-      "id": "relation:0a98b21940955922",
-      "type": "imports",
-      "source": "file:src/App.jsx",
-      "target": "file:src/lib/groupMembership.js",
-      "names": [
-        "findGroupAtPoint",
-        "findGroupDropTarget",
-        "positionInsideGroup",
-        "reparentNodePreservingPosition"
-      ],
-      "dynamic": false
-    },
-    {
       "id": "relation:0ae6c2c9f9fc2762",
       "type": "contains",
       "source": "file:shared/digitalTwinProposal.js",
@@ -60625,6 +60684,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/layout.js:segmentIntersectsRect"
     },
     {
+      "id": "relation:4249afdba1a07c26",
+      "type": "contains",
+      "source": "file:src/lib/groupMembership.js",
+      "target": "function:src/lib/groupMembership.js:overlapsWithGap"
+    },
+    {
       "id": "relation:426dabc2c7e871f5",
       "type": "imports",
       "source": "file:src/App.jsx",
@@ -61452,6 +61517,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/nodes/SystemNode.jsx:runtimeCheckedAtLabel"
     },
     {
+      "id": "relation:501b227c8b088284",
+      "type": "contains",
+      "source": "file:src/lib/groupMembership.js",
+      "target": "function:src/lib/groupMembership.js:findNonOverlappingAbsolutePosition"
+    },
+    {
       "id": "relation:50224304141fa2b1",
       "type": "contains",
       "source": "file:src/components/SourceTwinPanel.jsx",
@@ -62100,6 +62171,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/localConnector.js",
       "target": "function:shared/localConnector.js:localConnectorIsOnline"
+    },
+    {
+      "id": "relation:5b506717ffc23665",
+      "type": "imports",
+      "source": "file:src/App.jsx",
+      "target": "file:src/lib/groupMembership.js",
+      "names": [
+        "findGroupAtPoint",
+        "findGroupDropTarget",
+        "findNonOverlappingAbsolutePosition",
+        "nodeDimensions",
+        "positionInsideGroup",
+        "reparentNodePreservingPosition"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:5b61209e79de736e",
@@ -64343,6 +64429,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/systemRuntime.js",
       "target": "function:shared/systemRuntime.js:failedSystemRuntimeResult"
+    },
+    {
+      "id": "relation:81ddf6dc083fd919",
+      "type": "imports",
+      "source": "file:scripts/test-group-membership.mjs",
+      "target": "file:src/lib/groupMembership.js",
+      "names": [
+        "findGroupAtPoint",
+        "findGroupDropTarget",
+        "findNonOverlappingAbsolutePosition",
+        "nodeDimensions",
+        "positionInsideGroup",
+        "reparentNodePreservingPosition"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:820c47e8a8e3ae21",
@@ -69734,20 +69835,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:api/local-connector.js:handleBrowser"
     },
     {
-      "id": "relation:e1ac24a60003f66c",
-      "type": "imports",
-      "source": "file:scripts/test-group-membership.mjs",
-      "target": "file:src/lib/groupMembership.js",
-      "names": [
-        "findGroupAtPoint",
-        "findGroupDropTarget",
-        "nodeDimensions",
-        "positionInsideGroup",
-        "reparentNodePreservingPosition"
-      ],
-      "dynamic": false
-    },
-    {
       "id": "relation:e1b3b61ac4efc75b",
       "type": "contains",
       "source": "file:mcp/store.js",
@@ -72546,10 +72633,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/lib/friendships.js:sendFriendRequest",
       "function:src/lib/groupMembership.js:findGroupAtPoint",
       "function:src/lib/groupMembership.js:findGroupDropTarget",
+      "function:src/lib/groupMembership.js:findNonOverlappingAbsolutePosition",
       "function:src/lib/groupMembership.js:groupCandidates",
       "function:src/lib/groupMembership.js:nodeAbsoluteRect",
       "function:src/lib/groupMembership.js:nodeDimensions",
       "function:src/lib/groupMembership.js:overlapArea",
+      "function:src/lib/groupMembership.js:overlapsWithGap",
       "function:src/lib/groupMembership.js:positionInsideGroup",
       "function:src/lib/groupMembership.js:positiveDimension",
       "function:src/lib/groupMembership.js:reparentNodePreservingPosition",
@@ -74024,10 +74113,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/lib/friendships.js:sendFriendRequest",
       "function:src/lib/groupMembership.js:findGroupAtPoint",
       "function:src/lib/groupMembership.js:findGroupDropTarget",
+      "function:src/lib/groupMembership.js:findNonOverlappingAbsolutePosition",
       "function:src/lib/groupMembership.js:groupCandidates",
       "function:src/lib/groupMembership.js:nodeAbsoluteRect",
       "function:src/lib/groupMembership.js:nodeDimensions",
       "function:src/lib/groupMembership.js:overlapArea",
+      "function:src/lib/groupMembership.js:overlapsWithGap",
       "function:src/lib/groupMembership.js:positionInsideGroup",
       "function:src/lib/groupMembership.js:positiveDimension",
       "function:src/lib/groupMembership.js:reparentNodePreservingPosition",
@@ -74407,18 +74498,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
     ]
   },
   "fingerprints": {
-    "code": "4b24c088ce1c291a575c",
-    "database": "5b15956c4a97a35a0a4c",
+    "code": "5df56eab1631a9814ff1",
+    "database": "1dc58dee5b8f3b4fd454",
     "security": "a63fa88e27d72f7aa081",
-    "deployment": "cf4c1e3c2abe81b732bc",
-    "explanations": "e8dc06d45d59078a3120"
+    "deployment": "d8dabba0f7fe78939e6a",
+    "explanations": "932d6f99fe83f28db0f0"
   },
   "summary": {
-    "entities": 1578,
+    "entities": 1580,
     "areas": 14,
     "subsystems": 38,
     "files": 152,
-    "functions": 1298,
+    "functions": 1300,
     "imports": 473,
     "apiRoutes": 6,
     "dbTables": 16,
@@ -74432,26 +74523,140 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
     "structureOnlyFiles": 0
   },
   "changeSet": {
-    "baseManifestId": "source-twin-v1-d9bd7bf328f7",
+    "baseManifestId": "source-twin-v1-094bc0521315",
     "initialBaseline": false,
-    "added": [],
-    "changed": [
-      "file:src/index.css"
+    "added": [
+      "function:src/lib/groupMembership.js:findNonOverlappingAbsolutePosition",
+      "function:src/lib/groupMembership.js:overlapsWithGap"
     ],
-    "explanationChanged": [],
+    "changed": [
+      "deployment:vercel-web",
+      "file:scripts/test-group-membership.mjs",
+      "file:scripts/test-performance-boundaries.mjs",
+      "file:src/App.jsx",
+      "file:src/lib/groupMembership.js",
+      "file:vite.config.js",
+      "function:src/App.jsx:App"
+    ],
+    "explanationChanged": [
+      "dependency:@vitejs/plugin-react",
+      "dependency:@xyflow/react",
+      "dependency:@xyflow/react/dist/style.css",
+      "dependency:react",
+      "dependency:vite",
+      "dependency:vite-plugin-pwa",
+      "function:src/App.jsx:ContextItem",
+      "function:src/App.jsx:IconBtn",
+      "function:src/App.jsx:TypeItem",
+      "function:src/App.jsx:absPos",
+      "function:src/App.jsx:afterLogin",
+      "function:src/App.jsx:aggregateSystemNodeRuntime",
+      "function:src/App.jsx:baseEdgeStyle",
+      "function:src/App.jsx:cancelEdgeLp",
+      "function:src/App.jsx:canvasSnapshot",
+      "function:src/App.jsx:centerInFrame",
+      "function:src/App.jsx:cleanup",
+      "function:src/App.jsx:closeContext",
+      "function:src/App.jsx:closestHandles",
+      "function:src/App.jsx:cloudRowSnapshot",
+      "function:src/App.jsx:commitRename",
+      "function:src/App.jsx:creationPosition",
+      "function:src/App.jsx:dedupeParticipants",
+      "function:src/App.jsx:detachDigitalTwinBinding",
+      "function:src/App.jsx:dim",
+      "function:src/App.jsx:dim#2",
+      "function:src/App.jsx:dim#3",
+      "function:src/App.jsx:distOf",
+      "function:src/App.jsx:findAxisSnap",
+      "function:src/App.jsx:fn",
+      "function:src/App.jsx:handleContextAddContent",
+      "function:src/App.jsx:handleContextAddGroup",
+      "function:src/App.jsx:handleContextAddIntent",
+      "function:src/App.jsx:handleContextAddMemo",
+      "function:src/App.jsx:handleContextAddStage",
+      "function:src/App.jsx:handleContextAddSystem",
+      "function:src/App.jsx:handleContextCleanupEdges",
+      "function:src/App.jsx:handleContextDeleteEdge",
+      "function:src/App.jsx:handleContextDeleteNode",
+      "function:src/App.jsx:handleContextGroupSelection",
+      "function:src/App.jsx:handleContextPaste",
+      "function:src/App.jsx:handleContextUngroup",
+      "function:src/App.jsx:handleContextUpdateEdgeRelation",
+      "function:src/App.jsx:handler",
+      "function:src/App.jsx:handler#2",
+      "function:src/App.jsx:handler#3",
+      "function:src/App.jsx:isPartEdge",
+      "function:src/App.jsx:isTypingTarget",
+      "function:src/App.jsx:maxNodeId",
+      "function:src/App.jsx:midOf",
+      "function:src/App.jsx:nextId",
+      "function:src/App.jsx:nodeDisplayName",
+      "function:src/App.jsx:normalizeEdges",
+      "function:src/App.jsx:onClickCapture",
+      "function:src/App.jsx:onDown",
+      "function:src/App.jsx:onDown#2",
+      "function:src/App.jsx:onEdgeLpMove",
+      "function:src/App.jsx:onEnd",
+      "function:src/App.jsx:onHashChange",
+      "function:src/App.jsx:onKey",
+      "function:src/App.jsx:onMouseDown",
+      "function:src/App.jsx:onMove",
+      "function:src/App.jsx:onMove#2",
+      "function:src/App.jsx:onSecondPointer",
+      "function:src/App.jsx:onStart",
+      "function:src/App.jsx:onStorageError",
+      "function:src/App.jsx:onTouchStart",
+      "function:src/App.jsx:onUp",
+      "function:src/App.jsx:parseSharedId",
+      "function:src/App.jsx:partIdFromHandle",
+      "function:src/App.jsx:participantKey",
+      "function:src/App.jsx:poll",
+      "function:src/App.jsx:positionMenu",
+      "function:src/App.jsx:refreshDecision",
+      "function:src/App.jsx:remapPartHandle",
+      "function:src/App.jsx:sanitizeNodes",
+      "function:src/App.jsx:sanitizeNotes",
+      "function:src/App.jsx:scopedParticipants",
+      "function:src/App.jsx:sharedCanvasId",
+      "function:src/App.jsx:sortParentsFirst",
+      "function:src/App.jsx:stripEdge",
+      "function:src/App.jsx:stripNode",
+      "function:src/App.jsx:stripNote",
+      "function:src/App.jsx:swallow",
+      "function:src/App.jsx:swallow#2",
+      "function:src/App.jsx:systemRuntimeByEdge",
+      "function:src/App.jsx:systemRuntimeDashboardSummary",
+      "function:src/App.jsx:systemRuntimeMapFromRecords",
+      "function:src/App.jsx:systemRuntimePersistenceError",
+      "function:src/App.jsx:systemRuntimeTargetsForNodes",
+      "function:src/App.jsx:visit",
+      "function:src/lib/groupMembership.js:findGroupAtPoint",
+      "function:src/lib/groupMembership.js:findGroupDropTarget",
+      "function:src/lib/groupMembership.js:groupCandidates",
+      "function:src/lib/groupMembership.js:overlapArea",
+      "function:src/lib/groupMembership.js:positionInsideGroup",
+      "function:src/lib/groupMembership.js:reparentNodePreservingPosition"
+    ],
     "removed": [],
     "changedPaths": [
-      "src/index.css"
+      "scripts/test-group-membership.mjs",
+      "scripts/test-performance-boundaries.mjs",
+      "src/App.jsx",
+      "src/lib/groupMembership.js",
+      "vite.config.js"
     ],
-    "explanationChangedPaths": [],
+    "explanationChangedPaths": [
+      "src/App.jsx",
+      "src/lib/groupMembership.js"
+    ],
     "profileChanged": null,
     "summary": {
-      "added": 0,
-      "changed": 1,
-      "explanationChanged": 0,
+      "added": 2,
+      "changed": 7,
+      "explanationChanged": 97,
       "removed": 0,
-      "paths": 1,
-      "explanationPaths": 0
+      "paths": 5,
+      "explanationPaths": 2
     }
   }
 }

@@ -29,6 +29,44 @@ export function nodeAbsoluteRect(node, byId) {
   return { ...position, width, height }
 }
 
+function overlapsWithGap(left, right, gap) {
+  return left.x < right.x + right.width + gap
+    && left.x + left.width + gap > right.x
+    && left.y < right.y + right.height + gap
+    && left.y + left.height + gap > right.y
+}
+
+export function findNonOverlappingAbsolutePosition(nodes, desiredPosition, {
+  width,
+  height,
+  parentId = null,
+  gap = 24,
+  rowsPerColumn = 8,
+} = {}) {
+  if (![desiredPosition?.x, desiredPosition?.y, width, height].every(Number.isFinite)) return desiredPosition
+  const normalizedParentId = parentId || null
+  const byId = new Map((nodes ?? []).map((node) => [node.id, node]))
+  const obstacles = (nodes ?? [])
+    .filter((node) => (node.parentId || null) === normalizedParentId)
+    .map((node) => nodeAbsoluteRect(node, byId))
+
+  for (let index = 0; index < rowsPerColumn * 8; index += 1) {
+    const column = Math.floor(index / rowsPerColumn)
+    const row = index % rowsPerColumn
+    const candidate = {
+      x: desiredPosition.x + column * (width + gap),
+      y: desiredPosition.y + row * (height + gap),
+    }
+    const candidateRect = { ...candidate, width, height }
+    if (!obstacles.some((rect) => overlapsWithGap(candidateRect, rect, gap))) return candidate
+  }
+
+  return {
+    x: desiredPosition.x + 8 * (width + gap),
+    y: desiredPosition.y,
+  }
+}
+
 function overlapArea(left, right) {
   const width = Math.max(0, Math.min(left.x + left.width, right.x + right.width) - Math.max(left.x, right.x))
   const height = Math.max(0, Math.min(left.y + left.height, right.y + right.height) - Math.max(left.y, right.y))

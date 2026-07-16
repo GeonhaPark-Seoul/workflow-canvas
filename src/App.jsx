@@ -66,8 +66,10 @@ import {
 } from './lib/canvasNavigation'
 import { absoluteNodePosition, boundsForNodeIds } from './lib/canvasGeometry'
 import {
+  findNonOverlappingAbsolutePosition,
   findGroupAtPoint,
   findGroupDropTarget,
+  nodeDimensions,
   positionInsideGroup,
   reparentNodePreservingPosition,
 } from './lib/groupMembership'
@@ -3785,9 +3787,21 @@ export default function App() {
       x: sourceAbsolute.x + (sourceNode.measured?.width ?? sourceNode.width ?? 240) + 36,
       y: sourceAbsolute.y,
     }
-    const position = sourceNode.parentId
-      ? positionInsideGroup(nodes, sourceNode.parentId, desiredAbsolute, { width: 240, height: 140 })
-      : desiredAbsolute
+    const intentSize = { width: 240, height: 140 }
+    const placementAbsolute = findNonOverlappingAbsolutePosition(nodes, desiredAbsolute, {
+      ...intentSize,
+      parentId: sourceNode.parentId,
+    })
+    const parentNode = sourceNode.parentId ? byId.get(sourceNode.parentId) : null
+    const parentAbsolute = parentNode ? absoluteNodePosition(parentNode, byId) : null
+    const position = parentAbsolute
+      ? { x: placementAbsolute.x - parentAbsolute.x, y: placementAbsolute.y - parentAbsolute.y }
+      : placementAbsolute
+    const parentSize = parentNode ? nodeDimensions(parentNode) : null
+    const expandedParentSize = parentSize ? {
+      width: Math.max(parentSize.width, position.x + intentSize.width + 12),
+      height: Math.max(parentSize.height, position.y + intentSize.height + 12),
+    } : null
     const intentNode = {
       id: intentNodeId,
       type: 'intent',
@@ -3795,7 +3809,14 @@ export default function App() {
       ...(sourceNode.parentId ? { parentId: sourceNode.parentId } : {}),
       data: intentData,
     }
-    setNodes((currentNodes) => sortParentsFirst([...currentNodes, intentNode]))
+    setNodes((currentNodes) => sortParentsFirst([
+      ...currentNodes.map((node) => (
+        expandedParentSize && node.id === sourceNode.parentId
+          ? { ...node, ...expandedParentSize }
+          : node
+      )),
+      intentNode,
+    ]))
     return workIntentBindingFromNode(intentNode)
   }, [nodes, setNodes])
 

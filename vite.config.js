@@ -21,6 +21,10 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg', 'apple-touch-icon.png'],
+      workbox: {
+        // The review engine carries generated discovery evidence and is loaded only when review opens.
+        globIgnores: ['**/workflowSystemTwinAdapter-*.js'],
+      },
       manifest: {
         name: 'Workflow Canvas',
         short_name: 'Canvas',

@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 
 import { absoluteNodePosition } from '../src/lib/canvasGeometry.js'
 import {
+  findNonOverlappingAbsolutePosition,
   findGroupAtPoint,
   findGroupDropTarget,
   nodeDimensions,
@@ -40,6 +41,16 @@ assert.deepEqual(
 
 assert.equal(findGroupDropTarget(nodes, 'group-a'), null, '그룹 프레임 자체를 다른 그룹의 자식으로 만들지 않습니다.')
 assert.deepEqual(nodeDimensions({ type: 'intent' }), { width: 220, height: 120 })
+
+const placementNodes = [
+  { id: 'work', type: 'system', position: { x: 100, y: 100 }, width: 240, height: 130 },
+  { id: 'intent-1', type: 'intent', position: { x: 376, y: 100 }, width: 240, height: 140 },
+]
+assert.deepEqual(
+  findNonOverlappingAbsolutePosition(placementNodes, { x: 376, y: 100 }, { width: 240, height: 140 }),
+  { x: 376, y: 264 },
+  '같은 Work에서 만든 다음 Intent는 먼저 만든 Intent 아래의 빈자리를 사용해야 합니다.',
+)
 
 const engineNode = {
   id: 'engine-a', type: 'system', position: { x: 150, y: 150 }, width: 240, height: 130,
