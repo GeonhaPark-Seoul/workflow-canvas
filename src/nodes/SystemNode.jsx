@@ -692,8 +692,8 @@ export default function SystemNode({ data, selected, id }) {
         <NodeToolbar
           nodeId={id}
           isVisible
-          position={Position.Bottom}
-          align="start"
+          position={partDraft.kind === 'work' ? Position.Right : Position.Bottom}
+          align={partDraft.kind === 'work' ? 'center' : 'start'}
           offset={8}
           style={{ zIndex: 2002, pointerEvents: 'all' }}
         >

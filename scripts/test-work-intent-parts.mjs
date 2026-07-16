@@ -120,6 +120,7 @@ assert.match(app, /onCreateIntentForWork/)
 assert.match(app, /intentNodeId:\s*idMap\.get\(binding\.intentNodeId\)/)
 assert.match(systemNode, /work-intent-rail/)
 assert.match(systemNode, /투입 → 처리 → 결과/)
+assert.match(systemNode, /partDraft\.kind === 'work' \? Position\.Right/)
 assert.match(picker, /새 Intent 작성/)
 assert.match(css, /\.work-intent-module/)
 
