@@ -318,6 +318,7 @@ const repository = manuallyChanged.nodes.find((node) => node.id === 'map-local-r
 repository.position = { x: 9_999, y: -2_000 }
 repository.width = 444
 repository.data.manualAnnotation = '사용자 전용 메모'
+repository.data.presentation = { layerOverride: 'L1' }
 manuallyChanged.nodes.push({
   id: 'manual-unmanaged-node',
   type: 'system',
@@ -333,6 +334,7 @@ assert.equal(preservedReview.summary.unmanagedCanvasNodes, 1)
 assert.deepEqual(repository.position, { x: 9_999, y: -2_000 })
 assert.equal(repository.width, 444)
 assert.equal(repository.data.manualAnnotation, '사용자 전용 메모')
+assert.deepEqual(repository.data.presentation, { layerOverride: 'L1' })
 
 const changedMeaning = structuredClone(boundWorkflowCanvas)
 changedMeaning.nodes.find((node) => node.id === 'map-web-app').data.purpose = '사용자가 직접 바꾼 목적'

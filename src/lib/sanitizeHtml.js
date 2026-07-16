@@ -1,5 +1,6 @@
 import { normalizeSystemNodeData, SYSTEM_ONTOLOGY_TEXT_FIELDS } from '../../shared/systemOntology.js'
 import { normalizeIntentNodeData } from '../../shared/intentOntology.js'
+import { normalizeNodePresentation } from '../../shared/systemLayers.js'
 import { normalizeSystemParts } from '../../shared/systemPartOntology.js'
 import { sanitizeRichTextHtml } from '../../shared/richTextSanitizer.js'
 
@@ -24,6 +25,8 @@ export function sanitizeNodeData(data) {
   delete next.systemPartRuntime
   delete next.canRunSystemChecks
   delete next.onCheckSystemPart
+  delete next.layerPortals
+  delete next.onOpenLayerPortal
   for (const key of new Set(['label', 'description', 'header', 'text', ...SYSTEM_ONTOLOGY_TEXT_FIELDS])) {
     if (typeof next[key] === 'string') next[key] = sanitizeHtml(next[key])
   }
@@ -32,6 +35,11 @@ export function sanitizeNodeData(data) {
     next.parts = next.parts.map((part) => ({ ...part, text: typeof part.text === 'string' ? sanitizeHtml(part.text) : part.text }))
   }
   if (Array.isArray(next.systemParts)) next.systemParts = normalizeSystemParts(next.systemParts)
+  if (Object.hasOwn(next, 'presentation')) {
+    const presentation = normalizeNodePresentation(next.presentation)
+    if (presentation) next.presentation = presentation
+    else delete next.presentation
+  }
   if (next.systemKind != null || next.sourceKind != null || next.externalRef != null || next.trustZone != null) {
     next = normalizeSystemNodeData(next)
   }

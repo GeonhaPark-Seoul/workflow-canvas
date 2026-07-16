@@ -82,6 +82,19 @@ import {
 } from './lib/shares'
 import { getMyProfile, loadMySettings, upsertMyEmail, touchLastSeen } from './lib/profiles'
 import { createSystemNodeData } from '../shared/systemOntology.js'
+import {
+  annotationDataForSystemLayer,
+  canvasSupportsSystemLayers,
+  createSystemLayerProjection,
+  effectiveSystemLayerForNode,
+  ensureSystemLayerViews,
+  isCanvasAnnotationNode,
+  isSystemLayerView,
+  normalizeSystemLayerId,
+  SYSTEM_LAYER_DEFINITIONS,
+  systemLayerFromView,
+  withSystemLayerOverride,
+} from '../shared/systemLayers.js'
 import { createIntentNodeData, recordIntentVersion } from '../shared/intentOntology.js'
 import {
   workIntentBindingFromNode,
@@ -471,7 +484,7 @@ function stripNode(n) {
     onUpdate, onEditStart, onEditEnd, onOpenInNotes, onCheckSystemPart,
     onSelectForPart, stageTypes, imageContext, twinRuntime, systemPartRuntime, canRunSystemChecks,
     intentLibrary, onCreateIntentForWork, onOpenIntentFromWork,
-    groupDropTarget, ...data
+    groupDropTarget, layerPortals, onOpenLayerPortal, ...data
   } = n.data ?? {}
   const { selected, ...rest } = n
   return { ...rest, data }
@@ -568,6 +581,15 @@ export default function App() {
   // Saved views (per canvas): [{ id, name, bounds: {x,y,width,height} }]
   const [views, setViews] = useState(initData.views ?? [])
   const [currentViewId, setCurrentViewId] = useState(null) // view shown in the toolbar selector
+  const currentView = views.find((view) => view.id === currentViewId) ?? null
+  const activeSystemLayer = systemLayerFromView(currentView)
+  const systemLayersEnabled = canvasSupportsSystemLayers(nodes, views)
+  const annotationCreationLayer = systemLayersEnabled ? (activeSystemLayer ?? 'L1') : null
+
+  useEffect(() => {
+    if (!canvasSupportsSystemLayers(nodes, views)) return
+    setViews((current) => ensureSystemLayerViews(current))
+  }, [nodes, views])
 
   // Touch / responsive detection
   const [touchDevice] = useState(() => 'ontouchstart' in window || navigator.maxTouchPoints > 0)
@@ -2874,19 +2896,28 @@ export default function App() {
       : type === 'memo'
         ? { header: '', text: '' }
         : { header: '', kind: contentKind }
-    setNotes((items) => [...items, { id, type, data }])
+    setNotes((items) => [...items, {
+      id,
+      type,
+      data: annotationDataForSystemLayer(data, annotationCreationLayer),
+    }])
     setNotesPanel({ type })
     setNotesSelectedId(id)
-  }, [canEditNotes])
+  }, [annotationCreationLayer, canEditNotes])
 
   const promoteNoteAt = useCallback((noteId, position) => {
     if (!canEditNotes) return
     const note = latestRef.current.notes.find((item) => item.id === noteId)
     if (!note || nodes.some((node) => node.id === noteId)) return
-    const node = { ...stripNote(note), position }
+    const stripped = stripNote(note)
+    const node = {
+      ...stripped,
+      position,
+      data: annotationDataForSystemLayer(stripped.data, annotationCreationLayer),
+    }
     setNotes((items) => items.filter((item) => item.id !== noteId))
     setNodes((items) => [...items, node])
-  }, [canEditNotes, nodes, setNodes])
+  }, [annotationCreationLayer, canEditNotes, nodes, setNodes])
 
   const promoteNoteToCenter = useCallback((noteId) => {
     if (!rfInstance || !reactFlowRef.current) return
@@ -2995,22 +3026,22 @@ export default function App() {
     if (!target.allowed) return
     const id = nextId()
     if (target.frame) {
-      setNodes((nds) => sortParentsFirst([...nds, { id, type: 'stage', parentId: target.frame.id, position: creationPosition(target.frame, nds, null, 200, 80), data: { label: '새 단계', description: '', colorIdx: 0 } }]))
+      setNodes((nds) => sortParentsFirst([...nds, { id, type: 'stage', parentId: target.frame.id, position: creationPosition(target.frame, nds, null, 200, 80), data: annotationDataForSystemLayer({ label: '새 단계', description: '', colorIdx: 0 }, annotationCreationLayer) }]))
       return
     }
-    setNodes((nds) => [...nds, { id, type: 'stage', position: { x: 200 + Math.random() * 400, y: 150 + Math.random() * 300 }, data: { label: '새 단계', description: '', colorIdx: 0 } }])
-  }, [setNodes, scopedCreationTarget])
+    setNodes((nds) => [...nds, { id, type: 'stage', position: { x: 200 + Math.random() * 400, y: 150 + Math.random() * 300 }, data: annotationDataForSystemLayer({ label: '새 단계', description: '', colorIdx: 0 }, annotationCreationLayer) }])
+  }, [annotationCreationLayer, setNodes, scopedCreationTarget])
 
   const addMemo = useCallback(() => {
     const target = scopedCreationTarget()
     if (!target.allowed) return
     const id = nextId()
     if (target.frame) {
-      setNodes((nds) => sortParentsFirst([...nds, { id, type: 'memo', parentId: target.frame.id, position: creationPosition(target.frame, nds, null, 160, 80), data: { header: '', text: '' } }]))
+      setNodes((nds) => sortParentsFirst([...nds, { id, type: 'memo', parentId: target.frame.id, position: creationPosition(target.frame, nds, null, 160, 80), data: annotationDataForSystemLayer({ header: '', text: '' }, annotationCreationLayer) }]))
       return
     }
-    setNodes((nds) => [...nds, { id, type: 'memo', position: { x: 300 + Math.random() * 400, y: 200 + Math.random() * 200 }, data: { header: '', text: '' } }])
-  }, [setNodes, scopedCreationTarget])
+    setNodes((nds) => [...nds, { id, type: 'memo', position: { x: 300 + Math.random() * 400, y: 200 + Math.random() * 200 }, data: annotationDataForSystemLayer({ header: '', text: '' }, annotationCreationLayer) }])
+  }, [annotationCreationLayer, setNodes, scopedCreationTarget])
 
   const addStageAt = useCallback((pos) => {
     const target = scopedCreationTarget(pos)
@@ -3021,9 +3052,9 @@ export default function App() {
       type: 'stage',
       ...(target.frame ? { parentId: target.frame.id } : {}),
       position: creationPosition(target.frame, nds, pos, 200, 80),
-      data: { label: '새 단계', description: '', colorIdx: 0 },
+      data: annotationDataForSystemLayer({ label: '새 단계', description: '', colorIdx: 0 }, annotationCreationLayer),
     }]))
-  }, [scopedCreationTarget, setNodes])
+  }, [annotationCreationLayer, scopedCreationTarget, setNodes])
 
   const addMemoAt = useCallback((pos) => {
     const target = scopedCreationTarget(pos)
@@ -3034,9 +3065,9 @@ export default function App() {
       type: 'memo',
       ...(target.frame ? { parentId: target.frame.id } : {}),
       position: creationPosition(target.frame, nds, pos, 160, 80),
-      data: { header: '', text: '' },
+      data: annotationDataForSystemLayer({ header: '', text: '' }, annotationCreationLayer),
     }]))
-  }, [scopedCreationTarget, setNodes])
+  }, [annotationCreationLayer, scopedCreationTarget, setNodes])
 
   // ── Palette (드래그&드롭 / 탭) node creation ──────────────────────────────
   // Shared by the canvas drop target (onDrop) and Toolbar's tap-to-add
@@ -3053,7 +3084,12 @@ export default function App() {
     if (payload.nodeType === 'content') {
       const id = nextId()
       setNodes((nds) => {
-        const node = { id, type: 'content', position: creationPosition(frame, nds, pos, 220, 140), data: { kind: payload.contentKind } }
+        const node = {
+          id,
+          type: 'content',
+          position: creationPosition(frame, nds, pos, 220, 140),
+          data: annotationDataForSystemLayer({ kind: payload.contentKind }, annotationCreationLayer),
+        }
         return sortParentsFirst([...nds, forceFrame ? { ...node, parentId: frame.id } : node])
       })
       return
@@ -3091,17 +3127,17 @@ export default function App() {
     if (payload.nodeType === 'stage') {
       if (forceFrame) {
         const id = nextId()
-        setNodes((nds) => sortParentsFirst([...nds, { id, type: 'stage', parentId: frame.id, position: creationPosition(frame, nds, pos, 200, 80), data: { label: '새 단계', description: '', colorIdx: 0 } }]))
+        setNodes((nds) => sortParentsFirst([...nds, { id, type: 'stage', parentId: frame.id, position: creationPosition(frame, nds, pos, 200, 80), data: annotationDataForSystemLayer({ label: '새 단계', description: '', colorIdx: 0 }, annotationCreationLayer) }]))
       } else addStageAt(pos)
       return
     }
     if (payload.nodeType === 'memo') {
       if (forceFrame) {
         const id = nextId()
-        setNodes((nds) => sortParentsFirst([...nds, { id, type: 'memo', parentId: frame.id, position: creationPosition(frame, nds, pos, 160, 80), data: { header: '', text: '' } }]))
+        setNodes((nds) => sortParentsFirst([...nds, { id, type: 'memo', parentId: frame.id, position: creationPosition(frame, nds, pos, 160, 80), data: annotationDataForSystemLayer({ header: '', text: '' }, annotationCreationLayer) }]))
       } else addMemoAt(pos)
     }
-  }, [scopedCreationTarget, addStageAt, addMemoAt, setNodes])
+  }, [annotationCreationLayer, scopedCreationTarget, addStageAt, addMemoAt, setNodes])
 
   const onDragOver = useCallback((e) => {
     e.preventDefault()
@@ -3596,7 +3632,15 @@ export default function App() {
     if (!rfInstance || !contextMenu) return
     const pos = rfInstance.screenToFlowPosition({ x: contextMenu.flowX, y: contextMenu.flowY })
     const id = nextId()
-    setNodes((nds) => [...nds, { id, type: 'group', position: pos, width: 320, height: 220, zIndex: -1, data: { label: '새 그룹' } }])
+    setNodes((nds) => [...nds, {
+      id,
+      type: 'group',
+      position: pos,
+      width: 320,
+      height: 220,
+      zIndex: -1,
+      data: annotationDataForSystemLayer({ label: '새 그룹' }, annotationCreationLayer),
+    }])
     closeContext()
   }
 
@@ -3970,7 +4014,10 @@ export default function App() {
     const groupId = nextId()
     const groupNode = {
       id: groupId, type: 'group', position: { x: gx, y: gy },
-      width: gw, height: gh, zIndex: -1, data: { label: '새 그룹' },
+      width: gw,
+      height: gh,
+      zIndex: -1,
+      data: annotationDataForSystemLayer({ label: '새 그룹' }, annotationCreationLayer),
     }
     const idSet = new Set(ids)
     const byId = new Map(nodes.map((node) => [node.id, node]))
@@ -3987,7 +4034,7 @@ export default function App() {
       })
       return [...others, groupNode, ...children]
     })
-  }, [boundsOf, nodes, setNodes])
+  }, [annotationCreationLayer, boundsOf, nodes, setNodes])
 
   // Remove a group frame, converting its children back to absolute positions
   // and dropping their parentId. Used by both "그룹 해제" and "그룹 삭제".
@@ -4010,12 +4057,24 @@ export default function App() {
     const bounds = boundsOf(ids)
     if (!bounds || !rfInstance) return
     rfInstance.fitBounds(bounds, { padding: 0.15, duration: 500 })
-    setViews((prev) => [...prev, { id: uid(), name: `뷰 ${prev.length + 1}`, bounds }])
-  }, [boundsOf, rfInstance])
+    setViews((prev) => [...prev, {
+      id: uid(),
+      name: `뷰 ${prev.length + 1}`,
+      bounds,
+      ...(activeSystemLayer ? { systemLayer: activeSystemLayer } : {}),
+    }])
+  }, [activeSystemLayer, boundsOf, rfInstance])
 
   const recallView = useCallback((view) => {
-    rfInstance?.fitBounds(view.bounds, { padding: 0.15, duration: 500 })
-  }, [rfInstance])
+    if (!rfInstance) return
+    if (isSystemLayerView(view)) {
+      const projection = createSystemLayerProjection(nodes, edges, systemLayerFromView(view))
+      const bounds = boundsForNodeIds(nodes, projection.focusNodeIds)
+      if (bounds) rfInstance.fitBounds(bounds, { padding: 0.18, duration: 500 })
+      return
+    }
+    if (view?.bounds) rfInstance.fitBounds(view.bounds, { padding: 0.15, duration: 500 })
+  }, [edges, nodes, rfInstance])
 
   // Toolbar selector: null = fit all, otherwise recall the chosen view.
   const selectView = useCallback((id) => {
@@ -4028,13 +4087,50 @@ export default function App() {
 
   const renameView = useCallback((id, name) => {
     if (!name.trim()) return
-    setViews((prev) => prev.map((v) => (v.id === id ? { ...v, name: name.trim() } : v)))
+    setViews((prev) => prev.map((v) => (
+      v.id === id && !isSystemLayerView(v) ? { ...v, name: name.trim() } : v
+    )))
   }, [])
 
   const deleteView = useCallback((id) => {
-    setViews((prev) => prev.filter((v) => v.id !== id))
-    setCurrentViewId((cur) => (cur === id ? null : cur))
-  }, [])
+    setViews((prev) => prev.filter((v) => v.id !== id || isSystemLayerView(v)))
+    setCurrentViewId((cur) => {
+      const deleting = views.find((view) => view.id === id)
+      return cur === id && !isSystemLayerView(deleting) ? null : cur
+    })
+  }, [views])
+
+  const selectSystemLayer = useCallback((layerId) => {
+    const normalized = normalizeSystemLayerId(layerId)
+    if (!normalized) {
+      selectView(null)
+      return
+    }
+    const view = views.find((candidate) => (
+      isSystemLayerView(candidate) && systemLayerFromView(candidate) === normalized
+    ))
+    if (view) selectView(view.id)
+  }, [selectView, views])
+
+  const openSystemLayerPortal = useCallback((layerId, targetNodeId) => {
+    const normalized = normalizeSystemLayerId(layerId)
+    const target = nodes.find((node) => node.id === targetNodeId && node.data?.redacted !== true)
+    if (!normalized || !target || !rfInstance) return
+    const view = views.find((candidate) => (
+      isSystemLayerView(candidate) && systemLayerFromView(candidate) === normalized
+    ))
+    if (view) setCurrentViewId(view.id)
+    const byId = new Map(nodes.map((node) => [node.id, node]))
+    const position = absoluteNodePosition(target, byId)
+    const width = target.measured?.width ?? target.width ?? 240
+    const height = target.measured?.height ?? target.height ?? 140
+    requestAnimationFrame(() => {
+      rfInstance.fitBounds(
+        { x: position.x, y: position.y, width, height },
+        { padding: 0.65, duration: 500, maxZoom: 1.05 },
+      )
+    })
+  }, [nodes, rfInstance, views])
 
   // ── Selected-edge highlight ───────────────────────────────────────────────
   // Non-selected edges get a forced base style so baked-in bold can never linger.
@@ -4163,12 +4259,26 @@ export default function App() {
         }
       })
     : nodes
-  const renderedCanvasNodes = twinProposalPreviewNodes.length
+  const candidateCanvasNodes = twinProposalPreviewNodes.length
     ? [...previewAugmentedNodes, ...twinProposalPreviewNodes]
     : previewAugmentedNodes
-  const renderedCanvasEdges = twinProposalPreviewEdges.length
+  const candidateCanvasEdges = twinProposalPreviewEdges.length
     ? [...styledEdges, ...twinProposalPreviewEdges]
     : styledEdges
+  const systemLayerProjection = createSystemLayerProjection(
+    candidateCanvasNodes,
+    candidateCanvasEdges,
+    activeSystemLayer,
+  )
+  const renderedCanvasNodes = activeSystemLayer
+    ? candidateCanvasNodes.map((node) => ({
+        ...node,
+        hidden: !systemLayerProjection.visibleNodeIds.has(node.id),
+      }))
+    : candidateCanvasNodes
+  const renderedCanvasEdges = activeSystemLayer
+    ? candidateCanvasEdges.filter((edge) => systemLayerProjection.visibleEdgeIds.has(edge.id))
+    : candidateCanvasEdges
   const linkedPartHandlesByNode = new Map()
   for (const edge of renderedCanvasEdges) {
     for (const [nodeId, handleId] of [[edge.source, edge.sourceHandle], [edge.target, edge.targetHandle]]) {
@@ -4216,6 +4326,25 @@ export default function App() {
   // multi-selection (so labels can say "전체 …").
   const ctxIds = contextMenu?.selectedIds?.length ? contextMenu.selectedIds : (contextMenu?.nodeId ? [contextMenu.nodeId] : [])
   const ctxMulti = (contextMenu?.selectedIds?.length ?? 0) >= 2
+  const ctxNodes = ctxIds.map((id) => nodes.find((node) => node.id === id)).filter(Boolean)
+  const ctxCanChangeSystemLayer = systemLayersEnabled
+    && ctxNodes.length > 0
+    && ctxNodes.every((node) => isNodeStructureEditable(node.id))
+  const ctxSystemLayers = new Set(ctxNodes.map(effectiveSystemLayerForNode).filter(Boolean))
+  const ctxCanUseAutomaticLayer = ctxNodes.length > 0 && ctxNodes.every((node) => (
+    !isCanvasAnnotationNode(node)
+    && !!effectiveSystemLayerForNode({ ...node, data: withSystemLayerOverride(node.data, null) })
+  ))
+  const changeContextSystemLayer = (layerId) => {
+    if (!ctxCanChangeSystemLayer) return
+    const ids = new Set(ctxNodes.map((node) => node.id))
+    setNodes((current) => current.map((node) => {
+      if (!ids.has(node.id) || !isNodeStructureEditable(node.id)) return node
+      if (!layerId && isCanvasAnnotationNode(node)) return node
+      return { ...node, data: sanitizeNodeData(withSystemLayerOverride(node.data, layerId)) }
+    }))
+    closeContext()
+  }
 
   // Sharing: canvas-scope invitees get full edit (including stage-type
   // editing); group/node-scope invitees only touch nodes in their editable
@@ -4279,6 +4408,9 @@ export default function App() {
         onSelectView={selectView}
         onRenameView={renameView}
         onDeleteView={deleteView}
+        systemLayers={systemLayersEnabled ? SYSTEM_LAYER_DEFINITIONS : []}
+        activeSystemLayer={activeSystemLayer}
+        onSelectSystemLayer={selectSystemLayer}
         onPaletteAdd={onPaletteAdd}
         systemRuntime={systemRuntimeSummary ? {
           ...systemRuntimeSummary,
@@ -4579,6 +4711,8 @@ export default function App() {
               scopedParticipants: nodeScopedParticipants,
               systemPartRuntime: systemPartRuntimeByNode[n.id] ?? {},
               linkedSystemPartHandles,
+              layerPortals: n.type === 'system' ? (systemLayerProjection.portalsByNode.get(n.id) ?? []) : [],
+              onOpenLayerPortal: n.type === 'system' ? openSystemLayerPortal : undefined,
               intentLibrary: n.type === 'system' ? workIntentLibrary : undefined,
               onOpenIntentFromWork: n.type === 'system' ? openIntentFromWork : undefined,
               onCreateIntentForWork: n.type === 'system' && structureEditable
@@ -4856,6 +4990,32 @@ export default function App() {
               <ContextItem icon="⧉" label="복사" color="#8b94a7" onClick={() => { copySelection(ctxIds); closeContext() }} />
               {clipboardRef.current && canEditCanvas && (canEditFullCanvas || !!singleEditableGroupId) && (
                 <ContextItem icon="📋" label="붙여넣기" color="#8b94a7" onClick={handleContextPaste} />
+              )}
+              <div style={{ height: 1, background: '#ffffff18', margin: '4px 2px' }} />
+            </>
+          )}
+
+          {contextMenu.nodeId && ctxCanChangeSystemLayer && (
+            <>
+              <div style={{ padding: '4px 8px', color: '#777', fontSize: 10, fontWeight: 700 }}>
+                층 지정
+              </div>
+              {SYSTEM_LAYER_DEFINITIONS.map((layer) => (
+                <ContextItem
+                  key={layer.id}
+                  icon={ctxSystemLayers.size === 1 && ctxSystemLayers.has(layer.id) ? '✓' : layer.id}
+                  label={layer.label}
+                  color={layer.color}
+                  onClick={() => changeContextSystemLayer(layer.id)}
+                />
+              ))}
+              {ctxCanUseAutomaticLayer && (
+                <ContextItem
+                  icon="↺"
+                  label="결정적 기본값 사용"
+                  color="#8b94a7"
+                  onClick={() => changeContextSystemLayer(null)}
+                />
               )}
               <div style={{ height: 1, background: '#ffffff18', margin: '4px 2px' }} />
             </>

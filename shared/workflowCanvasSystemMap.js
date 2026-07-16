@@ -2,6 +2,7 @@ import { createEdgeRelationData, edgeRelationInfo } from './relationOntology.js'
 import { createSystemNodeData } from './systemOntology.js'
 import { createEngineCapabilityMap } from './capabilityMapper.js'
 import { MAINTAINER_AGENT_MANIFEST, WORKFLOW_ENGINE_REGISTRY } from './engineRegistry.js'
+import { createSystemLayerViews } from './systemLayers.js'
 import { WORKFLOW_SYSTEM_DISCOVERY } from './workflowSystemDiscoveryManifest.js'
 import {
   WORKFLOW_SOURCE_TWIN_PART_IDS,
@@ -468,7 +469,7 @@ export function createWorkflowCanvasSystemMap() {
     nodes: mapNodes(engineCapabilityMap),
     edges: mapEdges(engineCapabilityMap),
     notes: [],
-    views: GROUPS.map((group) => ({
+    views: createSystemLayerViews().concat(GROUPS.map((group) => ({
       id: `view-${group.id}`,
       name: group.label,
       bounds: { x: group.x, y: group.y, width: group.width, height: group.height },
@@ -481,7 +482,7 @@ export function createWorkflowCanvasSystemMap() {
         width: engineCapabilityMap.group.width,
         height: engineCapabilityMap.group.height,
       },
-    }),
+    })),
     stageTypes: null,
   }
 }

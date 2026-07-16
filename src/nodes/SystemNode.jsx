@@ -101,6 +101,64 @@ function blankSystemPart() {
   }
 }
 
+function LayerPortalControls({ portals = [], onOpen }) {
+  const [expandedId, setExpandedId] = useState(null)
+
+  useEffect(() => {
+    if (expandedId && !portals.some((portal) => portal.id === expandedId)) setExpandedId(null)
+  }, [expandedId, portals])
+
+  if (!portals.length || typeof onOpen !== 'function') return null
+  return (
+    <div
+      className="system-layer-portals nodrag nowheel"
+      onPointerDown={(event) => event.stopPropagation()}
+      onClick={(event) => event.stopPropagation()}
+    >
+      {portals.map((portal) => {
+        const arrow = portal.depthDirection === 'down' ? '↓' : '↑'
+        const expanded = expandedId === portal.id
+        const title = `${portal.targetLayer} ${portal.targetLayerLabel}로 이동 · 보이는 연결 대상 ${portal.count}개`
+        return (
+          <div key={portal.id} className="system-layer-portal-wrap">
+            <button
+              type="button"
+              className="system-layer-portal"
+              title={title}
+              aria-label={title}
+              aria-expanded={portal.count > 1 ? expanded : undefined}
+              onClick={() => {
+                if (portal.count === 1) onOpen(portal.targetLayer, portal.targets[0].nodeId)
+                else setExpandedId(expanded ? null : portal.id)
+              }}
+            >
+              <span>{portal.targetLayer}</span>
+              <span aria-hidden="true">{arrow}</span>
+              {portal.count > 1 && <strong>{portal.count}</strong>}
+            </button>
+            {expanded && (
+              <div className="system-layer-portal-menu" role="menu">
+                {portal.targets.map((target) => (
+                  <button
+                    key={target.nodeId}
+                    type="button"
+                    role="menuitem"
+                    title={target.relationLabels.join(' · ')}
+                    onClick={() => onOpen(portal.targetLayer, target.nodeId)}
+                  >
+                    <span>{target.label || target.nodeId}</span>
+                    <small>{portal.targetLayer}</small>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 export default function SystemNode({ data, selected, id }) {
   const updateNodeInternals = useUpdateNodeInternals()
   const abstract = useStore((state) => state.transform[2] < (data.lodThreshold ?? 0.55))
@@ -376,6 +434,8 @@ export default function SystemNode({ data, selected, id }) {
       {PORTS.map((port) => (
         <Handle key={port.id} type="source" id={port.id} position={port.position} style={handleStyle} />
       ))}
+
+      <LayerPortalControls portals={data.layerPortals} onOpen={data.onOpenLayerPortal} />
 
       {abstract && systemParts.map((part, index) => {
         const partKind = systemPartKindDefinition(part.kind)

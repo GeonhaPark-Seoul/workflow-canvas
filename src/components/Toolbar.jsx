@@ -4,10 +4,12 @@ import NodePalette from './NodePalette'
 export default function Toolbar({
   onAddStage, onAddMemo, onClearAll, onUndo, mobile,
   views = [], currentViewId, onSelectView, onRenameView, onDeleteView,
+  systemLayers = [], activeSystemLayer = null, onSelectSystemLayer = () => {},
   onPaletteAdd = () => {},
   systemRuntime = null,
 }) {
   const viewProps = { views, currentViewId, onSelectView, onRenameView, onDeleteView, mobile }
+  const layerProps = { layers: systemLayers, activeLayer: activeSystemLayer, onSelectLayer: onSelectSystemLayer, mobile }
   const [paletteOpen, setPaletteOpen] = useState(false)
   const closePalette = () => setPaletteOpen(false)
   const handlePick = (payload) => { onPaletteAdd(payload); closePalette() }
@@ -38,6 +40,7 @@ export default function Toolbar({
           {paletteOpen && <NodePalette mobile onClose={closePalette} onPick={handlePick} />}
         </div>
         <ViewSelector {...viewProps} />
+        {systemLayers.length > 0 && <LayerSwitcher {...layerProps} />}
         <MobileBtn onClick={onUndo} color="#06b6d4" icon="↩︎" label="되돌리기" />
         {systemRuntime && <RuntimeButton runtime={systemRuntime} mobile />}
       </div>
@@ -68,6 +71,12 @@ export default function Toolbar({
       </div>
       <div style={{ width: 1, background: '#ffffff18', margin: '0 4px' }} />
       <ViewSelector {...viewProps} />
+      {systemLayers.length > 0 && (
+        <>
+          <div style={{ width: 1, background: '#ffffff18', margin: '0 4px' }} />
+          <LayerSwitcher {...layerProps} />
+        </>
+      )}
       <ToolBtn onClick={onUndo} color="#06b6d4" icon="↩︎" label="되돌리기" />
       {systemRuntime && (
         <>
@@ -132,9 +141,11 @@ function ViewSelector({ views, currentViewId, onSelectView, onRenameView, onDele
         <div style={{ padding: '6px 12px', color: '#555', fontSize: 11 }}>저장된 뷰 없음</div>
       )}
 
-      {views.map((v) => (
+      {views.map((v) => {
+        const fixedLayerView = v.viewKind === 'system-layer'
+        return (
         <div key={v.id} style={{ display: 'flex', alignItems: 'center', gap: 2, padding: '1px 2px' }}>
-          {renameId === v.id ? (
+          {renameId === v.id && !fixedLayerView ? (
             <input
               autoFocus
               value={renameValue}
@@ -156,17 +167,22 @@ function ViewSelector({ views, currentViewId, onSelectView, onRenameView, onDele
           ) : (
             <>
               <button onClick={() => pick(v.id)} style={rowBtn(currentViewId === v.id)}>
-                <span style={{ fontSize: 11 }}>⊡</span>
+                <span style={{ fontSize: 11 }}>{fixedLayerView ? v.systemLayer : '⊡'}</span>
                 <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.name}</span>
               </button>
-              <SmallIcon title="이름 변경" hoverColor="#aaa"
-                onClick={(e) => { e.stopPropagation(); setRenameId(v.id); setRenameValue(v.name) }}>✎</SmallIcon>
-              <SmallIcon title="삭제" hoverColor="#ef4444"
-                onClick={(e) => { e.stopPropagation(); onDeleteView(v.id) }}>✕</SmallIcon>
+              {!fixedLayerView && (
+                <>
+                  <SmallIcon title="이름 변경" hoverColor="#aaa"
+                    onClick={(e) => { e.stopPropagation(); setRenameId(v.id); setRenameValue(v.name) }}>✎</SmallIcon>
+                  <SmallIcon title="삭제" hoverColor="#ef4444"
+                    onClick={(e) => { e.stopPropagation(); onDeleteView(v.id) }}>✕</SmallIcon>
+                </>
+              )}
             </>
           )}
         </div>
-      ))}
+        )
+      })}
     </div>
   )
 
@@ -250,6 +266,49 @@ function ViewSelector({ views, currentViewId, onSelectView, onRenameView, onDele
         </button>
       </div>
       {open && dropdown}
+    </div>
+  )
+}
+
+function LayerSwitcher({ layers, activeLayer, onSelectLayer, mobile }) {
+  return (
+    <div
+      className="system-layer-switcher"
+      role="tablist"
+      aria-label="시스템 지도 층"
+      style={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}
+    >
+      {layers.map((layer) => {
+        const active = activeLayer === layer.id
+        return (
+          <button
+            key={layer.id}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            className="main-hover-control"
+            title={`${layer.id} ${layer.label} · ${layer.question}`}
+            onClick={() => onSelectLayer(layer.id)}
+            style={{
+              width: mobile ? 27 : 31,
+              height: mobile ? 31 : 29,
+              padding: 0,
+              display: 'grid',
+              placeItems: 'center',
+              border: `1px solid ${active ? layer.color : `${layer.color}55`}`,
+              borderRadius: 5,
+              background: active ? `${layer.color}2e` : 'transparent',
+              color: active ? layer.color : '#9ca3af',
+              fontSize: 10,
+              fontWeight: 800,
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+            }}
+          >
+            {layer.id}
+          </button>
+        )
+      })}
     </div>
   )
 }

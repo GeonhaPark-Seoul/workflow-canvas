@@ -1117,6 +1117,114 @@ body[data-theme='light'] .react-flow__node:hover .canvas-group-frame {
   border-color: #94a3b866;
 }
 
+.system-layer-portals {
+  position: absolute;
+  left: 50%;
+  bottom: -30px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transform: translateX(-50%);
+  pointer-events: auto;
+}
+.system-layer-portal-wrap {
+  position: relative;
+}
+.system-layer-portal {
+  min-width: 42px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  box-sizing: border-box;
+  border: 1px solid #60a5fa88;
+  border-radius: 5px;
+  background: #171a21;
+  color: #bfdbfe;
+  padding: 0 6px;
+  font-family: inherit;
+  font-size: 9px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 3px 10px #0009;
+}
+.system-layer-portal:hover,
+.system-layer-portal[aria-expanded='true'] {
+  border-color: #60a5fa;
+  background: #1d2a3c;
+  color: #fff;
+}
+.system-layer-portal strong {
+  min-width: 14px;
+  height: 14px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #3b82f633;
+  font-size: 8px;
+}
+.system-layer-portal-menu {
+  position: absolute;
+  left: 50%;
+  top: 28px;
+  z-index: 50;
+  width: 220px;
+  max-height: 180px;
+  overflow-y: auto;
+  transform: translateX(-50%);
+  border: 1px solid #ffffff24;
+  border-radius: 6px;
+  background: #171a21;
+  box-shadow: 0 10px 28px #000c;
+  padding: 4px;
+}
+.system-layer-portal-menu button {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #d8deea;
+  padding: 6px 7px;
+  font-family: inherit;
+  font-size: 10px;
+  text-align: left;
+  cursor: pointer;
+}
+.system-layer-portal-menu button:hover {
+  background: #3b82f622;
+  color: #fff;
+}
+.system-layer-portal-menu button span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.system-layer-portal-menu button small {
+  flex: 0 0 auto;
+  color: #60a5fa;
+  font-size: 8px;
+}
+body[data-theme='light'] .system-layer-portal,
+body[data-theme='light'] .system-layer-portal-menu {
+  background: #fff;
+  color: #273142;
+  box-shadow: 0 4px 14px #1f293733;
+}
+body[data-theme='light'] .system-layer-portal:hover,
+body[data-theme='light'] .system-layer-portal[aria-expanded='true'],
+body[data-theme='light'] .system-layer-portal-menu button:hover {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
 .node-open-notes {
   position: absolute;
   top: -30px;

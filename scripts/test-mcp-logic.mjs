@@ -73,6 +73,7 @@ import {
   RELATION_SOURCE_DEFS,
 } from '../shared/relationOntology.js'
 import { createWorkflowCanvasSystemMap } from '../shared/workflowCanvasSystemMap.js'
+import { SYSTEM_LAYER_DEFINITIONS } from '../shared/systemLayers.js'
 import { ENGINE_CAPABILITY_MAP_GROUP_ID } from '../shared/capabilityMapper.js'
 import { WORKFLOW_ENGINE_REGISTRY } from '../shared/engineRegistry.js'
 import {
@@ -474,6 +475,18 @@ t('system metadata normalization clamps enums and plain identifiers', () => {
   assert.equal(result.externalRef, 'table name')
 })
 
+t('node presentation keeps only a valid manual system layer override', () => {
+  const valid = normalizeSystemNodeData({
+    systemKind: 'service', presentation: { layerOverride: 'L3', hiddenClaim: 'drop' },
+  })
+  assert.deepEqual(valid.presentation, { layerOverride: 'L3' })
+  const invalid = sanitizeBrowserNodeData({ presentation: { layerOverride: 'LIVE' } })
+  assert.equal(Object.hasOwn(invalid, 'presentation'), false)
+  const patch = { presentation: { layerOverride: 'L4', forged: true } }
+  sanitizeTextFields(patch)
+  assert.deepEqual(patch.presentation, { layerOverride: 'L4' })
+})
+
 console.log('trust topology')
 
 t('trust topology definitions have unique stable ids', () => {
@@ -592,11 +605,15 @@ t('browser persistence sanitizer removes every runtime-only field and active mar
     systemPartRuntime: { 'key-ref': { status: 'healthy' } },
     canRunSystemChecks: true,
     onCheckSystemPart: 'forged-callback',
+    layerPortals: [{ targetLayer: 'L4', count: 99 }],
+    onOpenLayerPortal: 'forged-callback',
   })
   assert.equal(Object.hasOwn(result, 'twinRuntime'), false)
   assert.equal(Object.hasOwn(result, 'systemPartRuntime'), false)
   assert.equal(Object.hasOwn(result, 'canRunSystemChecks'), false)
   assert.equal(Object.hasOwn(result, 'onCheckSystemPart'), false)
+  assert.equal(Object.hasOwn(result, 'layerPortals'), false)
+  assert.equal(Object.hasOwn(result, 'onOpenLayerPortal'), false)
   assert.equal(result.purpose, '<b>원본 보관</b>')
 })
 
@@ -1456,7 +1473,10 @@ t('self map is a declared, evidence-backed model with valid topology', () => {
   const idSet = new Set(ids)
   assert.equal(idSet.size, ids.length)
   const groupNodes = map.nodes.filter((node) => node.type === 'group')
-  assert.equal(map.views.length, groupNodes.length)
+  const layerViews = map.views.filter((view) => view.viewKind === 'system-layer')
+  assert.equal(layerViews.length, SYSTEM_LAYER_DEFINITIONS.length)
+  assert.deepEqual(layerViews.map((view) => view.systemLayer), ['L1', 'L2', 'L3', 'L4'])
+  assert.equal(map.views.length, groupNodes.length + SYSTEM_LAYER_DEFINITIONS.length)
   assert.equal(groupNodes.some((node) => node.id === ENGINE_CAPABILITY_MAP_GROUP_ID), true)
   const logicalNodes = map.nodes.filter((node) => node.data?.logicalComponent)
   assert.equal(logicalNodes.length, WORKFLOW_ENGINE_REGISTRY.components.length)
@@ -3633,6 +3653,27 @@ t('group invite: server rejects moving a child outside the group', () => {
   assert.throws(() => applySharedCanvasUpdate(
     { row: sharedRow, scope: 'group', targetId: 'frame', canEdit: true, restrictView: false }, submitted, sharedRow.edges,
   ), /그룹 밖/)
+})
+
+t('node invite: server rejects layer changes when the same user cannot move the node', () => {
+  const submitted = structuredClone(sharedRow.nodes)
+  submitted.find((node) => node.id === 'inside').data.presentation = { layerOverride: 'L2' }
+  assert.throws(() => applySharedCanvasUpdate(
+    { row: sharedRow, scope: 'node', targetId: 'inside', canEdit: true, restrictView: false },
+    submitted,
+    sharedRow.edges,
+  ), /내용과 크기/)
+})
+
+t('group invite: server accepts a sanitized layer change where node movement is allowed', () => {
+  const submitted = structuredClone(sharedRow.nodes)
+  submitted.find((node) => node.id === 'inside').data.presentation = { layerOverride: 'L3', forged: 'drop' }
+  const result = applySharedCanvasUpdate(
+    { row: sharedRow, scope: 'group', targetId: 'frame', canEdit: true, restrictView: false },
+    submitted,
+    sharedRow.edges,
+  )
+  assert.deepEqual(result.nodes.find((node) => node.id === 'inside').data.presentation, { layerOverride: 'L3' })
 })
 
 t('group invite: server rejects rewiring an inside edge to an outside node', () => {

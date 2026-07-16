@@ -1,4 +1,5 @@
 import { normalizeDigitalTwinBinding, normalizeSystemParts } from './systemPartOntology.js'
+import { normalizeNodePresentation } from './systemLayers.js'
 import { normalizeTrustZone } from './trustTopology.js'
 
 export const SYSTEM_KIND_DEFS = Object.freeze([
@@ -144,6 +145,9 @@ export function normalizeSystemNodeData(data = {}) {
   const logicalComponent = normalizeLogicalComponent(data.logicalComponent)
   if (logicalComponent) normalized.logicalComponent = logicalComponent
   else delete normalized.logicalComponent
+  const presentation = normalizeNodePresentation(data.presentation)
+  if (presentation) normalized.presentation = presentation
+  else delete normalized.presentation
   return normalized
 }
 

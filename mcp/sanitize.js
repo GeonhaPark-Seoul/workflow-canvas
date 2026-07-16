@@ -1,4 +1,5 @@
 import { normalizeSystemNodeData, SYSTEM_ONTOLOGY_TEXT_FIELDS } from '../shared/systemOntology.js'
+import { normalizeNodePresentation } from '../shared/systemLayers.js'
 import { normalizeSystemParts } from '../shared/systemPartOntology.js'
 import { sanitizeRichTextHtml } from '../shared/richTextSanitizer.js'
 
@@ -27,11 +28,18 @@ export function sanitizeExternalUrl(value) {
 // Sanitize the HTML-bearing text fields of a node input/patch object, in place-ish.
 export function sanitizeTextFields(obj) {
   if (!obj || typeof obj !== 'object') return obj
+  delete obj.layerPortals
+  delete obj.onOpenLayerPortal
   for (const key of new Set(['label', 'description', 'header', 'text', ...SYSTEM_ONTOLOGY_TEXT_FIELDS])) {
     if (typeof obj[key] === 'string') obj[key] = sanitizeHtml(obj[key])
   }
   if (typeof obj.url === 'string') obj.url = sanitizeExternalUrl(obj.url)
   if (Array.isArray(obj.systemParts)) obj.systemParts = normalizeSystemParts(obj.systemParts)
+  if (Object.hasOwn(obj, 'presentation')) {
+    const presentation = normalizeNodePresentation(obj.presentation)
+    if (presentation) obj.presentation = presentation
+    else delete obj.presentation
+  }
   const systemPlainFields = ['systemKind', 'environment', 'sourceKind', 'provider', 'externalRef']
   const hasTrustZone = Object.hasOwn(obj, 'trustZone')
   if (hasTrustZone || systemPlainFields.some((key) => Object.hasOwn(obj, key))) {

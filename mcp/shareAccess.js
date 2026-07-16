@@ -457,6 +457,8 @@ function sanitizeNode(node) {
   delete storedData.systemPartRuntime
   delete storedData.canRunSystemChecks
   delete storedData.onCheckSystemPart
+  delete storedData.layerPortals
+  delete storedData.onOpenLayerPortal
   let data = sanitizeTextFields({ ...storedData })
   if (Array.isArray(data.parts)) {
     data.parts = data.parts.map((part) => ({ ...part, text: typeof part.text === 'string' ? sanitizeHtml(part.text) : part.text }))
@@ -513,8 +515,9 @@ export function applySharedCanvasUpdate(access, submittedNodes, submittedEdges, 
     }
     if (!mayEditStructure(original) && (
       submitted.type !== original.type || submitted.parentId !== original.parentId ||
-      !same(submitted.position, original.position)
-    )) throw new Error('노드 초대에서는 대상 노드의 내용과 크기만 수정할 수 있습니다.')
+      !same(submitted.position, original.position) ||
+      !same(submitted.data?.presentation ?? null, original.data?.presentation ?? null)
+    )) throw new Error('노드 초대에서는 대상 노드의 내용과 크기만 수정할 수 있으며 위치·그룹·층은 바꿀 수 없습니다.')
     if (!permission.canEditCanvas && mayEditStructure(original) && !permissionCanCreateInGroup(permission, submitted.parentId)) {
       throw new Error('그룹 초대에서는 노드를 초대된 그룹 밖으로 옮길 수 없습니다.')
     }
