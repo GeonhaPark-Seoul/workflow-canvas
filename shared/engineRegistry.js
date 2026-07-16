@@ -9,13 +9,13 @@ function deepFreeze(value, seen = new WeakSet()) {
   return Object.freeze(value)
 }
 
-const topLevel = ({ id, name, description, inputs, outputs, codeEvidence, testEvidence, compatibility, row, column }) => ({
+const topLevel = ({ id, name, description, inputs, outputs, codeEvidence, testEvidence, compatibility, row, column, technicalVersion = '0.1.0-alpha.0' }) => ({
   id,
   name,
   kind: 'engine',
   parentId: null,
   productVersion: WORKFLOW_CANVAS_PRODUCT_VERSION,
-  technicalVersion: '0.1.0-alpha.0',
+  technicalVersion,
   maturity: 'alpha',
   maintainerAgentId: null,
   description,
@@ -27,13 +27,13 @@ const topLevel = ({ id, name, description, inputs, outputs, codeEvidence, testEv
   display: { row, column, order: 0 },
 })
 
-const component = ({ id, parentId, name, kind, description, inputs, outputs, codeEvidence, testEvidence, compatibility = [], order }) => ({
+const component = ({ id, parentId, name, kind, description, inputs, outputs, codeEvidence, testEvidence, compatibility = [], order, technicalVersion = '0.1.0-alpha.0' }) => ({
   id,
   name,
   kind,
   parentId,
   productVersion: WORKFLOW_CANVAS_PRODUCT_VERSION,
-  technicalVersion: '0.1.0-alpha.0',
+  technicalVersion,
   maturity: kind === 'agent-skill' ? 'prototype' : 'alpha',
   maintainerAgentId: null,
   description,
@@ -186,9 +186,10 @@ export const WORKFLOW_ENGINE_REGISTRY = deepFreeze({
       description: '코드를 제품 영역과 하위 시스템으로 묶고 쉬운 설명과 개발자 근거를 함께 만듭니다.',
       inputs: ['Git 저장소 파일', '제품별 Source Profile'],
       outputs: ['Source Twin manifest', '계층형 코드 설명'],
-      codeEvidence: ['scripts/source-twin-scanner.mjs', 'scripts/source-twin-semantics.mjs', 'shared/sourceTwin.js'],
-      testEvidence: ['scripts/test-source-twin.mjs', 'scripts/test-local-connector-agent.mjs'],
-      compatibility: ['Source Twin Schema v1'],
+      codeEvidence: ['scripts/source-twin-scanner.mjs', 'scripts/source-twin-semantics.mjs', 'shared/sourceProfileContract.js', 'shared/sourceTwin.js'],
+      testEvidence: ['scripts/test-source-profiles.mjs', 'scripts/test-source-twin.mjs', 'scripts/test-local-connector-agent.mjs'],
+      compatibility: ['Source Twin Schema v1', 'Source Profile Contract v1'],
+      technicalVersion: '0.2.0-alpha.0',
       row: 0,
       column: 2,
     }),
@@ -201,21 +202,23 @@ export const WORKFLOW_ENGINE_REGISTRY = deepFreeze({
       inputs: ['허용된 저장소 파일'],
       outputs: ['본문이 제외된 코드 근거'],
       codeEvidence: ['scripts/source-twin-scanner.mjs'],
-      testEvidence: ['scripts/test-source-twin.mjs'],
-      compatibility: ['JavaScript AST', 'SQL declaration scan'],
+      testEvidence: ['scripts/test-source-profiles.mjs', 'scripts/test-source-twin.mjs'],
+      compatibility: ['JavaScript AST', 'SQL declaration scan', 'structure-only file discovery'],
+      technicalVersion: '0.2.0-alpha.0',
       order: 1,
     }),
     component({
       id: 'component-source-profile',
       parentId: 'engine-source-lens',
-      name: 'Source Semantics Profile',
+      name: 'Source Profile Registry',
       kind: 'manifest',
-      description: 'Workflow Canvas 코드의 제품 영역, 하위 시스템과 제품 역할을 선언합니다.',
-      inputs: ['파일·구조 근거'],
-      outputs: ['제품별 분류와 설명 규칙'],
-      codeEvidence: ['scripts/source-twin-semantics.mjs', 'shared/sourceTwinSemantics.js'],
-      testEvidence: ['scripts/test-source-twin.mjs'],
-      compatibility: ['Workflow Canvas Profile v1'],
+      description: '버전 계약에 따라 저장소에 맞는 제품 영역, 하위 시스템과 파일 역할 사전을 선택합니다.',
+      inputs: ['저장소 식별 근거', '버전이 있는 Source Profile'],
+      outputs: ['선택된 프로필', '제품별 분류와 설명 규칙'],
+      codeEvidence: ['shared/sourceProfileContract.js', 'scripts/source-profiles/index.mjs', 'scripts/source-profiles/workflow-canvas.mjs', 'scripts/source-profiles/fastapi-order-service.mjs'],
+      testEvidence: ['scripts/test-source-profiles.mjs'],
+      compatibility: ['Source Profile Contract v1', 'Workflow Canvas Profile 0.1.0', 'FastAPI reference Profile 0.1.0'],
+      technicalVersion: '0.2.0-alpha.0',
       order: 2,
     }),
 

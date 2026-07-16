@@ -21,7 +21,7 @@ const EXPLANATION_METHODS = new Set([
 ])
 const EXPLANATION_REFERENCE_KINDS = new Set([
   'source', 'symbol', 'api', 'db-table', 'db-function', 'env',
-  'security', 'dependency', 'deployment', 'script',
+  'security', 'dependency', 'deployment', 'script', 'profile',
 ])
 
 function plainObject(value) {
@@ -71,6 +71,7 @@ function explanationReference(value) {
   if (['db-table', 'db-function'].includes(kind) && !/^[A-Za-z_][A-Za-z0-9_]{0,179}$/.test(target)) return ''
   if (kind === 'env' && !/^[A-Z][A-Z0-9_]{0,179}$/.test(target)) return ''
   if (kind === 'security' && !/^[a-z0-9-]{1,120}$/.test(target)) return ''
+  if (kind === 'profile' && !/^[a-z0-9][a-z0-9.-]{1,119}@(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?$/.test(target)) return ''
   if (['dependency', 'deployment', 'script'].includes(kind) && !/^[A-Za-z0-9@_./:-]{1,240}$/.test(target)) return ''
   if (kind === 'dependency' && (target.startsWith('.') || target.split('/').includes('..'))) return ''
   return `${kind}:${target}`
@@ -83,6 +84,35 @@ function explanationBasis(value) {
     .map(explanationReference)
     .filter(Boolean))]
   return refs.length ? { method: value.method, refs } : undefined
+}
+
+function normalizeSourceProfileDescriptor(value) {
+  if (!plainObject(value)) return null
+  if (value.contractVersion !== 1) return null
+  const id = text(value.id, 120)
+  const version = text(value.version, 80)
+  const sourceId = text(value.sourceId, 180)
+  if (!/^[a-z0-9][a-z0-9.-]{1,119}$/.test(id)) return null
+  if (!/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?$/.test(version)) return null
+  if (!/^[A-Za-z0-9][A-Za-z0-9:._-]{1,179}$/.test(sourceId)) return null
+  const languageSupport = (Array.isArray(value.languageSupport) ? value.languageSupport : [])
+    .slice(0, 30)
+    .flatMap((item) => {
+      if (!plainObject(item)) return []
+      const language = text(item.language, 80)
+      const level = ['parsed', 'structure-only', 'unsupported'].includes(item.level) ? item.level : ''
+      return language && level ? [{ language, level, note: text(item.note, 300) }] : []
+    })
+  return {
+    contractVersion: 1,
+    id,
+    version,
+    sourceId,
+    label: text(value.label, 180) || id,
+    capabilities: stringList(value.capabilities, 80, 120),
+    languageSupport,
+    matchEvidence: stringList(value.matchEvidence, 20, 500),
+  }
 }
 
 function shellSingleQuote(value) {
@@ -158,6 +188,8 @@ function sourceEntity(value) {
     technicalSummary: text(value.technicalSummary, 400),
     tags: stringList(value.tags, 40, 120),
   }
+  const explanationFingerprint = text(value.explanationFingerprint, 128)
+  if (SAFE_FINGERPRINT.test(explanationFingerprint)) normalized.explanationFingerprint = explanationFingerprint
   for (const key of ['path', 'layer', 'language', 'parentId', 'area', 'subsystem']) {
     const next = text(value[key], key === 'path' ? 500 : 180)
     if (next) normalized[key] = next
@@ -188,11 +220,12 @@ export function normalizeLocalSourceManifest(value) {
   const repositoryUrl = /^https:\/\/github\.com\/[\w.-]+\/[\w.-]+$/i.test(source.repositoryUrl ?? '')
     ? source.repositoryUrl
     : ''
+  const sourceProfile = normalizeSourceProfileDescriptor(source.profile)
   const perspective = (predicate) => entities.filter(predicate).map((entity) => entity.id)
   const perspectives = {
     all: entities.map((entity) => entity.id),
     functionality: perspective((entity) => ['api-route', 'function'].includes(entity.kind)
-      || ['frontend', 'api', 'mcp', 'shared'].includes(entity.layer)),
+      || ['frontend', 'api', 'backend', 'mcp', 'shared'].includes(entity.layer)),
     code: perspective((entity) => ['file', 'function', 'dependency', 'npm-script'].includes(entity.kind)),
     database: perspective((entity) => entity.layer === 'database'
       || ['db-table', 'db-function', 'rls-policy'].includes(entity.kind)
@@ -239,6 +272,7 @@ export function normalizeLocalSourceManifest(value) {
       label: text(source.label, 180) || '로컬 프로젝트 저장소',
       repositoryUrl,
       defaultBranch: text(source.defaultBranch, 120) || 'main',
+      ...(sourceProfile ? { profile: sourceProfile } : {}),
     },
     areas,
     subsystems,
@@ -248,6 +282,7 @@ export function normalizeLocalSourceManifest(value) {
       functions: entities.filter((entity) => entity.kind === 'function').length,
       apiRoutes: entities.filter((entity) => entity.kind === 'api-route').length,
       dbTables: entities.filter((entity) => entity.kind === 'db-table').length,
+      structureOnlyFiles: entities.filter((entity) => entity.kind === 'file' && entity.details?.parseStatus === 'structure-only').length,
       entities: entities.length,
       subsystems: subsystems.length,
     },
@@ -255,8 +290,9 @@ export function normalizeLocalSourceManifest(value) {
     relations: [],
     changeSet: {
       initialBaseline: false,
-      summary: { added: 0, changed: 0, removed: 0 },
-      added: [], changed: [], removed: [],
+      summary: { added: 0, changed: 0, explanationChanged: 0, removed: 0, paths: 0, explanationPaths: 0 },
+      added: [], changed: [], explanationChanged: [], removed: [],
+      changedPaths: [], explanationChangedPaths: [], profileChanged: null,
     },
   }
 }
@@ -270,7 +306,10 @@ export function compareLocalAndDeployedManifests(deployed, local) {
   for (const [id, entity] of localById) {
     const previous = deployedById.get(id)
     if (!previous) added.push(id)
-    else if (previous.fingerprint !== entity.fingerprint) changed.push(id)
+    else if (
+      previous.fingerprint !== entity.fingerprint
+      || (previous.explanationFingerprint ?? '') !== (entity.explanationFingerprint ?? '')
+    ) changed.push(id)
   }
   for (const id of deployedById.keys()) {
     if (!localById.has(id)) removed.push(id)

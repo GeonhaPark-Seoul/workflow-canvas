@@ -202,6 +202,8 @@ const workflowCanvasSemanticManifest = buildSourceTwinManifest(new Map([
   ['shared/systemRuntime.js', 'export function normalizeSystemRuntimeResult() { return null }\n'],
   ['shared/workflowSystemTwinAdapter.js', 'export function inspectWorkflowSystemTwin() { return null }\n'],
 ]))
+assert.equal(workflowCanvasSemanticManifest.source.profile.id, 'workflow-canvas')
+assert.equal(workflowCanvasSemanticManifest.source.profile.version, '0.1.0')
 const appSemanticEntity = workflowCanvasSemanticManifest.entities.find((entity) => entity.id === 'file:src/App.jsx')
 const sourcePanelSemanticEntity = workflowCanvasSemanticManifest.entities.find((entity) => entity.id === 'file:src/components/SourceTwinPanel.jsx')
 assert.equal(appSemanticEntity.area, 'canvas-interface')
@@ -253,6 +255,8 @@ const localManifest = normalizeLocalSourceManifest({
 })
 assert.ok(localManifest)
 assert.equal(localManifest.source.label, 'actual-local-repo')
+assert.equal(localManifest.source.profile.id, changedManifest.source.profile.id)
+assert.equal(localManifest.source.profile.version, changedManifest.source.profile.version)
 assert.doesNotMatch(JSON.stringify(localManifest), /source-body-must-not-survive/)
 assert.doesNotMatch(JSON.stringify(localManifest), /\/Users\/private|\.\.\/private-package|literal-secret/)
 assert.ok(localManifest.perspectives.code.length > 0)

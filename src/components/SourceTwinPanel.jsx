@@ -47,6 +47,7 @@ const KIND_LABELS = {
 }
 const LAYER_LABELS = {
   frontend: '사용자 화면', api: '웹 API', mcp: 'AI 연결', shared: '공통 규칙',
+  backend: '서버 애플리케이션',
   database: '데이터베이스', test: '검증', deployment: '배포', documentation: '문서',
   security: '보안', code: '외부 의존',
 }
@@ -351,17 +352,32 @@ function ChangesView({ current }) {
   const repositoryUrl = /^https:\/\/github\.com\/[\w.-]+\/[\w.-]+$/i.test(manifest.source?.repositoryUrl ?? '')
     ? manifest.source.repositoryUrl
     : ''
+  const changeCount = changes.summary.added
+    + changes.summary.changed
+    + changes.summary.removed
+    + (changes.summary.explanationChanged ?? 0)
+  const beforeProfile = changes.profileChanged?.before
+  const afterProfile = changes.profileChanged?.after
   return (
     <div className="source-twin-change-list">
       {repositoryUrl && <a className="source-twin-repository-link" href={repositoryUrl} target="_blank" rel="noreferrer">GitHub 저장소에서 전체 코드 열기 ↗</a>}
       {changes.initialBaseline ? (
         <div className="source-twin-baseline">첫 소스 기준선입니다. 다음 커밋부터 변경분만 표시됩니다.</div>
-      ) : changes.summary.added + changes.summary.changed + changes.summary.removed === 0 ? (
+      ) : changeCount === 0 ? (
         <div className="twin-review-empty">직전 manifest 이후 소스 변경 없음</div>
       ) : (
         <>
+          {changes.profileChanged && (
+            <div className="source-twin-baseline">
+              코드 설명 규칙이 {beforeProfile ? `${beforeProfile.id} v${beforeProfile.version}` : '이전 미기록 상태'}에서 {afterProfile.id} v{afterProfile.version}로 바뀌었습니다.
+              {' '}코드 본문 변경과 구분해 설명 {(changes.summary.explanationChanged ?? 0).toLocaleString()}개를 다시 계산했습니다.
+            </div>
+          )}
           <ChangeEntityList title="추가" ids={changes.added} entityMap={entityMap} manifest={manifest} commitSha={current.deployment?.commitSha} />
           <ChangeEntityList title="변경" ids={changes.changed} entityMap={entityMap} manifest={manifest} commitSha={current.deployment?.commitSha} />
+          {!changes.profileChanged && (
+            <ChangeEntityList title="설명 변경" ids={changes.explanationChanged} entityMap={entityMap} manifest={manifest} commitSha={current.deployment?.commitSha} />
+          )}
           <ChangeEntityList title="삭제" ids={changes.removed} entityMap={entityMap} manifest={manifest} commitSha={current.deployment?.commitSha} />
         </>
       )}
@@ -969,7 +985,17 @@ export default function SourceTwinPanel({
             <IconButton title={side === 'right' ? '코드 트리 창을 왼쪽으로 이동' : '코드 트리 창을 오른쪽으로 이동'} onClick={() => onSideChange(side === 'right' ? 'left' : 'right')}>{side === 'right' ? '←' : '→'}</IconButton>
             <IconButton title="코드 트리 닫기" onClick={onClose}>✕</IconButton>
           </div>
-          <div className="twin-review-source-name">{entry?.actionLabel ?? manifest?.source?.label ?? 'Workflow Canvas 소스 코드'}</div>
+          <div className="twin-review-source-name">
+            <span>{entry?.actionLabel ?? manifest?.source?.label ?? 'Workflow Canvas 소스 코드'}</span>
+            {manifest?.source?.profile && (
+              <span
+                className="source-twin-profile-badge"
+                title={`이 저장소에 선택된 코드 설명 규칙: ${manifest.source.profile.label} ${manifest.source.profile.version}`}
+              >
+                {manifest.source.profile.id} v{manifest.source.profile.version}
+              </span>
+            )}
+          </div>
           {entry?.description && <p className="source-twin-context-description">{entry.description}</p>}
           <code className="twin-review-snapshot" title="소스 manifest ID">{manifest?.id ?? ''}</code>
         </header>
@@ -978,6 +1004,11 @@ export default function SourceTwinPanel({
             <span>함수 <strong>{manifest.summary.functions}</strong></span>
             <span>API <strong>{manifest.summary.apiRoutes}</strong></span>
             <span>DB <strong>{manifest.summary.dbTables}</strong></span>
+            {manifest.summary.structureOnlyFiles > 0 && (
+              <span title="파일 역할과 위치만 확인했으며 함수·호출 구조는 아직 분석하지 않았습니다.">
+                구조만 <strong>{manifest.summary.structureOnlyFiles}</strong>
+              </span>
+            )}
             <span>커밋 <strong>{current.deployment?.commitSha?.slice(0, 7) || 'local'}</strong></span>
           </div>
         )}

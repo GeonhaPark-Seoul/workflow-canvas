@@ -3,8 +3,10 @@ import { execFileSync } from 'node:child_process'
 import { existsSync, lstatSync, readFileSync, readdirSync, realpathSync } from 'node:fs'
 import path from 'node:path'
 import { parse } from '@babel/parser'
-import { SOURCE_TWIN_SCHEMA_VERSION, SOURCE_TWIN_SOURCE_ID } from '../shared/sourceTwin.js'
+import { SOURCE_TWIN_SCHEMA_VERSION } from '../shared/sourceTwin.js'
+import { sourceProfileDescriptor } from '../shared/sourceProfileContract.js'
 import { sourceTwinAreaCatalog, sourceTwinSubsystemCatalog } from '../shared/sourceTwinSemantics.js'
+import { DEFAULT_SOURCE_PROFILES, registeredSourceProfile } from './source-profiles/index.mjs'
 import {
   areaForSourceResource,
   explainDatabaseResource,
@@ -19,9 +21,12 @@ import {
 
 export const SOURCE_TWIN_MANIFEST_PATH = 'shared/sourceTwinManifest.js'
 
-const INCLUDED_ROOT_FILES = new Set(['README.md', 'index.html', 'package.json', 'vercel.json', 'vite.config.js'])
+const INCLUDED_ROOT_FILES = new Set([
+  'README.md', 'Dockerfile', 'index.html', 'package.json', 'pyproject.toml',
+  'requirements.txt', 'vercel.json', 'vite.config.js',
+])
 const EXCLUDED_FILES = new Set([SOURCE_TWIN_MANIFEST_PATH, 'shared/workflowSystemDiscoveryManifest.js'])
-const CODE_EXTENSIONS = ['.js', '.jsx', '.mjs']
+const JAVASCRIPT_EXTENSIONS = ['.js', '.jsx', '.mjs']
 const WRITE_METHODS = new Set(['insert', 'update', 'upsert', 'delete'])
 const DATABASE_IDENTIFIER_PATTERN = /^[a-zA-Z_][a-zA-Z0-9_]*$/
 const CREDENTIAL_PATTERN = /(?:KEY|TOKEN|SECRET|PASSWORD|CREDENTIAL)/i
@@ -30,9 +35,10 @@ const MAX_SOURCE_TOTAL_BYTES = 24 * 1024 * 1024
 
 function shouldInspect(relativePath) {
   if (EXCLUDED_FILES.has(relativePath)) return false
+  if (relativePath.startsWith('scripts/fixtures/')) return false
   if (INCLUDED_ROOT_FILES.has(relativePath)) return true
   if (/^[^/]+\.sql$/i.test(relativePath)) return true
-  return /^(api|mcp|scripts|shared|src)\/.*\.(css|js|jsx|mjs)$/i.test(relativePath)
+  return /^(api|app|mcp|scripts|shared|src|tests)\/.*\.(css|js|jsx|mjs|py)$/i.test(relativePath)
 }
 
 function normalized(value) {
@@ -76,6 +82,11 @@ function layerForFile(relativePath) {
   if (/^(scripts\/test-|.*(?:\.test|\.spec)\.)/i.test(relativePath)) return 'test'
   if (relativePath.startsWith('api/')) return 'api'
   if (relativePath.startsWith('mcp/')) return 'mcp'
+  if (/^(app|tests)\//.test(relativePath) && /\.py$/i.test(relativePath)) {
+    if (/^tests\//.test(relativePath)) return 'test'
+    if (/^app\/(?:api\/|main\.py$)/.test(relativePath)) return 'api'
+    return 'backend'
+  }
   if (relativePath.startsWith('shared/')) return 'shared'
   if (relativePath.startsWith('src/')) return 'frontend'
   if (['package.json', 'vercel.json', 'vite.config.js'].includes(relativePath)) return 'deployment'
@@ -88,8 +99,13 @@ function languageForFile(relativePath) {
   if (/\.html$/i.test(relativePath)) return 'html'
   if (/\.jsx$/i.test(relativePath)) return 'jsx'
   if (/\.m?js$/i.test(relativePath)) return 'javascript'
+  if (/\.py$/i.test(relativePath)) return 'python'
   if (/\.json$/i.test(relativePath)) return 'json'
   return 'markdown'
+}
+
+function analysisLevelForLanguage(profile, language) {
+  return profile?.languageSupport?.find((item) => item.language === language)?.level ?? 'unsupported'
 }
 
 function nodeName(node) {
@@ -259,14 +275,24 @@ function parseSql(content) {
 function resolveLocalImport(relativePath, source, filePaths) {
   if (!source.startsWith('.')) return ''
   const base = path.posix.normalize(path.posix.join(path.posix.dirname(relativePath), source))
-  for (const candidate of [base, ...CODE_EXTENSIONS.map((ext) => `${base}${ext}`), ...CODE_EXTENSIONS.map((ext) => `${base}/index${ext}`)]) {
+  for (const candidate of [base, ...JAVASCRIPT_EXTENSIONS.map((ext) => `${base}${ext}`), ...JAVASCRIPT_EXTENSIONS.map((ext) => `${base}/index${ext}`)]) {
     if (filePaths.has(candidate)) return candidate
   }
   return ''
 }
 
 function entity(id, kind, label, fingerprint, fields = {}) {
-  return { id, kind, label, fingerprint, ...fields }
+  const explanationFingerprint = fields.summary || fields.userImpact || fields.area || fields.subsystem
+    ? semanticHash({
+        area: fields.area ?? '',
+        subsystem: fields.subsystem ?? '',
+        summary: fields.summary ?? '',
+        userImpact: fields.userImpact ?? '',
+        technicalSummary: fields.technicalSummary ?? '',
+        explanationBasis: fields.explanationBasis ?? null,
+      })
+    : ''
+  return { id, kind, label, fingerprint, ...(explanationFingerprint ? { explanationFingerprint } : {}), ...fields }
 }
 
 function sourceEvidenceRef(relativePath, lineStart = 1, lineEnd = lineStart) {
@@ -327,18 +353,36 @@ export function readSourceRepositoryMetadata(root) {
   return { repositoryUrl: resolvedRepositoryUrl, defaultBranch }
 }
 
-export function buildSourceTwinManifest(filesInput, { previous = null, repository = {} } = {}) {
+export function buildSourceTwinManifest(filesInput, {
+  previous = null,
+  repository = {},
+  sourceProfiles = DEFAULT_SOURCE_PROFILES,
+} = {}) {
   const files = filesInput instanceof Map ? filesInput : new Map(Object.entries(filesInput ?? {}))
   const project = sourceTwinProjectIdentity(files)
+  const profileResolution = registeredSourceProfile({ project, files }, sourceProfiles)
+  const profile = profileResolution.profile
+  const profileInfo = sourceProfileDescriptor(profile, profileResolution.matchEvidence)
+  const projectLabel = profile.match.fallback
+    ? (project.label || profile.projectLabel || '소프트웨어')
+    : (profile.projectLabel || project.label || '소프트웨어')
   const filePaths = new Set(files.keys())
   const records = []
   for (const [relativePath, rawContent] of [...files.entries()].sort(([left], [right]) => compareSourceTwinText(left, right))) {
     const content = normalized(rawContent)
     const layer = layerForFile(relativePath)
     const language = languageForFile(relativePath)
-    const parsed = CODE_EXTENSIONS.includes(path.posix.extname(relativePath))
+    const declaredAnalysisLevel = analysisLevelForLanguage(profile, language)
+    const parserAvailable = JAVASCRIPT_EXTENSIONS.includes(path.posix.extname(relativePath)) || language === 'sql'
+    if (declaredAnalysisLevel === 'parsed' && !parserAvailable) {
+      throw new Error(`Source Profile ${profile.id}@${profile.version}이 ${language} 분석을 선언했지만 등록된 parser가 없습니다.`)
+    }
+    const parsed = declaredAnalysisLevel === 'parsed' && JAVASCRIPT_EXTENSIONS.includes(path.posix.extname(relativePath))
       ? parseJavaScript(relativePath, content)
-      : language === 'sql' ? parseSql(content) : {}
+      : declaredAnalysisLevel === 'parsed' && language === 'sql' ? parseSql(content) : {}
+    const analysisStatus = declaredAnalysisLevel === 'parsed'
+      ? (parsed.parseError ? 'failed' : 'parsed')
+      : declaredAnalysisLevel
     records.push({
       path: relativePath,
       content,
@@ -360,11 +404,12 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
       env: parsed.env ?? [],
       securitySignals: parsed.securitySignals ?? [],
       parseError: parsed.parseError ?? '',
+      analysisStatus,
     })
   }
   for (const record of records) {
-    record.explanation = explainSourceFile(record, project)
-    record.subsystem = sourceTwinSubsystemForRecord(record, project, record.explanation.area)
+    record.explanation = explainSourceFile(record, project, profile)
+    record.subsystem = sourceTwinSubsystemForRecord(record, project, record.explanation.area, profile)
   }
 
   const entities = []
@@ -404,6 +449,7 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
       technicalSummary,
       explanationBasis: explanationBasis(record.explanation.explanationMethod, [
         sourceEvidenceRef(record.path, 1, record.lineCount),
+        `profile:${profile.id}@${profile.version}`,
         ...record.apiRoutes.map((route) => `api:${route}`),
         ...unique(record.dbTables).map((table) => `db-table:${table}`),
         ...unique(record.dbFunctions).map((name) => `db-function:${name}`),
@@ -420,7 +466,7 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
         dbFunctions: unique(record.dbFunctions),
         environmentVariables: unique(record.env),
         securitySignals: unique(record.securitySignals),
-        parseStatus: record.parseError ? 'failed' : 'parsed',
+        parseStatus: record.analysisStatus,
       },
     }))
     for (const fn of record.functions) {
@@ -629,7 +675,7 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
   const entityFingerprintMap = Object.fromEntries(entities.map((item) => [item.id, item.fingerprint]))
   const perspective = (predicate) => entities.filter(predicate).map((item) => item.id)
   const perspectives = {
-    functionality: perspective((item) => ['api-route', 'function'].includes(item.kind) || ['frontend', 'api', 'mcp', 'shared'].includes(item.layer)),
+    functionality: perspective((item) => ['api-route', 'function'].includes(item.kind) || ['frontend', 'api', 'backend', 'mcp', 'shared'].includes(item.layer)),
     code: perspective((item) => ['file', 'function', 'dependency', 'npm-script'].includes(item.kind)),
     database: perspective((item) => item.layer === 'database'
       || ['db-table', 'db-function', 'rls-policy'].includes(item.kind)
@@ -647,28 +693,53 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
     security: semanticHash(perspectives.security.map((id) => [id, entityFingerprintMap[id]])),
     deployment: semanticHash(perspectives.deployment.map((id) => [id, entityFingerprintMap[id]])),
   }
-  const id = `source-twin-v1-${semanticHash({ entities: entityFingerprintMap, relations }, 12)}`
+  const explanationFingerprintMap = Object.fromEntries(entities.map((item) => [item.id, item.explanationFingerprint ?? '']))
+  fingerprints.explanations = semanticHash({ profile: profileInfo, entities: explanationFingerprintMap })
+  const id = `source-twin-v1-${semanticHash({
+    profile: profileInfo,
+    entities: entityFingerprintMap,
+    explanations: explanationFingerprintMap,
+    relations,
+  }, 12)}`
   const previousMap = new Map((previous?.entities ?? []).map((item) => [item.id, item]))
   const currentMap = new Map(entities.map((item) => [item.id, item]))
   const added = entities.filter((item) => !previousMap.has(item.id)).map((item) => item.id)
-  const changed = entities.filter((item) => previousMap.has(item.id) && previousMap.get(item.id).fingerprint !== item.fingerprint).map((item) => item.id)
+  const changed = entities.filter((item) => {
+    const prior = previousMap.get(item.id)
+    return prior && prior.fingerprint !== item.fingerprint
+  }).map((item) => item.id)
+  const explanationChanged = entities.filter((item) => {
+    const prior = previousMap.get(item.id)
+    return prior
+      && prior.fingerprint === item.fingerprint
+      && (prior.explanationFingerprint ?? '') !== (item.explanationFingerprint ?? '')
+  }).map((item) => item.id)
   const removed = [...previousMap.values()].filter((item) => !currentMap.has(item.id)).map((item) => item.id)
   const changedPaths = unique([...added, ...changed, ...removed].map((entityId) => (
     currentMap.get(entityId)?.path || previousMap.get(entityId)?.path
   )))
-  const areas = sourceTwinAreaCatalog(entities.map((item) => item.area))
-  const subsystems = sourceTwinSubsystemCatalog(entities.map((item) => item.subsystem))
+  const explanationChangedPaths = unique(explanationChanged.map((entityId) => currentMap.get(entityId)?.path))
+  const previousProfile = previous?.source?.profile ?? null
+  const profileChanged = previous?.id && semanticHash(previousProfile) !== semanticHash(profileInfo)
+    ? {
+        before: previousProfile ? { id: previousProfile.id ?? '', version: previousProfile.version ?? '' } : null,
+        after: { id: profileInfo.id, version: profileInfo.version },
+      }
+    : null
+  const areas = sourceTwinAreaCatalog(entities.map((item) => item.area), profile.areas)
+  const subsystems = sourceTwinSubsystemCatalog(entities.map((item) => item.subsystem), profile.subsystems)
   const manifest = {
     schemaVersion: SOURCE_TWIN_SCHEMA_VERSION,
     id,
     source: {
-      id: SOURCE_TWIN_SOURCE_ID,
-      label: `${project.label || '소프트웨어'} 소스 코드`,
+      id: profile.sourceId,
+      label: `${projectLabel} 소스 코드`,
       repositoryUrl: repository.repositoryUrl ?? '',
       defaultBranch: repository.defaultBranch ?? 'main',
       observationMode: 'build-time-ast',
       contentIncluded: false,
       credentialValuesIncluded: false,
+      profile: profileInfo,
     },
     areas,
     subsystems,
@@ -692,15 +763,26 @@ export function buildSourceTwinManifest(filesInput, { previous = null, repositor
       deploymentEntities: perspectives.deployment.length,
       securityEntities: perspectives.security.length,
       parseFailures: records.filter((record) => record.parseError).length,
+      structureOnlyFiles: records.filter((record) => record.analysisStatus === 'structure-only').length,
     },
     changeSet: {
       baseManifestId: previous?.id ?? null,
       initialBaseline: !previous?.id,
       added: unique(added),
       changed: unique(changed),
+      explanationChanged: unique(explanationChanged),
       removed: unique(removed),
       changedPaths,
-      summary: { added: added.length, changed: changed.length, removed: removed.length, paths: changedPaths.length },
+      explanationChangedPaths,
+      profileChanged,
+      summary: {
+        added: added.length,
+        changed: changed.length,
+        explanationChanged: explanationChanged.length,
+        removed: removed.length,
+        paths: changedPaths.length,
+        explanationPaths: explanationChangedPaths.length,
+      },
     },
   }
   return manifest

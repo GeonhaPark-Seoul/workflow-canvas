@@ -153,11 +153,12 @@ The source-code twin now uses deterministic explanations before active AI integr
 - local and GitHub repository views share explicit easy and developer display modes
 - technical counts, paths, line ranges, API routes, DB references, and security signals remain available as developer facts
 - product-area and subsystem classification groups functionality before showing individual files and functions
-- the Workflow Canvas semantic profile contains product-specific roles while the scanner keeps a generic evidence-based fallback for a different repository
+- Source Profile Contract v1 keeps Workflow Canvas-specific roles outside the common scanner and selects a versioned product profile from deterministic repository evidence
+- a FastAPI order-service reference profile validates different product areas and subsystems at file level while honestly marking Python as `structure-only`
 - each entity records the explanation rule plus bounded relative source-range and structural references
 - local connector payloads preserve explanations, classifications, and allowlisted evidence while excluding source bodies, absolute paths, and credential values
 
-This is the deterministic explanation baseline, not the completed semantic engine. A later version must split evidence per sentence, validate a second software stack, support additional languages, measure fallback quality, and persist user audience preferences. AI can improve wording only after the user grants the necessary source scope; its output remains an explanation artifact rather than verified system truth.
+This is the deterministic explanation baseline, not the completed semantic engine. A later version must split evidence per sentence, validate parsed evidence and runtime integration on a real second software stack, support additional languages, measure fallback quality, and persist user audience preferences. AI can improve wording only after the user grants the necessary source scope; its output remains an explanation artifact rather than verified system truth.
 
 ### Future manipulable code twin
 
@@ -317,18 +318,18 @@ The future AI does not replace this helper or receive direct Mac access. Direct 
 
 ### Phase C - Extract the engine core
 
-Current progress: C1 establishes adapter contract v1 and a provider-neutral registry. C2 adds deterministic normalization, reference and trust-boundary validation, and a common reconciliation engine. C3 upgrades the canonical model to `TwinBuild v3`, adds sequential v0-to-v1-to-v2-to-v3 migration, separates data classes, policies, observations, events, threats, and controls, and preserves explicit logical-component metadata. It also establishes the universal operation lifecycle for direct UI, deterministic automation, and future AI initiators. Workflow Canvas is normalized as 54 entities, 9 parts, 56 relations, 3 data classes, 3 policies, 2 executable operations, 2 observations, 3 controls, and one threat. Twenty-five entities and eighteen containment relations form the registry-backed product-engine logical layer; they are never promoted to LIVE resources. Git synchronization and append-only system snapshots bind their signed plans to canonical operation-definition fingerprints. A second order-service fixture still reaches zero findings through staged common proposals while manual layout, notes, extra parts, and review decisions survive rescans.
+Current progress: C1 establishes adapter contract v1 and a provider-neutral registry. C2 adds deterministic normalization, reference and trust-boundary validation, and a common reconciliation engine. C3 upgrades the canonical model to `TwinBuild v3`, adds sequential v0-to-v1-to-v2-to-v3 migration, separates data classes, policies, observations, events, threats, and controls, and preserves explicit logical-component metadata. It also establishes the universal operation lifecycle for direct UI, deterministic automation, and future AI initiators. Workflow Canvas is normalized as 54 entities, 9 parts, 56 relations, 3 data classes, 3 policies, 2 executable operations, 2 observations, 3 controls, and one threat. Twenty-five entities and eighteen containment relations form the registry-backed product-engine logical layer; they are never promoted to LIVE resources. Git synchronization and append-only system snapshots bind their signed plans to canonical operation-definition fingerprints. A second order-service fixture still reaches zero findings through staged common proposals while manual layout, notes, extra parts, and review decisions survive rescans. C4 adds Source Profile Contract v1: Workflow Canvas semantics now live outside the common scanner, and a FastAPI order-service profile proves a second product vocabulary without pretending that Python functions were parsed.
 
 The future orchestration map's human approval, execution connector, test/review gate, runtime status/log, audit, stop/retry, and recovery concepts now share this operation contract. Conversation/context/planning and agent assignment remain deferred; when added, they cannot bypass the contract.
 
-- move Workflow Canvas-specific knowledge behind the first adapter
+- keep Workflow Canvas-specific source meaning behind its versioned Source Profile
 - create versioned canonical records and migrations
 - add golden fixture repositories and expected twin snapshots
 - prove manual layout and review decisions survive rescans
 
 ### Phase D - Onboard a second software stack
 
-Use a materially different stack, such as Python/FastAPI + PostgreSQL + container deployment. The second adapter is the test that the engine is genuinely general rather than merely renamed Workflow Canvas code.
+Use a materially different stack, such as Python/FastAPI + PostgreSQL + container deployment. The file-level FastAPI reference profile is complete, but it is only the first compatibility gate. The phase completes after an approved Python parser produces tested structural evidence and a real adapter discovers database, deployment, trust boundaries, runtime state, and bounded operations without changing the common engine or canvas UI.
 
 ### Phase E - AI-assisted onboarding
 

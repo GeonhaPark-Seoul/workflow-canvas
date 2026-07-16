@@ -118,6 +118,7 @@ const SUBSYSTEM_BY_ID = new Map(SOURCE_TWIN_SUBSYSTEM_DEFINITIONS.map((item, ind
 const FALLBACK_AREA_BY_LAYER = Object.freeze({
   frontend: 'canvas-interface',
   api: 'data-storage-sync',
+  backend: 'project-foundation',
   mcp: 'ai-integration',
   shared: 'project-foundation',
   database: 'data-storage-sync',
@@ -196,18 +197,30 @@ export function sourceTwinSubsystemDefinition(subsystemId, manifest = null) {
   }
 }
 
-export function sourceTwinAreaCatalog(areaIds = []) {
+export function sourceTwinAreaCatalog(areaIds = [], customDefinitions = []) {
   const selected = new Set(areaIds.filter(Boolean))
-  return SOURCE_TWIN_AREA_DEFINITIONS
+  const definitions = [
+    ...SOURCE_TWIN_AREA_DEFINITIONS,
+    ...(Array.isArray(customDefinitions) ? customDefinitions : []).filter((item) => (
+      item?.id && !AREA_BY_ID.has(item.id)
+    )),
+  ]
+  return definitions
     .filter((item) => selected.has(item.id))
-    .map((item, order) => ({ ...item, order }))
+    .map((item, order) => ({ ...item, order: Number.isInteger(item.order) ? item.order : order }))
 }
 
-export function sourceTwinSubsystemCatalog(subsystemIds = []) {
+export function sourceTwinSubsystemCatalog(subsystemIds = [], customDefinitions = []) {
   const selected = new Set(subsystemIds.filter(Boolean))
-  return SOURCE_TWIN_SUBSYSTEM_DEFINITIONS
+  const definitions = [
+    ...SOURCE_TWIN_SUBSYSTEM_DEFINITIONS,
+    ...(Array.isArray(customDefinitions) ? customDefinitions : []).filter((item) => (
+      item?.id && !SUBSYSTEM_BY_ID.has(item.id)
+    )),
+  ]
+  return definitions
     .filter((item) => selected.has(item.id))
-    .map((item, order) => ({ ...item, order }))
+    .map((item, order) => ({ ...item, order: Number.isInteger(item.order) ? item.order : order }))
 }
 
 export function groupSourceTwinEntitiesByArea(manifest, entities = []) {

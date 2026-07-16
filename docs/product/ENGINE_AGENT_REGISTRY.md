@@ -17,7 +17,7 @@
 |---|---|---:|---|
 | `engine-twin-core` | Twin Core | 0.1.0-alpha.0 | Engine Schema v2, TwinBuild v3, Adapter Contract v1 |
 | `engine-create-graph` | Create Graph | 0.1.0-alpha.0 | MCP `create_graph` v1 |
-| `engine-source-lens` | Source Lens | 0.1.0-alpha.0 | Source Twin Schema v1 |
+| `engine-source-lens` | Source Lens | 0.2.0-alpha.0 | Source Twin Schema v1, Source Profile Contract v1 |
 | `engine-trust-map` | Trust Map | 0.1.0-alpha.0 | Trust Topology Schema v1 |
 | `engine-liveops` | LiveOps | 0.1.0-alpha.0 | System Runtime Schema v3 |
 | `engine-safe-operations` | Safe Operations | 0.1.0-alpha.0 | Operation Contract v1 |
@@ -35,6 +35,15 @@
 | Graph Write Guardrails | Hard Guardrail | 입력 한도, 권한, 정제, 중복과 저장 충돌 강제 |
 
 이 네 요소를 사용자에게 별도 제품 네 개처럼 판매하지 않는다. 사용자 경험은 `Create Graph` 엔진 하나이며 내부 책임만 분리한다.
+
+## Source Lens 내부 예시
+
+| 표시 이름 | 내부 종류 | 책임 |
+|---|---|---|
+| Source Scanner | Engine | 지원되는 parser와 파일 구조에서 코드 근거 추출 |
+| Source Profile Registry | Manifest | 저장소와 일치하는 버전형 제품 의미 사전 선택 |
+
+Workflow Canvas 프로필과 FastAPI 참조 프로필은 Source Lens를 별도 제품으로 복제하지 않는다. 같은 스캐너 계약에 연결되는 제품별 manifest이며, 실제 DB·배포·운영 조작 연결은 별도 Twin Adapter의 책임이다.
 
 ## 코드 경계 원칙
 

@@ -1178,6 +1178,29 @@ body[data-theme='light'] .react-flow__node:hover .canvas-group-frame {
 .source-twin-header .twin-review-snapshot {
   grid-column: 1 / -1;
 }
+.source-twin-header .twin-review-source-name {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.source-twin-header .twin-review-source-name > span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.source-twin-profile-badge {
+  flex: 0 0 auto;
+  max-width: min(210px, 45%);
+  overflow: hidden;
+  border: 1px solid #06b6d44d;
+  border-radius: 4px;
+  padding: 2px 5px;
+  color: #67e8f9;
+  background: #06b6d412;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 9px;
+}
 .source-twin-header .twin-review-snapshot {
   max-width: 100%;
   text-align: left;

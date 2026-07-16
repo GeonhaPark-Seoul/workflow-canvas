@@ -25,10 +25,23 @@
 - 현재 JavaScript AST·SQL 구조 분석, 제품 영역·하위 시스템 분류와 근거 기반 설명을 기준 기능으로 기록했다.
 - Workflow Canvas Source Profile 분리와 두 번째 언어 검증은 다음 호환성 작업으로 남아 있다.
 
+## Source Lens 0.2.0-alpha.0 - 2026-07-16
+
+- Source Profile Contract v1과 결정적 registry를 추가하고 Workflow Canvas 전용 역할·분류를 공통 스캐너 밖으로 분리했다.
+- 두 번째 FastAPI 주문 서비스 참조 프로필로 제품 영역·하위 시스템·쉬운 설명을 검증했다.
+- Python은 파일 구조만 확인하며 함수·호출을 분석하지 않았음을 manifest와 화면에 명시한다.
+- 프로필 버전이나 설명만 바뀐 경우도 별도 설명 fingerprint와 상태 변경으로 감지한다.
+
 ## Source Scanner 0.1.0-alpha.0 - 2026-07-16
 
 - Babel AST 기반 JavaScript 분석과 제한된 SQL 선언 분석을 첫 엔진 버전으로 기록했다.
 - 새 언어는 검증된 Parser 후보를 먼저 평가한 뒤 추가한다.
+
+## Source Scanner 0.2.0-alpha.0 - 2026-07-16
+
+- 제품별 조건 대신 선택된 Source Profile의 언어 지원·분류·파일 역할 계약을 사용한다.
+- JavaScript/JSX·SQL 분석과 `structure-only`·`unsupported` 상태를 구별한다.
+- 새 parser 의존성은 추가하지 않았다.
 
 ## Trust Map 0.1.0-alpha.0 - 2026-07-16
 

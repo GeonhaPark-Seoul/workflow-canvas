@@ -73,6 +73,7 @@ function explanationReference(value) {
     dependency: `외부 라이브러리 ${target}`,
     deployment: `배포 대상 ${target}`,
     script: `프로젝트 명령 ${target}`,
+    profile: `Source Profile ${target}`,
   }
   return { kind, ref, label: labels[kind] ?? target }
 }
@@ -141,6 +142,7 @@ export function sourceTwinCodeUrl(manifest, entity, commitSha = '') {
 function compactEntityFingerprints(manifest) {
   return Object.fromEntries((manifest?.entities ?? []).map((entity) => [entity.id, {
     fingerprint: entity.fingerprint,
+    explanationFingerprint: entity.explanationFingerprint ?? '',
     kind: entity.kind,
     label: entity.label,
     path: entity.path ?? '',
@@ -237,7 +239,10 @@ function changedEntities(fromEntities = {}, toEntities = {}) {
   const removed = []
   for (const [id, entity] of Object.entries(toEntities)) {
     if (!fromEntities[id]) added.push(entity)
-    else if (fromEntities[id].fingerprint !== entity.fingerprint) changed.push(entity)
+    else if (
+      fromEntities[id].fingerprint !== entity.fingerprint
+      || (fromEntities[id].explanationFingerprint ?? '') !== (entity.explanationFingerprint ?? '')
+    ) changed.push(entity)
   }
   for (const [id, entity] of Object.entries(fromEntities)) {
     if (!toEntities[id]) removed.push(entity)
