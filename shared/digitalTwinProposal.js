@@ -5,6 +5,7 @@ import {
   normalizeSystemParts,
   validateSystemPartInput,
 } from './systemPartOntology.js'
+import { normalizeLogicalComponent } from './systemOntology.js'
 
 export const DIGITAL_TWIN_PROPOSAL_SCHEMA_VERSION = 1
 
@@ -123,6 +124,10 @@ export function digitalTwinProposalNodeIdentityFingerprint(value) {
   })
 }
 
+export function digitalTwinProposalLogicalComponentFingerprint(value) {
+  return digitalTwinReviewFingerprint(normalizeLogicalComponent(value))
+}
+
 function normalizeOperation(operation) {
   if (!plainObject(operation)) throw new DigitalTwinProposalError('INVALID_OPERATION', '수정안 작업 형식이 올바르지 않습니다.')
   if (operation.action === 'add_node') {
@@ -142,6 +147,21 @@ function normalizeOperation(operation) {
       targetNodeId: safeId(operation.targetNodeId, '트윈 연결 대상 노드'),
       expectedNodeFingerprint: safeId(operation.expectedNodeFingerprint, '기존 노드 정체성 지문'),
       binding,
+    }
+  }
+  if (operation.action === 'sync_logical_component') {
+    const logicalComponent = normalizeLogicalComponent(operation.logicalComponent)
+    if (!logicalComponent) {
+      throw new DigitalTwinProposalError('INVALID_LOGICAL_COMPONENT', '동기화할 엔진 계약이 올바르지 않습니다.')
+    }
+    return {
+      action: 'sync_logical_component',
+      label: safeText(operation.label, 180),
+      targetNodeId: safeId(operation.targetNodeId, '엔진 계약 대상 노드'),
+      expectedEntityKey: safeId(operation.expectedEntityKey, '엔진 계약 실체'),
+      expectedNodeFingerprint: safeId(operation.expectedNodeFingerprint, '기존 노드 정체성 지문'),
+      expectedLogicalComponentFingerprint: safeId(operation.expectedLogicalComponentFingerprint, '기존 엔진 계약 지문'),
+      logicalComponent,
     }
   }
   if (operation.action === 'add_part') {
@@ -201,7 +221,7 @@ function normalizeOperation(operation) {
   }
   throw new DigitalTwinProposalError(
     'UNSAFE_OPERATION',
-    '디지털 트윈 수정안은 새 노드·연결선·파츠 추가, 제한된 노드 근거 연결과 지문이 일치하는 파츠 제거·교체 및 연결선 교체만 허용합니다.',
+    '디지털 트윈 수정안은 새 노드·연결선·파츠 추가, 제한된 노드 근거·엔진 계약 동기화와 지문이 일치하는 파츠 제거·교체 및 연결선 교체만 허용합니다.',
   )
 }
 
@@ -231,6 +251,7 @@ export function createDigitalTwinGraphProposal({
   const edgeIds = normalizedOperations.filter((operation) => operation.action === 'add_edge').map((operation) => operation.edge.id)
   const replacedEdgeIds = normalizedOperations.filter((operation) => operation.action === 'replace_edge').map((operation) => operation.edge.id)
   const bindingNodeIds = normalizedOperations.filter((operation) => operation.action === 'bind_node').map((operation) => operation.targetNodeId)
+  const componentNodeIds = normalizedOperations.filter((operation) => operation.action === 'sync_logical_component').map((operation) => operation.targetNodeId)
   const partIds = normalizedOperations
     .filter((operation) => ['add_part', 'replace_part', 'remove_part'].includes(operation.action))
     .map((operation) => `${operation.targetNodeId}:${operation.part?.id ?? operation.partId}`)
@@ -239,6 +260,8 @@ export function createDigitalTwinGraphProposal({
     || new Set([...edgeIds, ...replacedEdgeIds]).size !== edgeIds.length + replacedEdgeIds.length
     || new Set(bindingNodeIds).size !== bindingNodeIds.length
     || bindingNodeIds.some((id) => nodeIds.includes(id))
+    || new Set(componentNodeIds).size !== componentNodeIds.length
+    || componentNodeIds.some((id) => nodeIds.includes(id) || bindingNodeIds.includes(id))
     || new Set(partIds).size !== partIds.length
   ) {
     throw new DigitalTwinProposalError('DUPLICATE_OPERATION', '수정안 안에 중복된 노드, 연결선 또는 시스템 파츠가 있습니다.')
@@ -258,6 +281,7 @@ export function createDigitalTwinGraphProposal({
       edges: edgeIds.length + replacedEdgeIds.length,
       parts: partIds.length,
       ...(bindingNodeIds.length ? { bindings: bindingNodeIds.length } : {}),
+      ...(componentNodeIds.length ? { components: componentNodeIds.length } : {}),
     },
   }
   return {
@@ -349,7 +373,7 @@ export function planDigitalTwinGraphProposal(graph, proposal) {
   if (digitalTwinReviewFingerprint(proposalBody) !== fingerprint) {
     throw new DigitalTwinProposalError('PROPOSAL_CHANGED', '미리보기 이후 수정안 내용이 달라졌습니다. 다시 검토해야 합니다.')
   }
-  if (proposal.operations.some((operation) => !['add_node', 'add_edge', 'bind_node', 'add_part', 'replace_part', 'remove_part', 'replace_edge'].includes(operation?.action))) {
+  if (proposal.operations.some((operation) => !['add_node', 'add_edge', 'bind_node', 'sync_logical_component', 'add_part', 'replace_part', 'remove_part', 'replace_edge'].includes(operation?.action))) {
     throw new DigitalTwinProposalError('UNSAFE_OPERATION', '허용되지 않은 수정안 작업은 적용할 수 없습니다.')
   }
   const currentNodes = Array.isArray(graph?.nodes) ? graph.nodes : []
@@ -364,6 +388,15 @@ export function planDigitalTwinGraphProposal(graph, proposal) {
       targetNodeId: operation.targetNodeId,
       expectedNodeFingerprint: operation.expectedNodeFingerprint,
       binding: operation.binding,
+    }))
+  const plannedLogicalComponents = proposal.operations
+    .filter((operation) => operation.action === 'sync_logical_component')
+    .map((operation) => ({
+      targetNodeId: operation.targetNodeId,
+      expectedEntityKey: operation.expectedEntityKey,
+      expectedNodeFingerprint: operation.expectedNodeFingerprint,
+      expectedLogicalComponentFingerprint: operation.expectedLogicalComponentFingerprint,
+      logicalComponent: operation.logicalComponent,
     }))
   const plannedEdgeReplacements = proposal.operations
     .filter((operation) => operation.action === 'replace_edge')
@@ -393,6 +426,7 @@ export function planDigitalTwinGraphProposal(graph, proposal) {
   const addNodes = []
   const addEdges = []
   const nodeBindings = []
+  const logicalComponentUpdates = []
   const addParts = []
   const replaceParts = []
   const removeParts = []
@@ -432,6 +466,46 @@ export function planDigitalTwinGraphProposal(graph, proposal) {
       throw new DigitalTwinProposalError('NODE_CHANGED', `노드 ${planned.targetNodeId}의 정체성 정보가 미리보기 이후 달라졌습니다. 수정안을 다시 확인해야 합니다.`)
     }
     nodeBindings.push(planned)
+  }
+
+  for (const planned of plannedLogicalComponents) {
+    const existing = currentNodeById.get(planned.targetNodeId)
+    if (!existing) {
+      throw new DigitalTwinProposalError('NODE_MISSING', `엔진 계약을 동기화할 노드 ${planned.targetNodeId}를 찾을 수 없습니다.`)
+    }
+    if (existing.type !== 'system') {
+      throw new DigitalTwinProposalError('INVALID_LOGICAL_COMPONENT_TARGET', '엔진 계약은 시스템 노드에만 동기화할 수 있습니다.')
+    }
+    const currentComponent = normalizeLogicalComponent(existing.data?.logicalComponent)
+    if (
+      currentComponent
+      && currentComponent.id !== planned.logicalComponent.id
+    ) {
+      throw new DigitalTwinProposalError('LOGICAL_COMPONENT_ID_CHANGE_NOT_ALLOWED', `노드 ${planned.targetNodeId}의 엔진 식별자는 바꿀 수 없습니다.`)
+    }
+    if (!currentComponent) {
+      const currentBinding = normalizeDigitalTwinBinding(existing.data?.digitalTwinBinding)
+      if (currentBinding?.sourceId !== proposal.sourceId || currentBinding.entityKey !== planned.expectedEntityKey) {
+        throw new DigitalTwinProposalError('LOGICAL_COMPONENT_IDENTITY_UNPROVEN', `노드 ${planned.targetNodeId}가 해당 엔진 실체라는 근거가 없습니다.`)
+      }
+    }
+    if (
+      digitalTwinProposalLogicalComponentFingerprint(currentComponent)
+      === digitalTwinProposalLogicalComponentFingerprint(planned.logicalComponent)
+    ) {
+      alreadyPresent.push(planned.targetNodeId)
+      continue
+    }
+    if (digitalTwinProposalNodeIdentityFingerprint(existing) !== planned.expectedNodeFingerprint) {
+      throw new DigitalTwinProposalError('NODE_CHANGED', `노드 ${planned.targetNodeId}의 정체성 정보가 미리보기 이후 달라졌습니다. 수정안을 다시 확인해야 합니다.`)
+    }
+    if (
+      digitalTwinProposalLogicalComponentFingerprint(currentComponent)
+      !== planned.expectedLogicalComponentFingerprint
+    ) {
+      throw new DigitalTwinProposalError('LOGICAL_COMPONENT_CHANGED', `노드 ${planned.targetNodeId}의 엔진 계약이 미리보기 이후 달라졌습니다. 수정안을 다시 확인해야 합니다.`)
+    }
+    logicalComponentUpdates.push(planned)
   }
 
   const availableNodeIds = new Set([...currentNodeById.keys(), ...plannedNodes.map((node) => node.id)])
@@ -530,12 +604,13 @@ export function planDigitalTwinGraphProposal(graph, proposal) {
     nodes: addNodes,
     edges: addEdges,
     nodeBindings,
+    logicalComponentUpdates,
     edgeReplacements: replaceEdges,
     parts: addParts,
     partReplacements: replaceParts,
     partRemovals: removeParts,
     alreadyPresent,
-    writesRequired: addNodes.length > 0 || addEdges.length > 0 || nodeBindings.length > 0 || replaceEdges.length > 0 || addParts.length > 0 || replaceParts.length > 0 || removeParts.length > 0,
+    writesRequired: addNodes.length > 0 || addEdges.length > 0 || nodeBindings.length > 0 || logicalComponentUpdates.length > 0 || replaceEdges.length > 0 || addParts.length > 0 || replaceParts.length > 0 || removeParts.length > 0,
   }
 }
 
@@ -561,13 +636,19 @@ export function applyDigitalTwinGraphProposal(graph, proposal) {
   }
   const currentNodes = Array.isArray(graph?.nodes) ? graph.nodes : []
   const bindingByNode = new Map(plan.nodeBindings.map((planned) => [planned.targetNodeId, planned.binding]))
+  const logicalComponentByNode = new Map(plan.logicalComponentUpdates.map((planned) => [planned.targetNodeId, planned.logicalComponent]))
   const edgeReplacementById = new Map(plan.edgeReplacements.map((planned) => [planned.edgeId, planned.edge]))
   const nodesWithBindings = currentNodes.map((node) => {
     const binding = bindingByNode.get(node.id)
     if (!binding) return node
     return { ...node, data: { ...node.data, digitalTwinBinding: binding } }
   })
-  const nodesWithParts = nodesWithBindings.map((node) => {
+  const nodesWithLogicalComponents = nodesWithBindings.map((node) => {
+    const logicalComponent = logicalComponentByNode.get(node.id)
+    if (!logicalComponent) return node
+    return { ...node, data: { ...node.data, logicalComponent } }
+  })
+  const nodesWithParts = nodesWithLogicalComponents.map((node) => {
     const additions = partsByNode.get(node.id)
     const replacements = replacementsByNode.get(node.id)
     const removals = removalsByNode.get(node.id)
@@ -594,6 +675,7 @@ export function applyDigitalTwinGraphProposal(graph, proposal) {
     ],
     appliedNodeIds: plan.nodes.map((node) => node.id),
     appliedNodeBindingIds: plan.nodeBindings.map((planned) => planned.targetNodeId),
+    appliedLogicalComponentIds: plan.logicalComponentUpdates.map((planned) => planned.targetNodeId),
     appliedEdgeIds: [...plan.edges.map((edge) => edge.id), ...plan.edgeReplacements.map((planned) => planned.edgeId)],
     appliedPartIds: [
       ...plan.parts.map((planned) => `${planned.targetNodeId}:${planned.part.id}`),

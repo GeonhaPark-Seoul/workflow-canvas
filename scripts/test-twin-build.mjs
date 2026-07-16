@@ -232,6 +232,49 @@ function bindAllTwinEntities(canvas) {
 }
 
 const boundWorkflowCanvas = bindAllTwinEntities(expectedWorkflowCanvas)
+const staleEngineContracts = structuredClone(boundWorkflowCanvas)
+const staleComponentIds = new Set([
+  'engine-twin-core',
+  'component-twin-reconciler',
+  'engine-source-lens',
+  'component-source-scanner',
+  'component-source-profile',
+])
+for (const node of staleEngineContracts.nodes) {
+  if (!staleComponentIds.has(node.data?.logicalComponent?.id)) continue
+  node.data.logicalComponent.technicalVersion = '0.1.0-alpha.0'
+}
+const staleSourceLens = staleEngineContracts.nodes.find((node) => node.id === 'map-engine-source-lens')
+staleSourceLens.data.logicalComponent.compatibility = ['Source Twin Schema v1']
+staleSourceLens.data.manualAnnotation = '버전 동기화 뒤에도 보존할 메모'
+const componentDriftReview = reconcileTwinBuild({
+  build: WORKFLOW_SYSTEM_TWIN_BUILD,
+  canvas: staleEngineContracts,
+})
+const componentDriftItem = componentDriftReview.items.find((item) => item.status === 'logical_component_stale')
+assert.equal(componentDriftItem.proposal.counts.components, 5)
+assert.equal(componentDriftItem.focus.nodeId, 'map-engine-source-lens')
+assert.ok(componentDriftItem.proposal.operations.some((operation) => (
+  operation.targetNodeId === 'map-engine-source-lens'
+  && operation.logicalComponent.technicalVersion === '0.2.0-alpha.0'
+)))
+const componentDriftApplied = applyDigitalTwinGraphProposal(staleEngineContracts, componentDriftItem.proposal)
+assert.equal(componentDriftApplied.appliedLogicalComponentIds.length, 5)
+assert.equal(
+  componentDriftApplied.nodes.find((node) => node.id === 'map-engine-source-lens').data.logicalComponent.technicalVersion,
+  '0.2.0-alpha.0',
+)
+assert.equal(
+  componentDriftApplied.nodes.find((node) => node.id === 'map-engine-source-lens').data.manualAnnotation,
+  '버전 동기화 뒤에도 보존할 메모',
+)
+assert.equal(
+  reconcileTwinBuild({
+    build: WORKFLOW_SYSTEM_TWIN_BUILD,
+    canvas: { ...staleEngineContracts, nodes: componentDriftApplied.nodes },
+  }).items.some((item) => ['logical_component_missing', 'logical_component_stale'].includes(item.status)),
+  false,
+)
 const workflowReview = reconcileTwinBuild({
   build: WORKFLOW_SYSTEM_TWIN_BUILD,
   canvas: boundWorkflowCanvas,

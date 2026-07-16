@@ -271,6 +271,7 @@ export default function SystemNode({ data, selected, id }) {
       data-proposal-preview={data.digitalTwinProposalPreview ? 'true' : undefined}
       data-part-proposal-preview={previewPartIds.size ? 'true' : undefined}
       data-binding-proposal-preview={data.digitalTwinProposalPreviewBinding ? 'true' : undefined}
+      data-component-proposal-preview={data.digitalTwinProposalPreviewLogicalComponent ? 'true' : undefined}
       style={{
         width: '100%',
         height: '100%',
@@ -314,7 +315,10 @@ export default function SystemNode({ data, selected, id }) {
       {!data.digitalTwinProposalPreview && previewPartIds.size > 0 && (
         <span className="digital-twin-proposal-node-badge">파츠 미리보기</span>
       )}
-      {!data.digitalTwinProposalPreview && !previewPartIds.size && data.digitalTwinProposalPreviewBinding && (
+      {!data.digitalTwinProposalPreview && !previewPartIds.size && data.digitalTwinProposalPreviewLogicalComponent && (
+        <span className="digital-twin-proposal-node-badge">엔진 계약 미리보기</span>
+      )}
+      {!data.digitalTwinProposalPreview && !previewPartIds.size && !data.digitalTwinProposalPreviewLogicalComponent && data.digitalTwinProposalPreviewBinding && (
         <span className="digital-twin-proposal-node-badge">트윈 연결 미리보기</span>
       )}
 

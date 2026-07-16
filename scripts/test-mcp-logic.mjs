@@ -108,6 +108,7 @@ import {
   createDigitalTwinGraphProposal,
   digitalTwinProposalAutoFitKey,
   digitalTwinProposalEdgeFingerprint,
+  digitalTwinProposalLogicalComponentFingerprint,
   digitalTwinProposalNodeIdentityFingerprint,
   digitalTwinProposalMatchesItem,
   filterDigitalTwinProposalNodeChanges,
@@ -1902,6 +1903,126 @@ t('node binding proposals preserve node content and reject stale identity change
   assert.throws(
     () => applyDigitalTwinGraphProposal(changedAfterPreview, proposal),
     /정체성 정보가 미리보기 이후 달라졌/,
+  )
+})
+
+t('engine contract proposals update only registry-managed metadata and reject stale previews', () => {
+  const item = createDigitalTwinReviewItem({
+    sourceId: 'source-one', itemKey: 'component:source-lens', title: 'Source Lens contract', observation: { version: 2 },
+  })
+  const currentComponent = {
+    schemaVersion: 1,
+    id: 'engine-source-lens',
+    kind: 'engine',
+    productVersion: '0.1.0-alpha.0',
+    technicalVersion: '0.1.0-alpha.0',
+    maturity: 'alpha',
+    maintainerAgentId: '',
+    inputs: ['Git 저장소 파일'],
+    outputs: ['Source Twin manifest'],
+    codeEvidence: ['scripts/source-twin-scanner.mjs'],
+    testEvidence: ['scripts/test-source-twin.mjs'],
+    compatibility: ['Source Twin Schema v1'],
+  }
+  const nextComponent = {
+    ...currentComponent,
+    technicalVersion: '0.2.0-alpha.0',
+    inputs: ['Git 저장소 파일', '제품별 Source Profile'],
+    compatibility: ['Source Twin Schema v1', 'Source Profile Contract v1'],
+  }
+  const graph = {
+    nodes: [{
+      id: 'map-engine-source-lens',
+      type: 'system',
+      position: { x: 120, y: 80 },
+      width: 320,
+      data: {
+        label: '사용자가 배치한 Source Lens',
+        description: '사용자가 보존할 설명',
+        systemKind: 'service',
+        sourceKind: 'code',
+        manualAnnotation: '사용자 메모',
+        logicalComponent: currentComponent,
+        digitalTwinBinding: {
+          schemaVersion: 1,
+          sourceId: 'source-one',
+          entityKey: 'engine-source-lens',
+          observedFingerprint: '1234567890abcdef',
+          observedSnapshotId: 'snapshot-one',
+        },
+      },
+    }],
+    edges: [],
+  }
+  const proposal = createDigitalTwinGraphProposal({
+    sourceId: item.sourceId,
+    proposalKey: 'sync-source-lens-contract',
+    itemId: item.id,
+    itemFingerprint: item.fingerprint,
+    snapshotId: 'snapshot-two',
+    operations: [{
+      action: 'sync_logical_component',
+      targetNodeId: graph.nodes[0].id,
+      expectedEntityKey: 'engine-source-lens',
+      expectedNodeFingerprint: digitalTwinProposalNodeIdentityFingerprint(graph.nodes[0]),
+      expectedLogicalComponentFingerprint: digitalTwinProposalLogicalComponentFingerprint(currentComponent),
+      logicalComponent: nextComponent,
+      label: 'Source Lens 0.1.0-alpha.0 → 0.2.0-alpha.0',
+    }],
+  })
+
+  assert.deepEqual(proposal.counts, { nodes: 0, edges: 0, parts: 0, components: 1 })
+  const before = structuredClone(graph)
+  const plan = planDigitalTwinGraphProposal(graph, proposal)
+  assert.deepEqual(graph, before)
+  assert.deepEqual(plan.logicalComponentUpdates.map((planned) => planned.targetNodeId), ['map-engine-source-lens'])
+
+  const applied = applyDigitalTwinGraphProposal(graph, proposal)
+  assert.deepEqual(applied.appliedLogicalComponentIds, ['map-engine-source-lens'])
+  assert.equal(applied.nodes[0].data.logicalComponent.technicalVersion, '0.2.0-alpha.0')
+  assert.equal(applied.nodes[0].data.label, before.nodes[0].data.label)
+  assert.equal(applied.nodes[0].data.description, before.nodes[0].data.description)
+  assert.equal(applied.nodes[0].data.manualAnnotation, '사용자 메모')
+  assert.deepEqual(applied.nodes[0].position, before.nodes[0].position)
+  assert.equal(applied.nodes[0].width, 320)
+  assert.equal(applyDigitalTwinGraphProposal(applied, proposal).writesPerformed, false)
+
+  const changedAfterPreview = structuredClone(graph)
+  changedAfterPreview.nodes[0].data.logicalComponent.technicalVersion = '0.1.1-alpha.0'
+  assert.throws(
+    () => applyDigitalTwinGraphProposal(changedAfterPreview, proposal),
+    /엔진 계약이 미리보기 이후 달라졌/,
+  )
+  const wrongIdentity = structuredClone(proposal)
+  wrongIdentity.operations[0].logicalComponent.id = 'engine-other'
+  const { fingerprint: _fingerprint, ...wrongBody } = wrongIdentity
+  wrongIdentity.fingerprint = digitalTwinReviewFingerprint(wrongBody)
+  assert.throws(
+    () => applyDigitalTwinGraphProposal(graph, wrongIdentity),
+    /엔진 식별자는 바꿀 수 없/,
+  )
+
+  const missingComponentGraph = structuredClone(graph)
+  delete missingComponentGraph.nodes[0].data.logicalComponent
+  const restoreProposal = createDigitalTwinGraphProposal({
+    sourceId: item.sourceId,
+    proposalKey: 'restore-source-lens-contract',
+    itemId: item.id,
+    itemFingerprint: item.fingerprint,
+    snapshotId: 'snapshot-two',
+    operations: [{
+      action: 'sync_logical_component',
+      targetNodeId: missingComponentGraph.nodes[0].id,
+      expectedEntityKey: 'engine-source-lens',
+      expectedNodeFingerprint: digitalTwinProposalNodeIdentityFingerprint(missingComponentGraph.nodes[0]),
+      expectedLogicalComponentFingerprint: digitalTwinProposalLogicalComponentFingerprint(null),
+      logicalComponent: nextComponent,
+      label: 'Source Lens 엔진 계약 복구',
+    }],
+  })
+  assert.equal(
+    applyDigitalTwinGraphProposal(missingComponentGraph, restoreProposal).nodes[0].data.logicalComponent.technicalVersion,
+    '0.2.0-alpha.0',
   )
 })
 

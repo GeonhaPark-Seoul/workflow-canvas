@@ -58,7 +58,7 @@ const mappedTwinEntities = WORKFLOW_SYSTEM_TWIN_BUILD.entities.filter((entity) =
 assert.equal(mappedTwinEntities.length, WORKFLOW_ENGINE_REGISTRY.components.length)
 assert.equal(
   mappedTwinEntities.find((entity) => entity.id === 'map-engine-twin-core')?.logicalComponent?.technicalVersion,
-  '0.2.0-alpha.0',
+  '0.3.0-alpha.0',
 )
 
 assert.equal(MAINTAINER_AGENT_MANIFEST.agents.length, 1)

@@ -15,6 +15,8 @@ The recommended user-facing phrase is **시스템 가져오기**. Internally, ad
 
 User-facing engine names stay short: `Twin Core`, `Create Graph`, `Source Lens`, `Trust Map`, `LiveOps`, `Safe Operations`, and `Connector Bridge`. Internally, the registry distinguishes Engine, Contract, Resolver, Builder, Pipeline, Agent Skill, Hard Guardrail, Connector, and Manifest so a convenient product word does not erase technical responsibility. Logical-vs-physical representation and CODE-vs-LIVE evidence are independent axes; see [`architecture/TWIN_IDENTITY_AND_OBSERVATION.md`](architecture/TWIN_IDENTITY_AND_OBSERVATION.md).
 
+Twin Core 0.3 treats the registry-managed engine contract as a continuously reconcilable product record. Opening a supported system twin automatically compares version, maturity, inputs, outputs, compatibility and code/test evidence, then creates a bounded approval proposal when the canvas is stale. User-authored layout and narrative fields remain outside that automatic contract.
+
 ## Current commercial focus
 
 The long-term ontology remains general enough for business and life operations, but the first commercial product is deliberately narrow: a non-developer control room for small AI-generated JavaScript/React applications using GitHub, Vercel, and Supabase. The initial audience is vibe coders, solo founders, and small product teams without highly sensitive customer data. General life OS, regulated workloads, 3D rendering, autonomous agents, and operator-blind encryption are later horizons rather than current promises.

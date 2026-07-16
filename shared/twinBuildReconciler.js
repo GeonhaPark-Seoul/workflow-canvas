@@ -1,6 +1,7 @@
 import {
   createDigitalTwinGraphProposal,
   digitalTwinProposalEdgeFingerprint,
+  digitalTwinProposalLogicalComponentFingerprint,
   digitalTwinProposalNodeIdentityFingerprint,
 } from './digitalTwinProposal.js'
 import {
@@ -9,6 +10,7 @@ import {
   digitalTwinReviewFingerprint,
 } from './digitalTwinReview.js'
 import { normalizeDigitalTwinBinding, normalizeSystemPart, normalizeSystemParts } from './systemPartOntology.js'
+import { normalizeLogicalComponent } from './systemOntology.js'
 import { createTwinBuild } from './twinBuild.js'
 import {
   findTwinBuildEntityNode,
@@ -20,6 +22,7 @@ import {
 
 export const TWIN_BUILD_RECONCILIATION_SCHEMA_VERSION = 1
 const MAX_BINDING_OPERATIONS = 24
+const MAX_COMPONENT_OPERATIONS = 24
 
 function compactKey(kind, id) {
   const value = `${kind}:${id}`
@@ -148,6 +151,83 @@ function entityBindingBatchReview(build, candidates) {
     snapshotId: build.source.snapshotId,
     title: item.title,
     summary: '표시된 기존 노드에 검증된 TwinBuild 식별자와 코드 스냅샷 지문만 연결합니다. 다른 노드 필드는 변경하지 않습니다.',
+    operations,
+  })
+  return { ...item, proposal }
+}
+
+function logicalComponentCandidate(build, entity, node) {
+  const expectedComponent = normalizeLogicalComponent(entity.logicalComponent)
+  if (!node || node.type !== 'system' || !expectedComponent) return null
+  const currentComponent = normalizeLogicalComponent(node.data?.logicalComponent)
+  if (
+    digitalTwinProposalLogicalComponentFingerprint(currentComponent)
+    === digitalTwinProposalLogicalComponentFingerprint(expectedComponent)
+  ) return null
+  if (currentComponent && currentComponent.id !== expectedComponent.id) return null
+  if (!currentComponent) {
+    const binding = normalizeDigitalTwinBinding(node.data?.digitalTwinBinding)
+    if (binding?.sourceId !== build.source.id || binding.entityKey !== entity.id) return null
+  }
+  return { entity, node, currentComponent, expectedComponent }
+}
+
+function logicalComponentBatchReview(build, candidates) {
+  const ordered = [...candidates].sort((left, right) => {
+    const priority = (candidate) => candidate.expectedComponent.id === 'engine-source-lens'
+      ? 0
+      : candidate.expectedComponent.id === 'engine-twin-core'
+        ? 1
+        : candidate.entity.parentId ? 3 : 2
+    return priority(left) - priority(right) || left.entity.id.localeCompare(right.entity.id)
+  })
+  const batch = ordered.slice(0, MAX_COMPONENT_OPERATIONS)
+  if (!batch.length) return null
+  const missingCount = batch.filter((candidate) => !candidate.currentComponent).length
+  const staleCount = batch.length - missingCount
+  const entityIds = batch.map((candidate) => candidate.entity.id)
+  const versionChanges = batch.map((candidate) => ({
+    entityId: candidate.entity.id,
+    before: candidate.currentComponent?.technicalVersion ?? null,
+    after: candidate.expectedComponent.technicalVersion,
+  }))
+  const item = createItem(build, {
+    itemKey: compactKey('build-logical-components', digitalTwinReviewFingerprint(versionChanges)),
+    category: 'entity',
+    changeType: 'changed',
+    severity: 'attention',
+    title: `엔진 계약 동기화 ${batch.length}개`,
+    summary: `Engine Registry와 다른 버전·입출력·호환성·코드 및 테스트 근거만 동기화합니다. 누락 ${missingCount}개${staleCount ? ` · 갱신 ${staleCount}개` : ''}.`,
+    evidenceIds: [...new Set(batch.flatMap((candidate) => candidate.entity.evidenceIds ?? []))],
+    focus: { nodeId: batch.find((candidate) => candidate.expectedComponent.id === 'engine-source-lens')?.node.id ?? batch[0].node.id },
+    status: missingCount ? 'logical_component_missing' : 'logical_component_stale',
+    observation: {
+      buildFingerprint: build.fingerprint,
+      snapshotId: build.source.snapshotId,
+      totalCandidates: ordered.length,
+      entityIds,
+      missingCount,
+      staleCount,
+      versionChanges,
+    },
+  })
+  const operations = batch.map((candidate) => ({
+    action: 'sync_logical_component',
+    targetNodeId: candidate.node.id,
+    expectedEntityKey: candidate.entity.id,
+    expectedNodeFingerprint: digitalTwinProposalNodeIdentityFingerprint(candidate.node),
+    expectedLogicalComponentFingerprint: digitalTwinProposalLogicalComponentFingerprint(candidate.currentComponent),
+    logicalComponent: candidate.expectedComponent,
+    label: `${candidate.entity.label} ${candidate.currentComponent?.technicalVersion ?? '미연결'} → ${candidate.expectedComponent.technicalVersion}`,
+  }))
+  const proposal = createDigitalTwinGraphProposal({
+    sourceId: build.source.id,
+    proposalKey: compactKey('sync-logical-components', digitalTwinReviewFingerprint(versionChanges)),
+    itemId: item.id,
+    itemFingerprint: item.fingerprint,
+    snapshotId: build.source.snapshotId,
+    title: item.title,
+    summary: '표시된 엔진 노드의 Registry 관리 계약만 갱신합니다. 제목, 설명, 위치, 크기, 메모, 파츠, 연결선과 실행 상태는 바꾸지 않습니다.',
     operations,
   })
   return { ...item, proposal }
@@ -368,10 +448,19 @@ export function reconcileTwinBuild({ build: inputBuild, canvas }) {
   const bindingReview = entityBindingBatchReview(build, build.entities
     .map((entity) => entityBindingCandidate(build, entity, nodeByEntityId.get(entity.id)))
     .filter(Boolean))
+  const logicalComponentReview = logicalComponentBatchReview(build, build.entities
+    .map((entity) => logicalComponentCandidate(build, entity, nodeByEntityId.get(entity.id)))
+    .filter(Boolean))
   const entityItems = build.entities.map((entity) => entityReview(build, entity, canvas, nodeByEntityId)).filter(Boolean)
   const partItems = build.parts.map((part) => partReview(build, part, nodeByEntityId)).filter(Boolean)
   const relationItems = build.relations.map((relation) => relationReview(build, relation, canvas, nodeByEntityId)).filter(Boolean)
-  const items = [...(bindingReview ? [bindingReview] : []), ...entityItems, ...partItems, ...relationItems].sort((left, right) => (
+  const items = [
+    ...(bindingReview ? [bindingReview] : []),
+    ...(logicalComponentReview ? [logicalComponentReview] : []),
+    ...entityItems,
+    ...partItems,
+    ...relationItems,
+  ].sort((left, right) => (
     severityRank(left.severity) - severityRank(right.severity)
     || left.category.localeCompare(right.category)
     || left.title.localeCompare(right.title)
@@ -382,7 +471,8 @@ export function reconcileTwinBuild({ build: inputBuild, canvas }) {
     pending: items.length,
     actionable: items.filter((item) => !!item.proposal).length,
     blocked: items.filter((item) => item.status === 'blocked_dependency').length,
-    entityFindings: entityItems.length + (bindingReview ? 1 : 0),
+    entityFindings: entityItems.length + (bindingReview ? 1 : 0) + (logicalComponentReview ? 1 : 0),
+    logicalComponentFindings: logicalComponentReview ? 1 : 0,
     partFindings: partItems.length,
     relationFindings: relationItems.length,
     unmanagedCanvasNodes: (canvas?.nodes ?? []).filter((node) => !managedNodeIds.has(node.id)).length,
@@ -405,7 +495,7 @@ export function reconcileTwinBuild({ build: inputBuild, canvas }) {
       },
       summary,
       ownership: {
-        engineManaged: ['실체 의미 필드', '정규화된 파츠 계약', '관계 계약', '신뢰영역과 게이트웨이 참조'],
+        engineManaged: ['실체 의미 필드', '논리 구성요소 버전·호환성·근거 계약', '정규화된 파츠 계약', '관계 계약', '신뢰영역과 게이트웨이 참조'],
         userPreserved: ['노드 위치', '노드 크기', '사용자 메모', '추가 파츠와 연결선', '검토 결정'],
       },
     },

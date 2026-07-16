@@ -15,7 +15,7 @@
 
 | Registry ID | 표시 이름 | 기술 버전 | 주요 호환성 |
 |---|---|---:|---|
-| `engine-twin-core` | Twin Core | 0.2.0-alpha.0 | Engine Schema v2, TwinBuild v3, Adapter Contract v1 |
+| `engine-twin-core` | Twin Core | 0.3.0-alpha.0 | Engine Schema v2, TwinBuild v3, Adapter Contract v1 |
 | `engine-create-graph` | Create Graph | 0.1.0-alpha.0 | MCP `create_graph` v1 |
 | `engine-source-lens` | Source Lens | 0.2.0-alpha.0 | Source Twin Schema v1, Source Profile Contract v1 |
 | `engine-trust-map` | Trust Map | 0.1.0-alpha.0 | Trust Topology Schema v1 |
