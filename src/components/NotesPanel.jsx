@@ -8,6 +8,7 @@ import {
   SYSTEM_SOURCE_DEFS,
   systemKindDefinition,
   systemNodeReality,
+  systemNodeTwinLink,
 } from '../../shared/systemOntology.js'
 
 // ── Notes-app-style split pane ───────────────────────────────────────────────
@@ -383,6 +384,7 @@ function NotePage({ node, byId, inMap, outMap, isEditable, onUpdateNode, onFocus
 
         {node.type === 'system' && (() => {
           const reality = systemNodeReality(node.data)
+          const twinLink = systemNodeTwinLink(node.data)
           const fieldStyle = {
             width: '100%', boxSizing: 'border-box', background: '#12121a',
             border: '1px solid #ffffff18', borderRadius: 6, color: '#d8dae0',
@@ -399,8 +401,25 @@ function NotePage({ node, byId, inMap, outMap, isEditable, onUpdateNode, onFocus
                 }}>
                   {reality.label}
                 </span>
+                {twinLink.linked && (
+                  <span
+                    title={twinLink.title}
+                    style={{
+                      color: twinLink.color, background: `${twinLink.color}18`, border: `1px solid ${twinLink.color}66`,
+                      borderRadius: 4, padding: '2px 6px', fontSize: 9, fontWeight: 800,
+                    }}
+                  >
+                    {twinLink.label}
+                  </span>
+                )}
                 <span style={{ color: '#666', fontSize: 10.5 }}>
-                  {reality.id === 'twin' ? '서버에서 외부 자원 확인됨' : '외부 자원 검증 전'}
+                  {reality.id === 'twin'
+                    ? '서버에서 외부 자원 확인됨'
+                    : twinLink.linked
+                      ? '코드 스냅샷 연결 · 실행 상태는 별도 확인'
+                      : reality.id === 'logical'
+                        ? '제품의 논리 구성요소 · 실행 자원 아님'
+                        : '외부 자원 검증 전'}
                 </span>
               </div>
 

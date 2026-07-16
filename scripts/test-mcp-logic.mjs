@@ -38,7 +38,12 @@ import {
   CanvasSchemaGuardError,
   RELATION_METADATA_GUARD_MARKER,
 } from '../src/lib/canvasSchemaGuard.js'
-import { createSystemNodeData, normalizeSystemNodeData, systemNodeReality } from '../shared/systemOntology.js'
+import {
+  createSystemNodeData,
+  normalizeSystemNodeData,
+  systemNodeReality,
+  systemNodeTwinLink,
+} from '../shared/systemOntology.js'
 import {
   analyzeTrustBoundary,
   normalizeTrustGateway,
@@ -103,6 +108,7 @@ import {
   createDigitalTwinGraphProposal,
   digitalTwinProposalAutoFitKey,
   digitalTwinProposalEdgeFingerprint,
+  digitalTwinProposalNodeIdentityFingerprint,
   digitalTwinProposalMatchesItem,
   filterDigitalTwinProposalNodeChanges,
   planDigitalTwinGraphProposal,
@@ -436,6 +442,23 @@ t('server-shaped verification evidence promotes a system model to LIVE', () => {
   })
   assert.equal(result.id, 'twin')
   assert.equal(result.label, 'LIVE')
+})
+
+t('code-backed twin status remains distinct from runtime LIVE status', () => {
+  const data = {
+    ...createSystemNodeData('frontend'),
+    sourceKind: 'code',
+    digitalTwinBinding: {
+      schemaVersion: 1,
+      sourceId: 'workflow-canvas:self-system',
+      entityKey: 'map-canvas-engine',
+      observedFingerprint: '1234567890abcdef',
+      observedSnapshotId: 'snapshot-one',
+    },
+  }
+  assert.equal(systemNodeReality(data).id, 'declared')
+  assert.equal(systemNodeTwinLink(data).id, 'code-twin')
+  assert.equal(systemNodeTwinLink(data).label, 'CODE')
 })
 
 t('system metadata normalization clamps enums and plain identifiers', () => {
@@ -1779,7 +1802,8 @@ t('Workflow Canvas adapter emits generic discovered items without claiming live 
   assert.equal(review.source.id, WORKFLOW_SYSTEM_TWIN_SOURCE_ID)
   assert.equal(review.source.observationLevel, 'discovered')
   assert.equal(review.source.runtimeVerified, false)
-  assert.equal(review.items.length, expectedCount)
+  assert.ok(review.items.length >= expectedCount)
+  assert.ok(review.items.some((item) => item.status === 'twin_binding_missing'))
   assert.equal(new Set(review.items.map((item) => item.id)).size, review.items.length)
   assert.ok(review.items.some((item) => item.itemKey === 'resource:db-table:share_revocations'))
   assert.ok(review.items.every((item) => item.fingerprint && item.sourceId === WORKFLOW_SYSTEM_TWIN_SOURCE_ID))
@@ -1811,6 +1835,74 @@ t('digital twin proposals reject generic update and delete operations before the
     itemFingerprint: item.fingerprint,
     operations: [{ action: 'remove_node', node: { id: 'orders' } }],
   }), /파츠 제거·교체/)
+})
+
+t('node binding proposals preserve node content and reject stale identity changes', () => {
+  const item = createDigitalTwinReviewItem({
+    sourceId: 'source-one', itemKey: 'binding:web-app', title: 'web app binding', observation: { version: 1 },
+  })
+  const graph = {
+    nodes: [{
+      id: 'web-app',
+      type: 'system',
+      position: { x: 30, y: 40 },
+      width: 360,
+      data: {
+        label: '사용자가 바꾼 앱 이름',
+        systemKind: 'frontend',
+        sourceKind: 'code',
+        provider: 'React',
+        externalRef: 'src/App.jsx',
+        manualAnnotation: '보존할 메모',
+      },
+    }],
+    edges: [],
+  }
+  const binding = {
+    schemaVersion: 1,
+    sourceId: 'source-one',
+    entityKey: 'entity:web-app',
+    observedFingerprint: '1234567890abcdef',
+    observedSnapshotId: 'snapshot-one',
+    itemId: item.id,
+    itemFingerprint: item.fingerprint,
+  }
+  const proposal = createDigitalTwinGraphProposal({
+    sourceId: item.sourceId,
+    proposalKey: 'bind-web-app',
+    itemId: item.id,
+    itemFingerprint: item.fingerprint,
+    snapshotId: 'snapshot-one',
+    operations: [{
+      action: 'bind_node',
+      targetNodeId: 'web-app',
+      expectedNodeFingerprint: digitalTwinProposalNodeIdentityFingerprint(graph.nodes[0]),
+      binding,
+      label: '웹 앱 코드 트윈 연결',
+    }],
+  })
+
+  assert.deepEqual(proposal.counts, { nodes: 0, edges: 0, parts: 0, bindings: 1 })
+  const before = structuredClone(graph)
+  const plan = planDigitalTwinGraphProposal(graph, proposal)
+  assert.deepEqual(graph, before)
+  assert.deepEqual(plan.nodeBindings.map((planned) => planned.targetNodeId), ['web-app'])
+
+  const applied = applyDigitalTwinGraphProposal(graph, proposal)
+  assert.deepEqual(applied.appliedNodeBindingIds, ['web-app'])
+  assert.deepEqual(applied.nodes[0].position, before.nodes[0].position)
+  assert.equal(applied.nodes[0].width, 360)
+  assert.equal(applied.nodes[0].data.label, '사용자가 바꾼 앱 이름')
+  assert.equal(applied.nodes[0].data.manualAnnotation, '보존할 메모')
+  assert.equal(applied.nodes[0].data.digitalTwinBinding.entityKey, 'entity:web-app')
+  assert.equal(applyDigitalTwinGraphProposal(applied, proposal).writesPerformed, false)
+
+  const changedAfterPreview = structuredClone(graph)
+  changedAfterPreview.nodes[0].data.externalRef = 'src/OtherApp.jsx'
+  assert.throws(
+    () => applyDigitalTwinGraphProposal(changedAfterPreview, proposal),
+    /정체성 정보가 미리보기 이후 달라졌/,
+  )
 })
 
 t('proposal preview is read-only and explicit apply adds only the planned graph entities', () => {

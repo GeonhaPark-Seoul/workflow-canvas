@@ -52,7 +52,7 @@ function normalizedId(value) {
   return SAFE_ID.test(id) ? id : ''
 }
 
-function normalizeDigitalTwinBinding(value) {
+export function normalizeDigitalTwinBinding(value) {
   if (!plainObject(value)) return undefined
   const sourceId = plainText(value.sourceId, 160)
   const entityKey = plainText(value.entityKey, 300)

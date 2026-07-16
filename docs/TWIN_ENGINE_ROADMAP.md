@@ -5,13 +5,15 @@
 - **System onboarding / 시스템 가져오기**: the user-facing act of connecting software or another operating system to Workflow Canvas.
 - **Twin adapter / 트윈 어댑터**: a provider-specific module that knows how to discover and operate one stack, such as GitHub + Vercel + Supabase.
 - **Twin build / 트윈 빌드**: deterministic discovery and normalization that produces a proposed digital twin.
+- **CODE / 코드 트윈**: a canvas entity bound to a versioned code, manifest, or Connector snapshot. It is a digital-twin identity link, not proof that the target is currently running.
+- **LIVE / 실행 관측**: a server-verified observation of an allowlisted external resource with a resource id and observation time. Browser-authored data cannot create it.
 - **Materialization / 지도 실체화**: applying an approved twin proposal to visible nodes, parts, edges, boundaries, and overlays.
 - **Reconciliation / 상태 대조**: comparing observed reality with the current canvas and creating review items.
 - **Operation capability / 조작 능력**: a bounded action that can be planned, approved, executed, verified, and audited.
 
 The recommended user-facing phrase is **시스템 가져오기**. Internally, adapters perform a **twin build** and then **materialize** the result.
 
-User-facing engine names stay short: `Twin Core`, `Create Graph`, `Source Lens`, `Trust Map`, `LiveOps`, `Safe Operations`, and `Connector Bridge`. Internally, the registry distinguishes Engine, Contract, Resolver, Builder, Pipeline, Agent Skill, Hard Guardrail, Connector, and Manifest so a convenient product word does not erase technical responsibility.
+User-facing engine names stay short: `Twin Core`, `Create Graph`, `Source Lens`, `Trust Map`, `LiveOps`, `Safe Operations`, and `Connector Bridge`. Internally, the registry distinguishes Engine, Contract, Resolver, Builder, Pipeline, Agent Skill, Hard Guardrail, Connector, and Manifest so a convenient product word does not erase technical responsibility. Logical-vs-physical representation and CODE-vs-LIVE evidence are independent axes; see [`architecture/TWIN_IDENTITY_AND_OBSERVATION.md`](architecture/TWIN_IDENTITY_AND_OBSERVATION.md).
 
 ## Current commercial focus
 

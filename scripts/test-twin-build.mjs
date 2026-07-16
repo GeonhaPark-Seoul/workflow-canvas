@@ -8,6 +8,7 @@ import {
   TwinBuildError,
 } from '../shared/twinBuild.js'
 import { reconcileTwinBuild } from '../shared/twinBuildReconciler.js'
+import { applyDigitalTwinGraphProposal } from '../shared/digitalTwinProposal.js'
 import { TWIN_ENGINE_SCHEMA_VERSION } from '../shared/twinAdapterContract.js'
 import { createWorkflowCanvasSystemMap } from '../shared/workflowCanvasSystemMap.js'
 import { ENGINE_CAPABILITY_MAP_GROUP_ID } from '../shared/capabilityMapper.js'
@@ -204,9 +205,36 @@ assert.equal(
   WORKFLOW_SYSTEM_TWIN_BUILD.operations.find((item) => item.id === WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION.id)?.fingerprint,
   WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION.fingerprint,
 )
-const workflowReview = reconcileTwinBuild({
+const firstBindingReview = reconcileTwinBuild({
   build: WORKFLOW_SYSTEM_TWIN_BUILD,
   canvas: expectedWorkflowCanvas,
+})
+const firstBindingItem = firstBindingReview.items.find((item) => item.status === 'twin_binding_missing')
+assert.equal(firstBindingItem.proposal.counts.bindings, 24)
+assert.ok(firstBindingItem.proposal.operations.some((operation) => operation.targetNodeId === 'map-canvas-engine'))
+const canvasEngineBefore = structuredClone(expectedWorkflowCanvas.nodes.find((node) => node.id === 'map-canvas-engine'))
+const firstBindingApplied = applyDigitalTwinGraphProposal(expectedWorkflowCanvas, firstBindingItem.proposal)
+const canvasEngineAfter = firstBindingApplied.nodes.find((node) => node.id === 'map-canvas-engine')
+assert.deepEqual(canvasEngineAfter.position, canvasEngineBefore.position)
+assert.equal(canvasEngineAfter.data.purpose, canvasEngineBefore.data.purpose)
+assert.equal(canvasEngineAfter.data.digitalTwinBinding.entityKey, 'map-canvas-engine')
+
+function bindAllTwinEntities(canvas) {
+  let current = structuredClone(canvas)
+  for (let index = 0; index < 10; index += 1) {
+    const review = reconcileTwinBuild({ build: WORKFLOW_SYSTEM_TWIN_BUILD, canvas: current })
+    const item = review.items.find((candidate) => ['twin_binding_missing', 'twin_binding_stale'].includes(candidate.status))
+    if (!item) return current
+    const applied = applyDigitalTwinGraphProposal(current, item.proposal)
+    current = { ...current, nodes: applied.nodes, edges: applied.edges }
+  }
+  throw new Error('코드 트윈 바인딩 배치가 종료되지 않았습니다.')
+}
+
+const boundWorkflowCanvas = bindAllTwinEntities(expectedWorkflowCanvas)
+const workflowReview = reconcileTwinBuild({
+  build: WORKFLOW_SYSTEM_TWIN_BUILD,
+  canvas: boundWorkflowCanvas,
 })
 assert.equal(workflowReview.summary.pending, 0)
 assert.equal(workflowReview.summary.actionable, 0)
@@ -242,7 +270,7 @@ const thirdEngineStage = inspectWorkflowSystemTwin(legacySystemMap).items
   .find((item) => item.status === 'engine_relations_missing')
 assert.deepEqual(thirdEngineStage.proposal.counts, { nodes: 0, edges: engineEdgeIds.size, parts: 0 })
 
-const manuallyChanged = createWorkflowCanvasSystemMap()
+const manuallyChanged = structuredClone(boundWorkflowCanvas)
 const repository = manuallyChanged.nodes.find((node) => node.id === 'map-local-repo')
 repository.position = { x: 9_999, y: -2_000 }
 repository.width = 444
@@ -263,7 +291,7 @@ assert.deepEqual(repository.position, { x: 9_999, y: -2_000 })
 assert.equal(repository.width, 444)
 assert.equal(repository.data.manualAnnotation, '사용자 전용 메모')
 
-const changedMeaning = createWorkflowCanvasSystemMap()
+const changedMeaning = structuredClone(boundWorkflowCanvas)
 changedMeaning.nodes.find((node) => node.id === 'map-web-app').data.purpose = '사용자가 직접 바꾼 목적'
 const changedReview = reconcileTwinBuild({
   build: WORKFLOW_SYSTEM_TWIN_BUILD,

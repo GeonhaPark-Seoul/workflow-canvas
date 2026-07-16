@@ -1,9 +1,10 @@
 {
   "first": {
-    "pending": 3,
-    "actionable": 2,
+    "pending": 4,
+    "actionable": 3,
     "blocked": 1,
     "items": [
+      { "itemKey": "build-entity-bindings:5e1fb4590e141690", "status": "twin_binding_missing", "action": "bind_node" },
       { "itemKey": "build-entity:fixture-orders-db", "status": "missing_on_canvas", "action": "add_node" },
       { "itemKey": "build-part:part:orders-api:route", "status": "system_part_missing", "action": "add_part" },
       { "itemKey": "build-relation-blocked:relation:orders-api-writes-db", "status": "blocked_dependency", "action": null }

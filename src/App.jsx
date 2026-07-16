@@ -2436,14 +2436,14 @@ export default function App() {
     : null
   const activeTwinProposal = twinProposalPreviewItem?.proposal ?? null
   const twinProposalPlan = useMemo(() => {
-    if (!activeTwinProposal) return { nodes: [], edges: [], edgeReplacements: [], parts: [], partReplacements: [], partRemovals: [], alreadyPresent: [], error: null }
+    if (!activeTwinProposal) return { nodes: [], edges: [], nodeBindings: [], edgeReplacements: [], parts: [], partReplacements: [], partRemovals: [], alreadyPresent: [], error: null }
     try {
       return {
         ...planDigitalTwinGraphProposal({ nodes, edges }, activeTwinProposal),
         error: null,
       }
     } catch (error) {
-      return { nodes: [], edges: [], edgeReplacements: [], parts: [], partReplacements: [], partRemovals: [], alreadyPresent: [], error: error?.message ?? '수정안을 미리 볼 수 없습니다.' }
+      return { nodes: [], edges: [], nodeBindings: [], edgeReplacements: [], parts: [], partReplacements: [], partRemovals: [], alreadyPresent: [], error: error?.message ?? '수정안을 미리 볼 수 없습니다.' }
     }
   }, [activeTwinProposal, nodes, edges])
   const twinProposalPreviewNodes = useMemo(() => twinProposalPlan.nodes.map((node) => ({
@@ -2477,9 +2477,13 @@ export default function App() {
     }
     return byNode
   }, [twinProposalPlan.parts, twinProposalPlan.partReplacements, twinProposalPlan.partRemovals])
+  const twinProposalPreviewBindingsByNode = useMemo(
+    () => new Map(twinProposalPlan.nodeBindings.map((planned) => [planned.targetNodeId, planned.binding])),
+    [twinProposalPlan.nodeBindings],
+  )
   const twinProposalPreviewAugmentedNodeIds = useMemo(
-    () => new Set(twinProposalPreviewPartsByNode.keys()),
-    [twinProposalPreviewPartsByNode],
+    () => new Set([...twinProposalPreviewPartsByNode.keys(), ...twinProposalPreviewBindingsByNode.keys()]),
+    [twinProposalPreviewBindingsByNode, twinProposalPreviewPartsByNode],
   )
   const twinProposalPreviewEdges = useMemo(() => [
     ...twinProposalPlan.edges,
@@ -2519,6 +2523,7 @@ export default function App() {
       || (
         !twinProposalPlan.nodes.length
         && !twinProposalPlan.edges.length
+        && !twinProposalPlan.nodeBindings.length
         && !twinProposalPlan.edgeReplacements.length
         && !twinProposalPlan.parts.length
         && !twinProposalPlan.partReplacements.length
@@ -2530,6 +2535,7 @@ export default function App() {
     const ids = [...new Set([
       ...twinProposalPlan.nodes.map((node) => node.id),
       ...twinProposalPlan.edges.flatMap((edge) => [edge.source, edge.target]),
+      ...twinProposalPlan.nodeBindings.map((planned) => planned.targetNodeId),
       ...twinProposalPlan.edgeReplacements.flatMap((planned) => [planned.edge.source, planned.edge.target]),
       ...twinProposalPlan.parts.map((planned) => planned.targetNodeId),
       ...twinProposalPlan.partReplacements.map((planned) => planned.targetNodeId),
@@ -2545,6 +2551,7 @@ export default function App() {
     twinProposalPlan.error,
     twinProposalPlan.nodes,
     twinProposalPlan.edges,
+    twinProposalPlan.nodeBindings,
     twinProposalPlan.edgeReplacements,
     twinProposalPlan.parts,
     twinProposalPlan.partReplacements,
@@ -2623,7 +2630,7 @@ export default function App() {
       setTwinProposalStatus({
         type: 'success',
         message: result.writesPerformed
-          ? `지도에 노드 ${result.appliedNodeIds.length}개, 연결선 ${result.appliedEdgeIds.length}개, 시스템 파츠 ${result.appliedPartIds.length}개 변경을 적용했습니다.`
+          ? `지도에 노드 ${result.appliedNodeIds.length}개, 연결선 ${result.appliedEdgeIds.length}개, 시스템 파츠 ${result.appliedPartIds.length}개, 코드 트윈 연결 ${result.appliedNodeBindingIds.length}개 변경을 적용했습니다.`
           : '같은 수정안이 이미 지도에 적용되어 있습니다.',
       })
     } catch (error) {
@@ -3959,22 +3966,31 @@ export default function App() {
       markerEnd: isMemo || !relation.directed ? undefined : { type: MarkerType.ArrowClosed, color },
     }
   })
-  const previewAugmentedNodes = twinProposalPreviewPartsByNode.size
+  const previewAugmentedNodes = twinProposalPreviewAugmentedNodeIds.size
     ? nodes.map((node) => {
+        const previewBinding = twinProposalPreviewBindingsByNode.get(node.id)
         const previewPlan = twinProposalPreviewPartsByNode.get(node.id)
-        if (!previewPlan) return node
-        const { parts: previewParts, previewPartIds } = previewDigitalTwinPartChanges(
-          node.data?.systemParts,
-          previewPlan.additions,
-          previewPlan.replacements,
-          previewPlan.removals,
-        )
+        if (!previewPlan && !previewBinding) return node
+        const previewPartResult = previewPlan
+          ? previewDigitalTwinPartChanges(
+              node.data?.systemParts,
+              previewPlan.additions,
+              previewPlan.replacements,
+              previewPlan.removals,
+            )
+          : null
         return {
           ...node,
           data: {
             ...node.data,
-            systemParts: previewParts,
-            digitalTwinProposalPreviewPartIds: previewPartIds,
+            ...(previewPartResult ? {
+              systemParts: previewPartResult.parts,
+              digitalTwinProposalPreviewPartIds: previewPartResult.previewPartIds,
+            } : {}),
+            ...(previewBinding ? {
+              digitalTwinBinding: previewBinding,
+              digitalTwinProposalPreviewBinding: true,
+            } : {}),
           },
         }
       })

@@ -1,13 +1,14 @@
 import {
   createDigitalTwinGraphProposal,
   digitalTwinProposalEdgeFingerprint,
+  digitalTwinProposalNodeIdentityFingerprint,
 } from './digitalTwinProposal.js'
 import {
   DIGITAL_TWIN_REVIEW_SCHEMA_VERSION,
   createDigitalTwinReviewItem,
   digitalTwinReviewFingerprint,
 } from './digitalTwinReview.js'
-import { normalizeSystemPart, normalizeSystemParts } from './systemPartOntology.js'
+import { normalizeDigitalTwinBinding, normalizeSystemPart, normalizeSystemParts } from './systemPartOntology.js'
 import { createTwinBuild } from './twinBuild.js'
 import {
   findTwinBuildEntityNode,
@@ -18,6 +19,7 @@ import {
 } from './twinBuildCanvas.js'
 
 export const TWIN_BUILD_RECONCILIATION_SCHEMA_VERSION = 1
+const MAX_BINDING_OPERATIONS = 24
 
 function compactKey(kind, id) {
   const value = `${kind}:${id}`
@@ -62,6 +64,93 @@ function createItem(build, value) {
     evidence: evidenceRefs(build, value.evidenceIds ?? []),
     ...value,
   })
+}
+
+function withoutNodeBinding(node) {
+  const { digitalTwinBinding, ...data } = node?.data ?? {}
+  return { ...node, data }
+}
+
+function matchingBindingIdentity(current, expected) {
+  return digitalTwinProposalNodeIdentityFingerprint(withoutNodeBinding(current))
+    === digitalTwinProposalNodeIdentityFingerprint(withoutNodeBinding(expected))
+}
+
+function sameObservedEntity(current, expected) {
+  return current?.sourceId === expected?.sourceId
+    && current?.entityKey === expected?.entityKey
+    && current?.observedFingerprint === expected?.observedFingerprint
+}
+
+function entityBindingCandidate(build, entity, node) {
+  if (!node) return null
+  const expectedNode = materializeTwinBuildEntity(build, entity)
+  if (!matchingBindingIdentity(node, expectedNode)) return null
+  const currentBinding = normalizeDigitalTwinBinding(node.data?.digitalTwinBinding)
+  const expectedBinding = normalizeDigitalTwinBinding(expectedNode.data?.digitalTwinBinding)
+  if (!expectedBinding || sameObservedEntity(currentBinding, expectedBinding)) return null
+  if (
+    currentBinding
+    && (
+      currentBinding.sourceId !== expectedBinding.sourceId
+      || currentBinding.entityKey !== expectedBinding.entityKey
+    )
+  ) return null
+  return { entity, node, currentBinding, expectedBinding }
+}
+
+function entityBindingBatchReview(build, candidates) {
+  const ordered = [...candidates].sort((left, right) => {
+    const priority = (candidate) => candidate.node.id === 'map-canvas-engine'
+      ? 0
+      : candidate.node.type === 'system' ? 1 : 2
+    return priority(left) - priority(right) || left.node.id.localeCompare(right.node.id)
+  })
+  const batch = ordered.slice(0, MAX_BINDING_OPERATIONS)
+  if (!batch.length) return null
+  const missingCount = batch.filter((candidate) => !candidate.currentBinding).length
+  const staleCount = batch.length - missingCount
+  const entityIds = batch.map((candidate) => candidate.entity.id)
+  const item = createItem(build, {
+    itemKey: compactKey('build-entity-bindings', digitalTwinReviewFingerprint(entityIds)),
+    category: 'entity',
+    changeType: 'changed',
+    severity: 'attention',
+    title: `코드 트윈 연결 ${batch.length}개`,
+    summary: `기존 노드의 위치, 크기, 설명과 메모는 유지하고 코드 근거 연결만 추가하거나 갱신합니다. 누락 ${missingCount}개${staleCount ? ` · 갱신 ${staleCount}개` : ''}.`,
+    evidenceIds: [...new Set(batch.flatMap((candidate) => candidate.entity.evidenceIds ?? []))],
+    focus: { nodeId: batch.find((candidate) => candidate.node.id === 'map-canvas-engine')?.node.id ?? batch[0].node.id },
+    status: missingCount ? 'twin_binding_missing' : 'twin_binding_stale',
+    observation: {
+      buildFingerprint: build.fingerprint,
+      snapshotId: build.source.snapshotId,
+      totalCandidates: ordered.length,
+      entityIds,
+      missingCount,
+      staleCount,
+    },
+  })
+  const operations = batch.map((candidate) => {
+    const expectedNode = materializeTwinBuildEntity(build, candidate.entity, item)
+    return {
+      action: 'bind_node',
+      targetNodeId: candidate.node.id,
+      expectedNodeFingerprint: digitalTwinProposalNodeIdentityFingerprint(candidate.node),
+      label: `${candidate.entity.label} 코드 트윈 연결`,
+      binding: expectedNode.data.digitalTwinBinding,
+    }
+  })
+  const proposal = createDigitalTwinGraphProposal({
+    sourceId: build.source.id,
+    proposalKey: compactKey('bind-build-entities', digitalTwinReviewFingerprint(entityIds)),
+    itemId: item.id,
+    itemFingerprint: item.fingerprint,
+    snapshotId: build.source.snapshotId,
+    title: item.title,
+    summary: '표시된 기존 노드에 검증된 TwinBuild 식별자와 코드 스냅샷 지문만 연결합니다. 다른 노드 필드는 변경하지 않습니다.',
+    operations,
+  })
+  return { ...item, proposal }
 }
 
 function entityReview(build, entity, canvas, nodeByEntityId) {
@@ -276,10 +365,13 @@ export function reconcileTwinBuild({ build: inputBuild, canvas }) {
     entity.id,
     findTwinBuildEntityNode(build, entity, canvas),
   ]).filter(([, node]) => !!node))
+  const bindingReview = entityBindingBatchReview(build, build.entities
+    .map((entity) => entityBindingCandidate(build, entity, nodeByEntityId.get(entity.id)))
+    .filter(Boolean))
   const entityItems = build.entities.map((entity) => entityReview(build, entity, canvas, nodeByEntityId)).filter(Boolean)
   const partItems = build.parts.map((part) => partReview(build, part, nodeByEntityId)).filter(Boolean)
   const relationItems = build.relations.map((relation) => relationReview(build, relation, canvas, nodeByEntityId)).filter(Boolean)
-  const items = [...entityItems, ...partItems, ...relationItems].sort((left, right) => (
+  const items = [...(bindingReview ? [bindingReview] : []), ...entityItems, ...partItems, ...relationItems].sort((left, right) => (
     severityRank(left.severity) - severityRank(right.severity)
     || left.category.localeCompare(right.category)
     || left.title.localeCompare(right.title)
@@ -290,7 +382,7 @@ export function reconcileTwinBuild({ build: inputBuild, canvas }) {
     pending: items.length,
     actionable: items.filter((item) => !!item.proposal).length,
     blocked: items.filter((item) => item.status === 'blocked_dependency').length,
-    entityFindings: entityItems.length,
+    entityFindings: entityItems.length + (bindingReview ? 1 : 0),
     partFindings: partItems.length,
     relationFindings: relationItems.length,
     unmanagedCanvasNodes: (canvas?.nodes ?? []).filter((node) => !managedNodeIds.has(node.id)).length,

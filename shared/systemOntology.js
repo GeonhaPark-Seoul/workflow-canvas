@@ -1,4 +1,4 @@
-import { normalizeSystemParts } from './systemPartOntology.js'
+import { normalizeDigitalTwinBinding, normalizeSystemParts } from './systemPartOntology.js'
 import { normalizeTrustZone } from './trustTopology.js'
 
 export const SYSTEM_KIND_DEFS = Object.freeze([
@@ -138,6 +138,9 @@ export function normalizeSystemNodeData(data = {}) {
   if (trustZone) normalized.trustZone = trustZone
   else delete normalized.trustZone
   if (Array.isArray(data.systemParts)) normalized.systemParts = normalizeSystemParts(data.systemParts)
+  const digitalTwinBinding = normalizeDigitalTwinBinding(data.digitalTwinBinding)
+  if (digitalTwinBinding) normalized.digitalTwinBinding = digitalTwinBinding
+  else delete normalized.digitalTwinBinding
   const logicalComponent = normalizeLogicalComponent(data.logicalComponent)
   if (logicalComponent) normalized.logicalComponent = logicalComponent
   else delete normalized.logicalComponent
@@ -184,4 +187,28 @@ export function systemNodeReality(data = {}) {
   return status === 'healthy' && runtime.verification === 'verified'
     ? { id: 'twin', label: 'LIVE', color: '#22c55e' }
     : { id: 'unknown', label: '미확인', color: '#94a3b8' }
+}
+
+export function systemNodeTwinLink(data = {}) {
+  const binding = normalizeDigitalTwinBinding(data.digitalTwinBinding)
+  if (!binding) {
+    return {
+      id: 'unbound',
+      label: '연결 안 됨',
+      color: '#94a3b8',
+      linked: false,
+      title: '코드, 커넥터 또는 실행 근거와 연결되지 않은 캔버스 모델입니다.',
+    }
+  }
+  return {
+    id: 'code-twin',
+    label: 'CODE',
+    color: '#38bdf8',
+    linked: true,
+    sourceId: binding.sourceId,
+    entityKey: binding.entityKey,
+    observedFingerprint: binding.observedFingerprint,
+    observedSnapshotId: binding.observedSnapshotId,
+    title: '코드 또는 manifest 근거에 연결된 디지털 트윈 스냅샷입니다. 실제 실행 상태를 확인한 LIVE와는 다릅니다.',
+  }
 }

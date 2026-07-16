@@ -11,6 +11,7 @@ import {
   SYSTEM_SOURCE_DEFS,
   systemKindDefinition,
   systemNodeReality,
+  systemNodeTwinLink,
 } from '../../shared/systemOntology.js'
 import {
   normalizeSystemPart,
@@ -100,6 +101,10 @@ export default function SystemNode({ data, selected, id }) {
   const shapeOnly = data.forceShapeOnly || zoomShapeOnly
   const kind = systemKindDefinition(data.systemKind)
   const reality = systemNodeReality(data)
+  const twinLink = systemNodeTwinLink(data)
+  const headlineStatus = twinLink.linked && ['declared', 'logical'].includes(reality.id)
+    ? twinLink
+    : reality
   const logicalComponent = data.logicalComponent ?? null
   const componentKind = byId(SYSTEM_COMPONENT_KIND_DEFS, logicalComponent?.kind)?.label ?? 'Engine'
   const componentMaturity = byId(SYSTEM_COMPONENT_MATURITY_DEFS, logicalComponent?.maturity)?.label ?? '프로토타입'
@@ -262,8 +267,10 @@ export default function SystemNode({ data, selected, id }) {
     <div
       className="canvas-node-card system-node-card"
       data-reality={reality.id}
+      data-twin-link={twinLink.id}
       data-proposal-preview={data.digitalTwinProposalPreview ? 'true' : undefined}
       data-part-proposal-preview={previewPartIds.size ? 'true' : undefined}
+      data-binding-proposal-preview={data.digitalTwinProposalPreviewBinding ? 'true' : undefined}
       style={{
         width: '100%',
         height: '100%',
@@ -306,6 +313,9 @@ export default function SystemNode({ data, selected, id }) {
       )}
       {!data.digitalTwinProposalPreview && previewPartIds.size > 0 && (
         <span className="digital-twin-proposal-node-badge">파츠 미리보기</span>
+      )}
+      {!data.digitalTwinProposalPreview && !previewPartIds.size && data.digitalTwinProposalPreviewBinding && (
+        <span className="digital-twin-proposal-node-badge">트윈 연결 미리보기</span>
       )}
 
       {PORTS.map((port) => (
@@ -380,15 +390,15 @@ export default function SystemNode({ data, selected, id }) {
             </span>
             <span style={{
               flexShrink: 0,
-              color: reality.color,
-              background: `${reality.color}18`,
-              border: `1px solid ${reality.color}66`,
+              color: headlineStatus.color,
+              background: `${headlineStatus.color}18`,
+              border: `1px solid ${headlineStatus.color}66`,
               borderRadius: 4,
               padding: '1px 5px',
               fontSize: 9,
               fontWeight: 800,
-            }}>
-              {reality.label}
+            }} title={headlineStatus.title ?? headlineStatus.label}>
+              {headlineStatus.label}
             </span>
             <ScopedParticipants
               participants={data.scopedParticipants}

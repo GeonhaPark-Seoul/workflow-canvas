@@ -63,6 +63,7 @@ export const WORKFLOW_ENGINE_REGISTRY = deepFreeze({
       codeEvidence: ['shared/twinBuild.js', 'shared/twinBuildReconciler.js', 'shared/twinBuildCanvas.js'],
       testEvidence: ['scripts/test-twin-build.mjs', 'scripts/test-twin-adapter-contract.mjs'],
       compatibility: ['Engine Schema v2', 'TwinBuild v3', 'Adapter Contract v1'],
+      technicalVersion: '0.2.0-alpha.0',
       row: 0,
       column: 0,
     }),
@@ -103,6 +104,7 @@ export const WORKFLOW_ENGINE_REGISTRY = deepFreeze({
       codeEvidence: ['shared/twinBuildReconciler.js', 'shared/digitalTwinProposal.js'],
       testEvidence: ['scripts/test-twin-build.mjs'],
       compatibility: ['Reconciliation Schema v1'],
+      technicalVersion: '0.2.0-alpha.0',
       order: 3,
     }),
     component({
