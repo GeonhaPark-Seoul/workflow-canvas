@@ -4,6 +4,15 @@ Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-s
 
 **Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
 
+## 0. Master Document, Roles, And Reading Protocol
+
+**`docs/MASTER.md` is the single source of direction, terminology, features, and roadmap.**
+
+- Before any task, read this file (CLAUDE.md) plus MASTER.md — for MASTER.md, §2 (terminology) and §4 (principles) plus only the sections relevant to the task are enough.
+- Do NOT read other docs by default. MASTER.md §11 defines a tiered reading protocol: contracts, ledgers, and appendix docs are read only when the task touches them. Saving tokens is a rule, not an optimization.
+- If direction or terminology in any other document conflicts with MASTER.md, MASTER.md wins; report the conflict instead of silently picking one.
+- Fixed role split (MASTER.md §12): the user + Claude Code do planning and write design briefs; **Codex designs and implements** from a brief and produces a patch + handoff document (base commit, SHA-256, verification results — keep the existing handoff conventions); **Claude Code reviews, commits, pushes, deploys**, guides SQL execution, and bumps the MASTER.md version. Codex does not commit, push, deploy, or run production SQL.
+
 ## 1. Think Before Coding
 
 **Don't assume. Don't hide confusion. Surface tradeoffs.**
