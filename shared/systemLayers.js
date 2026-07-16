@@ -39,13 +39,26 @@ const INFRASTRUCTURE_TRUST_ZONES = new Set([
 ])
 const ANNOTATION_NODE_TYPES = new Set(['stage', 'memo', 'content', 'group'])
 const SYSTEM_LAYER_VIEW_PREFIX = 'view:system-layer:'
+// Custom (user-created) layer ids: `u` + 4-24 base36 chars. Layers are a
+// general canvas feature (MASTER.md §2.4); L1-L4 are the protected presets
+// of system maps, everything else is user-defined.
+const CUSTOM_LAYER_ID_PATTERN = /^u[0-9a-z]{4,24}$/
+const CUSTOM_LAYER_COLORS = Object.freeze([
+  '#f59e0b', '#ec4899', '#14b8a6', '#8b5cf6', '#ef4444', '#84cc16', '#0ea5e9', '#f97316',
+])
+
+export function isOfficialSystemLayerId(value) {
+  return typeof value === 'string' && LAYER_BY_ID.has(value)
+}
 
 export function normalizeSystemLayerId(value) {
-  return typeof value === 'string' && LAYER_BY_ID.has(value) ? value : null
+  if (typeof value !== 'string') return null
+  if (LAYER_BY_ID.has(value)) return value
+  return CUSTOM_LAYER_ID_PATTERN.test(value) ? value : null
 }
 
 export function systemLayerDefinition(value) {
-  return LAYER_BY_ID.get(normalizeSystemLayerId(value)) ?? null
+  return LAYER_BY_ID.get(value) ?? null
 }
 
 export function normalizeNodePresentation(value) {
@@ -109,6 +122,68 @@ export function ensureSystemLayerViews(views = []) {
   return missing.length ? [...current, ...missing] : current
 }
 
+export function createCustomSystemLayerView(name) {
+  const trimmed = String(name ?? '').replace(/\s+/g, ' ').trim().slice(0, 40)
+  if (!trimmed) return null
+  const layerId = `u${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`.slice(0, 25)
+  return {
+    id: `${SYSTEM_LAYER_VIEW_PREFIX}custom:${layerId}`,
+    name: trimmed,
+    viewKind: 'system-layer',
+    systemLayer: layerId,
+  }
+}
+
+export function isCustomSystemLayerView(view) {
+  return isSystemLayerView(view) && !isOfficialSystemLayerId(view.systemLayer)
+}
+
+// Ordered switcher entries derived from the canvas's own views: official
+// presets first (L1-L4 order), then custom layers in view order. The result
+// also feeds portal labels/ordering so custom layers never fall back to ids.
+export function systemLayerOptionsFromViews(views = []) {
+  const layerViews = (Array.isArray(views) ? views : []).filter(isSystemLayerView)
+  const official = []
+  const custom = []
+  const seen = new Set()
+  for (const view of layerViews) {
+    const id = systemLayerFromView(view)
+    if (!id || seen.has(id)) continue
+    seen.add(id)
+    const def = systemLayerDefinition(id)
+    if (def) {
+      official.push({ ...def, short: def.id, official: true })
+    } else {
+      custom.push({
+        id,
+        label: view.name || '사용자 층',
+        short: (view.name || '층').slice(0, 2),
+        color: CUSTOM_LAYER_COLORS[custom.length % CUSTOM_LAYER_COLORS.length],
+        question: '',
+        official: false,
+      })
+    }
+  }
+  official.sort((left, right) => left.order - right.order)
+  return [...official.map((item, i) => ({ ...item })), ...custom.map((item, index) => ({
+    ...item,
+    order: 100 + index,
+  }))]
+}
+
+// Pure helper for deleting a custom layer: clears matching overrides so nodes
+// return to the derived default (assets) or the everywhere-visible legacy
+// mode (annotations) instead of vanishing behind a dead layer id.
+export function removeSystemLayerFromNodes(nodes = [], layerId) {
+  const normalized = normalizeSystemLayerId(layerId)
+  if (!normalized) return nodes
+  return (nodes ?? []).map((node) => {
+    const override = normalizeNodePresentation(node?.data?.presentation)?.layerOverride
+    if (override !== normalized) return node
+    return { ...node, data: withSystemLayerOverride(node.data, null) }
+  })
+}
+
 // Stable group ids from the self system map template (present since the map
 // template's first commit, well before systemMapSnapshot metadata existed).
 // A map created before that metadata field shipped still carries these ids,
@@ -117,8 +192,9 @@ const LEGACY_SYSTEM_MAP_GROUP_IDS = new Set([
   'map-group-experience', 'map-group-runtime', 'map-group-data', 'map-group-development',
 ])
 
-export function canvasSupportsSystemLayers(nodes = [], views = []) {
-  if ((views ?? []).some(isSystemLayerView)) return true
+// True only for the self system map template — gates the official L1-L4
+// preset backfill. Generic canvases never get presets forced onto them.
+export function isSystemMapTemplateCanvas(nodes = []) {
   return (nodes ?? []).some((node) => (
     node?.data?.redacted !== true
     && (
@@ -126,6 +202,13 @@ export function canvasSupportsSystemLayers(nodes = [], views = []) {
       || LEGACY_SYSTEM_MAP_GROUP_IDS.has(node?.id)
     )
   ))
+}
+
+// Layers are enabled wherever any layer view exists (user-created included),
+// or on a recognized system map template (which then backfills presets).
+export function canvasSupportsSystemLayers(nodes = [], views = []) {
+  if ((views ?? []).some(isSystemLayerView)) return true
+  return isSystemMapTemplateCanvas(nodes)
 }
 
 function nodeIsRedacted(node) {
@@ -161,7 +244,12 @@ function addAncestorIds(visibleNodeIds, nodeById) {
   }
 }
 
-export function createSystemLayerProjection(nodes = [], edges = [], activeLayerId = null) {
+// layerMeta: optional Map(layerId -> {short, label, order}) so custom (user)
+// layers resolve to their names/order in portals instead of raw ids. Falls
+// back to the official definition, then the id itself.
+export function createSystemLayerProjection(nodes = [], edges = [], activeLayerId = null, layerMeta = null) {
+  const metaFor = (id) => (layerMeta?.get?.(id)) ?? systemLayerDefinition(id) ?? null
+  const orderOf = (id) => metaFor(id)?.order ?? 999
   const activeLayer = normalizeSystemLayerId(activeLayerId)
   if (!activeLayer) {
     return {
@@ -195,13 +283,14 @@ export function createSystemLayerProjection(nodes = [], edges = [], activeLayerI
   const addPortal = (anchorId, targetId, targetLayer, edge, relationDirection) => {
     if (!visibleNodeIds.has(anchorId) || !targetLayer) return
     const key = `${anchorId}:${targetLayer}`
-    const layer = systemLayerDefinition(targetLayer)
+    const layer = metaFor(targetLayer)
     const group = portalGroups.get(key) ?? {
       id: key,
       nodeId: anchorId,
       targetLayer,
+      targetLayerShort: layer?.short ?? targetLayer,
       targetLayerLabel: layer?.label ?? targetLayer,
-      depthDirection: (layer?.order ?? 0) > (systemLayerDefinition(activeLayer)?.order ?? 0) ? 'down' : 'up',
+      depthDirection: orderOf(targetLayer) > orderOf(activeLayer) ? 'down' : 'up',
       targets: new Map(),
     }
     const target = group.targets.get(targetId) ?? {
@@ -246,9 +335,7 @@ export function createSystemLayerProjection(nodes = [], edges = [], activeLayerI
     portalsByNode.set(group.nodeId, entries)
   }
   for (const entries of portalsByNode.values()) {
-    entries.sort((left, right) => (
-      (systemLayerDefinition(left.targetLayer)?.order ?? 0) - (systemLayerDefinition(right.targetLayer)?.order ?? 0)
-    ))
+    entries.sort((left, right) => orderOf(left.targetLayer) - orderOf(right.targetLayer))
   }
 
   return { activeLayer, visibleNodeIds, visibleEdgeIds, focusNodeIds, portalsByNode }

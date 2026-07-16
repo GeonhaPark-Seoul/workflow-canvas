@@ -5,11 +5,12 @@ export default function Toolbar({
   onAddStage, onAddMemo, onClearAll, onUndo, mobile,
   views = [], currentViewId, onSelectView, onRenameView, onDeleteView,
   systemLayers = [], activeSystemLayer = null, onSelectSystemLayer = () => {},
+  onCreateSystemLayer = null,
   onPaletteAdd = () => {},
   systemRuntime = null,
 }) {
   const viewProps = { views, currentViewId, onSelectView, onRenameView, onDeleteView, mobile }
-  const layerProps = { layers: systemLayers, activeLayer: activeSystemLayer, onSelectLayer: onSelectSystemLayer, mobile }
+  const layerProps = { layers: systemLayers, activeLayer: activeSystemLayer, onSelectLayer: onSelectSystemLayer, onCreateLayer: onCreateSystemLayer, mobile }
   const [paletteOpen, setPaletteOpen] = useState(false)
   const closePalette = () => setPaletteOpen(false)
   const handlePick = (payload) => { onPaletteAdd(payload); closePalette() }
@@ -142,7 +143,9 @@ function ViewSelector({ views, currentViewId, onSelectView, onRenameView, onDele
       )}
 
       {views.map((v) => {
-        const fixedLayerView = v.viewKind === 'system-layer'
+        // Only the official L1-L4 presets are name/delete locked; custom
+        // (user-created) layers use the ':custom:' id segment and stay editable.
+        const fixedLayerView = v.viewKind === 'system-layer' && !v.id.includes(':custom:')
         return (
         <div key={v.id} style={{ display: 'flex', alignItems: 'center', gap: 2, padding: '1px 2px' }}>
           {renameId === v.id && !fixedLayerView ? (
@@ -270,12 +273,17 @@ function ViewSelector({ views, currentViewId, onSelectView, onRenameView, onDele
   )
 }
 
-function LayerSwitcher({ layers, activeLayer, onSelectLayer, mobile }) {
+function LayerSwitcher({ layers, activeLayer, onSelectLayer, onCreateLayer, mobile }) {
+  const promptNewLayer = () => {
+    if (!onCreateLayer) return
+    const name = window.prompt('새 층 이름')
+    if (name && name.trim()) onCreateLayer(name.trim())
+  }
   return (
     <div
       className="system-layer-switcher"
       role="tablist"
-      aria-label="시스템 지도 층"
+      aria-label="캔버스 층"
       style={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}
     >
       {layers.map((layer) => {
@@ -287,12 +295,12 @@ function LayerSwitcher({ layers, activeLayer, onSelectLayer, mobile }) {
             role="tab"
             aria-selected={active}
             className="main-hover-control"
-            title={`${layer.id} ${layer.label} · ${layer.question}`}
+            title={[layer.short, layer.label, layer.question].filter(Boolean).join(' · ')}
             onClick={() => onSelectLayer(layer.id)}
             style={{
-              width: mobile ? 27 : 31,
+              minWidth: mobile ? 27 : 31,
               height: mobile ? 31 : 29,
-              padding: 0,
+              padding: layer.official ? 0 : '0 6px',
               display: 'grid',
               placeItems: 'center',
               border: `1px solid ${active ? layer.color : `${layer.color}55`}`,
@@ -303,12 +311,38 @@ function LayerSwitcher({ layers, activeLayer, onSelectLayer, mobile }) {
               fontWeight: 800,
               cursor: 'pointer',
               fontFamily: 'inherit',
+              whiteSpace: 'nowrap',
             }}
           >
-            {layer.id}
+            {layer.short}
           </button>
         )
       })}
+      {onCreateLayer && (
+        <button
+          type="button"
+          className="main-hover-control"
+          title="새 층 만들기"
+          aria-label="새 층 만들기"
+          onClick={promptNewLayer}
+          style={{
+            width: mobile ? 27 : 29,
+            height: mobile ? 31 : 29,
+            padding: 0,
+            display: 'grid',
+            placeItems: 'center',
+            border: '1px dashed #ffffff33',
+            borderRadius: 5,
+            background: 'transparent',
+            color: '#9ca3af',
+            fontSize: 14,
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+          }}
+        >
+          ＋
+        </button>
+      )}
     </div>
   )
 }

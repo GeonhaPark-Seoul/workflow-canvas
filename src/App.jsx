@@ -85,13 +85,17 @@ import { createSystemNodeData } from '../shared/systemOntology.js'
 import {
   annotationDataForSystemLayer,
   canvasSupportsSystemLayers,
+  createCustomSystemLayerView,
   createSystemLayerProjection,
   effectiveSystemLayerForNode,
   ensureSystemLayerViews,
   isCanvasAnnotationNode,
+  isCustomSystemLayerView,
   isSystemLayerView,
+  isSystemMapTemplateCanvas,
   normalizeSystemLayerId,
-  SYSTEM_LAYER_DEFINITIONS,
+  removeSystemLayerFromNodes,
+  systemLayerOptionsFromViews,
   systemLayerFromView,
   withSystemLayerOverride,
 } from '../shared/systemLayers.js'
@@ -584,10 +588,15 @@ export default function App() {
   const currentView = views.find((view) => view.id === currentViewId) ?? null
   const activeSystemLayer = systemLayerFromView(currentView)
   const systemLayersEnabled = canvasSupportsSystemLayers(nodes, views)
-  const annotationCreationLayer = systemLayersEnabled ? (activeSystemLayer ?? 'L1') : null
+  const systemLayerOptions = useMemo(() => systemLayerOptionsFromViews(views), [views])
+  // New annotations join the layer you are currently viewing; in fit-all they
+  // stay unassigned (visible on every layer, legacy-compatible).
+  const annotationCreationLayer = systemLayersEnabled ? activeSystemLayer : null
 
+  // Only the self system map template gets the official L1-L4 preset backfill.
+  // Generic canvases enable layers solely through user-created layer views.
   useEffect(() => {
-    if (!canvasSupportsSystemLayers(nodes, views)) return
+    if (!isSystemMapTemplateCanvas(nodes)) return
     setViews((current) => ensureSystemLayerViews(current))
   }, [nodes, views])
 
@@ -4085,20 +4094,37 @@ export default function App() {
     recallView(v)
   }, [views, fitView, recallView])
 
+  // Official L1-L4 presets are name-locked; custom (user-created) layers and
+  // ordinary saved views can be renamed and deleted.
+  const isLockedView = useCallback((v) => isSystemLayerView(v) && !isCustomSystemLayerView(v), [])
+
   const renameView = useCallback((id, name) => {
     if (!name.trim()) return
     setViews((prev) => prev.map((v) => (
-      v.id === id && !isSystemLayerView(v) ? { ...v, name: name.trim() } : v
+      v.id === id && !isLockedView(v) ? { ...v, name: name.trim() } : v
     )))
-  }, [])
+  }, [isLockedView])
 
   const deleteView = useCallback((id) => {
-    setViews((prev) => prev.filter((v) => v.id !== id || isSystemLayerView(v)))
-    setCurrentViewId((cur) => {
-      const deleting = views.find((view) => view.id === id)
-      return cur === id && !isSystemLayerView(deleting) ? null : cur
-    })
-  }, [views])
+    const target = views.find((view) => view.id === id)
+    if (!target || isLockedView(target)) return
+    // Deleting a custom layer clears its overrides so nodes fall back to their
+    // derived default or the everywhere-visible legacy mode, not a dead id.
+    if (isCustomSystemLayerView(target)) {
+      const layerId = systemLayerFromView(target)
+      setNodes((current) => removeSystemLayerFromNodes(current, layerId))
+    }
+    setViews((prev) => prev.filter((v) => v.id !== id))
+    setCurrentViewId((cur) => (cur === id ? null : cur))
+  }, [views, isLockedView, setNodes])
+
+  const createSystemLayer = useCallback((name) => {
+    const view = createCustomSystemLayerView(name)
+    if (!view) return
+    setViews((prev) => [...prev, view])
+    setCurrentViewId(view.id)
+    recallView(view)
+  }, [recallView])
 
   const selectSystemLayer = useCallback((layerId) => {
     const normalized = normalizeSystemLayerId(layerId)
@@ -4265,10 +4291,15 @@ export default function App() {
   const candidateCanvasEdges = twinProposalPreviewEdges.length
     ? [...styledEdges, ...twinProposalPreviewEdges]
     : styledEdges
+  const systemLayerMeta = useMemo(
+    () => new Map(systemLayerOptions.map((layer) => [layer.id, layer])),
+    [systemLayerOptions],
+  )
   const systemLayerProjection = createSystemLayerProjection(
     candidateCanvasNodes,
     candidateCanvasEdges,
     activeSystemLayer,
+    systemLayerMeta,
   )
   const renderedCanvasNodes = activeSystemLayer
     ? candidateCanvasNodes.map((node) => ({
@@ -4408,9 +4439,10 @@ export default function App() {
         onSelectView={selectView}
         onRenameView={renameView}
         onDeleteView={deleteView}
-        systemLayers={systemLayersEnabled ? SYSTEM_LAYER_DEFINITIONS : []}
+        systemLayers={systemLayersEnabled ? systemLayerOptions : []}
         activeSystemLayer={activeSystemLayer}
         onSelectSystemLayer={selectSystemLayer}
+        onCreateSystemLayer={canEditFullCanvas ? createSystemLayer : null}
         onPaletteAdd={onPaletteAdd}
         systemRuntime={systemRuntimeSummary ? {
           ...systemRuntimeSummary,
@@ -5000,10 +5032,10 @@ export default function App() {
               <div style={{ padding: '4px 8px', color: '#777', fontSize: 10, fontWeight: 700 }}>
                 층 지정
               </div>
-              {SYSTEM_LAYER_DEFINITIONS.map((layer) => (
+              {systemLayerOptions.map((layer) => (
                 <ContextItem
                   key={layer.id}
-                  icon={ctxSystemLayers.size === 1 && ctxSystemLayers.has(layer.id) ? '✓' : layer.id}
+                  icon={ctxSystemLayers.size === 1 && ctxSystemLayers.has(layer.id) ? '✓' : layer.short}
                   label={layer.label}
                   color={layer.color}
                   onClick={() => changeContextSystemLayer(layer.id)}

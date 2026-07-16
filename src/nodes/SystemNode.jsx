@@ -118,7 +118,8 @@ function LayerPortalControls({ portals = [], onOpen }) {
       {portals.map((portal) => {
         const arrow = portal.depthDirection === 'down' ? '↓' : '↑'
         const expanded = expandedId === portal.id
-        const title = `${portal.targetLayer} ${portal.targetLayerLabel}로 이동 · 보이는 연결 대상 ${portal.count}개`
+        const short = portal.targetLayerShort ?? portal.targetLayer
+        const title = `${portal.targetLayerLabel}로 이동 · 보이는 연결 대상 ${portal.count}개`
         return (
           <div key={portal.id} className="system-layer-portal-wrap">
             <button
@@ -132,7 +133,7 @@ function LayerPortalControls({ portals = [], onOpen }) {
                 else setExpandedId(expanded ? null : portal.id)
               }}
             >
-              <span>{portal.targetLayer}</span>
+              <span>{short}</span>
               <span aria-hidden="true">{arrow}</span>
               {portal.count > 1 && <strong>{portal.count}</strong>}
             </button>
@@ -147,7 +148,7 @@ function LayerPortalControls({ portals = [], onOpen }) {
                     onClick={() => onOpen(portal.targetLayer, target.nodeId)}
                   >
                     <span>{target.label || target.nodeId}</span>
-                    <small>{portal.targetLayer}</small>
+                    <small>{short}</small>
                   </button>
                 ))}
               </div>

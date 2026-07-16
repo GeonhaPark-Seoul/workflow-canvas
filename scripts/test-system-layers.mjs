@@ -3,12 +3,18 @@ import assert from 'node:assert/strict'
 import {
   annotationDataForSystemLayer,
   canvasSupportsSystemLayers,
+  createCustomSystemLayerView,
   createSystemLayerProjection,
   createSystemLayerViews,
   deriveDefaultSystemLayer,
   effectiveSystemLayerForNode,
   ensureSystemLayerViews,
+  isCustomSystemLayerView,
+  isSystemMapTemplateCanvas,
   normalizeNodePresentation,
+  normalizeSystemLayerId,
+  removeSystemLayerFromNodes,
+  systemLayerOptionsFromViews,
   SYSTEM_LAYER_DEFINITIONS,
   withSystemLayerOverride,
 } from '../shared/systemLayers.js'
@@ -115,4 +121,41 @@ assert.equal(canvasSupportsSystemLayers([{ id: 'map-group-experience', type: 'gr
 assert.equal(canvasSupportsSystemLayers([{ id: 'random-node', type: 'stage', data: {} }], []), false,
   '일반 사용자 캔버스는 층 기능이 활성화되지 않아야 합니다.')
 
-console.log('System layer derivation, saved views and redaction-safe portal checks passed')
+// Custom (user-created) layers: a general canvas feature, not self-map only.
+const customView = createCustomSystemLayerView('  업무 흐름  ')
+assert.equal(customView.name, '업무 흐름')
+assert.equal(customView.viewKind, 'system-layer')
+assert.equal(isCustomSystemLayerView(customView), true)
+assert.ok(customView.id.includes(':custom:'))
+const customId = customView.systemLayer
+assert.equal(normalizeSystemLayerId(customId), customId, '커스텀 층 id는 유효한 층으로 인식되어야 합니다.')
+assert.equal(createCustomSystemLayerView('   '), null, '빈 이름은 층을 만들지 않습니다.')
+
+// A generic canvas (no system map template) enables layers purely via a
+// user-created layer view, and presets are NOT force-added there.
+assert.equal(isSystemMapTemplateCanvas([{ id: 'n1', type: 'stage', data: {} }]), false)
+assert.equal(canvasSupportsSystemLayers([{ id: 'n1', type: 'stage', data: {} }], [customView]), true,
+  '사용자가 만든 층 뷰가 있으면 일반 캔버스에서도 층이 활성화되어야 합니다.')
+
+// Options: official presets ordered first, then custom layers with names/order.
+const options = systemLayerOptionsFromViews([...createSystemLayerViews(), customView])
+assert.deepEqual(options.slice(0, 4).map((o) => o.id), ['L1', 'L2', 'L3', 'L4'])
+assert.equal(options[0].official, true)
+const customOption = options.find((o) => o.id === customId)
+assert.equal(customOption.official, false)
+assert.equal(customOption.label, '업무 흐름')
+assert.ok(customOption.order >= 100, '커스텀 층은 프리셋 뒤에 정렬되어야 합니다.')
+
+// Assigning a node to a custom layer, then a projection on that layer.
+const nodeOnCustom = { id: 'cn', type: 'system', data: withSystemLayerOverride({ systemKind: 'frontend' }, customId) }
+assert.equal(effectiveSystemLayerForNode(nodeOnCustom), customId)
+const customProjection = createSystemLayerProjection([nodeOnCustom], [], customId,
+  new Map(options.map((o) => [o.id, o])))
+assert.equal(customProjection.visibleNodeIds.has('cn'), true)
+
+// Deleting a custom layer clears its overrides so the node returns to its
+// derived default instead of a dead layer id.
+const cleared = removeSystemLayerFromNodes([nodeOnCustom], customId)
+assert.equal(effectiveSystemLayerForNode(cleared[0]), 'L2', '커스텀 층 삭제 후 노드는 결정적 기본값으로 돌아가야 합니다.')
+
+console.log('System layer derivation, saved views, custom layers and redaction-safe portal checks passed')
