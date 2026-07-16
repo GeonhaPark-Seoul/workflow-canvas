@@ -1,5 +1,7 @@
-import { useState, useEffect, useCallback } from 'react'
-import { createShare, createLinkShare, listShares, deleteShare, listShareMembers } from '../lib/shares'
+import { useState, useEffect, useCallback, useMemo } from 'react'
+import { listShares, deleteShare, listShareMembers } from '../lib/shares'
+import { createCanvasInvitation } from '../lib/sharedCanvasApi'
+import { listFriendships } from '../lib/friendships'
 import { Avatar } from './AuthPanel'
 
 // Sharing controls positioned near the canvas/group/node header. Online state
@@ -11,9 +13,10 @@ const SCOPE_LABEL = {
   node: '노드 공유',
 }
 
-export default function InvitePopover({ scope, targetId, canvasId, onClose, onlineUserIds, onSharesChanged }) {
+export default function InvitePopover({ scope, targetId, ownerId, canvasId, isOwner, onClose, onlineUserIds, onSharesChanged }) {
   const [shares, setShares] = useState([])
   const [members, setMembers] = useState([]) // claimed members across all my shares for this canvas
+  const [friends, setFriends] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -27,21 +30,36 @@ export default function InvitePopover({ scope, targetId, canvasId, onClose, onli
   const [linkShareId, setLinkShareId] = useState(null)
   const [copied, setCopied] = useState(false)
 
+  const membersByShare = useMemo(() => {
+    const grouped = new Map()
+    members.forEach((member) => {
+      const current = grouped.get(member.shareId)
+      if (current) current.push(member)
+      else grouped.set(member.shareId, [member])
+    })
+    return grouped
+  }, [members])
+
   const refresh = useCallback(() => {
     setLoading(true)
-    Promise.all([listShares(canvasId), listShareMembers(canvasId)])
-      .then(([all, mem]) => {
+    Promise.all([
+      isOwner ? listShares(canvasId) : Promise.resolve([]),
+      isOwner ? listShareMembers(canvasId) : Promise.resolve([]),
+      listFriendships().catch(() => []),
+    ])
+      .then(([all, mem, connections]) => {
         const scopedShares = all.filter((s) => s.scope === scope && (s.target_id ?? null) === (targetId ?? null))
         const linkShare = scopedShares.find((s) => s.link_token)
         setShares(scopedShares)
         setLinkShareId(linkShare?.id ?? null)
         setLinkUrl(linkShare?.link_token ? `${location.origin}/#share=${linkShare.link_token}` : null)
         setMembers(mem)
+        setFriends(connections.filter((item) => item.status === 'accepted'))
         setError(null)
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
-  }, [canvasId, scope, targetId])
+  }, [canvasId, isOwner, scope, targetId])
 
   useEffect(() => { refresh() }, [refresh])
 
@@ -51,7 +69,9 @@ export default function InvitePopover({ scope, targetId, canvasId, onClose, onli
     setInviting(true)
     setError(null)
     try {
-      await createShare({ canvasId, scope, targetId, email, restrictView })
+      await createCanvasInvitation(ownerId, canvasId, {
+        scope, targetId, email, restrictView, kind: 'email',
+      })
       setEmail('')
       refresh()
       onSharesChanged?.()
@@ -66,8 +86,10 @@ export default function InvitePopover({ scope, targetId, canvasId, onClose, onli
     setCreatingLink(true)
     setError(null)
     try {
-      const { share, url } = await createLinkShare({ canvasId, scope, targetId, restrictView })
-      setLinkUrl(url)
+      const { share, url } = await createCanvasInvitation(ownerId, canvasId, {
+        scope, targetId, restrictView, kind: 'link',
+      })
+      setLinkUrl(url ? `${location.origin}${url}` : null)
       setLinkShareId(share.id)
       refresh()
       onSharesChanged?.()
@@ -127,6 +149,23 @@ export default function InvitePopover({ scope, targetId, canvasId, onClose, onli
         </button>
       </div>
 
+      {friends.length > 0 && (
+        <div style={{ display: 'flex', gap: 5, overflowX: 'auto', paddingBottom: 8, marginBottom: 2 }} aria-label="친구 빠른 선택">
+          {friends.map((friend) => (
+            <button
+              key={friend.id}
+              type="button"
+              title={`${friend.profile?.nickname || friend.email} 선택`}
+              onClick={() => setEmail(friend.email ?? '')}
+              style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0, background: '#ffffff0a', border: '1px solid #ffffff18', borderRadius: 6, color: '#bbb', fontSize: 10, padding: '4px 6px', cursor: 'pointer', fontFamily: 'inherit' }}
+            >
+              <Avatar profile={friend.profile} size={16} opacityOffState={false} />
+              <span>{friend.profile?.nickname || friend.email}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Email invite */}
       <form onSubmit={handleInvite} style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
         <input
@@ -154,7 +193,7 @@ export default function InvitePopover({ scope, targetId, canvasId, onClose, onli
       </form>
 
       {/* Link share */}
-      {linkUrl ? (
+      {isOwner && (linkUrl ? (
         <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
           <input
             readOnly
@@ -189,7 +228,7 @@ export default function InvitePopover({ scope, targetId, canvasId, onClose, onli
         >
           {creatingLink ? '생성 중...' : '🔗 공유 링크 만들기'}
         </button>
-      )}
+      ))}
 
       {/* Restrict view checkbox — meaningless for canvas scope (the invited
           region IS the whole canvas, so there is no "outside" to hide). */}
@@ -209,10 +248,10 @@ export default function InvitePopover({ scope, targetId, canvasId, onClose, onli
         <div style={{ fontSize: 11, color: '#ef4444', marginBottom: 8 }}>{error}</div>
       )}
 
-      <div style={{ height: 1, background: '#ffffff18', margin: '2px 0 8px' }} />
+      {isOwner && <div style={{ height: 1, background: '#ffffff18', margin: '2px 0 8px' }} />}
 
       {/* Existing shares */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 200, overflowY: 'auto' }}>
+      {isOwner && <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 200, overflowY: 'auto' }}>
         {loading && <div style={{ fontSize: 11, color: '#555' }}>불러오는 중...</div>}
         {!loading && shares.length === 0 && (
           <div style={{ fontSize: 11, color: '#555' }}>아직 공유되지 않았습니다</div>
@@ -251,7 +290,7 @@ export default function InvitePopover({ scope, targetId, canvasId, onClose, onli
                   시야제한
                 </span>
               )}
-              {members.filter((m) => m.shareId === s.id).map((m) => (
+              {(membersByShare.get(s.id) ?? []).map((m) => (
                 <span key={m.userId} title={m.profile?.nickname || m.profile?.email || ''} style={{ flexShrink: 0, display: 'flex' }}>
                   <Avatar profile={m.profile} size={16} />
                 </span>
@@ -268,7 +307,7 @@ export default function InvitePopover({ scope, targetId, canvasId, onClose, onli
             </div>
           )
         })}
-      </div>
+      </div>}
     </div>
   )
 }

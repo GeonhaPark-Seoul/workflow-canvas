@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 
 const read = (name) => readFile(new URL(`../${name}`, import.meta.url), 'utf8')
-const [shares, profiles, profilePrivacy, images, tokens, notes, relationGuard, runtimeRead, runtimeObservations, dataAccessAudit, sourceTwinHistory, localConnectors] = await Promise.all([
+const [shares, profiles, profilePrivacy, images, tokens, notes, relationGuard, runtimeRead, runtimeObservations, dataAccessAudit, sourceTwinHistory, localConnectors, canvasSummaries, securityHardening] = await Promise.all([
   read('supabase-shares.sql'),
   read('supabase-profiles.sql'),
   read('supabase-profile-privacy.sql'),
@@ -15,6 +15,8 @@ const [shares, profiles, profilePrivacy, images, tokens, notes, relationGuard, r
   read('supabase-data-access-audit.sql'),
   read('supabase-source-twin-history.sql'),
   read('supabase-local-connectors.sql'),
+  read('supabase-canvas-summaries.sql'),
+  read('supabase-security-hardening.sql'),
 ])
 
 const restrictedFunctions = [
@@ -28,6 +30,10 @@ const restrictedFunctions = [
   'revoke_share_member(uuid, uuid)',
   'is_share_member(uuid, uuid)',
   'owns_share(uuid, uuid)',
+  'list_my_friendships()',
+  'send_friend_request(text)',
+  'respond_friend_request(uuid, boolean)',
+  'remove_friendship(uuid)',
 ]
 
 for (const signature of restrictedFunctions) {
@@ -44,15 +50,45 @@ for (const signature of ['share_link_is_active(text)', 'share_link_preview(text)
 }
 
 for (const sql of [profiles, profilePrivacy]) {
-  assert.match(sql, /revoke execute on function can_view_profile\(uuid, uuid\) from PUBLIC, anon;/i)
-  assert.match(sql, /viewer_member\.user_id\s*=\s*p_viewer/i, 'profile access must recognize accepted viewer membership')
+  assert.match(sql, /drop function if exists can_view_profile\(uuid, uuid\);/i)
+  assert.match(sql, /revoke execute on function can_view_profile\(uuid\) from PUBLIC, anon;/i)
+  assert.match(sql, /viewer_member\.user_id\s*=\s*auth\.uid\(\)/i, 'profile access must bind the viewer to the current caller')
   assert.match(sql, /target_member\.user_id\s*=\s*p_target/i, 'profile access must recognize accepted teammate membership')
+  assert.doesNotMatch(sql, /can_view_profile\(auth\.uid\(\),/i, 'callers must not supply a forged viewer id')
 }
+assert.match(profiles, /create or replace function upsert_my_profile\(p_nickname text, p_glyph text, p_color text\)/i)
+assert.match(profiles, /select email into trusted_email from auth\.users where id = auth\.uid\(\)/i)
+assert.match(profiles, /create or replace function touch_my_profile\(\)/i)
+assert.match(profiles, /revoke insert, update on profiles from authenticated;/i)
+assert.match(securityHardening, /with check \(auth\.uid\(\) = user_id\)/i, 'owner RLS must constrain inserted and updated ownership')
+assert.match(securityHardening, /constraint canvases_payload_item_limits/i)
 
 assert.match(images, /values\s*\(\s*'canvas-images'[\s\S]*?false,/i, 'canvas image bucket must stay private')
 assert.match(images, /revoke execute on function can_access_canvas_image\(text, boolean\) from PUBLIC, anon;/i)
 assert.match(images, /coalesce\(m\.restrict_view_override,\s*s\.restrict_view\)/i, 'image reads must honor per-member view restriction overrides')
 assert.match(shares, /share_members add column if not exists restrict_view_override boolean/i)
+assert.match(shares, /share_members add column if not exists can_invite boolean not null default false/i)
+assert.match(shares, /canvas_shares add column if not exists default_can_edit boolean not null default true/i)
+assert.match(shares, /canvas_shares add column if not exists invited_by_user_id uuid references auth\.users\(id\) on delete set null/i)
+assert.match(shares, /canvas_shares_inviter_created_idx/i)
+assert.match(shares, /canvas_shares_invitee_active_idx[\s\S]*?lower\(invitee_email\)[\s\S]*?where invitation_active/i)
+assert.match(shares, /insert into share_members \(share_id, user_id, can_edit\)[\s\S]*?found_share\.default_can_edit/i, 'accepted link members must inherit bounded edit permission')
+assert.match(shares, /create unique index if not exists friendships_pair_unique_idx/i)
+assert.match(shares, /friendships_requester_status_idx/i)
+assert.match(shares, /alter table friendships enable row level security/i)
+assert.match(shares, /revoke all on friendships from PUBLIC, anon, authenticated/i)
+assert.match(shares, /create policy "friends select own relationships"[\s\S]*?requester_id = auth\.uid\(\) or addressee_id = auth\.uid\(\)/i)
+assert.match(
+  shares,
+  /create or replace function send_friend_request\(p_email text\)[\s\S]*?from canvases c[\s\S]*?mine_member\.user_id = auth\.uid\(\)[\s\S]*?target_member\.user_id = target_user/i,
+  'friend requests must be limited to users who already share an accepted canvas',
+)
+assert.match(shares, /select u\.id into target_user[\s\S]*?from auth\.users u[\s\S]*?lower\(u\.email\)/i, 'friend lookup must trust auth email, not editable profile data')
+
+assert.match(canvasSummaries, /jsonb_array_length\(c\.nodes\)/i)
+assert.match(canvasSummaries, /jsonb_array_length\(c\.edges\)/i)
+assert.match(canvasSummaries, /revoke execute on function public\.get_canvas_summaries\(uuid, text\[\]\) from PUBLIC, anon, authenticated;/i)
+assert.match(canvasSummaries, /grant execute on function public\.get_canvas_summaries\(uuid, text\[\]\) to service_role;/i)
 assert.match(tokens, /token\s*=\s*encode\(digest\(token, 'sha256'\), 'hex'\)/i, 'legacy MCP tokens must be hashed in place')
 assert.doesNotMatch(tokens, /select token from mcp_tokens/i, 'raw MCP secrets must not be documented as recoverable')
 assert.match(notes, /add column if not exists notes jsonb not null default '\[\]'::jsonb/i, 'canvas notes migration must be idempotent')

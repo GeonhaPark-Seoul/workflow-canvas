@@ -392,7 +392,7 @@ export default function SystemNode({ data, selected, id }) {
             </span>
             <ScopedParticipants
               participants={data.scopedParticipants}
-              canInvite={selected && data.canInvite && !data.readOnly}
+              canInvite={selected && data.canInvite}
               onInvite={data.onInvite}
               canManageRestrictions={data.canManageParticipants}
               onToggleViewRestriction={data.onToggleViewRestriction}
@@ -454,7 +454,7 @@ export default function SystemNode({ data, selected, id }) {
               </div>
               {logicalComponent && (
                 <div
-                  className="logical-component-details nodrag nowheel"
+                  className="logical-component-details nowheel"
                   style={{
                     display: 'grid',
                     gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',

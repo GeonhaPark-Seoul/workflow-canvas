@@ -21,6 +21,12 @@ export const LOCAL_GIT_SYNC_CONFIRMATION = WORKFLOW_GIT_SYNC_CONFIRMATION
 const OPERATION_TYPE = 'local_git_sync'
 const TOKEN_PATTERN = /^wclc_[a-f0-9]{64}$/
 const OPERATION_ID_PATTERN = /^op-[a-f0-9]{64}$/
+const CONNECTOR_SELECT = [
+  'id', 'user_id', 'token_prefix', 'label', 'repository_label', 'repository_url',
+  'manifest', 'manifest_id', 'git_state', 'state_fingerprint', 'agent_version',
+  'last_seen_at', 'revoked_at', 'created_at',
+].join(',')
+const OPERATION_CLAIM_SELECT = 'operation_id,connector_id,user_id,action,status,state_fingerprint,expected_state,requested_at,claimed_at'
 
 export class LocalConnectorError extends Error {
   constructor(status, code, message) {
@@ -119,7 +125,7 @@ function connectorRow(row, now = Date.now()) {
 async function loadOwnedConnector(db, userId, connectorId) {
   const { data, error } = await db
     .from('local_connectors')
-    .select('*')
+    .select(CONNECTOR_SELECT)
     .eq('id', connectorId)
     .eq('user_id', userId)
     .is('revoked_at', null)
@@ -132,7 +138,7 @@ async function loadOwnedConnector(db, userId, connectorId) {
 export async function listLocalConnectors(db, userId, now = Date.now()) {
   const { data, error } = await db
     .from('local_connectors')
-    .select('*')
+    .select(CONNECTOR_SELECT)
     .eq('user_id', userId)
     .is('revoked_at', null)
     .order('created_at', { ascending: false })
@@ -173,7 +179,7 @@ export async function createLocalConnector(db, { userId, label }) {
     token_prefix: token.slice(0, 13),
     label: cleanText(label, 120) || '새 로컬 연결',
   }
-  const { data, error } = await db.from('local_connectors').insert(row).select('*').single()
+  const { data, error } = await db.from('local_connectors').insert(row).select(CONNECTOR_SELECT).single()
   if (error) throw databaseError(error, '로컬 커넥터를 만들지 못했습니다.')
   return { connector: connectorRow(data), token }
 }
@@ -196,7 +202,7 @@ export async function resolveLocalConnectorToken(db, token) {
   if (!TOKEN_PATTERN.test(token ?? '')) return null
   const { data, error } = await db
     .from('local_connectors')
-    .select('*')
+    .select(CONNECTOR_SELECT)
     .eq('token_hash', tokenHash(token))
     .is('revoked_at', null)
     .maybeSingle()
@@ -242,7 +248,7 @@ export async function recordLocalConnectorHeartbeat(db, connector, payload) {
     .update(update)
     .eq('id', connector.id)
     .is('revoked_at', null)
-    .select('*')
+    .select(CONNECTOR_SELECT)
     .single()
   if (error) throw databaseError(error, '로컬 프로젝트 상태를 저장하지 못했습니다.')
   return { connector: connectorRow(data), stateFingerprint }
@@ -373,7 +379,7 @@ export async function applyLocalGitSync(db, {
 export async function claimLocalGitSyncOperation(db, connector) {
   const query = await db
     .from('local_connector_operations')
-    .select('*')
+    .select(OPERATION_CLAIM_SELECT)
     .eq('connector_id', connector.id)
     .eq('status', 'queued')
     .order('requested_at', { ascending: true })
@@ -387,7 +393,7 @@ export async function claimLocalGitSyncOperation(db, connector) {
     .update({ status: 'running', claimed_at: claimedAt })
     .eq('operation_id', query.data.operation_id)
     .eq('status', 'queued')
-    .select('*')
+    .select(OPERATION_CLAIM_SELECT)
     .maybeSingle()
   if (claimed.error) throw databaseError(claimed.error, 'Git 동기화 작업을 시작하지 못했습니다.')
   if (!claimed.data) return { operation: null }

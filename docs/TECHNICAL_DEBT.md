@@ -102,6 +102,43 @@ This is the durable ledger for security, reliability, commercialization, and arc
 
 ## Privacy, identity, and transparency
 
+### SEC-001 - Browser source visibility and repository exposure
+
+- Severity: high
+- Gate: release-blocker for any "users cannot inspect the technology" claim
+- Status: open
+- Current limitation: code delivered to a browser can be inspected with developer tools. Minification and disabled production source maps reduce convenience but do not make frontend code secret. Repository visibility is a separate GitHub setting and was not independently verified in this session.
+- Current mitigation: no service-role secret is referenced by browser code; privileged operations remain behind authenticated server or database boundaries; production security headers limit several browser attack classes.
+- Required work: verify that the production GitHub repository has the intended visibility and branch protections, add secret and source-map checks to release CI, and document which client code is intentionally public. Keep all secrets, authorization decisions, and sensitive business logic server-side.
+- Exit criteria: CI proves that browser bundles contain no server credentials or source maps, repository visibility is verified for every release, and product claims never imply that developer tools can be disabled as a security boundary.
+
+### SEC-002 - MCP URL token transport and rotation
+
+- Severity: high
+- Gate: public MCP release
+- Status: open
+- Current limitation: connector compatibility currently places the MCP bearer token in the query string. `no-referrer` and `no-store` reduce propagation, but the URL can still appear in browser history, provider telemetry, reverse-proxy access logs, screenshots, or copied text.
+- Required work: prefer an authorization header, OAuth/device authorization, or short-lived exchange token when connector support allows it; redact query strings in every log; provide rotation, expiry, device/session binding, and a visible last-used audit trail.
+- Exit criteria: long-lived credentials never appear in URLs and a leaked short-lived token cannot be replayed outside its intended connector session.
+
+### SEC-003 - Distributed abuse controls and security monitoring
+
+- Severity: high
+- Gate: release-blocker
+- Status: in-progress
+- Current evidence: invitation creation validates bounded identifiers and email shape, rejects oversized canvas payloads, and applies per-inviter minute/day limits. Shared-canvas errors no longer expose raw database failures.
+- Required work: move rate counters to a shared durable limiter; cover authentication, invitations, friendship actions, links, MCP, local connector, runtime probes, and write endpoints; add IP/account/device anomaly signals, alerting, safe lockout recovery, and incident runbooks. Application limits must be backed by Vercel/firewall controls where appropriate.
+- Exit criteria: concurrent instances cannot bypass limits, security events produce actionable alerts without leaking private content, and abuse/load tests verify both fail-closed behavior and legitimate recovery.
+
+### SEC-004 - Shared identity and delegated invitation integrity
+
+- Severity: critical
+- Gate: release-blocker
+- Status: implemented-pending-deploy
+- Current evidence: profile email is sourced from `auth.users`, profile writes use auth-bound RPCs, browser roles receive read-only access to profile/share control tables, and shared participant visibility is computed from accepted canvas grants. Multiple group/node grants compose without dropping scope, while owner-managed `can_invite` only delegates invitations inside the participant's accepted scope.
+- Required work: deploy `supabase-profiles.sql`, `supabase-shares.sql`, and `supabase-security-hardening.sql` together; exercise owner, delegated inviter, read-only participant, removed participant, and unrelated-user cases against staging data; add browser end-to-end coverage for every control.
+- Exit criteria: direct REST/table mutation cannot forge identity, membership, or invitation authority, and staging tests prove that unrelated users cannot enumerate profiles, shares, or canvas content.
+
 ### PRIV-001 - Operator-blind canvas content
 
 - Severity: critical
@@ -110,6 +147,15 @@ This is the durable ledger for security, reliability, commercialization, and arc
 - Current limitation: Supabase/Vercel operators with privileged access can read stored canvas JSON.
 - Required work: client-side or end-to-end encryption, participant key wrapping, recovery design, encrypted search/merge strategy, attachment encryption, and explicit MCP/AI key delegation.
 - Exit criteria: server storage and logs contain ciphertext only, authorized collaboration still works, and independent review verifies the threat model.
+
+### PRIV-003 - Friendship discovery privacy
+
+- Severity: medium
+- Gate: product-v1
+- Status: implemented-pending-deploy
+- Current evidence: a friend request can target only an account that already shares an accepted canvas with the requester, and address resolution uses the authenticated identity table rather than user-editable profile email.
+- Required work: add block/report controls, request throttling, notification preferences, friendship export/deletion coverage, and a privacy review of whether email should remain visible after a shared relationship ends.
+- Exit criteria: friendship cannot be used for global account discovery or repeated harassment, and both participants can revoke the relationship and its notifications predictably.
 
 ### PRIV-002 - Data lifecycle and user rights
 
@@ -189,6 +235,79 @@ This is the durable ledger for security, reliability, commercialization, and arc
 - Current evidence: `docs/architecture/OPEN_SOURCE_POLICY.md` requires standards and proven-library review before foundational custom code, `docs/architecture/dependency-registry.json` records every current direct dependency and locked license, `THIRD_PARTY_NOTICES.md` exposes the direct inventory, and `npm run governance:check` blocks tests and builds when package metadata drifts. No new large dependency was adopted. SBOM generation is available through npm, but retention as a CI release artifact and automated vulnerability review are not yet configured.
 - Required work: retain a CycloneDX SBOM for each release, scan direct and transitive dependencies plus licenses in protected CI, define vulnerability severity and update SLAs, capture copyright notices where licenses require them, review bundled/browser-distributed licenses, and make dependency decisions reviewable before merge.
 - Exit criteria: every release has a retained SBOM and license report tied to its commit, an undeclared direct dependency or disallowed license cannot merge, and critical dependency findings block release under a documented exception process.
+
+### OPS-007 - Online vulnerability and deployment verification
+
+- Severity: high
+- Gate: release-blocker
+- Status: open
+- Current evidence: the production dependency graph passes the locally cached `npm audit --omit=dev --offline` database and no service-role credential was found by the repository boundary test. Offline success is not proof against advisories published after the cache was last updated.
+- Required work: run online dependency, secret, SAST, and production-bundle scans in protected CI; retain reports with the commit and deployment; verify Vercel security headers and database migration versions after production deployment.
+- Exit criteria: a release cannot become production-ready when a blocking advisory, exposed secret, missing hardening migration, or required header is detected.
+
+## Scale, performance, and domain correctness
+
+### PERF-001 - Summary-first canvas loading
+
+- Severity: high
+- Gate: product-v1
+- Status: implemented-pending-deploy
+- Current evidence: login and navigation fetch paginated canvas summaries, hydrate only the active canvas body, guard stale asynchronous loads, and invalidate inactive cache entries without downloading every canvas JSON document. MCP and shared-canvas listings use a service-role-only database summary projection and batch shared-owner reads.
+- Required work: verify the migration and browser flow on production-shaped accounts; add a bounded LRU cache, cancellation, loading/error states, and cursor-based UI pagination for accounts with thousands of canvases.
+- Exit criteria: startup payload and query count stay bounded as inactive canvas count grows, and stale requests cannot replace or overwrite the active canvas.
+
+### PERF-002 - Large-canvas persistence and incremental synchronization
+
+- Severity: high
+- Gate: large-workspace release
+- Status: open
+- Current limitation: the active canvas is still stored and written as large JSON arrays in one row. Summary projection avoids listing costs but editing a very large canvas can still transfer, reconcile, and rewrite the full document.
+- Required work: define measured thresholds; add compressed/delta transport or normalized node/edge tables with versioned migrations; preserve atomic revisions, offline recovery, collaboration permissions, manual layout, and rollback. Do not change storage solely to reduce line counts.
+- Exit criteria: load, save, realtime update, and conflict behavior meet explicit latency/memory targets at the supported maximum node and edge counts.
+
+### PERF-003 - UI and source-module decomposition
+
+- Severity: medium
+- Gate: product-v1 maintenance
+- Status: open
+- Current limitation: `src/App.jsx`, `mcp/store.js`, and several source-twin modules contain many unrelated responsibilities, increasing regression risk even when runtime performance is acceptable.
+- Required work: split by tested domain boundaries such as canvas navigation, sharing, grouping, review, runtime observation, and persistence; establish bundle and complexity budgets; preserve behavior through contract and browser tests. File length alone is not a valid refactor goal.
+- Exit criteria: core workflows can be changed and tested independently without duplicating state or increasing initial bundle cost.
+
+### PERF-004 - Source-twin bundle and PWA cache budget
+
+- Severity: medium
+- Gate: product-v1
+- Status: open
+- Current evidence: the source-twin adapter is emitted as a separate lazy chunk, but the latest measured build produced roughly 1.66 MiB minified and the PWA precache currently includes it.
+- Required work: measure real route usage; split large generated manifests from interactive code; load them only when the system map is opened; revise precache rules; fail CI when agreed gzip, startup, or memory budgets regress.
+- Exit criteria: ordinary canvas startup does not download or precache source-twin data that the user never opens, and system-map loading remains responsive on supported devices.
+
+### PERF-005 - Shared-list pagination and request consolidation
+
+- Severity: medium
+- Gate: product-v1
+- Status: in-progress
+- Current evidence: server and client share queries page and batch records, participant lookup uses maps instead of repeated full-list filters, and service-role access begins from the authenticated user's membership rows rather than scanning all shares.
+- Required work: expose cursor-based pagination in the participant/share UI, consolidate duplicate share/member fetches, add request cancellation, and test accounts with thousands of accepted and revoked grants.
+- Exit criteria: participant and invite panels have bounded memory/query counts and do not freeze or return partial authority decisions at supported scale.
+
+### QA-001 - Domain workflow and rendered-content correctness
+
+- Severity: high
+- Gate: release-blocker for each shipped business template
+- Status: open
+- Context: a fast interface is still defective if a leave form cannot select leave dates, HTML appears in a list, or ledger totals and states are semantically wrong.
+- Required work: define typed schemas and business invariants per template; validate at input, API, and database boundaries; render rich text only through the shared allowlist sanitizer; create golden fixtures and end-to-end journeys with domain reviewers; test empty, malformed, concurrent, timezone, permission, and rollback cases.
+- Exit criteria: every marketed workflow has executable acceptance criteria and representative domain review, and raw markup or invalid state cannot leak into list/table views.
+
+### QA-002 - Production-shaped performance and correctness gates
+
+- Severity: high
+- Gate: product-v1
+- Status: open
+- Required work: create anonymized fixture generators for many canvases, dense graphs, many participants, large notes, and long operation histories; measure browser memory, interaction latency, database query plans, API payloads, and error behavior; add browser regression screenshots for critical controls.
+- Exit criteria: releases meet documented budgets on desktop and mobile, and performance fixes cannot silently change permissions, ordering, forms, or canvas behavior.
 
 ## Twin engine and product architecture
 

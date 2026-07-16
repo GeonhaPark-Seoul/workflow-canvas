@@ -30,7 +30,7 @@ import { appendHistorySnapshot, sameCanvasSnapshot } from '../src/lib/canvasSync
 import { absoluteNodePosition, boundsForNodeIds } from '../src/lib/canvasGeometry.js'
 import { mergeCanvasSnapshots } from '../src/lib/canvasMerge.js'
 import { getStubEdgeGeometry } from '../src/edges/stubEdgeGeometry.js'
-import { chooseOwnCanvasToRestore } from '../src/lib/canvasNavigation.js'
+import { chooseOwnCanvasToRestore, orderCanvasSummaries } from '../src/lib/canvasNavigation.js'
 import { nativeWheelScrollTarget } from '../src/lib/wheelRouting.js'
 import { claimShareLaunchFallback, shareTokenFingerprint } from '../src/lib/shareLaunchCoordinator.js'
 import {
@@ -2673,6 +2673,27 @@ t('browser sanitizer blocks stored-XSS markup while preserving safe formatting',
   assert.equal(out.includes('<b>ok</b>'), true)
 })
 
+t('rich-text style allowlist blocks UI redress while preserving text formatting', () => {
+  const source = '<div class="cl-item app-shell" style="position:fixed;inset:0;z-index:99999;color:#ff0000;font-size:18px;background-image:url(https://evil.example/x)">x</div>'
+  for (const sanitizer of [sanitizeHtml, sanitizeBrowserHtml]) {
+    const out = sanitizer(source)
+    assert.equal(/position|inset|z-index|background-image|url\s*\(/i.test(out), false, out)
+    assert.equal(out.includes('class="cl-item"'), true, out)
+    assert.equal(out.includes('app-shell'), false, out)
+    assert.equal(out.includes('color: #ff0000'), true, out)
+    assert.equal(out.includes('font-size: 18px'), true, out)
+  }
+})
+
+t('rich-text allowlist drops active foreign namespaces and their content', () => {
+  const source = '<svg><a href="javascript:alert(1)"><text>가짜 버튼</text></a></svg><math><mtext>가짜 수식</mtext></math><b>안전</b>'
+  for (const sanitizer of [sanitizeHtml, sanitizeBrowserHtml]) {
+    const out = sanitizer(source)
+    assert.equal(out.includes('가짜'), false, out)
+    assert.equal(out.includes('<b>안전</b>'), true, out)
+  }
+})
+
 t('browser URL sanitizer allows http(s) and rejects active protocols', () => {
   assert.equal(sanitizeBrowserUrl('javascript:alert(1)'), '')
   assert.equal(sanitizeBrowserUrl('data:text/html,boom'), '')
@@ -3507,6 +3528,23 @@ t('refresh restores the tab-local own canvas before a stale cloud preference', (
 t('refresh ignores deleted or shared ids until server access is revalidated', () => {
   const rows = [{ canvas_id: 'safe' }]
   assert.equal(chooseOwnCanvasToRestore(rows, { active_canvas_id: 'deleted' }, 'shared:owner:canvas'), 'safe')
+})
+
+t('canvas summary ordering removes ghost tabs and trusts current database names', () => {
+  const summaries = [
+    { canvas_id: 'live-b', name: '현재 이름 B' },
+    { canvas_id: 'live-a', name: '현재 이름 A' },
+    { canvas_id: 'mcp-new', name: 'AI가 만든 캔버스' },
+  ]
+  assert.deepEqual(orderCanvasSummaries(summaries, [
+    { id: 'deleted', name: '삭제된 탭' },
+    { id: 'live-a', name: '오래된 이름' },
+    { id: 'live-b', name: '오래된 이름 B' },
+  ]), [
+    { id: 'live-a', name: '현재 이름 A' },
+    { id: 'live-b', name: '현재 이름 B' },
+    { id: 'mcp-new', name: 'AI가 만든 캔버스' },
+  ])
 })
 
 console.log('MCP canvas node representation')

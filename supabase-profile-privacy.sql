@@ -17,19 +17,22 @@ begin
 end $$;
 alter table profiles drop column if exists settings;
 
-create or replace function can_view_profile(p_viewer uuid, p_target uuid)
+drop policy if exists "profiles readable by signed-in users" on profiles;
+drop policy if exists "profiles readable by canvas participants" on profiles;
+drop function if exists can_view_profile(uuid, uuid);
+create or replace function can_view_profile(p_target uuid)
   returns boolean language sql security definer stable set search_path = public as $$
-  select p_viewer = p_target or exists (
+  select auth.uid() is not null and (auth.uid() = p_target or exists (
     select 1
-    from (select distinct owner_id, canvas_id from canvas_shares) workspace
+    from canvas_shares workspace
     where (
-      workspace.owner_id = p_viewer
+      workspace.owner_id = auth.uid()
       or exists (
         select 1 from canvas_shares viewer_share
         join share_members viewer_member on viewer_member.share_id = viewer_share.id
         where viewer_share.owner_id = workspace.owner_id
           and viewer_share.canvas_id = workspace.canvas_id
-          and viewer_member.user_id = p_viewer
+          and viewer_member.user_id = auth.uid()
       )
     ) and (
       workspace.owner_id = p_target
@@ -41,12 +44,10 @@ create or replace function can_view_profile(p_viewer uuid, p_target uuid)
           and target_member.user_id = p_target
       )
     )
-  );
+  ));
 $$;
 
-revoke execute on function can_view_profile(uuid, uuid) from PUBLIC, anon;
-grant execute on function can_view_profile(uuid, uuid) to authenticated;
-drop policy if exists "profiles readable by signed-in users" on profiles;
-drop policy if exists "profiles readable by canvas participants" on profiles;
+revoke execute on function can_view_profile(uuid) from PUBLIC, anon;
+grant execute on function can_view_profile(uuid) to authenticated;
 create policy "profiles readable by canvas participants" on profiles
-  for select using (can_view_profile(auth.uid(), profiles.user_id));
+  for select using (can_view_profile(profiles.user_id));

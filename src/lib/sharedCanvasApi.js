@@ -47,3 +47,19 @@ export function setMemberViewRestriction(ownerId, canvasId, userId, restricted) 
     body: JSON.stringify({ action: 'set-view-restriction', ownerId, canvasId, userId, restricted }),
   })
 }
+
+export function createCanvasInvitation(ownerId, canvasId, { scope, targetId, email, restrictView, kind }) {
+  return request('/api/shared-canvas', {
+    method: 'POST',
+    body: JSON.stringify({
+      action: 'create-invitation', ownerId, canvasId, scope, targetId, email, restrictView, kind,
+    }),
+  })
+}
+
+export function setCanvasMemberPermission(ownerId, canvasId, userId, field, enabled) {
+  return request('/api/shared-canvas', {
+    method: 'PATCH',
+    body: JSON.stringify({ action: 'set-member-permission', ownerId, canvasId, userId, field, enabled }),
+  })
+}

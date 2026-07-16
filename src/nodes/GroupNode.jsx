@@ -80,7 +80,8 @@ export default function GroupNode({ data, selected, id }) {
 
   return (
     <div
-      className="canvas-group-frame"
+      className={`canvas-group-frame${data.groupDropTarget ? ' is-drop-target' : ''}`}
+      data-drop-target={data.groupDropTarget ? 'true' : undefined}
       style={{
         width: '100%',
         height: '100%',
@@ -168,7 +169,7 @@ export default function GroupNode({ data, selected, id }) {
         )}
         <ScopedParticipants
           participants={data.scopedParticipants}
-          canInvite={!editing && data.canInvite && !data.readOnly}
+          canInvite={!editing && data.canInvite}
           onInvite={data.onInvite}
           canManageRestrictions={data.canManageParticipants}
           onToggleViewRestriction={data.onToggleViewRestriction}

@@ -10,60 +10,107 @@ async function currentUserId() {
   return data.user?.id
 }
 
-export async function createShare({ canvasId, scope, targetId, email, restrictView }) {
-  const ownerId = await currentUserId()
-  const { data, error } = await supabase.from('canvas_shares').insert({
-    owner_id: ownerId,
-    canvas_id: canvasId,
-    scope,
-    target_id: targetId ?? null,
-    invitee_email: email.trim().toLowerCase(),
-    restrict_view: !!restrictView,
-  }).select().single()
-  if (error) { console.error('[shares] createShare:', error.message); throw new Error('createShare: ' + error.message) }
-  return data
+async function loadOwnedShareRows(ownerId, canvasId, columns, { activeOnly = false } = {}) {
+  const rows = []
+  const pageSize = 200
+  for (let from = 0; ; from += pageSize) {
+    let query = supabase.from('canvas_shares')
+      .select(columns)
+      .eq('owner_id', ownerId)
+      .order('created_at', { ascending: true })
+      .range(from, from + pageSize - 1)
+    if (canvasId) query = query.eq('canvas_id', canvasId)
+    if (activeOnly) query = query.eq('invitation_active', true)
+    const { data, error } = await query
+    if (error) throw error
+    rows.push(...(data ?? []))
+    if ((data?.length ?? 0) < pageSize) break
+  }
+  return rows
 }
 
-export async function createLinkShare({ canvasId, scope, targetId, restrictView }) {
+export async function listOwnedSharedCanvasIds() {
   const ownerId = await currentUserId()
-  const token = crypto.randomUUID()
-  const { data, error } = await supabase.from('canvas_shares').insert({
-    owner_id: ownerId,
-    canvas_id: canvasId,
-    scope,
-    target_id: targetId ?? null,
-    link_token: token,
-    restrict_view: !!restrictView,
-  }).select().single()
-  if (error) { console.error('[shares] createLinkShare:', error.message); throw new Error('createLinkShare: ' + error.message) }
-  return { share: data, url: `${location.origin}/#share=${token}` }
+  let shares
+  try {
+    shares = await loadOwnedShareRows(
+      ownerId,
+      null,
+      'id, canvas_id, invitation_active, link_token, invitee_email, created_at',
+    )
+  } catch (error) {
+    console.error('[shares] listOwnedSharedCanvasIds:', error.message)
+    throw new Error('listOwnedSharedCanvasIds: ' + error.message)
+  }
+
+  const shareIds = shares.map((share) => share.id)
+  let members = []
+  if (shareIds.length) {
+    try { members = await loadMemberRows(shareIds, 'share_id') } catch (error) {
+      console.error('[shares] listOwnedSharedCanvasIds (members):', error.message)
+      throw new Error('listOwnedSharedCanvasIds: ' + error.message)
+    }
+  }
+  const membered = new Set(members.map((member) => member.share_id))
+  return new Set(shares
+    .filter((share) => (
+      membered.has(share.id)
+      || (share.invitation_active && (share.link_token || share.invitee_email))
+    ))
+    .map((share) => share.canvas_id))
+}
+
+async function loadMemberRows(shareIds, columns) {
+  const rows = []
+  for (let offset = 0; offset < shareIds.length; offset += 150) {
+    for (let from = 0; ; from += 500) {
+      const { data, error } = await supabase.from('share_members')
+        .select(columns)
+        .in('share_id', shareIds.slice(offset, offset + 150))
+        .order('share_id', { ascending: true })
+        .order('user_id', { ascending: true })
+        .range(from, from + 499)
+      if (error) throw error
+      rows.push(...(data ?? []))
+      if ((data?.length ?? 0) < 500) break
+    }
+  }
+  return rows
 }
 
 export async function listShares(canvasId) {
   const ownerId = await currentUserId()
-  const { data: shares, error } = await supabase
-    .from('canvas_shares')
-    .select('*')
-    .eq('owner_id', ownerId)
-    .eq('canvas_id', canvasId)
-    .eq('invitation_active', true)
-    .order('created_at', { ascending: true })
-  if (error) { console.error('[shares] listShares:', error.message); throw new Error('listShares: ' + error.message) }
+  let shares
+  try {
+    shares = await loadOwnedShareRows(
+      ownerId,
+      canvasId,
+      'id, owner_id, canvas_id, scope, target_id, invitee_email, link_token, invitation_active, restrict_view, created_at',
+      { activeOnly: true },
+    )
+  } catch (error) {
+    console.error('[shares] listShares:', error.message)
+    throw new Error('listShares: ' + error.message)
+  }
 
   const shareIds = (shares ?? []).map((s) => s.id)
   let members = []
   if (shareIds.length) {
-    const { data: memberRows, error: memberError } = await supabase
-      .from('share_members')
-      .select('share_id, user_id')
-      .in('share_id', shareIds)
-    if (memberError) { console.error('[shares] listShares (members):', memberError.message); throw new Error('listShares: ' + memberError.message) }
-    members = memberRows ?? []
+    try { members = await loadMemberRows(shareIds, 'share_id, user_id') } catch (error) {
+      console.error('[shares] listShares (members):', error.message)
+      throw new Error('listShares: ' + error.message)
+    }
   }
 
-  return (shares ?? []).map((s) => ({
-    ...s,
-    memberUserIds: members.filter((m) => m.share_id === s.id).map((m) => m.user_id),
+  const membersByShare = new Map()
+  for (const member of members) {
+    const ids = membersByShare.get(member.share_id) ?? []
+    ids.push(member.user_id)
+    membersByShare.set(member.share_id, ids)
+  }
+  return (shares ?? []).map((share) => ({
+    ...share,
+    memberUserIds: membersByShare.get(share.id) ?? [],
   }))
 }
 
@@ -72,41 +119,34 @@ export async function listShares(canvasId) {
 // invite row.
 export async function listShareMembers(canvasId) {
   const ownerId = await currentUserId()
-  const { data: shares, error } = await supabase
-    .from('canvas_shares')
-    .select('id, scope, target_id, invitation_active')
-    .eq('owner_id', ownerId)
-    .eq('canvas_id', canvasId)
-  if (error) { console.error('[shares] listShareMembers:', error.message); throw new Error('listShareMembers: ' + error.message) }
+  let shares
+  try {
+    shares = await loadOwnedShareRows(ownerId, canvasId, 'id, scope, target_id, invitation_active, created_at')
+  } catch (error) {
+    console.error('[shares] listShareMembers:', error.message)
+    throw new Error('listShareMembers: ' + error.message)
+  }
 
   const shareIds = (shares ?? []).map((s) => s.id)
   if (!shareIds.length) return []
 
-  const { data: memberRows, error: memberError } = await supabase
-    .from('share_members')
-    .select('share_id, user_id, can_edit')
-    .in('share_id', shareIds)
-  if (memberError) { console.error('[shares] listShareMembers (members):', memberError.message); throw new Error('listShareMembers: ' + memberError.message) }
+  let memberRows
+  try { memberRows = await loadMemberRows(shareIds, 'share_id, user_id, can_edit') } catch (error) {
+    console.error('[shares] listShareMembers (members):', error.message)
+    throw new Error('listShareMembers: ' + error.message)
+  }
 
   const profiles = await getProfiles((memberRows ?? []).map((m) => m.user_id))
+  const shareById = new Map((shares ?? []).map((share) => [share.id, share]))
 
   return (memberRows ?? []).map((m) => ({
     shareId: m.share_id,
     userId: m.user_id,
     canEdit: m.can_edit,
     profile: profiles.get(m.user_id) ?? null,
-    scope: shares.find((s) => s.id === m.share_id)?.scope ?? 'canvas',
-    targetId: shares.find((s) => s.id === m.share_id)?.target_id ?? null,
+    scope: shareById.get(m.share_id)?.scope ?? 'canvas',
+    targetId: shareById.get(m.share_id)?.target_id ?? null,
   }))
-}
-
-export async function setMemberEdit(shareId, userId, canEdit) {
-  const { error } = await supabase
-    .from('share_members')
-    .update({ can_edit: canEdit })
-    .eq('share_id', shareId)
-    .eq('user_id', userId)
-  if (error) { console.error('[shares] setMemberEdit:', error.message); throw new Error('setMemberEdit: ' + error.message) }
 }
 
 export async function kickMember(canvasId, userId) {

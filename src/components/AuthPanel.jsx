@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { upsertMyProfile, saveMySettings } from '../lib/profiles'
 import { listMyTokens, createToken, deleteToken } from '../lib/mcpTokens'
+import FriendManager from './FriendManager'
 
 const MCP_CONNECTOR_URL = 'https://workflow-canvas-orpin.vercel.app/api/mcp?token='
 
@@ -403,6 +404,10 @@ export default function AuthPanel({
                 <span style={{ color: '#555', fontSize: 10 }}>항상 표시</span>
                 <span style={{ color: '#555', fontSize: 10 }}>빨리 숨김</span>
               </div>
+
+              <div style={{ height: 1, background: '#ffffff18', margin: '14px 0' }} />
+
+              <FriendManager active={open && !!user} AvatarComponent={Avatar} />
 
               <div style={{ height: 1, background: '#ffffff18', margin: '14px 0' }} />
 

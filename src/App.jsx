@@ -44,7 +44,7 @@ import {
 } from './lib/systemRuntimeApi.js'
 import {
   saveCanvas as cloudSaveCanvas,
-  loadAllCanvases as cloudLoadAllCanvases,
+  loadCanvasSummaries as cloudLoadCanvasSummaries,
   loadCanvasRow as cloudLoadCanvasRow,
   deleteCanvas as cloudDeleteCanvas,
   saveUserPrefs as cloudSaveUserPrefs,
@@ -57,19 +57,25 @@ import { claimShareLaunch } from './lib/shareLaunchCoordinator'
 import { loadLocalConnectors } from './lib/localConnectorApi.js'
 import {
   getSharedCanvas, listCanvasParticipants, listSharedCanvases,
-  setMemberViewRestriction, updateSharedCanvas,
+  setCanvasMemberPermission, setMemberViewRestriction, updateSharedCanvas,
 } from './lib/sharedCanvasApi'
 import { appendHistorySnapshot, sameCanvasSnapshot } from './lib/canvasSync'
 import {
-  chooseOwnCanvasToRestore, loadLastOpenedCanvas, saveLastOpenedCanvas,
+  chooseOwnCanvasToRestore, loadLastOpenedCanvas, orderCanvasSummaries, saveLastOpenedCanvas,
 } from './lib/canvasNavigation'
 import { absoluteNodePosition, boundsForNodeIds } from './lib/canvasGeometry'
+import {
+  findGroupAtPoint,
+  findGroupDropTarget,
+  positionInsideGroup,
+  reparentNodePreservingPosition,
+} from './lib/groupMembership'
 import { dataUrlToBlob, uploadCanvasImage } from './lib/imageStorage'
 import { mergeCanvasSnapshots } from './lib/canvasMerge'
 import { joinCanvasPresence } from './lib/presence'
 import {
-  claimEmailInvite, claimShareToken, getShareLinkPreview, isShareLinkActive, listPendingEmailInvites, listShares, revokeShareMember,
-  setMemberEdit, kickMember, leaveSharedCanvas,
+  claimEmailInvite, claimShareToken, getShareLinkPreview, isShareLinkActive, listOwnedSharedCanvasIds, listPendingEmailInvites, listShares, revokeShareMember,
+  kickMember, leaveSharedCanvas,
 } from './lib/shares'
 import { getMyProfile, loadMySettings, upsertMyEmail, touchLastSeen } from './lib/profiles'
 import { createSystemNodeData } from '../shared/systemOntology.js'
@@ -120,6 +126,7 @@ import {
   editableNodeIdSetForPermission,
   permissionCanEditEdge,
   permissionCanEditNodeStructure,
+  permissionCanInviteScope,
   visibleNodeIdSetForPermission,
 } from '../shared/sharePermissions.js'
 
@@ -388,6 +395,12 @@ function centerInFrame(frame, nodeW, nodeH) {
   }
 }
 
+function creationPosition(frame, nodes, flowPosition, nodeW, nodeH) {
+  if (!frame) return flowPosition
+  if (!flowPosition) return centerInFrame(frame, nodeW, nodeH)
+  return positionInsideGroup(nodes, frame.id, flowPosition, { width: nodeW, height: nodeH })
+}
+
 // React Flow requires a parent node to appear before its children in the
 // nodes array. Loaded data (localStorage / cloud) doesn't guarantee this, so
 // re-sort on load: parents first, otherwise stable relative to input order.
@@ -447,7 +460,8 @@ function baseEdgeStyle(e) {
 function stripNode(n) {
   const {
     onUpdate, onEditStart, onEditEnd, onOpenInNotes, onCheckSystemPart,
-    onSelectForPart, stageTypes, imageContext, twinRuntime, systemPartRuntime, canRunSystemChecks, ...data
+    onSelectForPart, stageTypes, imageContext, twinRuntime, systemPartRuntime, canRunSystemChecks,
+    groupDropTarget, ...data
   } = n.data ?? {}
   const { selected, ...rest } = n
   return { ...rest, data }
@@ -529,6 +543,7 @@ export default function App() {
   const [isPinching, setIsPinching] = useState(false)
   const [lassoRect, setLassoRect] = useState(null) // screen-space rubber-band box
   const [alignGuides, setAlignGuides] = useState([]) // [{axis:'x'|'y', value}] in flow-space coords, drawn while dragging
+  const [groupDropTargetId, setGroupDropTargetId] = useState(null)
   // Unified canvas settings (theme / node-fill / LOD threshold). AuthPanel owns
   // the editor UI and cloud persistence (user_prefs.settings) — it calls
   // onSettingsChange(next) below on every change; lodThreshold keeps its
@@ -634,6 +649,8 @@ export default function App() {
   const canvasSyncBaseRef = useRef(new Map()) // canvas key -> { revision, snapshot }
   const dirtyCanvasSnapshotsRef = useRef(new Map()) // canvas key -> queued save entry
   const conflictedCanvasKeysRef = useRef(new Set())
+  const canvasRenameRequestRef = useRef(new Map())
+  const canvasLoadRequestRef = useRef(0)
   const syncFlushRunningRef = useRef(false)
   const [syncConflict, setSyncConflict] = useState(null)
   const [canvasSchemaGuardError, setCanvasSchemaGuardError] = useState(null)
@@ -1157,7 +1174,9 @@ export default function App() {
   }, [rfInstance, touchDevice])
 
   // ── Multi-canvas ───────────────────────────────────────────────────────────
-  const loadCanvas = useCallback(async (id, prefetchedData) => {
+  const loadCanvas = useCallback(async (id, prefetchedData, requestedLoadId = null) => {
+    const loadId = requestedLoadId ?? ++canvasLoadRequestRef.current
+    if (requestedLoadId !== null && requestedLoadId !== canvasLoadRequestRef.current) return
     let data
     if (prefetchedData) {
       data = prefetchedData
@@ -1195,6 +1214,7 @@ export default function App() {
         }
       }
     }
+    if (loadId !== canvasLoadRequestRef.current) return
     if (data.revision) {
       canvasSyncBaseRef.current.set(id, {
         revision: data.revision,
@@ -1246,7 +1266,9 @@ export default function App() {
 
   // Invited canvases always pass through the server permission gateway. It
   // redacts restricted nodes before the browser sees them.
-  const loadSharedCanvas = useCallback(async (ownerId, canvasId) => {
+  const loadSharedCanvas = useCallback(async (ownerId, canvasId, requestedLoadId = null) => {
+    const loadId = requestedLoadId ?? ++canvasLoadRequestRef.current
+    if (requestedLoadId !== null && requestedLoadId !== canvasLoadRequestRef.current) return
     let row
     try {
       row = await getSharedCanvas(ownerId, canvasId)
@@ -1254,6 +1276,7 @@ export default function App() {
       console.error('[shares] loadSharedCanvas:', err.message)
       throw err
     }
+    if (loadId !== canvasLoadRequestRef.current) return
     const compositeId = sharedCanvasId(ownerId, canvasId)
     const data = {
       nodes: row.nodes ?? [],
@@ -1284,7 +1307,7 @@ export default function App() {
     if (latestRef.current.activeCanvasId === compositeId && loadedSharedIdRef.current === compositeId && existing && JSON.stringify(existing) === JSON.stringify(data)) return
     saveCanvasData(compositeId, data)
     loadedSharedIdRef.current = compositeId
-    loadCanvas(compositeId, data)
+    loadCanvas(compositeId, data, loadId)
   }, [loadCanvas])
 
   const handleSharedAccessLost = useCallback((ownerId, canvasId, error) => {
@@ -1361,18 +1384,19 @@ export default function App() {
 
   const switchCanvas = useCallback((id) => {
     if (id === activeCanvasId) return
+    const loadId = ++canvasLoadRequestRef.current
     if (user?.id) saveLastOpenedCanvas(user.id, id)
     persistCurrent()
     const shared = parseSharedId(id)
     if (shared) {
-      loadSharedCanvas(shared.ownerId, shared.canvasId).catch((err) => {
+      loadSharedCanvas(shared.ownerId, shared.canvasId, loadId).catch((err) => {
         if (!handleSharedAccessLost(shared.ownerId, shared.canvasId, err)) {
           window.alert(`공유 캔버스를 열지 못했습니다: ${err.message}`)
         }
       })
       return
     }
-    loadCanvas(id)
+    loadCanvas(id, undefined, loadId)
   }, [activeCanvasId, user, persistCurrent, loadCanvas, loadSharedCanvas, handleSharedAccessLost])
 
   const addCanvas = useCallback(() => {
@@ -1405,16 +1429,37 @@ export default function App() {
       return next
     })
     if (user && cloudHydratedUserRef.current === user.id) {
-      const data = id === activeCanvasId
-        ? { nodes: nodes.map(stripNode), edges: edges.map(stripEdge), notes: notes.map(stripNote), views, stageTypes }
-        : (loadCanvasData(id) ?? { nodes: [], edges: [], notes: [], views: [], stageTypes: DEFAULT_STAGE_TYPES })
-      dirtyCanvasSnapshotsRef.current.set(id, {
-        key: id,
-        shared: false,
-        canvasId: id,
-        userId: user.id,
-        snapshot: canvasSnapshot(name, data),
-      })
+      if (id === activeCanvasId) {
+        const data = { nodes: nodes.map(stripNode), edges: edges.map(stripEdge), notes: notes.map(stripNote), views, stageTypes }
+        dirtyCanvasSnapshotsRef.current.set(id, {
+          key: id,
+          shared: false,
+          canvasId: id,
+          userId: user.id,
+          snapshot: canvasSnapshot(name, data),
+        })
+      } else {
+        const requestId = (canvasRenameRequestRef.current.get(id) ?? 0) + 1
+        canvasRenameRequestRef.current.set(id, requestId)
+        cloudLoadCanvasRow(user.id, id).then((row) => {
+          if (!row || canvasRenameRequestRef.current.get(id) !== requestId) return
+          canvasSyncBaseRef.current.set(id, { revision: row.updated_at, snapshot: cloudRowSnapshot(row) })
+          dirtyCanvasSnapshotsRef.current.set(id, {
+            key: id,
+            shared: false,
+            canvasId: id,
+            userId: user.id,
+            snapshot: canvasSnapshot(name, {
+              nodes: row.nodes,
+              edges: row.edges,
+              notes: row.notes,
+              views: row.views,
+              stageTypes: row.stage_types,
+            }),
+          })
+          setCanvases((previous) => previous.some((canvas) => canvas.id === id) ? [...previous] : previous)
+        }).catch((error) => console.error('[cloud] rename canvas:', error.message))
+      }
     }
   }, [activeCanvasId, nodes, edges, notes, views, stageTypes, user])
 
@@ -1427,19 +1472,20 @@ export default function App() {
       dirtyCanvasSnapshotsRef.current.delete(id)
       canvasSyncBaseRef.current.delete(id)
       conflictedCanvasKeysRef.current.delete(id)
+      canvasRenameRequestRef.current.delete(id)
       if (user) cloudDeleteCanvas(user.id, id)
       if (id === activeCanvasId) loadCanvas(next[0].id)
       return next
     })
   }, [activeCanvasId, loadCanvas, user])
 
-  // ── Cloud: load all canvases from Supabase into memory + localStorage ────
+  // ── Cloud: load tab metadata first, then hydrate only the active canvas ──
   // Placed after loadCanvas so it can be a stable dep reference (no TDZ).
   const loadFromCloud = useCallback(async (userId, preferredCanvasId = null) => {
-    let rows, prefs
+    let summaries, prefs
     try {
-      ;[rows, prefs] = await Promise.all([
-        cloudLoadAllCanvases(userId),
+      ;[summaries, prefs] = await Promise.all([
+        cloudLoadCanvasSummaries(userId),
         cloudLoadUserPrefs(userId),
       ])
     } catch (err) {
@@ -1447,7 +1493,7 @@ export default function App() {
       return
     }
 
-    if (!rows.length) {
+    if (!summaries.length) {
       // First login: push existing localStorage data up to the cloud
       const list = loadCanvasList() ?? []
       for (const c of list) {
@@ -1466,25 +1512,19 @@ export default function App() {
       return
     }
 
-    // Populate localStorage from cloud (so existing loadCanvas() works unchanged)
-    // Merge prefs.canvas_order with rows so MCP-created canvases (not in canvas_order) appear in tabs
+    // Keep preference ordering, but names and existence come from authoritative
+    // canvas rows. This removes deleted ghost tabs and includes MCP-created rows.
     const prefOrder = prefs?.canvas_order ?? []
-    const prefIds = new Set(prefOrder.map((c) => c.id))
-    const missing = rows.filter((r) => !prefIds.has(r.canvas_id)).map((r) => ({ id: r.canvas_id, name: r.name }))
-    const canvasList = prefOrder.length ? [...prefOrder, ...missing] : rows.map((r) => ({ id: r.canvas_id, name: r.name }))
-    canvasSyncBaseRef.current = new Map(rows.map((row) => [
-      row.canvas_id,
-      { revision: row.updated_at, snapshot: cloudRowSnapshot(row) },
-    ]))
+    const canvasList = orderCanvasSummaries(summaries, prefOrder)
+    canvasSyncBaseRef.current.clear()
     dirtyCanvasSnapshotsRef.current.clear()
     conflictedCanvasKeysRef.current.clear()
-    rows.forEach((r) => saveCanvasData(r.canvas_id, { nodes: r.nodes ?? [], edges: r.edges ?? [], notes: r.notes ?? [], views: r.views ?? [], stageTypes: r.stage_types?.length ? r.stage_types : undefined }))
     saveCanvasList(canvasList)
-    const activeId = chooseOwnCanvasToRestore(rows, prefs, preferredCanvasId)
+    const activeId = chooseOwnCanvasToRestore(summaries, prefs, preferredCanvasId)
 
     setCanvases(canvasList)
     if (activeId) {
-      const activeRow = rows.find((r) => r.canvas_id === activeId)
+      const activeRow = await cloudLoadCanvasRow(userId, activeId)
       const prefetched = activeRow
         ? {
             name: activeRow.name,
@@ -1496,6 +1536,19 @@ export default function App() {
             revision: activeRow.updated_at,
           }
         : null
+      if (activeRow) {
+        canvasSyncBaseRef.current.set(activeId, {
+          revision: activeRow.updated_at,
+          snapshot: cloudRowSnapshot(activeRow),
+        })
+        saveCanvasData(activeId, {
+          nodes: activeRow.nodes ?? [],
+          edges: activeRow.edges ?? [],
+          notes: activeRow.notes ?? [],
+          views: activeRow.views ?? [],
+          stageTypes: activeRow.stage_types?.length ? activeRow.stage_types : undefined,
+        })
+      }
       loadCanvas(activeId, prefetched)
     }
     cloudHydratedUserRef.current = userId
@@ -1581,24 +1634,7 @@ export default function App() {
       // that still carries a link token or an invitee email). This keeps a
       // canvas in the shared group after its invitation is deleted but members
       // remain, and drops ghost rows that grant access to nobody.
-      const { data: shares, error } = await supabase.from('canvas_shares')
-        .select('id, canvas_id, invitation_active, link_token, invitee_email')
-        .eq('owner_id', u.id)
-      if (error) throw error
-      const shareIds = (shares ?? []).map((s) => s.id)
-      let membered = new Set()
-      if (shareIds.length) {
-        const { data: mems, error: memErr } = await supabase.from('share_members')
-          .select('share_id').in('share_id', shareIds)
-        if (memErr) throw memErr
-        membered = new Set((mems ?? []).map((m) => m.share_id))
-      }
-      const ids = new Set()
-      for (const s of shares ?? []) {
-        const liveInvite = s.invitation_active && (s.link_token || s.invitee_email)
-        if (membered.has(s.id) || liveInvite) ids.add(s.canvas_id)
-      }
-      setSharedOutCanvasIds(ids)
+      setSharedOutCanvasIds(await listOwnedSharedCanvasIds())
     } catch (err) {
       console.error('[shares] refreshSharedOutCanvasIds:', err.message)
     }
@@ -1624,13 +1660,29 @@ export default function App() {
     if (firstOwn) loadCanvas(firstOwn.id)
   }, [loadCanvas])
 
-  // Owner controls in the participants modal: toggle a member's edit access
-  // / kick them off the share entirely.
+  // Owner controls apply to every grant that participant holds on this canvas.
   const onToggleMemberEdit = useCallback(async (p) => {
+    const owner = userRef.current
+    const canvasId = latestRef.current.activeCanvasId
+    if (!owner || !canvasId || parseSharedId(canvasId)) return
     try {
-      await setMemberEdit(p.shareId, p.userId, !p.canEdit)
+      await setCanvasMemberPermission(owner.id, canvasId, p.userId, 'can_edit', !p.canEdit)
     } catch (err) {
-      console.error('[shares] setMemberEdit:', err.message)
+      console.error('[shares] set member edit:', err.message)
+      window.alert(`편집 권한을 변경하지 못했습니다: ${err.message}`)
+    }
+    refreshShareParticipants()
+  }, [refreshShareParticipants])
+
+  const onToggleMemberInvite = useCallback(async (p) => {
+    const owner = userRef.current
+    const canvasId = latestRef.current.activeCanvasId
+    if (!owner || !canvasId || parseSharedId(canvasId)) return
+    try {
+      await setCanvasMemberPermission(owner.id, canvasId, p.userId, 'can_invite', !p.canInvite)
+    } catch (err) {
+      console.error('[shares] set member invite:', err.message)
+      window.alert(`초대 권한을 변경하지 못했습니다: ${err.message}`)
     }
     refreshShareParticipants()
   }, [refreshShareParticipants])
@@ -1842,6 +1894,7 @@ export default function App() {
           canvasSyncBaseRef.current.clear()
           dirtyCanvasSnapshotsRef.current.clear()
           conflictedCanvasKeysRef.current.clear()
+          canvasRenameRequestRef.current.clear()
           setSyncConflict(null)
         }
       })
@@ -1878,15 +1931,14 @@ export default function App() {
         return
       }
 
-      const { data: row } = await supabase
-        .from('canvases')
-        .select('name, nodes, edges, notes, views, stage_types, updated_at')
-        .eq('user_id', user.id)
-        .eq('canvas_id', id)
-        .maybeSingle()
-      if (!row) return
       if (dirtyCanvasSnapshotsRef.current.has(id) || conflictedCanvasKeysRef.current.has(id)) return
-      canvasSyncBaseRef.current.set(id, { revision: row.updated_at, snapshot: cloudRowSnapshot(row) })
+      const active = latestRef.current.activeCanvasId === id
+      const { data: row } = await supabase.from('canvases')
+        .select(active
+          ? 'name, nodes, edges, notes, views, stage_types, updated_at'
+          : 'name, updated_at')
+        .eq('user_id', user.id).eq('canvas_id', id).maybeSingle()
+      if (!row) return
 
       // Keep the tab list in sync (MCP-created canvas / renamed canvas)
       setCanvases((prev) => {
@@ -1899,16 +1951,21 @@ export default function App() {
         return next
       })
 
+      // Inactive canvases stay metadata-only. Their latest body is fetched
+      // when selected, so background MCP edits cannot fill browser memory.
+      if (!active || latestRef.current.activeCanvasId !== id) {
+        deleteCanvasData(id)
+        canvasSyncBaseRef.current.delete(id)
+        return
+      }
+      canvasSyncBaseRef.current.set(id, { revision: row.updated_at, snapshot: cloudRowSnapshot(row) })
+
       const mirror = {
         nodes: sortParentsFirst(row.nodes ?? []),
         edges: row.edges ?? [],
         notes: sanitizeNotes(row.notes),
         views: row.views ?? [],
         stageTypes: row.stage_types?.length ? row.stage_types : undefined,
-      }
-      if (latestRef.current.activeCanvasId !== id) {
-        saveCanvasData(id, mirror)
-        return
       }
       // Active canvas: never clobber an open editor; skip when content is
       // unchanged (this also swallows the echo of our own autosave, since the
@@ -2307,13 +2364,13 @@ export default function App() {
     const parsed = parseSharedId(activeCanvasId)
     if (!parsed) return {
       role: 'owner', scope: 'canvas', targetId: null, restrictView: false,
-      canEdit: true, canEditCanvas: true, grants: [],
+      canEdit: true, canEditCanvas: true, canInvite: true, grants: [],
     }
     const matches = sharedCanvases.filter((s) => s.ownerId === parsed.ownerId && s.canvasId === parsed.canvasId)
     // Fail closed while an invite list is loading or an invite was revoked.
     if (!matches.length) return {
       role: 'invitee', scope: 'composed', targetId: null, restrictView: true,
-      canEdit: false, canEditCanvas: false, grants: [],
+      canEdit: false, canEditCanvas: false, canInvite: false, grants: [],
     }
     const grants = matches.flatMap((item) => item.grants?.length ? item.grants : [item])
     return composeSharePermission(grants)
@@ -2861,40 +2918,33 @@ export default function App() {
   }, [stageTypes.length])
 
   // ── Add nodes ─────────────────────────────────────────────────────────────
-  // Scoped invitees may create only inside an editable group. With several
-  // group grants, a drop position selects the containing frame; toolbar adds
-  // stay disabled until the target is unambiguous.
+  // Full-canvas editors may create inside whichever group contains the drop
+  // point. Scoped invitees are limited to their granted group frames.
   const scopedCreationTarget = useCallback((flowPosition = null) => {
-    if (canEditFullCanvas) return { allowed: true, frame: null }
-    if (!canEditCanvas || !editableGroupIds.size) return { allowed: false, frame: null }
-    const frames = nodes.filter((node) => node.type === 'group' && editableGroupIds.has(node.id))
+    if (!canEditCanvas || (!canEditFullCanvas && !editableGroupIds.size)) {
+      return { allowed: false, frame: null }
+    }
+    const allowedGroupIds = canEditFullCanvas ? null : editableGroupIds
+    const frames = nodes.filter((node) => (
+      node.type === 'group' && (canEditFullCanvas || editableGroupIds.has(node.id))
+    ))
     let frame = null
     if (flowPosition) {
-      const byId = new Map(nodes.map((node) => [node.id, node]))
-      frame = frames
-        .filter((candidate) => {
-          const position = absoluteNodePosition(candidate, byId)
-          const width = candidate.measured?.width ?? candidate.width ?? 0
-          const height = candidate.measured?.height ?? candidate.height ?? 0
-          return flowPosition.x >= position.x && flowPosition.x <= position.x + width
-            && flowPosition.y >= position.y && flowPosition.y <= position.y + height
-        })
-        .sort((left, right) => (
-          (left.measured?.width ?? left.width ?? 0) * (left.measured?.height ?? left.height ?? 0)
-          - (right.measured?.width ?? right.width ?? 0) * (right.measured?.height ?? right.height ?? 0)
-        ))[0] ?? null
+      frame = findGroupAtPoint(nodes, flowPosition, { allowedGroupIds })
     } else {
       const selectedTargets = new Set(nodes
         .filter((node) => node.selected)
-        .map((node) => editableGroupIds.has(node.id) ? node.id : node.parentId)
-        .filter((id) => editableGroupIds.has(id)))
+        .map((node) => node.type === 'group' ? node.id : node.parentId)
+        .filter((id) => frames.some((candidate) => candidate.id === id)))
       if (selectedTargets.size === 1) {
         const selectedGroupId = [...selectedTargets][0]
         frame = frames.find((candidate) => candidate.id === selectedGroupId) ?? null
       }
     }
-    if (!frame && singleEditableGroupId) frame = frames.find((candidate) => candidate.id === singleEditableGroupId) ?? null
-    return { allowed: !!frame, frame }
+    if (!frame && !canEditFullCanvas && singleEditableGroupId) {
+      frame = frames.find((candidate) => candidate.id === singleEditableGroupId) ?? null
+    }
+    return { allowed: canEditFullCanvas || !!frame, frame }
   }, [canEditCanvas, canEditFullCanvas, editableGroupIds, nodes, singleEditableGroupId])
 
   const addStage = useCallback(() => {
@@ -2902,7 +2952,7 @@ export default function App() {
     if (!target.allowed) return
     const id = nextId()
     if (target.frame) {
-      setNodes((nds) => [...nds, { id, type: 'stage', parentId: target.frame.id, position: centerInFrame(target.frame, 200, 80), data: { label: '새 단계', description: '', colorIdx: 0 } }])
+      setNodes((nds) => sortParentsFirst([...nds, { id, type: 'stage', parentId: target.frame.id, position: creationPosition(target.frame, nds, null, 200, 80), data: { label: '새 단계', description: '', colorIdx: 0 } }]))
       return
     }
     setNodes((nds) => [...nds, { id, type: 'stage', position: { x: 200 + Math.random() * 400, y: 150 + Math.random() * 300 }, data: { label: '새 단계', description: '', colorIdx: 0 } }])
@@ -2913,21 +2963,37 @@ export default function App() {
     if (!target.allowed) return
     const id = nextId()
     if (target.frame) {
-      setNodes((nds) => [...nds, { id, type: 'memo', parentId: target.frame.id, position: centerInFrame(target.frame, 160, 80), data: { header: '', text: '' } }])
+      setNodes((nds) => sortParentsFirst([...nds, { id, type: 'memo', parentId: target.frame.id, position: creationPosition(target.frame, nds, null, 160, 80), data: { header: '', text: '' } }]))
       return
     }
     setNodes((nds) => [...nds, { id, type: 'memo', position: { x: 300 + Math.random() * 400, y: 200 + Math.random() * 200 }, data: { header: '', text: '' } }])
   }, [setNodes, scopedCreationTarget])
 
   const addStageAt = useCallback((pos) => {
+    const target = scopedCreationTarget(pos)
+    if (!target.allowed) return
     const id = nextId()
-    setNodes((nds) => [...nds, { id, type: 'stage', position: pos, data: { label: '새 단계', description: '', colorIdx: 0 } }])
-  }, [setNodes])
+    setNodes((nds) => sortParentsFirst([...nds, {
+      id,
+      type: 'stage',
+      ...(target.frame ? { parentId: target.frame.id } : {}),
+      position: creationPosition(target.frame, nds, pos, 200, 80),
+      data: { label: '새 단계', description: '', colorIdx: 0 },
+    }]))
+  }, [scopedCreationTarget, setNodes])
 
   const addMemoAt = useCallback((pos) => {
+    const target = scopedCreationTarget(pos)
+    if (!target.allowed) return
     const id = nextId()
-    setNodes((nds) => [...nds, { id, type: 'memo', position: pos, data: { header: '', text: '' } }])
-  }, [setNodes])
+    setNodes((nds) => sortParentsFirst([...nds, {
+      id,
+      type: 'memo',
+      ...(target.frame ? { parentId: target.frame.id } : {}),
+      position: creationPosition(target.frame, nds, pos, 160, 80),
+      data: { header: '', text: '' },
+    }]))
+  }, [scopedCreationTarget, setNodes])
 
   // ── Palette (드래그&드롭 / 탭) node creation ──────────────────────────────
   // Shared by the canvas drop target (onDrop) and Toolbar's tap-to-add
@@ -2943,29 +3009,31 @@ export default function App() {
 
     if (payload.nodeType === 'content') {
       const id = nextId()
-      const position = forceFrame ? centerInFrame(frame, 220, 140) : pos
-      const node = { id, type: 'content', position, data: { kind: payload.contentKind } }
-      setNodes((nds) => [...nds, forceFrame ? { ...node, parentId: frame.id } : node])
+      setNodes((nds) => {
+        const node = { id, type: 'content', position: creationPosition(frame, nds, pos, 220, 140), data: { kind: payload.contentKind } }
+        return sortParentsFirst([...nds, forceFrame ? { ...node, parentId: frame.id } : node])
+      })
       return
     }
     if (payload.nodeType === 'system') {
       const id = nextId()
-      const position = forceFrame ? centerInFrame(frame, 240, 130) : pos
-      const node = { id, type: 'system', position, data: createSystemNodeData(payload.systemKind) }
-      setNodes((nds) => [...nds, forceFrame ? { ...node, parentId: frame.id } : node])
+      setNodes((nds) => {
+        const node = { id, type: 'system', position: creationPosition(frame, nds, pos, 240, 130), data: createSystemNodeData(payload.systemKind) }
+        return sortParentsFirst([...nds, forceFrame ? { ...node, parentId: frame.id } : node])
+      })
       return
     }
     if (payload.nodeType === 'stage') {
       if (forceFrame) {
         const id = nextId()
-        setNodes((nds) => [...nds, { id, type: 'stage', parentId: frame.id, position: centerInFrame(frame, 200, 80), data: { label: '새 단계', description: '', colorIdx: 0 } }])
+        setNodes((nds) => sortParentsFirst([...nds, { id, type: 'stage', parentId: frame.id, position: creationPosition(frame, nds, pos, 200, 80), data: { label: '새 단계', description: '', colorIdx: 0 } }]))
       } else addStageAt(pos)
       return
     }
     if (payload.nodeType === 'memo') {
       if (forceFrame) {
         const id = nextId()
-        setNodes((nds) => [...nds, { id, type: 'memo', parentId: frame.id, position: centerInFrame(frame, 160, 80), data: { header: '', text: '' } }])
+        setNodes((nds) => sortParentsFirst([...nds, { id, type: 'memo', parentId: frame.id, position: creationPosition(frame, nds, pos, 160, 80), data: { header: '', text: '' } }]))
       } else addMemoAt(pos)
     }
   }, [scopedCreationTarget, addStageAt, addMemoAt, setNodes])
@@ -3234,6 +3302,21 @@ export default function App() {
   }, [nodes])
 
   const onNodeDrag = useCallback((_e, n) => {
+    if (canEditFullCanvas && n.type !== 'group') {
+      const dragSnapshot = nodes.map((candidate) => candidate.id === n.id
+        ? {
+            ...candidate,
+            position: n.position,
+            measured: n.measured ?? candidate.measured,
+            width: n.width ?? candidate.width,
+            height: n.height ?? candidate.height,
+          }
+        : candidate)
+      const target = findGroupDropTarget(dragSnapshot, n.id)
+      setGroupDropTargetId((current) => current === target?.id ? current : (target?.id ?? null))
+    } else {
+      setGroupDropTargetId(null)
+    }
     const snap = computeAlignSnap(n)
     if (!snap) { setAlignGuides([]); return }
     const { xSnap, ySnap } = snap
@@ -3251,11 +3334,17 @@ export default function App() {
     if (xSnap) guides.push({ axis: 'x', value: xSnap.guide })
     if (ySnap) guides.push({ axis: 'y', value: ySnap.guide })
     setAlignGuides(guides)
-  }, [computeAlignSnap, setNodes])
+  }, [canEditFullCanvas, computeAlignSnap, nodes, setNodes])
 
-  const onNodeDragStop = useCallback(() => {
+  const onNodeDragStop = useCallback((_event, dragged) => {
     setAlignGuides([])
-  }, [])
+    setGroupDropTargetId(null)
+    if (!canEditFullCanvas || !dragged || dragged.type === 'group') return
+    setNodes((currentNodes) => {
+      const target = findGroupDropTarget(currentNodes, dragged.id)
+      return sortParentsFirst(reparentNodePreservingPosition(currentNodes, dragged.id, target?.id ?? null))
+    })
+  }, [canEditFullCanvas, setNodes])
 
   // ── Alignment guides while RESIZING: same edge-snap idea as drag, applied
   // to whichever edge of the box is actually moving. A NodeResizer drag from
@@ -3437,16 +3526,14 @@ export default function App() {
   const handleContextAddContent = (kind) => {
     if (!rfInstance || !contextMenu) return
     const pos = rfInstance.screenToFlowPosition({ x: contextMenu.flowX, y: contextMenu.flowY })
-    const id = nextId()
-    setNodes((nds) => [...nds, { id, type: 'content', position: pos, data: { kind } }])
+    addFromPalette({ nodeType: 'content', contentKind: kind }, pos)
     closeContext()
   }
 
   const handleContextAddSystem = () => {
     if (!rfInstance || !contextMenu) return
     const pos = rfInstance.screenToFlowPosition({ x: contextMenu.flowX, y: contextMenu.flowY })
-    const id = nextId()
-    setNodes((nds) => [...nds, { id, type: 'system', position: pos, data: createSystemNodeData() }])
+    addFromPalette({ nodeType: 'system' }, pos)
     closeContext()
   }
 
@@ -3990,8 +4077,11 @@ export default function App() {
         sharedOutIds={sharedOutCanvasIds}
         onLeaveShared={onLeaveShared}
         onToggleMemberEdit={onToggleMemberEdit}
+        onToggleMemberInvite={onToggleMemberInvite}
         onKickMember={onKickMember}
         onToggleViewRestriction={onToggleMemberViewRestriction}
+        currentUserId={user?.id}
+        canInviteCanvas={permissionCanInviteScope(perm, 'canvas', null, nodes)}
       />
 
       <Toolbar
@@ -4033,7 +4123,9 @@ export default function App() {
           <InvitePopover
             scope={invite.scope}
             targetId={invite.targetId}
-            canvasId={activeCanvasId}
+            ownerId={parseSharedId(activeCanvasId)?.ownerId ?? user?.id}
+            canvasId={parseSharedId(activeCanvasId)?.canvasId ?? activeCanvasId}
+            isOwner={!parseSharedId(activeCanvasId)}
             onClose={() => { setInvite(null); refreshShareParticipants(); refreshSharedOutCanvasIds() }}
             onlineUserIds={new Set(onlineUsers.map((u) => u.user_id))}
             onSharesChanged={() => { refreshShareParticipants(); refreshSharedOutCanvasIds() }}
@@ -4295,8 +4387,9 @@ export default function App() {
               imageContext,
               readOnly: viewOnly || (scopedPermission && !editable),
               forceShapeOnly: forceShapeOnlySet?.has(n.id) ?? false,
-              canInvite: isOwner,
-              onInvite: isOwner ? openInvite : undefined,
+              groupDropTarget: n.type === 'group' && groupDropTargetId === n.id,
+              canInvite: permissionCanInviteScope(perm, nodeScope, n.id, nodes),
+              onInvite: permissionCanInviteScope(perm, nodeScope, n.id, nodes) ? openInvite : undefined,
               canManageParticipants: isOwner,
               onToggleViewRestriction: isOwner ? onToggleMemberViewRestriction : undefined,
               scopedParticipants: nodeScopedParticipants,

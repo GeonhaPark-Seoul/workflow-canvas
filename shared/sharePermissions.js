@@ -8,6 +8,7 @@ export function normalizeShareGrant(grant = {}) {
     scope,
     targetId,
     canEdit: (grant.canEdit ?? grant.can_edit) !== false,
+    canInvite: !!(grant.canInvite ?? grant.can_invite),
     restrictView: !!(grant.restrictView ?? grant.restrict_view),
   }
 }
@@ -16,6 +17,7 @@ export function composeSharePermission(grants = []) {
   const normalized = grants.map(normalizeShareGrant)
   const canEditCanvas = normalized.some((grant) => grant.scope === 'canvas' && grant.canEdit)
   const canEdit = normalized.some((grant) => grant.canEdit)
+  const canInvite = normalized.some((grant) => grant.canInvite)
   const restrictView = normalized.length > 0 && !normalized.some((grant) => (
     grant.scope === 'canvas' || !grant.restrictView
   ))
@@ -26,6 +28,7 @@ export function composeSharePermission(grants = []) {
     targetId: single?.targetId ?? null,
     canEdit,
     canEditCanvas,
+    canInvite,
     restrictView,
     grants: normalized,
   }
@@ -35,12 +38,34 @@ export function permissionFromAccess(access = {}) {
   if (access.role === 'owner') {
     return {
       role: 'owner', scope: 'canvas', targetId: null, canEdit: true,
-      canEditCanvas: true, restrictView: false, grants: [],
+      canEditCanvas: true, canInvite: true, restrictView: false, grants: [],
     }
   }
   if (Array.isArray(access.grants) && access.grants.length) return composeSharePermission(access.grants)
   if (!access.scope) return composeSharePermission([])
   return composeSharePermission([access])
+}
+
+function grantCoversInvitation(grant, scope, targetId, nodes) {
+  if (!grant.canInvite) return false
+  if (grant.scope === 'canvas') return true
+  if (scope === 'canvas') return false
+  if (grant.scope === 'node') return scope === 'node' && grant.targetId === targetId
+  if (scope === 'group') return grant.targetId === targetId
+  const target = (nodes ?? []).find((node) => node.id === targetId)
+  return target?.parentId === grant.targetId
+}
+
+export function invitationAuthorizingGrants(permission, scope, targetId, nodes = []) {
+  const resolved = permissionFromAccess(permission)
+  if (resolved.role === 'owner') return [{
+    scope: 'canvas', targetId: null, canEdit: true, canInvite: true, restrictView: false,
+  }]
+  return resolved.grants.filter((grant) => grantCoversInvitation(grant, scope, targetId, nodes))
+}
+
+export function permissionCanInviteScope(permission, scope, targetId, nodes = []) {
+  return invitationAuthorizingGrants(permission, scope, targetId, nodes).length > 0
 }
 
 export function editableGroupIdSet(permission) {

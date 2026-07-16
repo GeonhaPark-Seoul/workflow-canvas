@@ -13,8 +13,9 @@ async function currentUserId() {
 export async function listMyTokens() {
   const { data, error } = await supabase
     .from('mcp_tokens')
-    .select('*')
+    .select('token, token_prefix, label, created_at')
     .order('created_at', { ascending: false })
+    .limit(50)
   if (error) { console.error('[mcpTokens] listMyTokens:', error.message); throw new Error('listMyTokens: ' + error.message) }
   return (data ?? []).map((row) => ({
     tokenId: row.token,

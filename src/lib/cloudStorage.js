@@ -47,19 +47,26 @@ export async function saveCanvas(userId, canvasId, name, nodes, edges, notes = [
   return data.updated_at
 }
 
-export async function loadAllCanvases(userId) {
-  const { data, error } = await supabase
-    .from('canvases')
-    .select('*')
-    .eq('user_id', userId)
-    .order('updated_at', { ascending: true })
-  if (error) { console.error('[cloud] loadAllCanvases:', error.message); throw new Error('loadAllCanvases: ' + error.message) }
-  return data ?? []
+export async function loadCanvasSummaries(userId) {
+  const rows = []
+  const pageSize = 500
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await supabase
+      .from('canvases')
+      .select('canvas_id, name, updated_at')
+      .eq('user_id', userId)
+      .order('updated_at', { ascending: true })
+      .range(from, from + pageSize - 1)
+    if (error) { console.error('[cloud] loadCanvasSummaries:', error.message); throw new Error('loadCanvasSummaries: ' + error.message) }
+    rows.push(...(data ?? []))
+    if ((data?.length ?? 0) < pageSize) break
+  }
+  return rows
 }
 
 export async function loadCanvasRow(userId, canvasId) {
   const { data, error } = await supabase.from('canvases')
-    .select('*')
+    .select('user_id, canvas_id, name, nodes, edges, notes, views, stage_types, updated_at')
     .eq('user_id', userId)
     .eq('canvas_id', canvasId)
     .maybeSingle()
@@ -84,7 +91,7 @@ export async function saveUserPrefs(userId, prefs) {
 export async function loadUserPrefs(userId) {
   const { data, error } = await supabase
     .from('user_prefs')
-    .select('*')
+    .select('user_id, active_canvas_id, canvas_order, settings')
     .eq('user_id', userId)
     .maybeSingle()
   if (error) { console.error('[cloud] loadUserPrefs:', error.message); throw new Error('loadUserPrefs: ' + error.message) }

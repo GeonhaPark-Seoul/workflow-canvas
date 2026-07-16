@@ -552,3 +552,267 @@ drop policy if exists "invitee updates shared canvases" on canvases;
 -- The Phase 6 API gateway replaced this parameterized helper. Dropping it also
 -- prevents authenticated callers from probing access with someone else's email.
 drop function if exists can_access_canvas(uuid, text, uuid, text);
+
+-- Phase 7: composed grants, delegated invitations, and mutual friends.
+-- Accepted users may hold several group/node grants at once. Owner-managed
+-- member flags are repeated on each membership row and composed by the API.
+alter table share_members add column if not exists can_invite boolean not null default false;
+alter table canvas_shares add column if not exists default_can_edit boolean not null default true;
+alter table canvas_shares add column if not exists invited_by_user_id uuid references auth.users(id) on delete set null;
+
+create index if not exists canvas_shares_owner_canvas_idx on canvas_shares (owner_id, canvas_id);
+create index if not exists canvas_shares_inviter_created_idx on canvas_shares (invited_by_user_id, created_at desc);
+create index if not exists canvas_shares_invitee_active_idx
+  on canvas_shares (lower(invitee_email), created_at desc)
+  where invitation_active and invitee_email is not null;
+create index if not exists share_members_user_idx on share_members (user_id, share_id);
+create index if not exists share_revocations_user_idx on share_revocations (user_id, share_id);
+
+-- New memberships inherit the invitation's bounded edit permission. The API
+-- computes that value from the inviter's own grants; clients cannot override it.
+create or replace function claim_share(token text)
+returns table (
+  id uuid,
+  owner_id uuid,
+  canvas_id text,
+  scope text,
+  target_id text,
+  restrict_view boolean
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  found_share canvas_shares%rowtype;
+begin
+  if auth.uid() is null then
+    raise exception 'authentication required';
+  end if;
+
+  select * into found_share from canvas_shares cs where cs.link_token = token and cs.invitation_active;
+  if not found then
+    raise exception 'invalid share link';
+  end if;
+  if exists (select 1 from share_revocations r where r.share_id = found_share.id and r.user_id = auth.uid()) then
+    raise exception 'share access revoked';
+  end if;
+
+  insert into share_members (share_id, user_id, can_edit)
+  values (found_share.id, auth.uid(), found_share.default_can_edit)
+  on conflict do nothing;
+
+  return query
+    select found_share.id, found_share.owner_id, found_share.canvas_id,
+           found_share.scope, found_share.target_id, found_share.restrict_view;
+end;
+$$;
+
+create or replace function claim_email_invites()
+returns setof canvas_shares
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if auth.uid() is null or auth.email() is null then
+    raise exception 'authentication required';
+  end if;
+
+  return query
+    with claimed as (
+      insert into share_members (share_id, user_id, can_edit)
+      select cs.id, auth.uid(), cs.default_can_edit
+      from canvas_shares cs
+      where cs.invitation_active and lower(cs.invitee_email) = lower(auth.email())
+        and not exists (select 1 from share_revocations r where r.share_id = cs.id and r.user_id = auth.uid())
+      on conflict do nothing
+      returning share_id
+    )
+    select cs.* from canvas_shares cs join claimed c on c.share_id = cs.id;
+end;
+$$;
+
+create or replace function claim_email_invite(p_share_id uuid)
+returns canvas_shares language plpgsql security definer set search_path = public as $$
+declare found_share canvas_shares%rowtype;
+begin
+  if auth.uid() is null or auth.email() is null then
+    raise exception 'authentication required';
+  end if;
+
+  select * into found_share from canvas_shares
+  where id = p_share_id and invitation_active and lower(invitee_email) = lower(auth.email());
+  if not found or exists (select 1 from share_revocations r where r.share_id = p_share_id and r.user_id = auth.uid()) then
+    raise exception 'invalid email invitation';
+  end if;
+  insert into share_members (share_id, user_id, can_edit)
+  values (p_share_id, auth.uid(), found_share.default_can_edit)
+  on conflict do nothing;
+  return found_share;
+end;
+$$;
+
+revoke execute on function claim_share(text) from PUBLIC, anon;
+revoke execute on function claim_email_invites() from PUBLIC, anon;
+revoke execute on function claim_email_invite(uuid) from PUBLIC, anon;
+grant execute on function claim_share(text) to authenticated;
+grant execute on function claim_email_invites() to authenticated;
+grant execute on function claim_email_invite(uuid) to authenticated;
+
+create table if not exists friendships (
+  id uuid default gen_random_uuid() primary key,
+  requester_id uuid references auth.users(id) on delete cascade not null,
+  addressee_id uuid references auth.users(id) on delete cascade not null,
+  status text not null default 'pending' check (status in ('pending', 'accepted')),
+  created_at timestamptz not null default now(),
+  responded_at timestamptz,
+  check (requester_id <> addressee_id)
+);
+
+create unique index if not exists friendships_pair_unique_idx
+  on friendships (least(requester_id, addressee_id), greatest(requester_id, addressee_id));
+create index if not exists friendships_addressee_status_idx on friendships (addressee_id, status);
+create index if not exists friendships_requester_status_idx on friendships (requester_id, status);
+alter table friendships enable row level security;
+
+drop policy if exists "friends select own relationships" on friendships;
+create policy "friends select own relationships" on friendships
+  for select using (requester_id = auth.uid() or addressee_id = auth.uid());
+
+revoke all on friendships from PUBLIC, anon, authenticated;
+grant select on friendships to authenticated;
+grant all on friendships to service_role;
+
+create or replace function list_my_friendships()
+returns table (
+  id uuid,
+  other_user_id uuid,
+  status text,
+  direction text,
+  nickname text,
+  glyph text,
+  color text,
+  email text,
+  last_seen_at timestamptz
+)
+language sql security definer stable set search_path = public as $$
+  select
+    f.id,
+    case when f.requester_id = auth.uid() then f.addressee_id else f.requester_id end,
+    f.status,
+    case when f.requester_id = auth.uid() then 'outgoing' else 'incoming' end,
+    p.nickname,
+    p.glyph,
+    p.color,
+    p.email,
+    p.last_seen_at
+  from friendships f
+  join profiles p on p.user_id = case when f.requester_id = auth.uid() then f.addressee_id else f.requester_id end
+  where auth.uid() is not null and (f.requester_id = auth.uid() or f.addressee_id = auth.uid())
+  order by f.status, f.created_at;
+$$;
+
+create or replace function send_friend_request(p_email text)
+returns uuid language plpgsql security definer set search_path = public as $$
+declare
+  target_user uuid;
+  existing friendships%rowtype;
+  result_id uuid;
+begin
+  if auth.uid() is null or nullif(trim(p_email), '') is null then
+    raise exception 'friend request not allowed';
+  end if;
+  select u.id into target_user
+  from auth.users u
+  where lower(u.email) = lower(trim(p_email)) and u.id <> auth.uid()
+  limit 1;
+  if target_user is null then
+    raise exception 'friend request not allowed';
+  end if;
+
+  -- Friendship starts from a real collaboration relationship. This prevents
+  -- the email argument from becoming an authenticated account-discovery API.
+  if not exists (
+    select 1
+    from canvases c
+    where (
+      c.user_id = auth.uid()
+      or exists (
+        select 1
+        from canvas_shares mine_share
+        join share_members mine_member on mine_member.share_id = mine_share.id
+        where mine_share.owner_id = c.user_id
+          and mine_share.canvas_id = c.canvas_id
+          and mine_member.user_id = auth.uid()
+      )
+    )
+    and (
+      c.user_id = target_user
+      or exists (
+        select 1
+        from canvas_shares target_share
+        join share_members target_member on target_member.share_id = target_share.id
+        where target_share.owner_id = c.user_id
+          and target_share.canvas_id = c.canvas_id
+          and target_member.user_id = target_user
+      )
+    )
+  ) then
+    raise exception 'friend request not allowed';
+  end if;
+
+  select * into existing from friendships f
+  where (f.requester_id = auth.uid() and f.addressee_id = target_user)
+     or (f.requester_id = target_user and f.addressee_id = auth.uid())
+  limit 1;
+
+  if found then
+    if existing.status = 'pending' and existing.addressee_id = auth.uid() then
+      update friendships set status = 'accepted', responded_at = now() where id = existing.id;
+    end if;
+    return existing.id;
+  end if;
+
+  insert into friendships (requester_id, addressee_id)
+  values (auth.uid(), target_user)
+  returning id into result_id;
+  return result_id;
+end;
+$$;
+
+create or replace function respond_friend_request(p_friendship_id uuid, p_accept boolean)
+returns boolean language plpgsql security definer set search_path = public as $$
+begin
+  if auth.uid() is null or not exists (
+    select 1 from friendships f
+    where f.id = p_friendship_id and f.addressee_id = auth.uid() and f.status = 'pending'
+  ) then
+    raise exception 'friend response not allowed';
+  end if;
+  if p_accept then
+    update friendships set status = 'accepted', responded_at = now() where id = p_friendship_id;
+    return true;
+  end if;
+  delete from friendships where id = p_friendship_id;
+  return false;
+end;
+$$;
+
+create or replace function remove_friendship(p_friendship_id uuid)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  delete from friendships f
+  where f.id = p_friendship_id and (f.requester_id = auth.uid() or f.addressee_id = auth.uid());
+  if not found then raise exception 'friend removal not allowed'; end if;
+end;
+$$;
+
+revoke execute on function list_my_friendships() from PUBLIC, anon;
+revoke execute on function send_friend_request(text) from PUBLIC, anon;
+revoke execute on function respond_friend_request(uuid, boolean) from PUBLIC, anon;
+revoke execute on function remove_friendship(uuid) from PUBLIC, anon;
+grant execute on function list_my_friendships() to authenticated;
+grant execute on function send_friend_request(text) to authenticated;
+grant execute on function respond_friend_request(uuid, boolean) to authenticated;
+grant execute on function remove_friendship(uuid) to authenticated;

@@ -2,7 +2,7 @@
 export const SOURCE_TWIN_MANIFEST = Object.freeze(
 {
   "schemaVersion": 1,
-  "id": "source-twin-v1-448b5aa4b358",
+  "id": "source-twin-v1-dde14ef8c0c9",
   "source": {
     "id": "workflow-canvas:self-source",
     "label": "workflow-canvas 소스 코드",
@@ -420,7 +420,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "api:/api/shared-canvas",
       "kind": "api-route",
       "label": "/api/shared-canvas",
-      "fingerprint": "182256b08ef000747bf0",
+      "fingerprint": "bbc0ec10e78fafce5437",
       "name": "/api/shared-canvas",
       "path": "api/shared-canvas.js",
       "parentId": "file:api/shared-canvas.js",
@@ -434,7 +434,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "api-route-and-source",
         "refs": [
           "api:/api/shared-canvas",
-          "source:api/shared-canvas.js#L1-L126"
+          "source:api/shared-canvas.js#L1-L167"
         ]
       },
       "tags": [
@@ -566,7 +566,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "database-reference",
         "refs": [
           "db-function:can_access_canvas",
-          "source:supabase-shares.sql#L1-L555"
+          "source:supabase-shares.sql#L1-L819"
         ]
       },
       "tags": [
@@ -614,7 +614,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "database-reference",
         "refs": [
           "db-function:can_view_profile",
-          "source:supabase-profile-privacy.sql#L1-L53"
+          "source:supabase-profile-privacy.sql#L1-L54"
         ]
       },
       "tags": [
@@ -638,7 +638,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "database-reference",
         "refs": [
           "db-function:canvas_relation_metadata_guard_ready",
-          "source:mcp/store.js#L1-L1601"
+          "source:mcp/store.js#L1-L1571"
         ]
       },
       "tags": [
@@ -662,7 +662,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "database-reference",
         "refs": [
           "db-function:claim_email_invite",
-          "source:src/lib/shares.js#L1-L162"
+          "source:src/lib/shares.js#L1-L202"
         ]
       },
       "tags": [
@@ -686,7 +686,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "database-reference",
         "refs": [
           "db-function:claim_email_invites",
-          "source:supabase-shares.sql#L1-L555"
+          "source:supabase-shares.sql#L1-L819"
         ]
       },
       "tags": [
@@ -710,7 +710,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "database-reference",
         "refs": [
           "db-function:claim_share",
-          "source:src/lib/shares.js#L1-L162"
+          "source:src/lib/shares.js#L1-L202"
         ]
       },
       "tags": [
@@ -734,7 +734,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "database-reference",
         "refs": [
           "db-function:disable_share_invitation",
-          "source:src/lib/shares.js#L1-L162"
+          "source:src/lib/shares.js#L1-L202"
         ]
       },
       "tags": [
@@ -742,6 +742,30 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "function",
         "sharing-collaboration",
         "sharing-policy"
+      ]
+    },
+    {
+      "id": "db-function:get_canvas_summaries",
+      "kind": "db-function",
+      "label": "get_canvas_summaries",
+      "fingerprint": "d9445c137bfea5682efe",
+      "name": "get_canvas_summaries",
+      "layer": "database",
+      "area": "canvas-model",
+      "subsystem": "canvas-state",
+      "summary": "캔버스 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
+      "explanationBasis": {
+        "method": "database-reference",
+        "refs": [
+          "db-function:get_canvas_summaries",
+          "source:mcp/canvasSummaries.js#L1-L58"
+        ]
+      },
+      "tags": [
+        "database",
+        "function",
+        "canvas-model",
+        "canvas-state"
       ]
     },
     {
@@ -806,7 +830,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "database-reference",
         "refs": [
           "db-function:is_share_member",
-          "source:supabase-shares.sql#L1-L555"
+          "source:supabase-shares.sql#L1-L819"
         ]
       },
       "tags": [
@@ -830,7 +854,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "database-reference",
         "refs": [
           "db-function:leave_shared_canvas",
-          "source:src/lib/shares.js#L1-L162"
+          "source:src/lib/shares.js#L1-L202"
         ]
       },
       "tags": [
@@ -838,6 +862,30 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "function",
         "sharing-collaboration",
         "sharing-policy"
+      ]
+    },
+    {
+      "id": "db-function:list_my_friendships",
+      "kind": "db-function",
+      "label": "list_my_friendships",
+      "fingerprint": "75c8c13fd9abeac4d998",
+      "name": "list_my_friendships",
+      "layer": "database",
+      "area": "data-storage-sync",
+      "subsystem": "database-schema",
+      "summary": "목록 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
+      "explanationBasis": {
+        "method": "database-reference",
+        "refs": [
+          "db-function:list_my_friendships",
+          "source:src/lib/friendships.js#L1-L41"
+        ]
+      },
+      "tags": [
+        "database",
+        "function",
+        "data-storage-sync",
+        "database-schema"
       ]
     },
     {
@@ -854,7 +902,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "database-reference",
         "refs": [
           "db-function:list_pending_email_invites",
-          "source:src/lib/shares.js#L1-L162"
+          "source:src/lib/shares.js#L1-L202"
         ]
       },
       "tags": [
@@ -878,7 +926,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "database-reference",
         "refs": [
           "db-function:owns_share",
-          "source:supabase-shares.sql#L1-L555"
+          "source:supabase-shares.sql#L1-L819"
         ]
       },
       "tags": [
@@ -1009,6 +1057,54 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ]
     },
     {
+      "id": "db-function:remove_friendship",
+      "kind": "db-function",
+      "label": "remove_friendship",
+      "fingerprint": "013f8d841ebba93ec646",
+      "name": "remove_friendship",
+      "layer": "database",
+      "area": "data-storage-sync",
+      "subsystem": "database-schema",
+      "summary": "remove_friendship 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
+      "explanationBasis": {
+        "method": "database-reference",
+        "refs": [
+          "db-function:remove_friendship",
+          "source:src/lib/friendships.js#L1-L41"
+        ]
+      },
+      "tags": [
+        "database",
+        "function",
+        "data-storage-sync",
+        "database-schema"
+      ]
+    },
+    {
+      "id": "db-function:respond_friend_request",
+      "kind": "db-function",
+      "label": "respond_friend_request",
+      "fingerprint": "1ab4d8306720f7c1f992",
+      "name": "respond_friend_request",
+      "layer": "database",
+      "area": "data-storage-sync",
+      "subsystem": "database-schema",
+      "summary": "요청 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
+      "explanationBasis": {
+        "method": "database-reference",
+        "refs": [
+          "db-function:respond_friend_request",
+          "source:src/lib/friendships.js#L1-L41"
+        ]
+      },
+      "tags": [
+        "database",
+        "function",
+        "data-storage-sync",
+        "database-schema"
+      ]
+    },
+    {
       "id": "db-function:revoke_canvas_member",
       "kind": "db-function",
       "label": "revoke_canvas_member",
@@ -1022,7 +1118,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "database-reference",
         "refs": [
           "db-function:revoke_canvas_member",
-          "source:src/lib/shares.js#L1-L162"
+          "source:src/lib/shares.js#L1-L202"
         ]
       },
       "tags": [
@@ -1046,7 +1142,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "database-reference",
         "refs": [
           "db-function:revoke_share_member",
-          "source:src/lib/shares.js#L1-L162"
+          "source:src/lib/shares.js#L1-L202"
         ]
       },
       "tags": [
@@ -1054,6 +1150,30 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "function",
         "sharing-collaboration",
         "sharing-policy"
+      ]
+    },
+    {
+      "id": "db-function:send_friend_request",
+      "kind": "db-function",
+      "label": "send_friend_request",
+      "fingerprint": "7e825a94621d6422776d",
+      "name": "send_friend_request",
+      "layer": "database",
+      "area": "data-storage-sync",
+      "subsystem": "database-schema",
+      "summary": "요청 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
+      "explanationBasis": {
+        "method": "database-reference",
+        "refs": [
+          "db-function:send_friend_request",
+          "source:src/lib/friendships.js#L1-L41"
+        ]
+      },
+      "tags": [
+        "database",
+        "function",
+        "data-storage-sync",
+        "database-schema"
       ]
     },
     {
@@ -1070,7 +1190,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "database-reference",
         "refs": [
           "db-function:share_link_is_active",
-          "source:src/lib/shares.js#L1-L162"
+          "source:src/lib/shares.js#L1-L202"
         ]
       },
       "tags": [
@@ -1094,7 +1214,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "database-reference",
         "refs": [
           "db-function:share_link_preview",
-          "source:src/lib/shares.js#L1-L162"
+          "source:src/lib/shares.js#L1-L202"
         ]
       },
       "tags": [
@@ -1102,6 +1222,54 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "function",
         "sharing-collaboration",
         "sharing-policy"
+      ]
+    },
+    {
+      "id": "db-function:touch_my_profile",
+      "kind": "db-function",
+      "label": "touch_my_profile",
+      "fingerprint": "c7a9f0a76a6691fbf758",
+      "name": "touch_my_profile",
+      "layer": "database",
+      "area": "identity-profile",
+      "subsystem": "identity-account",
+      "summary": "프로필 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
+      "explanationBasis": {
+        "method": "database-reference",
+        "refs": [
+          "db-function:touch_my_profile",
+          "source:src/lib/profiles.js#L1-L93"
+        ]
+      },
+      "tags": [
+        "database",
+        "function",
+        "identity-profile",
+        "identity-account"
+      ]
+    },
+    {
+      "id": "db-function:upsert_my_profile",
+      "kind": "db-function",
+      "label": "upsert_my_profile",
+      "fingerprint": "f82c06d4edfd23a9694e",
+      "name": "upsert_my_profile",
+      "layer": "database",
+      "area": "identity-profile",
+      "subsystem": "identity-account",
+      "summary": "프로필 작업을 데이터베이스 권한 안에서 한 번에 수행하는 서버 함수입니다.",
+      "explanationBasis": {
+        "method": "database-reference",
+        "refs": [
+          "db-function:upsert_my_profile",
+          "source:src/lib/profiles.js#L1-L93"
+        ]
+      },
+      "tags": [
+        "database",
+        "function",
+        "identity-profile",
+        "identity-account"
       ]
     },
     {
@@ -1118,7 +1286,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "database-reference",
         "refs": [
           "db-table:canvas_shares",
-          "source:mcp/shareAccess.js#L1-L380"
+          "source:mcp/shareAccess.js#L1-L586"
         ]
       },
       "tags": [
@@ -1142,7 +1310,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "database-reference",
         "refs": [
           "db-table:canvases",
-          "source:api/shared-canvas.js#L1-L126"
+          "source:api/shared-canvas.js#L1-L167"
         ]
       },
       "tags": [
@@ -1150,6 +1318,30 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "table",
         "data-storage-sync",
         "database-schema"
+      ]
+    },
+    {
+      "id": "db-table:friendships",
+      "kind": "db-table",
+      "label": "friendships",
+      "fingerprint": "7a6f7aab04733cc3358c",
+      "name": "friendships",
+      "layer": "database",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "summary": "friendships 자료를 데이터베이스에 지속적으로 보관하는 칸입니다.",
+      "explanationBasis": {
+        "method": "database-reference",
+        "refs": [
+          "db-table:friendships",
+          "source:supabase-shares.sql#L1-L819"
+        ]
+      },
+      "tags": [
+        "database",
+        "table",
+        "sharing-collaboration",
+        "sharing-policy"
       ]
     },
     {
@@ -1166,7 +1358,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "database-reference",
         "refs": [
           "db-table:local_connector_operation_events",
-          "source:mcp/localConnectorStore.js#L1-L458"
+          "source:mcp/localConnectorStore.js#L1-L464"
         ]
       },
       "tags": [
@@ -1190,7 +1382,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "database-reference",
         "refs": [
           "db-table:local_connector_operations",
-          "source:mcp/localConnectorStore.js#L1-L458"
+          "source:mcp/localConnectorStore.js#L1-L464"
         ]
       },
       "tags": [
@@ -1214,7 +1406,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "database-reference",
         "refs": [
           "db-table:local_connectors",
-          "source:mcp/localConnectorStore.js#L1-L458"
+          "source:mcp/localConnectorStore.js#L1-L464"
         ]
       },
       "tags": [
@@ -1238,7 +1430,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "database-reference",
         "refs": [
           "db-table:mcp_tokens",
-          "source:mcp/store.js#L1-L1601"
+          "source:mcp/store.js#L1-L1571"
         ]
       },
       "tags": [
@@ -1262,7 +1454,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "database-reference",
         "refs": [
           "db-table:profiles",
-          "source:mcp/shareAccess.js#L1-L380"
+          "source:mcp/shareAccess.js#L1-L586"
         ]
       },
       "tags": [
@@ -1310,7 +1502,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "database-reference",
         "refs": [
           "db-table:share_members",
-          "source:mcp/shareAccess.js#L1-L380"
+          "source:mcp/shareAccess.js#L1-L586"
         ]
       },
       "tags": [
@@ -1334,7 +1526,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "database-reference",
         "refs": [
           "db-table:share_revocations",
-          "source:supabase-shares.sql#L1-L555"
+          "source:supabase-shares.sql#L1-L819"
         ]
       },
       "tags": [
@@ -1454,7 +1646,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "database-reference",
         "refs": [
           "db-table:user_prefs",
-          "source:mcp/store.js#L1-L1601"
+          "source:mcp/store.js#L1-L1571"
         ]
       },
       "tags": [
@@ -1498,7 +1690,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "explanationBasis": {
         "method": "dependency-reference",
         "refs": [
-          "source:mcp/store.js#L1-L1601"
+          "source:mcp/store.js#L1-L1571"
         ]
       },
       "tags": [
@@ -1563,7 +1755,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "dependency-reference",
         "refs": [
           "dependency:@modelcontextprotocol/sdk/server/mcp.js",
-          "source:mcp/server.js#L1-L683"
+          "source:mcp/server.js#L1-L687"
         ]
       },
       "tags": [
@@ -1585,7 +1777,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "dependency-reference",
         "refs": [
           "dependency:@modelcontextprotocol/sdk/server/streamableHttp.js",
-          "source:mcp/server.js#L1-L683"
+          "source:mcp/server.js#L1-L687"
         ]
       },
       "tags": [
@@ -1607,7 +1799,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "dependency-reference",
         "refs": [
           "dependency:@supabase/supabase-js",
-          "source:mcp/shareAccess.js#L1-L380"
+          "source:mcp/shareAccess.js#L1-L586"
         ]
       },
       "tags": [
@@ -1651,7 +1843,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "dependency-reference",
         "refs": [
           "dependency:@xyflow/react",
-          "source:src/App.jsx#L1-L4791"
+          "source:src/App.jsx#L1-L4884"
         ]
       },
       "tags": [
@@ -1673,7 +1865,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "dependency-reference",
         "refs": [
           "dependency:@xyflow/react/dist/style.css",
-          "source:src/App.jsx#L1-L4791"
+          "source:src/App.jsx#L1-L4884"
         ]
       },
       "tags": [
@@ -1695,7 +1887,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "dependency-reference",
         "refs": [
           "dependency:node:assert/strict",
-          "source:scripts/test-engine-registry.mjs#L1-L89"
+          "source:scripts/test-collaboration-permissions.mjs#L1-L38"
         ]
       },
       "tags": [
@@ -1915,7 +2107,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "dependency-reference",
         "refs": [
           "dependency:react",
-          "source:src/App.jsx#L1-L4791"
+          "source:src/App.jsx#L1-L4884"
         ]
       },
       "tags": [
@@ -2025,7 +2217,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "dependency-reference",
         "refs": [
           "dependency:zod",
-          "source:mcp/server.js#L1-L683"
+          "source:mcp/server.js#L1-L687"
         ]
       },
       "tags": [
@@ -2037,7 +2229,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "deployment:vercel-web",
       "kind": "deployment",
       "label": "Vercel 웹 배포",
-      "fingerprint": "c54a49e908f81f194a6b",
+      "fingerprint": "e0fa6b4cde7195fdb0e1",
       "layer": "deployment",
       "area": "deployment-operations",
       "subsystem": "build-release",
@@ -2098,7 +2290,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "environment-reference",
         "refs": [
           "env:SUPABASE_SERVICE_ROLE_KEY",
-          "source:mcp/shareAccess.js#L1-L380"
+          "source:mcp/shareAccess.js#L1-L586"
         ]
       },
       "tags": [
@@ -2125,7 +2317,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "environment-reference",
         "refs": [
           "env:SUPABASE_URL",
-          "source:mcp/shareAccess.js#L1-L380"
+          "source:mcp/shareAccess.js#L1-L586"
         ]
       },
       "tags": [
@@ -2538,23 +2730,23 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:api/shared-canvas.js",
       "kind": "file",
       "label": "api/shared-canvas.js",
-      "fingerprint": "498f7dd517674be391bb",
+      "fingerprint": "8ac0ed036a110f045ee7",
       "path": "api/shared-canvas.js",
       "layer": "api",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 126,
+      "lineEnd": 167,
       "area": "sharing-collaboration",
       "subsystem": "sharing-entry",
       "summary": "공유 링크의 유효성, 최초 참여 동의와 링크 취소 상태를 서버에서 판정합니다.",
       "userImpact": "로그아웃 방문자도 링크 안내를 보고 수락·거절할 수 있으며 취소된 링크는 들어오지 못하게 합니다.",
-      "technicalSummary": "함수 5개 · 코드 연결 3개 · API 1개 · DB 테이블 1개 참조",
+      "technicalSummary": "함수 5개 · 코드 연결 4개 · API 1개 · DB 테이블 1개 참조",
       "explanationBasis": {
         "method": "curated-product-profile",
         "refs": [
           "api:/api/shared-canvas",
           "db-table:canvases",
-          "source:api/shared-canvas.js#L1-L126"
+          "source:api/shared-canvas.js#L1-L167"
         ]
       },
       "tags": [
@@ -2566,7 +2758,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "functionCount": 5,
-        "importCount": 3,
+        "importCount": 4,
         "exports": [
           "handler"
         ],
@@ -2794,6 +2986,53 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "file:mcp/canvasSummaries.js",
+      "kind": "file",
+      "label": "mcp/canvasSummaries.js",
+      "fingerprint": "11cc15cb55600a30dc1a",
+      "path": "mcp/canvasSummaries.js",
+      "layer": "mcp",
+      "language": "javascript",
+      "lineStart": 1,
+      "lineEnd": 58,
+      "area": "ai-integration",
+      "subsystem": "mcp-tools",
+      "summary": "canvasSummaries 관련 AI 도구 요청을 권한 범위 안에서 실행하거나 검증합니다.",
+      "userImpact": "연결된 AI가 실제로 할 수 있는 작업과 제한에 영향을 줍니다.",
+      "technicalSummary": "함수 5개 · DB 테이블 1개 참조 · DB 함수 1개 참조",
+      "explanationBasis": {
+        "method": "deterministic-source-rule",
+        "refs": [
+          "db-function:get_canvas_summaries",
+          "db-table:canvases",
+          "source:mcp/canvasSummaries.js#L1-L58"
+        ]
+      },
+      "tags": [
+        "ai-integration",
+        "canvases",
+        "mcp",
+        "mcp-tools"
+      ],
+      "details": {
+        "functionCount": 5,
+        "importCount": 0,
+        "exports": [
+          "loadCanvasSummaries"
+        ],
+        "apiRoutes": [],
+        "dbTables": [
+          "canvases"
+        ],
+        "dbFunctions": [
+          "get_canvas_summaries"
+        ],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "parseStatus": "parsed"
+      }
+    },
+    {
       "id": "file:mcp/dataAccessAudit.js",
       "kind": "file",
       "label": "mcp/dataAccessAudit.js",
@@ -2895,12 +3134,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:mcp/localConnectorStore.js",
       "kind": "file",
       "label": "mcp/localConnectorStore.js",
-      "fingerprint": "6b58d00a4c424c3d13e4",
+      "fingerprint": "c8cc25e1ba86eb8b4cb7",
       "path": "mcp/localConnectorStore.js",
       "layer": "mcp",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 458,
+      "lineEnd": 464,
       "area": "source-code-twin",
       "subsystem": "local-connector",
       "summary": "로컬 커넥터 등록, heartbeat, Git 동기화 계획과 실행 결과를 서버에 보관합니다.",
@@ -2912,7 +3151,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
           "db-table:local_connector_operation_events",
           "db-table:local_connector_operations",
           "db-table:local_connectors",
-          "source:mcp/localConnectorStore.js#L1-L458"
+          "source:mcp/localConnectorStore.js#L1-L464"
         ]
       },
       "tags": [
@@ -2956,21 +3195,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:mcp/sanitize.js",
       "kind": "file",
       "label": "mcp/sanitize.js",
-      "fingerprint": "e081662ffecf35dcda54",
+      "fingerprint": "81f67ef0408fb35ea823",
       "path": "mcp/sanitize.js",
       "layer": "mcp",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 114,
+      "lineEnd": 51,
       "area": "security-privacy",
       "subsystem": "input-safety",
       "summary": "AI나 외부 요청에서 들어온 텍스트·HTML·URL의 위험한 내용을 서버에서도 제거합니다.",
       "userImpact": "브라우저 검사를 우회한 악성 입력이 저장되는 것을 막습니다.",
-      "technicalSummary": "함수 4개 · 코드 연결 2개",
+      "technicalSummary": "함수 3개 · 코드 연결 3개",
       "explanationBasis": {
         "method": "curated-product-profile",
         "refs": [
-          "source:mcp/sanitize.js#L1-L114"
+          "source:mcp/sanitize.js#L1-L51"
         ]
       },
       "tags": [
@@ -2979,8 +3218,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "security-privacy"
       ],
       "details": {
-        "functionCount": 4,
-        "importCount": 2,
+        "functionCount": 3,
+        "importCount": 3,
         "exports": [
           "sanitizeExternalUrl",
           "sanitizeHtml",
@@ -2998,12 +3237,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:mcp/server.js",
       "kind": "file",
       "label": "mcp/server.js",
-      "fingerprint": "53263748896c9d6a6e27",
+      "fingerprint": "2aae3c10c2ae5dd1f89e",
       "path": "mcp/server.js",
       "layer": "mcp",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 683,
+      "lineEnd": 687,
       "area": "ai-integration",
       "subsystem": "mcp-transport",
       "summary": "AI에게 공개할 캔버스 도구의 이름, 입력 형식과 실행 함수를 등록합니다.",
@@ -3012,7 +3251,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "explanationBasis": {
         "method": "curated-product-profile",
         "refs": [
-          "source:mcp/server.js#L1-L683"
+          "source:mcp/server.js#L1-L687"
         ]
       },
       "tags": [
@@ -3039,17 +3278,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:mcp/shareAccess.js",
       "kind": "file",
       "label": "mcp/shareAccess.js",
-      "fingerprint": "929c78624783fa4f5e0a",
+      "fingerprint": "a16f46a3633d30f324bb",
       "path": "mcp/shareAccess.js",
       "layer": "mcp",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 380,
+      "lineEnd": 586,
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
       "summary": "MCP에서 공유 참여자 목록과 초대 범위를 계산하고 시야 제한을 적용합니다.",
       "userImpact": "AI로 조회해도 캔버스 참여자끼리 허용된 정보만 보이게 합니다.",
-      "technicalSummary": "함수 21개 · 코드 연결 6개 · DB 테이블 4개 참조",
+      "technicalSummary": "함수 27개 · 코드 연결 6개 · DB 테이블 4개 참조",
       "explanationBasis": {
         "method": "curated-product-profile",
         "refs": [
@@ -3059,7 +3298,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
           "db-table:share_members",
           "env:SUPABASE_SERVICE_ROLE_KEY",
           "env:SUPABASE_URL",
-          "source:mcp/shareAccess.js#L1-L380"
+          "source:mcp/shareAccess.js#L1-L586"
         ]
       },
       "tags": [
@@ -3074,12 +3313,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "sharing-policy"
       ],
       "details": {
-        "functionCount": 21,
+        "functionCount": 27,
         "importCount": 6,
         "exports": [
           "admin",
           "applySharedCanvasUpdate",
           "compareShareAccess",
+          "createCanvasInvitation",
           "editableNodeIdSet",
           "effectiveShareGrant",
           "listCanvasParticipants",
@@ -3090,6 +3330,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
           "redactNode",
           "resolveBrowserUser",
           "resolveSharedCanvasAccess",
+          "setCanvasMemberPermission",
           "setCanvasMemberViewRestriction"
         ],
         "apiRoutes": [],
@@ -3170,30 +3411,28 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:mcp/store.js",
       "kind": "file",
       "label": "mcp/store.js",
-      "fingerprint": "fbc8ac3f4eb13fe29f8e",
+      "fingerprint": "8c1a96da0c11a5e5c2ec",
       "path": "mcp/store.js",
       "layer": "mcp",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 1601,
+      "lineEnd": 1571,
       "area": "ai-integration",
       "subsystem": "mcp-tools",
       "summary": "AI 도구가 캔버스·노드·연결선을 읽고 바꿀 때 소유권과 공유 범위를 검사하고 Supabase에 반영합니다.",
       "userImpact": "AI가 화면과 같은 권한 규칙을 지키며 실제 캔버스를 조작하게 합니다.",
-      "technicalSummary": "함수 67개 · 코드 연결 12개 · DB 테이블 5개 참조 · DB 함수 1개 참조",
+      "technicalSummary": "함수 66개 · 코드 연결 14개 · DB 테이블 3개 참조 · DB 함수 1개 참조",
       "explanationBasis": {
         "method": "curated-product-profile",
         "refs": [
           "db-function:canvas_relation_metadata_guard_ready",
-          "db-table:canvas_shares",
           "db-table:canvases",
           "db-table:mcp_tokens",
-          "db-table:share_members",
           "db-table:user_prefs",
           "env:SUPABASE_SERVICE_ROLE_KEY",
           "env:SUPABASE_URL",
           "env:WORKFLOW_CANVAS_OWNER_USER_ID",
-          "source:mcp/store.js#L1-L1601"
+          "source:mcp/store.js#L1-L1571"
         ]
       },
       "tags": [
@@ -3201,17 +3440,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "SUPABASE_URL",
         "WORKFLOW_CANVAS_OWNER_USER_ID",
         "ai-integration",
-        "canvas_shares",
         "canvases",
         "mcp",
         "mcp-tools",
         "mcp_tokens",
-        "share_members",
         "user_prefs"
       ],
       "details": {
-        "functionCount": 67,
-        "importCount": 12,
+        "functionCount": 66,
+        "importCount": 14,
         "exports": [
           "applyEdgeRelationPatch",
           "applySourceTwinSnapshot",
@@ -3254,10 +3491,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         ],
         "apiRoutes": [],
         "dbTables": [
-          "canvas_shares",
           "canvases",
           "mcp_tokens",
-          "share_members",
           "user_prefs"
         ],
         "dbFunctions": [
@@ -3369,7 +3604,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:package.json",
       "kind": "file",
       "label": "package.json",
-      "fingerprint": "a0d6434e641d48a2008f",
+      "fingerprint": "6674cd13ed181004d6e4",
       "path": "package.json",
       "layer": "deployment",
       "language": "json",
@@ -3753,6 +3988,44 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "file:scripts/test-collaboration-permissions.mjs",
+      "kind": "file",
+      "label": "scripts/test-collaboration-permissions.mjs",
+      "fingerprint": "c0d8c49fb226a494f184",
+      "path": "scripts/test-collaboration-permissions.mjs",
+      "layer": "test",
+      "language": "javascript",
+      "lineStart": 1,
+      "lineEnd": 38,
+      "area": "testing-quality",
+      "subsystem": "app-tests",
+      "summary": "collaboration permissions 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.",
+      "userImpact": "회귀나 보안 약화가 있는 빌드의 배포를 막습니다.",
+      "technicalSummary": "코드 연결 2개",
+      "explanationBasis": {
+        "method": "test-file-rule",
+        "refs": [
+          "source:scripts/test-collaboration-permissions.mjs#L1-L38"
+        ]
+      },
+      "tags": [
+        "app-tests",
+        "test",
+        "testing-quality"
+      ],
+      "details": {
+        "functionCount": 0,
+        "importCount": 2,
+        "exports": [],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "parseStatus": "parsed"
+      }
+    },
+    {
       "id": "file:scripts/test-engine-registry.mjs",
       "kind": "file",
       "label": "scripts/test-engine-registry.mjs",
@@ -3781,6 +4054,44 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "details": {
         "functionCount": 0,
         "importCount": 6,
+        "exports": [],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "parseStatus": "parsed"
+      }
+    },
+    {
+      "id": "file:scripts/test-group-membership.mjs",
+      "kind": "file",
+      "label": "scripts/test-group-membership.mjs",
+      "fingerprint": "20b36faa0ccba1eb12ae",
+      "path": "scripts/test-group-membership.mjs",
+      "layer": "test",
+      "language": "javascript",
+      "lineStart": 1,
+      "lineEnd": 59,
+      "area": "testing-quality",
+      "subsystem": "app-tests",
+      "summary": "group membership 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.",
+      "userImpact": "회귀나 보안 약화가 있는 빌드의 배포를 막습니다.",
+      "technicalSummary": "코드 연결 4개",
+      "explanationBasis": {
+        "method": "test-file-rule",
+        "refs": [
+          "source:scripts/test-group-membership.mjs#L1-L59"
+        ]
+      },
+      "tags": [
+        "app-tests",
+        "test",
+        "testing-quality"
+      ],
+      "details": {
+        "functionCount": 0,
+        "importCount": 4,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [],
@@ -3832,12 +4143,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:scripts/test-mcp-logic.mjs",
       "kind": "file",
       "label": "scripts/test-mcp-logic.mjs",
-      "fingerprint": "85aaea196255311c55de",
+      "fingerprint": "9b1c3a8e7c68f3f4fc8c",
       "path": "scripts/test-mcp-logic.mjs",
       "layer": "test",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 3558,
+      "lineEnd": 3596,
       "area": "testing-quality",
       "subsystem": "app-tests",
       "summary": "mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.",
@@ -3846,7 +4157,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "explanationBasis": {
         "method": "test-file-rule",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L1-L3558"
+          "source:scripts/test-mcp-logic.mjs#L1-L3596"
         ]
       },
       "tags": [
@@ -3905,6 +4216,82 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "file:scripts/test-performance-boundaries.mjs",
+      "kind": "file",
+      "label": "scripts/test-performance-boundaries.mjs",
+      "fingerprint": "ef7c02c8e1eb85561f15",
+      "path": "scripts/test-performance-boundaries.mjs",
+      "layer": "test",
+      "language": "javascript",
+      "lineStart": 1,
+      "lineEnd": 38,
+      "area": "testing-quality",
+      "subsystem": "app-tests",
+      "summary": "performance boundaries 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.",
+      "userImpact": "회귀나 보안 약화가 있는 빌드의 배포를 막습니다.",
+      "technicalSummary": "함수 1개 · 코드 연결 2개",
+      "explanationBasis": {
+        "method": "test-file-rule",
+        "refs": [
+          "source:scripts/test-performance-boundaries.mjs#L1-L38"
+        ]
+      },
+      "tags": [
+        "app-tests",
+        "test",
+        "testing-quality"
+      ],
+      "details": {
+        "functionCount": 1,
+        "importCount": 2,
+        "exports": [],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "parseStatus": "parsed"
+      }
+    },
+    {
+      "id": "file:scripts/test-security-boundaries.mjs",
+      "kind": "file",
+      "label": "scripts/test-security-boundaries.mjs",
+      "fingerprint": "3d4c331484f2789624d6",
+      "path": "scripts/test-security-boundaries.mjs",
+      "layer": "test",
+      "language": "javascript",
+      "lineStart": 1,
+      "lineEnd": 52,
+      "area": "testing-quality",
+      "subsystem": "app-tests",
+      "summary": "security boundaries 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.",
+      "userImpact": "회귀나 보안 약화가 있는 빌드의 배포를 막습니다.",
+      "technicalSummary": "함수 2개 · 코드 연결 2개",
+      "explanationBasis": {
+        "method": "test-file-rule",
+        "refs": [
+          "source:scripts/test-security-boundaries.mjs#L1-L52"
+        ]
+      },
+      "tags": [
+        "app-tests",
+        "test",
+        "testing-quality"
+      ],
+      "details": {
+        "functionCount": 2,
+        "importCount": 2,
+        "exports": [],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "parseStatus": "parsed"
+      }
+    },
+    {
       "id": "file:scripts/test-source-twin.mjs",
       "kind": "file",
       "label": "scripts/test-source-twin.mjs",
@@ -3946,12 +4333,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:scripts/test-sql-security.mjs",
       "kind": "file",
       "label": "scripts/test-sql-security.mjs",
-      "fingerprint": "c8eea0b2007ff7d4245f",
+      "fingerprint": "9108db823d12f4e44018",
       "path": "scripts/test-sql-security.mjs",
       "layer": "test",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 171,
+      "lineEnd": 207,
       "area": "testing-quality",
       "subsystem": "app-tests",
       "summary": "sql security 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.",
@@ -3960,7 +4347,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "explanationBasis": {
         "method": "test-file-rule",
         "refs": [
-          "source:scripts/test-sql-security.mjs#L1-L171"
+          "source:scripts/test-sql-security.mjs#L1-L207"
         ]
       },
       "tags": [
@@ -4493,24 +4880,69 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "file:shared/richTextSanitizer.js",
+      "kind": "file",
+      "label": "shared/richTextSanitizer.js",
+      "fingerprint": "078919aaf8b49844f52a",
+      "path": "shared/richTextSanitizer.js",
+      "layer": "shared",
+      "language": "javascript",
+      "lineStart": 1,
+      "lineEnd": 165,
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "summary": "텍스트에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다.",
+      "userImpact": "같은 자료를 서로 다른 화면과 서버가 다르게 해석하는 일을 줄입니다.",
+      "technicalSummary": "함수 10개 · 보안 점검 신호 1개",
+      "explanationBasis": {
+        "method": "deterministic-source-rule",
+        "refs": [
+          "security:raw-inner-html",
+          "source:shared/richTextSanitizer.js#L1-L165"
+        ]
+      },
+      "tags": [
+        "raw-inner-html",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionCount": 10,
+        "importCount": 0,
+        "exports": [
+          "sanitizeRichTextHtml",
+          "sanitizeRichTextStyle"
+        ],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [
+          "raw-inner-html"
+        ],
+        "parseStatus": "parsed"
+      }
+    },
+    {
       "id": "file:shared/sharePermissions.js",
       "kind": "file",
       "label": "shared/sharePermissions.js",
-      "fingerprint": "15956d8e57857bd0249c",
+      "fingerprint": "b7a1df594c75585e02a5",
       "path": "shared/sharePermissions.js",
       "layer": "shared",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 100,
+      "lineEnd": 125,
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
       "summary": "캔버스·그룹·노드 초대 권한을 합쳐 실제로 볼 수 있고 편집할 수 있는 범위를 계산합니다.",
       "userImpact": "같은 팀 참여자는 서로 보되 시야 제한을 우회해 본문을 읽지는 못하게 합니다.",
-      "technicalSummary": "함수 9개",
+      "technicalSummary": "함수 12개",
       "explanationBasis": {
         "method": "curated-product-profile",
         "refs": [
-          "source:shared/sharePermissions.js#L1-L100"
+          "source:shared/sharePermissions.js#L1-L125"
         ]
       },
       "tags": [
@@ -4519,16 +4951,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "sharing-policy"
       ],
       "details": {
-        "functionCount": 9,
+        "functionCount": 12,
         "importCount": 0,
         "exports": [
           "composeSharePermission",
           "editableGroupIdSet",
           "editableNodeIdSetForPermission",
+          "invitationAuthorizingGrants",
           "normalizeShareGrant",
           "permissionCanCreateInGroup",
           "permissionCanEditEdge",
           "permissionCanEditNodeStructure",
+          "permissionCanInviteScope",
           "permissionFromAccess",
           "visibleNodeIdSetForPermission"
         ],
@@ -5424,45 +5858,39 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:src/App.jsx",
       "kind": "file",
       "label": "src/App.jsx",
-      "fingerprint": "ce7dd8509fe9e0f2f08c",
+      "fingerprint": "40209668a3cf14759e4c",
       "path": "src/App.jsx",
       "layer": "frontend",
       "language": "jsx",
       "lineStart": 1,
-      "lineEnd": 4791,
+      "lineEnd": 4884,
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
       "summary": "캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.",
       "userImpact": "사용자가 캔버스에서 보고 클릭하는 대부분의 동작이 이 파일을 거쳐 함께 작동합니다.",
-      "technicalSummary": "함수 84개 · 코드 연결 46개 · DB 테이블 3개 참조",
+      "technicalSummary": "함수 85개 · 코드 연결 47개 · DB 테이블 1개 참조",
       "explanationBasis": {
         "method": "curated-product-profile",
         "refs": [
-          "db-table:canvas_shares",
           "db-table:canvases",
-          "db-table:share_members",
-          "source:src/App.jsx#L1-L4791"
+          "source:src/App.jsx#L1-L4884"
         ]
       },
       "tags": [
         "canvas-interface",
         "canvas-workspace",
-        "canvas_shares",
         "canvases",
-        "frontend",
-        "share_members"
+        "frontend"
       ],
       "details": {
-        "functionCount": 84,
-        "importCount": 46,
+        "functionCount": 85,
+        "importCount": 47,
         "exports": [
           "App"
         ],
         "apiRoutes": [],
         "dbTables": [
-          "canvas_shares",
-          "canvases",
-          "share_members"
+          "canvases"
         ],
         "dbFunctions": [],
         "environmentVariables": [],
@@ -5474,21 +5902,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:src/components/AuthPanel.jsx",
       "kind": "file",
       "label": "src/components/AuthPanel.jsx",
-      "fingerprint": "8ee1a3c608db54b1c419",
+      "fingerprint": "3e41821672f8346cba65",
       "path": "src/components/AuthPanel.jsx",
       "layer": "frontend",
       "language": "jsx",
       "lineStart": 1,
-      "lineEnd": 585,
+      "lineEnd": 590,
       "area": "identity-profile",
       "subsystem": "identity-account",
       "summary": "로그인·회원가입·프로필 편집과 아바타 설정 화면을 제공합니다.",
       "userImpact": "사용자가 자기 계정으로 접속하고 표시 이름과 색상을 관리하게 합니다.",
-      "technicalSummary": "함수 20개 · 코드 연결 4개",
+      "technicalSummary": "함수 20개 · 코드 연결 5개",
       "explanationBasis": {
         "method": "curated-product-profile",
         "refs": [
-          "source:src/components/AuthPanel.jsx#L1-L585"
+          "source:src/components/AuthPanel.jsx#L1-L590"
         ]
       },
       "tags": [
@@ -5498,7 +5926,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "functionCount": 20,
-        "importCount": 4,
+        "importCount": 5,
         "exports": [
           "AuthPanel",
           "Avatar"
@@ -5555,21 +5983,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:src/components/CanvasTabs.jsx",
       "kind": "file",
       "label": "src/components/CanvasTabs.jsx",
-      "fingerprint": "4dc04866a0637564f13e",
+      "fingerprint": "5873ef7f7c009636aa87",
       "path": "src/components/CanvasTabs.jsx",
       "layer": "frontend",
       "language": "jsx",
       "lineStart": 1,
-      "lineEnd": 533,
+      "lineEnd": 563,
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
       "summary": "개인·공유 캔버스 목록과 현재 캔버스 전환 화면을 표시합니다.",
       "userImpact": "여러 캔버스 사이를 이동하고 공유 상태를 구분하게 합니다.",
-      "technicalSummary": "함수 16개 · 코드 연결 2개",
+      "technicalSummary": "함수 16개 · 코드 연결 3개",
       "explanationBasis": {
         "method": "curated-product-profile",
         "refs": [
-          "source:src/components/CanvasTabs.jsx#L1-L533"
+          "source:src/components/CanvasTabs.jsx#L1-L563"
         ]
       },
       "tags": [
@@ -5579,7 +6007,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "functionCount": 16,
-        "importCount": 2,
+        "importCount": 3,
         "exports": [
           "CanvasTabs"
         ],
@@ -5712,24 +6140,64 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "file:src/components/FriendManager.jsx",
+      "kind": "file",
+      "label": "src/components/FriendManager.jsx",
+      "fingerprint": "275c07446c9f82b9dcf1",
+      "path": "src/components/FriendManager.jsx",
+      "layer": "frontend",
+      "language": "jsx",
+      "lineStart": 1,
+      "lineEnd": 111,
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "summary": "FriendManager 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다.",
+      "userImpact": "사용자가 화면에서 해당 기능을 보고 조작하는 방식에 영향을 줍니다.",
+      "technicalSummary": "함수 5개 · 코드 연결 2개",
+      "explanationBasis": {
+        "method": "deterministic-source-rule",
+        "refs": [
+          "source:src/components/FriendManager.jsx#L1-L111"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend"
+      ],
+      "details": {
+        "functionCount": 5,
+        "importCount": 2,
+        "exports": [
+          "FriendManager"
+        ],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "parseStatus": "parsed"
+      }
+    },
+    {
       "id": "file:src/components/InvitePopover.jsx",
       "kind": "file",
       "label": "src/components/InvitePopover.jsx",
-      "fingerprint": "49206bc9ba1d21f58950",
+      "fingerprint": "7020afaf48a51283b8d3",
       "path": "src/components/InvitePopover.jsx",
       "layer": "frontend",
       "language": "jsx",
       "lineStart": 1,
-      "lineEnd": 275,
+      "lineEnd": 314,
       "area": "sharing-collaboration",
       "subsystem": "sharing-entry",
       "summary": "이메일이나 링크로 캔버스·그룹·노드에 사람을 초대하는 화면을 제공합니다.",
       "userImpact": "공동 작업자를 초대하고 초대 범위를 지정하게 합니다.",
-      "technicalSummary": "함수 5개 · 코드 연결 3개",
+      "technicalSummary": "함수 5개 · 코드 연결 5개",
       "explanationBasis": {
         "method": "curated-product-profile",
         "refs": [
-          "source:src/components/InvitePopover.jsx#L1-L275"
+          "source:src/components/InvitePopover.jsx#L1-L314"
         ]
       },
       "tags": [
@@ -5739,7 +6207,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "functionCount": 5,
-        "importCount": 3,
+        "importCount": 5,
         "exports": [
           "InvitePopover"
         ],
@@ -6202,21 +6670,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:src/index.css",
       "kind": "file",
       "label": "src/index.css",
-      "fingerprint": "ff79c104ea75fec82db9",
+      "fingerprint": "85a5b1b64daef1a942e0",
       "path": "src/index.css",
       "layer": "frontend",
       "language": "css",
       "lineStart": 1,
-      "lineEnd": 2921,
+      "lineEnd": 2928,
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
       "summary": "캔버스, 노드, 연결선, 패널과 팝업의 크기·색·배치·반응형 모양을 결정합니다.",
       "userImpact": "화면이 읽기 쉽고 모바일과 데스크톱에서 겹치지 않게 보이는 방식을 바꿉니다.",
-      "technicalSummary": "2921줄의 css 파일",
+      "technicalSummary": "2928줄의 css 파일",
       "explanationBasis": {
         "method": "curated-product-profile",
         "refs": [
-          "source:src/index.css#L1-L2921"
+          "source:src/index.css#L1-L2928"
         ]
       },
       "tags": [
@@ -6321,21 +6789,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:src/lib/canvasNavigation.js",
       "kind": "file",
       "label": "src/lib/canvasNavigation.js",
-      "fingerprint": "fe0ce93827a2a4374bca",
+      "fingerprint": "771d199529fb1327c388",
       "path": "src/lib/canvasNavigation.js",
       "layer": "frontend",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 32,
+      "lineEnd": 44,
       "area": "canvas-model",
       "subsystem": "canvas-state",
       "summary": "현재 캔버스 ID와 주소를 맞추고 새로고침 뒤에도 같은 캔버스로 돌아오게 합니다.",
       "userImpact": "새로고침할 때 다른 캔버스로 튀는 일을 막습니다.",
-      "technicalSummary": "함수 5개",
+      "technicalSummary": "함수 6개",
       "explanationBasis": {
         "method": "curated-product-profile",
         "refs": [
-          "source:src/lib/canvasNavigation.js#L1-L32"
+          "source:src/lib/canvasNavigation.js#L1-L44"
         ]
       },
       "tags": [
@@ -6344,13 +6812,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "frontend"
       ],
       "details": {
-        "functionCount": 5,
+        "functionCount": 6,
         "importCount": 0,
         "exports": [
           "chooseOwnCanvasToRestore",
           "clearLastOpenedCanvas",
           "isSharedCanvasId",
           "loadLastOpenedCanvas",
+          "orderCanvasSummaries",
           "saveLastOpenedCanvas"
         ],
         "apiRoutes": [],
@@ -6449,12 +6918,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:src/lib/cloudStorage.js",
       "kind": "file",
       "label": "src/lib/cloudStorage.js",
-      "fingerprint": "37fd92b0cc28fa435512",
+      "fingerprint": "61dbc6b83b5e95605987",
       "path": "src/lib/cloudStorage.js",
       "layer": "frontend",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 93,
+      "lineEnd": 100,
       "area": "data-storage-sync",
       "subsystem": "cloud-persistence",
       "summary": "Supabase에서 캔버스 목록과 노드·연결선을 불러오고 저장·삭제합니다.",
@@ -6465,7 +6934,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "refs": [
           "db-table:canvases",
           "db-table:user_prefs",
-          "source:src/lib/cloudStorage.js#L1-L93"
+          "source:src/lib/cloudStorage.js#L1-L100"
         ]
       },
       "tags": [
@@ -6481,8 +6950,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "exports": [
           "CanvasConflictError",
           "deleteCanvas",
-          "loadAllCanvases",
           "loadCanvasRow",
+          "loadCanvasSummaries",
           "loadUserPrefs",
           "saveCanvas",
           "saveUserPrefs"
@@ -6532,6 +7001,104 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
           "DIGITAL_TWIN_ADAPTER_DESCRIPTORS",
           "DIGITAL_TWIN_ADAPTER_REGISTRY",
           "inspectDigitalTwinCanvas"
+        ],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "parseStatus": "parsed"
+      }
+    },
+    {
+      "id": "file:src/lib/friendships.js",
+      "kind": "file",
+      "label": "src/lib/friendships.js",
+      "fingerprint": "0b5473d140777d1a92d5",
+      "path": "src/lib/friendships.js",
+      "layer": "frontend",
+      "language": "javascript",
+      "lineStart": 1,
+      "lineEnd": 41,
+      "area": "data-storage-sync",
+      "subsystem": "cloud-persistence",
+      "summary": "friendships 기능을 화면의 여러 부분에서 다시 쓸 수 있게 제공합니다.",
+      "userImpact": "사용자가 화면에서 해당 기능을 보고 조작하는 방식에 영향을 줍니다.",
+      "technicalSummary": "함수 4개 · 코드 연결 1개 · DB 함수 4개 참조",
+      "explanationBasis": {
+        "method": "deterministic-source-rule",
+        "refs": [
+          "db-function:list_my_friendships",
+          "db-function:remove_friendship",
+          "db-function:respond_friend_request",
+          "db-function:send_friend_request",
+          "source:src/lib/friendships.js#L1-L41"
+        ]
+      },
+      "tags": [
+        "cloud-persistence",
+        "data-storage-sync",
+        "frontend"
+      ],
+      "details": {
+        "functionCount": 4,
+        "importCount": 1,
+        "exports": [
+          "listFriendships",
+          "removeFriendship",
+          "respondFriendRequest",
+          "sendFriendRequest"
+        ],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [
+          "list_my_friendships",
+          "remove_friendship",
+          "respond_friend_request",
+          "send_friend_request"
+        ],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "parseStatus": "parsed"
+      }
+    },
+    {
+      "id": "file:src/lib/groupMembership.js",
+      "kind": "file",
+      "label": "src/lib/groupMembership.js",
+      "fingerprint": "4c37f66aeaf4f2636ebb",
+      "path": "src/lib/groupMembership.js",
+      "layer": "frontend",
+      "language": "javascript",
+      "lineStart": 1,
+      "lineEnd": 135,
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "summary": "그룹 기능을 화면의 여러 부분에서 다시 쓸 수 있게 제공합니다.",
+      "userImpact": "사용자가 화면에서 해당 기능을 보고 조작하는 방식에 영향을 줍니다.",
+      "technicalSummary": "함수 9개 · 코드 연결 1개",
+      "explanationBasis": {
+        "method": "deterministic-source-rule",
+        "refs": [
+          "source:src/lib/groupMembership.js#L1-L135"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend"
+      ],
+      "details": {
+        "functionCount": 9,
+        "importCount": 1,
+        "exports": [
+          "GROUP_MEMBERSHIP_OVERLAP_THRESHOLD",
+          "findGroupAtPoint",
+          "findGroupDropTarget",
+          "nodeAbsoluteRect",
+          "nodeDimensions",
+          "positionInsideGroup",
+          "reparentNodePreservingPosition"
         ],
         "apiRoutes": [],
         "dbTables": [],
@@ -6631,12 +7198,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:src/lib/mcpTokens.js",
       "kind": "file",
       "label": "src/lib/mcpTokens.js",
-      "fingerprint": "6056eabd3beca62b5af8",
+      "fingerprint": "4ea1e5d844d29eb77d29",
       "path": "src/lib/mcpTokens.js",
       "layer": "frontend",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 56,
+      "lineEnd": 57,
       "area": "ai-integration",
       "subsystem": "mcp-transport",
       "summary": "사용자가 AI 커넥터에 쓸 MCP 토큰을 발급·조회·폐기하도록 서버와 통신합니다.",
@@ -6646,7 +7213,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "curated-product-profile",
         "refs": [
           "db-table:mcp_tokens",
-          "source:src/lib/mcpTokens.js#L1-L56"
+          "source:src/lib/mcpTokens.js#L1-L57"
         ]
       },
       "tags": [
@@ -6717,23 +7284,25 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:src/lib/profiles.js",
       "kind": "file",
       "label": "src/lib/profiles.js",
-      "fingerprint": "3b445d4c6884a7ec8a26",
+      "fingerprint": "c40ac0b0effac431c97d",
       "path": "src/lib/profiles.js",
       "layer": "frontend",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 104,
+      "lineEnd": 93,
       "area": "identity-profile",
       "subsystem": "identity-account",
       "summary": "사용자 프로필을 불러오고 이름·아바타·색상 변경을 저장합니다.",
       "userImpact": "프로필 저장 버튼의 결과가 계정에 실제 반영되게 합니다.",
-      "technicalSummary": "함수 9개 · 코드 연결 1개 · DB 테이블 2개 참조",
+      "technicalSummary": "함수 9개 · 코드 연결 1개 · DB 테이블 2개 참조 · DB 함수 2개 참조",
       "explanationBasis": {
         "method": "curated-product-profile",
         "refs": [
+          "db-function:touch_my_profile",
+          "db-function:upsert_my_profile",
           "db-table:profiles",
           "db-table:user_prefs",
-          "source:src/lib/profiles.js#L1-L104"
+          "source:src/lib/profiles.js#L1-L93"
         ]
       },
       "tags": [
@@ -6760,7 +7329,10 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
           "profiles",
           "user_prefs"
         ],
-        "dbFunctions": [],
+        "dbFunctions": [
+          "touch_my_profile",
+          "upsert_my_profile"
+        ],
         "environmentVariables": [],
         "securitySignals": [],
         "parseStatus": "parsed"
@@ -6770,21 +7342,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:src/lib/sanitizeHtml.js",
       "kind": "file",
       "label": "src/lib/sanitizeHtml.js",
-      "fingerprint": "6868f46c682587d540a3",
+      "fingerprint": "2b252065c0db0e146c2c",
       "path": "src/lib/sanitizeHtml.js",
       "layer": "frontend",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 87,
+      "lineEnd": 39,
       "area": "security-privacy",
       "subsystem": "input-safety",
       "summary": "노드 본문에서 위험한 HTML, 스크립트와 외부 주소를 제거한 뒤 화면에 표시할 자료만 남깁니다.",
       "userImpact": "공유된 콘텐츠를 이용한 스크립트 실행과 악성 링크 위험을 줄입니다.",
-      "technicalSummary": "함수 4개 · 코드 연결 2개",
+      "technicalSummary": "함수 3개 · 코드 연결 3개",
       "explanationBasis": {
         "method": "curated-product-profile",
         "refs": [
-          "source:src/lib/sanitizeHtml.js#L1-L87"
+          "source:src/lib/sanitizeHtml.js#L1-L39"
         ]
       },
       "tags": [
@@ -6793,8 +7365,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "security-privacy"
       ],
       "details": {
-        "functionCount": 4,
-        "importCount": 2,
+        "functionCount": 3,
+        "importCount": 3,
         "exports": [
           "sanitizeExternalUrl",
           "sanitizeHtml",
@@ -6854,21 +7426,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:src/lib/sharedCanvasApi.js",
       "kind": "file",
       "label": "src/lib/sharedCanvasApi.js",
-      "fingerprint": "78a2ff5bfb63f19b36b0",
+      "fingerprint": "c346e7cf290f0baa3be4",
       "path": "src/lib/sharedCanvasApi.js",
       "layer": "frontend",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 50,
+      "lineEnd": 66,
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
       "summary": "공유 링크 최초 접속의 확인·수락·거절 요청을 전용 서버 경로로 보냅니다.",
       "userImpact": "링크를 연 사람이 동의하기 전에는 참여자로 확정되지 않게 합니다.",
-      "technicalSummary": "함수 6개 · 코드 연결 3개",
+      "technicalSummary": "함수 8개 · 코드 연결 3개",
       "explanationBasis": {
         "method": "curated-product-profile",
         "refs": [
-          "source:src/lib/sharedCanvasApi.js#L1-L50"
+          "source:src/lib/sharedCanvasApi.js#L1-L66"
         ]
       },
       "tags": [
@@ -6877,12 +7449,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "sharing-policy"
       ],
       "details": {
-        "functionCount": 6,
+        "functionCount": 8,
         "importCount": 3,
         "exports": [
+          "createCanvasInvitation",
           "getSharedCanvas",
           "listCanvasParticipants",
           "listSharedCanvases",
+          "setCanvasMemberPermission",
           "setMemberViewRestriction",
           "updateSharedCanvas"
         ],
@@ -6898,12 +7472,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:src/lib/shares.js",
       "kind": "file",
       "label": "src/lib/shares.js",
-      "fingerprint": "baa0f91c1ae8f140d8d3",
+      "fingerprint": "9042bc57cc50b00ccd3b",
       "path": "src/lib/shares.js",
       "layer": "frontend",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 162,
+      "lineEnd": 202,
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
       "summary": "초대, 공유 링크, 참여자 권한과 나가기·추방 요청을 서버와 주고받습니다.",
@@ -6923,7 +7497,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
           "db-function:share_link_preview",
           "db-table:canvas_shares",
           "db-table:share_members",
-          "source:src/lib/shares.js#L1-L162"
+          "source:src/lib/shares.js#L1-L202"
         ]
       },
       "tags": [
@@ -6939,18 +7513,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "exports": [
           "claimEmailInvite",
           "claimShareToken",
-          "createLinkShare",
-          "createShare",
           "deleteShare",
           "getShareLinkPreview",
           "isShareLinkActive",
           "kickMember",
           "leaveSharedCanvas",
+          "listOwnedSharedCanvasIds",
           "listPendingEmailInvites",
           "listShareMembers",
           "listShares",
-          "revokeShareMember",
-          "setMemberEdit"
+          "revokeShareMember"
         ],
         "apiRoutes": [],
         "dbTables": [
@@ -7184,7 +7756,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:src/nodes/ContentNode.jsx",
       "kind": "file",
       "label": "src/nodes/ContentNode.jsx",
-      "fingerprint": "40e23972f3a20b365ca2",
+      "fingerprint": "2adf4346171b7f573854",
       "path": "src/nodes/ContentNode.jsx",
       "layer": "frontend",
       "language": "jsx",
@@ -7231,12 +7803,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:src/nodes/GroupNode.jsx",
       "kind": "file",
       "label": "src/nodes/GroupNode.jsx",
-      "fingerprint": "36e857254f07e54963b7",
+      "fingerprint": "228d194960d333c238cd",
       "path": "src/nodes/GroupNode.jsx",
       "layer": "frontend",
       "language": "jsx",
       "lineStart": 1,
-      "lineEnd": 183,
+      "lineEnd": 184,
       "area": "canvas-interface",
       "subsystem": "canvas-elements",
       "summary": "여러 노드를 묶는 그룹 상자와 그룹 편집 동작을 화면에 그립니다.",
@@ -7245,7 +7817,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "explanationBasis": {
         "method": "curated-product-profile",
         "refs": [
-          "source:src/nodes/GroupNode.jsx#L1-L183"
+          "source:src/nodes/GroupNode.jsx#L1-L184"
         ]
       },
       "tags": [
@@ -7271,7 +7843,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:src/nodes/MemoNode.jsx",
       "kind": "file",
       "label": "src/nodes/MemoNode.jsx",
-      "fingerprint": "a59c82a2fa0c7f8fe604",
+      "fingerprint": "eaeef519cd8e984351b0",
       "path": "src/nodes/MemoNode.jsx",
       "layer": "frontend",
       "language": "jsx",
@@ -7318,7 +7890,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:src/nodes/StageNode.jsx",
       "kind": "file",
       "label": "src/nodes/StageNode.jsx",
-      "fingerprint": "9329430584ced7229e00",
+      "fingerprint": "918710fab84ef953a521",
       "path": "src/nodes/StageNode.jsx",
       "layer": "frontend",
       "language": "jsx",
@@ -7365,7 +7937,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:src/nodes/SystemNode.jsx",
       "kind": "file",
       "label": "src/nodes/SystemNode.jsx",
-      "fingerprint": "81bc2d99bbe24a42145f",
+      "fingerprint": "3564a8f345f3f06f87b6",
       "path": "src/nodes/SystemNode.jsx",
       "layer": "frontend",
       "language": "jsx",
@@ -7583,6 +8155,54 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "file:supabase-canvas-summaries.sql",
+      "kind": "file",
+      "label": "supabase-canvas-summaries.sql",
+      "fingerprint": "35fc4b3aebb11ff07386",
+      "path": "supabase-canvas-summaries.sql",
+      "layer": "database",
+      "language": "sql",
+      "lineStart": 1,
+      "lineEnd": 34,
+      "area": "security-privacy",
+      "subsystem": "trust-controls",
+      "summary": "데이터베이스 자료의 저장 구조, 서버 함수 또는 사용자별 접근 규칙을 정의합니다.",
+      "userImpact": "화면 코드가 우회되더라도 데이터베이스가 허용할 읽기와 변경 범위를 결정합니다.",
+      "technicalSummary": "DB 함수 1개 참조 · 보안 점검 신호 2개",
+      "explanationBasis": {
+        "method": "deterministic-source-rule",
+        "refs": [
+          "db-function:get_canvas_summaries",
+          "security:security-definer-function",
+          "security:service-role-grant",
+          "source:supabase-canvas-summaries.sql#L1-L34"
+        ]
+      },
+      "tags": [
+        "database",
+        "security-definer-function",
+        "security-privacy",
+        "service-role-grant",
+        "trust-controls"
+      ],
+      "details": {
+        "functionCount": 0,
+        "importCount": 0,
+        "exports": [],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [
+          "get_canvas_summaries"
+        ],
+        "environmentVariables": [],
+        "securitySignals": [
+          "security-definer-function",
+          "service-role-grant"
+        ],
+        "parseStatus": "parsed"
+      }
+    },
+    {
       "id": "file:supabase-canvas-views.sql",
       "kind": "file",
       "label": "supabase-canvas-views.sql",
@@ -7788,12 +8408,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:supabase-profile-privacy.sql",
       "kind": "file",
       "label": "supabase-profile-privacy.sql",
-      "fingerprint": "7fb47b9c41b193b2b588",
+      "fingerprint": "591835f23d2c9a46577d",
       "path": "supabase-profile-privacy.sql",
       "layer": "database",
       "language": "sql",
       "lineStart": 1,
-      "lineEnd": 53,
+      "lineEnd": 54,
       "area": "security-privacy",
       "subsystem": "access-privacy",
       "summary": "프로필 이메일과 마지막 접속 정보가 공유 관계 안에서만 보이도록 DB 조회 경계를 보강합니다.",
@@ -7804,7 +8424,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "refs": [
           "db-function:can_view_profile",
           "security:security-definer-function",
-          "source:supabase-profile-privacy.sql#L1-L53"
+          "source:supabase-profile-privacy.sql#L1-L54"
         ]
       },
       "tags": [
@@ -7833,26 +8453,28 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:supabase-profiles.sql",
       "kind": "file",
       "label": "supabase-profiles.sql",
-      "fingerprint": "aa35edf5fb96923b1060",
+      "fingerprint": "46b9d7a755b61d38a9a6",
       "path": "supabase-profiles.sql",
       "layer": "database",
       "language": "sql",
       "lineStart": 1,
-      "lineEnd": 74,
+      "lineEnd": 114,
       "area": "identity-profile",
       "subsystem": "identity-account",
       "summary": "사용자 프로필과 아바타 정보를 저장하고 허용된 참여자끼리 조회할 규칙을 만듭니다.",
       "userImpact": "공유 참여자 이름과 아바타가 보이되 관계없는 사용자는 조회하지 못하게 합니다.",
-      "technicalSummary": "DB 테이블 1개 참조 · DB 함수 1개 참조 · 보안 점검 신호 3개",
+      "technicalSummary": "DB 테이블 1개 참조 · DB 함수 3개 참조 · 보안 점검 신호 3개",
       "explanationBasis": {
         "method": "curated-product-profile",
         "refs": [
           "db-function:can_view_profile",
+          "db-function:touch_my_profile",
+          "db-function:upsert_my_profile",
           "db-table:profiles",
           "security:row-level-security",
           "security:security-definer-function",
           "security:service-role-grant",
-          "source:supabase-profiles.sql#L1-L74"
+          "source:supabase-profiles.sql#L1-L114"
         ]
       },
       "tags": [
@@ -7873,7 +8495,9 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
           "profiles"
         ],
         "dbFunctions": [
-          "can_view_profile"
+          "can_view_profile",
+          "touch_my_profile",
+          "upsert_my_profile"
         ],
         "environmentVariables": [],
         "securitySignals": [
@@ -8116,20 +8740,69 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "file:supabase-security-hardening.sql",
+      "kind": "file",
+      "label": "supabase-security-hardening.sql",
+      "fingerprint": "a0918f92f5be3035f7e9",
+      "path": "supabase-security-hardening.sql",
+      "layer": "database",
+      "language": "sql",
+      "lineStart": 1,
+      "lineEnd": 121,
+      "area": "security-privacy",
+      "subsystem": "trust-controls",
+      "summary": "데이터베이스 자료의 저장 구조, 서버 함수 또는 사용자별 접근 규칙을 정의합니다.",
+      "userImpact": "화면 코드가 우회되더라도 데이터베이스가 허용할 읽기와 변경 범위를 결정합니다.",
+      "technicalSummary": "DB 함수 3개 참조 · 보안 점검 신호 1개",
+      "explanationBasis": {
+        "method": "deterministic-source-rule",
+        "refs": [
+          "db-function:can_view_profile",
+          "db-function:touch_my_profile",
+          "db-function:upsert_my_profile",
+          "security:security-definer-function",
+          "source:supabase-security-hardening.sql#L1-L121"
+        ]
+      },
+      "tags": [
+        "database",
+        "security-definer-function",
+        "security-privacy",
+        "trust-controls"
+      ],
+      "details": {
+        "functionCount": 0,
+        "importCount": 0,
+        "exports": [],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [
+          "can_view_profile",
+          "touch_my_profile",
+          "upsert_my_profile"
+        ],
+        "environmentVariables": [],
+        "securitySignals": [
+          "security-definer-function"
+        ],
+        "parseStatus": "parsed"
+      }
+    },
+    {
       "id": "file:supabase-shares.sql",
       "kind": "file",
       "label": "supabase-shares.sql",
-      "fingerprint": "6596b5ba2597e1933207",
+      "fingerprint": "e503e83469dd59a8ddc5",
       "path": "supabase-shares.sql",
       "layer": "database",
       "language": "sql",
       "lineStart": 1,
-      "lineEnd": 555,
+      "lineEnd": 819,
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
       "summary": "이메일·링크 초대, 참여자, 취소와 시야 제한을 저장하고 공유 범위별 접근 규칙을 만듭니다.",
       "userImpact": "초대 수락·거절·나가기·추방과 제한된 본문 공개가 실제 DB 권한으로 작동하게 합니다.",
-      "technicalSummary": "DB 테이블 3개 참조 · DB 함수 13개 참조 · 보안 점검 신호 3개",
+      "technicalSummary": "DB 테이블 4개 참조 · DB 함수 20개 참조 · 보안 점검 신호 3개",
       "explanationBasis": {
         "method": "curated-product-profile",
         "refs": [
@@ -8140,16 +8813,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
           "db-function:disable_share_invitation",
           "db-function:is_share_member",
           "db-function:leave_shared_canvas",
+          "db-function:list_my_friendships",
           "db-function:list_pending_email_invites",
           "db-function:owns_share",
-          "db-function:revoke_canvas_member",
-          "db-function:revoke_share_member",
-          "db-function:share_link_is_active"
+          "db-function:remove_friendship",
+          "db-function:respond_friend_request"
         ]
       },
       "tags": [
         "canvas_shares",
         "database",
+        "friendships",
         "row-level-security",
         "security-definer-function",
         "service-role-grant",
@@ -8165,6 +8839,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "apiRoutes": [],
         "dbTables": [
           "canvas_shares",
+          "friendships",
           "share_members",
           "share_revocations"
         ],
@@ -8176,10 +8851,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
           "disable_share_invitation",
           "is_share_member",
           "leave_shared_canvas",
+          "list_my_friendships",
           "list_pending_email_invites",
           "owns_share",
+          "remove_friendship",
+          "respond_friend_request",
           "revoke_canvas_member",
           "revoke_share_member",
+          "send_friend_request",
           "share_link_is_active",
           "share_link_preview"
         ],
@@ -8258,21 +8937,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:vercel.json",
       "kind": "file",
       "label": "vercel.json",
-      "fingerprint": "10b3591a1d54a4e2331e",
+      "fingerprint": "dc7967b87a9fffe50297",
       "path": "vercel.json",
       "layer": "deployment",
       "language": "json",
       "lineStart": 1,
-      "lineEnd": 6,
+      "lineEnd": 41,
       "area": "deployment-operations",
       "subsystem": "build-release",
       "summary": "개발 코드를 검사·빌드해 실제 웹 서비스로 실행할 설정과 명령을 정의합니다.",
       "userImpact": "잘못된 빌드가 배포되는 것을 막고 배포 환경의 실행 방식을 결정합니다.",
-      "technicalSummary": "6줄의 json 파일",
+      "technicalSummary": "41줄의 json 파일",
       "explanationBasis": {
         "method": "deterministic-source-rule",
         "refs": [
-          "source:vercel.json#L1-L6"
+          "source:vercel.json#L1-L41"
         ]
       },
       "tags": [
@@ -8551,14 +9230,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "api",
       "area": "sharing-collaboration",
       "subsystem": "sharing-entry",
-      "lineStart": 12,
-      "lineEnd": 16,
+      "lineStart": 13,
+      "lineEnd": 17,
       "summary": "이 파일이 맡은 “공유 링크의 유효성, 최초 참여 동의와 링크 취소 상태를 서버에서 판정합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:api/shared-canvas.js#L12-L16",
+          "source:api/shared-canvas.js#L13-L17",
           "symbol:conflict"
         ]
       },
@@ -8585,14 +9264,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "api",
       "area": "sharing-collaboration",
       "subsystem": "sharing-entry",
-      "lineStart": 23,
-      "lineEnd": 26,
+      "lineStart": 24,
+      "lineEnd": 27,
       "summary": "현재 상태 · 사용자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:api/shared-canvas.js#L23-L26",
+          "source:api/shared-canvas.js#L24-L27",
           "symbol:currentUser"
         ]
       },
@@ -8613,21 +9292,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:api/shared-canvas.js:handler",
       "kind": "function",
       "label": "handler",
-      "fingerprint": "b956ab4d2e2df5c1766b",
+      "fingerprint": "0d3bb32b2def1db2070d",
       "name": "handler",
       "path": "api/shared-canvas.js",
       "parentId": "file:api/shared-canvas.js",
       "layer": "api",
       "area": "sharing-collaboration",
       "subsystem": "sharing-entry",
-      "lineStart": 28,
-      "lineEnd": 125,
+      "lineStart": 29,
+      "lineEnd": 166,
       "summary": "이 서버 경로로 들어온 요청의 로그인과 입력을 확인하고 결과를 돌려줍니다. 이 요청은 다음 역할을 맡습니다: 공유 링크의 유효성, 최초 참여 동의와 링크 취소 상태를 서버에서 판정합니다.",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:api/shared-canvas.js#L28-L125",
+          "source:api/shared-canvas.js#L29-L166",
           "symbol:handler"
         ]
       },
@@ -8656,14 +9335,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "api",
       "area": "sharing-collaboration",
       "subsystem": "sharing-entry",
-      "lineStart": 18,
-      "lineEnd": 21,
+      "lineStart": 19,
+      "lineEnd": 22,
       "summary": "이 파일이 맡은 “공유 링크의 유효성, 최초 참여 동의와 링크 취소 상태를 서버에서 판정합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:api/shared-canvas.js#L18-L21",
+          "source:api/shared-canvas.js#L19-L22",
           "symbol:nextRevision"
         ]
       },
@@ -8690,14 +9369,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "api",
       "area": "sharing-collaboration",
       "subsystem": "sharing-entry",
-      "lineStart": 8,
-      "lineEnd": 10,
+      "lineStart": 9,
+      "lineEnd": 11,
       "summary": "서버 작업의 성공·오류 상태와 결과를 브라우저가 이해할 응답으로 보냅니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:api/shared-canvas.js#L8-L10",
+          "source:api/shared-canvas.js#L9-L11",
           "symbol:send"
         ]
       },
@@ -9365,6 +10044,179 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "digital-twin-engine",
         "function",
         "twin-runtime"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:mcp/canvasSummaries.js:count",
+      "kind": "function",
+      "label": "count",
+      "fingerprint": "b86e82ecf2ab7eb9a9c6",
+      "name": "count",
+      "path": "mcp/canvasSummaries.js",
+      "parentId": "file:mcp/canvasSummaries.js",
+      "layer": "mcp",
+      "area": "ai-integration",
+      "subsystem": "mcp-tools",
+      "lineStart": 9,
+      "lineEnd": 9,
+      "summary": "이 파일이 맡은 “canvasSummaries 관련 AI 도구 요청을 권한 범위 안에서 실행하거나 검증합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:mcp/canvasSummaries.js#L9",
+          "symbol:count"
+        ]
+      },
+      "tags": [
+        "ai-integration",
+        "arrow",
+        "mcp",
+        "mcp-tools"
+      ],
+      "details": {
+        "functionKind": "arrow",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:mcp/canvasSummaries.js:fallbackMetadata",
+      "kind": "function",
+      "label": "fallbackMetadata",
+      "fingerprint": "f5692b591b61a5ad45d5",
+      "name": "fallbackMetadata",
+      "path": "mcp/canvasSummaries.js",
+      "parentId": "file:mcp/canvasSummaries.js",
+      "layer": "mcp",
+      "area": "ai-integration",
+      "subsystem": "mcp-tools",
+      "lineStart": 19,
+      "lineEnd": 42,
+      "summary": "설명 메타데이터에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:mcp/canvasSummaries.js#L19-L42",
+          "symbol:fallbackMetadata"
+        ]
+      },
+      "tags": [
+        "ai-integration",
+        "async",
+        "function",
+        "mcp",
+        "mcp-tools"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": true
+      }
+    },
+    {
+      "id": "function:mcp/canvasSummaries.js:loadCanvasSummaries",
+      "kind": "function",
+      "label": "loadCanvasSummaries",
+      "fingerprint": "0762a8c053049aa66503",
+      "name": "loadCanvasSummaries",
+      "path": "mcp/canvasSummaries.js",
+      "parentId": "file:mcp/canvasSummaries.js",
+      "layer": "mcp",
+      "area": "ai-integration",
+      "subsystem": "mcp-tools",
+      "lineStart": 47,
+      "lineEnd": 57,
+      "summary": "캔버스 정보를 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:mcp/canvasSummaries.js#L47-L57",
+          "symbol:loadCanvasSummaries"
+        ]
+      },
+      "tags": [
+        "ai-integration",
+        "async",
+        "exported",
+        "function",
+        "mcp",
+        "mcp-tools"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": true
+      }
+    },
+    {
+      "id": "function:mcp/canvasSummaries.js:missingSummaryFunction",
+      "kind": "function",
+      "label": "missingSummaryFunction",
+      "fingerprint": "9999879ab708599a2725",
+      "name": "missingSummaryFunction",
+      "path": "mcp/canvasSummaries.js",
+      "parentId": "file:mcp/canvasSummaries.js",
+      "layer": "mcp",
+      "area": "ai-integration",
+      "subsystem": "mcp-tools",
+      "lineStart": 4,
+      "lineEnd": 6,
+      "summary": "함수에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:mcp/canvasSummaries.js#L4-L6",
+          "symbol:missingSummaryFunction"
+        ]
+      },
+      "tags": [
+        "ai-integration",
+        "function",
+        "mcp",
+        "mcp-tools"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:mcp/canvasSummaries.js:summaryRow",
+      "kind": "function",
+      "label": "summaryRow",
+      "fingerprint": "063e13b6a1c03e1e9676",
+      "name": "summaryRow",
+      "path": "mcp/canvasSummaries.js",
+      "parentId": "file:mcp/canvasSummaries.js",
+      "layer": "mcp",
+      "area": "ai-integration",
+      "subsystem": "mcp-tools",
+      "lineStart": 8,
+      "lineEnd": 17,
+      "summary": "이 파일이 맡은 “canvasSummaries 관련 AI 도구 요청을 권한 범위 안에서 실행하거나 검증합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:mcp/canvasSummaries.js#L8-L17",
+          "symbol:summaryRow"
+        ]
+      },
+      "tags": [
+        "ai-integration",
+        "function",
+        "mcp",
+        "mcp-tools"
       ],
       "details": {
         "functionKind": "function",
@@ -10486,14 +11338,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "source-code-twin",
       "subsystem": "local-connector",
-      "lineStart": 26,
-      "lineEnd": 31,
+      "lineStart": 32,
+      "lineEnd": 37,
       "summary": "로컬 저장소 · 로컬 커넥터 · 오류에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/localConnectorStore.js#L26-L31",
+          "source:mcp/localConnectorStore.js#L32-L37",
           "symbol:LocalConnectorError.constructor"
         ]
       },
@@ -10520,14 +11372,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "source-code-twin",
       "subsystem": "local-connector",
-      "lineStart": 304,
-      "lineEnd": 371,
+      "lineStart": 310,
+      "lineEnd": 377,
       "summary": "로컬 저장소 · Git 상태 · 동기화 작업을 승인된 변경을 적용합니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/localConnectorStore.js#L304-L371",
+          "source:mcp/localConnectorStore.js#L310-L377",
           "symbol:applyLocalGitSync"
         ]
       },
@@ -10549,21 +11401,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:mcp/localConnectorStore.js:claimLocalGitSyncOperation",
       "kind": "function",
       "label": "claimLocalGitSyncOperation",
-      "fingerprint": "d626ee8c139bb03a6468",
+      "fingerprint": "39a745bd2be03f51549d",
       "name": "claimLocalGitSyncOperation",
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
       "area": "source-code-twin",
       "subsystem": "local-connector",
-      "lineStart": 373,
-      "lineEnd": 410,
+      "lineStart": 379,
+      "lineEnd": 416,
       "summary": "실행 권한 선점 · 로컬 저장소 · Git 상태 · 동기화 · 실제 조작에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/localConnectorStore.js#L373-L410",
+          "source:mcp/localConnectorStore.js#L379-L416",
           "symbol:claimLocalGitSyncOperation"
         ]
       },
@@ -10592,14 +11444,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "source-code-twin",
       "subsystem": "local-connector",
-      "lineStart": 34,
-      "lineEnd": 38,
+      "lineStart": 40,
+      "lineEnd": 44,
       "summary": "텍스트에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/localConnectorStore.js#L34-L38",
+          "source:mcp/localConnectorStore.js#L40-L44",
           "symbol:cleanText"
         ]
       },
@@ -10626,14 +11478,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "source-code-twin",
       "subsystem": "local-connector",
-      "lineStart": 412,
-      "lineEnd": 457,
+      "lineStart": 418,
+      "lineEnd": 463,
       "summary": "로컬 저장소 · Git 상태 · 동기화 · 실제 조작에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/localConnectorStore.js#L412-L457",
+          "source:mcp/localConnectorStore.js#L418-L463",
           "symbol:completeLocalGitSyncOperation"
         ]
       },
@@ -10662,14 +11514,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "source-code-twin",
       "subsystem": "local-connector",
-      "lineStart": 95,
-      "lineEnd": 117,
+      "lineStart": 101,
+      "lineEnd": 123,
       "summary": "로컬 커넥터에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/localConnectorStore.js#L95-L117",
+          "source:mcp/localConnectorStore.js#L101-L123",
           "symbol:connectorRow"
         ]
       },
@@ -10689,21 +11541,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:mcp/localConnectorStore.js:createLocalConnector",
       "kind": "function",
       "label": "createLocalConnector",
-      "fingerprint": "36c6ea4b12ec3b685129",
+      "fingerprint": "04dd725c97973d4c25c4",
       "name": "createLocalConnector",
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
       "area": "source-code-twin",
       "subsystem": "local-connector",
-      "lineStart": 168,
-      "lineEnd": 179,
+      "lineStart": 174,
+      "lineEnd": 185,
       "summary": "로컬 저장소 · 로컬 커넥터 항목이나 구조를 새로 만듭니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/localConnectorStore.js#L168-L179",
+          "source:mcp/localConnectorStore.js#L174-L185",
           "symbol:createLocalConnector"
         ]
       },
@@ -10732,14 +11584,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "source-code-twin",
       "subsystem": "local-connector",
-      "lineStart": 87,
-      "lineEnd": 93,
+      "lineStart": 93,
+      "lineEnd": 99,
       "summary": "오류에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/localConnectorStore.js#L87-L93",
+          "source:mcp/localConnectorStore.js#L93-L99",
           "symbol:databaseError"
         ]
       },
@@ -10766,14 +11618,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "source-code-twin",
       "subsystem": "local-connector",
-      "lineStart": 48,
-      "lineEnd": 50,
+      "lineStart": 54,
+      "lineEnd": 56,
       "summary": "변경 식별값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/localConnectorStore.js#L48-L50",
+          "source:mcp/localConnectorStore.js#L54-L56",
           "symbol:fingerprint"
         ]
       },
@@ -10793,21 +11645,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:mcp/localConnectorStore.js:listLocalConnectors",
       "kind": "function",
       "label": "listLocalConnectors",
-      "fingerprint": "3c17787d643bccabdc0f",
+      "fingerprint": "cd489f6a7f9bd3aa26b0",
       "name": "listLocalConnectors",
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
       "area": "source-code-twin",
       "subsystem": "local-connector",
-      "lineStart": 132,
-      "lineEnd": 166,
+      "lineStart": 138,
+      "lineEnd": 172,
       "summary": "로컬 저장소 정보를 목록을 불러옵니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/localConnectorStore.js#L132-L166",
+          "source:mcp/localConnectorStore.js#L138-L172",
           "symbol:listLocalConnectors"
         ]
       },
@@ -10829,21 +11681,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:mcp/localConnectorStore.js:loadOwnedConnector",
       "kind": "function",
       "label": "loadOwnedConnector",
-      "fingerprint": "b6f322443f17228a3780",
+      "fingerprint": "3ad3306253f6a1fb63cb",
       "name": "loadOwnedConnector",
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
       "area": "source-code-twin",
       "subsystem": "local-connector",
-      "lineStart": 119,
-      "lineEnd": 130,
+      "lineStart": 125,
+      "lineEnd": 136,
       "summary": "로컬 커넥터 정보를 불러옵니다",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/localConnectorStore.js#L119-L130",
+          "source:mcp/localConnectorStore.js#L125-L136",
           "symbol:loadOwnedConnector"
         ]
       },
@@ -10871,14 +11723,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "source-code-twin",
       "subsystem": "local-connector",
-      "lineStart": 56,
-      "lineEnd": 85,
+      "lineStart": 62,
+      "lineEnd": 91,
       "summary": "로컬 저장소 · Git 상태 · 동기화 · 실행 결과 확인 자료를 안전한 공통 형식으로 정리합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/localConnectorStore.js#L56-L85",
+          "source:mcp/localConnectorStore.js#L62-L91",
           "symbol:normalizeLocalGitSyncVerification"
         ]
       },
@@ -10906,14 +11758,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "source-code-twin",
       "subsystem": "local-connector",
-      "lineStart": 251,
-      "lineEnd": 302,
+      "lineStart": 257,
+      "lineEnd": 308,
       "summary": "실행 전 미리보기 · 로컬 저장소 · Git 상태 · 동기화에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/localConnectorStore.js#L251-L302",
+          "source:mcp/localConnectorStore.js#L257-L308",
           "symbol:previewLocalGitSync"
         ]
       },
@@ -10935,21 +11787,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:mcp/localConnectorStore.js:recordLocalConnectorHeartbeat",
       "kind": "function",
       "label": "recordLocalConnectorHeartbeat",
-      "fingerprint": "bff430879d3ca0f50815",
+      "fingerprint": "ab6636eca888baaffa04",
       "name": "recordLocalConnectorHeartbeat",
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
       "area": "source-code-twin",
       "subsystem": "local-connector",
-      "lineStart": 207,
-      "lineEnd": 249,
+      "lineStart": 213,
+      "lineEnd": 255,
       "summary": "로컬 저장소 · 로컬 커넥터 · 연결 생존 신호 작업을 기록합니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/localConnectorStore.js#L207-L249",
+          "source:mcp/localConnectorStore.js#L213-L255",
           "symbol:recordLocalConnectorHeartbeat"
         ]
       },
@@ -10971,21 +11823,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:mcp/localConnectorStore.js:resolveLocalConnectorToken",
       "kind": "function",
       "label": "resolveLocalConnectorToken",
-      "fingerprint": "ab46ac45c635b77049f4",
+      "fingerprint": "733ed2e931f829fb802a",
       "name": "resolveLocalConnectorToken",
       "path": "mcp/localConnectorStore.js",
       "parentId": "file:mcp/localConnectorStore.js",
       "layer": "mcp",
       "area": "source-code-twin",
       "subsystem": "local-connector",
-      "lineStart": 195,
-      "lineEnd": 205,
+      "lineStart": 201,
+      "lineEnd": 211,
       "summary": "로컬 저장소 · 로컬 커넥터 · 연결 토큰 상태나 허용 여부를 찾아 결정합니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/localConnectorStore.js#L195-L205",
+          "source:mcp/localConnectorStore.js#L201-L211",
           "symbol:resolveLocalConnectorToken"
         ]
       },
@@ -11014,14 +11866,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "source-code-twin",
       "subsystem": "local-connector",
-      "lineStart": 181,
-      "lineEnd": 193,
+      "lineStart": 187,
+      "lineEnd": 199,
       "summary": "로컬 저장소 · 로컬 커넥터 대상을 권한을 해제합니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/localConnectorStore.js#L181-L193",
+          "source:mcp/localConnectorStore.js#L187-L199",
           "symbol:revokeLocalConnector"
         ]
       },
@@ -11050,14 +11902,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "source-code-twin",
       "subsystem": "local-connector",
-      "lineStart": 58,
-      "lineEnd": 61,
+      "lineStart": 64,
+      "lineEnd": 67,
       "summary": "Git 커밋 식별값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/localConnectorStore.js#L58-L61",
+          "source:mcp/localConnectorStore.js#L64-L67",
           "symbol:sha"
         ]
       },
@@ -11084,14 +11936,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "source-code-twin",
       "subsystem": "local-connector",
-      "lineStart": 40,
-      "lineEnd": 46,
+      "lineStart": 46,
+      "lineEnd": 52,
       "summary": "이 파일이 맡은 “로컬 커넥터 등록, heartbeat, Git 동기화 계획과 실행 결과를 서버에 보관합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/localConnectorStore.js#L40-L46",
+          "source:mcp/localConnectorStore.js#L46-L52",
           "symbol:stable"
         ]
       },
@@ -11118,14 +11970,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "source-code-twin",
       "subsystem": "local-connector",
-      "lineStart": 52,
-      "lineEnd": 54,
+      "lineStart": 58,
+      "lineEnd": 60,
       "summary": "연결 토큰 · 변경 식별값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/localConnectorStore.js#L52-L54",
+          "source:mcp/localConnectorStore.js#L58-L60",
           "symbol:tokenHash"
         ]
       },
@@ -11134,40 +11986,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "local-connector",
         "mcp",
         "source-code-twin"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
-      "id": "function:mcp/sanitize.js:sanitizeAttrs",
-      "kind": "function",
-      "label": "sanitizeAttrs",
-      "fingerprint": "7a04a98ec879535e48b1",
-      "name": "sanitizeAttrs",
-      "path": "mcp/sanitize.js",
-      "parentId": "file:mcp/sanitize.js",
-      "layer": "mcp",
-      "area": "security-privacy",
-      "subsystem": "input-safety",
-      "lineStart": 37,
-      "lineEnd": 57,
-      "summary": "위험한 입력 제거에서 위험한 내용을 제거합니다.",
-      "technicalSummary": "이 파일 내부에서 사용",
-      "explanationBasis": {
-        "method": "symbol-and-source-range",
-        "refs": [
-          "source:mcp/sanitize.js#L37-L57",
-          "symbol:sanitizeAttrs"
-        ]
-      },
-      "tags": [
-        "function",
-        "input-safety",
-        "mcp",
-        "security-privacy"
       ],
       "details": {
         "functionKind": "function",
@@ -11186,14 +12004,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "security-privacy",
       "subsystem": "input-safety",
-      "lineStart": 80,
-      "lineEnd": 88,
+      "lineStart": 17,
+      "lineEnd": 25,
       "summary": "외부 공개 자료 · 웹 주소에서 위험한 내용을 제거합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/sanitize.js#L80-L88",
+          "source:mcp/sanitize.js#L17-L25",
           "symbol:sanitizeExternalUrl"
         ]
       },
@@ -11214,21 +12032,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:mcp/sanitize.js:sanitizeHtml",
       "kind": "function",
       "label": "sanitizeHtml",
-      "fingerprint": "bdef3ac00ad45869af96",
+      "fingerprint": "eb63833e4ad36a2bb33a",
       "name": "sanitizeHtml",
       "path": "mcp/sanitize.js",
       "parentId": "file:mcp/sanitize.js",
       "layer": "mcp",
       "area": "security-privacy",
       "subsystem": "input-safety",
-      "lineStart": 59,
-      "lineEnd": 78,
+      "lineStart": 13,
+      "lineEnd": 15,
       "summary": "본문 HTML에서 위험한 내용을 제거합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/sanitize.js#L59-L78",
+          "source:mcp/sanitize.js#L13-L15",
           "symbol:sanitizeHtml"
         ]
       },
@@ -11256,14 +12074,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "security-privacy",
       "subsystem": "input-safety",
-      "lineStart": 91,
-      "lineEnd": 113,
+      "lineStart": 28,
+      "lineEnd": 50,
       "summary": "텍스트에서 위험한 내용을 제거합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/sanitize.js#L91-L113",
+          "source:mcp/sanitize.js#L28-L50",
           "symbol:sanitizeTextFields"
         ]
       },
@@ -11455,7 +12273,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:mcp/server.js:handler",
       "kind": "function",
       "label": "handler",
-      "fingerprint": "201411eb82b05a20a1c7",
+      "fingerprint": "65d26a3ce98695c2e771",
       "name": "handler",
       "path": "mcp/server.js",
       "parentId": "file:mcp/server.js",
@@ -11463,13 +12281,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "area": "ai-integration",
       "subsystem": "mcp-transport",
       "lineStart": 641,
-      "lineEnd": 682,
+      "lineEnd": 686,
       "summary": "이 서버 경로로 들어온 요청의 로그인과 입력을 확인하고 결과를 돌려줍니다. 이 요청은 다음 역할을 맡습니다: AI에게 공개할 캔버스 도구의 이름, 입력 형식과 실행 함수를 등록합니다.",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/server.js#L641-L682",
+          "source:mcp/server.js#L641-L686",
           "symbol:handler"
         ]
       },
@@ -11566,14 +12384,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 22,
-      "lineEnd": 26,
+      "lineStart": 25,
+      "lineEnd": 29,
       "summary": "서버에서만 허용된 Supabase 관리자 연결을 준비합니다. 브라우저에는 이 권한을 넘기지 않습니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/shareAccess.js#L22-L26",
+          "source:mcp/shareAccess.js#L25-L29",
           "symbol:admin"
         ]
       },
@@ -11594,21 +12412,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:mcp/shareAccess.js:applySharedCanvasUpdate",
       "kind": "function",
       "label": "applySharedCanvasUpdate",
-      "fingerprint": "b01149fe17541dbb3ee1",
+      "fingerprint": "0827ea690940369e268a",
       "name": "applySharedCanvasUpdate",
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 275,
-      "lineEnd": 379,
+      "lineStart": 473,
+      "lineEnd": 585,
       "summary": "캔버스 · 변경 작업을 승인된 변경을 적용합니다",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/shareAccess.js#L275-L379",
+          "source:mcp/shareAccess.js#L473-L585",
           "symbol:applySharedCanvasUpdate"
         ]
       },
@@ -11636,14 +12454,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 59,
-      "lineEnd": 63,
+      "lineStart": 113,
+      "lineEnd": 117,
       "summary": "공유 · 접근 권한 상태나 허용 여부를 서로 비교합니다",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/shareAccess.js#L59-L63",
+          "source:mcp/shareAccess.js#L113-L117",
           "symbol:compareShareAccess"
         ]
       },
@@ -11661,6 +12479,42 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:mcp/shareAccess.js:createCanvasInvitation",
+      "kind": "function",
+      "label": "createCanvasInvitation",
+      "fingerprint": "426a2f9b07519db9df19",
+      "name": "createCanvasInvitation",
+      "path": "mcp/shareAccess.js",
+      "parentId": "file:mcp/shareAccess.js",
+      "layer": "mcp",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 272,
+      "lineEnd": 345,
+      "summary": "캔버스 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:mcp/shareAccess.js#L272-L345",
+          "symbol:createCanvasInvitation"
+        ]
+      },
+      "tags": [
+        "async",
+        "exported",
+        "function",
+        "mcp",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": true
+      }
+    },
+    {
       "id": "function:mcp/shareAccess.js:editableNodeIdSet",
       "kind": "function",
       "label": "editableNodeIdSet",
@@ -11671,14 +12525,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 201,
-      "lineEnd": 203,
+      "lineStart": 398,
+      "lineEnd": 400,
       "summary": "노드 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/shareAccess.js#L201-L203",
+          "source:mcp/shareAccess.js#L398-L400",
           "symbol:editableNodeIdSet"
         ]
       },
@@ -11699,21 +12553,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:mcp/shareAccess.js:effectiveShareGrant",
       "kind": "function",
       "label": "effectiveShareGrant",
-      "fingerprint": "1dc763d4c523918eea06",
+      "fingerprint": "2ba65a647f44fb956be1",
       "name": "effectiveShareGrant",
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 51,
-      "lineEnd": 57,
+      "lineStart": 104,
+      "lineEnd": 111,
       "summary": "공유에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/shareAccess.js#L51-L57",
+          "source:mcp/shareAccess.js#L104-L111",
           "symbol:effectiveShareGrant"
         ]
       },
@@ -11731,24 +12585,59 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:mcp/shareAccess.js:enforceInvitationRateLimit",
+      "kind": "function",
+      "label": "enforceInvitationRateLimit",
+      "fingerprint": "3667f417dba05793466f",
+      "name": "enforceInvitationRateLimit",
+      "path": "mcp/shareAccess.js",
+      "parentId": "file:mcp/shareAccess.js",
+      "layer": "mcp",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 254,
+      "lineEnd": 270,
+      "summary": "이 파일이 맡은 “MCP에서 공유 참여자 목록과 초대 범위를 계산하고 시야 제한을 적용합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:mcp/shareAccess.js#L254-L270",
+          "symbol:enforceInvitationRateLimit"
+        ]
+      },
+      "tags": [
+        "async",
+        "function",
+        "mcp",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": true
+      }
+    },
+    {
       "id": "function:mcp/shareAccess.js:listCanvasParticipants",
       "kind": "function",
       "label": "listCanvasParticipants",
-      "fingerprint": "b2717b49b80dd9919f86",
+      "fingerprint": "9968e353026c32161dbf",
       "name": "listCanvasParticipants",
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 101,
-      "lineEnd": 180,
+      "lineStart": 155,
+      "lineEnd": 241,
       "summary": "캔버스 정보를 목록을 불러옵니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/shareAccess.js#L101-L180",
+          "source:mcp/shareAccess.js#L155-L241",
           "symbol:listCanvasParticipants"
         ]
       },
@@ -11767,6 +12656,76 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:mcp/shareAccess.js:loadCanvasShareRows",
+      "kind": "function",
+      "label": "loadCanvasShareRows",
+      "fingerprint": "292b2f1daa8651f69c78",
+      "name": "loadCanvasShareRows",
+      "path": "mcp/shareAccess.js",
+      "parentId": "file:mcp/shareAccess.js",
+      "layer": "mcp",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 37,
+      "lineEnd": 50,
+      "summary": "캔버스 · 공유 정보를 불러옵니다",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:mcp/shareAccess.js#L37-L50",
+          "symbol:loadCanvasShareRows"
+        ]
+      },
+      "tags": [
+        "async",
+        "function",
+        "mcp",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": true
+      }
+    },
+    {
+      "id": "function:mcp/shareAccess.js:loadMembersForShares",
+      "kind": "function",
+      "label": "loadMembersForShares",
+      "fingerprint": "a72d5c0925ff4f3b8da2",
+      "name": "loadMembersForShares",
+      "path": "mcp/shareAccess.js",
+      "parentId": "file:mcp/shareAccess.js",
+      "layer": "mcp",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 52,
+      "lineEnd": 67,
+      "summary": "이 기능 정보를 불러옵니다",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:mcp/shareAccess.js#L52-L67",
+          "symbol:loadMembersForShares"
+        ]
+      },
+      "tags": [
+        "async",
+        "function",
+        "mcp",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": true
+      }
+    },
+    {
       "id": "function:mcp/shareAccess.js:mayEdit",
       "kind": "function",
       "label": "mayEdit",
@@ -11777,14 +12736,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 292,
-      "lineEnd": 292,
+      "lineStart": 493,
+      "lineEnd": 493,
       "summary": "이 파일이 맡은 “MCP에서 공유 참여자 목록과 초대 범위를 계산하고 시야 제한을 적용합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/shareAccess.js#L292",
+          "source:mcp/shareAccess.js#L493",
           "symbol:mayEdit"
         ]
       },
@@ -11811,14 +12770,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 293,
-      "lineEnd": 293,
+      "lineStart": 494,
+      "lineEnd": 494,
       "summary": "이 파일이 맡은 “MCP에서 공유 참여자 목록과 초대 범위를 계산하고 시야 제한을 적용합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/shareAccess.js#L293",
+          "source:mcp/shareAccess.js#L494",
           "symbol:mayEditStructure"
         ]
       },
@@ -11838,21 +12797,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:mcp/shareAccess.js:mySharesFor",
       "kind": "function",
       "label": "mySharesFor",
-      "fingerprint": "e06c8b77f103e91a2021",
+      "fingerprint": "5553e7d54058ad391c67",
       "name": "mySharesFor",
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 34,
-      "lineEnd": 49,
+      "lineStart": 69,
+      "lineEnd": 102,
       "summary": "이 파일이 맡은 “MCP에서 공유 참여자 목록과 초대 범위를 계산하고 시야 제한을 적용합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/shareAccess.js#L34-L49",
+          "source:mcp/shareAccess.js#L69-L102",
           "symbol:mySharesFor"
         ]
       },
@@ -11871,6 +12830,40 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:mcp/shareAccess.js:normalizeInvitationTarget",
+      "kind": "function",
+      "label": "normalizeInvitationTarget",
+      "fingerprint": "c79081618706811c9f89",
+      "name": "normalizeInvitationTarget",
+      "path": "mcp/shareAccess.js",
+      "parentId": "file:mcp/shareAccess.js",
+      "layer": "mcp",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 243,
+      "lineEnd": 252,
+      "summary": "대상 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:mcp/shareAccess.js#L243-L252",
+          "symbol:normalizeInvitationTarget"
+        ]
+      },
+      "tags": [
+        "function",
+        "mcp",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
       "id": "function:mcp/shareAccess.js:pickBestShareAccess",
       "kind": "function",
       "label": "pickBestShareAccess",
@@ -11881,14 +12874,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 65,
-      "lineEnd": 67,
+      "lineStart": 119,
+      "lineEnd": 121,
       "summary": "공유 · 접근 권한에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/shareAccess.js#L65-L67",
+          "source:mcp/shareAccess.js#L119-L121",
           "symbol:pickBestShareAccess"
         ]
       },
@@ -11916,14 +12909,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 88,
-      "lineEnd": 97,
+      "lineStart": 142,
+      "lineEnd": 151,
       "summary": "프로필에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/shareAccess.js#L88-L97",
+          "source:mcp/shareAccess.js#L142-L151",
           "symbol:publicProfile"
         ]
       },
@@ -11943,21 +12936,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:mcp/shareAccess.js:redactCanvas",
       "kind": "function",
       "label": "redactCanvas",
-      "fingerprint": "fe58aabf4f608cf6b798",
+      "fingerprint": "3d2aae7968ec803ea55f",
       "name": "redactCanvas",
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 218,
-      "lineEnd": 238,
+      "lineStart": 415,
+      "lineEnd": 436,
       "summary": "캔버스에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/shareAccess.js#L218-L238",
+          "source:mcp/shareAccess.js#L415-L436",
           "symbol:redactCanvas"
         ]
       },
@@ -11985,14 +12978,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 211,
-      "lineEnd": 216,
+      "lineStart": 408,
+      "lineEnd": 413,
       "summary": "연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/shareAccess.js#L211-L216",
+          "source:mcp/shareAccess.js#L408-L413",
           "symbol:redactEdge"
         ]
       },
@@ -12020,14 +13013,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 205,
-      "lineEnd": 209,
+      "lineStart": 402,
+      "lineEnd": 406,
       "summary": "노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/shareAccess.js#L205-L209",
+          "source:mcp/shareAccess.js#L402-L406",
           "symbol:redactNode"
         ]
       },
@@ -12055,14 +13048,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 28,
-      "lineEnd": 32,
+      "lineStart": 31,
+      "lineEnd": 35,
       "summary": "브라우저 · 사용자 상태나 허용 여부를 찾아 결정합니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/shareAccess.js#L28-L32",
+          "source:mcp/shareAccess.js#L31-L35",
           "symbol:resolveBrowserUser"
         ]
       },
@@ -12084,21 +13077,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:mcp/shareAccess.js:resolveSharedCanvasAccess",
       "kind": "function",
       "label": "resolveSharedCanvasAccess",
-      "fingerprint": "b543acbd072d2718ea6d",
+      "fingerprint": "18353f2da70bb5d8db6e",
       "name": "resolveSharedCanvasAccess",
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 69,
-      "lineEnd": 86,
+      "lineStart": 123,
+      "lineEnd": 140,
       "summary": "캔버스 · 접근 권한 상태나 허용 여부를 찾아 결정합니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/shareAccess.js#L69-L86",
+          "source:mcp/shareAccess.js#L123-L140",
           "symbol:resolveSharedCanvasAccess"
         ]
       },
@@ -12127,14 +13120,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 253,
-      "lineEnd": 253,
+      "lineStart": 451,
+      "lineEnd": 451,
       "summary": "이 파일이 맡은 “MCP에서 공유 참여자 목록과 초대 범위를 계산하고 시야 제한을 적용합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/shareAccess.js#L253",
+          "source:mcp/shareAccess.js#L451",
           "symbol:same"
         ]
       },
@@ -12161,14 +13154,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 269,
-      "lineEnd": 273,
+      "lineStart": 467,
+      "lineEnd": 471,
       "summary": "연결선에서 위험한 내용을 제거합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/shareAccess.js#L269-L273",
+          "source:mcp/shareAccess.js#L467-L471",
           "symbol:sanitizeEdge"
         ]
       },
@@ -12195,14 +13188,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 255,
-      "lineEnd": 267,
+      "lineStart": 453,
+      "lineEnd": 465,
       "summary": "노드에서 위험한 내용을 제거합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/shareAccess.js#L255-L267",
+          "source:mcp/shareAccess.js#L453-L465",
           "symbol:sanitizeNode"
         ]
       },
@@ -12219,24 +13212,60 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:mcp/shareAccess.js:setCanvasMemberPermission",
+      "kind": "function",
+      "label": "setCanvasMemberPermission",
+      "fingerprint": "f5caeaf25d2184c8d664",
+      "name": "setCanvasMemberPermission",
+      "path": "mcp/shareAccess.js",
+      "parentId": "file:mcp/shareAccess.js",
+      "layer": "mcp",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 347,
+      "lineEnd": 375,
+      "summary": "캔버스 · 권한 대상을 설정합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:mcp/shareAccess.js#L347-L375",
+          "symbol:setCanvasMemberPermission"
+        ]
+      },
+      "tags": [
+        "async",
+        "exported",
+        "function",
+        "mcp",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": true
+      }
+    },
+    {
       "id": "function:mcp/shareAccess.js:setCanvasMemberViewRestriction",
       "kind": "function",
       "label": "setCanvasMemberViewRestriction",
-      "fingerprint": "aafee1033b7392bd4582",
+      "fingerprint": "1726e05f7a3322b82d43",
       "name": "setCanvasMemberViewRestriction",
       "path": "mcp/shareAccess.js",
       "parentId": "file:mcp/shareAccess.js",
       "layer": "mcp",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 182,
-      "lineEnd": 199,
+      "lineStart": 377,
+      "lineEnd": 396,
       "summary": "캔버스 · 화면 상태 대상을 설정합니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/shareAccess.js#L182-L199",
+          "source:mcp/shareAccess.js#L377-L396",
           "symbol:setCanvasMemberViewRestriction"
         ]
       },
@@ -12265,14 +13294,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 240,
-      "lineEnd": 251,
+      "lineStart": 438,
+      "lineEnd": 449,
       "summary": "값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/shareAccess.js#L240-L251",
+          "source:mcp/shareAccess.js#L438-L449",
           "symbol:stableValue"
         ]
       },
@@ -13033,14 +14062,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 45,
-      "lineEnd": 49,
+      "lineStart": 48,
+      "lineEnd": 52,
       "summary": "서버에서만 허용된 Supabase 관리자 연결을 준비합니다. 브라우저에는 이 권한을 넘기지 않습니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L45-L49",
+          "source:mcp/store.js#L48-L52",
           "symbol:admin"
         ]
       },
@@ -13067,14 +14096,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 1436,
-      "lineEnd": 1470,
+      "lineStart": 1406,
+      "lineEnd": 1440,
       "summary": "연결선 · 관계 작업을 승인된 변경을 적용합니다",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L1436-L1470",
+          "source:mcp/store.js#L1406-L1440",
           "symbol:applyEdgeRelationPatch"
         ]
       },
@@ -13102,14 +14131,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 1020,
-      "lineEnd": 1052,
+      "lineStart": 990,
+      "lineEnd": 1022,
       "summary": "승인된 변경 적용 작업을 승인된 변경을 적용합니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L1020-L1052",
+          "source:mcp/store.js#L990-L1022",
           "symbol:applyPatch"
         ]
       },
@@ -13136,14 +14165,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 1592,
-      "lineEnd": 1600,
+      "lineStart": 1562,
+      "lineEnd": 1570,
       "summary": "소스 코드 · 디지털 트윈 · 상태 스냅샷 작업을 승인된 변경을 적용합니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L1592-L1600",
+          "source:mcp/store.js#L1562-L1570",
           "symbol:applySourceTwinSnapshot"
         ]
       },
@@ -13172,14 +14201,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 339,
-      "lineEnd": 341,
+      "lineStart": 309,
+      "lineEnd": 311,
       "summary": "이 기능 상태나 허용 여부를 허용 조건을 강제합니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L339-L341",
+          "source:mcp/store.js#L309-L311",
           "symbol:assertOwner"
         ]
       },
@@ -13206,14 +14235,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 352,
-      "lineEnd": 392,
+      "lineStart": 322,
+      "lineEnd": 362,
       "summary": "이 기능 상태나 허용 여부를 허용 조건을 강제합니다",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L352-L392",
+          "source:mcp/store.js#L322-L362",
           "symbol:assertRegionEdit"
         ]
       },
@@ -13241,14 +14270,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 68,
-      "lineEnd": 76,
+      "lineStart": 71,
+      "lineEnd": 79,
       "summary": "단계 상태나 허용 여부를 허용 조건을 강제합니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L68-L76",
+          "source:mcp/store.js#L71-L79",
           "symbol:assertStageTypeIdx"
         ]
       },
@@ -13275,14 +14304,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 1189,
-      "lineEnd": 1201,
+      "lineStart": 1159,
+      "lineEnd": 1171,
       "summary": "이 파일이 맡은 “AI 도구가 캔버스·노드·연결선을 읽고 바꿀 때 소유권과 공유 범위를 검사하고 Supabase에 반영합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L1189-L1201",
+          "source:mcp/store.js#L1159-L1171",
           "symbol:autoPreset"
         ]
       },
@@ -13309,14 +14338,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 1153,
-      "lineEnd": 1184,
+      "lineStart": 1123,
+      "lineEnd": 1154,
       "summary": "연결선 항목이나 구조를 구성합니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L1153-L1184",
+          "source:mcp/store.js#L1123-L1154",
           "symbol:buildEdge"
         ]
       },
@@ -13343,14 +14372,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 641,
-      "lineEnd": 646,
+      "lineStart": 611,
+      "lineEnd": 616,
       "summary": "새 항목 · 워크플로우 · 시스템 · 시스템 지도 상태나 허용 여부를 허용 가능한지 판단합니다",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L641-L646",
+          "source:mcp/store.js#L611-L616",
           "symbol:canCreateWorkflowSystemMap"
         ]
       },
@@ -13378,14 +14407,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 100,
-      "lineEnd": 124,
+      "lineStart": 103,
+      "lineEnd": 127,
       "summary": "방사형에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L100-L124",
+          "source:mcp/store.js#L103-L127",
           "symbol:checkRadialLevelMixing"
         ]
       },
@@ -13413,14 +14442,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 146,
-      "lineEnd": 152,
+      "lineStart": 149,
+      "lineEnd": 155,
       "summary": "이 파일이 맡은 “AI 도구가 캔버스·노드·연결선을 읽고 바꿀 때 소유권과 공유 범위를 검사하고 Supabase에 반영합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L146-L152",
+          "source:mcp/store.js#L149-L155",
           "symbol:clampSize"
         ]
       },
@@ -13447,14 +14476,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 828,
-      "lineEnd": 832,
+      "lineStart": 798,
+      "lineEnd": 802,
       "summary": "비우기 · 캔버스에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L828-L832",
+          "source:mcp/store.js#L798-L802",
           "symbol:clearCanvas"
         ]
       },
@@ -13483,14 +14512,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 157,
-      "lineEnd": 166,
+      "lineStart": 160,
+      "lineEnd": 169,
       "summary": "이 파일이 맡은 “AI 도구가 캔버스·노드·연결선을 읽고 바꿀 때 소유권과 공유 범위를 검사하고 Supabase에 반영합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L157-L166",
+          "source:mcp/store.js#L160-L169",
           "symbol:closestHandles"
         ]
       },
@@ -13517,14 +14546,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 1574,
-      "lineEnd": 1584,
+      "lineStart": 1544,
+      "lineEnd": 1554,
       "summary": "소스 코드 · 디지털 트윈 · 상태 이력 상태나 허용 여부를 서로 비교합니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L1574-L1584",
+          "source:mcp/store.js#L1544-L1554",
           "symbol:compareSourceTwinHistory"
         ]
       },
@@ -13553,14 +14582,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 632,
-      "lineEnd": 639,
+      "lineStart": 602,
+      "lineEnd": 609,
       "summary": "캔버스 항목이나 구조를 새로 만듭니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L632-L639",
+          "source:mcp/store.js#L602-L609",
           "symbol:createCanvas"
         ]
       },
@@ -13589,14 +14618,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 1123,
-      "lineEnd": 1148,
+      "lineStart": 1093,
+      "lineEnd": 1118,
       "summary": "연결선 항목이나 구조를 새로 만듭니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L1123-L1148",
+          "source:mcp/store.js#L1093-L1118",
           "symbol:createEdge"
         ]
       },
@@ -13625,14 +14654,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 1204,
-      "lineEnd": 1434,
+      "lineStart": 1174,
+      "lineEnd": 1404,
       "summary": "노드·연결선 구조 항목이나 구조를 새로 만듭니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L1204-L1434",
+          "source:mcp/store.js#L1174-L1404",
           "symbol:createGraph"
         ]
       },
@@ -13661,14 +14690,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 958,
-      "lineEnd": 1017,
+      "lineStart": 928,
+      "lineEnd": 987,
       "summary": "노드 항목이나 구조를 새로 만듭니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L958-L1017",
+          "source:mcp/store.js#L928-L987",
           "symbol:createNode"
         ]
       },
@@ -13697,14 +14726,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 407,
-      "lineEnd": 420,
+      "lineStart": 377,
+      "lineEnd": 390,
       "summary": "단계 항목이나 구조를 새로 만듭니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L407-L420",
+          "source:mcp/store.js#L377-L390",
           "symbol:createStageType"
         ]
       },
@@ -13733,14 +14762,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 648,
-      "lineEnd": 678,
+      "lineStart": 618,
+      "lineEnd": 648,
       "summary": "워크플로우 · 시스템 · 시스템 지도 항목이나 구조를 새로 만듭니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L648-L678",
+          "source:mcp/store.js#L618-L648",
           "symbol:createWorkflowSystemMap"
         ]
       },
@@ -13769,14 +14798,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 873,
-      "lineEnd": 891,
+      "lineStart": 843,
+      "lineEnd": 861,
       "summary": "캔버스 대상을 삭제합니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L873-L891",
+          "source:mcp/store.js#L843-L861",
           "symbol:deleteCanvasRow"
         ]
       },
@@ -13805,14 +14834,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 1512,
-      "lineEnd": 1521,
+      "lineStart": 1482,
+      "lineEnd": 1491,
       "summary": "연결선 대상을 삭제합니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L1512-L1521",
+          "source:mcp/store.js#L1482-L1491",
           "symbol:deleteEdge"
         ]
       },
@@ -13841,14 +14870,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 1092,
-      "lineEnd": 1101,
+      "lineStart": 1062,
+      "lineEnd": 1071,
       "summary": "노드 대상을 삭제합니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L1092-L1101",
+          "source:mcp/store.js#L1062-L1071",
           "symbol:deleteNode"
         ]
       },
@@ -13877,14 +14906,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 1104,
-      "lineEnd": 1120,
+      "lineStart": 1074,
+      "lineEnd": 1090,
       "summary": "노드 대상을 삭제합니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L1104-L1120",
+          "source:mcp/store.js#L1074-L1090",
           "symbol:deleteNodes"
         ]
       },
@@ -13913,14 +14942,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 439,
-      "lineEnd": 463,
+      "lineStart": 409,
+      "lineEnd": 433,
       "summary": "단계 대상을 삭제합니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L439-L463",
+          "source:mcp/store.js#L409-L433",
           "symbol:deleteStageType"
         ]
       },
@@ -13949,14 +14978,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 355,
-      "lineEnd": 355,
+      "lineStart": 325,
+      "lineEnd": 325,
       "summary": "이 파일이 맡은 “AI 도구가 캔버스·노드·연결선을 읽고 바꿀 때 소유권과 공유 범위를 검사하고 Supabase에 반영합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L355",
+          "source:mcp/store.js#L325",
           "symbol:deny"
         ]
       },
@@ -13983,14 +15012,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 78,
-      "lineEnd": 83,
+      "lineStart": 81,
+      "lineEnd": 86,
       "summary": "연결선 · 관계에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L78-L83",
+          "source:mcp/store.js#L81-L86",
           "symbol:edgeRelationIdentity"
         ]
       },
@@ -14017,14 +15046,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 345,
-      "lineEnd": 347,
+      "lineStart": 315,
+      "lineEnd": 317,
       "summary": "노드 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L345-L347",
+          "source:mcp/store.js#L315-L317",
           "symbol:editableNodeIdSet"
         ]
       },
@@ -14052,14 +15081,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 90,
-      "lineEnd": 95,
+      "lineStart": 93,
+      "lineEnd": 98,
       "summary": "연결선 상태나 허용 여부를 대상을 찾습니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L90-L95",
+          "source:mcp/store.js#L93-L98",
           "symbol:findDuplicateEdge"
         ]
       },
@@ -14086,14 +15115,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 894,
-      "lineEnd": 917,
+      "lineStart": 864,
+      "lineEnd": 887,
       "summary": "이 기능 상태나 허용 여부를 대상을 찾습니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L894-L917",
+          "source:mcp/store.js#L864-L887",
           "symbol:findFreePosition"
         ]
       },
@@ -14120,14 +15149,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 572,
-      "lineEnd": 617,
+      "lineStart": 542,
+      "lineEnd": 587,
       "summary": "캔버스 정보를 불러옵니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L572-L617",
+          "source:mcp/store.js#L542-L587",
           "symbol:getCanvas"
         ]
       },
@@ -14156,14 +15185,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 1562,
-      "lineEnd": 1572,
+      "lineStart": 1532,
+      "lineEnd": 1542,
       "summary": "소스 코드 · 디지털 트윈 · 상태 이력 정보를 불러옵니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L1562-L1572",
+          "source:mcp/store.js#L1532-L1542",
           "symbol:getSourceTwinHistory"
         ]
       },
@@ -14192,14 +15221,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 402,
-      "lineEnd": 405,
+      "lineStart": 372,
+      "lineEnd": 375,
       "summary": "단계 정보를 불러옵니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L402-L405",
+          "source:mcp/store.js#L372-L375",
           "symbol:getStageTypes"
         ]
       },
@@ -14228,14 +15257,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 1523,
-      "lineEnd": 1560,
+      "lineStart": 1493,
+      "lineEnd": 1530,
       "summary": "소스 코드 · 디지털 트윈 상태나 허용 여부를 실제 상태와 대조합니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L1523-L1560",
+          "source:mcp/store.js#L1493-L1530",
           "symbol:inspectSourceTwin"
         ]
       },
@@ -14264,14 +15293,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 680,
-      "lineEnd": 695,
+      "lineStart": 650,
+      "lineEnd": 665,
       "summary": "워크플로우 · 시스템 · 시스템 지도 상태나 허용 여부를 실제 상태와 대조합니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L680-L695",
+          "source:mcp/store.js#L650-L665",
           "symbol:inspectWorkflowSystemMap"
         ]
       },
@@ -14293,21 +15322,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:mcp/store.js:listCanvases",
       "kind": "function",
       "label": "listCanvases",
-      "fingerprint": "8b72f281f2a5781273bd",
+      "fingerprint": "3e658c18c038ee2e0b74",
       "name": "listCanvases",
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 189,
-      "lineEnd": 252,
+      "lineStart": 192,
+      "lineEnd": 247,
       "summary": "캔버스 목록 정보를 목록을 불러옵니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L189-L252",
+          "source:mcp/store.js#L192-L247",
           "symbol:listCanvases"
         ]
       },
@@ -14336,14 +15365,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 834,
-      "lineEnd": 842,
+      "lineStart": 804,
+      "lineEnd": 812,
       "summary": "이 기능 정보를 불러옵니다",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L834-L842",
+          "source:mcp/store.js#L804-L812",
           "symbol:loadPrefs"
         ]
       },
@@ -14371,14 +15400,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 921,
-      "lineEnd": 956,
+      "lineStart": 891,
+      "lineEnd": 926,
       "summary": "노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L921-L956",
+          "source:mcp/store.js#L891-L926",
           "symbol:materializeNode"
         ]
       },
@@ -14395,41 +15424,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
-      "id": "function:mcp/store.js:mySharesFor",
-      "kind": "function",
-      "label": "mySharesFor",
-      "fingerprint": "5fdd31679f2cca5a16ca",
-      "name": "mySharesFor",
-      "path": "mcp/store.js",
-      "parentId": "file:mcp/store.js",
-      "layer": "mcp",
-      "area": "ai-integration",
-      "subsystem": "mcp-tools",
-      "lineStart": 260,
-      "lineEnd": 281,
-      "summary": "이 파일이 맡은 “AI 도구가 캔버스·노드·연결선을 읽고 바꿀 때 소유권과 공유 범위를 검사하고 Supabase에 반영합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
-      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
-      "explanationBasis": {
-        "method": "symbol-and-source-range",
-        "refs": [
-          "source:mcp/store.js#L260-L281",
-          "symbol:mySharesFor"
-        ]
-      },
-      "tags": [
-        "ai-integration",
-        "async",
-        "function",
-        "mcp",
-        "mcp-tools"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": false,
-        "async": true
-      }
-    },
-    {
       "id": "function:mcp/store.js:newEdgeId",
       "kind": "function",
       "label": "newEdgeId",
@@ -14440,14 +15434,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 53,
-      "lineEnd": 53,
+      "lineStart": 56,
+      "lineEnd": 56,
       "summary": "연결선 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L53",
+          "source:mcp/store.js#L56",
           "symbol:newEdgeId"
         ]
       },
@@ -14474,14 +15468,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 52,
-      "lineEnd": 52,
+      "lineStart": 55,
+      "lineEnd": 55,
       "summary": "노드 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L52",
+          "source:mcp/store.js#L55",
           "symbol:newNodeId"
         ]
       },
@@ -14508,14 +15502,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 61,
-      "lineEnd": 64,
+      "lineStart": 64,
+      "lineEnd": 67,
       "summary": "이 파일이 맡은 “AI 도구가 캔버스·노드·연결선을 읽고 바꿀 때 소유권과 공유 범위를 검사하고 Supabase에 반영합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L61-L64",
+          "source:mcp/store.js#L64-L67",
           "symbol:nextRevision"
         ]
       },
@@ -14542,14 +15536,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 1586,
-      "lineEnd": 1590,
+      "lineStart": 1556,
+      "lineEnd": 1560,
       "summary": "실행 전 미리보기 · 소스 코드 · 디지털 트윈 · 상태 스냅샷에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L1586-L1590",
+          "source:mcp/store.js#L1556-L1560",
           "symbol:previewSourceTwinSnapshot"
         ]
       },
@@ -14578,14 +15572,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 745,
-      "lineEnd": 766,
+      "lineStart": 715,
+      "lineEnd": 736,
       "summary": "실행 전 미리보기 · 워크플로우 · 시스템 · 시스템 지도 · 관계에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L745-L766",
+          "source:mcp/store.js#L715-L736",
           "symbol:previewWorkflowSystemMapRelationRepair"
         ]
       },
@@ -14614,14 +15608,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 740,
-      "lineEnd": 743,
+      "lineStart": 710,
+      "lineEnd": 713,
       "summary": "관계 · 설명 메타데이터 · 보호 규칙에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L740-L743",
+          "source:mcp/store.js#L710-L713",
           "symbol:relationMetadataGuardReady"
         ]
       },
@@ -14649,14 +15643,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 713,
-      "lineEnd": 738,
+      "lineStart": 683,
+      "lineEnd": 708,
       "summary": "관계 · 실행 전 미리보기에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L713-L738",
+          "source:mcp/store.js#L683-L708",
           "symbol:relationRepairPreview"
         ]
       },
@@ -14683,14 +15677,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 853,
-      "lineEnd": 871,
+      "lineStart": 823,
+      "lineEnd": 841,
       "summary": "캔버스에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L853-L871",
+          "source:mcp/store.js#L823-L841",
           "symbol:renameCanvas"
         ]
       },
@@ -14719,14 +15713,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 422,
-      "lineEnd": 437,
+      "lineStart": 392,
+      "lineEnd": 407,
       "summary": "단계에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L422-L437",
+          "source:mcp/store.js#L392-L407",
           "symbol:renameStageType"
         ]
       },
@@ -14755,14 +15749,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 768,
-      "lineEnd": 826,
+      "lineStart": 738,
+      "lineEnd": 796,
       "summary": "워크플로우 · 시스템 · 시스템 지도에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L768-L826",
+          "source:mcp/store.js#L738-L796",
           "symbol:repairWorkflowSystemMapRelations"
         ]
       },
@@ -14784,21 +15778,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:mcp/store.js:resolveCanvasAccess",
       "kind": "function",
       "label": "resolveCanvasAccess",
-      "fingerprint": "9c28902b7b24b4e8bfce",
+      "fingerprint": "bd2629456135813569d0",
       "name": "resolveCanvasAccess",
       "path": "mcp/store.js",
       "parentId": "file:mcp/store.js",
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 286,
-      "lineEnd": 337,
+      "lineStart": 256,
+      "lineEnd": 307,
       "summary": "캔버스 · 접근 권한 상태나 허용 여부를 찾아 결정합니다",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L286-L337",
+          "source:mcp/store.js#L256-L307",
           "symbol:resolveCanvasAccess"
         ]
       },
@@ -14826,14 +15820,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 169,
-      "lineEnd": 184,
+      "lineStart": 172,
+      "lineEnd": 187,
       "summary": "사용자 상태나 허용 여부를 찾아 결정합니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L169-L184",
+          "source:mcp/store.js#L172-L187",
           "symbol:resolveUser"
         ]
       },
@@ -14862,14 +15856,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 398,
-      "lineEnd": 400,
+      "lineStart": 368,
+      "lineEnd": 370,
       "summary": "단계에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L398-L400",
+          "source:mcp/store.js#L368-L370",
           "symbol:rowStageTypes"
         ]
       },
@@ -14896,14 +15890,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 619,
-      "lineEnd": 630,
+      "lineStart": 589,
+      "lineEnd": 600,
       "summary": "저장에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L619-L630",
+          "source:mcp/store.js#L589-L600",
           "symbol:saveArrays"
         ]
       },
@@ -14931,14 +15925,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 844,
-      "lineEnd": 849,
+      "lineStart": 814,
+      "lineEnd": 819,
       "summary": "저장에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L844-L849",
+          "source:mcp/store.js#L814-L819",
           "symbol:savePrefs"
         ]
       },
@@ -14966,14 +15960,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 465,
-      "lineEnd": 477,
+      "lineStart": 435,
+      "lineEnd": 447,
       "summary": "이 파일이 맡은 “AI 도구가 캔버스·노드·연결선을 읽고 바꿀 때 소유권과 공유 범위를 검사하고 Supabase에 반영합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L465-L477",
+          "source:mcp/store.js#L435-L447",
           "symbol:storedAbsolutePosition"
         ]
       },
@@ -15000,14 +15994,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 85,
-      "lineEnd": 88,
+      "lineStart": 88,
+      "lineEnd": 91,
       "summary": "연결선 · 관계에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L85-L88",
+          "source:mcp/store.js#L88-L91",
           "symbol:storedEdgeRelationIdentity"
         ]
       },
@@ -15034,14 +16028,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 186,
-      "lineEnd": 186,
+      "lineStart": 189,
+      "lineEnd": 189,
       "summary": "외부 공개 자료에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L186",
+          "source:mcp/store.js#L189",
           "symbol:toExternal"
         ]
       },
@@ -15068,14 +16062,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 538,
-      "lineEnd": 570,
+      "lineStart": 508,
+      "lineEnd": 540,
       "summary": "외부 공개 자료 · 캔버스 · 연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L538-L570",
+          "source:mcp/store.js#L508-L540",
           "symbol:toExternalCanvasEdge"
         ]
       },
@@ -15103,14 +16097,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 479,
-      "lineEnd": 536,
+      "lineStart": 449,
+      "lineEnd": 506,
       "summary": "외부 공개 자료 · 캔버스 · 노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L479-L536",
+          "source:mcp/store.js#L449-L506",
           "symbol:toExternalCanvasNode"
         ]
       },
@@ -15138,14 +16132,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 51,
-      "lineEnd": 51,
+      "lineStart": 54,
+      "lineEnd": 54,
       "summary": "이 파일이 맡은 “AI 도구가 캔버스·노드·연결선을 읽고 바꿀 때 소유권과 공유 범위를 검사하고 Supabase에 반영합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L51",
+          "source:mcp/store.js#L54",
           "symbol:uid"
         ]
       },
@@ -15172,14 +16166,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 1472,
-      "lineEnd": 1486,
+      "lineStart": 1442,
+      "lineEnd": 1456,
       "summary": "연결선 대상을 변경합니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L1472-L1486",
+          "source:mcp/store.js#L1442-L1456",
           "symbol:updateEdge"
         ]
       },
@@ -15208,14 +16202,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 1488,
-      "lineEnd": 1510,
+      "lineStart": 1458,
+      "lineEnd": 1480,
       "summary": "연결선 대상을 변경합니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L1488-L1510",
+          "source:mcp/store.js#L1458-L1480",
           "symbol:updateEdges"
         ]
       },
@@ -15244,14 +16238,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 1054,
-      "lineEnd": 1067,
+      "lineStart": 1024,
+      "lineEnd": 1037,
       "summary": "노드 대상을 변경합니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L1054-L1067",
+          "source:mcp/store.js#L1024-L1037",
           "symbol:updateNode"
         ]
       },
@@ -15280,14 +16274,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 1070,
-      "lineEnd": 1090,
+      "lineStart": 1040,
+      "lineEnd": 1060,
       "summary": "노드 대상을 변경합니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L1070-L1090",
+          "source:mcp/store.js#L1040-L1060",
           "symbol:updateNodes"
         ]
       },
@@ -15316,14 +16310,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 697,
-      "lineEnd": 711,
+      "lineStart": 667,
+      "lineEnd": 681,
       "summary": "워크플로우 · 시스템 · 시스템 지도 · 관계 · 실행 계획 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L697-L711",
+          "source:mcp/store.js#L667-L681",
           "symbol:workflowSystemMapRelationRepairPlanId"
         ]
       },
@@ -15351,14 +16345,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "mcp",
       "area": "ai-integration",
       "subsystem": "mcp-tools",
-      "lineStart": 55,
-      "lineEnd": 59,
+      "lineStart": 58,
+      "lineEnd": 62,
       "summary": "이 파일이 맡은 “AI 도구가 캔버스·노드·연결선을 읽고 바꿀 때 소유권과 공유 범위를 검사하고 Supabase에 반영합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:mcp/store.js#L55-L59",
+          "source:mcp/store.js#L58-L62",
           "symbol:writeConflict"
         ]
       },
@@ -19894,14 +20888,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 3079,
-      "lineEnd": 3079,
+      "lineStart": 3100,
+      "lineEnd": 3100,
       "summary": "단계에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L3079",
+          "source:scripts/test-mcp-logic.mjs#L3100",
           "symbol:bigStage"
         ]
       },
@@ -20064,14 +21058,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 3244,
-      "lineEnd": 3255,
+      "lineStart": 3265,
+      "lineEnd": 3276,
       "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L3244-L3255",
+          "source:scripts/test-mcp-logic.mjs#L3265-L3276",
           "symbol:fakeElement"
         ]
       },
@@ -20098,14 +21092,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 3009,
-      "lineEnd": 3015,
+      "lineStart": 3030,
+      "lineEnd": 3036,
       "summary": "노드 경계 상자 정보를 불러옵니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L3009-L3015",
+          "source:scripts/test-mcp-logic.mjs#L3030-L3036",
           "symbol:getRect"
         ]
       },
@@ -20132,14 +21126,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 3103,
-      "lineEnd": 3107,
+      "lineStart": 3124,
+      "lineEnd": 3128,
       "summary": "노드 경계 상자 정보를 불러옵니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L3103-L3107",
+          "source:scripts/test-mcp-logic.mjs#L3124-L3128",
           "symbol:getRect"
         ]
       },
@@ -20200,14 +21194,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 3046,
-      "lineEnd": 3046,
+      "lineStart": 3067,
+      "lineEnd": 3067,
       "summary": "노드 경계 상자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L3046",
+          "source:scripts/test-mcp-logic.mjs#L3067",
           "symbol:paddedRect"
         ]
       },
@@ -20234,14 +21228,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 3124,
-      "lineEnd": 3124,
+      "lineStart": 3145,
+      "lineEnd": 3145,
       "summary": "노드 경계 상자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L3124",
+          "source:scripts/test-mcp-logic.mjs#L3145",
           "symbol:paddedRect"
         ]
       },
@@ -20997,6 +21991,109 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "tags": [
         "arrow",
         "engine-tests",
+        "test",
+        "testing-quality"
+      ],
+      "details": {
+        "functionKind": "arrow",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:scripts/test-performance-boundaries.mjs:read",
+      "kind": "function",
+      "label": "read",
+      "fingerprint": "5c246d10a16e1cdbd256",
+      "name": "read",
+      "path": "scripts/test-performance-boundaries.mjs",
+      "parentId": "file:scripts/test-performance-boundaries.mjs",
+      "layer": "test",
+      "area": "testing-quality",
+      "subsystem": "app-tests",
+      "lineStart": 4,
+      "lineEnd": 4,
+      "summary": "이 기능 정보를 읽습니다",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:scripts/test-performance-boundaries.mjs#L4",
+          "symbol:read"
+        ]
+      },
+      "tags": [
+        "app-tests",
+        "arrow",
+        "test",
+        "testing-quality"
+      ],
+      "details": {
+        "functionKind": "arrow",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:scripts/test-security-boundaries.mjs:collect",
+      "kind": "function",
+      "label": "collect",
+      "fingerprint": "f88f02d7f8765d526793",
+      "name": "collect",
+      "path": "scripts/test-security-boundaries.mjs",
+      "parentId": "file:scripts/test-security-boundaries.mjs",
+      "layer": "test",
+      "area": "testing-quality",
+      "subsystem": "app-tests",
+      "lineStart": 38,
+      "lineEnd": 44,
+      "summary": "이 파일이 맡은 “security boundaries 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:scripts/test-security-boundaries.mjs#L38-L44",
+          "symbol:collect"
+        ]
+      },
+      "tags": [
+        "app-tests",
+        "async",
+        "function",
+        "test",
+        "testing-quality"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": true
+      }
+    },
+    {
+      "id": "function:scripts/test-security-boundaries.mjs:read",
+      "kind": "function",
+      "label": "read",
+      "fingerprint": "003b642770bdea562569",
+      "name": "read",
+      "path": "scripts/test-security-boundaries.mjs",
+      "parentId": "file:scripts/test-security-boundaries.mjs",
+      "layer": "test",
+      "area": "testing-quality",
+      "subsystem": "app-tests",
+      "lineStart": 5,
+      "lineEnd": 5,
+      "summary": "이 기능 정보를 읽습니다",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:scripts/test-security-boundaries.mjs#L5",
+          "symbol:read"
+        ]
+      },
+      "tags": [
+        "app-tests",
+        "arrow",
         "test",
         "testing-quality"
       ],
@@ -25484,24 +26581,366 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:shared/richTextSanitizer.js:cleanChildren",
+      "kind": "function",
+      "label": "cleanChildren",
+      "fingerprint": "4b4a63842161226f7c4f",
+      "name": "cleanChildren",
+      "path": "shared/richTextSanitizer.js",
+      "parentId": "file:shared/richTextSanitizer.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 106,
+      "lineEnd": 128,
+      "summary": "하위 항목에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/richTextSanitizer.js#L106-L128",
+          "symbol:cleanChildren"
+        ]
+      },
+      "tags": [
+        "arrow",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "arrow",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/richTextSanitizer.js:safeClassName",
+      "kind": "function",
+      "label": "safeClassName",
+      "fingerprint": "cf5811db2b23db17843d",
+      "name": "safeClassName",
+      "path": "shared/richTextSanitizer.js",
+      "parentId": "file:shared/richTextSanitizer.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 33,
+      "lineEnd": 35,
+      "summary": "허용 범위로 제한에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/richTextSanitizer.js#L33-L35",
+          "symbol:safeClassName"
+        ]
+      },
+      "tags": [
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/richTextSanitizer.js:safeFontSize",
+      "kind": "function",
+      "label": "safeFontSize",
+      "fingerprint": "48980873a447a00f50b4",
+      "name": "safeFontSize",
+      "path": "shared/richTextSanitizer.js",
+      "parentId": "file:shared/richTextSanitizer.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 37,
+      "lineEnd": 45,
+      "summary": "허용 범위로 제한에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/richTextSanitizer.js#L37-L45",
+          "symbol:safeFontSize"
+        ]
+      },
+      "tags": [
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/richTextSanitizer.js:safeStyleValue",
+      "kind": "function",
+      "label": "safeStyleValue",
+      "fingerprint": "fe52d4e35470de3b851f",
+      "name": "safeStyleValue",
+      "path": "shared/richTextSanitizer.js",
+      "parentId": "file:shared/richTextSanitizer.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 47,
+      "lineEnd": 54,
+      "summary": "허용 범위로 제한 · 값에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/richTextSanitizer.js#L47-L54",
+          "symbol:safeStyleValue"
+        ]
+      },
+      "tags": [
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/richTextSanitizer.js:sanitizeAttribute",
+      "kind": "function",
+      "label": "sanitizeAttribute",
+      "fingerprint": "2c52886b895d3812d0fd",
+      "name": "sanitizeAttribute",
+      "path": "shared/richTextSanitizer.js",
+      "parentId": "file:shared/richTextSanitizer.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 69,
+      "lineEnd": 90,
+      "summary": "위험한 입력 제거에서 위험한 내용을 제거합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/richTextSanitizer.js#L69-L90",
+          "symbol:sanitizeAttribute"
+        ]
+      },
+      "tags": [
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/richTextSanitizer.js:sanitizeAttributeList",
+      "kind": "function",
+      "label": "sanitizeAttributeList",
+      "fingerprint": "89c87a687cd88d809a48",
+      "name": "sanitizeAttributeList",
+      "path": "shared/richTextSanitizer.js",
+      "parentId": "file:shared/richTextSanitizer.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 92,
+      "lineEnd": 102,
+      "summary": "목록에서 위험한 내용을 제거합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/richTextSanitizer.js#L92-L102",
+          "symbol:sanitizeAttributeList"
+        ]
+      },
+      "tags": [
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/richTextSanitizer.js:sanitizeFallback",
+      "kind": "function",
+      "label": "sanitizeFallback",
+      "fingerprint": "4ac4e3acf7b268ae015a",
+      "name": "sanitizeFallback",
+      "path": "shared/richTextSanitizer.js",
+      "parentId": "file:shared/richTextSanitizer.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 133,
+      "lineEnd": 158,
+      "summary": "위험한 입력 제거에서 위험한 내용을 제거합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/richTextSanitizer.js#L133-L158",
+          "symbol:sanitizeFallback"
+        ]
+      },
+      "tags": [
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/richTextSanitizer.js:sanitizeRichTextHtml",
+      "kind": "function",
+      "label": "sanitizeRichTextHtml",
+      "fingerprint": "774fd82a028b8b2e23bf",
+      "name": "sanitizeRichTextHtml",
+      "path": "shared/richTextSanitizer.js",
+      "parentId": "file:shared/richTextSanitizer.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 160,
+      "lineEnd": 164,
+      "summary": "텍스트 · 본문 HTML에서 위험한 내용을 제거합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/richTextSanitizer.js#L160-L164",
+          "symbol:sanitizeRichTextHtml"
+        ]
+      },
+      "tags": [
+        "exported",
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/richTextSanitizer.js:sanitizeRichTextStyle",
+      "kind": "function",
+      "label": "sanitizeRichTextStyle",
+      "fingerprint": "b0c502519b138c7a75c4",
+      "name": "sanitizeRichTextStyle",
+      "path": "shared/richTextSanitizer.js",
+      "parentId": "file:shared/richTextSanitizer.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 56,
+      "lineEnd": 67,
+      "summary": "텍스트에서 위험한 내용을 제거합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/richTextSanitizer.js#L56-L67",
+          "symbol:sanitizeRichTextStyle"
+        ]
+      },
+      "tags": [
+        "exported",
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/richTextSanitizer.js:sanitizeWithDomParser",
+      "kind": "function",
+      "label": "sanitizeWithDomParser",
+      "fingerprint": "156371379f57438e57b0",
+      "name": "sanitizeWithDomParser",
+      "path": "shared/richTextSanitizer.js",
+      "parentId": "file:shared/richTextSanitizer.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 104,
+      "lineEnd": 131,
+      "summary": "위험한 입력 제거에서 위험한 내용을 제거합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/richTextSanitizer.js#L104-L131",
+          "symbol:sanitizeWithDomParser"
+        ]
+      },
+      "tags": [
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
       "id": "function:shared/sharePermissions.js:composeSharePermission",
       "kind": "function",
       "label": "composeSharePermission",
-      "fingerprint": "e4d95ec558719fb4b284",
+      "fingerprint": "a1dcc338b9905ab1f700",
       "name": "composeSharePermission",
       "path": "shared/sharePermissions.js",
       "parentId": "file:shared/sharePermissions.js",
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 15,
-      "lineEnd": 32,
+      "lineStart": 16,
+      "lineEnd": 35,
       "summary": "공유 · 권한에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/sharePermissions.js#L15-L32",
+          "source:shared/sharePermissions.js#L16-L35",
           "symbol:composeSharePermission"
         ]
       },
@@ -25529,14 +26968,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 46,
-      "lineEnd": 51,
+      "lineStart": 71,
+      "lineEnd": 76,
       "summary": "그룹 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/sharePermissions.js#L46-L51",
+          "source:shared/sharePermissions.js#L71-L76",
           "symbol:editableGroupIdSet"
         ]
       },
@@ -25564,15 +27003,84 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 53,
-      "lineEnd": 64,
+      "lineStart": 78,
+      "lineEnd": 89,
       "summary": "노드 · 식별자 · 권한에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/sharePermissions.js#L53-L64",
+          "source:shared/sharePermissions.js#L78-L89",
           "symbol:editableNodeIdSetForPermission"
+        ]
+      },
+      "tags": [
+        "exported",
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/sharePermissions.js:grantCoversInvitation",
+      "kind": "function",
+      "label": "grantCoversInvitation",
+      "fingerprint": "b6ac4fc5507562b65aef",
+      "name": "grantCoversInvitation",
+      "path": "shared/sharePermissions.js",
+      "parentId": "file:shared/sharePermissions.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 49,
+      "lineEnd": 57,
+      "summary": "이 파일이 맡은 “캔버스·그룹·노드 초대 권한을 합쳐 실제로 볼 수 있고 편집할 수 있는 범위를 계산합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/sharePermissions.js#L49-L57",
+          "symbol:grantCoversInvitation"
+        ]
+      },
+      "tags": [
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/sharePermissions.js:invitationAuthorizingGrants",
+      "kind": "function",
+      "label": "invitationAuthorizingGrants",
+      "fingerprint": "44ceb355b2fd872772c2",
+      "name": "invitationAuthorizingGrants",
+      "path": "shared/sharePermissions.js",
+      "parentId": "file:shared/sharePermissions.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 59,
+      "lineEnd": 65,
+      "summary": "이 파일이 맡은 “캔버스·그룹·노드 초대 권한을 합쳐 실제로 볼 수 있고 편집할 수 있는 범위를 계산합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/sharePermissions.js#L59-L65",
+          "symbol:invitationAuthorizingGrants"
         ]
       },
       "tags": [
@@ -25592,7 +27100,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:shared/sharePermissions.js:normalizeShareGrant",
       "kind": "function",
       "label": "normalizeShareGrant",
-      "fingerprint": "233b79022d571303ccc5",
+      "fingerprint": "9a570e8345e91ecc836b",
       "name": "normalizeShareGrant",
       "path": "shared/sharePermissions.js",
       "parentId": "file:shared/sharePermissions.js",
@@ -25600,13 +27108,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
       "lineStart": 3,
-      "lineEnd": 13,
+      "lineEnd": 14,
       "summary": "공유 자료를 안전한 공통 형식으로 정리합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/sharePermissions.js#L3-L13",
+          "source:shared/sharePermissions.js#L3-L14",
           "symbol:normalizeShareGrant"
         ]
       },
@@ -25634,14 +27142,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 88,
-      "lineEnd": 92,
+      "lineStart": 113,
+      "lineEnd": 117,
       "summary": "권한 · 새 항목 · 그룹에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/sharePermissions.js#L88-L92",
+          "source:shared/sharePermissions.js#L113-L117",
           "symbol:permissionCanCreateInGroup"
         ]
       },
@@ -25669,14 +27177,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 94,
-      "lineEnd": 99,
+      "lineStart": 119,
+      "lineEnd": 124,
       "summary": "권한 · 연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/sharePermissions.js#L94-L99",
+          "source:shared/sharePermissions.js#L119-L124",
           "symbol:permissionCanEditEdge"
         ]
       },
@@ -25704,15 +27212,50 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 82,
-      "lineEnd": 86,
+      "lineStart": 107,
+      "lineEnd": 111,
       "summary": "권한 · 노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/sharePermissions.js#L82-L86",
+          "source:shared/sharePermissions.js#L107-L111",
           "symbol:permissionCanEditNodeStructure"
+        ]
+      },
+      "tags": [
+        "exported",
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/sharePermissions.js:permissionCanInviteScope",
+      "kind": "function",
+      "label": "permissionCanInviteScope",
+      "fingerprint": "2e4d59923b3b86eaf7a6",
+      "name": "permissionCanInviteScope",
+      "path": "shared/sharePermissions.js",
+      "parentId": "file:shared/sharePermissions.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 67,
+      "lineEnd": 69,
+      "summary": "권한 · 초대에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/sharePermissions.js#L67-L69",
+          "symbol:permissionCanInviteScope"
         ]
       },
       "tags": [
@@ -25732,21 +27275,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:shared/sharePermissions.js:permissionFromAccess",
       "kind": "function",
       "label": "permissionFromAccess",
-      "fingerprint": "8b027b224f33db5f35c6",
+      "fingerprint": "1f1bd4e8f5394f81ddc5",
       "name": "permissionFromAccess",
       "path": "shared/sharePermissions.js",
       "parentId": "file:shared/sharePermissions.js",
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 34,
-      "lineEnd": 44,
+      "lineStart": 37,
+      "lineEnd": 47,
       "summary": "권한 · 접근 권한에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/sharePermissions.js#L34-L44",
+          "source:shared/sharePermissions.js#L37-L47",
           "symbol:permissionFromAccess"
         ]
       },
@@ -25774,14 +27317,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 66,
-      "lineEnd": 80,
+      "lineStart": 91,
+      "lineEnd": 105,
       "summary": "볼 수 있는 범위 · 노드 · 식별자 · 권한에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/sharePermissions.js#L66-L80",
+          "source:shared/sharePermissions.js#L91-L105",
           "symbol:visibleNodeIdSetForPermission"
         ]
       },
@@ -33118,21 +34661,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/App.jsx:App",
       "kind": "function",
       "label": "App",
-      "fingerprint": "fe1d04eb8c8ea8e5ba37",
+      "fingerprint": "7e2f965e83e665a78050",
       "name": "App",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 497,
-      "lineEnd": 4733,
+      "lineStart": 511,
+      "lineEnd": 4826,
       "summary": "App 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L497-L4733",
+          "source:src/App.jsx#L511-L4826",
           "symbol:App"
         ]
       },
@@ -33160,14 +34703,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 4736,
-      "lineEnd": 4753,
+      "lineStart": 4829,
+      "lineEnd": 4846,
       "summary": "실행 문맥 · 검토 항목 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L4736-L4753",
+          "source:src/App.jsx#L4829-L4846",
           "symbol:ContextItem"
         ]
       },
@@ -33194,14 +34737,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 4774,
-      "lineEnd": 4790,
+      "lineStart": 4867,
+      "lineEnd": 4883,
       "summary": "IconBtn 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L4774-L4790",
+          "source:src/App.jsx#L4867-L4883",
           "symbol:IconBtn"
         ]
       },
@@ -33228,14 +34771,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 4755,
-      "lineEnd": 4772,
+      "lineStart": 4848,
+      "lineEnd": 4865,
       "summary": "검토 항목 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L4755-L4772",
+          "source:src/App.jsx#L4848-L4865",
           "symbol:TypeItem"
         ]
       },
@@ -33262,14 +34805,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 918,
-      "lineEnd": 926,
+      "lineStart": 935,
+      "lineEnd": 943,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L918-L926",
+          "source:src/App.jsx#L935-L943",
           "symbol:absPos"
         ]
       },
@@ -33296,14 +34839,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1729,
-      "lineEnd": 1805,
+      "lineStart": 1781,
+      "lineEnd": 1857,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1729-L1805",
+          "source:src/App.jsx#L1781-L1857",
           "symbol:afterLogin"
         ]
       },
@@ -33331,14 +34874,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 249,
-      "lineEnd": 269,
+      "lineStart": 256,
+      "lineEnd": 276,
       "summary": "시스템 · 노드 · 실제 운영 상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L249-L269",
+          "source:src/App.jsx#L256-L276",
           "symbol:aggregateSystemNodeRuntime"
         ]
       },
@@ -33365,14 +34908,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 431,
-      "lineEnd": 444,
+      "lineStart": 444,
+      "lineEnd": 457,
       "summary": "기준 · 연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L431-L444",
+          "source:src/App.jsx#L444-L457",
           "symbol:baseEdgeStyle"
         ]
       },
@@ -33399,14 +34942,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 867,
-      "lineEnd": 872,
+      "lineStart": 884,
+      "lineEnd": 889,
       "summary": "연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L867-L872",
+          "source:src/App.jsx#L884-L889",
           "symbol:cancelEdgeLp"
         ]
       },
@@ -33433,14 +34976,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 466,
-      "lineEnd": 475,
+      "lineStart": 480,
+      "lineEnd": 489,
       "summary": "캔버스 · 상태 스냅샷에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L466-L475",
+          "source:src/App.jsx#L480-L489",
           "symbol:canvasSnapshot"
         ]
       },
@@ -33467,14 +35010,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 380,
-      "lineEnd": 389,
+      "lineStart": 387,
+      "lineEnd": 396,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L380-L389",
+          "source:src/App.jsx#L387-L396",
           "symbol:centerInFrame"
         ]
       },
@@ -33501,14 +35044,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 842,
-      "lineEnd": 847,
+      "lineStart": 859,
+      "lineEnd": 864,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L842-L847",
+          "source:src/App.jsx#L859-L864",
           "symbol:cleanup"
         ]
       },
@@ -33535,14 +35078,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3415,
-      "lineEnd": 3415,
+      "lineStart": 3504,
+      "lineEnd": 3504,
       "summary": "실행 문맥 작업을 화면을 닫습니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3415",
+          "source:src/App.jsx#L3504",
           "symbol:closeContext"
         ]
       },
@@ -33569,14 +35112,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 355,
-      "lineEnd": 366,
+      "lineStart": 362,
+      "lineEnd": 373,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L355-L366",
+          "source:src/App.jsx#L362-L373",
           "symbol:closestHandles"
         ]
       },
@@ -33603,14 +35146,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 477,
-      "lineEnd": 485,
+      "lineStart": 491,
+      "lineEnd": 499,
       "summary": "상태 스냅샷에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L477-L485",
+          "source:src/App.jsx#L491-L499",
           "symbol:cloudRowSnapshot"
         ]
       },
@@ -33637,14 +35180,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3912,
-      "lineEnd": 3915,
+      "lineStart": 3999,
+      "lineEnd": 4002,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3912-L3915",
+          "source:src/App.jsx#L3999-L4002",
           "symbol:commitRename"
         ]
       },
@@ -33661,6 +35204,40 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:src/App.jsx:creationPosition",
+      "kind": "function",
+      "label": "creationPosition",
+      "fingerprint": "811ea535ee667311bd1e",
+      "name": "creationPosition",
+      "path": "src/App.jsx",
+      "parentId": "file:src/App.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 398,
+      "lineEnd": 402,
+      "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/App.jsx#L398-L402",
+          "symbol:creationPosition"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
       "id": "function:src/App.jsx:dedupeParticipants",
       "kind": "function",
       "label": "dedupeParticipants",
@@ -33671,14 +35248,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 318,
-      "lineEnd": 325,
+      "lineStart": 325,
+      "lineEnd": 332,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L318-L325",
+          "source:src/App.jsx#L325-L332",
           "symbol:dedupeParticipants"
         ]
       },
@@ -33705,14 +35282,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 455,
-      "lineEnd": 459,
+      "lineStart": 469,
+      "lineEnd": 473,
       "summary": "디지털 트윈에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L455-L459",
+          "source:src/App.jsx#L469-L473",
           "symbol:detachDigitalTwinBinding"
         ]
       },
@@ -33739,14 +35316,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 356,
-      "lineEnd": 356,
+      "lineStart": 363,
+      "lineEnd": 363,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L356",
+          "source:src/App.jsx#L363",
           "symbol:dim"
         ]
       },
@@ -33773,14 +35350,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3207,
-      "lineEnd": 3207,
+      "lineStart": 3275,
+      "lineEnd": 3275,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3207",
+          "source:src/App.jsx#L3275",
           "symbol:dim"
         ]
       },
@@ -33807,14 +35384,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3272,
-      "lineEnd": 3272,
+      "lineStart": 3361,
+      "lineEnd": 3361,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3272",
+          "source:src/App.jsx#L3361",
           "symbol:dim"
         ]
       },
@@ -33841,14 +35418,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1118,
-      "lineEnd": 1118,
+      "lineStart": 1135,
+      "lineEnd": 1135,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1118",
+          "source:src/App.jsx#L1135",
           "symbol:distOf"
         ]
       },
@@ -33875,14 +35452,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3208,
-      "lineEnd": 3215,
+      "lineStart": 3276,
+      "lineEnd": 3283,
       "summary": "이 기능 상태나 허용 여부를 대상을 찾습니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3208-L3215",
+          "source:src/App.jsx#L3276-L3283",
           "symbol:findAxisSnap"
         ]
       },
@@ -33909,14 +35486,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 552,
-      "lineEnd": 552,
+      "lineStart": 567,
+      "lineEnd": 567,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L552",
+          "source:src/App.jsx#L567",
           "symbol:fn"
         ]
       },
@@ -33936,21 +35513,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/App.jsx:handleContextAddContent",
       "kind": "function",
       "label": "handleContextAddContent",
-      "fingerprint": "9975357cab79839814a6",
+      "fingerprint": "d2dbe62d39b97b9d733d",
       "name": "handleContextAddContent",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3437,
-      "lineEnd": 3443,
+      "lineStart": 3526,
+      "lineEnd": 3531,
       "summary": "실행 문맥 · 본문 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3437-L3443",
+          "source:src/App.jsx#L3526-L3531",
           "symbol:handleContextAddContent"
         ]
       },
@@ -33977,14 +35554,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3429,
-      "lineEnd": 3435,
+      "lineStart": 3518,
+      "lineEnd": 3524,
       "summary": "실행 문맥 · 그룹 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3429-L3435",
+          "source:src/App.jsx#L3518-L3524",
           "symbol:handleContextAddGroup"
         ]
       },
@@ -34011,14 +35588,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3423,
-      "lineEnd": 3427,
+      "lineStart": 3512,
+      "lineEnd": 3516,
       "summary": "실행 문맥 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3423-L3427",
+          "source:src/App.jsx#L3512-L3516",
           "symbol:handleContextAddMemo"
         ]
       },
@@ -34045,14 +35622,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3417,
-      "lineEnd": 3421,
+      "lineStart": 3506,
+      "lineEnd": 3510,
       "summary": "실행 문맥 · 단계 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3417-L3421",
+          "source:src/App.jsx#L3506-L3510",
           "symbol:handleContextAddStage"
         ]
       },
@@ -34072,21 +35649,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/App.jsx:handleContextAddSystem",
       "kind": "function",
       "label": "handleContextAddSystem",
-      "fingerprint": "a3f5172f607f0e128346",
+      "fingerprint": "5b18ad0040bef1488f25",
       "name": "handleContextAddSystem",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3445,
-      "lineEnd": 3451,
+      "lineStart": 3533,
+      "lineEnd": 3538,
       "summary": "실행 문맥 · 시스템 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3445-L3451",
+          "source:src/App.jsx#L3533-L3538",
           "symbol:handleContextAddSystem"
         ]
       },
@@ -34113,14 +35690,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3505,
-      "lineEnd": 3521,
+      "lineStart": 3592,
+      "lineEnd": 3608,
       "summary": "실행 문맥 · 연결선 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3505-L3521",
+          "source:src/App.jsx#L3592-L3608",
           "symbol:handleContextCleanupEdges"
         ]
       },
@@ -34147,14 +35724,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3473,
-      "lineEnd": 3479,
+      "lineStart": 3560,
+      "lineEnd": 3566,
       "summary": "실행 문맥 · 삭제 · 연결선 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3473-L3479",
+          "source:src/App.jsx#L3560-L3566",
           "symbol:handleContextDeleteEdge"
         ]
       },
@@ -34181,14 +35758,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3463,
-      "lineEnd": 3471,
+      "lineStart": 3550,
+      "lineEnd": 3558,
       "summary": "실행 문맥 · 삭제 · 노드 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3463-L3471",
+          "source:src/App.jsx#L3550-L3558",
           "symbol:handleContextDeleteNode"
         ]
       },
@@ -34215,14 +35792,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3494,
-      "lineEnd": 3500,
+      "lineStart": 3581,
+      "lineEnd": 3587,
       "summary": "실행 문맥 · 그룹 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3494-L3500",
+          "source:src/App.jsx#L3581-L3587",
           "symbol:handleContextGroupSelection"
         ]
       },
@@ -34249,14 +35826,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3453,
-      "lineEnd": 3461,
+      "lineStart": 3540,
+      "lineEnd": 3548,
       "summary": "실행 문맥 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3453-L3461",
+          "source:src/App.jsx#L3540-L3548",
           "symbol:handleContextPaste"
         ]
       },
@@ -34283,14 +35860,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3523,
-      "lineEnd": 3528,
+      "lineStart": 3610,
+      "lineEnd": 3615,
       "summary": "실행 문맥 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3523-L3528",
+          "source:src/App.jsx#L3610-L3615",
           "symbol:handleContextUngroup"
         ]
       },
@@ -34317,14 +35894,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3481,
-      "lineEnd": 3492,
+      "lineStart": 3568,
+      "lineEnd": 3579,
       "summary": "실행 문맥 · 변경 · 연결선 · 관계 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3481-L3492",
+          "source:src/App.jsx#L3568-L3579",
           "symbol:handleContextUpdateEdgeRelation"
         ]
       },
@@ -34351,14 +35928,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 776,
-      "lineEnd": 783,
+      "lineStart": 793,
+      "lineEnd": 800,
       "summary": "이 서버 경로로 들어온 요청의 로그인과 입력을 확인하고 결과를 돌려줍니다. 이 요청은 다음 역할을 맡습니다: 캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L776-L783",
+          "source:src/App.jsx#L793-L800",
           "symbol:handler"
         ]
       },
@@ -34378,21 +35955,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/App.jsx:handler#2",
       "kind": "function",
       "label": "handler",
-      "fingerprint": "269d49992a2a92865abe",
+      "fingerprint": "8e4941c0c81a4fb770cd",
       "name": "handler",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1865,
-      "lineEnd": 1934,
+      "lineStart": 1918,
+      "lineEnd": 1991,
       "summary": "이 서버 경로로 들어온 요청의 로그인과 입력을 확인하고 결과를 돌려줍니다. 이 요청은 다음 역할을 맡습니다: 캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1865-L1934",
+          "source:src/App.jsx#L1918-L1991",
           "symbol:handler"
         ]
       },
@@ -34420,14 +35997,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3121,
-      "lineEnd": 3131,
+      "lineStart": 3189,
+      "lineEnd": 3199,
       "summary": "이 서버 경로로 들어온 요청의 로그인과 입력을 확인하고 결과를 돌려줍니다. 이 요청은 다음 역할을 맡습니다: 캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3121-L3131",
+          "source:src/App.jsx#L3189-L3199",
           "symbol:handler"
         ]
       },
@@ -34454,14 +36031,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 418,
-      "lineEnd": 420,
+      "lineStart": 431,
+      "lineEnd": 433,
       "summary": "시스템 파츠 · 연결선 상태나 허용 여부를 해당 상태인지 판단합니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L418-L420",
+          "source:src/App.jsx#L431-L433",
           "symbol:isPartEdge"
         ]
       },
@@ -34488,14 +36065,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 370,
-      "lineEnd": 375,
+      "lineStart": 377,
+      "lineEnd": 382,
       "summary": "대상 상태나 허용 여부를 해당 상태인지 판단합니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L370-L375",
+          "source:src/App.jsx#L377-L382",
           "symbol:isTypingTarget"
         ]
       },
@@ -34522,14 +36099,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 178,
-      "lineEnd": 180,
+      "lineStart": 185,
+      "lineEnd": 187,
       "summary": "노드 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L178-L180",
+          "source:src/App.jsx#L185-L187",
           "symbol:maxNodeId"
         ]
       },
@@ -34556,14 +36133,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1119,
-      "lineEnd": 1119,
+      "lineStart": 1136,
+      "lineEnd": 1136,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1119",
+          "source:src/App.jsx#L1136",
           "symbol:midOf"
         ]
       },
@@ -34590,14 +36167,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 667,
-      "lineEnd": 667,
+      "lineStart": 684,
+      "lineEnd": 684,
       "summary": "식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L667",
+          "source:src/App.jsx#L684",
           "symbol:nextId"
         ]
       },
@@ -34624,14 +36201,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 182,
-      "lineEnd": 196,
+      "lineStart": 189,
+      "lineEnd": 203,
       "summary": "노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L182-L196",
+          "source:src/App.jsx#L189-L203",
           "symbol:nodeDisplayName"
         ]
       },
@@ -34658,14 +36235,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 171,
-      "lineEnd": 176,
+      "lineStart": 178,
+      "lineEnd": 183,
       "summary": "연결선 자료를 안전한 공통 형식으로 정리합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L171-L176",
+          "source:src/App.jsx#L178-L183",
           "symbol:normalizeEdges"
         ]
       },
@@ -34692,14 +36269,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1027,
-      "lineEnd": 1053,
+      "lineStart": 1044,
+      "lineEnd": 1070,
       "summary": "상태 기록에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1027-L1053",
+          "source:src/App.jsx#L1044-L1070",
           "symbol:onClickCapture"
         ]
       },
@@ -34726,14 +36303,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 854,
-      "lineEnd": 892,
+      "lineStart": 871,
+      "lineEnd": 909,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L854-L892",
+          "source:src/App.jsx#L871-L909",
           "symbol:onDown"
         ]
       },
@@ -34760,14 +36337,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 2599,
-      "lineEnd": 2603,
+      "lineStart": 2656,
+      "lineEnd": 2660,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L2599-L2603",
+          "source:src/App.jsx#L2656-L2660",
           "symbol:onDown"
         ]
       },
@@ -34794,14 +36371,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 873,
-      "lineEnd": 875,
+      "lineStart": 890,
+      "lineEnd": 892,
       "summary": "연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L873-L875",
+          "source:src/App.jsx#L890-L892",
           "symbol:onEdgeLpMove"
         ]
       },
@@ -34828,14 +36405,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1142,
-      "lineEnd": 1142,
+      "lineStart": 1159,
+      "lineEnd": 1159,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1142",
+          "source:src/App.jsx#L1159",
           "symbol:onEnd"
         ]
       },
@@ -34862,14 +36439,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1680,
-      "lineEnd": 1682,
+      "lineStart": 1732,
+      "lineEnd": 1734,
       "summary": "변경 식별값 · 변경에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1680-L1682",
+          "source:src/App.jsx#L1732-L1734",
           "symbol:onHashChange"
         ]
       },
@@ -34896,14 +36473,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 2604,
-      "lineEnd": 2604,
+      "lineStart": 2661,
+      "lineEnd": 2661,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L2604",
+          "source:src/App.jsx#L2661",
           "symbol:onKey"
         ]
       },
@@ -34930,14 +36507,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1078,
-      "lineEnd": 1102,
+      "lineStart": 1095,
+      "lineEnd": 1119,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1078-L1102",
+          "source:src/App.jsx#L1095-L1119",
           "symbol:onMouseDown"
         ]
       },
@@ -34964,14 +36541,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 893,
-      "lineEnd": 905,
+      "lineStart": 910,
+      "lineEnd": 922,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L893-L905",
+          "source:src/App.jsx#L910-L922",
           "symbol:onMove"
         ]
       },
@@ -34998,14 +36575,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1133,
-      "lineEnd": 1141,
+      "lineStart": 1150,
+      "lineEnd": 1158,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1133-L1141",
+          "source:src/App.jsx#L1150-L1158",
           "symbol:onMove"
         ]
       },
@@ -35032,14 +36609,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 849,
-      "lineEnd": 853,
+      "lineStart": 866,
+      "lineEnd": 870,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L849-L853",
+          "source:src/App.jsx#L866-L870",
           "symbol:onSecondPointer"
         ]
       },
@@ -35066,14 +36643,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1121,
-      "lineEnd": 1132,
+      "lineStart": 1138,
+      "lineEnd": 1149,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1121-L1132",
+          "source:src/App.jsx#L1138-L1149",
           "symbol:onStart"
         ]
       },
@@ -35100,14 +36677,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 697,
-      "lineEnd": 697,
+      "lineStart": 714,
+      "lineEnd": 714,
       "summary": "오류에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L697",
+          "source:src/App.jsx#L714",
           "symbol:onStorageError"
         ]
       },
@@ -35134,14 +36711,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 981,
-      "lineEnd": 1006,
+      "lineStart": 998,
+      "lineEnd": 1023,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L981-L1006",
+          "source:src/App.jsx#L998-L1023",
           "symbol:onTouchStart"
         ]
       },
@@ -35168,14 +36745,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 906,
-      "lineEnd": 956,
+      "lineStart": 923,
+      "lineEnd": 973,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L906-L956",
+          "source:src/App.jsx#L923-L973",
           "symbol:onUp"
         ]
       },
@@ -35202,14 +36779,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 203,
-      "lineEnd": 209,
+      "lineStart": 210,
+      "lineEnd": 216,
       "summary": "식별자 자료의 구조를 읽어냅니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L203-L209",
+          "source:src/App.jsx#L210-L216",
           "symbol:parseSharedId"
         ]
       },
@@ -35236,14 +36813,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 422,
-      "lineEnd": 425,
+      "lineStart": 435,
+      "lineEnd": 438,
       "summary": "시스템 파츠 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L422-L425",
+          "source:src/App.jsx#L435-L438",
           "symbol:partIdFromHandle"
         ]
       },
@@ -35270,14 +36847,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 314,
-      "lineEnd": 316,
+      "lineStart": 321,
+      "lineEnd": 323,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L314-L316",
+          "source:src/App.jsx#L321-L323",
           "symbol:participantKey"
         ]
       },
@@ -35304,14 +36881,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3662,
-      "lineEnd": 3681,
+      "lineStart": 3749,
+      "lineEnd": 3768,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3662-L3681",
+          "source:src/App.jsx#L3749-L3768",
           "symbol:poll"
         ]
       },
@@ -35339,14 +36916,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3924,
-      "lineEnd": 3933,
+      "lineStart": 4011,
+      "lineEnd": 4020,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3924-L3933",
+          "source:src/App.jsx#L4011-L4020",
           "symbol:positionMenu"
         ]
       },
@@ -35373,14 +36950,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3638,
-      "lineEnd": 3649,
+      "lineStart": 3725,
+      "lineEnd": 3736,
       "summary": "검토 결정에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3638-L3649",
+          "source:src/App.jsx#L3725-L3736",
           "symbol:refreshDecision"
         ]
       },
@@ -35408,14 +36985,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3032,
-      "lineEnd": 3038,
+      "lineStart": 3100,
+      "lineEnd": 3106,
       "summary": "시스템 파츠에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3032-L3038",
+          "source:src/App.jsx#L3100-L3106",
           "symbol:remapPartHandle"
         ]
       },
@@ -35442,14 +37019,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 408,
-      "lineEnd": 410,
+      "lineStart": 421,
+      "lineEnd": 423,
       "summary": "노드에서 위험한 내용을 제거합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L408-L410",
+          "source:src/App.jsx#L421-L423",
           "symbol:sanitizeNodes"
         ]
       },
@@ -35476,14 +37053,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 412,
-      "lineEnd": 414,
+      "lineStart": 425,
+      "lineEnd": 427,
       "summary": "위험한 입력 제거에서 위험한 내용을 제거합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L412-L414",
+          "source:src/App.jsx#L425-L427",
           "symbol:sanitizeNotes"
         ]
       },
@@ -35510,14 +37087,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 327,
-      "lineEnd": 351,
+      "lineStart": 334,
+      "lineEnd": 358,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L327-L351",
+          "source:src/App.jsx#L334-L358",
           "symbol:scopedParticipants"
         ]
       },
@@ -35544,14 +37121,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 202,
-      "lineEnd": 202,
+      "lineStart": 209,
+      "lineEnd": 209,
       "summary": "캔버스 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L202",
+          "source:src/App.jsx#L209",
           "symbol:sharedCanvasId"
         ]
       },
@@ -35578,14 +37155,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 394,
-      "lineEnd": 406,
+      "lineStart": 407,
+      "lineEnd": 419,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L394-L406",
+          "source:src/App.jsx#L407-L419",
           "symbol:sortParentsFirst"
         ]
       },
@@ -35612,14 +37189,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 461,
-      "lineEnd": 464,
+      "lineStart": 475,
+      "lineEnd": 478,
       "summary": "연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L461-L464",
+          "source:src/App.jsx#L475-L478",
           "symbol:stripEdge"
         ]
       },
@@ -35639,21 +37216,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/App.jsx:stripNode",
       "kind": "function",
       "label": "stripNode",
-      "fingerprint": "bf4537fcb63f58fafe49",
+      "fingerprint": "02bebc288bac2d60b8af",
       "name": "stripNode",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 447,
-      "lineEnd": 454,
+      "lineStart": 460,
+      "lineEnd": 468,
       "summary": "노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L447-L454",
+          "source:src/App.jsx#L460-L468",
           "symbol:stripNode"
         ]
       },
@@ -35680,14 +37257,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 460,
-      "lineEnd": 460,
+      "lineStart": 474,
+      "lineEnd": 474,
       "summary": "노트에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L460",
+          "source:src/App.jsx#L474",
           "symbol:stripNote"
         ]
       },
@@ -35714,14 +37291,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 936,
-      "lineEnd": 936,
+      "lineStart": 953,
+      "lineEnd": 953,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L936",
+          "source:src/App.jsx#L953",
           "symbol:swallow"
         ]
       },
@@ -35748,14 +37325,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 945,
-      "lineEnd": 945,
+      "lineStart": 962,
+      "lineEnd": 962,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L945",
+          "source:src/App.jsx#L962",
           "symbol:swallow"
         ]
       },
@@ -35782,14 +37359,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 299,
-      "lineEnd": 312,
+      "lineStart": 306,
+      "lineEnd": 319,
       "summary": "시스템 · 실제 운영 상태 · 연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L299-L312",
+          "source:src/App.jsx#L306-L319",
           "symbol:systemRuntimeByEdge"
         ]
       },
@@ -35816,14 +37393,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 271,
-      "lineEnd": 297,
+      "lineStart": 278,
+      "lineEnd": 304,
       "summary": "시스템 · 실제 운영 상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L271-L297",
+          "source:src/App.jsx#L278-L304",
           "symbol:systemRuntimeDashboardSummary"
         ]
       },
@@ -35850,14 +37427,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 223,
-      "lineEnd": 229,
+      "lineStart": 230,
+      "lineEnd": 236,
       "summary": "시스템 · 실제 운영 상태 · 시스템 지도에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L223-L229",
+          "source:src/App.jsx#L230-L236",
           "symbol:systemRuntimeMapFromRecords"
         ]
       },
@@ -35884,14 +37461,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 231,
-      "lineEnd": 238,
+      "lineStart": 238,
+      "lineEnd": 245,
       "summary": "시스템 · 실제 운영 상태 · 오류에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L231-L238",
+          "source:src/App.jsx#L238-L245",
           "symbol:systemRuntimePersistenceError"
         ]
       },
@@ -35918,14 +37495,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 211,
-      "lineEnd": 221,
+      "lineStart": 218,
+      "lineEnd": 228,
       "summary": "시스템 · 실제 운영 상태 · 노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L211-L221",
+          "source:src/App.jsx#L218-L228",
           "symbol:systemRuntimeTargetsForNodes"
         ]
       },
@@ -35952,14 +37529,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 398,
-      "lineEnd": 403,
+      "lineStart": 411,
+      "lineEnd": 416,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L398-L403",
+          "source:src/App.jsx#L411-L416",
           "symbol:visit"
         ]
       },
@@ -35979,21 +37556,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/components/AuthPanel.jsx:AuthPanel",
       "kind": "function",
       "label": "AuthPanel",
-      "fingerprint": "d0d217c5c0d69b0c53fb",
+      "fingerprint": "03e0b3ef990b5d05df31",
       "name": "AuthPanel",
       "path": "src/components/AuthPanel.jsx",
       "parentId": "file:src/components/AuthPanel.jsx",
       "layer": "frontend",
       "area": "identity-profile",
       "subsystem": "identity-account",
-      "lineStart": 42,
-      "lineEnd": 546,
+      "lineStart": 43,
+      "lineEnd": 551,
       "summary": "로그인 인증 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/AuthPanel.jsx#L42-L546",
+          "source:src/components/AuthPanel.jsx#L43-L551",
           "symbol:AuthPanel"
         ]
       },
@@ -36021,14 +37598,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "identity-profile",
       "subsystem": "identity-account",
-      "lineStart": 20,
-      "lineEnd": 40,
+      "lineStart": 21,
+      "lineEnd": 41,
       "summary": "아바타 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/AuthPanel.jsx#L20-L40",
+          "source:src/components/AuthPanel.jsx#L21-L41",
           "symbol:Avatar"
         ]
       },
@@ -36056,14 +37633,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "identity-profile",
       "subsystem": "identity-account",
-      "lineStart": 253,
-      "lineEnd": 257,
+      "lineStart": 254,
+      "lineEnd": 258,
       "summary": "프로필에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/AuthPanel.jsx#L253-L257",
+          "source:src/components/AuthPanel.jsx#L254-L258",
           "symbol:beginProfileEdit"
         ]
       },
@@ -36090,14 +37667,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "identity-profile",
       "subsystem": "identity-account",
-      "lineStart": 555,
-      "lineEnd": 560,
+      "lineStart": 560,
+      "lineEnd": 565,
       "summary": "이 파일이 맡은 “로그인·회원가입·프로필 편집과 아바타 설정 화면을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/AuthPanel.jsx#L555-L560",
+          "source:src/components/AuthPanel.jsx#L560-L565",
           "symbol:fillBtn"
         ]
       },
@@ -36124,14 +37701,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "identity-profile",
       "subsystem": "identity-account",
-      "lineStart": 580,
-      "lineEnd": 584,
+      "lineStart": 585,
+      "lineEnd": 589,
       "summary": "이 파일이 맡은 “로그인·회원가입·프로필 편집과 아바타 설정 화면을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/AuthPanel.jsx#L580-L584",
+          "source:src/components/AuthPanel.jsx#L585-L589",
           "symbol:formatDate"
         ]
       },
@@ -36158,14 +37735,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "identity-profile",
       "subsystem": "identity-account",
-      "lineStart": 131,
-      "lineEnd": 139,
+      "lineStart": 132,
+      "lineEnd": 140,
       "summary": "연결 토큰 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/AuthPanel.jsx#L131-L139",
+          "source:src/components/AuthPanel.jsx#L132-L140",
           "symbol:handleCopyToken"
         ]
       },
@@ -36193,14 +37770,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "identity-profile",
       "subsystem": "identity-account",
-      "lineStart": 106,
-      "lineEnd": 117,
+      "lineStart": 107,
+      "lineEnd": 118,
       "summary": "새 항목 · 연결 토큰 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/AuthPanel.jsx#L106-L117",
+          "source:src/components/AuthPanel.jsx#L107-L118",
           "symbol:handleCreateToken"
         ]
       },
@@ -36228,14 +37805,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "identity-profile",
       "subsystem": "identity-account",
-      "lineStart": 119,
-      "lineEnd": 129,
+      "lineStart": 120,
+      "lineEnd": 130,
       "summary": "삭제 · 연결 토큰 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/AuthPanel.jsx#L119-L129",
+          "source:src/components/AuthPanel.jsx#L120-L130",
           "symbol:handleDeleteToken"
         ]
       },
@@ -36263,14 +37840,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "identity-profile",
       "subsystem": "identity-account",
-      "lineStart": 223,
-      "lineEnd": 229,
+      "lineStart": 224,
+      "lineEnd": 230,
       "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/AuthPanel.jsx#L223-L229",
+          "source:src/components/AuthPanel.jsx#L224-L230",
           "symbol:handleGoogle"
         ]
       },
@@ -36298,14 +37875,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "identity-profile",
       "subsystem": "identity-account",
-      "lineStart": 231,
-      "lineEnd": 234,
+      "lineStart": 232,
+      "lineEnd": 235,
       "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/AuthPanel.jsx#L231-L234",
+          "source:src/components/AuthPanel.jsx#L232-L235",
           "symbol:handleLogout"
         ]
       },
@@ -36333,14 +37910,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "identity-profile",
       "subsystem": "identity-account",
-      "lineStart": 236,
-      "lineEnd": 251,
+      "lineStart": 237,
+      "lineEnd": 252,
       "summary": "저장 · 프로필 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/AuthPanel.jsx#L236-L251",
+          "source:src/components/AuthPanel.jsx#L237-L252",
           "symbol:handleSaveProfile"
         ]
       },
@@ -36368,14 +37945,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "identity-profile",
       "subsystem": "identity-account",
-      "lineStart": 207,
-      "lineEnd": 221,
+      "lineStart": 208,
+      "lineEnd": 222,
       "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/AuthPanel.jsx#L207-L221",
+          "source:src/components/AuthPanel.jsx#L208-L222",
           "symbol:handleSubmit"
         ]
       },
@@ -36403,14 +37980,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "identity-profile",
       "subsystem": "identity-account",
-      "lineStart": 92,
-      "lineEnd": 104,
+      "lineStart": 93,
+      "lineEnd": 105,
       "summary": "이 기능 정보를 불러옵니다",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/AuthPanel.jsx#L92-L104",
+          "source:src/components/AuthPanel.jsx#L93-L105",
           "symbol:loadTokens"
         ]
       },
@@ -36438,14 +38015,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "identity-profile",
       "subsystem": "identity-account",
-      "lineStart": 145,
-      "lineEnd": 147,
+      "lineStart": 146,
+      "lineEnd": 148,
       "summary": "이 파일이 맡은 “로그인·회원가입·프로필 편집과 아바타 설정 화면을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/AuthPanel.jsx#L145-L147",
+          "source:src/components/AuthPanel.jsx#L146-L148",
           "symbol:onDown"
         ]
       },
@@ -36472,14 +38049,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "identity-profile",
       "subsystem": "identity-account",
-      "lineStart": 148,
-      "lineEnd": 148,
+      "lineStart": 149,
+      "lineEnd": 149,
       "summary": "이 파일이 맡은 “로그인·회원가입·프로필 편집과 아바타 설정 화면을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/AuthPanel.jsx#L148",
+          "source:src/components/AuthPanel.jsx#L149",
           "symbol:onKey"
         ]
       },
@@ -36506,14 +38083,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "identity-profile",
       "subsystem": "identity-account",
-      "lineStart": 562,
-      "lineEnd": 566,
+      "lineStart": 567,
+      "lineEnd": 571,
       "summary": "이 파일이 맡은 “로그인·회원가입·프로필 편집과 아바타 설정 화면을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/AuthPanel.jsx#L562-L566",
+          "source:src/components/AuthPanel.jsx#L567-L571",
           "symbol:outlineBtn"
         ]
       },
@@ -36540,14 +38117,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "identity-profile",
       "subsystem": "identity-account",
-      "lineStart": 90,
-      "lineEnd": 90,
+      "lineStart": 91,
+      "lineEnd": 91,
       "summary": "이 파일이 맡은 “로그인·회원가입·프로필 편집과 아바타 설정 화면을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/AuthPanel.jsx#L90",
+          "source:src/components/AuthPanel.jsx#L91",
           "symbol:reset"
         ]
       },
@@ -36574,14 +38151,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "identity-profile",
       "subsystem": "identity-account",
-      "lineStart": 568,
-      "lineEnd": 572,
+      "lineStart": 573,
+      "lineEnd": 577,
       "summary": "이 파일이 맡은 “로그인·회원가입·프로필 편집과 아바타 설정 화면을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/AuthPanel.jsx#L568-L572",
+          "source:src/components/AuthPanel.jsx#L573-L577",
           "symbol:segBtn"
         ]
       },
@@ -36608,14 +38185,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "identity-profile",
       "subsystem": "identity-account",
-      "lineStart": 574,
-      "lineEnd": 578,
+      "lineStart": 579,
+      "lineEnd": 583,
       "summary": "이 파일이 맡은 “로그인·회원가입·프로필 편집과 아바타 설정 화면을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/AuthPanel.jsx#L574-L578",
+          "source:src/components/AuthPanel.jsx#L579-L583",
           "symbol:smallBtn"
         ]
       },
@@ -36642,14 +38219,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "identity-profile",
       "subsystem": "identity-account",
-      "lineStart": 70,
-      "lineEnd": 80,
+      "lineStart": 71,
+      "lineEnd": 81,
       "summary": "변경 대상을 변경합니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/AuthPanel.jsx#L70-L80",
+          "source:src/components/AuthPanel.jsx#L71-L81",
           "symbol:updateSettings"
         ]
       },
@@ -36738,21 +38315,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/components/CanvasTabs.jsx:CanvasTabs",
       "kind": "function",
       "label": "CanvasTabs",
-      "fingerprint": "3a45d5c2f0f595218722",
+      "fingerprint": "7c96b9ccbb764c059e34",
       "name": "CanvasTabs",
       "path": "src/components/CanvasTabs.jsx",
       "parentId": "file:src/components/CanvasTabs.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 31,
-      "lineEnd": 532,
+      "lineStart": 32,
+      "lineEnd": 562,
       "summary": "캔버스 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/CanvasTabs.jsx#L31-L532",
+          "source:src/components/CanvasTabs.jsx#L32-L562",
           "symbol:CanvasTabs"
         ]
       },
@@ -36780,14 +38357,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 119,
-      "lineEnd": 133,
+      "lineStart": 122,
+      "lineEnd": 136,
       "summary": "아바타에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/CanvasTabs.jsx#L119-L133",
+          "source:src/components/CanvasTabs.jsx#L122-L136",
           "symbol:avatarOf"
         ]
       },
@@ -36814,14 +38391,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 101,
-      "lineEnd": 104,
+      "lineStart": 104,
+      "lineEnd": 107,
       "summary": "이 파일이 맡은 “개인·공유 캔버스 목록과 현재 캔버스 전환 화면을 표시합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/CanvasTabs.jsx#L101-L104",
+          "source:src/components/CanvasTabs.jsx#L104-L107",
           "symbol:commit"
         ]
       },
@@ -36848,14 +38425,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 7,
-      "lineEnd": 7,
+      "lineStart": 8,
+      "lineEnd": 8,
       "summary": "이 파일이 맡은 “개인·공유 캔버스 목록과 현재 캔버스 전환 화면을 표시합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/CanvasTabs.jsx#L7",
+          "source:src/components/CanvasTabs.jsx#L8",
           "symbol:fmt"
         ]
       },
@@ -36882,14 +38459,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 6,
-      "lineEnd": 12,
+      "lineStart": 7,
+      "lineEnd": 13,
       "summary": "이 파일이 맡은 “개인·공유 캔버스 목록과 현재 캔버스 전환 화면을 표시합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/CanvasTabs.jsx#L6-L12",
+          "source:src/components/CanvasTabs.jsx#L7-L13",
           "symbol:formatCount"
         ]
       },
@@ -36916,14 +38493,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 135,
-      "lineEnd": 139,
+      "lineStart": 138,
+      "lineEnd": 142,
       "summary": "화면 이름에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/CanvasTabs.jsx#L135-L139",
+          "source:src/components/CanvasTabs.jsx#L138-L142",
           "symbol:grantLabel"
         ]
       },
@@ -36950,14 +38527,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 26,
-      "lineEnd": 29,
+      "lineStart": 27,
+      "lineEnd": 30,
       "summary": "이 파일이 맡은 “개인·공유 캔버스 목록과 현재 캔버스 전환 화면을 표시합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/CanvasTabs.jsx#L26-L29",
+          "source:src/components/CanvasTabs.jsx#L27-L30",
           "symbol:grantsFor"
         ]
       },
@@ -36984,14 +38561,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 81,
-      "lineEnd": 86,
+      "lineStart": 84,
+      "lineEnd": 89,
       "summary": "이 서버 경로로 들어온 요청의 로그인과 입력을 확인하고 결과를 돌려줍니다. 이 요청은 다음 역할을 맡습니다: 개인·공유 캔버스 목록과 현재 캔버스 전환 화면을 표시합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/CanvasTabs.jsx#L81-L86",
+          "source:src/components/CanvasTabs.jsx#L84-L89",
           "symbol:handler"
         ]
       },
@@ -37018,14 +38595,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 95,
-      "lineEnd": 95,
+      "lineStart": 98,
+      "lineEnd": 98,
       "summary": "이 서버 경로로 들어온 요청의 로그인과 입력을 확인하고 결과를 돌려줍니다. 이 요청은 다음 역할을 맡습니다: 개인·공유 캔버스 목록과 현재 캔버스 전환 화면을 표시합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/CanvasTabs.jsx#L95",
+          "source:src/components/CanvasTabs.jsx#L98",
           "symbol:handler"
         ]
       },
@@ -37052,14 +38629,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 53,
-      "lineEnd": 55,
+      "lineStart": 56,
+      "lineEnd": 58,
       "summary": "이 파일이 맡은 “개인·공유 캔버스 목록과 현재 캔버스 전환 화면을 표시합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/CanvasTabs.jsx#L53-L55",
+          "source:src/components/CanvasTabs.jsx#L56-L58",
           "symbol:onDown"
         ]
       },
@@ -37086,14 +38663,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 56,
-      "lineEnd": 56,
+      "lineStart": 59,
+      "lineEnd": 59,
       "summary": "이 파일이 맡은 “개인·공유 캔버스 목록과 현재 캔버스 전환 화면을 표시합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/CanvasTabs.jsx#L56",
+          "source:src/components/CanvasTabs.jsx#L59",
           "symbol:onKey"
         ]
       },
@@ -37120,14 +38697,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 68,
-      "lineEnd": 76,
+      "lineStart": 71,
+      "lineEnd": 79,
       "summary": "이 파일이 맡은 “개인·공유 캔버스 목록과 현재 캔버스 전환 화면을 표시합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/CanvasTabs.jsx#L68-L76",
+          "source:src/components/CanvasTabs.jsx#L71-L79",
           "symbol:relativeLastSeen"
         ]
       },
@@ -37154,14 +38731,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 146,
-      "lineEnd": 224,
+      "lineStart": 149,
+      "lineEnd": 227,
       "summary": "이 파일이 맡은 “개인·공유 캔버스 목록과 현재 캔버스 전환 화면을 표시합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/CanvasTabs.jsx#L146-L224",
+          "source:src/components/CanvasTabs.jsx#L149-L227",
           "symbol:renderOwnRow"
         ]
       },
@@ -37188,14 +38765,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 100,
-      "lineEnd": 100,
+      "lineStart": 103,
+      "lineEnd": 103,
       "summary": "이 파일이 맡은 “개인·공유 캔버스 목록과 현재 캔버스 전환 화면을 표시합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/CanvasTabs.jsx#L100",
+          "source:src/components/CanvasTabs.jsx#L103",
           "symbol:startRename"
         ]
       },
@@ -37222,14 +38799,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 20,
-      "lineEnd": 24,
+      "lineStart": 21,
+      "lineEnd": 25,
       "summary": "대상에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/CanvasTabs.jsx#L20-L24",
+          "source:src/components/CanvasTabs.jsx#L21-L25",
           "symbol:targetName"
         ]
       },
@@ -37256,14 +38833,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 14,
-      "lineEnd": 18,
+      "lineStart": 15,
+      "lineEnd": 19,
       "summary": "텍스트 · 본문에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/CanvasTabs.jsx#L14-L18",
+          "source:src/components/CanvasTabs.jsx#L15-L19",
           "symbol:textContent"
         ]
       },
@@ -38303,24 +39880,196 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:src/components/FriendManager.jsx:FriendManager",
+      "kind": "function",
+      "label": "FriendManager",
+      "fingerprint": "5322736ce3d8fc234a95",
+      "name": "FriendManager",
+      "path": "src/components/FriendManager.jsx",
+      "parentId": "file:src/components/FriendManager.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 15,
+      "lineEnd": 110,
+      "summary": "FriendManager 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/FriendManager.jsx#L15-L110",
+          "symbol:FriendManager"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/components/FriendManager.jsx:actionButton",
+      "kind": "function",
+      "label": "actionButton",
+      "fingerprint": "be596e502418868b93a1",
+      "name": "actionButton",
+      "path": "src/components/FriendManager.jsx",
+      "parentId": "file:src/components/FriendManager.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 9,
+      "lineEnd": 13,
+      "summary": "이 파일이 맡은 “FriendManager 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/FriendManager.jsx#L9-L13",
+          "symbol:actionButton"
+        ]
+      },
+      "tags": [
+        "arrow",
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend"
+      ],
+      "details": {
+        "functionKind": "arrow",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/components/FriendManager.jsx:personRow",
+      "kind": "function",
+      "label": "personRow",
+      "fingerprint": "b26c85a6b33f33e419e1",
+      "name": "personRow",
+      "path": "src/components/FriendManager.jsx",
+      "parentId": "file:src/components/FriendManager.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 66,
+      "lineEnd": 77,
+      "summary": "이 파일이 맡은 “FriendManager 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/FriendManager.jsx#L66-L77",
+          "symbol:personRow"
+        ]
+      },
+      "tags": [
+        "arrow",
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend"
+      ],
+      "details": {
+        "functionKind": "arrow",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/components/FriendManager.jsx:run",
+      "kind": "function",
+      "label": "run",
+      "fingerprint": "1f4a78c6fdebe651024f",
+      "name": "run",
+      "path": "src/components/FriendManager.jsx",
+      "parentId": "file:src/components/FriendManager.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 38,
+      "lineEnd": 53,
+      "summary": "이 파일이 맡은 “FriendManager 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/FriendManager.jsx#L38-L53",
+          "symbol:run"
+        ]
+      },
+      "tags": [
+        "arrow",
+        "async",
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend"
+      ],
+      "details": {
+        "functionKind": "arrow",
+        "exported": false,
+        "async": true
+      }
+    },
+    {
+      "id": "function:src/components/FriendManager.jsx:submit",
+      "kind": "function",
+      "label": "submit",
+      "fingerprint": "b025796c090ede89b325",
+      "name": "submit",
+      "path": "src/components/FriendManager.jsx",
+      "parentId": "file:src/components/FriendManager.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 55,
+      "lineEnd": 60,
+      "summary": "이 파일이 맡은 “FriendManager 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/FriendManager.jsx#L55-L60",
+          "symbol:submit"
+        ]
+      },
+      "tags": [
+        "arrow",
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend"
+      ],
+      "details": {
+        "functionKind": "arrow",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
       "id": "function:src/components/InvitePopover.jsx:InvitePopover",
       "kind": "function",
       "label": "InvitePopover",
-      "fingerprint": "266823650cf87471db22",
+      "fingerprint": "b77148f25555b73f3113",
       "name": "InvitePopover",
       "path": "src/components/InvitePopover.jsx",
       "parentId": "file:src/components/InvitePopover.jsx",
       "layer": "frontend",
       "area": "sharing-collaboration",
       "subsystem": "sharing-entry",
-      "lineStart": 14,
-      "lineEnd": 274,
+      "lineStart": 16,
+      "lineEnd": 313,
       "summary": "초대 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/InvitePopover.jsx#L14-L274",
+          "source:src/components/InvitePopover.jsx#L16-L313",
           "symbol:InvitePopover"
         ]
       },
@@ -38348,14 +40097,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "sharing-collaboration",
       "subsystem": "sharing-entry",
-      "lineStart": 81,
-      "lineEnd": 86,
+      "lineStart": 103,
+      "lineEnd": 108,
       "summary": "이 기능 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/InvitePopover.jsx#L81-L86",
+          "source:src/components/InvitePopover.jsx#L103-L108",
           "symbol:handleCopy"
         ]
       },
@@ -38375,21 +40124,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/components/InvitePopover.jsx:handleCreateLink",
       "kind": "function",
       "label": "handleCreateLink",
-      "fingerprint": "fc2bc0d92c1562ca6099",
+      "fingerprint": "1d4589e932541aa4a820",
       "name": "handleCreateLink",
       "path": "src/components/InvitePopover.jsx",
       "parentId": "file:src/components/InvitePopover.jsx",
       "layer": "frontend",
       "area": "sharing-collaboration",
       "subsystem": "sharing-entry",
-      "lineStart": 65,
-      "lineEnd": 79,
+      "lineStart": 85,
+      "lineEnd": 101,
       "summary": "새 항목 · 공유 링크 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/InvitePopover.jsx#L65-L79",
+          "source:src/components/InvitePopover.jsx#L85-L101",
           "symbol:handleCreateLink"
         ]
       },
@@ -38417,14 +40166,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "sharing-collaboration",
       "subsystem": "sharing-entry",
-      "lineStart": 88,
-      "lineEnd": 101,
+      "lineStart": 110,
+      "lineEnd": 123,
       "summary": "삭제 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/InvitePopover.jsx#L88-L101",
+          "source:src/components/InvitePopover.jsx#L110-L123",
           "symbol:handleDelete"
         ]
       },
@@ -38445,21 +40194,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/components/InvitePopover.jsx:handleInvite",
       "kind": "function",
       "label": "handleInvite",
-      "fingerprint": "934a8d8a6c56321cdb05",
+      "fingerprint": "c20ddd908c1e6e51f7a3",
       "name": "handleInvite",
       "path": "src/components/InvitePopover.jsx",
       "parentId": "file:src/components/InvitePopover.jsx",
       "layer": "frontend",
       "area": "sharing-collaboration",
       "subsystem": "sharing-entry",
-      "lineStart": 48,
-      "lineEnd": 63,
+      "lineStart": 66,
+      "lineEnd": 83,
       "summary": "초대 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/InvitePopover.jsx#L48-L63",
+          "source:src/components/InvitePopover.jsx#L66-L83",
           "symbol:handleInvite"
         ]
       },
@@ -41425,14 +43174,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "canvas-model",
       "subsystem": "canvas-state",
-      "lineStart": 25,
-      "lineEnd": 31,
+      "lineStart": 37,
+      "lineEnd": 43,
       "summary": "캔버스에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/canvasNavigation.js#L25-L31",
+          "source:src/lib/canvasNavigation.js#L37-L43",
           "symbol:chooseOwnCanvasToRestore"
         ]
       },
@@ -41539,6 +43288,41 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "refs": [
           "source:src/lib/canvasNavigation.js#L7-L10",
           "symbol:loadLastOpenedCanvas"
+        ]
+      },
+      "tags": [
+        "canvas-model",
+        "canvas-state",
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/lib/canvasNavigation.js:orderCanvasSummaries",
+      "kind": "function",
+      "label": "orderCanvasSummaries",
+      "fingerprint": "fa70e51a19c986eed46b",
+      "name": "orderCanvasSummaries",
+      "path": "src/lib/canvasNavigation.js",
+      "parentId": "file:src/lib/canvasNavigation.js",
+      "layer": "frontend",
+      "area": "canvas-model",
+      "subsystem": "canvas-state",
+      "lineStart": 22,
+      "lineEnd": 32,
+      "summary": "캔버스에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/lib/canvasNavigation.js#L22-L32",
+          "symbol:orderCanvasSummaries"
         ]
       },
       "tags": [
@@ -41808,51 +43592,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "data-storage-sync",
       "subsystem": "cloud-persistence",
-      "lineStart": 70,
-      "lineEnd": 74,
+      "lineStart": 77,
+      "lineEnd": 81,
       "summary": "캔버스 대상을 삭제합니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/cloudStorage.js#L70-L74",
+          "source:src/lib/cloudStorage.js#L77-L81",
           "symbol:deleteCanvas"
-        ]
-      },
-      "tags": [
-        "async",
-        "cloud-persistence",
-        "data-storage-sync",
-        "exported",
-        "frontend",
-        "function"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": true,
-        "async": true
-      }
-    },
-    {
-      "id": "function:src/lib/cloudStorage.js:loadAllCanvases",
-      "kind": "function",
-      "label": "loadAllCanvases",
-      "fingerprint": "04a548da23b79b70b156",
-      "name": "loadAllCanvases",
-      "path": "src/lib/cloudStorage.js",
-      "parentId": "file:src/lib/cloudStorage.js",
-      "layer": "frontend",
-      "area": "data-storage-sync",
-      "subsystem": "cloud-persistence",
-      "lineStart": 50,
-      "lineEnd": 58,
-      "summary": "전체 · 캔버스 목록 정보를 불러옵니다",
-      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
-      "explanationBasis": {
-        "method": "symbol-and-source-range",
-        "refs": [
-          "source:src/lib/cloudStorage.js#L50-L58",
-          "symbol:loadAllCanvases"
         ]
       },
       "tags": [
@@ -41873,22 +43621,58 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/lib/cloudStorage.js:loadCanvasRow",
       "kind": "function",
       "label": "loadCanvasRow",
-      "fingerprint": "72532d5f615f86eb29bf",
+      "fingerprint": "4e2d8fb365cf00eb1bf8",
       "name": "loadCanvasRow",
       "path": "src/lib/cloudStorage.js",
       "parentId": "file:src/lib/cloudStorage.js",
       "layer": "frontend",
       "area": "data-storage-sync",
       "subsystem": "cloud-persistence",
-      "lineStart": 60,
-      "lineEnd": 68,
+      "lineStart": 67,
+      "lineEnd": 75,
       "summary": "캔버스 정보를 불러옵니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/cloudStorage.js#L60-L68",
+          "source:src/lib/cloudStorage.js#L67-L75",
           "symbol:loadCanvasRow"
+        ]
+      },
+      "tags": [
+        "async",
+        "cloud-persistence",
+        "data-storage-sync",
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": true
+      }
+    },
+    {
+      "id": "function:src/lib/cloudStorage.js:loadCanvasSummaries",
+      "kind": "function",
+      "label": "loadCanvasSummaries",
+      "fingerprint": "bd9d6ece285ea95edc3c",
+      "name": "loadCanvasSummaries",
+      "path": "src/lib/cloudStorage.js",
+      "parentId": "file:src/lib/cloudStorage.js",
+      "layer": "frontend",
+      "area": "data-storage-sync",
+      "subsystem": "cloud-persistence",
+      "lineStart": 50,
+      "lineEnd": 65,
+      "summary": "캔버스 정보를 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/lib/cloudStorage.js#L50-L65",
+          "symbol:loadCanvasSummaries"
         ]
       },
       "tags": [
@@ -41909,21 +43693,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/lib/cloudStorage.js:loadUserPrefs",
       "kind": "function",
       "label": "loadUserPrefs",
-      "fingerprint": "d6a6091478a5307c8283",
+      "fingerprint": "0ec4b31f13b7975191c0",
       "name": "loadUserPrefs",
       "path": "src/lib/cloudStorage.js",
       "parentId": "file:src/lib/cloudStorage.js",
       "layer": "frontend",
       "area": "data-storage-sync",
       "subsystem": "cloud-persistence",
-      "lineStart": 84,
-      "lineEnd": 92,
+      "lineStart": 91,
+      "lineEnd": 99,
       "summary": "사용자 정보를 불러옵니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/cloudStorage.js#L84-L92",
+          "source:src/lib/cloudStorage.js#L91-L99",
           "symbol:loadUserPrefs"
         ]
       },
@@ -42022,14 +43806,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "data-storage-sync",
       "subsystem": "cloud-persistence",
-      "lineStart": 76,
-      "lineEnd": 82,
+      "lineStart": 83,
+      "lineEnd": 89,
       "summary": "저장 · 사용자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/cloudStorage.js#L76-L82",
+          "source:src/lib/cloudStorage.js#L83-L89",
           "symbol:saveUserPrefs"
         ]
       },
@@ -42081,6 +43865,462 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "functionKind": "function",
         "exported": true,
         "async": true
+      }
+    },
+    {
+      "id": "function:src/lib/friendships.js:listFriendships",
+      "kind": "function",
+      "label": "listFriendships",
+      "fingerprint": "4acb3f3741e7b21cea3a",
+      "name": "listFriendships",
+      "path": "src/lib/friendships.js",
+      "parentId": "file:src/lib/friendships.js",
+      "layer": "frontend",
+      "area": "data-storage-sync",
+      "subsystem": "cloud-persistence",
+      "lineStart": 3,
+      "lineEnd": 20,
+      "summary": "목록 정보를 목록을 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/lib/friendships.js#L3-L20",
+          "symbol:listFriendships"
+        ]
+      },
+      "tags": [
+        "async",
+        "cloud-persistence",
+        "data-storage-sync",
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": true
+      }
+    },
+    {
+      "id": "function:src/lib/friendships.js:removeFriendship",
+      "kind": "function",
+      "label": "removeFriendship",
+      "fingerprint": "c6085daeffcf1e6929c7",
+      "name": "removeFriendship",
+      "path": "src/lib/friendships.js",
+      "parentId": "file:src/lib/friendships.js",
+      "layer": "frontend",
+      "area": "data-storage-sync",
+      "subsystem": "cloud-persistence",
+      "lineStart": 37,
+      "lineEnd": 40,
+      "summary": "이 기능 대상을 제거합니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/lib/friendships.js#L37-L40",
+          "symbol:removeFriendship"
+        ]
+      },
+      "tags": [
+        "async",
+        "cloud-persistence",
+        "data-storage-sync",
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": true
+      }
+    },
+    {
+      "id": "function:src/lib/friendships.js:respondFriendRequest",
+      "kind": "function",
+      "label": "respondFriendRequest",
+      "fingerprint": "740ed68a56fae1fc5229",
+      "name": "respondFriendRequest",
+      "path": "src/lib/friendships.js",
+      "parentId": "file:src/lib/friendships.js",
+      "layer": "frontend",
+      "area": "data-storage-sync",
+      "subsystem": "cloud-persistence",
+      "lineStart": 28,
+      "lineEnd": 35,
+      "summary": "요청에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/lib/friendships.js#L28-L35",
+          "symbol:respondFriendRequest"
+        ]
+      },
+      "tags": [
+        "async",
+        "cloud-persistence",
+        "data-storage-sync",
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": true
+      }
+    },
+    {
+      "id": "function:src/lib/friendships.js:sendFriendRequest",
+      "kind": "function",
+      "label": "sendFriendRequest",
+      "fingerprint": "be6cd5083f7fc06c8e4d",
+      "name": "sendFriendRequest",
+      "path": "src/lib/friendships.js",
+      "parentId": "file:src/lib/friendships.js",
+      "layer": "frontend",
+      "area": "data-storage-sync",
+      "subsystem": "cloud-persistence",
+      "lineStart": 22,
+      "lineEnd": 26,
+      "summary": "요청 결과를 브라우저에 보냅니다.",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/lib/friendships.js#L22-L26",
+          "symbol:sendFriendRequest"
+        ]
+      },
+      "tags": [
+        "async",
+        "cloud-persistence",
+        "data-storage-sync",
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": true
+      }
+    },
+    {
+      "id": "function:src/lib/groupMembership.js:findGroupAtPoint",
+      "kind": "function",
+      "label": "findGroupAtPoint",
+      "fingerprint": "b3abf07006228eb8a97c",
+      "name": "findGroupAtPoint",
+      "path": "src/lib/groupMembership.js",
+      "parentId": "file:src/lib/groupMembership.js",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 46,
+      "lineEnd": 58,
+      "summary": "그룹 상태나 허용 여부를 대상을 찾습니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/lib/groupMembership.js#L46-L58",
+          "symbol:findGroupAtPoint"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/lib/groupMembership.js:findGroupDropTarget",
+      "kind": "function",
+      "label": "findGroupDropTarget",
+      "fingerprint": "bda2ecff8ce911b11fc5",
+      "name": "findGroupDropTarget",
+      "path": "src/lib/groupMembership.js",
+      "parentId": "file:src/lib/groupMembership.js",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 60,
+      "lineEnd": 87,
+      "summary": "그룹 · 대상 상태나 허용 여부를 대상을 찾습니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/lib/groupMembership.js#L60-L87",
+          "symbol:findGroupDropTarget"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/lib/groupMembership.js:groupCandidates",
+      "kind": "function",
+      "label": "groupCandidates",
+      "fingerprint": "81efb526b0d6ef72c6ee",
+      "name": "groupCandidates",
+      "path": "src/lib/groupMembership.js",
+      "parentId": "file:src/lib/groupMembership.js",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 37,
+      "lineEnd": 44,
+      "summary": "그룹에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/lib/groupMembership.js#L37-L44",
+          "symbol:groupCandidates"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/lib/groupMembership.js:nodeAbsoluteRect",
+      "kind": "function",
+      "label": "nodeAbsoluteRect",
+      "fingerprint": "ffc9e7e7334baedc7602",
+      "name": "nodeAbsoluteRect",
+      "path": "src/lib/groupMembership.js",
+      "parentId": "file:src/lib/groupMembership.js",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 25,
+      "lineEnd": 29,
+      "summary": "노드 · 노드 경계 상자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/lib/groupMembership.js#L25-L29",
+          "symbol:nodeAbsoluteRect"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/lib/groupMembership.js:nodeDimensions",
+      "kind": "function",
+      "label": "nodeDimensions",
+      "fingerprint": "a31137e80c1a3e2cc225",
+      "name": "nodeDimensions",
+      "path": "src/lib/groupMembership.js",
+      "parentId": "file:src/lib/groupMembership.js",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 17,
+      "lineEnd": 23,
+      "summary": "노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/lib/groupMembership.js#L17-L23",
+          "symbol:nodeDimensions"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/lib/groupMembership.js:overlapArea",
+      "kind": "function",
+      "label": "overlapArea",
+      "fingerprint": "915c8769677881b56c62",
+      "name": "overlapArea",
+      "path": "src/lib/groupMembership.js",
+      "parentId": "file:src/lib/groupMembership.js",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 31,
+      "lineEnd": 35,
+      "summary": "이 파일이 맡은 “그룹 기능을 화면의 여러 부분에서 다시 쓸 수 있게 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/lib/groupMembership.js#L31-L35",
+          "symbol:overlapArea"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/lib/groupMembership.js:positionInsideGroup",
+      "kind": "function",
+      "label": "positionInsideGroup",
+      "fingerprint": "580f5168704a044e5349",
+      "name": "positionInsideGroup",
+      "path": "src/lib/groupMembership.js",
+      "parentId": "file:src/lib/groupMembership.js",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 89,
+      "lineEnd": 106,
+      "summary": "그룹에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/lib/groupMembership.js#L89-L106",
+          "symbol:positionInsideGroup"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/lib/groupMembership.js:positiveDimension",
+      "kind": "function",
+      "label": "positiveDimension",
+      "fingerprint": "fbd00f66f51771de9315",
+      "name": "positiveDimension",
+      "path": "src/lib/groupMembership.js",
+      "parentId": "file:src/lib/groupMembership.js",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 13,
+      "lineEnd": 15,
+      "summary": "이 파일이 맡은 “그룹 기능을 화면의 여러 부분에서 다시 쓸 수 있게 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/lib/groupMembership.js#L13-L15",
+          "symbol:positiveDimension"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:src/lib/groupMembership.js:reparentNodePreservingPosition",
+      "kind": "function",
+      "label": "reparentNodePreservingPosition",
+      "fingerprint": "e5f5a28624e789388987",
+      "name": "reparentNodePreservingPosition",
+      "path": "src/lib/groupMembership.js",
+      "parentId": "file:src/lib/groupMembership.js",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 108,
+      "lineEnd": 134,
+      "summary": "노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/lib/groupMembership.js#L108-L134",
+          "symbol:reparentNodePreservingPosition"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
       }
     },
     {
@@ -42479,14 +44719,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "ai-integration",
       "subsystem": "mcp-transport",
-      "lineStart": 33,
-      "lineEnd": 50,
+      "lineStart": 34,
+      "lineEnd": 51,
       "summary": "연결 토큰 항목이나 구조를 새로 만듭니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/mcpTokens.js#L33-L50",
+          "source:src/lib/mcpTokens.js#L34-L51",
           "symbol:createToken"
         ]
       },
@@ -42550,14 +44790,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "ai-integration",
       "subsystem": "mcp-transport",
-      "lineStart": 52,
-      "lineEnd": 55,
+      "lineStart": 53,
+      "lineEnd": 56,
       "summary": "연결 토큰 대상을 삭제합니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/mcpTokens.js#L52-L55",
+          "source:src/lib/mcpTokens.js#L53-L56",
           "symbol:deleteToken"
         ]
       },
@@ -42579,7 +44819,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/lib/mcpTokens.js:listMyTokens",
       "kind": "function",
       "label": "listMyTokens",
-      "fingerprint": "321928ae100995ef53f1",
+      "fingerprint": "bb0b31324546ca50d9f2",
       "name": "listMyTokens",
       "path": "src/lib/mcpTokens.js",
       "parentId": "file:src/lib/mcpTokens.js",
@@ -42587,13 +44827,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "area": "ai-integration",
       "subsystem": "mcp-transport",
       "lineStart": 13,
-      "lineEnd": 25,
+      "lineEnd": 26,
       "summary": "목록 정보를 목록을 불러옵니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/mcpTokens.js#L13-L25",
+          "source:src/lib/mcpTokens.js#L13-L26",
           "symbol:listMyTokens"
         ]
       },
@@ -42622,14 +44862,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "ai-integration",
       "subsystem": "mcp-transport",
-      "lineStart": 27,
-      "lineEnd": 31,
+      "lineStart": 28,
+      "lineEnd": 32,
       "summary": "이 파일이 맡은 “사용자가 AI 커넥터에 쓸 MCP 토큰을 발급·조회·폐기하도록 서버와 통신합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/mcpTokens.js#L27-L31",
+          "source:src/lib/mcpTokens.js#L28-L32",
           "symbol:sha256"
         ]
       },
@@ -42754,7 +44994,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/lib/profiles.js:getMyProfile",
       "kind": "function",
       "label": "getMyProfile",
-      "fingerprint": "993ac9883c7468691030",
+      "fingerprint": "8747b963dd4db417adfa",
       "name": "getMyProfile",
       "path": "src/lib/profiles.js",
       "parentId": "file:src/lib/profiles.js",
@@ -42790,21 +45030,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/lib/profiles.js:getProfiles",
       "kind": "function",
       "label": "getProfiles",
-      "fingerprint": "93ba621111dd2fff1eb5",
+      "fingerprint": "094bc79c9731f5553a13",
       "name": "getProfiles",
       "path": "src/lib/profiles.js",
       "parentId": "file:src/lib/profiles.js",
       "layer": "frontend",
       "area": "identity-profile",
       "subsystem": "identity-account",
-      "lineStart": 64,
-      "lineEnd": 75,
+      "lineStart": 53,
+      "lineEnd": 66,
       "summary": "이 기능 정보를 불러옵니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/profiles.js#L64-L75",
+          "source:src/lib/profiles.js#L53-L66",
           "symbol:getProfiles"
         ]
       },
@@ -42833,14 +45073,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "identity-profile",
       "subsystem": "identity-account",
-      "lineStart": 87,
-      "lineEnd": 93,
+      "lineStart": 78,
+      "lineEnd": 84,
       "summary": "이 기능 정보를 불러옵니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/profiles.js#L87-L93",
+          "source:src/lib/profiles.js#L78-L84",
           "symbol:loadMySettings"
         ]
       },
@@ -42903,14 +45143,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "identity-profile",
       "subsystem": "identity-account",
-      "lineStart": 78,
-      "lineEnd": 85,
+      "lineStart": 69,
+      "lineEnd": 76,
       "summary": "저장에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/profiles.js#L78-L85",
+          "source:src/lib/profiles.js#L69-L76",
           "symbol:saveMySettings"
         ]
       },
@@ -42932,21 +45172,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/lib/profiles.js:touchLastSeen",
       "kind": "function",
       "label": "touchLastSeen",
-      "fingerprint": "d513fd4a40e81113b17d",
+      "fingerprint": "0741ea2e3b9838afd4d0",
       "name": "touchLastSeen",
       "path": "src/lib/profiles.js",
       "parentId": "file:src/lib/profiles.js",
       "layer": "frontend",
       "area": "identity-profile",
       "subsystem": "identity-account",
-      "lineStart": 98,
-      "lineEnd": 103,
+      "lineStart": 89,
+      "lineEnd": 92,
       "summary": "이 파일이 맡은 “사용자 프로필을 불러오고 이름·아바타·색상 변경을 저장합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/profiles.js#L98-L103",
+          "source:src/lib/profiles.js#L89-L92",
           "symbol:touchLastSeen"
         ]
       },
@@ -42968,7 +45208,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/lib/profiles.js:upsertMyEmail",
       "kind": "function",
       "label": "upsertMyEmail",
-      "fingerprint": "be1aa17b7f70d6ffb725",
+      "fingerprint": "a0958fe8700eecd10693",
       "name": "upsertMyEmail",
       "path": "src/lib/profiles.js",
       "parentId": "file:src/lib/profiles.js",
@@ -42976,13 +45216,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "area": "identity-profile",
       "subsystem": "identity-account",
       "lineStart": 46,
-      "lineEnd": 61,
+      "lineEnd": 50,
       "summary": "이 파일이 맡은 “사용자 프로필을 불러오고 이름·아바타·색상 변경을 저장합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/profiles.js#L46-L61",
+          "source:src/lib/profiles.js#L46-L50",
           "symbol:upsertMyEmail"
         ]
       },
@@ -43004,7 +45244,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/lib/profiles.js:upsertMyProfile",
       "kind": "function",
       "label": "upsertMyProfile",
-      "fingerprint": "2deecc8ba5a1a8ce32e3",
+      "fingerprint": "85de2b29bf796738b251",
       "name": "upsertMyProfile",
       "path": "src/lib/profiles.js",
       "parentId": "file:src/lib/profiles.js",
@@ -43037,40 +45277,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
-      "id": "function:src/lib/sanitizeHtml.js:sanitizeAttrs",
-      "kind": "function",
-      "label": "sanitizeAttrs",
-      "fingerprint": "55453c967bf5d7b9fb7e",
-      "name": "sanitizeAttrs",
-      "path": "src/lib/sanitizeHtml.js",
-      "parentId": "file:src/lib/sanitizeHtml.js",
-      "layer": "frontend",
-      "area": "security-privacy",
-      "subsystem": "input-safety",
-      "lineStart": 20,
-      "lineEnd": 38,
-      "summary": "위험한 입력 제거에서 위험한 내용을 제거합니다.",
-      "technicalSummary": "이 파일 내부에서 사용",
-      "explanationBasis": {
-        "method": "symbol-and-source-range",
-        "refs": [
-          "source:src/lib/sanitizeHtml.js#L20-L38",
-          "symbol:sanitizeAttrs"
-        ]
-      },
-      "tags": [
-        "frontend",
-        "function",
-        "input-safety",
-        "security-privacy"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": false,
-        "async": false
-      }
-    },
-    {
       "id": "function:src/lib/sanitizeHtml.js:sanitizeExternalUrl",
       "kind": "function",
       "label": "sanitizeExternalUrl",
@@ -43081,14 +45287,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "security-privacy",
       "subsystem": "input-safety",
-      "lineStart": 57,
-      "lineEnd": 65,
+      "lineStart": 9,
+      "lineEnd": 17,
       "summary": "외부 공개 자료 · 웹 주소에서 위험한 내용을 제거합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/sanitizeHtml.js#L57-L65",
+          "source:src/lib/sanitizeHtml.js#L9-L17",
           "symbol:sanitizeExternalUrl"
         ]
       },
@@ -43109,21 +45315,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/lib/sanitizeHtml.js:sanitizeHtml",
       "kind": "function",
       "label": "sanitizeHtml",
-      "fingerprint": "cfff99f356a98b98aa0e",
+      "fingerprint": "eb63833e4ad36a2bb33a",
       "name": "sanitizeHtml",
       "path": "src/lib/sanitizeHtml.js",
       "parentId": "file:src/lib/sanitizeHtml.js",
       "layer": "frontend",
       "area": "security-privacy",
       "subsystem": "input-safety",
-      "lineStart": 40,
-      "lineEnd": 55,
+      "lineStart": 5,
+      "lineEnd": 7,
       "summary": "본문 HTML에서 위험한 내용을 제거합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/sanitizeHtml.js#L40-L55",
+          "source:src/lib/sanitizeHtml.js#L5-L7",
           "symbol:sanitizeHtml"
         ]
       },
@@ -43151,14 +45357,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "security-privacy",
       "subsystem": "input-safety",
-      "lineStart": 67,
-      "lineEnd": 86,
+      "lineStart": 19,
+      "lineEnd": 38,
       "summary": "노드 · 데이터에서 위험한 내용을 제거합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/sanitizeHtml.js#L67-L86",
+          "source:src/lib/sanitizeHtml.js#L19-L38",
           "symbol:sanitizeNodeData"
         ]
       },
@@ -43384,6 +45590,41 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:src/lib/sharedCanvasApi.js:createCanvasInvitation",
+      "kind": "function",
+      "label": "createCanvasInvitation",
+      "fingerprint": "7a4358098542f77acaba",
+      "name": "createCanvasInvitation",
+      "path": "src/lib/sharedCanvasApi.js",
+      "parentId": "file:src/lib/sharedCanvasApi.js",
+      "layer": "frontend",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 51,
+      "lineEnd": 58,
+      "summary": "캔버스 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/lib/sharedCanvasApi.js#L51-L58",
+          "symbol:createCanvasInvitation"
+        ]
+      },
+      "tags": [
+        "exported",
+        "frontend",
+        "function",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
       "id": "function:src/lib/sharedCanvasApi.js:getSharedCanvas",
       "kind": "function",
       "label": "getSharedCanvas",
@@ -43524,6 +45765,41 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:src/lib/sharedCanvasApi.js:setCanvasMemberPermission",
+      "kind": "function",
+      "label": "setCanvasMemberPermission",
+      "fingerprint": "0f0a189a7e264d3b7ed0",
+      "name": "setCanvasMemberPermission",
+      "path": "src/lib/sharedCanvasApi.js",
+      "parentId": "file:src/lib/sharedCanvasApi.js",
+      "layer": "frontend",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 60,
+      "lineEnd": 65,
+      "summary": "캔버스 · 권한 대상을 설정합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/lib/sharedCanvasApi.js#L60-L65",
+          "symbol:setCanvasMemberPermission"
+        ]
+      },
+      "tags": [
+        "exported",
+        "frontend",
+        "function",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false
+      }
+    },
+    {
       "id": "function:src/lib/sharedCanvasApi.js:setMemberViewRestriction",
       "kind": "function",
       "label": "setMemberViewRestriction",
@@ -43604,14 +45880,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 152,
-      "lineEnd": 156,
+      "lineStart": 192,
+      "lineEnd": 196,
       "summary": "실행 권한 선점 · 초대에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/shares.js#L152-L156",
+          "source:src/lib/shares.js#L192-L196",
           "symbol:claimEmailInvite"
         ]
       },
@@ -43640,87 +45916,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 128,
-      "lineEnd": 132,
+      "lineStart": 168,
+      "lineEnd": 172,
       "summary": "실행 권한 선점 · 공유 · 연결 토큰에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/shares.js#L128-L132",
+          "source:src/lib/shares.js#L168-L172",
           "symbol:claimShareToken"
-        ]
-      },
-      "tags": [
-        "async",
-        "exported",
-        "frontend",
-        "function",
-        "sharing-collaboration",
-        "sharing-policy"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": true,
-        "async": true
-      }
-    },
-    {
-      "id": "function:src/lib/shares.js:createLinkShare",
-      "kind": "function",
-      "label": "createLinkShare",
-      "fingerprint": "01eec314e95a07e85df9",
-      "name": "createLinkShare",
-      "path": "src/lib/shares.js",
-      "parentId": "file:src/lib/shares.js",
-      "layer": "frontend",
-      "area": "sharing-collaboration",
-      "subsystem": "sharing-policy",
-      "lineStart": 27,
-      "lineEnd": 40,
-      "summary": "공유 링크 · 공유 항목이나 구조를 새로 만듭니다",
-      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
-      "explanationBasis": {
-        "method": "symbol-and-source-range",
-        "refs": [
-          "source:src/lib/shares.js#L27-L40",
-          "symbol:createLinkShare"
-        ]
-      },
-      "tags": [
-        "async",
-        "exported",
-        "frontend",
-        "function",
-        "sharing-collaboration",
-        "sharing-policy"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": true,
-        "async": true
-      }
-    },
-    {
-      "id": "function:src/lib/shares.js:createShare",
-      "kind": "function",
-      "label": "createShare",
-      "fingerprint": "03fed95d67cf3c4ded09",
-      "name": "createShare",
-      "path": "src/lib/shares.js",
-      "parentId": "file:src/lib/shares.js",
-      "layer": "frontend",
-      "area": "sharing-collaboration",
-      "subsystem": "sharing-policy",
-      "lineStart": 13,
-      "lineEnd": 25,
-      "summary": "공유 항목이나 구조를 새로 만듭니다",
-      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
-      "explanationBasis": {
-        "method": "symbol-and-source-range",
-        "refs": [
-          "source:src/lib/shares.js#L13-L25",
-          "symbol:createShare"
         ]
       },
       "tags": [
@@ -43783,14 +45987,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 123,
-      "lineEnd": 126,
+      "lineStart": 163,
+      "lineEnd": 166,
       "summary": "공유 대상을 삭제합니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/shares.js#L123-L126",
+          "source:src/lib/shares.js#L163-L166",
           "symbol:deleteShare"
         ]
       },
@@ -43819,14 +46023,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 140,
-      "lineEnd": 144,
+      "lineStart": 180,
+      "lineEnd": 184,
       "summary": "공유 · 공유 링크 · 실행 전 미리보기 정보를 불러옵니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/shares.js#L140-L144",
+          "source:src/lib/shares.js#L180-L184",
           "symbol:getShareLinkPreview"
         ]
       },
@@ -43855,14 +46059,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 134,
-      "lineEnd": 138,
+      "lineStart": 174,
+      "lineEnd": 178,
       "summary": "공유 · 공유 링크 · 현재 선택 상태나 허용 여부를 해당 상태인지 판단합니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/shares.js#L134-L138",
+          "source:src/lib/shares.js#L174-L178",
           "symbol:isShareLinkActive"
         ]
       },
@@ -43891,14 +46095,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 112,
-      "lineEnd": 115,
+      "lineStart": 152,
+      "lineEnd": 155,
       "summary": "이 파일이 맡은 “초대, 공유 링크, 참여자 권한과 나가기·추방 요청을 서버와 주고받습니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/shares.js#L112-L115",
+          "source:src/lib/shares.js#L152-L155",
           "symbol:kickMember"
         ]
       },
@@ -43927,15 +46131,51 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 118,
-      "lineEnd": 121,
+      "lineStart": 158,
+      "lineEnd": 161,
       "summary": "캔버스에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/shares.js#L118-L121",
+          "source:src/lib/shares.js#L158-L161",
           "symbol:leaveSharedCanvas"
+        ]
+      },
+      "tags": [
+        "async",
+        "exported",
+        "frontend",
+        "function",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": true
+      }
+    },
+    {
+      "id": "function:src/lib/shares.js:listOwnedSharedCanvasIds",
+      "kind": "function",
+      "label": "listOwnedSharedCanvasIds",
+      "fingerprint": "e6cd9a8942e9004b4900",
+      "name": "listOwnedSharedCanvasIds",
+      "path": "src/lib/shares.js",
+      "parentId": "file:src/lib/shares.js",
+      "layer": "frontend",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 32,
+      "lineEnd": 61,
+      "summary": "캔버스 정보를 목록을 불러옵니다",
+      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/lib/shares.js#L32-L61",
+          "symbol:listOwnedSharedCanvasIds"
         ]
       },
       "tags": [
@@ -43963,14 +46203,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 146,
-      "lineEnd": 150,
+      "lineStart": 186,
+      "lineEnd": 190,
       "summary": "목록 정보를 목록을 불러옵니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/shares.js#L146-L150",
+          "source:src/lib/shares.js#L186-L190",
           "symbol:listPendingEmailInvites"
         ]
       },
@@ -43992,21 +46232,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/lib/shares.js:listShareMembers",
       "kind": "function",
       "label": "listShareMembers",
-      "fingerprint": "597a966385ad977c14e5",
+      "fingerprint": "57426eb1314657d51a60",
       "name": "listShareMembers",
       "path": "src/lib/shares.js",
       "parentId": "file:src/lib/shares.js",
       "layer": "frontend",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 73,
-      "lineEnd": 101,
+      "lineStart": 120,
+      "lineEnd": 150,
       "summary": "공유 정보를 목록을 불러옵니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/shares.js#L73-L101",
+          "source:src/lib/shares.js#L120-L150",
           "symbol:listShareMembers"
         ]
       },
@@ -44028,21 +46268,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/lib/shares.js:listShares",
       "kind": "function",
       "label": "listShares",
-      "fingerprint": "5eee157e6a0f107b4c1d",
+      "fingerprint": "3531e213b47278b9f78f",
       "name": "listShares",
       "path": "src/lib/shares.js",
       "parentId": "file:src/lib/shares.js",
       "layer": "frontend",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 42,
-      "lineEnd": 68,
+      "lineStart": 81,
+      "lineEnd": 115,
       "summary": "목록 정보를 목록을 불러옵니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/shares.js#L42-L68",
+          "source:src/lib/shares.js#L81-L115",
           "symbol:listShares"
         ]
       },
@@ -44061,6 +46301,76 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:src/lib/shares.js:loadMemberRows",
+      "kind": "function",
+      "label": "loadMemberRows",
+      "fingerprint": "6b223081d087a41922d8",
+      "name": "loadMemberRows",
+      "path": "src/lib/shares.js",
+      "parentId": "file:src/lib/shares.js",
+      "layer": "frontend",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 63,
+      "lineEnd": 79,
+      "summary": "이 기능 정보를 불러옵니다",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/lib/shares.js#L63-L79",
+          "symbol:loadMemberRows"
+        ]
+      },
+      "tags": [
+        "async",
+        "frontend",
+        "function",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": true
+      }
+    },
+    {
+      "id": "function:src/lib/shares.js:loadOwnedShareRows",
+      "kind": "function",
+      "label": "loadOwnedShareRows",
+      "fingerprint": "7a62eedce19f6a06d374",
+      "name": "loadOwnedShareRows",
+      "path": "src/lib/shares.js",
+      "parentId": "file:src/lib/shares.js",
+      "layer": "frontend",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 13,
+      "lineEnd": 30,
+      "summary": "공유 정보를 불러옵니다",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/lib/shares.js#L13-L30",
+          "symbol:loadOwnedShareRows"
+        ]
+      },
+      "tags": [
+        "async",
+        "frontend",
+        "function",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": true
+      }
+    },
+    {
       "id": "function:src/lib/shares.js:revokeShareMember",
       "kind": "function",
       "label": "revokeShareMember",
@@ -44071,51 +46381,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "layer": "frontend",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 158,
-      "lineEnd": 161,
+      "lineStart": 198,
+      "lineEnd": 201,
       "summary": "공유 대상을 권한을 해제합니다",
       "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/lib/shares.js#L158-L161",
+          "source:src/lib/shares.js#L198-L201",
           "symbol:revokeShareMember"
-        ]
-      },
-      "tags": [
-        "async",
-        "exported",
-        "frontend",
-        "function",
-        "sharing-collaboration",
-        "sharing-policy"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": true,
-        "async": true
-      }
-    },
-    {
-      "id": "function:src/lib/shares.js:setMemberEdit",
-      "kind": "function",
-      "label": "setMemberEdit",
-      "fingerprint": "883b60df1d1569d015f7",
-      "name": "setMemberEdit",
-      "path": "src/lib/shares.js",
-      "parentId": "file:src/lib/shares.js",
-      "layer": "frontend",
-      "area": "sharing-collaboration",
-      "subsystem": "sharing-policy",
-      "lineStart": 103,
-      "lineEnd": 110,
-      "summary": "이 기능 대상을 설정합니다",
-      "technicalSummary": "다른 파일에서 사용 가능 · 서버나 저장소 응답을 기다림",
-      "explanationBasis": {
-        "method": "symbol-and-source-range",
-        "refs": [
-          "source:src/lib/shares.js#L103-L110",
-          "symbol:setMemberEdit"
         ]
       },
       "tags": [
@@ -44729,7 +47003,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/nodes/ContentNode.jsx:ContentNode",
       "kind": "function",
       "label": "ContentNode",
-      "fingerprint": "dd58f90589141ab1d785",
+      "fingerprint": "966c8e69f438bd393cc1",
       "name": "ContentNode",
       "path": "src/nodes/ContentNode.jsx",
       "parentId": "file:src/nodes/ContentNode.jsx",
@@ -45343,7 +47617,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/nodes/GroupNode.jsx:GroupNode",
       "kind": "function",
       "label": "GroupNode",
-      "fingerprint": "d2b2560b170ecd5f74b1",
+      "fingerprint": "55d16647d148dca48c71",
       "name": "GroupNode",
       "path": "src/nodes/GroupNode.jsx",
       "parentId": "file:src/nodes/GroupNode.jsx",
@@ -45351,13 +47625,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "area": "canvas-interface",
       "subsystem": "canvas-elements",
       "lineStart": 12,
-      "lineEnd": 182,
+      "lineEnd": 183,
       "summary": "그룹 · 노드 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/nodes/GroupNode.jsx#L12-L182",
+          "source:src/nodes/GroupNode.jsx#L12-L183",
           "symbol:GroupNode"
         ]
       },
@@ -45650,7 +47924,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/nodes/MemoNode.jsx:MemoNode",
       "kind": "function",
       "label": "MemoNode",
-      "fingerprint": "e559b112fd1e49f160be",
+      "fingerprint": "bbd650da167ba71cc1db",
       "name": "MemoNode",
       "path": "src/nodes/MemoNode.jsx",
       "parentId": "file:src/nodes/MemoNode.jsx",
@@ -46297,7 +48571,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/nodes/StageNode.jsx:StageNode",
       "kind": "function",
       "label": "StageNode",
-      "fingerprint": "75d3b7bcda737142140e",
+      "fingerprint": "9c6a5b69b4d908ca01ca",
       "name": "StageNode",
       "path": "src/nodes/StageNode.jsx",
       "parentId": "file:src/nodes/StageNode.jsx",
@@ -46944,7 +49218,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/nodes/SystemNode.jsx:SystemNode",
       "kind": "function",
       "label": "SystemNode",
-      "fingerprint": "5b4d5827c9c09d8cd08c",
+      "fingerprint": "82a3df9f849648fc24ea",
       "name": "SystemNode",
       "path": "src/nodes/SystemNode.jsx",
       "parentId": "file:src/nodes/SystemNode.jsx",
@@ -48661,7 +50935,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "npm-script:test",
       "kind": "npm-script",
       "label": "npm run test",
-      "fingerprint": "aced1b576b528d21f41a",
+      "fingerprint": "f17b8a90035f08155e63",
       "name": "test",
       "path": "package.json",
       "parentId": "file:package.json",
@@ -48844,6 +51118,38 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "rls-policy:friendships:friends select own relationships",
+      "kind": "rls-policy",
+      "label": "friends select own relationships",
+      "fingerprint": "8b0f0921ce6492935b09",
+      "name": "friends select own relationships",
+      "path": "supabase-shares.sql",
+      "parentId": "file:supabase-shares.sql",
+      "layer": "database",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 680,
+      "summary": "friendships 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.",
+      "explanationBasis": {
+        "method": "database-policy-declaration",
+        "refs": [
+          "db-table:friendships",
+          "source:supabase-shares.sql#L680"
+        ]
+      },
+      "tags": [
+        "database",
+        "security",
+        "rls",
+        "friendships",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "table": "friendships"
+      }
+    },
+    {
       "id": "rls-policy:mcp_tokens:user creates own tokens",
       "kind": "rls-policy",
       "label": "user creates own tokens",
@@ -48943,20 +51249,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "rls-policy:profiles:profiles readable by canvas participants",
       "kind": "rls-policy",
       "label": "profiles readable by canvas participants",
-      "fingerprint": "5103fe759338b56e1ecb",
+      "fingerprint": "6f504719481f68620ab6",
       "name": "profiles readable by canvas participants",
       "path": "supabase-profile-privacy.sql",
       "parentId": "file:supabase-profile-privacy.sql",
       "layer": "database",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 51,
+      "lineStart": 52,
       "summary": "profiles 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.",
       "explanationBasis": {
         "method": "database-policy-declaration",
         "refs": [
           "db-table:profiles",
-          "source:supabase-profile-privacy.sql#L51"
+          "source:supabase-profile-privacy.sql#L52"
         ]
       },
       "tags": [
@@ -48975,20 +51281,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "rls-policy:profiles:user manages own profile",
       "kind": "rls-policy",
       "label": "user manages own profile",
-      "fingerprint": "d538703c63cb7b971cc0",
+      "fingerprint": "dc57bfa6258d63dc05c2",
       "name": "user manages own profile",
       "path": "supabase-profiles.sql",
       "parentId": "file:supabase-profiles.sql",
       "layer": "database",
       "area": "identity-profile",
       "subsystem": "identity-account",
-      "lineStart": 13,
+      "lineStart": 14,
       "summary": "profiles 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.",
       "explanationBasis": {
         "method": "database-policy-declaration",
         "refs": [
           "db-table:profiles",
-          "source:supabase-profiles.sql#L13"
+          "source:supabase-profiles.sql#L14"
         ]
       },
       "tags": [
@@ -49007,20 +51313,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "rls-policy:profiles:user updates own profile",
       "kind": "rls-policy",
       "label": "user updates own profile",
-      "fingerprint": "73c2e12676e0f9f35c44",
+      "fingerprint": "1cabe872f8f7d28c38e3",
       "name": "user updates own profile",
       "path": "supabase-profiles.sql",
       "parentId": "file:supabase-profiles.sql",
       "layer": "database",
       "area": "identity-profile",
       "subsystem": "identity-account",
-      "lineStart": 14,
+      "lineStart": 16,
       "summary": "profiles 자료 중 어떤 행을 누가 읽거나 바꿀 수 있는지 데이터베이스에서 강제하는 규칙입니다.",
       "explanationBasis": {
         "method": "database-policy-declaration",
         "refs": [
           "db-table:profiles",
-          "source:supabase-profiles.sql#L14"
+          "source:supabase-profiles.sql#L16"
         ]
       },
       "tags": [
@@ -49428,6 +51734,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:015dc60e7a9a0b09",
+      "type": "calls-db-function",
+      "source": "file:supabase-security-hardening.sql",
+      "target": "db-function:touch_my_profile"
+    },
+    {
       "id": "relation:019fb9ae123b3b2c",
       "type": "contains",
       "source": "file:mcp/systemOperationPlan.js",
@@ -49712,10 +52024,23 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
-      "id": "relation:075bcd5af73b7f0e",
+      "id": "relation:0752ba4749fefcf3",
       "type": "contains",
-      "source": "file:src/lib/shares.js",
-      "target": "function:src/lib/shares.js:createLinkShare"
+      "source": "file:mcp/canvasSummaries.js",
+      "target": "function:mcp/canvasSummaries.js:fallbackMetadata"
+    },
+    {
+      "id": "relation:075a244586a2ad65",
+      "type": "imports",
+      "source": "file:src/App.jsx",
+      "target": "file:src/lib/canvasNavigation.js",
+      "names": [
+        "chooseOwnCanvasToRestore",
+        "loadLastOpenedCanvas",
+        "orderCanvasSummaries",
+        "saveLastOpenedCanvas"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:077e6d4aa224b6d4",
@@ -49847,6 +52172,25 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/lib/sharedCanvasApi.js:setMemberViewRestriction"
     },
     {
+      "id": "relation:09eb1444ba64646d",
+      "type": "imports",
+      "source": "file:src/App.jsx",
+      "target": "file:src/lib/shares.js",
+      "names": [
+        "claimEmailInvite",
+        "claimShareToken",
+        "getShareLinkPreview",
+        "isShareLinkActive",
+        "kickMember",
+        "leaveSharedCanvas",
+        "listOwnedSharedCanvasIds",
+        "listPendingEmailInvites",
+        "listShares",
+        "revokeShareMember"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:0a5a0c982f8ef837",
       "type": "contains",
       "source": "file:shared/operationLifecycle.js",
@@ -49857,6 +52201,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/operationLifecycle.js",
       "target": "function:shared/operationLifecycle.js:startOperationRecovery"
+    },
+    {
+      "id": "relation:0a98b21940955922",
+      "type": "imports",
+      "source": "file:src/App.jsx",
+      "target": "file:src/lib/groupMembership.js",
+      "names": [
+        "findGroupAtPoint",
+        "findGroupDropTarget",
+        "positionInsideGroup",
+        "reparentNodePreservingPosition"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:0b0d5707c1a3d7bd",
@@ -49953,6 +52310,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/twinBuildCanvas.js:safeChildId"
     },
     {
+      "id": "relation:0ca1ae6662b27021",
+      "type": "contains",
+      "source": "file:mcp/shareAccess.js",
+      "target": "function:mcp/shareAccess.js:enforceInvitationRateLimit"
+    },
+    {
       "id": "relation:0cd90bafef4342d4",
       "type": "contains",
       "source": "file:shared/workflowSystemTwinAdapter.js",
@@ -49969,6 +52332,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/components/NotesPanel.jsx",
       "target": "function:src/components/NotesPanel.jsx:nodeBadge"
+    },
+    {
+      "id": "relation:0d33a8068a44c3b1",
+      "type": "contains",
+      "source": "file:mcp/shareAccess.js",
+      "target": "function:mcp/shareAccess.js:loadCanvasShareRows"
     },
     {
       "id": "relation:0d36e60b6c5f4e9c",
@@ -50003,6 +52372,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/lib/digitalTwinAdapters.js",
       "target": "function:src/lib/digitalTwinAdapters.js:inspectDigitalTwinCanvas"
+    },
+    {
+      "id": "relation:0dfcfe4f3f0b3a5f",
+      "type": "contains",
+      "source": "file:src/lib/sharedCanvasApi.js",
+      "target": "function:src/lib/sharedCanvasApi.js:createCanvasInvitation"
     },
     {
       "id": "relation:0e3348c257d482ff",
@@ -50162,6 +52537,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/store.js:deleteEdge"
     },
     {
+      "id": "relation:111f786cfb2705d6",
+      "type": "contains",
+      "source": "file:src/lib/groupMembership.js",
+      "target": "function:src/lib/groupMembership.js:positionInsideGroup"
+    },
+    {
       "id": "relation:1124edebb17e4e49",
       "type": "imports",
       "source": "file:src/lib/sharedCanvasApi.js",
@@ -50234,6 +52615,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/workflowSystemTwinAdapter.js",
       "target": "function:shared/workflowSystemTwinAdapter.js:unique"
+    },
+    {
+      "id": "relation:12d3883974d26b90",
+      "type": "calls-db-function",
+      "source": "file:src/lib/friendships.js",
+      "target": "db-function:list_my_friendships"
     },
     {
       "id": "relation:12e9a21ba5556080",
@@ -50442,20 +52829,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/shareAccess.js:sanitizeNode"
     },
     {
-      "id": "relation:16835b5ab0a58afd",
-      "type": "imports",
-      "source": "file:src/App.jsx",
-      "target": "file:src/lib/sharedCanvasApi.js",
-      "names": [
-        "getSharedCanvas",
-        "listCanvasParticipants",
-        "listSharedCanvases",
-        "setMemberViewRestriction",
-        "updateSharedCanvas"
-      ],
-      "dynamic": false
-    },
-    {
       "id": "relation:16a9c2af19ed7b7e",
       "type": "accesses",
       "source": "file:supabase-shares.sql",
@@ -50499,6 +52872,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:scripts/test-mcp-logic.mjs",
       "target": "function:scripts/test-mcp-logic.mjs:query.eq#3"
+    },
+    {
+      "id": "relation:17c20c07bdd42812",
+      "type": "imports",
+      "source": "file:src/components/CanvasTabs.jsx",
+      "target": "file:src/lib/friendships.js",
+      "names": [
+        "sendFriendRequest"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:17e0f6d0f9c0a809",
@@ -50830,6 +53213,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:1d71e132ae37ee11",
+      "type": "accesses",
+      "source": "file:supabase-shares.sql",
+      "target": "db-table:friendships",
+      "operations": [
+        "declares"
+      ]
+    },
+    {
       "id": "relation:1d794cdaa717c57b",
       "type": "imports",
       "source": "file:scripts/test-mcp-logic.mjs",
@@ -50871,6 +53263,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/twinBuildReconciler.js:reconcileTwinBuild"
     },
     {
+      "id": "relation:1dea2c3c67dfc44b",
+      "type": "imports",
+      "source": "file:src/components/InvitePopover.jsx",
+      "target": "file:src/lib/shares.js",
+      "names": [
+        "deleteShare",
+        "listShareMembers",
+        "listShares"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:1df7afb07c4308f9",
       "type": "contains",
       "source": "file:shared/operationLifecycle.js",
@@ -50899,15 +53303,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/lib/cloudStorage.js",
       "target": "function:src/lib/cloudStorage.js:loadUserPrefs"
-    },
-    {
-      "id": "relation:1ebaaa7789bfad35",
-      "type": "accesses",
-      "source": "file:mcp/store.js",
-      "target": "db-table:canvas_shares",
-      "operations": [
-        "read"
-      ]
     },
     {
       "id": "relation:1ed7128a67970b48",
@@ -51006,6 +53401,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/workflowCanvasSystemMap.js",
       "target": "function:shared/workflowCanvasSystemMap.js:createWorkflowCanvasSystemMap"
+    },
+    {
+      "id": "relation:20a77c8b8fdc729a",
+      "type": "contains",
+      "source": "file:src/lib/shares.js",
+      "target": "function:src/lib/shares.js:loadMemberRows"
     },
     {
       "id": "relation:20aa6e9632772a21",
@@ -51219,6 +53620,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/operationLifecycle.js:normalizeEventDetail"
     },
     {
+      "id": "relation:23ff9313645948a6",
+      "type": "contains",
+      "source": "file:scripts/test-performance-boundaries.mjs",
+      "target": "function:scripts/test-performance-boundaries.mjs:read"
+    },
+    {
       "id": "relation:2421b340a98b5d25",
       "type": "imports",
       "source": "file:api/local-connector.js",
@@ -51402,6 +53809,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/workflowSystemMapRepair.js:hasWorkflowRelationMetadata"
     },
     {
+      "id": "relation:27ab3bcc6cd62f92",
+      "type": "contains",
+      "source": "file:src/App.jsx",
+      "target": "function:src/App.jsx:creationPosition"
+    },
+    {
       "id": "relation:27b18aa412294852",
       "type": "contains",
       "source": "file:src/components/ScopedParticipants.jsx",
@@ -51416,15 +53829,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "digitalTwinReviewFingerprint"
       ],
       "dynamic": false
-    },
-    {
-      "id": "relation:280500065ab180e9",
-      "type": "accesses",
-      "source": "file:src/App.jsx",
-      "target": "db-table:canvas_shares",
-      "operations": [
-        "read"
-      ]
     },
     {
       "id": "relation:287598007b15edef",
@@ -51451,10 +53855,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/systemPartOntology.js:normalizeDigitalTwinBinding"
     },
     {
+      "id": "relation:28d1fe15ef649e08",
+      "type": "contains",
+      "source": "file:mcp/canvasSummaries.js",
+      "target": "function:mcp/canvasSummaries.js:loadCanvasSummaries"
+    },
+    {
       "id": "relation:28ead4b6fa932013",
       "type": "contains",
       "source": "file:src/nodes/StageNode.jsx",
       "target": "function:src/nodes/StageNode.jsx:handlePointerMove"
+    },
+    {
+      "id": "relation:2911adbfabe94678",
+      "type": "calls-db-function",
+      "source": "file:supabase-shares.sql",
+      "target": "db-function:respond_friend_request"
     },
     {
       "id": "relation:292389be57556adc",
@@ -51481,10 +53897,38 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:scripts/source-twin-scanner.mjs:explanationBasis"
     },
     {
+      "id": "relation:29df098a48cd4c9a",
+      "type": "calls-db-function",
+      "source": "file:src/lib/friendships.js",
+      "target": "db-function:respond_friend_request"
+    },
+    {
+      "id": "relation:2a03d2078e1093af",
+      "type": "contains",
+      "source": "file:src/components/FriendManager.jsx",
+      "target": "function:src/components/FriendManager.jsx:run"
+    },
+    {
+      "id": "relation:2a16b23b97cbf507",
+      "type": "imports",
+      "source": "file:scripts/test-security-boundaries.mjs",
+      "target": "dependency:node:assert/strict",
+      "names": [
+        "default"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:2a4e134d63a80d58",
       "type": "contains",
       "source": "file:src/components/NotesPanel.jsx",
       "target": "function:src/components/NotesPanel.jsx:fn"
+    },
+    {
+      "id": "relation:2a642231086401cc",
+      "type": "calls-db-function",
+      "source": "file:supabase-shares.sql",
+      "target": "db-function:send_friend_request"
     },
     {
       "id": "relation:2a71d95480103448",
@@ -51725,25 +54169,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/App.jsx:sortParentsFirst"
     },
     {
-      "id": "relation:2fb9db8290e67736",
-      "type": "accesses",
-      "source": "file:src/App.jsx",
-      "target": "db-table:share_members",
-      "operations": [
-        "read"
-      ]
-    },
-    {
-      "id": "relation:2fc9fec44d0d022a",
-      "type": "accesses",
-      "source": "file:src/lib/profiles.js",
-      "target": "db-table:profiles",
-      "operations": [
-        "read",
-        "write"
-      ]
-    },
-    {
       "id": "relation:2fda45496ef44f5a",
       "type": "contains",
       "source": "file:mcp/shareAccess.js",
@@ -51854,6 +54279,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:3257dd107be04616",
+      "type": "defines-policy",
+      "source": "file:supabase-security-hardening.sql",
+      "target": "rls-policy:profiles:profiles readable by canvas participants"
+    },
+    {
       "id": "relation:3273b77077607dba",
       "type": "contains",
       "source": "file:shared/operationLifecycle.js",
@@ -51948,12 +54379,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "composeSharePermission"
       ],
       "dynamic": false
-    },
-    {
-      "id": "relation:344ab5fa5b43516f",
-      "type": "contains",
-      "source": "file:mcp/sanitize.js",
-      "target": "function:mcp/sanitize.js:sanitizeAttrs"
     },
     {
       "id": "relation:346e79a3790f9618",
@@ -52122,6 +54547,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/store.js:inspectSourceTwin"
     },
     {
+      "id": "relation:38053b032ce773f3",
+      "type": "imports",
+      "source": "file:src/App.jsx",
+      "target": "file:src/lib/sharedCanvasApi.js",
+      "names": [
+        "getSharedCanvas",
+        "listCanvasParticipants",
+        "listSharedCanvases",
+        "setCanvasMemberPermission",
+        "setMemberViewRestriction",
+        "updateSharedCanvas"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:380855da500433c4",
       "type": "imports",
       "source": "file:src/lib/systemRuntimeApi.js",
@@ -52195,6 +54635,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:3a252f3d52e24124",
+      "type": "calls-db-function",
+      "source": "file:src/lib/profiles.js",
+      "target": "db-function:upsert_my_profile"
+    },
+    {
       "id": "relation:3a3de500d54cf348",
       "type": "imports",
       "source": "file:shared/workflowSystemTwinAdapter.js",
@@ -52218,20 +54664,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "file:src/lib/canvasSchemaGuard.js",
       "names": [
         "CanvasSchemaGuardError"
-      ],
-      "dynamic": false
-    },
-    {
-      "id": "relation:3aa4b774663f9e2f",
-      "type": "imports",
-      "source": "file:src/components/InvitePopover.jsx",
-      "target": "file:src/lib/shares.js",
-      "names": [
-        "createLinkShare",
-        "createShare",
-        "deleteShare",
-        "listShareMembers",
-        "listShares"
       ],
       "dynamic": false
     },
@@ -52282,10 +54714,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/nodes/GroupNode.jsx:handlePointerUp"
     },
     {
+      "id": "relation:3be1b5654e809ff7",
+      "type": "contains",
+      "source": "file:shared/richTextSanitizer.js",
+      "target": "function:shared/richTextSanitizer.js:sanitizeAttributeList"
+    },
+    {
       "id": "relation:3c00ee680a74fa10",
       "type": "contains",
       "source": "file:mcp/store.js",
       "target": "function:mcp/store.js:getSourceTwinHistory"
+    },
+    {
+      "id": "relation:3c0ec7259ea9c010",
+      "type": "contains",
+      "source": "file:src/lib/groupMembership.js",
+      "target": "function:src/lib/groupMembership.js:positiveDimension"
     },
     {
       "id": "relation:3c38f93257cbf8ed",
@@ -52375,6 +54819,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/components/Toolbar.jsx:SmallIcon"
     },
     {
+      "id": "relation:3f59e015cd7c2692",
+      "type": "contains",
+      "source": "file:src/lib/shares.js",
+      "target": "function:src/lib/shares.js:listOwnedSharedCanvasIds"
+    },
+    {
       "id": "relation:3f8eaa05b54881f2",
       "type": "contains",
       "source": "file:shared/workflowSystemTwinAdapter.js",
@@ -52439,12 +54889,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/store.js:deleteNode"
     },
     {
-      "id": "relation:401f9c7045a595ca",
-      "type": "contains",
-      "source": "file:src/lib/shares.js",
-      "target": "function:src/lib/shares.js:setMemberEdit"
-    },
-    {
       "id": "relation:402cc579ae2f3491",
       "type": "contains",
       "source": "file:src/components/ScopedParticipants.jsx",
@@ -52459,6 +54903,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "normalizeSystemParts"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:4040764df2a332aa",
+      "type": "calls-db-function",
+      "source": "file:supabase-shares.sql",
+      "target": "db-function:list_my_friendships"
     },
     {
       "id": "relation:404878452ecf0980",
@@ -52755,6 +55205,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/relationOntology.js:edgeRelationInfo"
     },
     {
+      "id": "relation:45984f679c074f04",
+      "type": "imports",
+      "source": "file:scripts/test-collaboration-permissions.mjs",
+      "target": "file:shared/sharePermissions.js",
+      "names": [
+        "composeSharePermission",
+        "invitationAuthorizingGrants",
+        "permissionCanInviteScope"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:459b9481d58f432d",
       "type": "contains",
       "source": "file:mcp/layout.js",
@@ -52803,6 +55265,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/components/CanvasTabs.jsx",
       "target": "function:src/components/CanvasTabs.jsx:formatCount"
+    },
+    {
+      "id": "relation:47d519bc053eb446",
+      "type": "imports",
+      "source": "file:src/lib/groupMembership.js",
+      "target": "file:src/lib/canvasGeometry.js",
+      "names": [
+        "absoluteNodePosition"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:481e5fcdf669094b",
@@ -52879,21 +55351,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:scripts/source-twin-scanner.mjs",
       "target": "function:scripts/source-twin-scanner.mjs:resolveLocalImport"
-    },
-    {
-      "id": "relation:49b454c2f631e45b",
-      "type": "imports",
-      "source": "file:src/App.jsx",
-      "target": "file:shared/sharePermissions.js",
-      "names": [
-        "composeSharePermission",
-        "editableGroupIdSet",
-        "editableNodeIdSetForPermission",
-        "permissionCanEditEdge",
-        "permissionCanEditNodeStructure",
-        "visibleNodeIdSetForPermission"
-      ],
-      "dynamic": false
     },
     {
       "id": "relation:49e9d59ea6d40302",
@@ -53123,6 +55580,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/systemOperationPlan.js:createSignedSystemOperationPlan"
     },
     {
+      "id": "relation:4cf6d384b5ed8adb",
+      "type": "contains",
+      "source": "file:src/lib/groupMembership.js",
+      "target": "function:src/lib/groupMembership.js:findGroupDropTarget"
+    },
+    {
       "id": "relation:4d09b8e1f1d138b7",
       "type": "imports",
       "source": "file:mcp/server.js",
@@ -53130,18 +55593,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "names": [
         "SOURCE_TWIN_OPERATION_CONFIRMATION",
         "SOURCE_TWIN_PERSPECTIVES"
-      ],
-      "dynamic": false
-    },
-    {
-      "id": "relation:4d534b4b29154426",
-      "type": "imports",
-      "source": "file:src/components/InvitePopover.jsx",
-      "target": "dependency:react",
-      "names": [
-        "useCallback",
-        "useEffect",
-        "useState"
       ],
       "dynamic": false
     },
@@ -53173,6 +55624,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:scripts/local-connector-agent.mjs",
       "target": "function:scripts/local-connector-agent.mjs:changedPaths"
+    },
+    {
+      "id": "relation:4dd51467527b18cf",
+      "type": "imports",
+      "source": "file:scripts/test-collaboration-permissions.mjs",
+      "target": "dependency:node:assert/strict",
+      "names": [
+        "default"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:4e0f3d1dbfb0c7b0",
@@ -53247,6 +55708,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/store.js",
       "target": "function:mcp/store.js:uid"
+    },
+    {
+      "id": "relation:4ee545761b6768db",
+      "type": "contains",
+      "source": "file:shared/sharePermissions.js",
+      "target": "function:shared/sharePermissions.js:permissionCanInviteScope"
+    },
+    {
+      "id": "relation:4f4690d47fed312b",
+      "type": "contains",
+      "source": "file:shared/richTextSanitizer.js",
+      "target": "function:shared/richTextSanitizer.js:safeClassName"
     },
     {
       "id": "relation:4f6c68c41f9a6dbf",
@@ -53535,6 +56008,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/workflowCanvasSystemMap.js:mapNodes"
     },
     {
+      "id": "relation:550ebae7e3d7e438",
+      "type": "imports",
+      "source": "file:src/components/AuthPanel.jsx",
+      "target": "file:src/components/FriendManager.jsx",
+      "names": [
+        "default"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:55201cfb77a10c1f",
       "type": "contains",
       "source": "file:src/components/NotesPanel.jsx",
@@ -53578,6 +56061,24 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/App.jsx",
       "target": "function:src/App.jsx:App"
+    },
+    {
+      "id": "relation:568207b8cdc5ca9d",
+      "type": "contains",
+      "source": "file:src/lib/friendships.js",
+      "target": "function:src/lib/friendships.js:sendFriendRequest"
+    },
+    {
+      "id": "relation:56bd86ee3c3c4ce8",
+      "type": "contains",
+      "source": "file:src/lib/groupMembership.js",
+      "target": "function:src/lib/groupMembership.js:nodeAbsoluteRect"
+    },
+    {
+      "id": "relation:57070a3f8fe152f3",
+      "type": "contains",
+      "source": "file:src/lib/friendships.js",
+      "target": "function:src/lib/friendships.js:removeFriendship"
     },
     {
       "id": "relation:570ca83eef0c2955",
@@ -53739,6 +56240,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/localConnector.js:integer"
     },
     {
+      "id": "relation:5991f708e1394715",
+      "type": "contains",
+      "source": "file:mcp/canvasSummaries.js",
+      "target": "function:mcp/canvasSummaries.js:missingSummaryFunction"
+    },
+    {
       "id": "relation:59e635ca4c4cbf34",
       "type": "contains",
       "source": "file:mcp/sourceTwinStore.js",
@@ -53834,27 +56341,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/components/OpenInNotesButton.jsx:OpenInNotesButton"
     },
     {
-      "id": "relation:5b6f49509fcade14",
-      "type": "imports",
-      "source": "file:api/shared-canvas.js",
-      "target": "file:mcp/shareAccess.js",
-      "names": [
-        "admin",
-        "applySharedCanvasUpdate",
-        "listCanvasParticipants",
-        "mySharesFor",
-        "redactCanvas",
-        "resolveBrowserUser",
-        "resolveSharedCanvasAccess",
-        "setCanvasMemberViewRestriction"
-      ],
-      "dynamic": false
-    },
-    {
       "id": "relation:5b7571215732a2a1",
       "type": "contains",
       "source": "file:scripts/source-twin-scanner.mjs",
       "target": "function:scripts/source-twin-scanner.mjs:normalized"
+    },
+    {
+      "id": "relation:5be6966633659f30",
+      "type": "imports",
+      "source": "file:mcp/store.js",
+      "target": "file:mcp/shareAccess.js",
+      "names": [
+        "mySharesFor"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:5c2b9c9147c113a9",
@@ -54037,19 +56537,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:scripts/source-twin-scanner.mjs:lineFor"
     },
     {
+      "id": "relation:5f9b41c8f43529f4",
+      "type": "accesses",
+      "source": "file:api/shared-canvas.js",
+      "target": "db-table:canvases",
+      "operations": [
+        "write"
+      ]
+    },
+    {
       "id": "relation:5fae10671e507c26",
       "type": "contains",
       "source": "file:scripts/test-mcp-logic.mjs",
       "target": "function:scripts/test-mcp-logic.mjs:query.limit#2"
-    },
-    {
-      "id": "relation:5fbeca251b6e18a9",
-      "type": "accesses",
-      "source": "file:mcp/shareAccess.js",
-      "target": "db-table:canvas_shares",
-      "operations": [
-        "read"
-      ]
     },
     {
       "id": "relation:5fdb61f4308d6f0b",
@@ -54089,6 +56589,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "db-function:can_view_profile"
     },
     {
+      "id": "relation:6054909d039e8a85",
+      "type": "imports",
+      "source": "file:src/lib/friendships.js",
+      "target": "file:src/lib/supabase.js",
+      "names": [
+        "supabase"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:605604671891ed3e",
       "type": "defines-policy",
       "source": "file:supabase-shares.sql",
@@ -54113,6 +56623,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/components/NotesPanel.jsx:createNote"
     },
     {
+      "id": "relation:60b348e59df68db6",
+      "type": "contains",
+      "source": "file:src/lib/canvasNavigation.js",
+      "target": "function:src/lib/canvasNavigation.js:orderCanvasSummaries"
+    },
+    {
       "id": "relation:60dea8dd9967a341",
       "type": "contains",
       "source": "file:src/App.jsx",
@@ -54135,6 +56651,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/sourceTwinStore.js",
       "target": "function:mcp/sourceTwinStore.js:SourceTwinError.constructor"
+    },
+    {
+      "id": "relation:61549947ac7bb27d",
+      "type": "accesses",
+      "source": "file:mcp/canvasSummaries.js",
+      "target": "db-table:canvases",
+      "operations": [
+        "read"
+      ]
     },
     {
       "id": "relation:61574f12383c3453",
@@ -54257,6 +56782,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "calls-db-function",
       "source": "file:supabase-shares.sql",
       "target": "db-function:list_pending_email_invites"
+    },
+    {
+      "id": "relation:63bc7a32d0bbf262",
+      "type": "contains",
+      "source": "file:src/lib/friendships.js",
+      "target": "function:src/lib/friendships.js:listFriendships"
     },
     {
       "id": "relation:63dadecd81dc12d9",
@@ -54402,16 +56933,29 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:api/shared-canvas.js:send"
     },
     {
-      "id": "relation:680b6f78f3a1a58f",
-      "type": "contains",
-      "source": "file:mcp/store.js",
-      "target": "function:mcp/store.js:mySharesFor"
-    },
-    {
       "id": "relation:6811b7a8952605ea",
       "type": "contains",
       "source": "file:mcp/layout.js",
       "target": "function:mcp/layout.js:paddedRect"
+    },
+    {
+      "id": "relation:68264d24dfb17dd1",
+      "type": "accesses",
+      "source": "file:src/lib/shares.js",
+      "target": "db-table:canvas_shares",
+      "operations": [
+        "read"
+      ]
+    },
+    {
+      "id": "relation:6877cfee7915f196",
+      "type": "imports",
+      "source": "file:src/components/InvitePopover.jsx",
+      "target": "file:src/lib/sharedCanvasApi.js",
+      "names": [
+        "createCanvasInvitation"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:68865a9f1bb76af9",
@@ -54724,6 +57268,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/dataAccessAudit.js:DataAccessAuditError.constructor"
     },
     {
+      "id": "relation:6e165035638def64",
+      "type": "imports",
+      "source": "file:scripts/test-security-boundaries.mjs",
+      "target": "dependency:node:fs/promises",
+      "names": [
+        "readFile",
+        "readdir"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:6e19f7cc43fd50eb",
       "type": "contains",
       "source": "file:src/lib/shares.js",
@@ -54833,6 +57388,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:6f916cd715718a82",
+      "type": "defines-policy",
+      "source": "file:supabase-security-hardening.sql",
+      "target": "rls-policy:user_prefs:users manage own prefs"
+    },
+    {
       "id": "relation:6fc21364c123c884",
       "type": "contains",
       "source": "file:src/demoCanvases.js",
@@ -54899,6 +57460,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:scripts/system-discovery.mjs",
       "target": "function:scripts/system-discovery.mjs:addTableSource"
+    },
+    {
+      "id": "relation:7130ac8c07dfd42f",
+      "type": "contains",
+      "source": "file:scripts/test-security-boundaries.mjs",
+      "target": "function:scripts/test-security-boundaries.mjs:read"
     },
     {
       "id": "relation:71381abd4d408f00",
@@ -54985,15 +57552,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/shareAccess.js",
       "target": "function:mcp/shareAccess.js:listCanvasParticipants"
-    },
-    {
-      "id": "relation:72c3564e72d3205e",
-      "type": "accesses",
-      "source": "file:mcp/store.js",
-      "target": "db-table:share_members",
-      "operations": [
-        "read"
-      ]
     },
     {
       "id": "relation:72e5445d8cd6be64",
@@ -55117,6 +57675,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/nodes/SystemNode.jsx",
       "target": "function:src/nodes/SystemNode.jsx:newPartId"
+    },
+    {
+      "id": "relation:751d2325a4c7b5ce",
+      "type": "contains",
+      "source": "file:shared/richTextSanitizer.js",
+      "target": "function:shared/richTextSanitizer.js:safeFontSize"
     },
     {
       "id": "relation:7520e059b2a48b81",
@@ -55355,6 +57919,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:78ebe9df18709651",
+      "type": "calls-db-function",
+      "source": "file:supabase-profiles.sql",
+      "target": "db-function:touch_my_profile"
+    },
+    {
+      "id": "relation:791b7255dc0cd33d",
+      "type": "imports",
+      "source": "file:mcp/store.js",
+      "target": "file:mcp/canvasSummaries.js",
+      "names": [
+        "loadCanvasSummaries"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:791f7f9b5c83fcd2",
       "type": "contains",
       "source": "file:api/shared-canvas.js",
@@ -55571,6 +58151,25 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/lib/canvasNavigation.js:chooseOwnCanvasToRestore"
     },
     {
+      "id": "relation:7ccba52b42a941be",
+      "type": "imports",
+      "source": "file:api/shared-canvas.js",
+      "target": "file:mcp/shareAccess.js",
+      "names": [
+        "admin",
+        "applySharedCanvasUpdate",
+        "createCanvasInvitation",
+        "listCanvasParticipants",
+        "mySharesFor",
+        "redactCanvas",
+        "resolveBrowserUser",
+        "resolveSharedCanvasAccess",
+        "setCanvasMemberPermission",
+        "setCanvasMemberViewRestriction"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:7cd120d9ca36d383",
       "type": "contains",
       "source": "file:shared/twinBuild.js",
@@ -55669,6 +58268,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/components/CanvasTabs.jsx:textContent"
     },
     {
+      "id": "relation:7f4e74ba4f3e2c33",
+      "type": "defines-policy",
+      "source": "file:supabase-shares.sql",
+      "target": "rls-policy:friendships:friends select own relationships"
+    },
+    {
       "id": "relation:7f903f0683317aa8",
       "type": "reads-env",
       "source": "file:api/source-twin-webhook.js",
@@ -55685,25 +58290,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/App.jsx",
       "target": "function:src/App.jsx:handleContextAddGroup"
-    },
-    {
-      "id": "relation:7ff5467fa8abc955",
-      "type": "imports",
-      "source": "file:src/App.jsx",
-      "target": "file:src/lib/shares.js",
-      "names": [
-        "claimEmailInvite",
-        "claimShareToken",
-        "getShareLinkPreview",
-        "isShareLinkActive",
-        "kickMember",
-        "leaveSharedCanvas",
-        "listPendingEmailInvites",
-        "listShares",
-        "revokeShareMember",
-        "setMemberEdit"
-      ],
-      "dynamic": false
     },
     {
       "id": "relation:80056ca861f15570",
@@ -55748,6 +58334,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:scripts/source-twin-scanner.mjs",
       "target": "function:scripts/source-twin-scanner.mjs:relation"
+    },
+    {
+      "id": "relation:813a22a607c05f3c",
+      "type": "contains",
+      "source": "file:shared/sharePermissions.js",
+      "target": "function:shared/sharePermissions.js:grantCoversInvitation"
     },
     {
       "id": "relation:8140c399d094efac",
@@ -56109,6 +58701,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:86aae14519f9677c",
+      "type": "contains",
+      "source": "file:src/lib/cloudStorage.js",
+      "target": "function:src/lib/cloudStorage.js:loadCanvasSummaries"
+    },
+    {
       "id": "relation:86b0ef51bb7c95d9",
       "type": "contains",
       "source": "file:shared/operationLifecycle.js",
@@ -56154,6 +58752,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:87da813634e13957",
+      "type": "imports",
+      "source": "file:mcp/sanitize.js",
+      "target": "file:shared/richTextSanitizer.js",
+      "names": [
+        "sanitizeRichTextHtml"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:882b5dc55cf1dccd",
       "type": "imports",
       "source": "file:api/source-twin-webhook.js",
@@ -56163,6 +58771,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "recordSourceTwinPushEvent"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:886c202bab4d919f",
+      "type": "contains",
+      "source": "file:shared/sharePermissions.js",
+      "target": "function:shared/sharePermissions.js:invitationAuthorizingGrants"
     },
     {
       "id": "relation:888dac1ba1a0cdcb",
@@ -56209,6 +58823,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/twinBuildReconciler.js",
       "target": "function:shared/twinBuildReconciler.js:relationReview"
+    },
+    {
+      "id": "relation:893c7c39ad5250c8",
+      "type": "calls-db-function",
+      "source": "file:supabase-security-hardening.sql",
+      "target": "db-function:can_view_profile"
     },
     {
       "id": "relation:898d891e967610f6",
@@ -56273,10 +58893,26 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/workflowSystemMapRepair.js:hasOwn"
     },
     {
+      "id": "relation:8a7971b0b4a61934",
+      "type": "imports",
+      "source": "file:src/components/InvitePopover.jsx",
+      "target": "file:src/lib/friendships.js",
+      "names": [
+        "listFriendships"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:8a83ab7f7b75bc0b",
       "type": "serves",
       "source": "file:api/shared-canvas.js",
       "target": "api:/api/shared-canvas"
+    },
+    {
+      "id": "relation:8af7e73eb0fdd5bd",
+      "type": "contains",
+      "source": "file:src/components/FriendManager.jsx",
+      "target": "function:src/components/FriendManager.jsx:personRow"
     },
     {
       "id": "relation:8b11b1f89e708a42",
@@ -56340,6 +58976,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/systemRuntime.js",
       "target": "function:shared/systemRuntime.js:systemRuntimeCapabilityForPart"
+    },
+    {
+      "id": "relation:8c06c22f4a1496b3",
+      "type": "contains",
+      "source": "file:shared/richTextSanitizer.js",
+      "target": "function:shared/richTextSanitizer.js:sanitizeAttribute"
     },
     {
       "id": "relation:8c1bde440607e6ad",
@@ -56501,6 +59143,23 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "configures",
       "source": "file:vite.config.js",
       "target": "deployment:vercel-web"
+    },
+    {
+      "id": "relation:8fe6745a1b9bd0c1",
+      "type": "imports",
+      "source": "file:mcp/shareAccess.js",
+      "target": "file:shared/sharePermissions.js",
+      "names": [
+        "composeSharePermission",
+        "editableNodeIdSetForPermission",
+        "invitationAuthorizingGrants",
+        "permissionCanCreateInGroup",
+        "permissionCanEditEdge",
+        "permissionCanEditNodeStructure",
+        "permissionFromAccess",
+        "visibleNodeIdSetForPermission"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:8ff2d77faed1db70",
@@ -56856,6 +59515,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/twinBuildCanvas.js:twinBuildEntityCanvasProjection"
     },
     {
+      "id": "relation:97bbaf7ddf5978a0",
+      "type": "imports",
+      "source": "file:src/lib/sanitizeHtml.js",
+      "target": "file:shared/richTextSanitizer.js",
+      "names": [
+        "sanitizeRichTextHtml"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:97c0d5758918e0a1",
       "type": "contains",
       "source": "file:mcp/store.js",
@@ -56910,6 +59579,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/localConnector.js:sourceEntity"
     },
     {
+      "id": "relation:989cb4de3f93e6c1",
+      "type": "contains",
+      "source": "file:mcp/canvasSummaries.js",
+      "target": "function:mcp/canvasSummaries.js:summaryRow"
+    },
+    {
       "id": "relation:98a7550c3775792b",
       "type": "calls-db-function",
       "source": "file:supabase-relation-metadata-guard.sql",
@@ -56932,6 +59607,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:scripts/system-discovery.mjs",
       "target": "function:scripts/system-discovery.mjs:nulSeparated"
+    },
+    {
+      "id": "relation:9926b7bc418de00e",
+      "type": "contains",
+      "source": "file:src/lib/sharedCanvasApi.js",
+      "target": "function:src/lib/sharedCanvasApi.js:setCanvasMemberPermission"
     },
     {
       "id": "relation:993a17d614eda818",
@@ -57037,6 +59718,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/lib/mcpTokens.js:createToken"
     },
     {
+      "id": "relation:9b419231293215aa",
+      "type": "calls-db-function",
+      "source": "file:src/lib/friendships.js",
+      "target": "db-function:remove_friendship"
+    },
+    {
       "id": "relation:9b4c1fa7e2353d91",
       "type": "contains",
       "source": "file:src/components/NotesPanel.jsx",
@@ -57124,20 +59811,10 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:scripts/test-mcp-logic.mjs:db.rpc"
     },
     {
-      "id": "relation:9d2c841242589e02",
-      "type": "imports",
-      "source": "file:src/App.jsx",
-      "target": "file:src/lib/cloudStorage.js",
-      "names": [
-        "CanvasConflictError",
-        "deleteCanvas",
-        "loadAllCanvases",
-        "loadCanvasRow",
-        "loadUserPrefs",
-        "saveCanvas",
-        "saveUserPrefs"
-      ],
-      "dynamic": false
+      "id": "relation:9d23bad1e1c35b82",
+      "type": "contains",
+      "source": "file:mcp/canvasSummaries.js",
+      "target": "function:mcp/canvasSummaries.js:count"
     },
     {
       "id": "relation:9d2fe748073ec7e0",
@@ -57204,6 +59881,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/lib/canvasNavigation.js:loadLastOpenedCanvas"
     },
     {
+      "id": "relation:9e132dc32ba59bed",
+      "type": "imports",
+      "source": "file:scripts/test-group-membership.mjs",
+      "target": "file:src/lib/canvasGeometry.js",
+      "names": [
+        "absoluteNodePosition"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:9e491e5f416a1c29",
       "type": "contains",
       "source": "file:scripts/system-discovery.mjs",
@@ -57220,6 +59907,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/server.js",
       "target": "function:mcp/server.js:bearer"
+    },
+    {
+      "id": "relation:9e78c272597704b7",
+      "type": "calls-db-function",
+      "source": "file:src/lib/friendships.js",
+      "target": "db-function:send_friend_request"
     },
     {
       "id": "relation:9e7faa5373eba21e",
@@ -57242,6 +59935,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "WORKFLOW_ENGINE_REGISTRY"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:9f28ef800de65ddd",
+      "type": "contains",
+      "source": "file:shared/richTextSanitizer.js",
+      "target": "function:shared/richTextSanitizer.js:sanitizeRichTextHtml"
     },
     {
       "id": "relation:9f49cd539429efc2",
@@ -57302,22 +60001,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:api/source-twin-webhook.js",
       "target": "function:api/source-twin-webhook.js:sourceTwinRepositoryName"
-    },
-    {
-      "id": "relation:a0db83af45c7ea42",
-      "type": "imports",
-      "source": "file:mcp/shareAccess.js",
-      "target": "file:shared/sharePermissions.js",
-      "names": [
-        "composeSharePermission",
-        "editableNodeIdSetForPermission",
-        "permissionCanCreateInGroup",
-        "permissionCanEditEdge",
-        "permissionCanEditNodeStructure",
-        "permissionFromAccess",
-        "visibleNodeIdSetForPermission"
-      ],
-      "dynamic": false
     },
     {
       "id": "relation:a0e340efab6dea5a",
@@ -57531,20 +60214,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/sanitize.js:sanitizeExternalUrl"
     },
     {
-      "id": "relation:a327a3236d00d23c",
-      "type": "accesses",
-      "source": "file:src/lib/shares.js",
-      "target": "db-table:share_members",
-      "operations": [
-        "read",
-        "write"
-      ]
-    },
-    {
       "id": "relation:a34686deff151c34",
       "type": "contains",
       "source": "file:scripts/source-twin-scanner.mjs",
       "target": "function:scripts/source-twin-scanner.mjs:readSourceTwinWorkingTree"
+    },
+    {
+      "id": "relation:a35edaf987e35c95",
+      "type": "contains",
+      "source": "file:src/lib/groupMembership.js",
+      "target": "function:src/lib/groupMembership.js:groupCandidates"
     },
     {
       "id": "relation:a378a7f8d799f0c4",
@@ -57665,6 +60344,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/nodes/SystemNode.jsx:finishTitleEdit"
     },
     {
+      "id": "relation:a5e9968c3c056517",
+      "type": "imports",
+      "source": "file:src/App.jsx",
+      "target": "file:shared/sharePermissions.js",
+      "names": [
+        "composeSharePermission",
+        "editableGroupIdSet",
+        "editableNodeIdSetForPermission",
+        "permissionCanEditEdge",
+        "permissionCanEditNodeStructure",
+        "permissionCanInviteScope",
+        "visibleNodeIdSetForPermission"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:a60a7847a318bcc4",
       "type": "accesses",
       "source": "file:supabase-data-access-audit.sql",
@@ -57692,22 +60387,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:scripts/test-source-twin.mjs:localCompletionDb"
     },
     {
+      "id": "relation:a6a99feef142c651",
+      "type": "contains",
+      "source": "file:src/components/FriendManager.jsx",
+      "target": "function:src/components/FriendManager.jsx:actionButton"
+    },
+    {
       "id": "relation:a6cbdae9dc260814",
       "type": "contains",
       "source": "file:scripts/test-mcp-logic.mjs",
       "target": "function:scripts/test-mcp-logic.mjs:paddedRect"
-    },
-    {
-      "id": "relation:a71b77d37d6766f5",
-      "type": "imports",
-      "source": "file:src/App.jsx",
-      "target": "file:src/lib/canvasNavigation.js",
-      "names": [
-        "chooseOwnCanvasToRestore",
-        "loadLastOpenedCanvas",
-        "saveLastOpenedCanvas"
-      ],
-      "dynamic": false
     },
     {
       "id": "relation:a809f1fd6fd81d4c",
@@ -57760,6 +60449,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/lib/cloudStorage.js",
       "target": "function:src/lib/cloudStorage.js:saveCanvas"
+    },
+    {
+      "id": "relation:a9ab0d2f4021f6d8",
+      "type": "imports",
+      "source": "file:scripts/test-performance-boundaries.mjs",
+      "target": "dependency:node:assert/strict",
+      "names": [
+        "default"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:a9c11a2266d12255",
@@ -57991,6 +60690,25 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:add1c5002a22dff0",
+      "type": "accesses",
+      "source": "file:src/lib/shares.js",
+      "target": "db-table:share_members",
+      "operations": [
+        "read"
+      ]
+    },
+    {
+      "id": "relation:addb50ea06353ede",
+      "type": "accesses",
+      "source": "file:mcp/shareAccess.js",
+      "target": "db-table:canvas_shares",
+      "operations": [
+        "read",
+        "write"
+      ]
+    },
+    {
       "id": "relation:ae0d02be6af2e97e",
       "type": "contains",
       "source": "file:src/App.jsx",
@@ -58045,6 +60763,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/nodes/SystemNode.jsx:handlePointerDown"
     },
     {
+      "id": "relation:aee92f0eaabe2b03",
+      "type": "calls-db-function",
+      "source": "file:supabase-canvas-summaries.sql",
+      "target": "db-function:get_canvas_summaries"
+    },
+    {
       "id": "relation:af2b9af794fccaec",
       "type": "contains",
       "source": "file:shared/twinBuildReconciler.js",
@@ -58079,16 +60803,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/shareAccess.js",
       "target": "function:mcp/shareAccess.js:redactNode"
-    },
-    {
-      "id": "relation:afbf42ab2ad7f242",
-      "type": "accesses",
-      "source": "file:api/shared-canvas.js",
-      "target": "db-table:canvases",
-      "operations": [
-        "read",
-        "write"
-      ]
     },
     {
       "id": "relation:afcfc5578fb34e3a",
@@ -58146,6 +60860,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/systemOperationPlan.js",
       "target": "function:mcp/systemOperationPlan.js:normalizeOperationContract"
+    },
+    {
+      "id": "relation:b150cd14f8f3372b",
+      "type": "contains",
+      "source": "file:src/lib/groupMembership.js",
+      "target": "function:src/lib/groupMembership.js:overlapArea"
     },
     {
       "id": "relation:b15db97e6fc40252",
@@ -58281,6 +61001,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/localConnectorStore.js:normalizeLocalGitSyncVerification"
     },
     {
+      "id": "relation:b3bb43b728e40378",
+      "type": "imports",
+      "source": "file:scripts/test-mcp-logic.mjs",
+      "target": "file:src/lib/canvasNavigation.js",
+      "names": [
+        "chooseOwnCanvasToRestore",
+        "orderCanvasSummaries"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:b41131426edd2a83",
       "type": "imports",
       "source": "file:src/main.jsx",
@@ -58357,16 +61088,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
-      "id": "relation:b65215e07ae53ada",
-      "type": "accesses",
-      "source": "file:src/lib/shares.js",
-      "target": "db-table:canvas_shares",
-      "operations": [
-        "read",
-        "write"
-      ]
-    },
-    {
       "id": "relation:b68476926d7dd6b0",
       "type": "imports",
       "source": "file:src/App.jsx",
@@ -58375,6 +61096,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "default"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:b684a9d4598bd02d",
+      "type": "contains",
+      "source": "file:mcp/shareAccess.js",
+      "target": "function:mcp/shareAccess.js:setCanvasMemberPermission"
     },
     {
       "id": "relation:b6884312e0113f7c",
@@ -58393,10 +61120,32 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:scripts/source-twin-scanner.mjs:semanticHash"
     },
     {
+      "id": "relation:b70b2e6cb3d40d92",
+      "type": "imports",
+      "source": "file:scripts/test-performance-boundaries.mjs",
+      "target": "dependency:node:fs/promises",
+      "names": [
+        "readFile"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "relation:b70b479aa04cd4b8",
+      "type": "contains",
+      "source": "file:shared/richTextSanitizer.js",
+      "target": "function:shared/richTextSanitizer.js:cleanChildren"
+    },
+    {
       "id": "relation:b75b3e0c4be6b70f",
       "type": "contains",
       "source": "file:src/lib/cloudStorage.js",
       "target": "function:src/lib/cloudStorage.js:nextRevision"
+    },
+    {
+      "id": "relation:b77bf20a4ce92b43",
+      "type": "contains",
+      "source": "file:mcp/shareAccess.js",
+      "target": "function:mcp/shareAccess.js:loadMembersForShares"
     },
     {
       "id": "relation:b7a4468f3f40235c",
@@ -58468,6 +61217,15 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/components/EditToolbar.jsx:AlignButtons"
     },
     {
+      "id": "relation:b88cf971e942f7d7",
+      "type": "accesses",
+      "source": "file:src/lib/profiles.js",
+      "target": "db-table:profiles",
+      "operations": [
+        "read"
+      ]
+    },
+    {
       "id": "relation:b8cfe734a837fabc",
       "type": "contains",
       "source": "file:src/lib/imageStorage.js",
@@ -58520,12 +61278,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/systemPartOntology.js",
       "target": "function:shared/systemPartOntology.js:normalizeSystemParts"
-    },
-    {
-      "id": "relation:b9e7633de102294b",
-      "type": "contains",
-      "source": "file:src/lib/shares.js",
-      "target": "function:src/lib/shares.js:createShare"
     },
     {
       "id": "relation:ba2002ce962bf139",
@@ -58613,6 +61365,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:scripts/system-discovery.mjs",
       "target": "function:scripts/system-discovery.mjs:normalizedContent"
+    },
+    {
+      "id": "relation:bbc9bb5750a25105",
+      "type": "imports",
+      "source": "file:scripts/test-group-membership.mjs",
+      "target": "dependency:node:assert/strict",
+      "names": [
+        "default"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:bc14c5ea2330674e",
@@ -58753,6 +61515,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "assertPrivacyReleaseGate"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:befcfe75f92fc38e",
+      "type": "contains",
+      "source": "file:shared/richTextSanitizer.js",
+      "target": "function:shared/richTextSanitizer.js:sanitizeFallback"
     },
     {
       "id": "relation:bf65f068b402653e",
@@ -58913,16 +61681,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/workflowSystemTwinAdapter.js",
       "target": "function:shared/workflowSystemTwinAdapter.js:workflowTwinRoot"
-    },
-    {
-      "id": "relation:c2dd2f8c2c225527",
-      "type": "imports",
-      "source": "file:scripts/test-mcp-logic.mjs",
-      "target": "file:src/lib/canvasNavigation.js",
-      "names": [
-        "chooseOwnCanvasToRestore"
-      ],
-      "dynamic": false
     },
     {
       "id": "relation:c2e73c1dac0273da",
@@ -59190,6 +61948,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:c81019ea56d46229",
+      "type": "calls-db-function",
+      "source": "file:supabase-profiles.sql",
+      "target": "db-function:upsert_my_profile"
+    },
+    {
       "id": "relation:c82279a8dce19faf",
       "type": "accesses",
       "source": "file:supabase-source-twin-history.sql",
@@ -59225,6 +61989,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/operationLifecycle.js",
       "target": "function:shared/operationLifecycle.js:withFingerprint"
+    },
+    {
+      "id": "relation:c8c0d5b044962127",
+      "type": "contains",
+      "source": "file:scripts/test-security-boundaries.mjs",
+      "target": "function:scripts/test-security-boundaries.mjs:collect"
     },
     {
       "id": "relation:c8c60537855b3a4d",
@@ -59270,12 +62040,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/workflowSystemTwinAdapter.js",
       "target": "function:shared/workflowSystemTwinAdapter.js:resourceObservation"
-    },
-    {
-      "id": "relation:c90f2ae6a5bbd97c",
-      "type": "contains",
-      "source": "file:src/lib/cloudStorage.js",
-      "target": "function:src/lib/cloudStorage.js:loadAllCanvases"
     },
     {
       "id": "relation:c957866ff53464cb",
@@ -59401,6 +62165,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:cb8e4c2cedbb0bb9",
+      "type": "calls-db-function",
+      "source": "file:supabase-shares.sql",
+      "target": "db-function:remove_friendship"
+    },
+    {
       "id": "relation:cb91f570d17e52ec",
       "type": "imports",
       "source": "file:src/nodes/GroupNode.jsx",
@@ -59428,6 +62198,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "defines-policy",
       "source": "file:supabase-shares.sql",
       "target": "rls-policy:canvas_shares:invitee selects own invites"
+    },
+    {
+      "id": "relation:cc258edbdb209abc",
+      "type": "contains",
+      "source": "file:mcp/shareAccess.js",
+      "target": "function:mcp/shareAccess.js:normalizeInvitationTarget"
     },
     {
       "id": "relation:cc5bc18fdbc0d2f1",
@@ -59523,6 +62299,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:ce6b7454484985b6",
+      "type": "calls-db-function",
+      "source": "file:src/lib/profiles.js",
+      "target": "db-function:touch_my_profile"
+    },
+    {
       "id": "relation:ce89020423406fe5",
       "type": "contains",
       "source": "file:shared/workflowSystemTwinAdapter.js",
@@ -59601,10 +62383,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/digitalTwinProposal.js:safeText"
     },
     {
+      "id": "relation:d07479bfad46451d",
+      "type": "calls-db-function",
+      "source": "file:supabase-security-hardening.sql",
+      "target": "db-function:upsert_my_profile"
+    },
+    {
       "id": "relation:d08a27a478c7b075",
       "type": "contains",
       "source": "file:mcp/store.js",
       "target": "function:mcp/store.js:checkRadialLevelMixing"
+    },
+    {
+      "id": "relation:d09c4dadb124c51f",
+      "type": "contains",
+      "source": "file:src/lib/friendships.js",
+      "target": "function:src/lib/friendships.js:respondFriendRequest"
     },
     {
       "id": "relation:d112afce42bc5257",
@@ -59690,6 +62484,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:d30e035dde182a5e",
+      "type": "contains",
+      "source": "file:src/lib/shares.js",
+      "target": "function:src/lib/shares.js:loadOwnedShareRows"
+    },
+    {
+      "id": "relation:d32e50e7ac2dacff",
+      "type": "calls-db-function",
+      "source": "file:mcp/canvasSummaries.js",
+      "target": "db-function:get_canvas_summaries"
+    },
+    {
       "id": "relation:d379fd71883abed6",
       "type": "imports",
       "source": "file:scripts/test-engine-registry.mjs",
@@ -59750,6 +62556,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/App.jsx",
       "target": "function:src/App.jsx:systemRuntimeTargetsForNodes"
+    },
+    {
+      "id": "relation:d4bd3df7cdcf5d05",
+      "type": "imports",
+      "source": "file:api/shared-canvas.js",
+      "target": "file:mcp/canvasSummaries.js",
+      "names": [
+        "loadCanvasSummaries"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:d4d283d95a13d302",
@@ -59946,6 +62762,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ]
     },
     {
+      "id": "relation:d96a86ab14d6c04c",
+      "type": "contains",
+      "source": "file:src/lib/groupMembership.js",
+      "target": "function:src/lib/groupMembership.js:findGroupAtPoint"
+    },
+    {
       "id": "relation:d96d4ec76f0c5d2a",
       "type": "contains",
       "source": "file:src/nodes/StageNode.jsx",
@@ -60093,6 +62915,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:scripts/test-twin-adapter-contract.mjs",
       "target": "function:scripts/test-twin-adapter-contract.mjs:fixtureAdapter.inspect"
+    },
+    {
+      "id": "relation:dcb01252ac61b507",
+      "type": "imports",
+      "source": "file:src/components/FriendManager.jsx",
+      "target": "file:src/lib/friendships.js",
+      "names": [
+        "listFriendships",
+        "removeFriendship",
+        "respondFriendRequest",
+        "sendFriendRequest"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:dcc589572cb1e5e6",
@@ -60273,6 +63108,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:df3d9c3f0fb2decb",
+      "type": "imports",
+      "source": "file:src/App.jsx",
+      "target": "file:src/lib/cloudStorage.js",
+      "names": [
+        "CanvasConflictError",
+        "deleteCanvas",
+        "loadCanvasRow",
+        "loadCanvasSummaries",
+        "loadUserPrefs",
+        "saveCanvas",
+        "saveUserPrefs"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:df5913b60617e102",
       "type": "imports",
       "source": "file:mcp/shareAccess.js",
@@ -60330,6 +63181,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:scripts/test-mcp-logic.mjs:getRect"
     },
     {
+      "id": "relation:dfb21ce3ebf3642b",
+      "type": "imports",
+      "source": "file:src/components/FriendManager.jsx",
+      "target": "dependency:react",
+      "names": [
+        "useCallback",
+        "useEffect",
+        "useState"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:dfb5bb523fb06f17",
       "type": "imports",
       "source": "file:scripts/test-source-twin.mjs",
@@ -60348,6 +63211,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "default"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:e003758ffc69e1c9",
+      "type": "contains",
+      "source": "file:src/lib/groupMembership.js",
+      "target": "function:src/lib/groupMembership.js:reparentNodePreservingPosition"
     },
     {
       "id": "relation:e038973be79d9a1f",
@@ -60631,6 +63500,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/systemPartOntology.js:normalizedId"
     },
     {
+      "id": "relation:e67fb7de73c6801c",
+      "type": "contains",
+      "source": "file:shared/richTextSanitizer.js",
+      "target": "function:shared/richTextSanitizer.js:sanitizeWithDomParser"
+    },
+    {
       "id": "relation:e681cfdb417cec6a",
       "type": "contains",
       "source": "file:shared/workflowSystemTwinAdapter.js",
@@ -60687,12 +63562,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "configures",
       "source": "file:vercel.json",
       "target": "deployment:vercel-web"
-    },
-    {
-      "id": "relation:e7236dd0c0e5509b",
-      "type": "contains",
-      "source": "file:src/lib/sanitizeHtml.js",
-      "target": "function:src/lib/sanitizeHtml.js:sanitizeAttrs"
     },
     {
       "id": "relation:e73185c34c7574a0",
@@ -60759,6 +63628,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/sourceTwin.js",
       "target": "function:shared/sourceTwin.js:sourceTwinCodeUrl"
+    },
+    {
+      "id": "relation:e7fd71ff15dd30a3",
+      "type": "imports",
+      "source": "file:scripts/test-group-membership.mjs",
+      "target": "file:src/lib/groupMembership.js",
+      "names": [
+        "findGroupAtPoint",
+        "findGroupDropTarget",
+        "positionInsideGroup",
+        "reparentNodePreservingPosition"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:e8295ed10fe4030d",
@@ -60843,6 +63725,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "systemRuntimePathEdgeIds"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:e9b594d6bc9b954e",
+      "type": "defines-policy",
+      "source": "file:supabase-security-hardening.sql",
+      "target": "rls-policy:canvases:users manage own canvases"
     },
     {
       "id": "relation:e9da1cdcecc75c76",
@@ -61189,6 +64077,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/App.jsx:findAxisSnap"
     },
     {
+      "id": "relation:ef78eefbf63f2c3a",
+      "type": "contains",
+      "source": "file:src/components/FriendManager.jsx",
+      "target": "function:src/components/FriendManager.jsx:submit"
+    },
+    {
       "id": "relation:efac54e5b0ecf104",
       "type": "contains",
       "source": "file:shared/sharePermissions.js",
@@ -61414,6 +64308,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/components/EditToolbar.jsx:EditToolbar"
     },
     {
+      "id": "relation:f38d67f27a902f1f",
+      "type": "contains",
+      "source": "file:mcp/shareAccess.js",
+      "target": "function:mcp/shareAccess.js:createCanvasInvitation"
+    },
+    {
       "id": "relation:f3b9f19c461c73df",
       "type": "contains",
       "source": "file:mcp/store.js",
@@ -61476,6 +64376,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:f55d1a844792988a",
+      "type": "contains",
+      "source": "file:src/components/FriendManager.jsx",
+      "target": "function:src/components/FriendManager.jsx:FriendManager"
     },
     {
       "id": "relation:f581133065ea8e85",
@@ -61548,6 +64454,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/twinBuild.js:positiveInteger"
     },
     {
+      "id": "relation:f6db87540619fb24",
+      "type": "imports",
+      "source": "file:scripts/test-group-membership.mjs",
+      "target": "dependency:node:fs/promises",
+      "names": [
+        "readFile"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:f710204e640cd88a",
       "type": "contains",
       "source": "file:shared/digitalTwinProposal.js",
@@ -61608,10 +64524,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/digitalTwinProposal.js:filterDigitalTwinProposalNodeChanges"
     },
     {
+      "id": "relation:f8b8ceb90b89bb2e",
+      "type": "contains",
+      "source": "file:shared/richTextSanitizer.js",
+      "target": "function:shared/richTextSanitizer.js:safeStyleValue"
+    },
+    {
       "id": "relation:f905f06a7a2cc914",
       "type": "contains",
       "source": "file:src/lib/canvasGeometry.js",
       "target": "function:src/lib/canvasGeometry.js:boundsForNodeIds"
+    },
+    {
+      "id": "relation:f9084f11609c6ea7",
+      "type": "contains",
+      "source": "file:shared/richTextSanitizer.js",
+      "target": "function:shared/richTextSanitizer.js:sanitizeRichTextStyle"
     },
     {
       "id": "relation:f91e756e1e849c54",
@@ -61635,6 +64563,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:scripts/source-twin-semantics.mjs",
       "target": "function:scripts/source-twin-semantics.mjs:explainDatabaseResource"
+    },
+    {
+      "id": "relation:f9a7b92d1fa5575a",
+      "type": "contains",
+      "source": "file:src/lib/groupMembership.js",
+      "target": "function:src/lib/groupMembership.js:nodeDimensions"
     },
     {
       "id": "relation:f9ce0c0c8e0b9b97",
@@ -61839,6 +64773,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:scripts/test-operation-lifecycle.mjs:planFor"
     },
     {
+      "id": "relation:ff61a97ccc69b4cc",
+      "type": "imports",
+      "source": "file:src/components/InvitePopover.jsx",
+      "target": "dependency:react",
+      "names": [
+        "useCallback",
+        "useEffect",
+        "useMemo",
+        "useState"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:ff8193cfe4dca450",
       "type": "accesses",
       "source": "file:supabase-local-connectors.sql",
@@ -61887,6 +64834,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:api/source-twin-webhook.js",
       "file:api/source-twin.js",
       "file:api/system-runtime.js",
+      "file:mcp/canvasSummaries.js",
       "file:mcp/dataAccessAudit.js",
       "file:mcp/layout.js",
       "file:mcp/localConnectorStore.js",
@@ -61906,6 +64854,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:shared/operationLifecycle.js",
       "file:shared/privacyCapabilities.js",
       "file:shared/relationOntology.js",
+      "file:shared/richTextSanitizer.js",
       "file:shared/sharePermissions.js",
       "file:shared/sourceTwin.js",
       "file:shared/sourceTwinSemantics.js",
@@ -61933,6 +64882,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:src/components/DigitalTwinReviewPanel.jsx",
       "file:src/components/EdgeRelationEditor.jsx",
       "file:src/components/EditToolbar.jsx",
+      "file:src/components/FriendManager.jsx",
       "file:src/components/InvitePopover.jsx",
       "file:src/components/NodePalette.jsx",
       "file:src/components/NotesPanel.jsx",
@@ -61953,6 +64903,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:src/lib/canvasSync.js",
       "file:src/lib/cloudStorage.js",
       "file:src/lib/digitalTwinAdapters.js",
+      "file:src/lib/friendships.js",
+      "file:src/lib/groupMembership.js",
       "file:src/lib/imageStorage.js",
       "file:src/lib/localConnectorApi.js",
       "file:src/lib/mcpTokens.js",
@@ -62003,6 +64955,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:api/system-runtime.js:runTarget",
       "function:api/system-runtime.js:runtimeBaseUrl",
       "function:api/system-runtime.js:send",
+      "function:mcp/canvasSummaries.js:count",
+      "function:mcp/canvasSummaries.js:fallbackMetadata",
+      "function:mcp/canvasSummaries.js:loadCanvasSummaries",
+      "function:mcp/canvasSummaries.js:missingSummaryFunction",
+      "function:mcp/canvasSummaries.js:summaryRow",
       "function:mcp/dataAccessAudit.js:DataAccessAuditError.constructor",
       "function:mcp/dataAccessAudit.js:dataAccessAuditRequired",
       "function:mcp/dataAccessAudit.js:recordCanvasDataAccess",
@@ -62054,7 +65011,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:mcp/localConnectorStore.js:sha",
       "function:mcp/localConnectorStore.js:stable",
       "function:mcp/localConnectorStore.js:tokenHash",
-      "function:mcp/sanitize.js:sanitizeAttrs",
       "function:mcp/sanitize.js:sanitizeExternalUrl",
       "function:mcp/sanitize.js:sanitizeHtml",
       "function:mcp/sanitize.js:sanitizeTextFields",
@@ -62069,12 +65025,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:mcp/shareAccess.js:admin",
       "function:mcp/shareAccess.js:applySharedCanvasUpdate",
       "function:mcp/shareAccess.js:compareShareAccess",
+      "function:mcp/shareAccess.js:createCanvasInvitation",
       "function:mcp/shareAccess.js:editableNodeIdSet",
       "function:mcp/shareAccess.js:effectiveShareGrant",
+      "function:mcp/shareAccess.js:enforceInvitationRateLimit",
       "function:mcp/shareAccess.js:listCanvasParticipants",
+      "function:mcp/shareAccess.js:loadCanvasShareRows",
+      "function:mcp/shareAccess.js:loadMembersForShares",
       "function:mcp/shareAccess.js:mayEdit",
       "function:mcp/shareAccess.js:mayEditStructure",
       "function:mcp/shareAccess.js:mySharesFor",
+      "function:mcp/shareAccess.js:normalizeInvitationTarget",
       "function:mcp/shareAccess.js:pickBestShareAccess",
       "function:mcp/shareAccess.js:publicProfile",
       "function:mcp/shareAccess.js:redactCanvas",
@@ -62085,6 +65046,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:mcp/shareAccess.js:same",
       "function:mcp/shareAccess.js:sanitizeEdge",
       "function:mcp/shareAccess.js:sanitizeNode",
+      "function:mcp/shareAccess.js:setCanvasMemberPermission",
       "function:mcp/shareAccess.js:setCanvasMemberViewRestriction",
       "function:mcp/shareAccess.js:stableValue",
       "function:mcp/sourceTwinStore.js:SourceTwinError.constructor",
@@ -62147,7 +65109,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:mcp/store.js:listCanvases",
       "function:mcp/store.js:loadPrefs",
       "function:mcp/store.js:materializeNode",
-      "function:mcp/store.js:mySharesFor",
       "function:mcp/store.js:newEdgeId",
       "function:mcp/store.js:newNodeId",
       "function:mcp/store.js:nextRevision",
@@ -62339,6 +65300,9 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:scripts/test-mcp-logic.mjs:writeDb.from",
       "function:scripts/test-mcp-logic.mjs:writeDb.insert",
       "function:scripts/test-operation-lifecycle.mjs:planFor",
+      "function:scripts/test-performance-boundaries.mjs:read",
+      "function:scripts/test-security-boundaries.mjs:collect",
+      "function:scripts/test-security-boundaries.mjs:read",
       "function:scripts/test-source-twin.mjs:localCompletionDb",
       "function:scripts/test-source-twin.mjs:localCompletionDb.from",
       "function:scripts/test-source-twin.mjs:localConnectorDb.from",
@@ -62469,13 +65433,26 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/relationOntology.js:relationDefinition",
       "function:shared/relationOntology.js:relationFamilyDefinition",
       "function:shared/relationOntology.js:relationSourceDefinition",
+      "function:shared/richTextSanitizer.js:cleanChildren",
+      "function:shared/richTextSanitizer.js:safeClassName",
+      "function:shared/richTextSanitizer.js:safeFontSize",
+      "function:shared/richTextSanitizer.js:safeStyleValue",
+      "function:shared/richTextSanitizer.js:sanitizeAttribute",
+      "function:shared/richTextSanitizer.js:sanitizeAttributeList",
+      "function:shared/richTextSanitizer.js:sanitizeFallback",
+      "function:shared/richTextSanitizer.js:sanitizeRichTextHtml",
+      "function:shared/richTextSanitizer.js:sanitizeRichTextStyle",
+      "function:shared/richTextSanitizer.js:sanitizeWithDomParser",
       "function:shared/sharePermissions.js:composeSharePermission",
       "function:shared/sharePermissions.js:editableGroupIdSet",
       "function:shared/sharePermissions.js:editableNodeIdSetForPermission",
+      "function:shared/sharePermissions.js:grantCoversInvitation",
+      "function:shared/sharePermissions.js:invitationAuthorizingGrants",
       "function:shared/sharePermissions.js:normalizeShareGrant",
       "function:shared/sharePermissions.js:permissionCanCreateInGroup",
       "function:shared/sharePermissions.js:permissionCanEditEdge",
       "function:shared/sharePermissions.js:permissionCanEditNodeStructure",
+      "function:shared/sharePermissions.js:permissionCanInviteScope",
       "function:shared/sharePermissions.js:permissionFromAccess",
       "function:shared/sharePermissions.js:visibleNodeIdSetForPermission",
       "function:shared/sourceTwin.js:changedEntities",
@@ -62707,6 +65684,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/App.jsx:closestHandles",
       "function:src/App.jsx:cloudRowSnapshot",
       "function:src/App.jsx:commitRename",
+      "function:src/App.jsx:creationPosition",
       "function:src/App.jsx:dedupeParticipants",
       "function:src/App.jsx:detachDigitalTwinBinding",
       "function:src/App.jsx:dim",
@@ -62843,6 +65821,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/components/EditToolbar.jsx:toggle",
       "function:src/components/EditToolbar.jsx:toggle#2",
       "function:src/components/EditToolbar.jsx:toggle#3",
+      "function:src/components/FriendManager.jsx:FriendManager",
+      "function:src/components/FriendManager.jsx:actionButton",
+      "function:src/components/FriendManager.jsx:personRow",
+      "function:src/components/FriendManager.jsx:run",
+      "function:src/components/FriendManager.jsx:submit",
       "function:src/components/InvitePopover.jsx:InvitePopover",
       "function:src/components/InvitePopover.jsx:handleCopy",
       "function:src/components/InvitePopover.jsx:handleCreateLink",
@@ -62938,6 +65921,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/lib/canvasNavigation.js:clearLastOpenedCanvas",
       "function:src/lib/canvasNavigation.js:isSharedCanvasId",
       "function:src/lib/canvasNavigation.js:loadLastOpenedCanvas",
+      "function:src/lib/canvasNavigation.js:orderCanvasSummaries",
       "function:src/lib/canvasNavigation.js:saveLastOpenedCanvas",
       "function:src/lib/canvasSchemaGuard.js:CanvasSchemaGuardError.constructor",
       "function:src/lib/canvasSchemaGuard.js:canvasWriteError",
@@ -62946,13 +65930,26 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/lib/canvasSync.js:sameCanvasSnapshot",
       "function:src/lib/cloudStorage.js:CanvasConflictError.constructor",
       "function:src/lib/cloudStorage.js:deleteCanvas",
-      "function:src/lib/cloudStorage.js:loadAllCanvases",
       "function:src/lib/cloudStorage.js:loadCanvasRow",
+      "function:src/lib/cloudStorage.js:loadCanvasSummaries",
       "function:src/lib/cloudStorage.js:loadUserPrefs",
       "function:src/lib/cloudStorage.js:nextRevision",
       "function:src/lib/cloudStorage.js:saveCanvas",
       "function:src/lib/cloudStorage.js:saveUserPrefs",
       "function:src/lib/digitalTwinAdapters.js:inspectDigitalTwinCanvas",
+      "function:src/lib/friendships.js:listFriendships",
+      "function:src/lib/friendships.js:removeFriendship",
+      "function:src/lib/friendships.js:respondFriendRequest",
+      "function:src/lib/friendships.js:sendFriendRequest",
+      "function:src/lib/groupMembership.js:findGroupAtPoint",
+      "function:src/lib/groupMembership.js:findGroupDropTarget",
+      "function:src/lib/groupMembership.js:groupCandidates",
+      "function:src/lib/groupMembership.js:nodeAbsoluteRect",
+      "function:src/lib/groupMembership.js:nodeDimensions",
+      "function:src/lib/groupMembership.js:overlapArea",
+      "function:src/lib/groupMembership.js:positionInsideGroup",
+      "function:src/lib/groupMembership.js:positiveDimension",
+      "function:src/lib/groupMembership.js:reparentNodePreservingPosition",
       "function:src/lib/imageStorage.js:dataUrlToBlob",
       "function:src/lib/imageStorage.js:getCanvasImageUrl",
       "function:src/lib/imageStorage.js:safeSegment",
@@ -62980,7 +65977,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/lib/profiles.js:touchLastSeen",
       "function:src/lib/profiles.js:upsertMyEmail",
       "function:src/lib/profiles.js:upsertMyProfile",
-      "function:src/lib/sanitizeHtml.js:sanitizeAttrs",
       "function:src/lib/sanitizeHtml.js:sanitizeExternalUrl",
       "function:src/lib/sanitizeHtml.js:sanitizeHtml",
       "function:src/lib/sanitizeHtml.js:sanitizeNodeData",
@@ -62990,27 +65986,29 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/lib/shareLaunchCoordinator.js:claimShareLaunchFallback.release#2",
       "function:src/lib/shareLaunchCoordinator.js:claimShareLaunchFallback.release#3",
       "function:src/lib/shareLaunchCoordinator.js:shareTokenFingerprint",
+      "function:src/lib/sharedCanvasApi.js:createCanvasInvitation",
       "function:src/lib/sharedCanvasApi.js:getSharedCanvas",
       "function:src/lib/sharedCanvasApi.js:listCanvasParticipants",
       "function:src/lib/sharedCanvasApi.js:listSharedCanvases",
       "function:src/lib/sharedCanvasApi.js:request",
+      "function:src/lib/sharedCanvasApi.js:setCanvasMemberPermission",
       "function:src/lib/sharedCanvasApi.js:setMemberViewRestriction",
       "function:src/lib/sharedCanvasApi.js:updateSharedCanvas",
       "function:src/lib/shares.js:claimEmailInvite",
       "function:src/lib/shares.js:claimShareToken",
-      "function:src/lib/shares.js:createLinkShare",
-      "function:src/lib/shares.js:createShare",
       "function:src/lib/shares.js:currentUserId",
       "function:src/lib/shares.js:deleteShare",
       "function:src/lib/shares.js:getShareLinkPreview",
       "function:src/lib/shares.js:isShareLinkActive",
       "function:src/lib/shares.js:kickMember",
       "function:src/lib/shares.js:leaveSharedCanvas",
+      "function:src/lib/shares.js:listOwnedSharedCanvasIds",
       "function:src/lib/shares.js:listPendingEmailInvites",
       "function:src/lib/shares.js:listShareMembers",
       "function:src/lib/shares.js:listShares",
+      "function:src/lib/shares.js:loadMemberRows",
+      "function:src/lib/shares.js:loadOwnedShareRows",
       "function:src/lib/shares.js:revokeShareMember",
-      "function:src/lib/shares.js:setMemberEdit",
       "function:src/lib/sourceTwinApi.js:applySourceTwinHistoryCapture",
       "function:src/lib/sourceTwinApi.js:compareSourceTwinHistory",
       "function:src/lib/sourceTwinApi.js:loadSourceTwinCurrent",
@@ -63170,6 +66168,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:api/source-twin.js",
       "file:api/system-runtime.js",
       "file:index.html",
+      "file:mcp/canvasSummaries.js",
       "file:mcp/dataAccessAudit.js",
       "file:mcp/layout.js",
       "file:mcp/localConnectorStore.js",
@@ -63189,10 +66188,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:scripts/source-twin-scanner.mjs",
       "file:scripts/source-twin-semantics.mjs",
       "file:scripts/system-discovery.mjs",
+      "file:scripts/test-collaboration-permissions.mjs",
       "file:scripts/test-engine-registry.mjs",
+      "file:scripts/test-group-membership.mjs",
       "file:scripts/test-local-connector-agent.mjs",
       "file:scripts/test-mcp-logic.mjs",
       "file:scripts/test-operation-lifecycle.mjs",
+      "file:scripts/test-performance-boundaries.mjs",
+      "file:scripts/test-security-boundaries.mjs",
       "file:scripts/test-source-twin.mjs",
       "file:scripts/test-sql-security.mjs",
       "file:scripts/test-twin-adapter-contract.mjs",
@@ -63206,6 +66209,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:shared/operationLifecycle.js",
       "file:shared/privacyCapabilities.js",
       "file:shared/relationOntology.js",
+      "file:shared/richTextSanitizer.js",
       "file:shared/sharePermissions.js",
       "file:shared/sourceTwin.js",
       "file:shared/sourceTwinSemantics.js",
@@ -63233,6 +66237,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:src/components/DigitalTwinReviewPanel.jsx",
       "file:src/components/EdgeRelationEditor.jsx",
       "file:src/components/EditToolbar.jsx",
+      "file:src/components/FriendManager.jsx",
       "file:src/components/InvitePopover.jsx",
       "file:src/components/NodePalette.jsx",
       "file:src/components/NotesPanel.jsx",
@@ -63253,6 +66258,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:src/lib/canvasSync.js",
       "file:src/lib/cloudStorage.js",
       "file:src/lib/digitalTwinAdapters.js",
+      "file:src/lib/friendships.js",
+      "file:src/lib/groupMembership.js",
       "file:src/lib/imageStorage.js",
       "file:src/lib/localConnectorApi.js",
       "file:src/lib/mcpTokens.js",
@@ -63276,6 +66283,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:supabase-canvas-images.sql",
       "file:supabase-canvas-notes.sql",
       "file:supabase-canvas-stage-types.sql",
+      "file:supabase-canvas-summaries.sql",
       "file:supabase-canvas-views.sql",
       "file:supabase-data-access-audit.sql",
       "file:supabase-local-connectors.sql",
@@ -63287,6 +66295,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:supabase-runtime-observations.sql",
       "file:supabase-runtime-read.sql",
       "file:supabase-schema.sql",
+      "file:supabase-security-hardening.sql",
       "file:supabase-shares.sql",
       "file:supabase-source-twin-history.sql",
       "file:vercel.json",
@@ -63321,6 +66330,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:api/system-runtime.js:runTarget",
       "function:api/system-runtime.js:runtimeBaseUrl",
       "function:api/system-runtime.js:send",
+      "function:mcp/canvasSummaries.js:count",
+      "function:mcp/canvasSummaries.js:fallbackMetadata",
+      "function:mcp/canvasSummaries.js:loadCanvasSummaries",
+      "function:mcp/canvasSummaries.js:missingSummaryFunction",
+      "function:mcp/canvasSummaries.js:summaryRow",
       "function:mcp/dataAccessAudit.js:DataAccessAuditError.constructor",
       "function:mcp/dataAccessAudit.js:dataAccessAuditRequired",
       "function:mcp/dataAccessAudit.js:recordCanvasDataAccess",
@@ -63372,7 +66386,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:mcp/localConnectorStore.js:sha",
       "function:mcp/localConnectorStore.js:stable",
       "function:mcp/localConnectorStore.js:tokenHash",
-      "function:mcp/sanitize.js:sanitizeAttrs",
       "function:mcp/sanitize.js:sanitizeExternalUrl",
       "function:mcp/sanitize.js:sanitizeHtml",
       "function:mcp/sanitize.js:sanitizeTextFields",
@@ -63387,12 +66400,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:mcp/shareAccess.js:admin",
       "function:mcp/shareAccess.js:applySharedCanvasUpdate",
       "function:mcp/shareAccess.js:compareShareAccess",
+      "function:mcp/shareAccess.js:createCanvasInvitation",
       "function:mcp/shareAccess.js:editableNodeIdSet",
       "function:mcp/shareAccess.js:effectiveShareGrant",
+      "function:mcp/shareAccess.js:enforceInvitationRateLimit",
       "function:mcp/shareAccess.js:listCanvasParticipants",
+      "function:mcp/shareAccess.js:loadCanvasShareRows",
+      "function:mcp/shareAccess.js:loadMembersForShares",
       "function:mcp/shareAccess.js:mayEdit",
       "function:mcp/shareAccess.js:mayEditStructure",
       "function:mcp/shareAccess.js:mySharesFor",
+      "function:mcp/shareAccess.js:normalizeInvitationTarget",
       "function:mcp/shareAccess.js:pickBestShareAccess",
       "function:mcp/shareAccess.js:publicProfile",
       "function:mcp/shareAccess.js:redactCanvas",
@@ -63403,6 +66421,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:mcp/shareAccess.js:same",
       "function:mcp/shareAccess.js:sanitizeEdge",
       "function:mcp/shareAccess.js:sanitizeNode",
+      "function:mcp/shareAccess.js:setCanvasMemberPermission",
       "function:mcp/shareAccess.js:setCanvasMemberViewRestriction",
       "function:mcp/shareAccess.js:stableValue",
       "function:mcp/sourceTwinStore.js:SourceTwinError.constructor",
@@ -63465,7 +66484,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:mcp/store.js:listCanvases",
       "function:mcp/store.js:loadPrefs",
       "function:mcp/store.js:materializeNode",
-      "function:mcp/store.js:mySharesFor",
       "function:mcp/store.js:newEdgeId",
       "function:mcp/store.js:newNodeId",
       "function:mcp/store.js:nextRevision",
@@ -63657,6 +66675,9 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:scripts/test-mcp-logic.mjs:writeDb.from",
       "function:scripts/test-mcp-logic.mjs:writeDb.insert",
       "function:scripts/test-operation-lifecycle.mjs:planFor",
+      "function:scripts/test-performance-boundaries.mjs:read",
+      "function:scripts/test-security-boundaries.mjs:collect",
+      "function:scripts/test-security-boundaries.mjs:read",
       "function:scripts/test-source-twin.mjs:localCompletionDb",
       "function:scripts/test-source-twin.mjs:localCompletionDb.from",
       "function:scripts/test-source-twin.mjs:localConnectorDb.from",
@@ -63787,13 +66808,26 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/relationOntology.js:relationDefinition",
       "function:shared/relationOntology.js:relationFamilyDefinition",
       "function:shared/relationOntology.js:relationSourceDefinition",
+      "function:shared/richTextSanitizer.js:cleanChildren",
+      "function:shared/richTextSanitizer.js:safeClassName",
+      "function:shared/richTextSanitizer.js:safeFontSize",
+      "function:shared/richTextSanitizer.js:safeStyleValue",
+      "function:shared/richTextSanitizer.js:sanitizeAttribute",
+      "function:shared/richTextSanitizer.js:sanitizeAttributeList",
+      "function:shared/richTextSanitizer.js:sanitizeFallback",
+      "function:shared/richTextSanitizer.js:sanitizeRichTextHtml",
+      "function:shared/richTextSanitizer.js:sanitizeRichTextStyle",
+      "function:shared/richTextSanitizer.js:sanitizeWithDomParser",
       "function:shared/sharePermissions.js:composeSharePermission",
       "function:shared/sharePermissions.js:editableGroupIdSet",
       "function:shared/sharePermissions.js:editableNodeIdSetForPermission",
+      "function:shared/sharePermissions.js:grantCoversInvitation",
+      "function:shared/sharePermissions.js:invitationAuthorizingGrants",
       "function:shared/sharePermissions.js:normalizeShareGrant",
       "function:shared/sharePermissions.js:permissionCanCreateInGroup",
       "function:shared/sharePermissions.js:permissionCanEditEdge",
       "function:shared/sharePermissions.js:permissionCanEditNodeStructure",
+      "function:shared/sharePermissions.js:permissionCanInviteScope",
       "function:shared/sharePermissions.js:permissionFromAccess",
       "function:shared/sharePermissions.js:visibleNodeIdSetForPermission",
       "function:shared/sourceTwin.js:changedEntities",
@@ -64025,6 +67059,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/App.jsx:closestHandles",
       "function:src/App.jsx:cloudRowSnapshot",
       "function:src/App.jsx:commitRename",
+      "function:src/App.jsx:creationPosition",
       "function:src/App.jsx:dedupeParticipants",
       "function:src/App.jsx:detachDigitalTwinBinding",
       "function:src/App.jsx:dim",
@@ -64161,6 +67196,11 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/components/EditToolbar.jsx:toggle",
       "function:src/components/EditToolbar.jsx:toggle#2",
       "function:src/components/EditToolbar.jsx:toggle#3",
+      "function:src/components/FriendManager.jsx:FriendManager",
+      "function:src/components/FriendManager.jsx:actionButton",
+      "function:src/components/FriendManager.jsx:personRow",
+      "function:src/components/FriendManager.jsx:run",
+      "function:src/components/FriendManager.jsx:submit",
       "function:src/components/InvitePopover.jsx:InvitePopover",
       "function:src/components/InvitePopover.jsx:handleCopy",
       "function:src/components/InvitePopover.jsx:handleCreateLink",
@@ -64256,6 +67296,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/lib/canvasNavigation.js:clearLastOpenedCanvas",
       "function:src/lib/canvasNavigation.js:isSharedCanvasId",
       "function:src/lib/canvasNavigation.js:loadLastOpenedCanvas",
+      "function:src/lib/canvasNavigation.js:orderCanvasSummaries",
       "function:src/lib/canvasNavigation.js:saveLastOpenedCanvas",
       "function:src/lib/canvasSchemaGuard.js:CanvasSchemaGuardError.constructor",
       "function:src/lib/canvasSchemaGuard.js:canvasWriteError",
@@ -64264,13 +67305,26 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/lib/canvasSync.js:sameCanvasSnapshot",
       "function:src/lib/cloudStorage.js:CanvasConflictError.constructor",
       "function:src/lib/cloudStorage.js:deleteCanvas",
-      "function:src/lib/cloudStorage.js:loadAllCanvases",
       "function:src/lib/cloudStorage.js:loadCanvasRow",
+      "function:src/lib/cloudStorage.js:loadCanvasSummaries",
       "function:src/lib/cloudStorage.js:loadUserPrefs",
       "function:src/lib/cloudStorage.js:nextRevision",
       "function:src/lib/cloudStorage.js:saveCanvas",
       "function:src/lib/cloudStorage.js:saveUserPrefs",
       "function:src/lib/digitalTwinAdapters.js:inspectDigitalTwinCanvas",
+      "function:src/lib/friendships.js:listFriendships",
+      "function:src/lib/friendships.js:removeFriendship",
+      "function:src/lib/friendships.js:respondFriendRequest",
+      "function:src/lib/friendships.js:sendFriendRequest",
+      "function:src/lib/groupMembership.js:findGroupAtPoint",
+      "function:src/lib/groupMembership.js:findGroupDropTarget",
+      "function:src/lib/groupMembership.js:groupCandidates",
+      "function:src/lib/groupMembership.js:nodeAbsoluteRect",
+      "function:src/lib/groupMembership.js:nodeDimensions",
+      "function:src/lib/groupMembership.js:overlapArea",
+      "function:src/lib/groupMembership.js:positionInsideGroup",
+      "function:src/lib/groupMembership.js:positiveDimension",
+      "function:src/lib/groupMembership.js:reparentNodePreservingPosition",
       "function:src/lib/imageStorage.js:dataUrlToBlob",
       "function:src/lib/imageStorage.js:getCanvasImageUrl",
       "function:src/lib/imageStorage.js:safeSegment",
@@ -64298,7 +67352,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/lib/profiles.js:touchLastSeen",
       "function:src/lib/profiles.js:upsertMyEmail",
       "function:src/lib/profiles.js:upsertMyProfile",
-      "function:src/lib/sanitizeHtml.js:sanitizeAttrs",
       "function:src/lib/sanitizeHtml.js:sanitizeExternalUrl",
       "function:src/lib/sanitizeHtml.js:sanitizeHtml",
       "function:src/lib/sanitizeHtml.js:sanitizeNodeData",
@@ -64308,27 +67361,29 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/lib/shareLaunchCoordinator.js:claimShareLaunchFallback.release#2",
       "function:src/lib/shareLaunchCoordinator.js:claimShareLaunchFallback.release#3",
       "function:src/lib/shareLaunchCoordinator.js:shareTokenFingerprint",
+      "function:src/lib/sharedCanvasApi.js:createCanvasInvitation",
       "function:src/lib/sharedCanvasApi.js:getSharedCanvas",
       "function:src/lib/sharedCanvasApi.js:listCanvasParticipants",
       "function:src/lib/sharedCanvasApi.js:listSharedCanvases",
       "function:src/lib/sharedCanvasApi.js:request",
+      "function:src/lib/sharedCanvasApi.js:setCanvasMemberPermission",
       "function:src/lib/sharedCanvasApi.js:setMemberViewRestriction",
       "function:src/lib/sharedCanvasApi.js:updateSharedCanvas",
       "function:src/lib/shares.js:claimEmailInvite",
       "function:src/lib/shares.js:claimShareToken",
-      "function:src/lib/shares.js:createLinkShare",
-      "function:src/lib/shares.js:createShare",
       "function:src/lib/shares.js:currentUserId",
       "function:src/lib/shares.js:deleteShare",
       "function:src/lib/shares.js:getShareLinkPreview",
       "function:src/lib/shares.js:isShareLinkActive",
       "function:src/lib/shares.js:kickMember",
       "function:src/lib/shares.js:leaveSharedCanvas",
+      "function:src/lib/shares.js:listOwnedSharedCanvasIds",
       "function:src/lib/shares.js:listPendingEmailInvites",
       "function:src/lib/shares.js:listShareMembers",
       "function:src/lib/shares.js:listShares",
+      "function:src/lib/shares.js:loadMemberRows",
+      "function:src/lib/shares.js:loadOwnedShareRows",
       "function:src/lib/shares.js:revokeShareMember",
-      "function:src/lib/shares.js:setMemberEdit",
       "function:src/lib/sourceTwinApi.js:applySourceTwinHistoryCapture",
       "function:src/lib/sourceTwinApi.js:compareSourceTwinHistory",
       "function:src/lib/sourceTwinApi.js:loadSourceTwinCurrent",
@@ -64476,10 +67531,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "db-function:claim_email_invites",
       "db-function:claim_share",
       "db-function:disable_share_invitation",
+      "db-function:get_canvas_summaries",
       "db-function:get_my_canvas_data_access_audit",
       "db-function:get_workflow_system_operational_snapshot",
       "db-function:is_share_member",
       "db-function:leave_shared_canvas",
+      "db-function:list_my_friendships",
       "db-function:list_pending_email_invites",
       "db-function:owns_share",
       "db-function:prevent_canvas_relation_metadata_loss",
@@ -64487,12 +67544,18 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "db-function:reject_server_data_access_audit_mutation",
       "db-function:reject_source_twin_history_mutation",
       "db-function:reject_system_operation_audit_mutation",
+      "db-function:remove_friendship",
+      "db-function:respond_friend_request",
       "db-function:revoke_canvas_member",
       "db-function:revoke_share_member",
+      "db-function:send_friend_request",
       "db-function:share_link_is_active",
       "db-function:share_link_preview",
+      "db-function:touch_my_profile",
+      "db-function:upsert_my_profile",
       "db-table:canvas_shares",
       "db-table:canvases",
+      "db-table:friendships",
       "db-table:local_connector_operation_events",
       "db-table:local_connector_operations",
       "db-table:local_connectors",
@@ -64508,6 +67571,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "db-table:user_prefs",
       "file:api/shared-canvas.js",
       "file:api/system-runtime.js",
+      "file:mcp/canvasSummaries.js",
       "file:mcp/dataAccessAudit.js",
       "file:mcp/localConnectorStore.js",
       "file:mcp/shareAccess.js",
@@ -64515,12 +67579,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:mcp/store.js",
       "file:src/App.jsx",
       "file:src/lib/cloudStorage.js",
+      "file:src/lib/friendships.js",
       "file:src/lib/mcpTokens.js",
       "file:src/lib/profiles.js",
       "file:src/lib/shares.js",
       "file:supabase-canvas-images.sql",
       "file:supabase-canvas-notes.sql",
       "file:supabase-canvas-stage-types.sql",
+      "file:supabase-canvas-summaries.sql",
       "file:supabase-canvas-views.sql",
       "file:supabase-data-access-audit.sql",
       "file:supabase-local-connectors.sql",
@@ -64532,6 +67598,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:supabase-runtime-observations.sql",
       "file:supabase-runtime-read.sql",
       "file:supabase-schema.sql",
+      "file:supabase-security-hardening.sql",
       "file:supabase-shares.sql",
       "file:supabase-source-twin-history.sql",
       "rls-policy:canvas_shares:invitee selects own invites",
@@ -64539,6 +67606,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "rls-policy:canvases:invitee selects shared canvases",
       "rls-policy:canvases:invitee updates shared canvases",
       "rls-policy:canvases:users manage own canvases",
+      "rls-policy:friendships:friends select own relationships",
       "rls-policy:mcp_tokens:user creates own tokens",
       "rls-policy:mcp_tokens:user deletes own tokens",
       "rls-policy:mcp_tokens:user reads own tokens",
@@ -64560,12 +67628,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "env:SUPABASE_SERVICE_ROLE_KEY",
       "env:WORKFLOW_CANVAS_GITHUB_WEBHOOK_SECRET",
       "env:WORKFLOW_CANVAS_LOCAL_CONNECTOR_TOKEN",
+      "file:shared/richTextSanitizer.js",
       "file:src/components/NotesPanel.jsx",
       "file:src/nodes/ContentNode.jsx",
       "file:src/nodes/MemoNode.jsx",
       "file:src/nodes/StageNode.jsx",
       "file:src/nodes/SystemNode.jsx",
       "file:supabase-canvas-images.sql",
+      "file:supabase-canvas-summaries.sql",
       "file:supabase-data-access-audit.sql",
       "file:supabase-local-connectors.sql",
       "file:supabase-mcp-schema.sql",
@@ -64575,6 +67645,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:supabase-runtime-observations.sql",
       "file:supabase-runtime-read.sql",
       "file:supabase-schema.sql",
+      "file:supabase-security-hardening.sql",
       "file:supabase-shares.sql",
       "file:supabase-source-twin-history.sql",
       "rls-policy:canvas_shares:invitee selects own invites",
@@ -64582,6 +67653,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "rls-policy:canvases:invitee selects shared canvases",
       "rls-policy:canvases:invitee updates shared canvases",
       "rls-policy:canvases:users manage own canvases",
+      "rls-policy:friendships:friends select own relationships",
       "rls-policy:mcp_tokens:user creates own tokens",
       "rls-policy:mcp_tokens:user deletes own tokens",
       "rls-policy:mcp_tokens:user reads own tokens",
@@ -64619,110 +67691,250 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
     ]
   },
   "fingerprints": {
-    "code": "79c3b6d41ea380e67d5d",
-    "database": "586abced2f3b50d9f708",
-    "security": "87e2f08ee5e390d8ce87",
-    "deployment": "16eb6662199bc031a35a"
+    "code": "cd46e94b30fc3a5521eb",
+    "database": "e18a67e98d35f0f11b07",
+    "security": "6aa4df7cddb848011703",
+    "deployment": "faee4de60994d40a3285"
   },
   "summary": {
-    "entities": 1409,
+    "entities": 1475,
     "areas": 14,
     "subsystems": 37,
-    "files": 129,
-    "functions": 1161,
-    "imports": 400,
+    "files": 140,
+    "functions": 1207,
+    "imports": 424,
     "apiRoutes": 6,
-    "dbTables": 15,
-    "dbFunctions": 24,
-    "rlsPolicies": 21,
+    "dbTables": 16,
+    "dbFunctions": 31,
+    "rlsPolicies": 22,
     "environmentVariables": 13,
-    "testFiles": 8,
+    "testFiles": 12,
     "deploymentEntities": 16,
-    "securityEntities": 41,
+    "securityEntities": 45,
     "parseFailures": 0
   },
   "changeSet": {
-    "baseManifestId": "source-twin-v1-7c54765bd70a",
+    "baseManifestId": "source-twin-v1-448b5aa4b358",
     "initialBaseline": false,
     "added": [
-      "file:scripts/check-governance.mjs",
-      "file:scripts/test-engine-registry.mjs",
-      "file:shared/capabilityMapper.js",
-      "file:shared/engineRegistry.js",
-      "function:scripts/check-governance.mjs:fail",
-      "function:scripts/check-governance.mjs:readJson",
-      "function:shared/capabilityMapper.js:componentNodeId",
-      "function:shared/capabilityMapper.js:componentPosition",
-      "function:shared/capabilityMapper.js:createCapabilityNode",
-      "function:shared/capabilityMapper.js:createCapabilityRelation",
-      "function:shared/capabilityMapper.js:createEngineCapabilityMap",
-      "function:shared/capabilityMapper.js:validateRegistry",
-      "function:shared/engineRegistry.js:component",
-      "function:shared/engineRegistry.js:deepFreeze",
-      "function:shared/engineRegistry.js:topLevel",
-      "function:shared/systemOntology.js:normalizeLogicalComponent",
-      "function:shared/systemOntology.js:normalizeTextList",
-      "function:shared/workflowSystemTwinAdapter.js:engineCapabilityMigrationItem",
-      "function:shared/workflowSystemTwinAdapter.js:isEngineBatchBuildItem",
-      "function:src/nodes/SystemNode.jsx:compactList",
-      "function:src/nodes/SystemNode.jsx:evidenceSummary",
-      "npm-script:governance:check",
-      "npm-script:sbom:generate"
+      "db-function:get_canvas_summaries",
+      "db-function:list_my_friendships",
+      "db-function:remove_friendship",
+      "db-function:respond_friend_request",
+      "db-function:send_friend_request",
+      "db-function:touch_my_profile",
+      "db-function:upsert_my_profile",
+      "db-table:friendships",
+      "file:mcp/canvasSummaries.js",
+      "file:scripts/test-collaboration-permissions.mjs",
+      "file:scripts/test-group-membership.mjs",
+      "file:scripts/test-performance-boundaries.mjs",
+      "file:scripts/test-security-boundaries.mjs",
+      "file:shared/richTextSanitizer.js",
+      "file:src/components/FriendManager.jsx",
+      "file:src/lib/friendships.js",
+      "file:src/lib/groupMembership.js",
+      "file:supabase-canvas-summaries.sql",
+      "file:supabase-security-hardening.sql",
+      "function:mcp/canvasSummaries.js:count",
+      "function:mcp/canvasSummaries.js:fallbackMetadata",
+      "function:mcp/canvasSummaries.js:loadCanvasSummaries",
+      "function:mcp/canvasSummaries.js:missingSummaryFunction",
+      "function:mcp/canvasSummaries.js:summaryRow",
+      "function:mcp/shareAccess.js:createCanvasInvitation",
+      "function:mcp/shareAccess.js:enforceInvitationRateLimit",
+      "function:mcp/shareAccess.js:loadCanvasShareRows",
+      "function:mcp/shareAccess.js:loadMembersForShares",
+      "function:mcp/shareAccess.js:normalizeInvitationTarget",
+      "function:mcp/shareAccess.js:setCanvasMemberPermission",
+      "function:scripts/test-performance-boundaries.mjs:read",
+      "function:scripts/test-security-boundaries.mjs:collect",
+      "function:scripts/test-security-boundaries.mjs:read",
+      "function:shared/richTextSanitizer.js:cleanChildren",
+      "function:shared/richTextSanitizer.js:safeClassName",
+      "function:shared/richTextSanitizer.js:safeFontSize",
+      "function:shared/richTextSanitizer.js:safeStyleValue",
+      "function:shared/richTextSanitizer.js:sanitizeAttribute",
+      "function:shared/richTextSanitizer.js:sanitizeAttributeList",
+      "function:shared/richTextSanitizer.js:sanitizeFallback",
+      "function:shared/richTextSanitizer.js:sanitizeRichTextHtml",
+      "function:shared/richTextSanitizer.js:sanitizeRichTextStyle",
+      "function:shared/richTextSanitizer.js:sanitizeWithDomParser",
+      "function:shared/sharePermissions.js:grantCoversInvitation",
+      "function:shared/sharePermissions.js:invitationAuthorizingGrants",
+      "function:shared/sharePermissions.js:permissionCanInviteScope",
+      "function:src/App.jsx:creationPosition",
+      "function:src/components/FriendManager.jsx:FriendManager",
+      "function:src/components/FriendManager.jsx:actionButton",
+      "function:src/components/FriendManager.jsx:personRow",
+      "function:src/components/FriendManager.jsx:run",
+      "function:src/components/FriendManager.jsx:submit",
+      "function:src/lib/canvasNavigation.js:orderCanvasSummaries",
+      "function:src/lib/cloudStorage.js:loadCanvasSummaries",
+      "function:src/lib/friendships.js:listFriendships",
+      "function:src/lib/friendships.js:removeFriendship",
+      "function:src/lib/friendships.js:respondFriendRequest",
+      "function:src/lib/friendships.js:sendFriendRequest",
+      "function:src/lib/groupMembership.js:findGroupAtPoint",
+      "function:src/lib/groupMembership.js:findGroupDropTarget",
+      "function:src/lib/groupMembership.js:groupCandidates",
+      "function:src/lib/groupMembership.js:nodeAbsoluteRect",
+      "function:src/lib/groupMembership.js:nodeDimensions",
+      "function:src/lib/groupMembership.js:overlapArea",
+      "function:src/lib/groupMembership.js:positionInsideGroup",
+      "function:src/lib/groupMembership.js:positiveDimension",
+      "function:src/lib/groupMembership.js:reparentNodePreservingPosition",
+      "function:src/lib/sharedCanvasApi.js:createCanvasInvitation",
+      "function:src/lib/sharedCanvasApi.js:setCanvasMemberPermission",
+      "function:src/lib/shares.js:listOwnedSharedCanvasIds",
+      "function:src/lib/shares.js:loadMemberRows",
+      "function:src/lib/shares.js:loadOwnedShareRows",
+      "rls-policy:friendships:friends select own relationships"
     ],
     "changed": [
+      "api:/api/shared-canvas",
       "deployment:vercel-web",
-      "file:README.md",
+      "file:api/shared-canvas.js",
+      "file:mcp/localConnectorStore.js",
+      "file:mcp/sanitize.js",
+      "file:mcp/server.js",
+      "file:mcp/shareAccess.js",
+      "file:mcp/store.js",
       "file:package.json",
-      "file:scripts/source-twin-semantics.mjs",
       "file:scripts/test-mcp-logic.mjs",
-      "file:scripts/test-twin-build.mjs",
-      "file:shared/sourceTwinSemantics.js",
-      "file:shared/systemOntology.js",
-      "file:shared/twinBuild.js",
-      "file:shared/twinBuildCanvas.js",
-      "file:shared/workflowCanvasSystemMap.js",
-      "file:shared/workflowSystemTwinAdapter.js",
+      "file:scripts/test-sql-security.mjs",
+      "file:shared/sharePermissions.js",
+      "file:src/App.jsx",
+      "file:src/components/AuthPanel.jsx",
+      "file:src/components/CanvasTabs.jsx",
+      "file:src/components/InvitePopover.jsx",
+      "file:src/index.css",
+      "file:src/lib/canvasNavigation.js",
+      "file:src/lib/cloudStorage.js",
+      "file:src/lib/mcpTokens.js",
+      "file:src/lib/profiles.js",
+      "file:src/lib/sanitizeHtml.js",
+      "file:src/lib/sharedCanvasApi.js",
+      "file:src/lib/shares.js",
+      "file:src/nodes/ContentNode.jsx",
+      "file:src/nodes/GroupNode.jsx",
+      "file:src/nodes/MemoNode.jsx",
+      "file:src/nodes/StageNode.jsx",
       "file:src/nodes/SystemNode.jsx",
-      "function:scripts/source-twin-semantics.mjs:subsystemFromArea",
-      "function:shared/systemOntology.js:normalizeSystemNodeData",
-      "function:shared/systemOntology.js:systemNodeReality",
-      "function:shared/twinBuild.js:migrateTwinBuild",
-      "function:shared/twinBuild.js:normalizeEntity",
-      "function:shared/twinBuildCanvas.js:createTwinBuildFromCanvasTemplate",
-      "function:shared/twinBuildCanvas.js:materializeTwinBuildEntity",
-      "function:shared/workflowCanvasSystemMap.js:createWorkflowCanvasSystemMap",
-      "function:shared/workflowCanvasSystemMap.js:mapEdges",
-      "function:shared/workflowCanvasSystemMap.js:mapNodes",
-      "function:shared/workflowSystemTwinAdapter.js:inspectWorkflowSystemTwin",
+      "file:supabase-profile-privacy.sql",
+      "file:supabase-profiles.sql",
+      "file:supabase-shares.sql",
+      "file:vercel.json",
+      "function:api/shared-canvas.js:handler",
+      "function:mcp/localConnectorStore.js:claimLocalGitSyncOperation",
+      "function:mcp/localConnectorStore.js:createLocalConnector",
+      "function:mcp/localConnectorStore.js:listLocalConnectors",
+      "function:mcp/localConnectorStore.js:loadOwnedConnector",
+      "function:mcp/localConnectorStore.js:recordLocalConnectorHeartbeat",
+      "function:mcp/localConnectorStore.js:resolveLocalConnectorToken",
+      "function:mcp/sanitize.js:sanitizeHtml",
+      "function:mcp/server.js:handler",
+      "function:mcp/shareAccess.js:applySharedCanvasUpdate",
+      "function:mcp/shareAccess.js:effectiveShareGrant",
+      "function:mcp/shareAccess.js:listCanvasParticipants",
+      "function:mcp/shareAccess.js:mySharesFor",
+      "function:mcp/shareAccess.js:redactCanvas",
+      "function:mcp/shareAccess.js:resolveSharedCanvasAccess",
+      "function:mcp/shareAccess.js:setCanvasMemberViewRestriction",
+      "function:mcp/store.js:listCanvases",
+      "function:mcp/store.js:resolveCanvasAccess",
+      "function:shared/sharePermissions.js:composeSharePermission",
+      "function:shared/sharePermissions.js:normalizeShareGrant",
+      "function:shared/sharePermissions.js:permissionFromAccess",
+      "function:src/App.jsx:App",
+      "function:src/App.jsx:handleContextAddContent",
+      "function:src/App.jsx:handleContextAddSystem",
+      "function:src/App.jsx:handler#2",
+      "function:src/App.jsx:stripNode",
+      "function:src/components/AuthPanel.jsx:AuthPanel",
+      "function:src/components/CanvasTabs.jsx:CanvasTabs",
+      "function:src/components/InvitePopover.jsx:InvitePopover",
+      "function:src/components/InvitePopover.jsx:handleCreateLink",
+      "function:src/components/InvitePopover.jsx:handleInvite",
+      "function:src/lib/cloudStorage.js:loadCanvasRow",
+      "function:src/lib/cloudStorage.js:loadUserPrefs",
+      "function:src/lib/mcpTokens.js:listMyTokens",
+      "function:src/lib/profiles.js:getMyProfile",
+      "function:src/lib/profiles.js:getProfiles",
+      "function:src/lib/profiles.js:touchLastSeen",
+      "function:src/lib/profiles.js:upsertMyEmail",
+      "function:src/lib/profiles.js:upsertMyProfile",
+      "function:src/lib/sanitizeHtml.js:sanitizeHtml",
+      "function:src/lib/shares.js:listShareMembers",
+      "function:src/lib/shares.js:listShares",
+      "function:src/nodes/ContentNode.jsx:ContentNode",
+      "function:src/nodes/GroupNode.jsx:GroupNode",
+      "function:src/nodes/MemoNode.jsx:MemoNode",
+      "function:src/nodes/StageNode.jsx:StageNode",
       "function:src/nodes/SystemNode.jsx:SystemNode",
-      "function:src/nodes/SystemNode.jsx:startTitleEdit",
-      "npm-script:build",
-      "npm-script:test"
+      "npm-script:test",
+      "rls-policy:profiles:profiles readable by canvas participants",
+      "rls-policy:profiles:user manages own profile",
+      "rls-policy:profiles:user updates own profile"
     ],
-    "removed": [],
+    "removed": [
+      "function:mcp/sanitize.js:sanitizeAttrs",
+      "function:mcp/store.js:mySharesFor",
+      "function:src/lib/cloudStorage.js:loadAllCanvases",
+      "function:src/lib/sanitizeHtml.js:sanitizeAttrs",
+      "function:src/lib/shares.js:createLinkShare",
+      "function:src/lib/shares.js:createShare",
+      "function:src/lib/shares.js:setMemberEdit"
+    ],
     "changedPaths": [
-      "README.md",
+      "api/shared-canvas.js",
+      "mcp/canvasSummaries.js",
+      "mcp/localConnectorStore.js",
+      "mcp/sanitize.js",
+      "mcp/server.js",
+      "mcp/shareAccess.js",
+      "mcp/store.js",
       "package.json",
-      "scripts/check-governance.mjs",
-      "scripts/source-twin-semantics.mjs",
-      "scripts/test-engine-registry.mjs",
+      "scripts/test-collaboration-permissions.mjs",
+      "scripts/test-group-membership.mjs",
       "scripts/test-mcp-logic.mjs",
-      "scripts/test-twin-build.mjs",
-      "shared/capabilityMapper.js",
-      "shared/engineRegistry.js",
-      "shared/sourceTwinSemantics.js",
-      "shared/systemOntology.js",
-      "shared/twinBuild.js",
-      "shared/twinBuildCanvas.js",
-      "shared/workflowCanvasSystemMap.js",
-      "shared/workflowSystemTwinAdapter.js",
-      "src/nodes/SystemNode.jsx"
+      "scripts/test-performance-boundaries.mjs",
+      "scripts/test-security-boundaries.mjs",
+      "scripts/test-sql-security.mjs",
+      "shared/richTextSanitizer.js",
+      "shared/sharePermissions.js",
+      "src/App.jsx",
+      "src/components/AuthPanel.jsx",
+      "src/components/CanvasTabs.jsx",
+      "src/components/FriendManager.jsx",
+      "src/components/InvitePopover.jsx",
+      "src/index.css",
+      "src/lib/canvasNavigation.js",
+      "src/lib/cloudStorage.js",
+      "src/lib/friendships.js",
+      "src/lib/groupMembership.js",
+      "src/lib/mcpTokens.js",
+      "src/lib/profiles.js",
+      "src/lib/sanitizeHtml.js",
+      "src/lib/sharedCanvasApi.js",
+      "src/lib/shares.js",
+      "src/nodes/ContentNode.jsx",
+      "src/nodes/GroupNode.jsx",
+      "src/nodes/MemoNode.jsx",
+      "src/nodes/StageNode.jsx",
+      "src/nodes/SystemNode.jsx",
+      "supabase-canvas-summaries.sql",
+      "supabase-profile-privacy.sql",
+      "supabase-profiles.sql",
+      "supabase-security-hardening.sql",
+      "supabase-shares.sql",
+      "vercel.json"
     ],
     "summary": {
-      "added": 23,
-      "changed": 28,
-      "removed": 0,
-      "paths": 16
+      "added": 73,
+      "changed": 84,
+      "removed": 7,
+      "paths": 42
     }
   }
 }

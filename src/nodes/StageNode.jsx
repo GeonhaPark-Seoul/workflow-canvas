@@ -359,7 +359,7 @@ export default function StageNode({ data, selected, id }) {
             </div>
             <ScopedParticipants
               participants={data.scopedParticipants}
-              canInvite={selected && data.canInvite && !data.readOnly}
+              canInvite={selected && data.canInvite}
               onInvite={data.onInvite}
               canManageRestrictions={data.canManageParticipants}
               onToggleViewRestriction={data.onToggleViewRestriction}
@@ -424,7 +424,7 @@ export default function StageNode({ data, selected, id }) {
               </div>
               <ScopedParticipants
                 participants={data.scopedParticipants}
-                canInvite={selected && data.canInvite && !data.readOnly}
+                canInvite={selected && data.canInvite}
                 onInvite={data.onInvite}
                 canManageRestrictions={data.canManageParticipants}
                 onToggleViewRestriction={data.onToggleViewRestriction}

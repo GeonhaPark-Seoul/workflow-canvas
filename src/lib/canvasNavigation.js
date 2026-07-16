@@ -19,6 +19,18 @@ export function clearLastOpenedCanvas(userId) {
   try { sessionStorage.removeItem(`${LAST_OPENED_PREFIX}${userId}`) } catch {}
 }
 
+export function orderCanvasSummaries(summaries, preferredOrder = []) {
+  const summaryById = new Map((summaries ?? []).map((row) => [row.canvas_id, row]))
+  const ordered = (preferredOrder ?? [])
+    .filter((canvas) => summaryById.has(canvas.id))
+    .map((canvas) => ({ id: canvas.id, name: summaryById.get(canvas.id).name }))
+  const orderedIds = new Set(ordered.map((canvas) => canvas.id))
+  const missing = (summaries ?? [])
+    .filter((row) => !orderedIds.has(row.canvas_id))
+    .map((row) => ({ id: row.canvas_id, name: row.name }))
+  return [...ordered, ...missing]
+}
+
 // A tab-local choice wins because it is written synchronously before a canvas
 // switch. Cloud preferences remain the cross-device fallback. Every candidate
 // must still exist in the freshly loaded owner rows before it can be restored.

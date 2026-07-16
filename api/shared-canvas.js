@@ -1,9 +1,10 @@
 import {
-  admin, applySharedCanvasUpdate, listCanvasParticipants, mySharesFor, redactCanvas,
-  setCanvasMemberViewRestriction, resolveBrowserUser, resolveSharedCanvasAccess,
+  admin, applySharedCanvasUpdate, createCanvasInvitation, listCanvasParticipants, mySharesFor, redactCanvas,
+  setCanvasMemberPermission, setCanvasMemberViewRestriction, resolveBrowserUser, resolveSharedCanvasAccess,
 } from '../mcp/shareAccess.js'
 import { composeSharePermission } from '../shared/sharePermissions.js'
 import { recordCanvasDataAccess } from '../mcp/dataAccessAudit.js'
+import { loadCanvasSummaries } from '../mcp/canvasSummaries.js'
 
 function send(res, status, body) {
   res.status(status).json(body)
@@ -45,18 +46,32 @@ export default async function handler(req, res) {
         current.grants.push(share)
         grouped.set(key, current)
       }
-      const canvases = await Promise.all([...grouped.values()].map(async (item) => {
-        const { data } = await admin().from('canvases').select('name')
-          .eq('user_id', item.ownerId).eq('canvas_id', item.canvasId).maybeSingle()
-        const permission = composeSharePermission(item.grants)
-        return data ? {
-          ownerId: item.ownerId, canvasId: item.canvasId, name: data.name,
-          scope: permission.scope, targetId: permission.targetId,
-          restrictView: permission.restrictView, canEdit: permission.canEdit,
-          canEditCanvas: permission.canEditCanvas, grants: permission.grants,
-        } : null
-      }))
-      return send(res, 200, { canvases: canvases.filter(Boolean) })
+      const canvases = []
+      const byOwner = new Map()
+      for (const item of grouped.values()) {
+        const items = byOwner.get(item.ownerId) ?? []
+        items.push(item)
+        byOwner.set(item.ownerId, items)
+      }
+      for (const [ownerId, items] of byOwner) {
+        const summaries = await loadCanvasSummaries(admin(), {
+          ownerId,
+          canvasIds: items.map((item) => item.canvasId),
+        })
+        const summaryById = new Map(summaries.map((summary) => [summary.canvas_id, summary]))
+        for (const item of items) {
+          const summary = summaryById.get(item.canvasId)
+          if (!summary) continue
+          const permission = composeSharePermission(item.grants)
+          canvases.push({
+            ownerId: item.ownerId, canvasId: item.canvasId, name: summary.name,
+            scope: permission.scope, targetId: permission.targetId,
+            restrictView: permission.restrictView, canEdit: permission.canEdit,
+            canEditCanvas: permission.canEditCanvas, canInvite: permission.canInvite, grants: permission.grants,
+          })
+        }
+      }
+      return send(res, 200, { canvases })
     }
 
     if (req.method === 'GET' && req.query.mode === 'participants') {
@@ -69,6 +84,25 @@ export default async function handler(req, res) {
     const input = req.method === 'GET' ? req.query : req.body
     const { ownerId, canvasId } = input ?? {}
     if (!ownerId || !canvasId) return send(res, 400, { error: 'ownerId와 canvasId가 필요합니다.' })
+
+    if (req.method === 'POST' && input.action === 'create-invitation') {
+      const result = await createCanvasInvitation({
+        viewer: user,
+        ownerId,
+        canvasId,
+        scope: input.scope,
+        targetId: input.targetId,
+        email: input.email,
+        restrictView: input.restrictView,
+        kind: input.kind,
+      })
+      return send(res, 201, result)
+    }
+
+    if (req.method === 'PATCH' && input.action === 'set-member-permission') {
+      await setCanvasMemberPermission(ownerId, canvasId, input.userId, input.field, input.enabled, user.id)
+      return send(res, 200, { ok: true })
+    }
 
     if (req.method === 'PATCH' && input.action === 'set-view-restriction') {
       if (typeof input.restricted !== 'boolean') return send(res, 400, { error: 'restricted 값이 필요합니다.' })
@@ -119,7 +153,14 @@ export default async function handler(req, res) {
     const status = error?.code === 'CANVAS_CONFLICT'
       ? 409
       : message.includes('workflow_canvas_relation_metadata_guard') ? 428
-      : message.includes('권한') || message.includes('읽기 전용') || message.includes('범위') ? 403 : 500
+      : message.includes('너무 많') ? 429
+      : message.includes('권한') || message.includes('읽기 전용') || message.includes('범위') ? 403
+      : message.includes('찾을 수 없습니다') ? 404
+      : message.includes('올바르지') || message.includes('필요') || message.includes('이미 활성화') || message.includes('한도') ? 400 : 500
+    if (status === 500) {
+      console.error('[shared-canvas] request failed:', error)
+      return send(res, 500, { error: '공유 캔버스 요청을 처리하지 못했습니다.' })
+    }
     return send(res, status, { error: message })
   }
 }

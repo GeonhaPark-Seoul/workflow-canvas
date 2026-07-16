@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import ParticipantAvatar from './ParticipantAvatar'
+import { sendFriendRequest } from '../lib/friendships'
 
 // Compact count formatter: 1000 → 1k, 1500 → 1.5k, 1000000 → 1m (1 decimal,
 // trailing .0 stripped).
@@ -32,8 +33,9 @@ export default function CanvasTabs({
   canvases, activeId, onSwitch, onAdd, onRename, onDelete, mobile,
   sharedCanvases = [], onInvite,
   participants = [], nodes = [], sharedOutIds = new Set(),
-  onLeaveShared = () => {}, onToggleMemberEdit = () => {}, onKickMember = () => {},
+  onLeaveShared = () => {}, onToggleMemberEdit = () => {}, onToggleMemberInvite = () => {}, onKickMember = () => {},
   onToggleViewRestriction = () => {},
+  currentUserId = null, canInviteCanvas = false,
 }) {
   const [open, setOpen] = useState(false)
   const [editingId, setEditingId] = useState(null)
@@ -41,6 +43,7 @@ export default function CanvasTabs({
   const inputRef = useRef(null)
   const containerRef = useRef(null)
   const [peopleOpen, setPeopleOpen] = useState(false) // 참여자 전체 목록 모달
+  const [friendNotice, setFriendNotice] = useState('')
   const peopleRef = useRef(null)
 
   useEffect(() => {
@@ -393,7 +396,7 @@ export default function CanvasTabs({
               {avatarOf(p, 20)}
             </span>
           ))}
-          {isOwnActive && onInvite && (
+          {canInviteCanvas && onInvite && (
             <span
               className="main-avatar-control"
               onClick={(e) => { e.stopPropagation(); const rect = e.currentTarget.getBoundingClientRect(); onInvite('canvas', null, rect) }}
@@ -439,8 +442,8 @@ export default function CanvasTabs({
             style={{
               background: '#1a1a22',
               border: '1px solid #ffffff22',
-              borderRadius: 14,
-              width: 300,
+              borderRadius: 8,
+              width: 'min(390px, calc(100vw - 24px))',
               maxHeight: '70vh',
               overflowY: 'auto',
               padding: 16,
@@ -456,6 +459,7 @@ export default function CanvasTabs({
                 ✕
               </button>
             </div>
+            {friendNotice && <div aria-live="polite" style={{ color: friendNotice.startsWith('오류:') ? '#ef4444' : '#22c55e', fontSize: 10, marginBottom: 8 }}>{friendNotice}</div>}
 
             {participants.map((p) => {
               const nickname = p.profile?.nickname || '이름 없음'
@@ -493,21 +497,47 @@ export default function CanvasTabs({
                       ))}
                     </div>
                   </div>
+                  {p.userId && p.userId !== currentUserId && p.email && (
+                    <button
+                      type="button"
+                      title="친구 요청"
+                      onClick={async () => {
+                        try {
+                          await sendFriendRequest(p.email)
+                          setFriendNotice(`${nickname}님에게 친구 요청을 보냈습니다.`)
+                        } catch (error) {
+                          setFriendNotice(`오류: ${error.message}`)
+                        }
+                      }}
+                      style={{ background: 'transparent', border: '1px solid #8b94a755', borderRadius: 4, color: '#aab', fontSize: 10, fontWeight: 600, padding: '3px 6px', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}
+                    >
+                      친구
+                    </button>
+                  )}
                   {isOwnActive && p.shareId && p.userId && !p.isOwner && (
-                    <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
-                      {grants.length === 1 && (
-                        <button
-                          onClick={() => onToggleMemberEdit(p)}
-                          title="편집 권한 전환"
-                          style={{
-                            background: 'transparent', border: '1px solid #3b82f655', borderRadius: 4,
-                            color: '#3b82f6', fontSize: 10, fontWeight: 600, padding: '3px 6px',
-                            cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
-                          }}
-                        >
-                          {p.canEdit ? '편집' : '읽기'}
-                        </button>
-                      )}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: 4, flexShrink: 0, maxWidth: 142 }}>
+                      <button
+                        onClick={() => onToggleMemberEdit(p)}
+                        title="모든 초대 범위의 편집 권한 전환"
+                        style={{
+                          background: 'transparent', border: '1px solid #3b82f655', borderRadius: 4,
+                          color: '#3b82f6', fontSize: 10, fontWeight: 600, padding: '3px 6px',
+                          cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {p.canEdit ? '편집' : '읽기'}
+                      </button>
+                      <button
+                        onClick={() => onToggleMemberInvite(p)}
+                        title={p.canInvite ? '초대 권한 끄기' : '초대 권한 켜기'}
+                        style={{
+                          background: 'transparent', border: `1px solid ${p.canInvite ? '#22c55e88' : '#8b94a755'}`, borderRadius: 4,
+                          color: p.canInvite ? '#22c55e' : '#8b94a7', fontSize: 10, fontWeight: 600, padding: '3px 6px',
+                          cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
+                        }}
+                      >
+                        초대
+                      </button>
                       <button
                         onClick={() => { if (window.confirm(`"${nickname}"님을 추방할까요?`)) onKickMember(p) }}
                         title="추방"

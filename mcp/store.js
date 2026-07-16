@@ -37,9 +37,12 @@ import {
   visibleNodeIdSetForPermission,
 } from '../shared/sharePermissions.js'
 import { recordCanvasDataAccess } from './dataAccessAudit.js'
+import { loadCanvasSummaries } from './canvasSummaries.js'
+import { mySharesFor as listAcceptedShares } from './shareAccess.js'
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://tuaifwiigkacrflbhjmu.supabase.co'
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
+const CANVAS_ROW_SELECT = 'user_id, canvas_id, name, nodes, edges, notes, views, stage_types, updated_at'
 
 let _admin
 function admin() {
@@ -188,13 +191,8 @@ const toExternal = (types) => types.map((t, i) => ({ stageTypeIdx: i, label: t.l
 // ── Canvas-level ─────────────────────────────────────────────────────────────
 export async function listCanvases(userId) {
   const db = admin()
-  const { data, error } = await db
-    .from('canvases')
-    .select('canvas_id, name, nodes, edges, updated_at')
-    .eq('user_id', userId)
-    .order('updated_at', { ascending: true })
-  if (error) throw new Error(error.message)
-  await Promise.all((data ?? []).map((row) => recordCanvasDataAccess(db, {
+  const own = await loadCanvasSummaries(db, { ownerId: userId })
+  await Promise.all(own.map((row) => recordCanvasDataAccess(db, {
     actorUserId: userId,
     ownerUserId: userId,
     canvasId: row.canvas_id,
@@ -202,16 +200,9 @@ export async function listCanvases(userId) {
     purpose: 'mcp_canvas_operation',
     operation: 'read',
   })))
-  const own = (data ?? []).map((r) => ({
-    canvas_id: r.canvas_id,
-    name: r.name,
-    node_count: (r.nodes ?? []).length,
-    edge_count: (r.edges ?? []).length,
-    updated_at: r.updated_at,
-  }))
 
   // Canvases shared to me: compose every accepted scope per owner+canvas.
-  const shares = await mySharesFor(userId, null)
+  const shares = await listAcceptedShares(userId, null)
   const grouped = new Map()
   for (const s of shares) {
     const key = `${s.owner_id}:${s.canvas_id}`
@@ -220,33 +211,37 @@ export async function listCanvases(userId) {
     grouped.set(key, current)
   }
   const shared = []
+  const groupedByOwner = new Map()
   for (const item of grouped.values()) {
-    const permission = composeSharePermission(item.grants)
-    const { data: r } = await db
-      .from('canvases')
-      .select('canvas_id, name, nodes, edges, updated_at')
-      .eq('user_id', item.ownerId)
-      .eq('canvas_id', item.canvasId)
-      .maybeSingle()
-    if (!r) continue
-    await recordCanvasDataAccess(db, {
-      actorUserId: userId,
-      ownerUserId: item.ownerId,
-      canvasId: item.canvasId,
-      source: 'mcp',
-      purpose: 'mcp_canvas_operation',
-      operation: 'read',
+    const items = groupedByOwner.get(item.ownerId) ?? []
+    items.push(item)
+    groupedByOwner.set(item.ownerId, items)
+  }
+  for (const [ownerId, items] of groupedByOwner) {
+    const summaries = await loadCanvasSummaries(db, {
+      ownerId,
+      canvasIds: items.map((item) => item.canvasId),
     })
-    shared.push({
-      canvas_id: r.canvas_id,
-      name: r.name,
-      node_count: (r.nodes ?? []).length,
-      edge_count: (r.edges ?? []).length,
-      updated_at: r.updated_at,
-      shared: true,
-      permission_scope: permission.scope,
-      permission_grants: permission.grants,
-    })
+    const summaryById = new Map(summaries.map((summary) => [summary.canvas_id, summary]))
+    for (const item of items) {
+      const summary = summaryById.get(item.canvasId)
+      if (!summary) continue
+      const permission = composeSharePermission(item.grants)
+      await recordCanvasDataAccess(db, {
+        actorUserId: userId,
+        ownerUserId: item.ownerId,
+        canvasId: item.canvasId,
+        source: 'mcp',
+        purpose: 'mcp_canvas_operation',
+        operation: 'read',
+      })
+      shared.push({
+        ...summary,
+        shared: true,
+        permission_scope: permission.scope,
+        permission_grants: permission.grants,
+      })
+    }
   }
   return [...own, ...shared]
 }
@@ -255,38 +250,13 @@ export async function listCanvases(userId) {
 // The service-role client bypasses RLS, so shared-canvas access and the invited
 // region are enforced explicitly here (mirrors the browser's gating in App.jsx).
 
-// Shares addressed to this user. Email invitations are converted to memberships
-// at login, so a revoked membership cannot regain access through email matching.
-async function mySharesFor(userId, canvasId) {
-  const db = admin()
-  let q = db.from('canvas_shares').select('id, owner_id, canvas_id, scope, target_id, invitee_email, restrict_view')
-  if (canvasId) q = q.eq('canvas_id', canvasId)
-  const { data: shares, error } = await q
-  if (error) throw new Error(error.message)
-  if (!shares?.length) return []
-  const { data: mems, error: e2 } = await db.from('share_members')
-    .select('share_id, can_edit, restrict_view_override').eq('user_id', userId)
-  if (e2) throw new Error(e2.message)
-  const memberByShareId = new Map((mems ?? []).map((m) => [m.share_id, m]))
-  return shares
-    .filter((s) => s.owner_id !== userId && memberByShareId.has(s.id))
-    .map((s) => {
-      const member = memberByShareId.get(s.id)
-      return {
-        ...s,
-        can_edit: member.can_edit !== false,
-        restrict_view: member.restrict_view_override ?? !!s.restrict_view,
-      }
-    })
-}
-
 // Resolve what `userId` may do with `canvasId`: own it, or hold an invite.
 // Returns { row, role:'owner'|'invitee', ownerId, scope?, targetId? } (invitee
 // gets the union of every accepted scope when several invites exist).
 async function resolveCanvasAccess(userId, canvasId) {
   const db = admin()
   const { data: own, error } = await db
-    .from('canvases').select('*').eq('user_id', userId).eq('canvas_id', canvasId).maybeSingle()
+    .from('canvases').select(CANVAS_ROW_SELECT).eq('user_id', userId).eq('canvas_id', canvasId).maybeSingle()
   if (error) throw new Error(error.message)
   if (own) {
     await recordCanvasDataAccess(db, {
@@ -300,7 +270,7 @@ async function resolveCanvasAccess(userId, canvasId) {
     return { row: own, role: 'owner', ownerId: userId }
   }
 
-  const mine = await mySharesFor(userId, canvasId)
+  const mine = await listAcceptedShares(userId, canvasId)
   if (mine.length) {
     const byOwner = new Map()
     for (const share of mine) {
@@ -319,7 +289,7 @@ async function resolveCanvasAccess(userId, canvasId) {
     ))
     const selected = candidates[0]
     const { data: row, error: e3 } = await db
-      .from('canvases').select('*').eq('user_id', selected.ownerId).eq('canvas_id', canvasId).maybeSingle()
+      .from('canvases').select(CANVAS_ROW_SELECT).eq('user_id', selected.ownerId).eq('canvas_id', canvasId).maybeSingle()
     if (e3) throw new Error(e3.message)
     if (row) {
       await recordCanvasDataAccess(db, {
