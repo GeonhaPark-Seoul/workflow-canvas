@@ -7,7 +7,7 @@
 
 | 항목 | 값 |
 |---|---|
-| 문서 버전 | **0.3.0** |
+| 문서 버전 | **0.3.2** |
 | 최종 수정일 | 2026-07-17 |
 | 제품 버전 | 0.1.0-alpha.0 (내부 알파) |
 | 관리 규칙 | 이 문서 맨 아래 §13 |
@@ -334,7 +334,7 @@ Agent Skill/Agent Policy/Hard Guardrail/Connector/Manifest를 구별한다
 | **Twin Core** | 모든 Lens의 결과를 공통 Asset Graph로 정규화하고 동일 대상을 식별, 현재 캔버스와 대조 | 알파 |
 | **Create Graph** | Asset과 관계를 검증·배치해 실제 캔버스 노드·연결선으로 생성 | 알파 |
 | **Source Lens** | 코드·DB·설정·배포를 분석해 설명하고, 근거에 따라 기능 Asset·Capability·속성의 표현 경계(Feature Boundary Resolver)를 결정. 디지털 소프트웨어 세계 담당 전문 Lens | 알파 0.3 |
-| **Trust Map** | 신뢰영역·게이트웨이·확인되지 않은 통로(unknown-gap) 구별 | 알파 |
+| **Trust Map** | 신뢰영역·게이트웨이·확인되지 않은 통로(unknown-gap) 구별 + 보안 오버레이 렌더링 | 알파 0.2 |
 | **LiveOps** | 확인 가능한 운영 상태, 관측 시각, stale 표시 | 알파 |
 | **Safe Operations** | 계획·승인·실행·검증·감사·복구를 거치는 제한 조작 | 알파 |
 | **Connector Bridge** | 로컬 저장소·외부 시스템을 공통 계약으로 연결 | 개발용 알파 |
@@ -359,6 +359,7 @@ Agent Skill/Agent Policy/Hard Guardrail/Connector/Manifest를 구별한다
 | Maintainer Agent Manifest | v1 (전원 미배정) | `docs/product/ENGINE_AGENT_REGISTRY.md` |
 | Source Profile 계약 | v1 (+ Feature Model extension v1) | `docs/architecture/SOURCE_PROFILE_CONTRACT.md`, `shared/sourceProfileContract.js`, `shared/sourceFeatureModel.js` |
 | 관측 카탈로그 (런타임 스키마) | v3 | `shared/systemObservationCatalog.js`, `shared/systemRuntime.js` |
+| Security Overlay Schema | v1 | `shared/securityOverlay.js`, `shared/trustTopology.js`, `shared/workflowTrustTopology.js` |
 
 **버전 규칙:** 제품·각 엔진·스키마는 독립 SemVer. `0.x`는 약속 미고정. 호환되지 않는
 변경에는 전진 마이그레이션 + fixture 테스트 필수. `1.0.0`은 공개 약속·지원 범위·
@@ -403,7 +404,9 @@ Agent Skill/Agent Policy/Hard Guardrail/Connector/Manifest를 구별한다
    Resolver가 제품영역·하위시스템을 근거 기반으로 feature-asset/capability/속성 3등급
    판정, L1 기능 Asset Proposal(영역 8 → 하위 9 → 근거 관계 ≤20개씩). FastAPI
    참조 프로필로 엔진 범용성 검증.
-3. **보안 오버레이** — 신뢰영역·게이트웨이·unknown-gap 캔버스 시각화 (기존 부채).
+3. ~~**보안 오버레이**~~ ✅ 완료 (배치 C, 커밋 `c974fdb`) — 자기 지도에 신뢰영역
+   6·게이트웨이 11 근거 선언 + Proposal 실체화, 층 전환기 옆 토글(기본 꺼짐), 노드
+   테두리+배지, 게이트웨이 ◈/unknown-gap ! + 팝업, redaction-안전. 침투 테스트 아님.
 4. **Source Profile 분리 완성 + Python/FastAPI 두 번째 실제 스택 검증 + 온보딩
    마법사 v1** — 범용 온보딩의 첫 실전 시험 = 두 번째 스택. 온보딩은 Workflow Run으로
    시각화(§2A). 실패하면 엔진 코어에 숨은 전용 가정이 드러난다(그것도 가치 있는 결과다).
@@ -525,6 +528,7 @@ Claude)으로 되돌릴 수 있으며, 그때도 전달 문서 관행(기준 커
 | 버전 | 날짜 | 변경 |
 |---|---|---|
 | 0.3.0 | 2026-07-17 | 층 문법 교정: 층은 자기 지도 전용이 아니라 **모든 캔버스의 사용자 기능**(생성·이름·순서·삭제), L1~L4는 시스템 지도 기본 프리셋 — 배치 A2로 구현. 역할 편성 변경: Codex 휴무, 구현·검수·배포 모두 Claude Code + 자기검수 보완 장치. 시스템 지도 최신성 규칙(§12). 점검 제도 신설: AUDIT_PLAYBOOK.md + QUAL 품질 장부. |
+| 0.3.2 | 2026-07-17 | 배치 C 배포 완료 기록. 보안 오버레이: 자기 지도 신뢰영역 6·게이트웨이 11 근거 선언 + Proposal 실체화, 층 전환기 옆 토글(기본 꺼짐), 노드 테두리+배지·게이트웨이 팝업·unknown-gap 경고, redaction-안전·비밀값 차단. Trust Map 0.2.0-alpha.0 + Security Overlay Projector + Security Overlay Schema v1. 전부 declared(LIVE·침투테스트 아님). |
 | 0.3.1 | 2026-07-17 | 배치 B 배포 완료 기록. Source Lens 0.3.0-alpha.0(Feature Boundary Resolver 구성요소 추가), Workflow Canvas Source Profile 0.3.0, FastAPI 참조 0.2.0, Source Profile Contract v1의 Feature Model extension v1. 신규 온톨로지: systemKind `feature`→L1, part kind `capability`, relationType `implemented_by`. 기능 Asset은 declared(LIVE 아님). 계약 버전 현황·엔진 카탈로그 갱신. |
 | 0.2.2 | 2026-07-17 | 배치 A 배포 완료 기록: 시스템 지도 L1~L4 층 공식화(층 전환기, 결정적 기본 층, layerOverride, redaction-안전 포털). 로드맵 §9-1 완료 표시, 기능 목록 갱신. |
 | 0.2.1 | 2026-07-17 | Node 정의 명확화: Asset 바인딩 있는 노드만 Asset의 표현, 자유 작성 노드는 캔버스 주석(승격 가능). 배치 A 층 저장 설계 확정 기록(layerOverride 수동 지정만 저장, 기본값 결정적 계산, 포털 개수는 redaction 이후 계산). |
