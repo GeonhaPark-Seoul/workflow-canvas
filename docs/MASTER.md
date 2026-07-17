@@ -7,7 +7,7 @@
 
 | 항목 | 값 |
 |---|---|
-| 문서 버전 | **0.3.2** |
+| 문서 버전 | **0.4.0** |
 | 최종 수정일 | 2026-07-17 |
 | 제품 버전 | 0.1.0-alpha.0 (내부 알파) |
 | 관리 규칙 | 이 문서 맨 아래 §13 |
@@ -57,6 +57,8 @@ Workflow Canvas OS는 **세상에서 관리할 가치가 있는 모든 대상을
 | **Lens** (렌즈) | 무엇을 Asset으로 인식하고, 어느 정도로 쪼개며, 어떤 속성과 관계를 보여줄지 정하는 해석 규칙. |
 | **Node** (노드) | Lens가 Asset을 캔버스에 표현한 형태. 위치·크기·접힘 등 표현 상태는 사용자 소유이며 Asset 비교에서 제외된다. **모든 노드가 Asset의 표현은 아니다** — Asset 바인딩(실체 근거)이 있는 노드만 Asset의 표현이고, 사용자가 자유롭게 그린 단계·메모·콘텐츠 노드는 캔버스 주석(기록)이다. 주석 노드는 근거가 생기면 Asset으로 승격할 수 있다. |
 | **Asset Graph** | Asset, Capability, Relation, 신뢰영역, 게이트웨이, 근거, 정책, 조작을 담는 공통 사실 그래프. 내부 정규형의 이름은 TwinBuild다(§7). |
+| **코드 Asset 계층** | 소프트웨어 시스템 지도의 표준 계층: **제품 영역 > 서브시스템 > 컴포넌트 > 모듈 > 코드 파츠**. **모듈** = 저장소에 실재하는 코드 단위(파일·함수)의 Asset. **컴포넌트** = 흩어진 모듈을 우리가 정제해 묶은 분류(엔진이 첫 사례) — 저장소 구조가 아니므로 코드에 반영되지 않는다. **서브시스템** = 컴포넌트의 상위 분류(기존 Source Twin '하위 시스템' 38개가 이 계층에 해당). 발견된 workflow(userflow)는 먼저 파츠로 표현하고, 승격 시 컴포넌트 계층의 Asset이 된다. |
+| **코드 파츠** | 모듈 Asset 안에서 AST 근거로 분류된 코드 단위: 선언 · 명령 · 가정/분기 · 반복 · 응답/반환, 그리고 리소스 · 설정(config) · 데이터. 각 파츠는 자연어 번역과 (엔진 능력 범위 안에서) 직접 수정 화면을 갖는다. 수정은 근원 코드 저장소에 실제 반영되어야 하며 ENG-006 왕복 편집 계약을 따른다. |
 
 ### 2.2 신뢰·근거 문법 (사실 계층)
 
@@ -339,6 +341,11 @@ Agent Skill/Agent Policy/Hard Guardrail/Connector/Manifest를 구별한다
 | **Safe Operations** | 계획·승인·실행·검증·감사·복구를 거치는 제한 조작 | 알파 |
 | **Connector Bridge** | 로컬 저장소·외부 시스템을 공통 계약으로 연결 | 개발용 알파 |
 
+**내부 구성 분류의 사용자 공개(확정):** Engine / Contract / Resolver / Builder /
+Pipeline / Agent Skill / Agent Policy / Hard Guardrail / Connector / Manifest
+구별은 내부 문서 전용이 아니라 **사용자 화면에도 공개**한다 (구성요소 배지·상세).
+짧은 표시명 원칙은 유지하되 분류를 숨기지 않는다.
+
 ### 미래 Lens 후보 (미구현 — 착수 조건 §9)
 
 | Lens | 역할 | 착수 조건 |
@@ -407,12 +414,20 @@ Agent Skill/Agent Policy/Hard Guardrail/Connector/Manifest를 구별한다
 3. ~~**보안 오버레이**~~ ✅ 완료 (배치 C, 커밋 `c974fdb`) — 자기 지도에 신뢰영역
    6·게이트웨이 11 근거 선언 + Proposal 실체화, 층 전환기 옆 토글(기본 꺼짐), 노드
    테두리+배지, 게이트웨이 ◈/unknown-gap ! + 팝업, redaction-안전. 침투 테스트 아님.
-4. **Source Profile 분리 완성 + Python/FastAPI 두 번째 실제 스택 검증 + 온보딩
-   마법사 v1** — 범용 온보딩의 첫 실전 시험 = 두 번째 스택. 온보딩은 Workflow Run으로
-   시각화(§2A). 실패하면 엔진 코어에 숨은 전용 가정이 드러난다(그것도 가치 있는 결과다).
-   두 번째 스택의 조작은 `declared/planned`로만 시작한다.
-5. **제한 조작 확대 (Engine 1.x)** — 테스트, 상태 확인, 비강제 Git 동기화 중심.
-6. **번들 분리와 성능 예산 CI 고정.**
+4. **Source Lens 집중 개발 프로그램 (현재 초점, SL-0~SL-5)** — 정적 구조 인벤토리를
+   **프로그램 이해 엔진**으로: 실행 흐름·React 컴포넌트 구조 이해, 기능 경계 자기 발견,
+   코드 한 줄까지 정확한 자연어 설명.
+   - SL-0: 노트 뷰에서 노드 파츠 표시 (버그)
+   - SL-1: 코드 Asset 계층 정식화 — 모듈=Asset, 컴포넌트 층(엔진=첫 컴포넌트),
+     코드 브라우저에서 컴포넌트·소속 모듈 확인, 내부 kind 10종 사용자 공개
+   - SL-2: 코드 파츠(선언/명령/분기/반복/반환 + 리소스·설정·데이터) + 자연어 번역
+   - SL-3: 조작 가능한 코드 왕복 편집 MVP (ENG-006 착수, 근원 저장소 바인딩)
+   - SL-4: workflow(userflow) 발견 — 파츠로 표현, 승격 시 컴포넌트 Asset
+   - SL-5: 외부 도구 통합 평가 (Storybook·DB diagram·mermaid·tree-sitter·Figma dev
+     mode·Copilot 등 — 적극 활용 방향 승인됨, 도입은 건별 기록·승인)
+   - 상시: Source Lens 자체를 하나의 workflow로 자기 정리 (모듈 목록 유지)
+5. Python/FastAPI 두 번째 스택 검증 + 온보딩 마법사 v1 (SL 프로그램에 이어)
+6. 제한 조작 확대 (Engine 1.x), 번들 분리와 성능 예산 CI 고정.
 
 ### 조작 자유도 (엔진 버전 전략)
 - **Engine 0.x** (현재): 읽기와 상태 대조. 일반 대상 변경 금지
@@ -528,6 +543,7 @@ Claude)으로 되돌릴 수 있으며, 그때도 전달 문서 관행(기준 커
 | 버전 | 날짜 | 변경 |
 |---|---|---|
 | 0.3.0 | 2026-07-17 | 층 문법 교정: 층은 자기 지도 전용이 아니라 **모든 캔버스의 사용자 기능**(생성·이름·순서·삭제), L1~L4는 시스템 지도 기본 프리셋 — 배치 A2로 구현. 역할 편성 변경: Codex 휴무, 구현·검수·배포 모두 Claude Code + 자기검수 보완 장치. 시스템 지도 최신성 규칙(§12). 점검 제도 신설: AUDIT_PLAYBOOK.md + QUAL 품질 장부. |
+| 0.4.0 | 2026-07-18 | Source Lens 집중 프로그램(SL-0~5)으로 로드맵 개편. 코드 Asset 계층 문법 신설: 제품 영역>서브시스템>컴포넌트>모듈>코드 파츠 (컴포넌트=정제 분류로 코드 미반영, 기존 '하위 시스템'=서브시스템 계층). 코드 파츠 문법(선언/명령/분기/반복/반환+리소스·설정·데이터, ENG-006 왕복 편집 계약). 내부 구성 분류 10종 사용자 공개 확정. 외부 도구 적극 활용 방향 승인(건별 기록·승인 유지). |
 | 0.3.2 | 2026-07-17 | 배치 C 배포 완료 기록. 보안 오버레이: 자기 지도 신뢰영역 6·게이트웨이 11 근거 선언 + Proposal 실체화, 층 전환기 옆 토글(기본 꺼짐), 노드 테두리+배지·게이트웨이 팝업·unknown-gap 경고, redaction-안전·비밀값 차단. Trust Map 0.2.0-alpha.0 + Security Overlay Projector + Security Overlay Schema v1. 전부 declared(LIVE·침투테스트 아님). |
 | 0.3.1 | 2026-07-17 | 배치 B 배포 완료 기록. Source Lens 0.3.0-alpha.0(Feature Boundary Resolver 구성요소 추가), Workflow Canvas Source Profile 0.3.0, FastAPI 참조 0.2.0, Source Profile Contract v1의 Feature Model extension v1. 신규 온톨로지: systemKind `feature`→L1, part kind `capability`, relationType `implemented_by`. 기능 Asset은 declared(LIVE 아님). 계약 버전 현황·엔진 카탈로그 갱신. |
 | 0.2.2 | 2026-07-17 | 배치 A 배포 완료 기록: 시스템 지도 L1~L4 층 공식화(층 전환기, 결정적 기본 층, layerOverride, redaction-안전 포털). 로드맵 §9-1 완료 표시, 기능 목록 갱신. |
