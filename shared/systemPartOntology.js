@@ -33,6 +33,8 @@ export const SYSTEM_PART_SOURCE_DEFS = Object.freeze([
 const KIND_BY_ID = new Map(SYSTEM_PART_KIND_DEFS.map((item) => [item.id, item]))
 const EXPOSURE_IDS = new Set(SYSTEM_PART_EXPOSURE_DEFS.map((item) => item.id))
 const SOURCE_IDS = new Set(SYSTEM_PART_SOURCE_DEFS.map((item) => item.id))
+const EXPOSURE_BY_ID = new Map(SYSTEM_PART_EXPOSURE_DEFS.map((item) => [item.id, item]))
+const SOURCE_BY_ID = new Map(SYSTEM_PART_SOURCE_DEFS.map((item) => [item.id, item]))
 const SAFE_ID = /^[a-zA-Z0-9][a-zA-Z0-9._:-]{0,119}$/
 const FINGERPRINT = /^[a-f0-9]{8,80}$/i
 const SECRET_LITERAL_PATTERNS = [
@@ -79,6 +81,27 @@ export function normalizeDigitalTwinBinding(value) {
 
 export function systemPartKindDefinition(id) {
   return KIND_BY_ID.get(id) ?? KIND_BY_ID.get('connection')
+}
+
+export function systemPartExposureDefinition(id) {
+  return EXPOSURE_BY_ID.get(id) ?? EXPOSURE_BY_ID.get('internal')
+}
+
+export function systemPartSourceDefinition(id) {
+  return SOURCE_BY_ID.get(id) ?? SOURCE_BY_ID.get('manual')
+}
+
+export function systemPartsForPresentation(node) {
+  if (node?.type !== 'system' || node?.data?.redacted === true) return []
+  return normalizeSystemParts(node?.data?.systemParts)
+}
+
+export function systemPartEvidenceStatus(part) {
+  const normalized = normalizeSystemPart(part)
+  if (!normalized) return '근거 없음'
+  if (normalized.digitalTwinBinding) return '코드 근거 연결'
+  if (normalized.evidenceRef) return `${systemPartSourceDefinition(normalized.sourceKind).label} 근거`
+  return normalized.sourceKind === 'manual' ? '수동 선언' : `${systemPartSourceDefinition(normalized.sourceKind).label}에서 발견`
 }
 
 export function systemPartContainsSecretLiteral(value) {

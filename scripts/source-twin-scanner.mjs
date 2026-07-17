@@ -5,6 +5,7 @@ import path from 'node:path'
 import { parse } from '@babel/parser'
 import { SOURCE_TWIN_SCHEMA_VERSION } from '../shared/sourceTwin.js'
 import { sourceProfileDescriptor } from '../shared/sourceProfileContract.js'
+import { buildSourceAssetHierarchy } from '../shared/sourceAssetHierarchy.js'
 import { sourceTwinAreaCatalog, sourceTwinSubsystemCatalog } from '../shared/sourceTwinSemantics.js'
 import { DEFAULT_SOURCE_PROFILES, registeredSourceProfile } from './source-profiles/index.mjs'
 import {
@@ -733,6 +734,11 @@ export function buildSourceTwinManifest(filesInput, {
     : null
   const areas = sourceTwinAreaCatalog(entities.map((item) => item.area), profile.areas)
   const subsystems = sourceTwinSubsystemCatalog(entities.map((item) => item.subsystem), profile.subsystems)
+  const assetHierarchy = buildSourceAssetHierarchy({
+    entities,
+    components: profile.components,
+    implementationRules: profile.featureModel?.implementationRules,
+  })
   const manifest = {
     schemaVersion: SOURCE_TWIN_SCHEMA_VERSION,
     id,
@@ -750,6 +756,7 @@ export function buildSourceTwinManifest(filesInput, {
     subsystems,
     entities,
     relations,
+    assetHierarchy,
     perspectives,
     fingerprints,
     summary: {
@@ -769,6 +776,8 @@ export function buildSourceTwinManifest(filesInput, {
       securityEntities: perspectives.security.length,
       parseFailures: records.filter((record) => record.parseError).length,
       structureOnlyFiles: records.filter((record) => record.analysisStatus === 'structure-only').length,
+      components: assetHierarchy.components.length,
+      moduleAssets: entities.filter((item) => assetHierarchy.moduleEntityKinds.includes(item.kind)).length,
     },
     changeSet: {
       baseManifestId: previous?.id ?? null,

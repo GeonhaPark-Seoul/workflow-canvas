@@ -55,6 +55,14 @@
 - Workflow Canvas와 FastAPI 참조 프로필이 같은 판정 코어로 서로 다른 기능 집합을 만든다.
 - Source Lens의 판정 코드와 버전 변경도 다시 Source Twin과 자기 시스템 지도 검토안에 반영된다.
 
+## Source Lens 0.4.0-alpha.0 - 2026-07-17
+
+- 코드 탐색 계층을 제품 영역 → 서브시스템 → Component → 모듈 → 코드 단위로 공식화했다.
+- Registry의 `codeEvidence`와 Source Profile의 `implementationRules`만 사용해 Component 소속을 만들며 경로를 추측하지 않는다.
+- 파일과 함수는 코드 Asset 후보로 식별하지만 캔버스 노드로 자동 실체화하지 않고 `proposal-required` 경계를 기록한다.
+- Source Component Mapper를 Source Lens 내부 Component로 등록해 새 분류 코드도 다음 Source Twin 분석 대상에 포함했다.
+- 시스템 노트 상세에서 redaction 경계를 지키며 파츠 종류·이름·참조·근거 상태를 읽기 전용으로 표시한다.
+
 ## Source Scanner 0.1.0-alpha.0 - 2026-07-16
 
 - Babel AST 기반 JavaScript 분석과 제한된 SQL 선언 분석을 첫 엔진 버전으로 기록했다.
@@ -78,6 +86,11 @@
 - 8개 제품 영역과 사용자가 별도 흐름으로 인식하는 9개 하위 시스템을 기능 Asset으로 판정했다.
 - 13개 세부 능력은 소유 기능 Asset의 Capability 파츠로 판정하고 내부 구현 사실은 속성으로 남겼다.
 - 구현 모듈과 기존 시스템 지도 DB 엔티티의 제품별 매핑을 프로필에 두어 공통 판정 코어의 재사용성을 유지했다.
+
+## Workflow Canvas Source Profile 0.4.0 - 2026-07-17
+
+- Engine Registry Component와 코드 근거를 제품별 Source Profile 선언으로 연결했다.
+- 화면 용어를 `서브시스템`으로 정리하되 기존 wire 필드 `subsystem`은 유지했다.
 
 ## FastAPI Reference Source Profile 0.2.0 - 2026-07-17
 

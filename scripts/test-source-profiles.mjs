@@ -20,7 +20,8 @@ const workflowFiles = new Map([
 ])
 const workflowSelection = registeredSourceProfile({ project: { name: 'workflow-canvas' }, files: workflowFiles })
 assert.equal(workflowSelection.profile.id, 'workflow-canvas')
-assert.equal(workflowSelection.profile.version, '0.3.0')
+assert.equal(workflowSelection.profile.version, '0.4.0')
+assert.ok(workflowSelection.profile.components.some((item) => item.id === 'engine-source-lens'))
 assert.equal(workflowSelection.profile.featureModel.schemaVersion, 1)
 assert.deepEqual(workflowSelection.matchEvidence, ['package:workflow-canvas'])
 
@@ -81,6 +82,10 @@ const referenceProfile = defineSourceProfile({
   match: { requiredFiles: ['console.entry'] },
   capabilities: ['file-structure'],
   languageSupport: [],
+  components: [{
+    id: 'reference-component', label: 'Reference Component', kind: 'engine',
+    description: '명시된 파일만 묶는 참조 Component입니다.', codeEvidence: ['console.entry'],
+  }],
   fileRoles: {
     'console.entry': {
       area: 'project-foundation',
@@ -96,6 +101,9 @@ const referenceManifest = buildSourceTwinManifest(referenceFiles, {
 })
 assert.equal(referenceManifest.source.profile.id, 'reference-console')
 assert.equal(referenceManifest.entities[0].summary, '참조 콘솔을 시작하는 선언 파일입니다.')
+assert.deepEqual(referenceManifest.assetHierarchy.levels, ['product-area', 'subsystem', 'component', 'module', 'code-part'])
+assert.equal(referenceManifest.assetHierarchy.materialization, 'proposal-required')
+assert.deepEqual(referenceManifest.assetHierarchy.components[0].moduleIds, ['file:console.entry'])
 
 const revisedProfile = defineSourceProfile({
   ...referenceProfile,

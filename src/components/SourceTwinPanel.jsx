@@ -16,6 +16,8 @@ import {
   sourceTwinSubsystemDefinition,
   sourceTwinSubsystemId,
 } from '../../shared/sourceTwinSemantics.js'
+import { sourceComponentsForSubsystem, sourceEntityIsModuleAsset } from '../../shared/sourceAssetHierarchy.js'
+import { systemComponentKindDefinition } from '../../shared/systemOntology.js'
 import {
   compareLocalAndDeployedManifests,
   localConnectorConnectionState,
@@ -196,7 +198,7 @@ function EntityRow({ entity, children, expanded, selectedId, audienceMode, onTog
           <strong>{entity.label}</strong>
           <small>{developerMode ? (entity.technicalSummary || entity.path || entity.summary) : entity.summary}</small>
         </span>
-        <span className="source-twin-kind">{KIND_LABELS[entity.kind] ?? entity.kind}</span>
+        <span className="source-twin-kind">{sourceEntityIsModuleAsset(null, entity) ? '코드 Asset' : (KIND_LABELS[entity.kind] ?? entity.kind)}</span>
       </button>
       {expanded && children.map((child) => (
         <button type="button" className={`source-twin-function-row${selectedId === child.id ? ' is-selected' : ''}`} key={child.id} onClick={() => onSelect(child)}>
@@ -206,6 +208,25 @@ function EntityRow({ entity, children, expanded, selectedId, audienceMode, onTog
         </button>
       ))}
     </div>
+  )
+}
+
+function ComponentGroup({ component, entities, childrenByParent, filteredIds, expandedFiles, selectedId, audienceMode, onToggleFile, onSelect }) {
+  const [open, setOpen] = useState(false)
+  const kind = systemComponentKindDefinition(component.kind)
+  return (
+    <section className="source-twin-component-section">
+      <button type="button" className="source-twin-component-heading" onClick={() => setOpen((value) => !value)} aria-expanded={open} title={kind.description}>
+        <span aria-hidden="true">{open ? '▾' : '▸'}</span>
+        <span><strong>{component.label}</strong><small>{component.description}</small></span>
+        <span className="source-twin-component-kind">{kind.label}</span>
+        <em>{entities.length}</em>
+      </button>
+      {open && entities.map((entity) => {
+        const children = (childrenByParent.get(entity.id) ?? []).filter((child) => filteredIds.has(child.id))
+        return <EntityRow key={`${component.id}:${entity.id}`} entity={entity} children={children} expanded={expandedFiles.has(entity.id)} selectedId={selectedId} audienceMode={audienceMode} onToggle={onToggleFile} onSelect={onSelect} />
+      })}
+    </section>
   )
 }
 
@@ -298,6 +319,9 @@ function StructureView({ current, perspective, setPerspective, query, setQuery, 
             </header>
             {area.subsystems.map((subsystem) => {
               const subsystemExpanded = expandedSubsystems.has(subsystem.id) || !!query
+              const components = sourceComponentsForSubsystem(manifest, area.id, subsystem.id, subsystem.entities)
+              const componentModuleIds = new Set(components.flatMap((item) => item.moduleIds))
+              const ungrouped = subsystem.entities.filter((item) => !componentModuleIds.has(item.id))
               return (
                 <section className="source-twin-subsystem-section" key={subsystem.id}>
                   <button type="button" className="source-twin-subsystem-heading" onClick={() => toggleSubsystem(subsystem.id)} aria-expanded={subsystemExpanded}>
@@ -308,10 +332,29 @@ function StructureView({ current, perspective, setPerspective, query, setQuery, 
                     </span>
                     <em>{subsystem.entities.length}</em>
                   </button>
-                  {subsystemExpanded && subsystem.entities.map((entity) => {
-                    const children = (childrenByParent.get(entity.id) ?? []).filter((child) => filteredIds.has(child.id))
-                    return <EntityRow key={entity.id} entity={entity} children={children} expanded={expanded.has(entity.id) || !!query} selectedId={selectedId} audienceMode={audienceMode} onToggle={toggle} onSelect={(value) => setSelectedId(value.id)} />
-                  })}
+                  {subsystemExpanded && components.map((component) => (
+                    <ComponentGroup
+                      key={component.id}
+                      component={component}
+                      entities={component.moduleIds.map((id) => entityMap.get(id)).filter(Boolean)}
+                      childrenByParent={childrenByParent}
+                      filteredIds={filteredIds}
+                      expandedFiles={expanded}
+                      selectedId={selectedId}
+                      audienceMode={audienceMode}
+                      onToggleFile={toggle}
+                      onSelect={(value) => setSelectedId(value.id)}
+                    />
+                  ))}
+                  {subsystemExpanded && ungrouped.length > 0 && (
+                    <section className="source-twin-component-section is-uncategorized">
+                      <div className="source-twin-component-heading"><span>·</span><span><strong>기타 모듈·리소스</strong><small>Component 근거가 아직 연결되지 않은 코드와 시스템 자원입니다.</small></span><em>{ungrouped.length}</em></div>
+                      {ungrouped.map((entity) => {
+                        const children = (childrenByParent.get(entity.id) ?? []).filter((child) => filteredIds.has(child.id))
+                        return <EntityRow key={entity.id} entity={entity} children={children} expanded={expanded.has(entity.id) || !!query} selectedId={selectedId} audienceMode={audienceMode} onToggle={toggle} onSelect={(value) => setSelectedId(value.id)} />
+                      })}
+                    </section>
+                  )}
                 </section>
               )
             })}

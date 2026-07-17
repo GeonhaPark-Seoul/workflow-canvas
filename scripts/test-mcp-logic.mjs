@@ -55,6 +55,8 @@ import {
   detachSystemPartBindings,
   normalizeSystemPart,
   normalizeSystemParts,
+  systemPartEvidenceStatus,
+  systemPartsForPresentation,
   validateSystemPartInput,
 } from '../shared/systemPartOntology.js'
 import {
@@ -3870,6 +3872,13 @@ t('get_canvas represents system ontology without claiming a live twin', () => {
   assert.equal(result.system_parts[0].ref, 'orders.id')
   assert.equal(result.trust_zone.id, 'zone:private-data')
   assert.equal(result.reality, 'declared')
+})
+
+t('notes part presentation does not leak redacted system parts', () => {
+  const part = { id: 'code', kind: 'code', label: '코드', ref: 'src/App.jsx', exposure: 'internal', sourceKind: 'code', evidenceRef: 'src/App.jsx' }
+  assert.equal(systemPartsForPresentation({ type: 'system', data: { systemParts: [part] } }).length, 1)
+  assert.equal(systemPartEvidenceStatus(part), '코드 근거')
+  assert.deepEqual(systemPartsForPresentation({ type: 'system', data: { redacted: true, systemParts: [part] } }), [])
 })
 }
 

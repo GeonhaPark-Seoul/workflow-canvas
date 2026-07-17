@@ -1,6 +1,6 @@
 # Source Profile 계약
 
-Source Profile은 Source Lens가 서로 다른 소프트웨어의 코드를 그 제품의 언어로 설명하고 **무엇을 어디까지 지도에 표현할지** 결정하도록 연결하는 버전이 있는 제품별 번역 사전이다. 공통 스캐너가 파일과 구조 근거를 수집하고, 프로필은 저장소 식별 근거, 제품 영역, 하위 시스템, 잘 알려진 파일 역할, 지원 수준과 선택적인 기능 표현 경계를 선언한다.
+Source Profile은 Source Lens가 서로 다른 소프트웨어의 코드를 그 제품의 언어로 설명하고 **무엇을 어디까지 지도에 표현할지** 결정하도록 연결하는 버전이 있는 제품별 번역 사전이다. 공통 스캐너가 파일과 구조 근거를 수집하고, 프로필은 저장소 식별 근거, 제품 영역, 서브시스템(`subsystem`), 잘 알려진 파일 역할, 지원 수준과 선택적인 기능 표현 경계를 선언한다.
 
 ## 책임 경계
 
@@ -22,6 +22,7 @@ Source Profile은 parser, 실행 플러그인, 서버 또는 AI prompt가 아니
 - `capabilities`, `languageSupport`
 - `areas`, `subsystems`
 - `fileRoles`, `areaRules`, `subsystemRules`
+- 선택적인 `components`: 종류·설명·버전과 실제 `codeEvidence`를 가진 Component catalog
 
 `featureModel`은 계약 v1의 선택 확장이다. 확장을 사용하면 `schemaVersion: 1`, 영역·하위 시스템의 기본 판정, 명시적 판정, 구현 연결 규칙과 데이터 연결 규칙을 선언한다. 확장이 없는 기존 프로필은 코드 설명만 만들며 기능 Asset 후보를 만들지 않는다.
 
@@ -42,6 +43,12 @@ Source Profile은 parser, 실행 플러그인, 서버 또는 AI prompt가 아니
 판정 결과는 자동으로 캔버스를 바꾸지 않는다. Twin Adapter가 기존 Reconciliation 경계에서 미리보기 → 사용자 승인 → 실체화 순서의 Proposal로 바꾼다. Feature Asset은 `declared`이며 코드 근거만으로 LIVE를 암시하지 않는다.
 
 Source Lens의 표현 규칙과 판정 코드도 Source Twin의 분석 대상이다. 따라서 판정기가 바뀌면 Source Lens 버전·근거와 자기 시스템 지도의 변경 검토안에 다시 나타난다. 이 자기반영 구조는 유지하되, 구체적인 세분화 수준은 프로필 버전으로 바꿀 수 있다.
+
+## 코드 Asset 계층 v1
+
+코드 탐색은 `제품 영역 → 서브시스템 → Component → 모듈 → 코드 단위` 계층을 사용한다. 현재 모듈은 파일과 함수이며 둘 다 Asset 후보지만, 캔버스 노드 자동 실체화는 금지하고 `proposal-required`로 기록한다.
+
+Component 소속은 프로필의 명시적 `codeEvidence`와 기존 `implementationRules`의 정확한 경로 일치에서만 만든다. 근거가 없는 파일은 `기타 모듈·리소스`에 남기며 이름이나 폴더 유사성으로 추측하지 않는다. Component 목록과 파일 ID만 manifest에 한 번 저장해 브라우저 payload의 중복을 제한한다.
 
 ## 분석 수준
 

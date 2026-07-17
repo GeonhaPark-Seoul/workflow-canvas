@@ -3,6 +3,7 @@ import {
   SOURCE_TWIN_AREA_DEFINITIONS,
   SOURCE_TWIN_SUBSYSTEM_DEFINITIONS,
 } from '../../shared/sourceTwinSemantics.js'
+import { WORKFLOW_ENGINE_REGISTRY } from '../../shared/engineRegistry.js'
 
 const ROLE = (area, summary, userImpact, subsystem = '') => Object.freeze({
   area, summary, userImpact, ...(subsystem ? { subsystem } : {}),
@@ -181,13 +182,13 @@ export const WORKFLOW_CANVAS_FILE_ROLES = Object.freeze({
 export const WORKFLOW_CANVAS_SOURCE_PROFILE = defineSourceProfile({
   contractVersion: SOURCE_PROFILE_CONTRACT_VERSION,
   id: 'workflow-canvas',
-  version: '0.3.0',
+  version: '0.4.0',
   sourceId: 'workflow-canvas:self-source',
   label: 'Workflow Canvas Source Profile',
   projectLabel: 'Workflow Canvas',
   priority: 100,
   match: { packageNames: ['workflow-canvas'] },
-  capabilities: ['file-structure', 'javascript-ast', 'sql-declarations', 'curated-file-roles', 'product-area-classification', 'feature-boundary-classification'],
+  capabilities: ['file-structure', 'javascript-ast', 'sql-declarations', 'curated-file-roles', 'product-area-classification', 'feature-boundary-classification', 'component-catalog', 'module-asset-candidates'],
   languageSupport: [
     { language: 'javascript', level: 'parsed', note: 'Babel AST로 함수·import·API·DB 참조를 분석합니다.' },
     { language: 'jsx', level: 'parsed', note: 'Babel AST로 컴포넌트와 함수 구조를 분석합니다.' },
@@ -195,6 +196,16 @@ export const WORKFLOW_CANVAS_SOURCE_PROFILE = defineSourceProfile({
   ],
   areas: SOURCE_TWIN_AREA_DEFINITIONS.map((item, order) => ({ ...item, order })),
   subsystems: SOURCE_TWIN_SUBSYSTEM_DEFINITIONS.map((item, order) => ({ ...item, order })),
+  components: WORKFLOW_ENGINE_REGISTRY.components.map((item) => ({
+    id: item.id,
+    label: item.name,
+    kind: item.kind,
+    parentId: item.parentId ?? '',
+    description: item.description,
+    technicalVersion: item.technicalVersion,
+    maturity: item.maturity,
+    codeEvidence: item.codeEvidence,
+  })),
   featureModel: {
     schemaVersion: 1,
     defaults: { area: 'attribute', subsystem: 'attribute' },

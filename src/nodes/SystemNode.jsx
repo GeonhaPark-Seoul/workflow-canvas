@@ -11,6 +11,7 @@ import {
   SYSTEM_COMPONENT_MATURITY_DEFS,
   SYSTEM_ENVIRONMENT_DEFS,
   SYSTEM_SOURCE_DEFS,
+  systemComponentKindDefinition,
   systemKindDefinition,
   systemNodeReality,
   systemNodeTwinLink,
@@ -172,7 +173,7 @@ export default function SystemNode({ data, selected, id }) {
     ? twinLink
     : reality
   const logicalComponent = data.logicalComponent ?? null
-  const componentKind = byId(SYSTEM_COMPONENT_KIND_DEFS, logicalComponent?.kind)?.label ?? 'Engine'
+  const componentKind = systemComponentKindDefinition(logicalComponent?.kind)
   const componentMaturity = byId(SYSTEM_COMPONENT_MATURITY_DEFS, logicalComponent?.maturity)?.label ?? '프로토타입'
   const componentManaged = !!logicalComponent
   const environment = byId(SYSTEM_ENVIRONMENT_DEFS, data.environment)?.label ?? '환경 미지정'
@@ -609,7 +610,7 @@ export default function SystemNode({ data, selected, id }) {
                     minWidth: 0,
                   }}
                 >
-                  <span title={`내부 종류: ${componentKind}`}><b style={{ color: kind.color }}>종류</b> {componentKind}</span>
+                  <span title={componentKind.description}><b style={{ color: kind.color }}>종류</b> {componentKind.label}</span>
                   <span title={`성숙도: ${componentMaturity}`}><b style={{ color: kind.color }}>성숙도</b> {componentMaturity}</span>
                   <span title={`제품 버전 ${logicalComponent.productVersion || '미정'}`}><b style={{ color: kind.color }}>제품</b> {logicalComponent.productVersion || '미정'}</span>
                   <span title={`기술 버전 ${logicalComponent.technicalVersion || '미정'}${logicalComponent.compatibility?.length ? ` · ${logicalComponent.compatibility.join(' · ')}` : ''}`}><b style={{ color: kind.color }}>기술</b> {logicalComponent.technicalVersion || '미정'}</span>

@@ -7,10 +7,17 @@ import {
   SYSTEM_ENVIRONMENT_DEFS,
   SYSTEM_KIND_DEFS,
   SYSTEM_SOURCE_DEFS,
+  systemComponentKindDefinition,
   systemKindDefinition,
   systemNodeReality,
   systemNodeTwinLink,
 } from '../../shared/systemOntology.js'
+import {
+  systemPartEvidenceStatus,
+  systemPartExposureDefinition,
+  systemPartKindDefinition,
+  systemPartsForPresentation,
+} from '../../shared/systemPartOntology.js'
 import {
   INTENT_CLAUSE_KIND_DEFS,
   INTENT_KIND_DEFS,
@@ -531,6 +538,8 @@ function NotePage({ node, byId, inMap, outMap, isEditable, onUpdateNode, onRecor
         {node.type === 'system' && (() => {
           const reality = systemNodeReality(node.data)
           const twinLink = systemNodeTwinLink(node.data)
+          const logicalKind = node.data?.logicalComponent ? systemComponentKindDefinition(node.data.logicalComponent.kind) : null
+          const visibleParts = systemPartsForPresentation(node)
           const fieldStyle = {
             width: '100%', boxSizing: 'border-box', background: '#12121a',
             border: '1px solid #ffffff18', borderRadius: 6, color: '#d8dae0',
@@ -568,6 +577,29 @@ function NotePage({ node, byId, inMap, outMap, isEditable, onUpdateNode, onRecor
                         : '외부 자원 검증 전'}
                 </span>
               </div>
+
+              {logicalKind && (
+                <div className="notes-system-component-kind" title={logicalKind.description}>
+                  <strong>{logicalKind.label}</strong>
+                  <span>{logicalKind.description}</span>
+                </div>
+              )}
+
+              <section className="notes-system-parts" aria-label="시스템 파츠">
+                <header><strong>파츠</strong><span>{visibleParts.length}</span></header>
+                {visibleParts.length === 0 ? (
+                  <p>표시할 파츠가 없습니다.</p>
+                ) : visibleParts.map((part) => {
+                  const kind = systemPartKindDefinition(part.kind)
+                  return (
+                    <article key={part.id}>
+                      <span className="notes-system-part-kind" style={{ color: kind.color, borderColor: `${kind.color}66` }}>{kind.icon} {kind.label}</span>
+                      <div><strong>{part.label}</strong><code>{part.ref || '참조 없음'}</code></div>
+                      <small>{systemPartEvidenceStatus(part)} · {systemPartExposureDefinition(part.exposure).label}</small>
+                    </article>
+                  )
+                })}
+              </section>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10 }}>
                 <label style={{ display: 'grid', gap: 5, minWidth: 0 }}>

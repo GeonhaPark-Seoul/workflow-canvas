@@ -168,6 +168,22 @@ function dataBinding(value) {
   return { sourceEntityId, targetEntityId }
 }
 
+function sourceComponent(value) {
+  if (!plainObject(value)) throw new Error('Source Profile Component 선언이 객체가 아닙니다.')
+  const id = text(value.id, 180)
+  const label = text(value.label || value.name, 180)
+  const kind = text(value.kind, 80)
+  if (!SOURCE_ID_PATTERN.test(id) || !label || !kind) throw new Error('Source Profile Component 선언이 불완전합니다.')
+  return {
+    id, label, kind,
+    parentId: text(value.parentId, 180),
+    description: text(value.description, 800),
+    technicalVersion: text(value.technicalVersion, 80),
+    maturity: text(value.maturity, 40),
+    codeEvidence: stringList(value.codeEvidence, 80, 500),
+  }
+}
+
 function featureModelContract(value, catalogs) {
   if (value == null) return null
   if (!plainObject(value)) throw new Error('Source Profile 기능 모델이 객체가 아닙니다.')
@@ -238,6 +254,7 @@ export function defineSourceProfile(value) {
     languageSupport: languages,
     areas,
     subsystems,
+    components: assertUniqueIds((Array.isArray(value.components) ? value.components : []).slice(0, 300).map(sourceComponent), 'Component'),
     fileRoles,
     areaRules: (Array.isArray(value.areaRules) ? value.areaRules : []).slice(0, 200).map((item) => rule(item, 'area')),
     subsystemRules: (Array.isArray(value.subsystemRules) ? value.subsystemRules : []).slice(0, 400).map((item) => rule(item, 'subsystem')),

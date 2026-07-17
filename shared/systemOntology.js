@@ -23,18 +23,18 @@ export const SYSTEM_KIND_DEFS = Object.freeze([
 ])
 
 export const SYSTEM_COMPONENT_KIND_DEFS = Object.freeze([
-  { id: 'engine', label: 'Engine' },
-  { id: 'contract', label: 'Contract' },
-  { id: 'resolver', label: 'Resolver' },
-  { id: 'builder', label: 'Builder' },
-  { id: 'pipeline', label: 'Pipeline' },
-  { id: 'agent-skill', label: 'Agent Skill' },
-  { id: 'agent-policy', label: 'Agent Policy' },
-  { id: 'guardrail', label: 'Hard Guardrail' },
-  { id: 'workflow', label: 'Workflow' },
-  { id: 'tool', label: 'Tool' },
-  { id: 'connector', label: 'Connector' },
-  { id: 'manifest', label: 'Manifest' },
+  { id: 'engine', label: 'Engine', description: '여러 단계를 조율해 하나의 제품 능력을 수행합니다.' },
+  { id: 'contract', label: 'Contract', description: '서로 다른 구성요소가 지켜야 할 입력·출력 형식을 정합니다.' },
+  { id: 'resolver', label: 'Resolver', description: '여러 후보 중 증거에 맞는 대상이나 의미를 결정합니다.' },
+  { id: 'builder', label: 'Builder', description: '검증된 입력을 구조화된 결과물로 조립합니다.' },
+  { id: 'pipeline', label: 'Pipeline', description: '여러 처리 단계를 정해진 순서와 조건으로 연결합니다.' },
+  { id: 'agent-skill', label: 'Agent Skill', description: 'AI가 특정 작업을 수행하도록 안내하는 재사용 절차입니다.' },
+  { id: 'agent-policy', label: 'Agent Policy', description: 'AI가 지켜야 할 허용 범위와 승인 조건을 정합니다.' },
+  { id: 'guardrail', label: 'Hard Guardrail', description: 'AI나 화면에서 우회할 수 없도록 코드로 강제하는 제한입니다.' },
+  { id: 'workflow', label: 'Workflow', description: '호환성을 위해 유지하는 기존 작업 흐름 분류입니다.', legacy: true },
+  { id: 'tool', label: 'Tool', description: '호환성을 위해 유지하는 기존 단일 명령 분류입니다.', legacy: true },
+  { id: 'connector', label: 'Connector', description: '외부 시스템과 제한된 데이터·명령을 주고받는 경계입니다.' },
+  { id: 'manifest', label: 'Manifest', description: '버전이 있는 구성요소와 지원 범위를 선언한 목록입니다.' },
 ])
 
 export const SYSTEM_COMPONENT_MATURITY_DEFS = Object.freeze([
@@ -74,10 +74,15 @@ const KIND_BY_ID = new Map(SYSTEM_KIND_DEFS.map((item) => [item.id, item]))
 const ENVIRONMENT_IDS = new Set(SYSTEM_ENVIRONMENT_DEFS.map((item) => item.id))
 const SOURCE_IDS = new Set(SYSTEM_SOURCE_DEFS.map((item) => item.id))
 const COMPONENT_KIND_IDS = new Set(SYSTEM_COMPONENT_KIND_DEFS.map((item) => item.id))
+const COMPONENT_KIND_BY_ID = new Map(SYSTEM_COMPONENT_KIND_DEFS.map((item) => [item.id, item]))
 const COMPONENT_MATURITY_IDS = new Set(SYSTEM_COMPONENT_MATURITY_DEFS.map((item) => item.id))
 
 export function systemKindDefinition(id) {
   return KIND_BY_ID.get(id) ?? KIND_BY_ID.get('service')
+}
+
+export function systemComponentKindDefinition(id) {
+  return COMPONENT_KIND_BY_ID.get(id) ?? COMPONENT_KIND_BY_ID.get('engine')
 }
 
 export function normalizeSystemPlainText(value, maxLength = 240) {

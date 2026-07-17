@@ -202,7 +202,7 @@ assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.controls.length, 3)
 assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.threats.length, 1)
 assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.trustZones.length, 6)
 assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.gateways.length, 11)
-assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.entities.filter((entity) => entity.trustZoneId).length, 58)
+assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.entities.filter((entity) => entity.trustZoneId).length, 59)
 assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.relations.filter((relation) => relation.gatewayId).length, 15)
 assert.equal(WORKFLOW_SOURCE_FEATURE_EXTENSION.entities.length, 17)
 assert.equal(WORKFLOW_SOURCE_FEATURE_EXTENSION.parts.length, 13)
@@ -281,13 +281,13 @@ assert.equal(componentDriftItem.proposal.counts.components, 5)
 assert.equal(componentDriftItem.focus.nodeId, 'map-engine-source-lens')
 assert.ok(componentDriftItem.proposal.operations.some((operation) => (
       operation.targetNodeId === 'map-engine-source-lens'
-      && operation.logicalComponent.technicalVersion === '0.3.0-alpha.0'
+      && operation.logicalComponent.technicalVersion === '0.4.0-alpha.0'
 )))
 const componentDriftApplied = applyDigitalTwinGraphProposal(staleEngineContracts, componentDriftItem.proposal)
 assert.equal(componentDriftApplied.appliedLogicalComponentIds.length, 5)
 assert.equal(
   componentDriftApplied.nodes.find((node) => node.id === 'map-engine-source-lens').data.logicalComponent.technicalVersion,
-  '0.3.0-alpha.0',
+  '0.4.0-alpha.0',
 )
 assert.equal(
   componentDriftApplied.nodes.find((node) => node.id === 'map-engine-source-lens').data.manualAnnotation,

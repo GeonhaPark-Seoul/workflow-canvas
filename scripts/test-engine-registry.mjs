@@ -70,6 +70,10 @@ assert.equal(
   mappedTwinEntities.find((entity) => entity.id === 'map-engine-twin-core')?.logicalComponent?.technicalVersion,
   '0.3.0-alpha.0',
 )
+assert.equal(
+  mappedTwinEntities.find((entity) => entity.id === 'map-engine-source-lens')?.logicalComponent?.technicalVersion,
+  '0.4.0-alpha.0',
+)
 
 assert.equal(MAINTAINER_AGENT_MANIFEST.agents.length, 1)
 const maintainer = MAINTAINER_AGENT_MANIFEST.agents[0]

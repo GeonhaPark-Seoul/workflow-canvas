@@ -58,6 +58,7 @@ import {
   WORKFLOW_SOURCE_TWIN_NODE_IDS,
 } from '../shared/workflowSourceTwinCanvas.js'
 import { SOURCE_TWIN_MANIFEST } from '../shared/sourceTwinManifest.js'
+import { sourceComponentsForSubsystem, sourceEntityIsModuleAsset } from '../shared/sourceAssetHierarchy.js'
 import {
   WORKFLOW_GIT_SYNC_OPERATION_DEFINITION,
   WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION,
@@ -96,6 +97,13 @@ assert.deepEqual(localGitSyncEdgePresentation({ action: 'push' }), {
 assert.equal(localGitSyncEdgePresentation({ action: 'pull_ff_only' }).direction, 'github-to-local')
 assert.equal(localGitSyncEdgePresentation({ action: 'noop' }).icon, '✓')
 assert.equal(SOURCE_TWIN_MANIFEST.changeSet.initialBaseline, false, 'generated source history must keep the committed parent manifest')
+assert.equal(SOURCE_TWIN_MANIFEST.assetHierarchy.schemaVersion, 1)
+assert.equal(SOURCE_TWIN_MANIFEST.assetHierarchy.materialization, 'proposal-required')
+assert.ok(SOURCE_TWIN_MANIFEST.assetHierarchy.components.some((item) => item.id === 'engine-source-lens'))
+assert.ok(SOURCE_TWIN_MANIFEST.assetHierarchy.components.some((item) => item.id === 'component-source-component-mapper'))
+assert.equal(sourceEntityIsModuleAsset(SOURCE_TWIN_MANIFEST, SOURCE_TWIN_MANIFEST.entities.find((item) => item.kind === 'file')), true)
+const sourceLensComponent = SOURCE_TWIN_MANIFEST.assetHierarchy.components.find((item) => item.id === 'engine-source-lens')
+assert.ok(sourceComponentsForSubsystem(SOURCE_TWIN_MANIFEST, sourceLensComponent.area, sourceLensComponent.subsystem, SOURCE_TWIN_MANIFEST.entities).some((item) => item.id === 'engine-source-lens'))
 
 const connectorNow = Date.parse('2026-07-15T08:00:00.000Z')
 const waitingConnector = { id: 'waiting', createdAt: '2026-07-15T07:59:00.000Z', lastSeenAt: null }
@@ -205,7 +213,7 @@ const workflowCanvasSemanticManifest = buildSourceTwinManifest(new Map([
   ['src/components/IntentWorkspace.jsx', 'export default function IntentWorkspace() { return null }\n'],
 ]))
 assert.equal(workflowCanvasSemanticManifest.source.profile.id, 'workflow-canvas')
-assert.equal(workflowCanvasSemanticManifest.source.profile.version, '0.3.0')
+assert.equal(workflowCanvasSemanticManifest.source.profile.version, '0.4.0')
 const appSemanticEntity = workflowCanvasSemanticManifest.entities.find((entity) => entity.id === 'file:src/App.jsx')
 const sourcePanelSemanticEntity = workflowCanvasSemanticManifest.entities.find((entity) => entity.id === 'file:src/components/SourceTwinPanel.jsx')
 assert.equal(appSemanticEntity.area, 'canvas-interface')
