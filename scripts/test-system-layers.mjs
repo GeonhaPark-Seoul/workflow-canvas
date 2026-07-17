@@ -22,6 +22,7 @@ import { SYSTEM_KIND_DEFS } from '../shared/systemOntology.js'
 
 const expectedKinds = {
   actor: 'L1',
+  feature: 'L1',
   engine: 'L2',
   frontend: 'L2',
   service: 'L2',

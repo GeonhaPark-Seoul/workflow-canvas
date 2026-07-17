@@ -1,9 +1,18 @@
 export const SOURCE_PROFILE_CONTRACT_VERSION = 1
+export const SOURCE_FEATURE_MODEL_SCHEMA_VERSION = 1
+
+export const SOURCE_FEATURE_CLASSIFICATIONS = Object.freeze([
+  'feature-asset',
+  'capability',
+  'attribute',
+])
 
 const ID_PATTERN = /^[a-z0-9][a-z0-9.-]{1,119}$/
 const SEMVER_PATTERN = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?$/
 const SOURCE_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9:._-]{1,179}$/
 const ANALYSIS_LEVELS = new Set(['parsed', 'structure-only', 'unsupported'])
+const FEATURE_SCOPES = new Set(['area', 'subsystem'])
+const FEATURE_CLASSIFICATION_IDS = new Set(SOURCE_FEATURE_CLASSIFICATIONS)
 
 function plainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
@@ -116,6 +125,78 @@ function languageSupport(value) {
   return { language, level, note: text(value.note, 300) }
 }
 
+function featureClassification(value, fallback = 'attribute') {
+  return FEATURE_CLASSIFICATION_IDS.has(value) ? value : fallback
+}
+
+function featureDecision(value, catalogs) {
+  if (!plainObject(value)) throw new Error('Source Profile 기능 판정이 객체가 아닙니다.')
+  const scope = FEATURE_SCOPES.has(value.scope) ? value.scope : ''
+  const id = text(value.id, 120)
+  const classification = featureClassification(value.classification, '')
+  const rationale = text(value.rationale, 500)
+  if (!scope || !ID_PATTERN.test(id) || !classification || !rationale) {
+    throw new Error('Source Profile 기능 판정이 불완전합니다.')
+  }
+  const catalog = scope === 'area' ? catalogs.areaIds : catalogs.subsystemIds
+  if (!catalog.has(id)) {
+    throw new Error(`Source Profile 기능 판정 대상이 분류 사전에 없습니다: ${scope}:${id}`)
+  }
+  return { scope, id, classification, rationale }
+}
+
+function implementationRule(value) {
+  if (!plainObject(value)) throw new Error('Source Profile 구현 연결 규칙이 객체가 아닙니다.')
+  const pathPattern = text(value.pathPattern, 500)
+  const targetEntityId = text(value.targetEntityId, 180)
+  if (!pathPattern || !SOURCE_ID_PATTERN.test(targetEntityId)) {
+    throw new Error('Source Profile 구현 연결 규칙이 불완전합니다.')
+  }
+  try { new RegExp(pathPattern, 'i') } catch {
+    throw new Error(`Source Profile 구현 연결 경로 규칙이 올바르지 않습니다: ${pathPattern}`)
+  }
+  return { pathPattern, targetEntityId }
+}
+
+function dataBinding(value) {
+  if (!plainObject(value)) throw new Error('Source Profile 데이터 연결 규칙이 객체가 아닙니다.')
+  const sourceEntityId = text(value.sourceEntityId, 180)
+  const targetEntityId = text(value.targetEntityId, 180)
+  if (!SOURCE_ID_PATTERN.test(sourceEntityId) || !SOURCE_ID_PATTERN.test(targetEntityId)) {
+    throw new Error('Source Profile 데이터 연결 규칙이 불완전합니다.')
+  }
+  return { sourceEntityId, targetEntityId }
+}
+
+function featureModelContract(value, catalogs) {
+  if (value == null) return null
+  if (!plainObject(value)) throw new Error('Source Profile 기능 모델이 객체가 아닙니다.')
+  if (value.schemaVersion !== SOURCE_FEATURE_MODEL_SCHEMA_VERSION) {
+    throw new Error(`지원하지 않는 Source Profile 기능 모델 버전입니다: ${value.schemaVersion}`)
+  }
+  const decisions = (Array.isArray(value.decisions) ? value.decisions : [])
+    .slice(0, 500)
+    .map((item) => featureDecision(item, catalogs))
+  assertUniqueIds(decisions.map((item) => ({ id: `${item.scope}:${item.id}` })), '기능 판정')
+  const implementationRules = (Array.isArray(value.implementationRules) ? value.implementationRules : [])
+    .slice(0, 300)
+    .map(implementationRule)
+  const dataBindings = (Array.isArray(value.dataBindings) ? value.dataBindings : [])
+    .slice(0, 300)
+    .map(dataBinding)
+  assertUniqueIds(dataBindings.map((item) => ({ id: item.sourceEntityId })), '데이터 연결')
+  return {
+    schemaVersion: SOURCE_FEATURE_MODEL_SCHEMA_VERSION,
+    defaults: {
+      area: featureClassification(value.defaults?.area),
+      subsystem: featureClassification(value.defaults?.subsystem),
+    },
+    decisions,
+    implementationRules,
+    dataBindings,
+  }
+}
+
 export function defineSourceProfile(value) {
   if (!plainObject(value)) throw new Error('Source Profile이 객체가 아닙니다.')
   if (value.contractVersion !== SOURCE_PROFILE_CONTRACT_VERSION) {
@@ -140,6 +221,10 @@ export function defineSourceProfile(value) {
   assertUniqueIds(languages.map((item) => ({ id: item.language })), '언어 지원')
   const areas = assertUniqueIds((Array.isArray(value.areas) ? value.areas : []).slice(0, 100).map((item) => definition(item)), '영역')
   const subsystems = assertUniqueIds((Array.isArray(value.subsystems) ? value.subsystems : []).slice(0, 300).map((item) => definition(item, { subsystem: true })), '하위 시스템')
+  const featureModel = featureModelContract(value.featureModel, {
+    areaIds: new Set(areas.map((item) => item.id)),
+    subsystemIds: new Set(subsystems.map((item) => item.id)),
+  })
   const normalized = {
     contractVersion: SOURCE_PROFILE_CONTRACT_VERSION,
     id,
@@ -156,6 +241,7 @@ export function defineSourceProfile(value) {
     fileRoles,
     areaRules: (Array.isArray(value.areaRules) ? value.areaRules : []).slice(0, 200).map((item) => rule(item, 'area')),
     subsystemRules: (Array.isArray(value.subsystemRules) ? value.subsystemRules : []).slice(0, 400).map((item) => rule(item, 'subsystem')),
+    ...(featureModel ? { featureModel } : {}),
   }
   return freeze(normalized)
 }
@@ -215,6 +301,7 @@ export function sourceProfileDescriptor(profile, matchEvidence = []) {
     sourceId: profile.sourceId,
     capabilities: profile.capabilities,
     languageSupport: profile.languageSupport,
+    ...(profile.featureModel ? { featureModel: profile.featureModel } : {}),
     matchEvidence: stringList(matchEvidence, 20, 500),
   }
 }

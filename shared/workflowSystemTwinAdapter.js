@@ -27,13 +27,24 @@ import {
 } from './workflowSystemDiscovery.js'
 import { WORKFLOW_SYSTEM_DISCOVERY } from './workflowSystemDiscoveryManifest.js'
 import { TWIN_ENGINE_SCHEMA_VERSION } from './twinAdapterContract.js'
-import { materializeTwinBuildEntity, materializeTwinBuildRelation } from './twinBuildCanvas.js'
+import {
+  findTwinBuildEntityNode,
+  materializeTwinBuildEntity,
+  materializeTwinBuildRelation,
+} from './twinBuildCanvas.js'
 import { reconcileTwinBuild } from './twinBuildReconciler.js'
 import {
   canInspectWorkflowSystemCanvas,
   WORKFLOW_SYSTEM_TWIN_ADAPTER_DESCRIPTOR,
 } from './workflowSystemTwinAdapterDescriptor.js'
-import { WORKFLOW_SYSTEM_TWIN_BUILD } from './workflowSystemTwinBuild.js'
+import {
+  WORKFLOW_SOURCE_FEATURE_EXTENSION,
+  WORKFLOW_SYSTEM_TWIN_BUILD,
+} from './workflowSystemTwinBuild.js'
+import {
+  WORKFLOW_SOURCE_FEATURE_ENTITY_PREFIX,
+  WORKFLOW_SOURCE_FEATURE_RELATION_PREFIX,
+} from './workflowSourceFeatureBuild.js'
 
 export const WORKFLOW_SYSTEM_TWIN_SOURCE_ID = WORKFLOW_SYSTEM_DISCOVERY_SOURCE_ID
 
@@ -201,6 +212,123 @@ function isEngineBatchBuildItem(item) {
   return ENGINE_BATCH_ITEM_IDS.some((id) => item.itemKey?.includes(id))
 }
 
+function sourceFeatureMigrationItem(canvas) {
+  const entityById = new Map(WORKFLOW_SYSTEM_TWIN_BUILD.entities.map((entity) => [entity.id, entity]))
+  const relationById = new Map(WORKFLOW_SYSTEM_TWIN_BUILD.relations.map((relation) => [relation.id, relation]))
+  const presentEntityIds = new Set(WORKFLOW_SOURCE_FEATURE_EXTENSION.entityIds.filter((entityId) => (
+    !!findTwinBuildEntityNode(WORKFLOW_SYSTEM_TWIN_BUILD, entityById.get(entityId), canvas)
+  )))
+  const areaEntityIds = WORKFLOW_SOURCE_FEATURE_EXTENSION.featureModel.candidates
+    .filter((candidate) => candidate.classification === 'feature-asset' && candidate.eligible && candidate.scope === 'area')
+    .map((candidate) => `${WORKFLOW_SOURCE_FEATURE_ENTITY_PREFIX}${candidate.scope}:${candidate.id}`)
+  const subsystemEntityIds = WORKFLOW_SOURCE_FEATURE_EXTENSION.featureModel.candidates
+    .filter((candidate) => candidate.classification === 'feature-asset' && candidate.eligible && candidate.scope === 'subsystem')
+    .map((candidate) => `${WORKFLOW_SOURCE_FEATURE_ENTITY_PREFIX}${candidate.scope}:${candidate.id}`)
+  const missingAreas = areaEntityIds.filter((id) => !presentEntityIds.has(id))
+  const missingSubsystems = subsystemEntityIds.filter((id) => !presentEntityIds.has(id))
+  const edgeIds = new Set((canvas.edges ?? []).map((edge) => edge.id))
+  const missingRelations = WORKFLOW_SOURCE_FEATURE_EXTENSION.relationIds
+    .filter((id) => !edgeIds.has(id))
+    .map((id) => relationById.get(id))
+    .filter(Boolean)
+    .filter((relation) => (
+      !!findTwinBuildEntityNode(WORKFLOW_SYSTEM_TWIN_BUILD, entityById.get(relation.source.entityId), canvas)
+      && !!findTwinBuildEntityNode(WORKFLOW_SYSTEM_TWIN_BUILD, entityById.get(relation.target.entityId), canvas)
+    ))
+
+  let stage = null
+  if (missingAreas.length) {
+    stage = {
+      id: 'feature-areas',
+      status: 'source_feature_areas_missing',
+      title: `L1 제품 기능 ${missingAreas.length}개 추가`,
+      summary: 'Source Profile이 기능 Asset으로 판정한 제품 영역을 L1 검토안으로 추가합니다.',
+      entityIds: missingAreas,
+      relations: [],
+    }
+  } else if (missingSubsystems.length) {
+    stage = {
+      id: 'feature-subsystems',
+      status: 'source_feature_subsystems_missing',
+      title: `L1 독립 하위 기능 ${missingSubsystems.length}개 추가`,
+      summary: '사용자가 별도 흐름으로 인식하는 하위 시스템만 독립 기능 Asset 검토안으로 추가합니다.',
+      entityIds: missingSubsystems,
+      relations: [],
+    }
+  } else if (missingRelations.length) {
+    const batch = missingRelations.slice(0, 20)
+    stage = {
+      id: `feature-relations-${digitalTwinReviewFingerprint(batch.map((relation) => relation.id)).slice(0, 12)}`,
+      status: 'source_feature_relations_missing',
+      title: `기능 근거 관계 ${batch.length}개 연결`,
+      summary: '실제 코드·DB 참조에서 확인된 구현, 읽기와 쓰기 관계만 연결합니다.',
+      entityIds: [],
+      relations: batch,
+    }
+  }
+  if (!stage) return null
+
+  const selectedEntities = stage.entityIds.map((id) => entityById.get(id)).filter(Boolean)
+  const evidence = unique([
+    `Source Profile ${WORKFLOW_SOURCE_FEATURE_EXTENSION.featureModel.profile.id}@${WORKFLOW_SOURCE_FEATURE_EXTENSION.featureModel.profile.version}`,
+    ...selectedEntities.flatMap((entity) => entity.evidenceIds
+      .map((id) => WORKFLOW_SYSTEM_TWIN_BUILD.evidence.find((item) => item.id === id)?.ref)),
+    ...stage.relations.flatMap((relation) => relation.evidenceIds
+      .map((id) => WORKFLOW_SYSTEM_TWIN_BUILD.evidence.find((item) => item.id === id)?.ref)),
+  ])
+  const item = createDigitalTwinReviewItem({
+    sourceId: WORKFLOW_SYSTEM_TWIN_SOURCE_ID,
+    itemKey: `source-feature-map:${stage.id}`,
+    category: stage.relations.length ? 'relation' : 'entity',
+    changeType: 'added',
+    severity: 'info',
+    title: stage.title,
+    summary: stage.summary,
+    evidence,
+    focus: null,
+    status: stage.status,
+    observation: {
+      featureModelFingerprint: WORKFLOW_SOURCE_FEATURE_EXTENSION.featureModel.fingerprint,
+      profile: WORKFLOW_SOURCE_FEATURE_EXTENSION.featureModel.profile,
+      entityIds: stage.entityIds,
+      relationIds: stage.relations.map((relation) => relation.id),
+      remainingRelations: missingRelations.length,
+    },
+  })
+  const workingCanvas = {
+    ...canvas,
+    nodes: [...(canvas.nodes ?? [])],
+  }
+  const nodeOperations = selectedEntities.map((entity) => {
+    const node = materializeTwinBuildEntity(WORKFLOW_SYSTEM_TWIN_BUILD, entity, item)
+    node.position = findOpenRootPosition(workingCanvas, node.width, node.height, entity.placement.initialPosition)
+    workingCanvas.nodes.push(node)
+    return { action: 'add_node', label: `${entity.label} 기능 Asset 추가`, node }
+  })
+  const edgeOperations = stage.relations.map((relation) => ({
+    action: 'add_edge',
+    label: `${relation.id} 근거 관계 추가`,
+    edge: materializeTwinBuildRelation(WORKFLOW_SYSTEM_TWIN_BUILD, relation),
+  }))
+  const proposal = createDigitalTwinGraphProposal({
+    sourceId: WORKFLOW_SYSTEM_TWIN_SOURCE_ID,
+    proposalKey: `source-feature-map:${stage.id}`,
+    itemId: item.id,
+    itemFingerprint: item.fingerprint,
+    snapshotId: WORKFLOW_SYSTEM_DISCOVERY.current.id,
+    title: stage.title,
+    summary: `${stage.summary} 기존 노드의 위치·크기·메모와 검토 결정은 변경하지 않으며 LIVE 상태를 만들지 않습니다.`,
+    operations: [...nodeOperations, ...edgeOperations],
+  })
+  return { ...item, proposal }
+}
+
+function isSourceFeatureBatchBuildItem(item) {
+  if (!['missing_on_canvas', 'blocked_dependency'].includes(item?.status)) return false
+  return item.itemKey?.includes(WORKFLOW_SOURCE_FEATURE_ENTITY_PREFIX)
+    || item.itemKey?.includes(WORKFLOW_SOURCE_FEATURE_RELATION_PREFIX)
+}
+
 function resourceObservation(resources = []) {
   return resources.map((resource) => ({
     key: resource.key,
@@ -243,6 +371,22 @@ function findOpenGroupPosition(canvas, parentId, width = 240, height = 140) {
     }
   }
   return null
+}
+
+function findOpenRootPosition(canvas, width = 260, height = 150, preferred = { x: 0, y: -1_800 }) {
+  const occupied = (canvas.nodes ?? []).map((node) => ({
+    ...absolutePosition(node, canvas),
+    ...nodeSize(node),
+  }))
+  const candidates = [preferred]
+  for (let band = 1; band <= 40; band += 1) {
+    candidates.push({ x: preferred.x, y: preferred.y - band * 205 })
+  }
+  for (const position of candidates) {
+    const candidate = { ...position, width, height }
+    if (!occupied.some((rect) => overlapsWithMargin(candidate, rect))) return position
+  }
+  return { x: preferred.x, y: preferred.y - 8_405 }
 }
 
 function absolutePosition(node, canvas) {
@@ -701,7 +845,10 @@ export function inspectWorkflowSystemTwin(canvas) {
   })
   const codePortMigration = workflowCodePortMigrationItem(canvas)
   const engineCapabilityMigration = engineCapabilityMigrationItem(canvas)
-  const visibleBuildItems = buildReview.items.filter((item) => !isEngineBatchBuildItem(item))
+  const sourceFeatureMigration = sourceFeatureMigrationItem(canvas)
+  const visibleBuildItems = buildReview.items.filter((item) => (
+    !isEngineBatchBuildItem(item) && !isSourceFeatureBatchBuildItem(item)
+  ))
   const migratedPartIds = new Set([
     WORKFLOW_SOURCE_TWIN_PART_IDS.localCode,
     WORKFLOW_SOURCE_TWIN_PART_IDS.githubCode,
@@ -709,6 +856,7 @@ export function inspectWorkflowSystemTwin(canvas) {
   const items = [
     ...(codePortMigration ? [codePortMigration] : []),
     ...(engineCapabilityMigration ? [engineCapabilityMigration] : []),
+    ...(sourceFeatureMigration ? [sourceFeatureMigration] : []),
     ...visibleBuildItems.filter((item) => (
       item.category !== 'runtime'
       && !(codePortMigration && item.itemKey.includes('map-edge-repo-github'))
@@ -756,8 +904,8 @@ export function inspectWorkflowSystemTwin(canvas) {
     },
     summary: {
       ...report.summary,
-      twin_build_findings: visibleBuildItems.length + (engineCapabilityMigration ? 1 : 0),
-      twin_build_actionable: visibleBuildItems.filter((item) => !!item.proposal).length + (engineCapabilityMigration ? 1 : 0),
+      twin_build_findings: visibleBuildItems.length + (engineCapabilityMigration ? 1 : 0) + (sourceFeatureMigration ? 1 : 0),
+      twin_build_actionable: visibleBuildItems.filter((item) => !!item.proposal).length + (engineCapabilityMigration ? 1 : 0) + (sourceFeatureMigration ? 1 : 0),
       twin_build_blocked: visibleBuildItems.filter((item) => item.status === 'blocked_dependency').length,
     },
     items,

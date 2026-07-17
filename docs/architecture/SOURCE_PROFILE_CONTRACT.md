@@ -1,12 +1,13 @@
 # Source Profile 계약
 
-Source Profile은 Source Lens가 서로 다른 소프트웨어의 코드를 그 제품의 언어로 설명하도록 연결하는 **버전이 있는 제품별 번역 사전**이다. 공통 스캐너가 파일과 구조 근거를 수집하고, 프로필은 저장소 식별 근거, 제품 영역, 하위 시스템, 잘 알려진 파일 역할과 지원 수준을 선언한다.
+Source Profile은 Source Lens가 서로 다른 소프트웨어의 코드를 그 제품의 언어로 설명하고 **무엇을 어디까지 지도에 표현할지** 결정하도록 연결하는 버전이 있는 제품별 번역 사전이다. 공통 스캐너가 파일과 구조 근거를 수집하고, 프로필은 저장소 식별 근거, 제품 영역, 하위 시스템, 잘 알려진 파일 역할, 지원 수준과 선택적인 기능 표현 경계를 선언한다.
 
 ## 책임 경계
 
 - Source Scanner: 허용된 파일을 찾고 지원되는 parser로 구조 근거를 추출한다.
 - Source Profile Registry: 저장소 근거와 일치하는 프로필 하나를 결정적으로 선택한다.
 - Source Profile: 제품별 이름, 분류와 파일 역할을 선언한다.
+- Feature Boundary Resolver: 프로필의 3등급 판정과 실제 코드·DB 근거를 대조한다.
 - Source Twin manifest: 선택된 프로필 ID·버전·근거와 분석 결과를 함께 보존한다.
 - Twin Adapter: 코드 외의 DB, 배포, 운영 상태와 조작 능력까지 시스템 트윈으로 변환한다.
 
@@ -22,7 +23,25 @@ Source Profile은 parser, 실행 플러그인, 서버 또는 AI prompt가 아니
 - `areas`, `subsystems`
 - `fileRoles`, `areaRules`, `subsystemRules`
 
+`featureModel`은 계약 v1의 선택 확장이다. 확장을 사용하면 `schemaVersion: 1`, 영역·하위 시스템의 기본 판정, 명시적 판정, 구현 연결 규칙과 데이터 연결 규칙을 선언한다. 확장이 없는 기존 프로필은 코드 설명만 만들며 기능 Asset 후보를 만들지 않는다.
+
 파일 역할에는 쉬운 설명과 사용자 영향이 모두 있어야 한다. 경로는 저장소 상대 경로만 허용하며 버전은 Semantic Versioning 형식으로 기록한다. 같은 근거에서는 priority, 근거 수와 ID 순서에 따라 항상 같은 프로필이 선택된다.
+
+## 기능 표현 경계 확장 v1
+
+각 제품 영역과 하위 시스템은 다음 셋 중 하나로만 판정한다.
+
+- `feature-asset`: 사용자가 독립 능력으로 인지하고 구현 근거와 관계가 필요한 L1 기능 Asset 후보
+- `capability`: 기능 Asset이 노출하는 세부 능력이며 소유 Asset의 파츠 후보
+- `attribute`: 별도 상태·관계가 필요하지 않은 내부 사실 또는 관측이며 노드나 파츠로 만들지 않음
+
+판정은 Source Profile의 데이터 선언이다. 공통 Source Lens 코어에는 Workflow Canvas 이름이나 노드 ID를 하드코딩하지 않는다. `implementationRules`는 위에서 아래로 평가해 파일마다 처음 일치한 Twin Adapter 대상 하나를 사용한다. `dataBindings`는 Source Twin의 DB 엔티티 ID를 대상 TwinBuild 엔티티 ID에 연결한다.
+
+`feature-asset`은 해당 영역·하위 시스템의 실제 파일 근거와 구현 대상 근거가 모두 있을 때만 실체화 가능하다. `capability`는 실제 파일 근거와 소유 기능 Asset이 있어야 한다. DB 관계는 Source Twin이 `read` 또는 `write`로 확인한 참조만 `reads`/`writes` 후보가 되며 SQL 선언만 있는 `declares`는 사용하지 않는다.
+
+판정 결과는 자동으로 캔버스를 바꾸지 않는다. Twin Adapter가 기존 Reconciliation 경계에서 미리보기 → 사용자 승인 → 실체화 순서의 Proposal로 바꾼다. Feature Asset은 `declared`이며 코드 근거만으로 LIVE를 암시하지 않는다.
+
+Source Lens의 표현 규칙과 판정 코드도 Source Twin의 분석 대상이다. 따라서 판정기가 바뀌면 Source Lens 버전·근거와 자기 시스템 지도의 변경 검토안에 다시 나타난다. 이 자기반영 구조는 유지하되, 구체적인 세분화 수준은 프로필 버전으로 바꿀 수 있다.
 
 ## 분석 수준
 
@@ -49,4 +68,4 @@ manifest ID와 설명 fingerprint에는 프로필 ID·버전, 설명, 분류와 
 
 ## 현재 범위와 다음 결정
 
-이번 버전은 Workflow Canvas 프로필 분리와 두 번째 FastAPI 참조 프로필의 파일 수준 검증까지 포함한다. 다음 단계의 실제 Python 함수·import·호출 분석은 표준 library 또는 검증된 parser를 비교하고 사용자 승인을 받은 뒤 도입한다. 그 전까지 Python 결과를 `parsed`나 LIVE로 승격하지 않는다.
+이번 버전은 Workflow Canvas 프로필의 기능 표현 경계와 두 번째 FastAPI 참조 프로필에서 같은 판정기의 재사용까지 포함한다. FastAPI는 여전히 파일 구조 수준이며 실제 Python 함수·import·호출 분석은 표준 library 또는 검증된 parser를 비교하고 사용자 승인을 받은 뒤 도입한다. 그 전까지 Python 결과를 `parsed`나 LIVE로 승격하지 않는다.

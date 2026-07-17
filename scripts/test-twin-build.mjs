@@ -14,7 +14,10 @@ import { createWorkflowCanvasSystemMap } from '../shared/workflowCanvasSystemMap
 import { ENGINE_CAPABILITY_MAP_GROUP_ID } from '../shared/capabilityMapper.js'
 import { WORKFLOW_ENGINE_REGISTRY } from '../shared/engineRegistry.js'
 import { inspectWorkflowSystemTwin } from '../shared/workflowSystemTwinAdapter.js'
-import { WORKFLOW_SYSTEM_TWIN_BUILD } from '../shared/workflowSystemTwinBuild.js'
+import {
+  WORKFLOW_SOURCE_FEATURE_EXTENSION,
+  WORKFLOW_SYSTEM_TWIN_BUILD,
+} from '../shared/workflowSystemTwinBuild.js'
 import {
   WORKFLOW_GIT_SYNC_OPERATION_DEFINITION,
   WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION,
@@ -197,6 +200,12 @@ assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.policies.length, 3)
 assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.observations.length, 2)
 assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.controls.length, 3)
 assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.threats.length, 1)
+assert.equal(WORKFLOW_SOURCE_FEATURE_EXTENSION.entities.length, 17)
+assert.equal(WORKFLOW_SOURCE_FEATURE_EXTENSION.parts.length, 13)
+assert.ok(WORKFLOW_SOURCE_FEATURE_EXTENSION.entities.every((entity) => entity.kind === 'feature'))
+assert.ok(WORKFLOW_SOURCE_FEATURE_EXTENSION.relations.some((relation) => relation.relationType === 'implemented_by'))
+assert.ok(WORKFLOW_SOURCE_FEATURE_EXTENSION.relations.some((relation) => relation.relationType === 'reads'))
+assert.ok(WORKFLOW_SOURCE_FEATURE_EXTENSION.relations.some((relation) => relation.relationType === 'writes'))
 assert.equal(
   WORKFLOW_SYSTEM_TWIN_BUILD.operations.find((item) => item.id === WORKFLOW_GIT_SYNC_OPERATION_DEFINITION.id)?.fingerprint,
   WORKFLOW_GIT_SYNC_OPERATION_DEFINITION.fingerprint,
@@ -255,14 +264,14 @@ const componentDriftItem = componentDriftReview.items.find((item) => item.status
 assert.equal(componentDriftItem.proposal.counts.components, 5)
 assert.equal(componentDriftItem.focus.nodeId, 'map-engine-source-lens')
 assert.ok(componentDriftItem.proposal.operations.some((operation) => (
-  operation.targetNodeId === 'map-engine-source-lens'
-  && operation.logicalComponent.technicalVersion === '0.2.0-alpha.0'
+      operation.targetNodeId === 'map-engine-source-lens'
+      && operation.logicalComponent.technicalVersion === '0.3.0-alpha.0'
 )))
 const componentDriftApplied = applyDigitalTwinGraphProposal(staleEngineContracts, componentDriftItem.proposal)
 assert.equal(componentDriftApplied.appliedLogicalComponentIds.length, 5)
 assert.equal(
   componentDriftApplied.nodes.find((node) => node.id === 'map-engine-source-lens').data.logicalComponent.technicalVersion,
-  '0.2.0-alpha.0',
+  '0.3.0-alpha.0',
 )
 assert.equal(
   componentDriftApplied.nodes.find((node) => node.id === 'map-engine-source-lens').data.manualAnnotation,
@@ -275,9 +284,31 @@ assert.equal(
   }).items.some((item) => ['logical_component_missing', 'logical_component_stale'].includes(item.status)),
   false,
 )
+const firstFeatureStage = inspectWorkflowSystemTwin(boundWorkflowCanvas).items
+  .find((item) => item.status === 'source_feature_areas_missing')
+assert.deepEqual(firstFeatureStage.proposal.counts, { nodes: 8, edges: 0, parts: 0 })
+const featureAreasApplied = applyDigitalTwinGraphProposal(boundWorkflowCanvas, firstFeatureStage.proposal)
+let featureCanvas = { ...boundWorkflowCanvas, nodes: featureAreasApplied.nodes, edges: featureAreasApplied.edges }
+const secondFeatureStage = inspectWorkflowSystemTwin(featureCanvas).items
+  .find((item) => item.status === 'source_feature_subsystems_missing')
+assert.deepEqual(secondFeatureStage.proposal.counts, { nodes: 9, edges: 0, parts: 0 })
+const featureSubsystemsApplied = applyDigitalTwinGraphProposal(featureCanvas, secondFeatureStage.proposal)
+featureCanvas = { ...featureCanvas, nodes: featureSubsystemsApplied.nodes, edges: featureSubsystemsApplied.edges }
+let relationBatchCount = 0
+for (let index = 0; index < 10; index += 1) {
+  const relationStage = inspectWorkflowSystemTwin(featureCanvas).items
+    .find((item) => item.status === 'source_feature_relations_missing')
+  if (!relationStage) break
+  assert.ok(relationStage.proposal.counts.edges > 0 && relationStage.proposal.counts.edges <= 20)
+  const applied = applyDigitalTwinGraphProposal(featureCanvas, relationStage.proposal)
+  featureCanvas = { ...featureCanvas, nodes: applied.nodes, edges: applied.edges }
+  relationBatchCount += 1
+}
+assert.ok(relationBatchCount > 1)
+assert.equal(new Set(featureCanvas.nodes.map((node) => node.id)).size, featureCanvas.nodes.length)
 const workflowReview = reconcileTwinBuild({
   build: WORKFLOW_SYSTEM_TWIN_BUILD,
-  canvas: boundWorkflowCanvas,
+  canvas: featureCanvas,
 })
 assert.equal(workflowReview.summary.pending, 0)
 assert.equal(workflowReview.summary.actionable, 0)
@@ -313,7 +344,7 @@ const thirdEngineStage = inspectWorkflowSystemTwin(legacySystemMap).items
   .find((item) => item.status === 'engine_relations_missing')
 assert.deepEqual(thirdEngineStage.proposal.counts, { nodes: 0, edges: engineEdgeIds.size, parts: 0 })
 
-const manuallyChanged = structuredClone(boundWorkflowCanvas)
+const manuallyChanged = structuredClone(featureCanvas)
 const repository = manuallyChanged.nodes.find((node) => node.id === 'map-local-repo')
 repository.position = { x: 9_999, y: -2_000 }
 repository.width = 444
@@ -336,7 +367,15 @@ assert.equal(repository.width, 444)
 assert.equal(repository.data.manualAnnotation, '사용자 전용 메모')
 assert.deepEqual(repository.data.presentation, { layerOverride: 'L1' })
 
-const changedMeaning = structuredClone(boundWorkflowCanvas)
+const sourceFeatureNode = manuallyChanged.nodes.find((node) => node.id === 'map-source-feature-area-source-code-twin')
+sourceFeatureNode.position = { x: 7_777, y: -7_777 }
+sourceFeatureNode.data.manualAnnotation = '사용자가 정리한 Source Lens 기능 메모'
+const sourceFeaturePreserved = inspectWorkflowSystemTwin(manuallyChanged)
+assert.equal(sourceFeaturePreserved.items.some((item) => item.status?.startsWith('source_feature_')), false)
+assert.deepEqual(sourceFeatureNode.position, { x: 7_777, y: -7_777 })
+assert.equal(sourceFeatureNode.data.manualAnnotation, '사용자가 정리한 Source Lens 기능 메모')
+
+const changedMeaning = structuredClone(featureCanvas)
 changedMeaning.nodes.find((node) => node.id === 'map-web-app').data.purpose = '사용자가 직접 바꾼 목적'
 const changedReview = reconcileTwinBuild({
   build: WORKFLOW_SYSTEM_TWIN_BUILD,

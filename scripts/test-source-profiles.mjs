@@ -20,7 +20,8 @@ const workflowFiles = new Map([
 ])
 const workflowSelection = registeredSourceProfile({ project: { name: 'workflow-canvas' }, files: workflowFiles })
 assert.equal(workflowSelection.profile.id, 'workflow-canvas')
-assert.equal(workflowSelection.profile.version, '0.2.0')
+assert.equal(workflowSelection.profile.version, '0.3.0')
+assert.equal(workflowSelection.profile.featureModel.schemaVersion, 1)
 assert.deepEqual(workflowSelection.matchEvidence, ['package:workflow-canvas'])
 
 const genericFiles = new Map([
@@ -49,7 +50,7 @@ const fastApiManifest = buildSourceTwinManifest(fastApiFiles)
 assert.equal(fastApiManifest.source.id, 'fastapi-order-service:source')
 assert.equal(fastApiManifest.source.label, '주문 처리 서비스 소스 코드')
 assert.equal(fastApiManifest.source.profile.id, 'fastapi-order-service-reference')
-assert.equal(fastApiManifest.source.profile.version, '0.1.0')
+assert.equal(fastApiManifest.source.profile.version, '0.2.0')
 assert.equal(fastApiManifest.summary.structureOnlyFiles, 7)
 assert.equal(fastApiManifest.entities.filter((item) => item.kind === 'function').length, 0)
 
@@ -57,7 +58,7 @@ const pythonFiles = fastApiManifest.entities.filter((item) => item.kind === 'fil
 assert.equal(pythonFiles.length, 7)
 assert.ok(pythonFiles.every((item) => item.details.parseStatus === 'structure-only'))
 assert.ok(pythonFiles.every((item) => /함수 구조는 아직 분석하지 않음/.test(item.technicalSummary)))
-assert.ok(pythonFiles.every((item) => item.explanationBasis.refs.includes('profile:fastapi-order-service-reference@0.1.0')))
+assert.ok(pythonFiles.every((item) => item.explanationBasis.refs.includes('profile:fastapi-order-service-reference@0.2.0')))
 assert.doesNotMatch(JSON.stringify(fastApiManifest), /canvas-interface|Workflow Canvas/)
 
 const orderService = fastApiManifest.entities.find((item) => item.id === 'file:app/services/order_service.py')
@@ -136,6 +137,14 @@ assert.throws(() => defineSourceProfile({
 }), /fallback은 다른 match 조건/)
 assert.throws(() => resolveSourceProfile([], {}), /일치하는 Source Profile/)
 assert.ok(Object.isFrozen(DEFAULT_SOURCE_PROFILES[0]))
+
+assert.throws(() => defineSourceProfile({
+  ...referenceProfile,
+  featureModel: {
+    schemaVersion: 1,
+    decisions: [{ scope: 'area', id: 'missing-area', classification: 'feature-asset', rationale: '존재하지 않는 분류' }],
+  },
+}), /분류 사전에 없습니다/)
 
 const dishonestPythonProfile = defineSourceProfile({
   contractVersion: SOURCE_PROFILE_CONTRACT_VERSION,

@@ -46,6 +46,15 @@
 - Python은 파일 구조만 확인하며 함수·호출을 분석하지 않았음을 manifest와 화면에 명시한다.
 - 프로필 버전이나 설명만 바뀐 경우도 별도 설명 fingerprint와 상태 변경으로 감지한다.
 
+## Source Lens 0.3.0-alpha.0 - 2026-07-17
+
+- Source Profile Contract v1에 하위 호환 `Feature Model extension v1`을 추가했다.
+- Feature Boundary Resolver가 제품 영역과 하위 시스템을 기능 Asset, Capability와 속성으로 결정적으로 판정한다.
+- 실제 파일과 구현 연결 근거가 없는 기능 Asset은 실체화 후보에서 제외하고 이유를 진단한다.
+- AST·DB 참조에서 확인한 `read`/`write`만 기능의 데이터 관계 후보로 사용하며 선언만 있는 관계는 제외한다.
+- Workflow Canvas와 FastAPI 참조 프로필이 같은 판정 코어로 서로 다른 기능 집합을 만든다.
+- Source Lens의 판정 코드와 버전 변경도 다시 Source Twin과 자기 시스템 지도 검토안에 반영된다.
+
 ## Source Scanner 0.1.0-alpha.0 - 2026-07-16
 
 - Babel AST 기반 JavaScript 분석과 제한된 SQL 선언 분석을 첫 엔진 버전으로 기록했다.
@@ -62,6 +71,18 @@
 - Work Core와 Intent Engine 코드를 `Work·Intent 엔진` 하위 시스템으로 묶었다.
 - Work 계약, Intent 원문·조문 작업공간과 관련 회귀 테스트에 비개발자용 역할 설명을 추가했다.
 - 공통 Source Lens 스캐너나 다른 소프트웨어의 Source Profile은 변경하지 않았다.
+
+## Workflow Canvas Source Profile 0.3.0 - 2026-07-17
+
+- 14개 제품 영역과 38개 하위 시스템에 3등급 기능 판정 경계를 선언했다.
+- 8개 제품 영역과 사용자가 별도 흐름으로 인식하는 9개 하위 시스템을 기능 Asset으로 판정했다.
+- 13개 세부 능력은 소유 기능 Asset의 Capability 파츠로 판정하고 내부 구현 사실은 속성으로 남겼다.
+- 구현 모듈과 기존 시스템 지도 DB 엔티티의 제품별 매핑을 프로필에 두어 공통 판정 코어의 재사용성을 유지했다.
+
+## FastAPI Reference Source Profile 0.2.0 - 2026-07-17
+
+- 구조 전용 Python 근거에 같은 기능 3등급 판정을 적용해 Workflow Canvas와 다른 기능 Asset·Capability 집합을 생성한다.
+- Python 함수·호출 분석이나 실제 Twin Adapter 연결을 완료한 것으로 표시하지 않는다.
 
 ## Trust Map 0.1.0-alpha.0 - 2026-07-16
 

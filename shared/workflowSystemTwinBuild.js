@@ -1,4 +1,5 @@
 import { createTwinBuildFromCanvasTemplate } from './twinBuildCanvas.js'
+import { extendWorkflowTwinBuildWithSourceFeatures } from './workflowSourceFeatureBuild.js'
 import { TWIN_ENGINE_SCHEMA_VERSION } from './twinAdapterContract.js'
 import { createWorkflowCanvasSystemMap } from './workflowCanvasSystemMap.js'
 import { WORKFLOW_SYSTEM_DISCOVERY_SOURCE_ID } from './workflowSystemDiscovery.js'
@@ -21,8 +22,8 @@ import {
   WORKFLOW_SOURCE_SNAPSHOT_POLICY_ID,
 } from './workflowOperationDefinitions.js'
 
-export function createWorkflowSystemTwinBuild() {
-  return createTwinBuildFromCanvasTemplate({
+function createWorkflowSystemTwinBuildResult() {
+  const baseBuild = createTwinBuildFromCanvasTemplate({
     id: `workflow-system-build:${WORKFLOW_SYSTEM_DISCOVERY.current.id}`,
     source: {
       id: WORKFLOW_SYSTEM_DISCOVERY_SOURCE_ID,
@@ -192,6 +193,14 @@ export function createWorkflowSystemTwinBuild() {
       evidenceIds: [GIT_SYNC_CONTROL_EVIDENCE_ID],
     }],
   })
+  return extendWorkflowTwinBuildWithSourceFeatures(baseBuild)
 }
 
-export const WORKFLOW_SYSTEM_TWIN_BUILD = createWorkflowSystemTwinBuild()
+const WORKFLOW_SYSTEM_TWIN_BUILD_RESULT = createWorkflowSystemTwinBuildResult()
+
+export function createWorkflowSystemTwinBuild() {
+  return createWorkflowSystemTwinBuildResult().build
+}
+
+export const WORKFLOW_SYSTEM_TWIN_BUILD = WORKFLOW_SYSTEM_TWIN_BUILD_RESULT.build
+export const WORKFLOW_SOURCE_FEATURE_EXTENSION = WORKFLOW_SYSTEM_TWIN_BUILD_RESULT.extension

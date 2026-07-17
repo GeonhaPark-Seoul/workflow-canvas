@@ -279,7 +279,7 @@ This is the durable ledger for security, reliability, commercialization, and arc
 - Severity: medium
 - Gate: product-v1
 - Status: open
-- Current evidence: the source-twin adapter is emitted as a separate lazy chunk, but the latest measured build produced roughly 1.66 MiB minified and the PWA precache currently includes it.
+- Current evidence: the source-twin adapter is emitted as a separate lazy chunk and the PWA precache still includes it. Batch B rejected a direct full Source Twin manifest import and instead emits a compact feature manifest, reducing the experimental chunk from about 4.03 MiB to 2.29 MiB minified (about 443 KiB gzip), but this remains above the product budget and the earlier 1.66 MiB measurement.
 - Required work: measure real route usage; split large generated manifests from interactive code; load them only when the system map is opened; revise precache rules; fail CI when agreed gzip, startup, or memory budgets regress.
 - Exit criteria: ordinary canvas startup does not download or precache source-twin data that the user never opens, and system-map loading remains responsive on supported devices.
 

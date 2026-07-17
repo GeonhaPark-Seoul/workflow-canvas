@@ -17,7 +17,7 @@
 |---|---|---:|---|
 | `engine-twin-core` | Twin Core | 0.3.0-alpha.0 | Engine Schema v2, TwinBuild v3, Adapter Contract v1 |
 | `engine-create-graph` | Create Graph | 0.1.0-alpha.0 | MCP `create_graph` v1 |
-| `engine-source-lens` | Source Lens | 0.2.0-alpha.0 | Source Twin Schema v1, Source Profile Contract v1 |
+| `engine-source-lens` | Source Lens | 0.3.0-alpha.0 | Source Twin Schema v1, Source Profile Contract v1, Feature Model extension v1 |
 | `engine-trust-map` | Trust Map | 0.1.0-alpha.0 | Trust Topology Schema v1 |
 | `engine-liveops` | LiveOps | 0.1.0-alpha.0 | System Runtime Schema v3 |
 | `engine-safe-operations` | Safe Operations | 0.1.0-alpha.0 | Operation Contract v1 |
@@ -44,8 +44,9 @@
 |---|---|---|
 | Source Scanner | Engine | 지원되는 parser와 파일 구조에서 코드 근거 추출 |
 | Source Profile Registry | Manifest | 저장소와 일치하는 버전형 제품 의미 사전 선택 |
+| Feature Boundary Resolver | Resolver | 프로필 3등급 규칙과 실제 근거를 대조해 기능 Asset·Capability·속성 판정 |
 
-Workflow Canvas 프로필과 FastAPI 참조 프로필은 Source Lens를 별도 제품으로 복제하지 않는다. 같은 스캐너 계약에 연결되는 제품별 manifest이며, 실제 DB·배포·운영 조작 연결은 별도 Twin Adapter의 책임이다.
+Workflow Canvas 프로필과 FastAPI 참조 프로필은 Source Lens를 별도 제품으로 복제하지 않는다. 같은 스캐너와 기능 경계 판정 계약에 연결되는 제품별 manifest이며, 실제 DB·배포·운영 조작 연결은 별도 Twin Adapter의 책임이다. Source Lens 자체의 판정 규칙과 구현도 다시 분석 대상에 포함해 자기 시스템 지도에 변경 검토안으로 돌아온다.
 
 ## Work Core와 Intent Engine
 

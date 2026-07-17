@@ -5,7 +5,7 @@ const ROLE = (area, subsystem, summary, userImpact) => ({ area, subsystem, summa
 export const FASTAPI_ORDER_SERVICE_SOURCE_PROFILE = defineSourceProfile({
   contractVersion: SOURCE_PROFILE_CONTRACT_VERSION,
   id: 'fastapi-order-service-reference',
-  version: '0.1.0',
+  version: '0.2.0',
   sourceId: 'fastapi-order-service:source',
   label: 'FastAPI Order Service Reference Profile',
   projectLabel: '주문 처리 서비스',
@@ -34,6 +34,25 @@ export const FASTAPI_ORDER_SERVICE_SOURCE_PROFILE = defineSourceProfile({
     { id: 'inventory-gateway', area: 'fulfillment-integration', label: '재고 연결', description: '재고 시스템에 예약과 해제를 요청하는 경계', order: 4 },
     { id: 'order-tests', area: 'testing-quality', label: '주문 검증', description: '주문 업무 규칙과 API 계약의 자동 검사', order: 5 },
   ],
+  featureModel: {
+    schemaVersion: 1,
+    defaults: { area: 'attribute', subsystem: 'attribute' },
+    decisions: [
+      { scope: 'area', id: 'service-interface', classification: 'feature-asset', rationale: '외부 사용자가 주문 요청과 결과를 주고받는 독립 서비스 능력입니다.' },
+      { scope: 'area', id: 'order-processing', classification: 'feature-asset', rationale: '주문 검증과 상태 전이를 수행하는 독립 업무 능력입니다.' },
+      { scope: 'area', id: 'fulfillment-integration', classification: 'feature-asset', rationale: '재고와 배송 시스템을 연결하는 독립 업무 능력입니다.' },
+      { scope: 'subsystem', id: 'order-workflow', classification: 'feature-asset', rationale: '주문 생성과 상태 변경 순서는 별도 업무 흐름으로 인식됩니다.' },
+      { scope: 'subsystem', id: 'order-api', classification: 'capability', rationale: '서비스 진입 기능이 노출하는 주문 접수·조회 능력입니다.' },
+      { scope: 'subsystem', id: 'inventory-gateway', classification: 'capability', rationale: '재고·배송 연결 기능이 노출하는 재고 예약 능력입니다.' },
+    ],
+    implementationRules: [
+      { pathPattern: '^app/services/', targetEntityId: 'reference-order-workflow' },
+      { pathPattern: '^app/models/', targetEntityId: 'reference-order-workflow' },
+      { pathPattern: '^app/integrations/', targetEntityId: 'reference-inventory-gateway' },
+      { pathPattern: '^app/(?:main\\.py|api/)', targetEntityId: 'reference-service-interface' },
+    ],
+    dataBindings: [],
+  },
   fileRoles: {
     'app/main.py': ROLE('service-interface', 'order-api', 'FastAPI 애플리케이션을 시작하고 주문 API 경로를 서비스에 연결합니다.', '이 파일이 실패하면 주문 서비스가 시작되지 않거나 외부 요청을 받을 수 없습니다.'),
     'app/api/orders.py': ROLE('service-interface', 'order-api', '주문 생성·조회 요청의 입력을 받고 업무 서비스의 결과를 HTTP 응답으로 돌려줍니다.', '고객이나 다른 시스템이 주문을 접수하고 현재 상태를 확인하는 방식을 결정합니다.'),

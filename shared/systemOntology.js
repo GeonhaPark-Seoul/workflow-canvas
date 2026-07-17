@@ -4,6 +4,7 @@ import { normalizeTrustZone } from './trustTopology.js'
 
 export const SYSTEM_KIND_DEFS = Object.freeze([
   { id: 'actor', label: '사용자·주체', icon: '◎', color: '#22c55e' },
+  { id: 'feature', label: '기능 Asset', icon: '◆', color: '#16a34a' },
   { id: 'engine', label: '제품 엔진', icon: '◈', color: '#14b8a6' },
   { id: 'frontend', label: '프론트엔드', icon: '▣', color: '#3b82f6' },
   { id: 'service', label: '백엔드 서비스', icon: '◆', color: '#06b6d4' },

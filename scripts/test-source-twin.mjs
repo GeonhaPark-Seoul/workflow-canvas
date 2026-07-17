@@ -205,7 +205,7 @@ const workflowCanvasSemanticManifest = buildSourceTwinManifest(new Map([
   ['src/components/IntentWorkspace.jsx', 'export default function IntentWorkspace() { return null }\n'],
 ]))
 assert.equal(workflowCanvasSemanticManifest.source.profile.id, 'workflow-canvas')
-assert.equal(workflowCanvasSemanticManifest.source.profile.version, '0.2.0')
+assert.equal(workflowCanvasSemanticManifest.source.profile.version, '0.3.0')
 const appSemanticEntity = workflowCanvasSemanticManifest.entities.find((entity) => entity.id === 'file:src/App.jsx')
 const sourcePanelSemanticEntity = workflowCanvasSemanticManifest.entities.find((entity) => entity.id === 'file:src/components/SourceTwinPanel.jsx')
 assert.equal(appSemanticEntity.area, 'canvas-interface')

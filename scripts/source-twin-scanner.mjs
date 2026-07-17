@@ -20,12 +20,17 @@ import {
 } from './source-twin-semantics.mjs'
 
 export const SOURCE_TWIN_MANIFEST_PATH = 'shared/sourceTwinManifest.js'
+export const SOURCE_FEATURE_MANIFEST_PATH = 'shared/sourceFeatureManifest.js'
 
 const INCLUDED_ROOT_FILES = new Set([
   'README.md', 'Dockerfile', 'index.html', 'package.json', 'pyproject.toml',
   'requirements.txt', 'vercel.json', 'vite.config.js',
 ])
-const EXCLUDED_FILES = new Set([SOURCE_TWIN_MANIFEST_PATH, 'shared/workflowSystemDiscoveryManifest.js'])
+const EXCLUDED_FILES = new Set([
+  SOURCE_TWIN_MANIFEST_PATH,
+  SOURCE_FEATURE_MANIFEST_PATH,
+  'shared/workflowSystemDiscoveryManifest.js',
+])
 const JAVASCRIPT_EXTENSIONS = ['.js', '.jsx', '.mjs']
 const WRITE_METHODS = new Set(['insert', 'update', 'upsert', 'delete'])
 const DATABASE_IDENTIFIER_PATTERN = /^[a-zA-Z_][a-zA-Z0-9_]*$/

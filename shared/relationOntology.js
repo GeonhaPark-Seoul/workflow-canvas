@@ -67,6 +67,7 @@ export const RELATION_DEFS = Object.freeze([
   { id: 'decides', family: 'knowledge', label: '결정함', phrase: '결정한다', directed: true },
 
   { id: 'calls', family: 'system', label: '호출함', phrase: '호출한다', directed: true },
+  { id: 'implemented_by', family: 'system', label: '구현됨', phrase: '에 의해 구현된다', directed: true },
   { id: 'reads', family: 'system', label: '읽음', phrase: '읽는다', directed: true },
   { id: 'writes', family: 'system', label: '씀', phrase: '쓴다', directed: true },
   { id: 'authenticates', family: 'system', label: '인증함', phrase: '인증한다', directed: true },

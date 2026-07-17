@@ -18,6 +18,7 @@ const INCLUDED_ROOT_FILES = new Set([
 function shouldInspect(relativePath) {
   if (relativePath === DISCOVERY_MANIFEST_PATH) return false
   if (relativePath === 'shared/sourceTwinManifest.js') return false
+  if (relativePath === 'shared/sourceFeatureManifest.js') return false
   if (INCLUDED_ROOT_FILES.has(relativePath)) return true
   if (/^[^/]+\.sql$/i.test(relativePath)) return true
   return /^(api|mcp|scripts|shared|src)\/.*\.(js|jsx|mjs)$/i.test(relativePath)

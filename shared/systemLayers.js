@@ -10,6 +10,7 @@ export const SYSTEM_LAYER_DEFINITIONS = Object.freeze([
 const LAYER_BY_ID = new Map(SYSTEM_LAYER_DEFINITIONS.map((item) => [item.id, item]))
 const SYSTEM_KIND_LAYER = Object.freeze({
   actor: 'L1',
+  feature: 'L1',
   engine: 'L2',
   frontend: 'L2',
   service: 'L2',
