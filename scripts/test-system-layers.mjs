@@ -24,6 +24,7 @@ const expectedKinds = {
   actor: 'L1',
   feature: 'L1',
   engine: 'L2',
+  module: 'L2',
   frontend: 'L2',
   service: 'L2',
   api: 'L2',

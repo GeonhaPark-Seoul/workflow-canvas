@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
-import { realpathSync } from 'node:fs'
+import { existsSync, mkdtempSync, realpathSync, rmSync, symlinkSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 import { createInterface } from 'node:readline/promises'
@@ -12,12 +13,23 @@ import {
   readSourceTwinWorkingTree,
 } from './source-twin-scanner.mjs'
 import { localGitSyncDecision, normalizeLocalSourceManifest } from '../shared/localConnector.js'
+import {
+  applyRegisteredSourceProperty,
+  inspectRegisteredSourceProperty,
+} from './source-edit-executor.mjs'
 
-export const LOCAL_CONNECTOR_AGENT_VERSION = '1.2.0'
+export const LOCAL_CONNECTOR_AGENT_VERSION = '1.3.0'
 
 const MAX_GIT_OUTPUT = 2 * 1024 * 1024
 const HEARTBEAT_INTERVAL_MS = 10_000
 const FETCH_INTERVAL_MS = 60_000
+const SOURCE_EDIT_ACTIONS = new Set(['source_edit', 'source_edit_rollback'])
+const SOURCE_EDIT_DERIVED_PATHS = new Set([
+  'shared/sourceTwinManifest.js',
+  'shared/sourceFeatureManifest.js',
+  'shared/sourceCodePartManifest.js',
+  'shared/sourceFlowManifest.js',
+])
 
 function argument(name, fallback = '') {
   const index = process.argv.indexOf(name)
@@ -87,8 +99,9 @@ function pinnedGitHubOrigin(root, { requireGitHubOrigin = true } = {}) {
 export function observeLocalGit(root, {
   fetchRemote = false,
   syncEnabled = false,
+  sourceWriteEnabled = false,
   expectedOrigin = '',
-  requireGitHubOrigin = syncEnabled,
+  requireGitHubOrigin = syncEnabled || sourceWriteEnabled,
 } = {}) {
   const origin = pinnedGitHubOrigin(root, { requireGitHubOrigin })
   if (expectedOrigin && origin !== expectedOrigin) {
@@ -129,6 +142,7 @@ export function observeLocalGit(root, {
     behind,
     dirty: paths.length,
     syncEnabled,
+    sourceWriteEnabled,
     changedPaths: paths,
     fetchStatus,
     fetchMessage,
@@ -288,16 +302,204 @@ export function verifyApprovedGitSync(root, operation, executionResult, {
   }
 }
 
+function sourceEditStateMatches(current, expected) {
+  return current.branch === expected.branch
+    && current.headSha === expected.headSha
+    && current.originFingerprint === expected.originFingerprint
+    && current.sourceWriteEnabled === true
+    && expected.sourceWriteEnabled === true
+    && current.dirty === 0
+}
+
+export function localSourceEditApprovalPhrase(operationId, rollback = false) {
+  return /^op-[a-f0-9]{64}$/i.test(operationId ?? '')
+    ? `${rollback ? 'ROLLBACK' : 'EDIT'} ${operationId.slice(-8).toLocaleLowerCase()}`
+    : ''
+}
+
+async function confirmSourceEditInTerminal({ repositoryRoot, origin, operation, diff }) {
+  const rollback = operation.action === 'source_edit_rollback'
+  const phrase = localSourceEditApprovalPhrase(operation.operationId, rollback)
+  if (!phrase || !process.stdin.isTTY || !process.stdout.isTTY) return false
+  const expected = operation.expectedState ?? {}
+  console.log('')
+  console.log('[로컬 코드 쓰기 승인 필요] 웹 승인은 Mac 파일 변경 권한을 대신하지 않습니다.')
+  console.log(`저장소: ${repositoryRoot}`)
+  console.log(`고정 원격: ${origin}`)
+  console.log(`작업: ${rollback ? '승인된 편집 커밋 롤백' : '등록된 UI 상수 편집'}`)
+  console.log(`속성: ${expected.label || expected.propertyId}`)
+  console.log(`값: ${JSON.stringify(expected.beforeValue)} -> ${JSON.stringify(expected.afterValue)}`)
+  console.log('검증된 실제 대상 파일 diff:')
+  console.log(diff || '(diff 없음)')
+  const prompt = createInterface({ input: process.stdin, output: process.stdout })
+  try {
+    const answer = await prompt.question(`계속하려면 ${phrase} 입력: `)
+    return answer.trim().toLocaleLowerCase() === phrase.toLocaleLowerCase()
+  } finally {
+    prompt.close()
+  }
+}
+
+function command(cwd, executable, args, { timeout = 900_000, maximumOutput = 8 * 1024 * 1024 } = {}) {
+  return execFileSync(executable, args, {
+    cwd,
+    encoding: 'utf8',
+    maxBuffer: maximumOutput,
+    timeout,
+    stdio: ['ignore', 'pipe', 'pipe'],
+  }).trim()
+}
+
+function runSourceEditChecks(worktree) {
+  command(worktree, process.execPath, ['scripts/test-source-editable-properties.mjs'], { timeout: 120_000 })
+  command(worktree, 'npm', ['run', 'build'], { timeout: 900_000 })
+  git(worktree, ['diff', '--check'])
+  return { propertyContract: 'passed', build: 'passed', diffCheck: 'passed' }
+}
+
+function sourceEditChangedPaths(worktree) {
+  return git(worktree, ['diff', '--name-only', 'HEAD'])
+    .split('\n')
+    .filter(Boolean)
+}
+
+function assertBoundedSourceEditDiff(paths, targetPath) {
+  if (!paths.includes(targetPath)) throw new Error('등록된 대상 파일 변경을 찾지 못했습니다.')
+  const unexpected = paths.filter((item) => item !== targetPath && !SOURCE_EDIT_DERIVED_PATHS.has(item))
+  if (unexpected.length) throw new Error(`허용되지 않은 파일 변경을 감지했습니다: ${unexpected.join(', ')}`)
+}
+
+export async function executeApprovedSourceOperation(root, operation, current, {
+  origin = '',
+  confirm = confirmSourceEditInTerminal,
+  runChecks = runSourceEditChecks,
+  requireGitHubOrigin = true,
+} = {}) {
+  const expected = operation.expectedState ?? {}
+  if (!SOURCE_EDIT_ACTIONS.has(operation.action)) throw new Error('허용되지 않은 Source Lens 코드 작업입니다.')
+  if (!sourceEditStateMatches(current, expected)) throw new Error('승인 이후 로컬 코드 또는 Git 상태가 달라졌습니다.')
+  const rollback = operation.action === 'source_edit_rollback'
+  const suffix = operation.operationId.slice(-12)
+  const branch = `workflow-canvas/source-${rollback ? 'rollback' : 'edit'}-${suffix}`
+  const temporaryRoot = mkdtempSync(path.join(tmpdir(), 'workflow-canvas-source-edit-'))
+  const worktree = path.join(temporaryRoot, 'worktree')
+  let branchCreated = false
+  try {
+    git(root, ['worktree', 'add', '-b', branch, worktree, current.headSha], { timeout: 120_000 })
+    branchCreated = true
+    const sourceNodeModules = path.join(root, 'node_modules')
+    if (existsSync(sourceNodeModules) && !existsSync(path.join(worktree, 'node_modules'))) {
+      symlinkSync(sourceNodeModules, path.join(worktree, 'node_modules'), 'dir')
+    }
+    let edit
+    if (rollback) {
+      git(worktree, ['revert', '--no-commit', expected.originalCommitSha], { timeout: 120_000 })
+      const observed = inspectRegisteredSourceProperty(worktree, expected.propertyId)
+      if (JSON.stringify(observed.currentValue) !== JSON.stringify(expected.afterValue)) {
+        throw new Error('롤백 후 등록 속성이 승인된 복구 값과 일치하지 않습니다.')
+      }
+      edit = {
+        propertyId: expected.propertyId,
+        label: expected.label,
+        path: expected.path,
+        beforeValue: expected.beforeValue,
+        afterValue: expected.afterValue,
+      }
+    } else {
+      edit = applyRegisteredSourceProperty(worktree, {
+        propertyId: expected.propertyId,
+        expectedValue: expected.beforeValue,
+        nextValue: expected.afterValue,
+        anchor: expected.anchor,
+      })
+    }
+    const checks = await runChecks(worktree, operation, edit)
+    const changedPaths = sourceEditChangedPaths(worktree)
+    assertBoundedSourceEditDiff(changedPaths, edit.path)
+    git(worktree, ['diff', '--check', 'HEAD'])
+    const diff = git(worktree, ['diff', '--no-ext-diff', '--unified=3', 'HEAD', '--', edit.path])
+    if (!diff) throw new Error('승인할 실제 파일 diff가 없습니다.')
+    const diffFingerprint = sha(diff)
+    const locallyApproved = await confirm({ repositoryRoot: root, origin, operation, current, diff })
+    if (!locallyApproved) throw new Error('로컬 터미널 승인이 없어 코드 쓰기를 실행하지 않았습니다.')
+    git(worktree, ['add', '--all'])
+    const subject = rollback ? `Rollback ${expected.label || expected.propertyId}` : `Adjust ${edit.label}`
+    command(worktree, 'git', [
+      'commit',
+      '-m', subject,
+      '-m', `Workflow-Canvas-Operation: ${operation.operationId}\nWorkflow-Canvas-Property: ${expected.propertyId}\nWorkflow-Canvas-Previous-Head: ${current.headSha}`,
+    ], { timeout: 120_000 })
+    const commitSha = git(worktree, ['rev-parse', 'HEAD'])
+    const rootState = observeLocalGit(root, {
+      syncEnabled: current.syncEnabled,
+      sourceWriteEnabled: true,
+      expectedOrigin: origin,
+      requireGitHubOrigin,
+    })
+    if (!sourceEditStateMatches(rootState, expected)) {
+      throw new Error('검증 중 원본 브랜치가 달라져 편집 커밋 반영을 중단했습니다.')
+    }
+    git(root, ['merge', '--ff-only', branch], { timeout: 120_000 })
+    const finalProperty = inspectRegisteredSourceProperty(root, expected.propertyId)
+    const after = observeLocalGit(root, {
+      syncEnabled: current.syncEnabled,
+      sourceWriteEnabled: true,
+      expectedOrigin: origin,
+      requireGitHubOrigin,
+    })
+    if (
+      after.headSha !== commitSha
+      || after.dirty !== 0
+      || JSON.stringify(finalProperty.currentValue) !== JSON.stringify(expected.afterValue)
+    ) throw new Error('원본 브랜치 반영 후 독립 검증에 실패했습니다.')
+    return {
+      summary: rollback
+        ? '승인된 Source Lens 편집을 새 revert 커밋으로 되돌리고 검증했습니다.'
+        : '등록된 UI 상수를 provenance 커밋으로 반영하고 검증했습니다.',
+      propertyId: expected.propertyId,
+      beforeValue: expected.beforeValue,
+      afterValue: expected.afterValue,
+      previousHeadSha: current.headSha,
+      commitSha,
+      diffFingerprint,
+      verification: {
+        status: 'verified',
+        propertyId: expected.propertyId,
+        path: edit.path,
+        branch: current.branch,
+        previousHeadSha: current.headSha,
+        commitSha,
+        originFingerprint: current.originFingerprint,
+        beforeValue: expected.beforeValue,
+        afterValue: expected.afterValue,
+        dirty: after.dirty,
+        diffFingerprint,
+        checks,
+      },
+    }
+  } finally {
+    try { git(root, ['worktree', 'remove', '--force', worktree], { timeout: 120_000 }) } catch {}
+    if (branchCreated) {
+      try { git(root, ['branch', '-d', branch]) } catch {
+        try { git(root, ['branch', '-D', branch]) } catch {}
+      }
+    }
+    rmSync(temporaryRoot, { recursive: true, force: true })
+  }
+}
+
 export async function runLocalConnectorAgent({
   server,
   token,
   root,
   once = false,
   allowGitSync = false,
+  allowSourceWrite = false,
   confirmGitSync = confirmGitSyncInTerminal,
+  confirmSourceEdit = confirmSourceEditInTerminal,
 }) {
   const repositoryRoot = resolveRepositoryRoot(root)
-  const repositoryOrigin = pinnedGitHubOrigin(repositoryRoot, { requireGitHubOrigin: allowGitSync })
+  const repositoryOrigin = pinnedGitHubOrigin(repositoryRoot, { requireGitHubOrigin: allowGitSync || allowSourceWrite })
   let previousManifest = null
   let lastFetchAt = 0
   let stopped = false
@@ -306,12 +508,11 @@ export async function runLocalConnectorAgent({
   process.once('SIGTERM', stop)
   console.log(`Workflow Canvas 로컬 커넥터 ${LOCAL_CONNECTOR_AGENT_VERSION}`)
   console.log(`허용한 저장소: ${repositoryRoot}`)
-  console.log(allowGitSync
+  console.log(allowGitSync || allowSourceWrite
     ? `고정한 GitHub origin: ${repositoryOrigin}`
     : 'Git 원격 접근: 사용 안 함')
-  console.log(allowGitSync
-    ? '권한: 구조 읽기 + 로컬 터미널에서 매번 확인한 Git 동기화'
-    : '권한: 구조 읽기 전용 (Git push/pull 차단)')
+  console.log(`권한: 구조 읽기${allowGitSync ? ' + 승인 Git 동기화' : ''}${allowSourceWrite ? ' + 등록 UI 상수 승인 편집' : ''}`)
+  if (!allowGitSync && !allowSourceWrite) console.log('쓰기 권한: 사용 안 함')
   console.log('소스 본문과 비밀값은 서버로 보내지 않습니다. 종료: Ctrl+C')
 
   while (!stopped) {
@@ -321,6 +522,7 @@ export async function runLocalConnectorAgent({
       const gitState = observeLocalGit(repositoryRoot, {
         fetchRemote: shouldFetch,
         syncEnabled: allowGitSync,
+        sourceWriteEnabled: allowSourceWrite,
         expectedOrigin: repositoryOrigin,
       })
       if (shouldFetch) lastFetchAt = now
@@ -339,10 +541,13 @@ export async function runLocalConnectorAgent({
         let status = 'succeeded'
         let result
         try {
-          if (!allowGitSync) throw new Error('읽기 전용 로컬 커넥터는 Git 동기화를 실행하지 않습니다.')
+          const sourceOperation = SOURCE_EDIT_ACTIONS.has(operation.action)
+          if (sourceOperation && !allowSourceWrite) throw new Error('별도 코드 쓰기 동의가 없어 Source Lens 편집을 실행하지 않습니다.')
+          if (!sourceOperation && !allowGitSync) throw new Error('읽기 전용 로컬 커넥터는 Git 동기화를 실행하지 않습니다.')
           const current = observeLocalGit(repositoryRoot, {
-            fetchRemote: true,
-            syncEnabled: true,
+            fetchRemote: !sourceOperation,
+            syncEnabled: allowGitSync,
+            sourceWriteEnabled: allowSourceWrite,
             expectedOrigin: repositoryOrigin,
           })
           const currentManifest = buildLocalConnectorManifest(repositoryRoot, previousManifest)
@@ -357,22 +562,30 @@ export async function runLocalConnectorAgent({
           if (currentHeartbeat.stateFingerprint !== operation.stateFingerprint) {
             throw new Error('승인 이후 로컬 코드 또는 GitHub 상태가 달라졌습니다.')
           }
-          const locallyApproved = await confirmGitSync({
-            repositoryRoot,
-            origin: repositoryOrigin,
-            operation,
-            current,
-          })
-          if (!locallyApproved) throw new Error('로컬 터미널 승인이 없어 Git 동기화를 실행하지 않았습니다.')
-          const executionState = observeLocalGit(repositoryRoot, {
-            fetchRemote: false,
-            syncEnabled: true,
-            expectedOrigin: repositoryOrigin,
-          })
-          const executionResult = executeApprovedGitSync(repositoryRoot, operation, executionState)
-          result = verifyApprovedGitSync(repositoryRoot, operation, executionResult, {
-            expectedOrigin: repositoryOrigin,
-          })
+          if (sourceOperation) {
+            result = await executeApprovedSourceOperation(repositoryRoot, operation, current, {
+              origin: repositoryOrigin,
+              confirm: confirmSourceEdit,
+            })
+          } else {
+            const locallyApproved = await confirmGitSync({
+              repositoryRoot,
+              origin: repositoryOrigin,
+              operation,
+              current,
+            })
+            if (!locallyApproved) throw new Error('로컬 터미널 승인이 없어 Git 동기화를 실행하지 않았습니다.')
+            const executionState = observeLocalGit(repositoryRoot, {
+              fetchRemote: false,
+              syncEnabled: true,
+              sourceWriteEnabled: allowSourceWrite,
+              expectedOrigin: repositoryOrigin,
+            })
+            const executionResult = executeApprovedGitSync(repositoryRoot, operation, executionState)
+            result = verifyApprovedGitSync(repositoryRoot, operation, executionResult, {
+              expectedOrigin: repositoryOrigin,
+            })
+          }
           console.log(`[완료] ${result.summary}`)
         } catch (error) {
           status = 'failed'
@@ -407,6 +620,7 @@ async function main() {
     root,
     once: process.argv.includes('--once'),
     allowGitSync: process.argv.includes('--allow-git-sync'),
+    allowSourceWrite: process.argv.includes('--allow-source-write'),
   })
 }
 

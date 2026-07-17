@@ -8,6 +8,7 @@ export const WORKFLOW_CANVAS_CONTENT_CLASS_ID = 'data:workflow-canvas-content'
 export const WORKFLOW_ACCESS_METADATA_CLASS_ID = 'data:workflow-access-metadata'
 export const WORKFLOW_IMAGE_CONTENT_CLASS_ID = 'data:workflow-image-content'
 export const WORKFLOW_SOURCE_CODE_CLASS_ID = 'data:workflow-source-code'
+export const WORKFLOW_SOURCE_AI_EXPLANATION_INPUT_CLASS_ID = 'data:workflow-source-ai-explanation-input'
 
 const ZONE_IDS = Object.freeze({
   unknown: 'zone:workflow-logical-unknown',
@@ -16,6 +17,7 @@ const ZONE_IDS = Object.freeze({
   supabaseService: 'zone:workflow-supabase-service',
   supabaseData: 'zone:workflow-supabase-private-data',
   github: 'zone:workflow-github-saas',
+  aiProvider: 'zone:workflow-ai-provider-saas',
 })
 
 function evidenced(record) {
@@ -68,6 +70,13 @@ export const WORKFLOW_TRUST_ZONES = Object.freeze([
     controlOwner: '저장소 소유자·GitHub',
     evidenceRef: 'package.json, scripts/local-connector-agent.mjs, vercel.json',
   }),
+  evidenced({
+    id: ZONE_IDS.aiProvider,
+    kind: 'external-saas',
+    label: '외부 AI 설명 제공자 · 선택 전',
+    controlOwner: '선택된 AI 제공자·Workflow Canvas 운영자',
+    evidenceRef: 'shared/sourceAiExplanation.js, api/source-twin.js',
+  }),
 ])
 
 const GATEWAY_IDS = Object.freeze({
@@ -82,6 +91,8 @@ const GATEWAY_IDS = Object.freeze({
   browserStorage: 'gateway:workflow-browser-supabase-storage',
   localGithub: 'gateway:workflow-local-connector-github',
   githubVercel: 'gateway:workflow-github-vercel-webhook',
+  browserSourceTwin: 'gateway:workflow-browser-source-twin-api',
+  serverAiExplanation: 'gateway:workflow-server-ai-explanation',
 })
 
 export const WORKFLOW_TRUST_GATEWAYS = Object.freeze([
@@ -261,6 +272,38 @@ export const WORKFLOW_TRUST_GATEWAYS = Object.freeze([
     initiator: 'GitHub',
     evidenceRef: 'vercel.json, package.json',
   }),
+  evidenced({
+    id: GATEWAY_IDS.browserSourceTwin,
+    kind: 'browser-api',
+    sourceZoneId: ZONE_IDS.local,
+    targetZoneId: ZONE_IDS.vercel,
+    direction: 'source-to-target',
+    exposure: 'restricted',
+    protocol: 'HTTPS JSON',
+    route: '/api/source-twin',
+    dataClasses: [WORKFLOW_SOURCE_METADATA_CLASS_ID],
+    authentication: 'Supabase 사용자 JWT 참조',
+    authorization: 'WORKFLOW_CANVAS_OWNER_USER_ID 소유자 전용',
+    encryption: '전송 구간 TLS',
+    initiator: '소유자 코드 브라우저',
+    evidenceRef: 'src/lib/sourceTwinApi.js, api/source-twin.js',
+  }),
+  evidenced({
+    id: GATEWAY_IDS.serverAiExplanation,
+    kind: 'api-gateway',
+    sourceZoneId: ZONE_IDS.vercel,
+    targetZoneId: ZONE_IDS.aiProvider,
+    direction: 'source-to-target',
+    exposure: 'restricted',
+    protocol: 'HTTPS JSON',
+    route: 'Source Lens AI 설명 provider adapter · 기본 비활성',
+    dataClasses: [WORKFLOW_SOURCE_AI_EXPLANATION_INPUT_CLASS_ID],
+    authentication: '서버 환경의 제공자 API 키 참조',
+    authorization: '소유자 전용 + enabled/provider/model 명시 설정',
+    encryption: '전송 구간 TLS',
+    initiator: 'Source Lens 서버 API',
+    evidenceRef: 'shared/sourceAiExplanation.js, api/source-twin.js',
+  }),
 ])
 
 const DIRECT_NODE_ZONE_IDS = Object.freeze({
@@ -288,6 +331,8 @@ const DIRECT_NODE_ZONE_IDS = Object.freeze({
   'map-mcp-tokens-table': ZONE_IDS.supabaseData,
   'map-image-storage': ZONE_IDS.supabaseData,
   'map-github': ZONE_IDS.github,
+  'map-source-twin-api': ZONE_IDS.vercel,
+  'map-ai-explanation-provider': ZONE_IDS.aiProvider,
 })
 
 const RELATION_GATEWAY_IDS = Object.freeze({
@@ -306,6 +351,8 @@ const RELATION_GATEWAY_IDS = Object.freeze({
   'map-edge-app-storage': GATEWAY_IDS.browserStorage,
   'map-edge-repo-github': GATEWAY_IDS.localGithub,
   'map-edge-github-vercel': GATEWAY_IDS.githubVercel,
+  'map-edge-app-source-twin': GATEWAY_IDS.browserSourceTwin,
+  'map-edge-source-twin-ai': GATEWAY_IDS.serverAiExplanation,
 })
 
 const ZONE_BY_ID = new Map(WORKFLOW_TRUST_ZONES.map((zone) => [zone.id, zone]))

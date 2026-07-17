@@ -29,7 +29,7 @@ create table if not exists public.local_connector_operations (
   operation_id text primary key check (operation_id ~ '^op-[a-f0-9]{64}$'),
   connector_id uuid not null references public.local_connectors(id) on delete restrict,
   user_id uuid not null references auth.users(id) on delete cascade,
-  action text not null check (action in ('push', 'pull_ff_only')),
+  action text not null check (action in ('push', 'pull_ff_only', 'source_edit', 'source_edit_rollback')),
   status text not null check (status in ('queued', 'running', 'succeeded', 'failed')),
   state_fingerprint text not null check (state_fingerprint ~ '^[a-f0-9]{64}$'),
   expected_state jsonb not null,

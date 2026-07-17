@@ -32,6 +32,45 @@ export const compareSourceTwinHistory = (from, to) => (
   sourceTwinRequest(`?mode=compare&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`)
 )
 
+export const loadSourceCodeParts = (moduleId) => (
+  sourceTwinRequest(`?mode=code-parts&module_id=${encodeURIComponent(moduleId)}`)
+)
+
+export const loadSourceFlows = (moduleId) => (
+  sourceTwinRequest(`?mode=flows&module_id=${encodeURIComponent(moduleId)}`)
+)
+
+export const loadSourceAiExplanation = (moduleId, partId) => sourceTwinRequest('', {
+  method: 'POST',
+  body: JSON.stringify({ action: 'explain_code_part', module_id: moduleId, part_id: partId }),
+})
+
+export const previewLocalSourceEdit = (connectorId, moduleId, partId, nextValue) => sourceTwinRequest('', {
+  method: 'POST',
+  body: JSON.stringify({
+    action: 'preview_source_edit',
+    connector_id: connectorId,
+    module_id: moduleId,
+    part_id: partId,
+    next_value: nextValue,
+  }),
+})
+
+export const applyLocalSourceEdit = (connectorId, planToken, confirmation) => sourceTwinRequest('', {
+  method: 'POST',
+  body: JSON.stringify({ action: 'apply_source_edit', connector_id: connectorId, plan_token: planToken, confirmation }),
+})
+
+export const previewLocalSourceEditRollback = (connectorId, operationId) => sourceTwinRequest('', {
+  method: 'POST',
+  body: JSON.stringify({ action: 'preview_source_edit_rollback', connector_id: connectorId, operation_id: operationId }),
+})
+
+export const applyLocalSourceEditRollback = (connectorId, planToken, confirmation) => sourceTwinRequest('', {
+  method: 'POST',
+  body: JSON.stringify({ action: 'apply_source_edit_rollback', connector_id: connectorId, plan_token: planToken, confirmation }),
+})
+
 export const previewSourceTwinHistoryCapture = () => sourceTwinRequest('', {
   method: 'POST',
   body: JSON.stringify({ action: 'preview_capture' }),

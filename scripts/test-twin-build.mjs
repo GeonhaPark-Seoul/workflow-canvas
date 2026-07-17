@@ -20,6 +20,8 @@ import {
 } from '../shared/workflowSystemTwinBuild.js'
 import {
   WORKFLOW_GIT_SYNC_OPERATION_DEFINITION,
+  WORKFLOW_SOURCE_EDIT_OPERATION_DEFINITION,
+  WORKFLOW_SOURCE_EDIT_ROLLBACK_OPERATION_DEFINITION,
   WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION,
 } from '../shared/workflowOperationDefinitions.js'
 
@@ -194,16 +196,16 @@ assert.match(gitSyncCanvasEdge.targetHandle, /^p-.+-l$/)
 assert.equal(gitSyncBuildRelation.partsLink, true)
 assert.ok(gitSyncBuildRelation.source.partId)
 assert.ok(gitSyncBuildRelation.target.partId)
-assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.operations.length, 2)
-assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.dataClasses.length, 8)
-assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.policies.length, 3)
-assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.observations.length, 2)
-assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.controls.length, 3)
-assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.threats.length, 1)
-assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.trustZones.length, 6)
-assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.gateways.length, 11)
-assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.entities.filter((entity) => entity.trustZoneId).length, 59)
-assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.relations.filter((relation) => relation.gatewayId).length, 15)
+assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.operations.length, 4)
+assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.dataClasses.length, 10)
+assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.policies.length, 7)
+assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.observations.length, 4)
+assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.controls.length, 6)
+assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.threats.length, 2)
+assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.trustZones.length, 7)
+assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.gateways.length, 13)
+assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.entities.filter((entity) => entity.trustZoneId).length, 65)
+assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.relations.filter((relation) => relation.gatewayId).length, 17)
 assert.equal(WORKFLOW_SOURCE_FEATURE_EXTENSION.entities.length, 17)
 assert.equal(WORKFLOW_SOURCE_FEATURE_EXTENSION.parts.length, 13)
 assert.ok(WORKFLOW_SOURCE_FEATURE_EXTENSION.entities.every((entity) => entity.kind === 'feature'))
@@ -218,6 +220,15 @@ assert.equal(
   WORKFLOW_SYSTEM_TWIN_BUILD.operations.find((item) => item.id === WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION.id)?.fingerprint,
   WORKFLOW_SOURCE_SNAPSHOT_OPERATION_DEFINITION.fingerprint,
 )
+assert.equal(
+  WORKFLOW_SYSTEM_TWIN_BUILD.operations.find((item) => item.id === WORKFLOW_SOURCE_EDIT_OPERATION_DEFINITION.id)?.fingerprint,
+  WORKFLOW_SOURCE_EDIT_OPERATION_DEFINITION.fingerprint,
+)
+assert.equal(
+  WORKFLOW_SYSTEM_TWIN_BUILD.operations.find((item) => item.id === WORKFLOW_SOURCE_EDIT_ROLLBACK_OPERATION_DEFINITION.id)?.fingerprint,
+  WORKFLOW_SOURCE_EDIT_ROLLBACK_OPERATION_DEFINITION.fingerprint,
+)
+assert.equal(WORKFLOW_SOURCE_EDIT_OPERATION_DEFINITION.recovery.rollbackOperationId, WORKFLOW_SOURCE_EDIT_ROLLBACK_OPERATION_DEFINITION.id)
 const firstBindingReview = reconcileTwinBuild({
   build: WORKFLOW_SYSTEM_TWIN_BUILD,
   canvas: expectedWorkflowCanvas,
@@ -281,13 +292,13 @@ assert.equal(componentDriftItem.proposal.counts.components, 5)
 assert.equal(componentDriftItem.focus.nodeId, 'map-engine-source-lens')
 assert.ok(componentDriftItem.proposal.operations.some((operation) => (
       operation.targetNodeId === 'map-engine-source-lens'
-      && operation.logicalComponent.technicalVersion === '0.4.0-alpha.0'
+      && operation.logicalComponent.technicalVersion === '0.7.0-alpha.0'
 )))
 const componentDriftApplied = applyDigitalTwinGraphProposal(staleEngineContracts, componentDriftItem.proposal)
 assert.equal(componentDriftApplied.appliedLogicalComponentIds.length, 5)
 assert.equal(
   componentDriftApplied.nodes.find((node) => node.id === 'map-engine-source-lens').data.logicalComponent.technicalVersion,
-  '0.4.0-alpha.0',
+  '0.7.0-alpha.0',
 )
 assert.equal(
   componentDriftApplied.nodes.find((node) => node.id === 'map-engine-source-lens').data.manualAnnotation,

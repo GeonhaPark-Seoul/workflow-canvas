@@ -1,11 +1,13 @@
 import { normalizeDigitalTwinBinding, normalizeSystemParts } from './systemPartOntology.js'
 import { normalizeNodePresentation } from './systemLayers.js'
 import { normalizeTrustZone } from './trustTopology.js'
+import { SYSTEM_MODULE_COLOR } from './uiConstants.js'
 
 export const SYSTEM_KIND_DEFS = Object.freeze([
   { id: 'actor', label: '사용자·주체', icon: '◎', color: '#22c55e' },
   { id: 'feature', label: '기능 Asset', icon: '◆', color: '#16a34a' },
   { id: 'engine', label: '제품 엔진', icon: '◈', color: '#14b8a6' },
+  { id: 'module', label: '코드 모듈', icon: '▥', color: SYSTEM_MODULE_COLOR },
   { id: 'frontend', label: '프론트엔드', icon: '▣', color: '#3b82f6' },
   { id: 'service', label: '백엔드 서비스', icon: '◆', color: '#06b6d4' },
   { id: 'api', label: 'API', icon: '↔', color: '#0ea5e9' },
@@ -198,6 +200,20 @@ export function systemNodeReality(data = {}) {
   return status === 'healthy' && runtime.verification === 'verified'
     ? { id: 'twin', label: 'LIVE', color: '#22c55e' }
     : { id: 'unknown', label: '미확인', color: '#94a3b8' }
+}
+
+export function systemNodeShouldDim(data = {}) {
+  if (data.dimmed === true || data.assetStatus === 'candidate') return true
+  const runtimeStatus = data.twinRuntime?.status
+  if (['checking', 'failed', 'stale', 'unknown'].includes(runtimeStatus)) return true
+  if (data.twinRuntime?.verification === 'verified' && runtimeStatus === 'healthy') return false
+  if (normalizeDigitalTwinBinding(data.digitalTwinBinding)) return false
+  const component = normalizeLogicalComponent(data.logicalComponent)
+  if ((component?.codeEvidence?.length ?? 0) > 0 || (component?.testEvidence?.length ?? 0) > 0) return false
+  if (data.sourceKind === 'code' && (data.externalRef || data.evidence)) return false
+  if (data.sourceKind === 'connector' && data.externalRef) return false
+  if (data.sourceKind === 'runtime') return runtimeStatus !== 'healthy'
+  return !data.evidence
 }
 
 export function systemNodeTwinLink(data = {}) {

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 
 const read = (name) => readFile(new URL(`../${name}`, import.meta.url), 'utf8')
-const [cloud, app, shares, store, shareAccess, summaries, viteConfig] = await Promise.all([
+const [cloud, app, shares, store, shareAccess, summaries, viteConfig, sourcePanel, sourceApiClient, sourceApiServer] = await Promise.all([
   read('src/lib/cloudStorage.js'),
   read('src/App.jsx'),
   read('src/lib/shares.js'),
@@ -10,6 +10,9 @@ const [cloud, app, shares, store, shareAccess, summaries, viteConfig] = await Pr
   read('mcp/shareAccess.js'),
   read('mcp/canvasSummaries.js'),
   read('vite.config.js'),
+  read('src/components/SourceTwinPanel.jsx'),
+  read('src/lib/sourceTwinApi.js'),
+  read('api/source-twin.js'),
 ])
 
 assert.match(cloud, /function loadCanvasSummaries\(userId\)/)
@@ -36,5 +39,11 @@ assert.match(summaries, /get_canvas_summaries/)
 assert.match(summaries, /metadata-only fallback/)
 assert.match(viteConfig, /globIgnores:\s*\['\*\*\/workflowSystemTwinAdapter-\*\.js'\]/)
 assert.doesNotMatch(viteConfig, /maximumFileSizeToCacheInBytes/)
+assert.doesNotMatch(sourcePanel, /source(?:CodePart|Flow)Manifest/)
+assert.doesNotMatch(sourceApiClient, /source(?:CodePart|Flow)Manifest/)
+assert.match(sourceApiClient, /mode=code-parts/)
+assert.match(sourceApiClient, /mode=flows/)
+assert.match(sourceApiServer, /sourceCodePartManifest/)
+assert.match(sourceApiServer, /sourceFlowManifest/)
 
 console.log('Performance boundary checks passed')

@@ -1,12 +1,14 @@
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import {
   executeApprovedGitSync,
+  executeApprovedSourceOperation,
   localConnectorAuthorizationStopped,
   localGitSyncApprovalPhrase,
+  localSourceEditApprovalPhrase,
   observeLocalGit,
   resolveRepositoryRoot,
   verifyApprovedGitSync,
@@ -32,6 +34,8 @@ const peerRoot = path.join(fixtureRoot, 'peer')
 
 assert.equal(localGitSyncApprovalPhrase(`op-${'a'.repeat(64)}`), 'SYNC aaaaaaaa')
 assert.equal(localGitSyncApprovalPhrase('invalid-operation'), '')
+assert.equal(localSourceEditApprovalPhrase(`op-${'b'.repeat(64)}`), 'EDIT bbbbbbbb')
+assert.equal(localSourceEditApprovalPhrase(`op-${'c'.repeat(64)}`, true), 'ROLLBACK cccccccc')
 assert.equal(localConnectorAuthorizationStopped({ status: 401 }), true)
 assert.equal(localConnectorAuthorizationStopped({ code: 'LOCAL_CONNECTOR_AUTH_REQUIRED' }), true)
 assert.equal(localConnectorAuthorizationStopped({ status: 500 }), false)
@@ -105,6 +109,78 @@ try {
   }, pullResult, { requireGitHubOrigin: false })
   assert.equal(verifiedPull.verification.headSha, verifiedPull.verification.upstreamSha)
   assert.equal(await readFile(path.join(localRoot, 'app.js'), 'utf8'), 'export const version = 3\n')
+  assert.equal(git(localRoot, 'status', '--porcelain'), '')
+
+  await mkdir(path.join(localRoot, 'shared'), { recursive: true })
+  await writeFile(path.join(localRoot, 'shared/uiConstants.js'), [
+    'export const SYSTEM_NODE_DEFAULT_WIDTH = 240',
+    'export const SYSTEM_NODE_DEFAULT_HEIGHT = 130',
+    "export const SYSTEM_MODULE_COLOR = '#0d9488'",
+    "export const SOURCE_TWIN_EMPTY_MESSAGE = '일치하는 코드 실체 없음'",
+    '',
+  ].join('\n'))
+  git(localRoot, 'add', 'shared/uiConstants.js')
+  git(localRoot, 'commit', '-m', 'Add editable UI constants')
+  const sourceEditState = observeLocalGit(localRoot, {
+    sourceWriteEnabled: true,
+    requireGitHubOrigin: false,
+  })
+  const origin = git(localRoot, 'config', '--get', 'remote.origin.url')
+  const checks = async () => ({ propertyContract: 'passed', build: 'passed', diffCheck: 'passed' })
+  const sourceEdit = await executeApprovedSourceOperation(localRoot, {
+    operationId: `op-${'b'.repeat(64)}`,
+    action: 'source_edit',
+    expectedState: {
+      branch: sourceEditState.branch,
+      headSha: sourceEditState.headSha,
+      originFingerprint: sourceEditState.originFingerprint,
+      dirty: 0,
+      sourceWriteEnabled: true,
+      propertyId: 'ui.system-node.default-width',
+      label: '시스템 노드 기본 너비',
+      path: 'shared/uiConstants.js',
+      beforeValue: 240,
+      afterValue: 280,
+      anchor: { path: 'shared/uiConstants.js', nodeType: 'VariableDeclaration', symbol: 'module', lineStart: 1, lineEnd: 1 },
+    },
+  }, sourceEditState, {
+    origin,
+    confirm: async () => true,
+    runChecks: checks,
+    requireGitHubOrigin: false,
+  })
+  assert.equal(sourceEdit.verification.status, 'verified')
+  assert.match(await readFile(path.join(localRoot, 'shared/uiConstants.js'), 'utf8'), /SYSTEM_NODE_DEFAULT_WIDTH = 280/)
+  assert.match(git(localRoot, 'show', '-s', '--format=%B', sourceEdit.commitSha), /Workflow-Canvas-Operation/)
+
+  const rollbackState = observeLocalGit(localRoot, {
+    sourceWriteEnabled: true,
+    requireGitHubOrigin: false,
+  })
+  const rollback = await executeApprovedSourceOperation(localRoot, {
+    operationId: `op-${'c'.repeat(64)}`,
+    action: 'source_edit_rollback',
+    expectedState: {
+      branch: rollbackState.branch,
+      headSha: rollbackState.headSha,
+      originFingerprint: rollbackState.originFingerprint,
+      dirty: 0,
+      sourceWriteEnabled: true,
+      originalCommitSha: sourceEdit.commitSha,
+      propertyId: 'ui.system-node.default-width',
+      label: '시스템 노드 기본 너비',
+      path: 'shared/uiConstants.js',
+      beforeValue: 280,
+      afterValue: 240,
+    },
+  }, rollbackState, {
+    origin,
+    confirm: async () => true,
+    runChecks: checks,
+    requireGitHubOrigin: false,
+  })
+  assert.equal(rollback.verification.status, 'verified')
+  assert.match(await readFile(path.join(localRoot, 'shared/uiConstants.js'), 'utf8'), /SYSTEM_NODE_DEFAULT_WIDTH = 240/)
   assert.equal(git(localRoot, 'status', '--porcelain'), '')
 
   assert.throws(() => executeApprovedGitSync(localRoot, {

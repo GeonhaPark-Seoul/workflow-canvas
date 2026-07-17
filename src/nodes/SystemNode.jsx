@@ -14,6 +14,7 @@ import {
   systemComponentKindDefinition,
   systemKindDefinition,
   systemNodeReality,
+  systemNodeShouldDim,
   systemNodeTwinLink,
 } from '../../shared/systemOntology.js'
 import {
@@ -403,7 +404,7 @@ export default function SystemNode({ data, selected, id }) {
         boxShadow: 'none',
         transition: 'border-color 0.15s, outline-color 0.15s, background-color 0.15s',
         touchAction: 'manipulation',
-        filter: data.dimmed ? 'grayscale(0.85) brightness(0.55)' : undefined,
+        filter: systemNodeShouldDim(data) ? 'grayscale(0.85) brightness(0.55)' : undefined,
       }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}

@@ -104,6 +104,10 @@ assert.ok(SOURCE_TWIN_MANIFEST.assetHierarchy.components.some((item) => item.id 
 assert.equal(sourceEntityIsModuleAsset(SOURCE_TWIN_MANIFEST, SOURCE_TWIN_MANIFEST.entities.find((item) => item.kind === 'file')), true)
 const sourceLensComponent = SOURCE_TWIN_MANIFEST.assetHierarchy.components.find((item) => item.id === 'engine-source-lens')
 assert.ok(sourceComponentsForSubsystem(SOURCE_TWIN_MANIFEST, sourceLensComponent.area, sourceLensComponent.subsystem, SOURCE_TWIN_MANIFEST.entities).some((item) => item.id === 'engine-source-lens'))
+assert.ok(SOURCE_TWIN_MANIFEST.assetHierarchy.components.find((item) => item.id === 'component-source-code-part-translator').moduleIds.includes('file:shared/sourceCodeParts.js'))
+assert.ok(SOURCE_TWIN_MANIFEST.assetHierarchy.components.find((item) => item.id === 'component-source-flow-discovery').moduleIds.includes('file:shared/sourceFlows.js'))
+assert.ok(SOURCE_TWIN_MANIFEST.assetHierarchy.components.find((item) => item.id === 'component-source-ai-explanation').moduleIds.includes('file:shared/sourceAiExplanation.js'))
+assert.ok(SOURCE_TWIN_MANIFEST.assetHierarchy.components.find((item) => item.id === 'component-source-roundtrip-editor').moduleIds.includes('file:shared/workflowSourceEditableProperties.js'))
 
 const connectorNow = Date.parse('2026-07-15T08:00:00.000Z')
 const waitingConnector = { id: 'waiting', createdAt: '2026-07-15T07:59:00.000Z', lastSeenAt: null }
@@ -213,14 +217,14 @@ const workflowCanvasSemanticManifest = buildSourceTwinManifest(new Map([
   ['src/components/IntentWorkspace.jsx', 'export default function IntentWorkspace() { return null }\n'],
 ]))
 assert.equal(workflowCanvasSemanticManifest.source.profile.id, 'workflow-canvas')
-assert.equal(workflowCanvasSemanticManifest.source.profile.version, '0.4.0')
+assert.equal(workflowCanvasSemanticManifest.source.profile.version, '0.7.0')
 const appSemanticEntity = workflowCanvasSemanticManifest.entities.find((entity) => entity.id === 'file:src/App.jsx')
 const sourcePanelSemanticEntity = workflowCanvasSemanticManifest.entities.find((entity) => entity.id === 'file:src/components/SourceTwinPanel.jsx')
 assert.equal(appSemanticEntity.area, 'canvas-interface')
 assert.match(appSemanticEntity.summary, /노드·연결선 편집/)
 assert.equal(appSemanticEntity.explanationBasis.method, 'curated-product-profile')
 assert.equal(sourcePanelSemanticEntity.area, 'source-code-twin')
-assert.match(sourcePanelSemanticEntity.summary, /역할별 구조/)
+assert.match(sourcePanelSemanticEntity.summary, /코드 트리/)
 assert.match(sourcePanelSemanticEntity.userImpact, /비개발자/)
 const workflowEngineFiles = workflowCanvasSemanticManifest.entities.filter((entity) => entity.kind === 'file' && entity.area === 'digital-twin-engine')
 const workflowEngineSubsystems = groupSourceTwinEntitiesBySubsystem(workflowCanvasSemanticManifest, workflowEngineFiles)
@@ -333,6 +337,17 @@ assert.match(localConnectorShellCommand({
   serverUrl: 'https://workflow.example.com',
   allowGitSync: true,
 }), / --allow-git-sync$/)
+assert.match(localConnectorShellCommand({
+  token: localConnectorToken,
+  serverUrl: 'https://workflow.example.com',
+  allowSourceWrite: true,
+}), / --allow-source-write$/)
+assert.match(localConnectorShellCommand({
+  token: localConnectorToken,
+  serverUrl: 'https://workflow.example.com',
+  allowGitSync: true,
+  allowSourceWrite: true,
+}), / --allow-git-sync --allow-source-write$/)
 assert.equal(localConnectorShellCommand({ token: 'exposed-token', serverUrl: 'https://workflow.example.com' }), '')
 assert.equal(localConnectorShellCommand({ token: localConnectorToken, serverUrl: 'http://remote.example.com' }), '')
 
@@ -523,7 +538,7 @@ await assert.rejects(() => applyLocalGitSyncOperation(localConnectorDb, {
 }), (error) => error.code === 'LOCAL_GIT_STATE_CHANGED')
 localConnectorRow.state_fingerprint = 'b'.repeat(64)
 
-function localCompletionDb(expectedState) {
+function localCompletionDb(expectedState, action = 'push') {
   const writes = []
   return {
     writes,
@@ -539,7 +554,7 @@ function localCompletionDb(expectedState) {
             return query
           },
           maybeSingle: async () => ({
-            data: update ? { operation_id: `op-${'9'.repeat(64)}` } : { expected_state: expectedState },
+            data: update ? { operation_id: `op-${'9'.repeat(64)}` } : { action, expected_state: expectedState },
             error: null,
           }),
         }

@@ -124,6 +124,7 @@ export function localConnectorShellCommand({
   serverUrl,
   repositoryPath = '~/workflow-canvas',
   allowGitSync = false,
+  allowSourceWrite = false,
 } = {}) {
   if (!LOCAL_CONNECTOR_TOKEN_PATTERN.test(token ?? '')) return ''
   let server
@@ -148,7 +149,8 @@ export function localConnectorShellCommand({
       ? `"$HOME"/${shellSingleQuote(requestedPath.slice(2))}`
       : shellSingleQuote(requestedPath)
   const gitSyncFlag = allowGitSync ? ' --allow-git-sync' : ''
-  return `cd ${directory} && WORKFLOW_CANVAS_LOCAL_CONNECTOR_TOKEN=${shellSingleQuote(token)} npm run local-connector -- --server ${shellSingleQuote(server)} --repo .${gitSyncFlag}`
+  const sourceWriteFlag = allowSourceWrite ? ' --allow-source-write' : ''
+  return `cd ${directory} && WORKFLOW_CANVAS_LOCAL_CONNECTOR_TOKEN=${shellSingleQuote(token)} npm run local-connector -- --server ${shellSingleQuote(server)} --repo .${gitSyncFlag}${sourceWriteFlag}`
 }
 
 function entityDetails(value) {
@@ -342,6 +344,7 @@ export function normalizeLocalGitState(value) {
     behind: integer(value.behind, 0, 100_000),
     dirty: integer(value.dirty, 0, 100_000),
     syncEnabled: value.syncEnabled === true,
+    sourceWriteEnabled: value.sourceWriteEnabled === true,
     changedPaths: stringList(value.changedPaths, 120, 500),
     fetchStatus: ['ok', 'failed', 'skipped'].includes(value.fetchStatus) ? value.fetchStatus : 'skipped',
     fetchMessage: text(value.fetchMessage, 240),

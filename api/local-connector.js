@@ -1,8 +1,8 @@
 import { admin, resolveBrowserUser } from '../mcp/shareAccess.js'
 import {
   applyLocalGitSync,
-  claimLocalGitSyncOperation,
-  completeLocalGitSyncOperation,
+  claimLocalConnectorOperation,
+  completeLocalConnectorOperation,
   createLocalConnector,
   listLocalConnectors,
   LocalConnectorError,
@@ -33,10 +33,10 @@ async function handleAgent(db, req, res, token) {
     return send(res, 200, await recordLocalConnectorHeartbeat(db, connector, req.body))
   }
   if (req.body?.action === 'poll') {
-    return send(res, 200, await claimLocalGitSyncOperation(db, connector))
+    return send(res, 200, await claimLocalConnectorOperation(db, connector))
   }
   if (req.body?.action === 'complete') {
-    return send(res, 200, await completeLocalGitSyncOperation(db, connector, req.body))
+    return send(res, 200, await completeLocalConnectorOperation(db, connector, req.body))
   }
   return send(res, 400, { error: '지원하지 않는 로컬 에이전트 작업입니다.', code: 'INVALID_AGENT_ACTION' })
 }

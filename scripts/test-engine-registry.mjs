@@ -72,7 +72,15 @@ assert.equal(
 )
 assert.equal(
   mappedTwinEntities.find((entity) => entity.id === 'map-engine-source-lens')?.logicalComponent?.technicalVersion,
-  '0.4.0-alpha.0',
+  '0.7.0-alpha.0',
+)
+assert.ok(map.nodes.some((node) => node.data.logicalComponent?.id === 'component-source-code-part-translator'))
+assert.ok(map.nodes.some((node) => node.data.logicalComponent?.id === 'component-source-flow-discovery'))
+assert.ok(map.nodes.some((node) => node.data.logicalComponent?.id === 'component-source-ai-explanation'))
+assert.ok(map.nodes.some((node) => node.data.logicalComponent?.id === 'component-source-roundtrip-editor'))
+assert.equal(
+  map.nodes.find((node) => node.data.logicalComponent?.id === 'component-local-connector')?.data.logicalComponent?.technicalVersion,
+  '1.3.0',
 )
 
 assert.equal(MAINTAINER_AGENT_MANIFEST.agents.length, 1)

@@ -20,8 +20,11 @@ const workflowFiles = new Map([
 ])
 const workflowSelection = registeredSourceProfile({ project: { name: 'workflow-canvas' }, files: workflowFiles })
 assert.equal(workflowSelection.profile.id, 'workflow-canvas')
-assert.equal(workflowSelection.profile.version, '0.4.0')
+assert.equal(workflowSelection.profile.version, '0.7.0')
 assert.ok(workflowSelection.profile.components.some((item) => item.id === 'engine-source-lens'))
+assert.ok(workflowSelection.profile.capabilities.includes('code-part-translation'))
+assert.ok(workflowSelection.profile.capabilities.includes('static-flow-discovery'))
+assert.ok(workflowSelection.profile.capabilities.includes('registered-property-roundtrip'))
 assert.equal(workflowSelection.profile.featureModel.schemaVersion, 1)
 assert.deepEqual(workflowSelection.matchEvidence, ['package:workflow-canvas'])
 

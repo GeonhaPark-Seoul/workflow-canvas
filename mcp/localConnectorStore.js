@@ -14,11 +14,24 @@ import {
 import {
   WORKFLOW_GIT_SYNC_CONFIRMATION,
   WORKFLOW_GIT_SYNC_OPERATION_DEFINITION,
+  WORKFLOW_SOURCE_EDIT_CONFIRMATION,
+  WORKFLOW_SOURCE_EDIT_OPERATION_DEFINITION,
+  WORKFLOW_SOURCE_EDIT_ROLLBACK_CONFIRMATION,
+  WORKFLOW_SOURCE_EDIT_ROLLBACK_OPERATION_DEFINITION,
 } from '../shared/workflowOperationDefinitions.js'
+import { SOURCE_CODE_PART_MANIFEST } from '../shared/sourceCodePartManifest.js'
+import { sourceCodePartsForModule } from '../shared/sourceCodeParts.js'
+import { normalizeSourceEditableValue } from '../shared/workflowSourceEditableProperties.js'
 
 export const LOCAL_GIT_SYNC_CONFIRMATION = WORKFLOW_GIT_SYNC_CONFIRMATION
+export const LOCAL_SOURCE_EDIT_CONFIRMATION = WORKFLOW_SOURCE_EDIT_CONFIRMATION
+export const LOCAL_SOURCE_EDIT_ROLLBACK_CONFIRMATION = WORKFLOW_SOURCE_EDIT_ROLLBACK_CONFIRMATION
 
 const OPERATION_TYPE = 'local_git_sync'
+const SOURCE_EDIT_OPERATION_TYPE = 'local_source_edit'
+const SOURCE_EDIT_ROLLBACK_OPERATION_TYPE = 'local_source_edit_rollback'
+const SOURCE_EDIT_ACTION = 'source_edit'
+const SOURCE_EDIT_ROLLBACK_ACTION = 'source_edit_rollback'
 const TOKEN_PATTERN = /^wclc_[a-f0-9]{64}$/
 const OPERATION_ID_PATTERN = /^op-[a-f0-9]{64}$/
 const CONNECTOR_SELECT = [
@@ -156,6 +169,10 @@ export async function listLocalConnectors(db, userId, now = Date.now()) {
     operations = result.data ?? []
   }
   const connectors = sortLocalConnectorsForDisplay((data ?? []).map((row) => connectorRow(row, now)), now)
+  const rolledBackOperationIds = new Set(operations
+    .filter((row) => row.action === SOURCE_EDIT_ROLLBACK_ACTION && row.status === 'succeeded')
+    .map((row) => row.result?.originalOperationId)
+    .filter(Boolean))
   return {
     connectors,
     operations: operations.map((row) => ({
@@ -167,6 +184,7 @@ export async function listLocalConnectors(db, userId, now = Date.now()) {
       claimedAt: row.claimed_at,
       completedAt: row.completed_at,
       result: row.result ?? null,
+      rolledBack: rolledBackOperationIds.has(row.operation_id),
     })),
   }
 }
@@ -231,6 +249,7 @@ export async function recordLocalConnectorHeartbeat(db, connector, payload) {
       behind: git.behind,
       dirty: git.dirty,
       syncEnabled: git.syncEnabled,
+      sourceWriteEnabled: git.sourceWriteEnabled,
     },
   })
   const update = {
@@ -376,7 +395,318 @@ export async function applyLocalGitSync(db, {
   return { queued: true, operationId: verified.id, status: 'queued', action: decision.action }
 }
 
-export async function claimLocalGitSyncOperation(db, connector) {
+function requireSourceEditOwner(userId, env) {
+  const ownerId = cleanText(env?.WORKFLOW_CANVAS_OWNER_USER_ID, 160)
+  if (!ownerId || ownerId !== userId) {
+    throw new LocalConnectorError(403, 'SOURCE_EDIT_OWNER_ONLY', '안전한 코드 편집 MVP는 시스템 지도 소유자만 사용할 수 있습니다.')
+  }
+}
+
+function sourceEditPart(moduleId, partId) {
+  const module = sourceCodePartsForModule(SOURCE_CODE_PART_MANIFEST, cleanText(moduleId, 800))
+  const part = module?.parts?.find((item) => item.id === cleanText(partId, 240))
+  if (!module || !part) throw new LocalConnectorError(404, 'SOURCE_EDIT_PART_NOT_FOUND', '편집할 코드 파츠를 찾을 수 없습니다.')
+  if (!part.editable?.eligible || !part.editable?.property) {
+    throw new LocalConnectorError(409, 'SOURCE_EDIT_NOT_REGISTERED', '이 코드 파츠는 안전 편집 대상으로 등록되지 않았습니다.')
+  }
+  return { module, part, property: part.editable.property }
+}
+
+function assertSourceEditConnector(connector, module, now) {
+  if (!connector.online || !localConnectorIsOnline(connector, now.getTime())) {
+    throw new LocalConnectorError(409, 'LOCAL_CONNECTOR_OFFLINE', '로컬 커넥터가 실행 중이 아닙니다.')
+  }
+  if (!connector.git?.sourceWriteEnabled) {
+    throw new LocalConnectorError(409, 'LOCAL_SOURCE_WRITE_DISABLED', '별도 코드 쓰기 동의로 로컬 커넥터를 다시 연결해야 합니다.')
+  }
+  if (!connector.git.originFingerprint) {
+    throw new LocalConnectorError(409, 'LOCAL_SOURCE_ORIGIN_UNPINNED', '고정된 GitHub origin을 확인할 수 없어 코드 편집을 차단했습니다.')
+  }
+  if (connector.git.dirty > 0) {
+    throw new LocalConnectorError(409, 'LOCAL_SOURCE_DIRTY', '커밋되지 않은 로컬 변경이 있어 격리 편집을 시작할 수 없습니다.')
+  }
+  const localEntity = connector.manifest?.entities?.find((item) => item.id === module.moduleId)
+  if (
+    connector.manifestId !== module.sourceManifestId
+    || !localEntity
+    || localEntity.fingerprint !== module.moduleFingerprint
+  ) {
+    throw new LocalConnectorError(409, 'LOCAL_SOURCE_BASELINE_MISMATCH', '배포 코드 파츠와 로컬 저장소 기준이 다릅니다. 먼저 동기화·배포 상태를 맞춰 주세요.')
+  }
+}
+
+function operationContract(definition) {
+  return {
+    definitionId: definition.id,
+    definitionFingerprint: definition.fingerprint,
+    initiatorKind: 'human_ui',
+    risk: definition.risk,
+    sideEffect: definition.sideEffect,
+    approval: definition.approval,
+    timeoutMs: definition.timeoutMs,
+    verification: definition.verification,
+    recovery: definition.recovery,
+  }
+}
+
+async function queueLocalOperation(db, connector, userId, verified, action, expectedState) {
+  const operation = {
+    operation_id: verified.id,
+    connector_id: connector.id,
+    user_id: userId,
+    action,
+    status: 'queued',
+    state_fingerprint: connector.stateFingerprint,
+    expected_state: expectedState,
+  }
+  const { error } = await db.from('local_connector_operations').insert(operation)
+  if (error) {
+    if (/duplicate|unique/i.test(String(error.message))) {
+      throw new LocalConnectorError(409, 'LOCAL_OPERATION_REPLAYED', '같은 승인 계획은 다시 실행할 수 없습니다.')
+    }
+    throw databaseError(error, '로컬 코드 작업을 대기열에 넣지 못했습니다.')
+  }
+  const eventResult = await db.from('local_connector_operation_events').insert({
+    operation_id: verified.id,
+    connector_id: connector.id,
+    user_id: userId,
+    event_type: 'queued',
+    detail: { action, stateFingerprint: connector.stateFingerprint },
+  })
+  if (eventResult.error) throw databaseError(eventResult.error, '로컬 코드 작업 감사 기록을 만들지 못했습니다.')
+  return { queued: true, operationId: verified.id, status: 'queued', action }
+}
+
+export async function previewLocalSourceEdit(db, {
+  userId,
+  connectorId,
+  moduleId,
+  partId,
+  nextValue,
+  env = process.env,
+  now = new Date(),
+}) {
+  requireSourceEditOwner(userId, env)
+  const context = sourceEditPart(moduleId, partId)
+  const normalizedNext = normalizeSourceEditableValue(context.property.id, nextValue)
+  if (!normalizedNext.valid) throw new LocalConnectorError(400, 'INVALID_SOURCE_EDIT_VALUE', normalizedNext.error)
+  if (JSON.stringify(normalizedNext.value) === JSON.stringify(context.property.currentValue)) {
+    throw new LocalConnectorError(409, 'SOURCE_EDIT_NO_CHANGE', '현재 값과 새 값이 같습니다.')
+  }
+  const row = await loadOwnedConnector(db, userId, connectorId)
+  const connector = connectorRow(row, now.getTime())
+  assertSourceEditConnector(connector, context.module, now)
+  const definition = WORKFLOW_SOURCE_EDIT_OPERATION_DEFINITION
+  const signed = createSignedSystemOperationPlan({
+    operation: SOURCE_EDIT_OPERATION_TYPE,
+    actorId: userId,
+    targetKey: `local-connector:${connectorId}:${context.property.id}`,
+    stateFingerprint: connector.stateFingerprint,
+    confirmation: LOCAL_SOURCE_EDIT_CONFIRMATION,
+    scope: {
+      label: context.property.label,
+      action: SOURCE_EDIT_ACTION,
+      propertyId: context.property.id,
+      propertyType: context.property.type,
+      unit: context.property.unit,
+      beforeValue: context.property.currentValue,
+      afterValue: normalizedNext.value,
+      owner: context.property.owner,
+      impactScope: context.property.impactScope,
+      requiredChecks: context.property.requiredChecks,
+      moduleId: context.module.moduleId,
+      partId: context.part.id,
+      sourceManifestId: context.module.sourceManifestId,
+      moduleFingerprint: context.module.moduleFingerprint,
+      anchor: context.part.anchor,
+      branch: connector.git.branch,
+      headSha: connector.git.headSha,
+      originFingerprint: connector.git.originFingerprint,
+    },
+    writeSet: [
+      { resource: 'registered_ui_constant', maximumRows: 1 },
+      { resource: 'isolated_local_git_worktree', maximumRows: 1 },
+      { resource: 'local_git_commit', maximumRows: 1 },
+      { resource: 'local_connector_operations', maximumRows: 1 },
+      { resource: 'local_connector_operation_events', maximumRows: 8 },
+    ],
+    excludes: ['arbitrary-source-edit', 'automatic-push', 'credential-values', 'force-push', 'unregistered-property'],
+    recovery: { available: true, note: '완료 뒤 별도 승인되는 롤백이 Git 이력을 지우지 않고 새 revert 커밋을 만듭니다.' },
+    contract: operationContract(definition),
+  }, systemOperationSigningSecret(env), { now })
+  return { plan: signed.publicPlan, plan_token: signed.token, property: context.property }
+}
+
+export async function applyLocalSourceEdit(db, {
+  userId,
+  connectorId,
+  planToken,
+  confirmation,
+  env = process.env,
+  now = new Date(),
+}) {
+  requireSourceEditOwner(userId, env)
+  const definition = WORKFLOW_SOURCE_EDIT_OPERATION_DEFINITION
+  const verified = verifySignedSystemOperationPlan(planToken, systemOperationSigningSecret(env), {
+    actorId: userId,
+    operation: SOURCE_EDIT_OPERATION_TYPE,
+    confirmation,
+    definitionId: definition.id,
+    definitionFingerprint: definition.fingerprint,
+    initiatorKind: 'human_ui',
+    now,
+  })
+  const scope = verified.payload.scope ?? {}
+  if (verified.payload.targetKey !== `local-connector:${connectorId}:${scope.propertyId}`) {
+    throw new LocalConnectorError(409, 'LOCAL_CONNECTOR_PLAN_MISMATCH', '편집 계획의 로컬 커넥터나 속성이 일치하지 않습니다.')
+  }
+  const context = sourceEditPart(scope.moduleId, scope.partId)
+  if (
+    context.property.id !== scope.propertyId
+    || context.module.sourceManifestId !== scope.sourceManifestId
+    || context.module.moduleFingerprint !== scope.moduleFingerprint
+    || context.part.anchor.fingerprint !== scope.anchor?.fingerprint
+    || JSON.stringify(context.property.currentValue) !== JSON.stringify(scope.beforeValue)
+  ) throw new LocalConnectorError(409, 'SOURCE_EDIT_PLAN_STALE', '미리보기 이후 코드 파츠나 등록 속성이 달라졌습니다.')
+  const row = await loadOwnedConnector(db, userId, connectorId)
+  const connector = connectorRow(row, now.getTime())
+  if (connector.stateFingerprint !== verified.payload.stateFingerprint) {
+    throw new LocalConnectorError(409, 'LOCAL_SOURCE_STATE_CHANGED', '미리보기 이후 로컬 코드 또는 Git 상태가 달라졌습니다.')
+  }
+  assertSourceEditConnector(connector, context.module, now)
+  return queueLocalOperation(db, connector, userId, verified, SOURCE_EDIT_ACTION, {
+    branch: connector.git.branch,
+    headSha: connector.git.headSha,
+    originFingerprint: connector.git.originFingerprint,
+    dirty: connector.git.dirty,
+    sourceWriteEnabled: connector.git.sourceWriteEnabled,
+    sourceManifestId: context.module.sourceManifestId,
+    moduleFingerprint: context.module.moduleFingerprint,
+    moduleId: context.module.moduleId,
+    partId: context.part.id,
+    propertyId: context.property.id,
+    label: context.property.label,
+    path: context.property.anchor.path,
+    beforeValue: context.property.currentValue,
+    afterValue: scope.afterValue,
+    anchor: context.part.anchor,
+  })
+}
+
+async function loadCompletedSourceEdit(db, userId, connectorId, operationId) {
+  const query = await db
+    .from('local_connector_operations')
+    .select('operation_id,connector_id,user_id,action,status,result')
+    .eq('operation_id', operationId)
+    .eq('connector_id', connectorId)
+    .eq('user_id', userId)
+    .maybeSingle()
+  if (query.error) throw databaseError(query.error, '되돌릴 편집 작업을 확인하지 못했습니다.')
+  if (!query.data || query.data.action !== SOURCE_EDIT_ACTION || query.data.status !== 'succeeded' || !query.data.result?.verification) {
+    throw new LocalConnectorError(404, 'SOURCE_EDIT_RESULT_NOT_FOUND', '완료된 Source Lens 편집 작업을 찾을 수 없습니다.')
+  }
+  return query.data
+}
+
+export async function previewLocalSourceEditRollback(db, {
+  userId,
+  connectorId,
+  operationId,
+  env = process.env,
+  now = new Date(),
+}) {
+  requireSourceEditOwner(userId, env)
+  const original = await loadCompletedSourceEdit(db, userId, connectorId, operationId)
+  const row = await loadOwnedConnector(db, userId, connectorId)
+  const connector = connectorRow(row, now.getTime())
+  if (!connector.online || !connector.git?.sourceWriteEnabled || connector.git.dirty > 0 || !connector.git.originFingerprint) {
+    throw new LocalConnectorError(409, 'LOCAL_SOURCE_ROLLBACK_BLOCKED', '온라인 코드 쓰기 커넥터와 깨끗한 Git 상태가 필요합니다.')
+  }
+  if (connector.git.headSha !== original.result.commitSha) {
+    throw new LocalConnectorError(409, 'LOCAL_SOURCE_ROLLBACK_HEAD_CHANGED', '편집 뒤 다른 커밋이 생겨 자동 롤백을 막았습니다. Git 이력을 검토해 주세요.')
+  }
+  const definition = WORKFLOW_SOURCE_EDIT_ROLLBACK_OPERATION_DEFINITION
+  const signed = createSignedSystemOperationPlan({
+    operation: SOURCE_EDIT_ROLLBACK_OPERATION_TYPE,
+    actorId: userId,
+    targetKey: `local-connector:${connectorId}:${original.operation_id}`,
+    stateFingerprint: connector.stateFingerprint,
+    confirmation: LOCAL_SOURCE_EDIT_ROLLBACK_CONFIRMATION,
+    scope: {
+      label: `${original.result.label} 되돌리기`,
+      action: SOURCE_EDIT_ROLLBACK_ACTION,
+      originalOperationId: original.operation_id,
+      originalCommitSha: original.result.commitSha,
+      propertyId: original.result.propertyId,
+      beforeValue: original.result.afterValue,
+      afterValue: original.result.beforeValue,
+      branch: connector.git.branch,
+      headSha: connector.git.headSha,
+      originFingerprint: connector.git.originFingerprint,
+    },
+    writeSet: [
+      { resource: 'registered_ui_constant', maximumRows: 1 },
+      { resource: 'isolated_local_git_worktree', maximumRows: 1 },
+      { resource: 'local_git_commit', maximumRows: 1 },
+      { resource: 'local_connector_operations', maximumRows: 1 },
+      { resource: 'local_connector_operation_events', maximumRows: 8 },
+    ],
+    excludes: ['git-reset', 'history-rewrite', 'automatic-push', 'credential-values', 'force-push'],
+    recovery: { available: true, note: 'Git 이력을 지우지 않고 원래 편집을 되돌리는 새 커밋을 만듭니다.' },
+    contract: operationContract(definition),
+  }, systemOperationSigningSecret(env), { now })
+  return { plan: signed.publicPlan, plan_token: signed.token }
+}
+
+export async function applyLocalSourceEditRollback(db, {
+  userId,
+  connectorId,
+  planToken,
+  confirmation,
+  env = process.env,
+  now = new Date(),
+}) {
+  requireSourceEditOwner(userId, env)
+  const definition = WORKFLOW_SOURCE_EDIT_ROLLBACK_OPERATION_DEFINITION
+  const verified = verifySignedSystemOperationPlan(planToken, systemOperationSigningSecret(env), {
+    actorId: userId,
+    operation: SOURCE_EDIT_ROLLBACK_OPERATION_TYPE,
+    confirmation,
+    definitionId: definition.id,
+    definitionFingerprint: definition.fingerprint,
+    initiatorKind: 'human_ui',
+    now,
+  })
+  const scope = verified.payload.scope ?? {}
+  if (verified.payload.targetKey !== `local-connector:${connectorId}:${scope.originalOperationId}`) {
+    throw new LocalConnectorError(409, 'LOCAL_CONNECTOR_PLAN_MISMATCH', '롤백 계획의 로컬 커넥터나 원본 작업이 일치하지 않습니다.')
+  }
+  const original = await loadCompletedSourceEdit(db, userId, connectorId, scope.originalOperationId)
+  const row = await loadOwnedConnector(db, userId, connectorId)
+  const connector = connectorRow(row, now.getTime())
+  if (connector.stateFingerprint !== verified.payload.stateFingerprint || connector.git.headSha !== original.result.commitSha) {
+    throw new LocalConnectorError(409, 'LOCAL_SOURCE_STATE_CHANGED', '미리보기 이후 로컬 코드 또는 Git 상태가 달라졌습니다.')
+  }
+  if (!connector.online || !connector.git?.sourceWriteEnabled || connector.git.dirty > 0 || !connector.git.originFingerprint) {
+    throw new LocalConnectorError(409, 'LOCAL_SOURCE_ROLLBACK_BLOCKED', '온라인 코드 쓰기 커넥터와 깨끗한 Git 상태가 필요합니다.')
+  }
+  return queueLocalOperation(db, connector, userId, verified, SOURCE_EDIT_ROLLBACK_ACTION, {
+    branch: connector.git.branch,
+    headSha: connector.git.headSha,
+    originFingerprint: connector.git.originFingerprint,
+    dirty: connector.git.dirty,
+    sourceWriteEnabled: connector.git.sourceWriteEnabled,
+    originalOperationId: original.operation_id,
+    originalCommitSha: original.result.commitSha,
+    propertyId: original.result.propertyId,
+    label: original.result.label,
+    beforeValue: original.result.afterValue,
+    afterValue: original.result.beforeValue,
+    path: original.result.path,
+  })
+}
+
+export async function claimLocalConnectorOperation(db, connector) {
   const query = await db
     .from('local_connector_operations')
     .select(OPERATION_CLAIM_SELECT)
@@ -385,7 +715,7 @@ export async function claimLocalGitSyncOperation(db, connector) {
     .order('requested_at', { ascending: true })
     .limit(1)
     .maybeSingle()
-  if (query.error) throw databaseError(query.error, 'Git 동기화 대기열을 읽지 못했습니다.')
+  if (query.error) throw databaseError(query.error, '로컬 작업 대기열을 읽지 못했습니다.')
   if (!query.data) return { operation: null }
   const claimedAt = new Date().toISOString()
   const claimed = await db
@@ -395,7 +725,7 @@ export async function claimLocalGitSyncOperation(db, connector) {
     .eq('status', 'queued')
     .select(OPERATION_CLAIM_SELECT)
     .maybeSingle()
-  if (claimed.error) throw databaseError(claimed.error, 'Git 동기화 작업을 시작하지 못했습니다.')
+  if (claimed.error) throw databaseError(claimed.error, '로컬 작업을 시작하지 못했습니다.')
   if (!claimed.data) return { operation: null }
   const eventResult = await db.from('local_connector_operation_events').insert({
     operation_id: claimed.data.operation_id,
@@ -404,7 +734,7 @@ export async function claimLocalGitSyncOperation(db, connector) {
     event_type: 'running',
     detail: { action: claimed.data.action },
   })
-  if (eventResult.error) throw databaseError(eventResult.error, 'Git 동기화 시작 기록을 남기지 못했습니다.')
+  if (eventResult.error) throw databaseError(eventResult.error, '로컬 작업 시작 기록을 남기지 못했습니다.')
   return {
     operation: {
       operationId: claimed.data.operation_id,
@@ -415,24 +745,90 @@ export async function claimLocalGitSyncOperation(db, connector) {
   }
 }
 
-export async function completeLocalGitSyncOperation(db, connector, payload) {
+export const claimLocalGitSyncOperation = claimLocalConnectorOperation
+
+function normalizeLocalSourceEditVerification(value, expectedState) {
+  if (!value || typeof value !== 'object' || value.status !== 'verified') return null
+  const sha = (candidate) => {
+    const normalized = cleanText(candidate, 64)
+    return /^[a-f0-9]{40,64}$/i.test(normalized) ? normalized.toLowerCase() : ''
+  }
+  const checks = value.checks && typeof value.checks === 'object' ? value.checks : {}
+  const normalized = {
+    status: 'verified',
+    propertyId: cleanText(value.propertyId, 180),
+    path: cleanText(value.path, 500),
+    branch: cleanText(value.branch, 160),
+    previousHeadSha: sha(value.previousHeadSha),
+    commitSha: sha(value.commitSha),
+    originFingerprint: sha(value.originFingerprint),
+    beforeValue: value.beforeValue,
+    afterValue: value.afterValue,
+    dirty: Number(value.dirty),
+    diffFingerprint: sha(value.diffFingerprint),
+    checks: {
+      propertyContract: checks.propertyContract === 'passed' ? 'passed' : '',
+      build: checks.build === 'passed' ? 'passed' : '',
+      diffCheck: checks.diffCheck === 'passed' ? 'passed' : '',
+    },
+  }
+  if (
+    !normalized.propertyId
+    || normalized.propertyId !== expectedState?.propertyId
+    || normalized.path !== expectedState?.path
+    || normalized.branch !== expectedState?.branch
+    || normalized.previousHeadSha !== expectedState?.headSha
+    || normalized.originFingerprint !== expectedState?.originFingerprint
+    || !normalized.commitSha
+    || normalized.commitSha === normalized.previousHeadSha
+    || normalized.dirty !== 0
+    || !normalized.diffFingerprint
+    || Object.values(normalized.checks).some((status) => status !== 'passed')
+    || JSON.stringify(normalized.beforeValue) !== JSON.stringify(expectedState?.beforeValue)
+    || JSON.stringify(normalized.afterValue) !== JSON.stringify(expectedState?.afterValue)
+  ) return null
+  return normalized
+}
+
+export async function completeLocalConnectorOperation(db, connector, payload) {
   const operationId = cleanText(payload?.operationId, 80)
   if (!OPERATION_ID_PATTERN.test(operationId)) {
-    throw new LocalConnectorError(400, 'INVALID_LOCAL_OPERATION_ID', 'Git 동기화 작업 ID가 올바르지 않습니다.')
+    throw new LocalConnectorError(400, 'INVALID_LOCAL_OPERATION_ID', '로컬 작업 ID가 올바르지 않습니다.')
   }
   const running = await db
     .from('local_connector_operations')
-    .select('expected_state')
+    .select('action,expected_state')
     .eq('operation_id', operationId)
     .eq('connector_id', connector.id)
     .eq('status', 'running')
     .maybeSingle()
-  if (running.error) throw databaseError(running.error, '실행 중인 Git 동기화 작업을 확인하지 못했습니다.')
-  if (!running.data) throw new LocalConnectorError(409, 'LOCAL_OPERATION_NOT_RUNNING', '실행 중인 Git 동기화 작업을 찾을 수 없습니다.')
+  if (running.error) throw databaseError(running.error, '실행 중인 로컬 작업을 확인하지 못했습니다.')
+  if (!running.data) throw new LocalConnectorError(409, 'LOCAL_OPERATION_NOT_RUNNING', '실행 중인 로컬 작업을 찾을 수 없습니다.')
   const requestedSuccess = payload?.status === 'succeeded'
-  const verification = normalizeLocalGitSyncVerification(payload?.result?.verification, running.data.expected_state)
+  const sourceAction = [SOURCE_EDIT_ACTION, SOURCE_EDIT_ROLLBACK_ACTION].includes(running.data.action)
+  const verification = sourceAction
+    ? normalizeLocalSourceEditVerification(payload?.result?.verification, running.data.expected_state)
+    : normalizeLocalGitSyncVerification(payload?.result?.verification, running.data.expected_state)
   const succeeded = requestedSuccess && !!verification
-  const result = {
+  const result = sourceAction ? {
+    summary: requestedSuccess && !verification
+      ? '로컬 편집 명령은 끝났지만 AST·빌드·Git 검증에 실패했습니다.'
+      : cleanText(payload?.result?.summary, 400) || (succeeded ? '등록된 UI 상수 편집과 검증을 완료했습니다.' : '로컬 코드 편집이 실패했습니다.'),
+    action: running.data.action,
+    propertyId: cleanText(running.data.expected_state?.propertyId, 180),
+    label: cleanText(running.data.expected_state?.label, 180),
+    path: cleanText(running.data.expected_state?.path, 500),
+    beforeValue: running.data.expected_state?.beforeValue,
+    afterValue: running.data.expected_state?.afterValue,
+    previousHeadSha: verification?.previousHeadSha ?? '',
+    commitSha: verification?.commitSha ?? '',
+    diffFingerprint: verification?.diffFingerprint ?? '',
+    originalOperationId: running.data.action === SOURCE_EDIT_ROLLBACK_ACTION
+      ? cleanText(running.data.expected_state?.originalOperationId, 80)
+      : '',
+    rollbackAvailable: running.data.action === SOURCE_EDIT_ACTION && succeeded,
+    verification,
+  } : {
     summary: requestedSuccess && !verification
       ? 'Git 명령은 끝났지만 실행 후 상태 검증에 실패했습니다.'
       : cleanText(payload?.result?.summary, 400) || (succeeded ? 'Git 동기화를 완료하고 상태를 검증했습니다.' : 'Git 동기화가 실패했습니다.'),
@@ -449,8 +845,8 @@ export async function completeLocalGitSyncOperation(db, connector, payload) {
     .eq('status', 'running')
     .select('operation_id')
     .maybeSingle()
-  if (completed.error) throw databaseError(completed.error, 'Git 동기화 결과를 저장하지 못했습니다.')
-  if (!completed.data) throw new LocalConnectorError(409, 'LOCAL_OPERATION_NOT_RUNNING', '실행 중인 Git 동기화 작업을 찾을 수 없습니다.')
+  if (completed.error) throw databaseError(completed.error, '로컬 작업 결과를 저장하지 못했습니다.')
+  if (!completed.data) throw new LocalConnectorError(409, 'LOCAL_OPERATION_NOT_RUNNING', '실행 중인 로컬 작업을 찾을 수 없습니다.')
   const eventResult = await db.from('local_connector_operation_events').insert({
     operation_id: operationId,
     connector_id: connector.id,
@@ -458,6 +854,8 @@ export async function completeLocalGitSyncOperation(db, connector, payload) {
     event_type: succeeded ? 'succeeded' : 'failed',
     detail: result,
   })
-  if (eventResult.error) throw databaseError(eventResult.error, 'Git 동기화 완료 기록을 남기지 못했습니다.')
+  if (eventResult.error) throw databaseError(eventResult.error, '로컬 작업 완료 기록을 남기지 못했습니다.')
   return { completed: true, operationId, status: succeeded ? 'succeeded' : 'failed' }
 }
+
+export const completeLocalGitSyncOperation = completeLocalConnectorOperation

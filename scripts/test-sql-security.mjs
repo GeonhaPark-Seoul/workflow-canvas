@@ -197,7 +197,7 @@ for (const table of ['local_connectors', 'local_connector_operations', 'local_co
 }
 assert.match(localConnectors, /token_hash text not null unique check \(token_hash ~ '\^\[a-f0-9\]\{64\}\$'\)/i)
 assert.match(localConnectors, /octet_length\(manifest::text\) <= 2500000/i)
-assert.match(localConnectors, /action in \('push', 'pull_ff_only'\)/i)
+assert.match(localConnectors, /action in \('push', 'pull_ff_only', 'source_edit', 'source_edit_rollback'\)/i)
 assert.match(localConnectors, /create unique index if not exists local_connector_one_active_operation_idx[\s\S]*where status in \('queued', 'running'\)/i)
 assert.doesNotMatch(localConnectors, /force.push|reset --hard|automatic.commit/i)
 assert.match(localConnectors, /before update or delete on public\.local_connector_operation_events/i)

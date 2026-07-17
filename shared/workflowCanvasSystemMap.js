@@ -163,6 +163,8 @@ function systemNode(id, parentId, x, y, systemKind, label, fields = {}) {
       sourceKind: 'code',
       provider: fields.provider ?? '',
       externalRef: fields.externalRef ?? '',
+      ...(fields.assetStatus ? { assetStatus: fields.assetStatus } : {}),
+      ...(fields.dimmed === true ? { dimmed: true } : {}),
       ...(Array.isArray(fields.systemParts) && fields.systemParts.length
         ? { systemParts: fields.systemParts }
         : {}),
@@ -277,6 +279,14 @@ function mapNodes(engineCapabilityMap) {
       evidence: '공유 접근 판정 순수 함수와 저장 게이트웨이',
       provider: 'Workflow Canvas',
       externalRef: 'mcp/shareAccess.js',
+    }),
+    systemNode('map-source-twin-api', 'map-group-runtime', 665, 390, 'api', 'Source Lens 서버 API', {
+      purpose: '코드 파츠·흐름을 모듈 단위로 지연 제공하고 소유자 전용 AI 비교·편집 계획을 중계한다.',
+      responsibility: '소유자 확인, compact 근거 조회, AI 메타데이터 전송, 서명된 로컬 편집 계획',
+      constraints: '코드 본문·캔버스 본문·키 값은 외부 AI나 브라우저 응답에 포함하지 않음',
+      evidence: 'Source Lens API와 서버 전용 코드 파츠·흐름 catalog',
+      provider: 'Vercel Function',
+      externalRef: '/api/source-twin',
     }),
 
     systemNode('map-supabase-auth', 'map-group-data', 45, 75, 'auth', 'Supabase Auth', {
@@ -409,6 +419,16 @@ function mapNodes(engineCapabilityMap) {
       externalRef: 'origin/main',
       systemParts: [GITHUB_CODE_PART, GITHUB_COMMIT_CHANGES_PART],
     }),
+    systemNode('map-ai-explanation-provider', 'map-group-development', 1575, 100, 'external', '외부 AI 설명 제공자 · 선택 전', {
+      purpose: '결정적 코드 파츠 설명과 비교할 문장 품질 상한을 시험한다.',
+      responsibility: '허용된 AST 메타데이터만 받아 쉬운 설명 문장을 반환',
+      constraints: '기본 비활성·제공자/모델/비용 승인 전 호출 없음·관계/권한/Reality 생성 금지',
+      evidence: 'provider-neutral AI 설명 어댑터와 전송 계약',
+      provider: '미선택',
+      externalRef: 'shared/sourceAiExplanation.js',
+      assetStatus: 'candidate',
+      dimmed: true,
+    }),
   ]
 }
 
@@ -422,7 +442,9 @@ function mapEdges(engineCapabilityMap) {
     relationEdge('map-edge-vercel-app', 'map-vercel', 'map-web-app', 'contains', 'vercel.json, vite.config.js', 'Vercel 배포가 빌드된 웹 앱을 제공한다.', { sourceHandle: 'left', targetHandle: 'right' }),
     relationEdge('map-edge-vercel-shared', 'map-vercel', 'map-shared-api', 'contains', 'api/shared-canvas.js', '공유 캔버스 API가 Vercel 함수로 배포된다.'),
     relationEdge('map-edge-vercel-mcp', 'map-vercel', 'map-mcp-api', 'contains', 'api/mcp.js', 'MCP 엔드포인트가 Vercel 함수로 배포된다.', { sourceHandle: 'bottom', targetHandle: 'left' }),
+    relationEdge('map-edge-vercel-source-twin', 'map-vercel', 'map-source-twin-api', 'contains', 'api/source-twin.js', 'Source Lens API가 Vercel 함수로 배포된다.', { sourceHandle: 'bottom', targetHandle: 'top' }),
     relationEdge('map-edge-app-shared', 'map-web-app', 'map-shared-api', 'calls', 'src/lib/sharedCanvasApi.js', '공유 캔버스 읽기·저장은 서버 API를 호출한다.'),
+    relationEdge('map-edge-app-source-twin', 'map-web-app', 'map-source-twin-api', 'calls', 'src/lib/sourceTwinApi.js, api/source-twin.js', '소유자 코드 브라우저가 인증된 Source Lens 서버 API를 호출한다.'),
     relationEdge('map-edge-shared-gateway', 'map-shared-api', 'map-permission-gateway', 'requires', 'api/shared-canvas.js, mcp/shareAccess.js', '공유 API가 서버 권한 판정을 거쳐야 한다.'),
     relationEdge('map-edge-mcp-gateway', 'map-mcp-api', 'map-permission-gateway', 'requires', 'mcp/store.js, mcp/shareAccess.js', 'MCP 공유 작업도 같은 범위 판정을 사용한다.'),
 
@@ -458,6 +480,7 @@ function mapEdges(engineCapabilityMap) {
       targetHandle: `p-${WORKFLOW_SOURCE_TWIN_PART_IDS.githubCode}-l`,
     }),
     relationEdge('map-edge-github-vercel', 'map-github', 'map-vercel', 'triggers', 'vercel.json', '원격 저장소의 배포 대상 변경이 Vercel 배포 흐름을 촉발한다.', { sourceHandle: 'top', targetHandle: 'bottom' }),
+    relationEdge('map-edge-source-twin-ai', 'map-source-twin-api', 'map-ai-explanation-provider', 'calls', 'api/source-twin.js, shared/sourceAiExplanation.js', '명시적으로 활성화된 경우에만 AST 종류·심볼·상대 경로·줄 범위·결정적 요약을 선택한 외부 AI 제공자에 전송한다.'),
     ...engineCapabilityMap.edges,
   ]
 }

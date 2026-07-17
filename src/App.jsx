@@ -12,6 +12,8 @@ import {
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 
+import { SYSTEM_NODE_DEFAULT_HEIGHT, SYSTEM_NODE_DEFAULT_WIDTH } from '../shared/uiConstants.js'
+
 import StageNode from './nodes/StageNode'
 import MemoNode from './nodes/MemoNode'
 import GroupNode from './nodes/GroupNode'
@@ -132,6 +134,7 @@ import {
   partitionDigitalTwinReviewItems,
   setDigitalTwinReviewDecision,
 } from '../shared/digitalTwinReview.js'
+import { createSourceModuleMaterializationItem } from '../shared/sourceModuleProposal.js'
 import {
   applyDigitalTwinGraphProposal,
   digitalTwinProposalAutoFitKey,
@@ -141,6 +144,7 @@ import {
   previewDigitalTwinPartChanges,
 } from '../shared/digitalTwinProposal.js'
 import { inspectDigitalTwinCanvas } from './lib/digitalTwinAdapters.js'
+import { loadSourceCodeParts, loadSourceFlows } from './lib/sourceTwinApi.js'
 import {
   createEdgeRelationData,
   edgeRelationInfo,
@@ -3142,9 +3146,9 @@ export default function App() {
         const node = {
           id,
           type: 'system',
-          position: creationPosition(frame, nds, pos, 240, 130),
-          width: 240,
-          height: 130,
+          position: creationPosition(frame, nds, pos, SYSTEM_NODE_DEFAULT_WIDTH, SYSTEM_NODE_DEFAULT_HEIGHT),
+          width: SYSTEM_NODE_DEFAULT_WIDTH,
+          height: SYSTEM_NODE_DEFAULT_HEIGHT,
           data: createSystemNodeData(payload.systemKind),
         }
         return sortParentsFirst([...nds, forceFrame ? { ...node, parentId: frame.id } : node])
@@ -3186,9 +3190,82 @@ export default function App() {
     e.dataTransfer.dropEffect = e.dataTransfer.types.includes('application/wfc-note') ? 'move' : 'copy'
   }, [])
 
+  const queueSourceModuleMaterialization = useCallback(async (payload, requestedPosition = null) => {
+    const reviewSourceId = digitalTwinReview?.source?.id
+    if (perm.role !== 'owner' || !reviewSourceId || !payload?.manifest?.id || !payload?.entity?.id) {
+      setTwinProposalStatus({ type: 'error', message: '이 코드 모듈을 검토함에 추가할 권한이나 근거가 없습니다.' })
+      return
+    }
+    try {
+      const [moduleResult, flowResult] = payload.codeParts
+        ? [{
+            sourceManifestId: payload.manifest.id,
+            moduleId: payload.entity.id,
+            moduleFingerprint: payload.entity.fingerprint,
+            parts: payload.codeParts,
+          }, {
+            sourceManifestId: payload.manifest.id,
+            moduleId: payload.entity.id,
+            moduleFingerprint: payload.entity.fingerprint,
+            flows: payload.flows ?? [],
+          }]
+        : await Promise.all([
+            loadSourceCodeParts(payload.entity.id).then((result) => result.module),
+            loadSourceFlows(payload.entity.id).then((result) => result.module),
+          ])
+      if (
+        moduleResult?.sourceManifestId !== payload.manifest.id
+        || moduleResult?.moduleId !== payload.entity.id
+        || moduleResult?.moduleFingerprint !== payload.entity.fingerprint
+        || flowResult?.sourceManifestId !== payload.manifest.id
+        || flowResult?.moduleId !== payload.entity.id
+        || flowResult?.moduleFingerprint !== payload.entity.fingerprint
+      ) {
+        throw new Error('코드 기준이 바뀌었습니다. 소스 트윈을 새로고침한 뒤 다시 시도해 주세요.')
+      }
+      const position = requestedPosition ?? rfInstance?.screenToFlowPosition({
+        x: Math.max(180, window.innerWidth / 2),
+        y: window.innerHeight / 2,
+      }) ?? { x: 0, y: 0 }
+      const item = createSourceModuleMaterializationItem({
+        reviewSourceId,
+        manifest: payload.manifest,
+        entity: payload.entity,
+        codeParts: moduleResult.parts,
+        flows: flowResult.flows,
+        position,
+      })
+      setDigitalTwinReview((current) => {
+        if (!current || current.source?.id !== reviewSourceId) return current
+        return {
+          ...current,
+          items: [item, ...(current.items ?? []).filter((candidate) => candidate.id !== item.id)],
+        }
+      })
+      setTwinReviewOpen(true)
+      setTwinProposalPreview({ itemId: item.id, itemFingerprint: item.fingerprint })
+      setTwinProposalStatus({ type: 'success', message: '코드 모듈 수정안을 검토함에 추가했습니다. 미리보기 뒤 적용할 수 있습니다.' })
+    } catch (error) {
+      setTwinProposalStatus({ type: 'error', message: error?.message ?? '코드 모듈 수정안을 만들지 못했습니다.' })
+      setTwinReviewOpen(true)
+    }
+  }, [digitalTwinReview?.source?.id, perm.role, rfInstance])
+
   const onDrop = useCallback((e) => {
     e.preventDefault()
     if (!rfInstance) return
+    const sourceModule = e.dataTransfer.getData('application/wfc-source-module')
+    if (sourceModule) {
+      try {
+        queueSourceModuleMaterialization(
+          JSON.parse(sourceModule),
+          rfInstance.screenToFlowPosition({ x: e.clientX, y: e.clientY }),
+        )
+      } catch {
+        setTwinProposalStatus({ type: 'error', message: '드래그한 코드 모듈 정보를 읽지 못했습니다.' })
+      }
+      return
+    }
     const noteId = e.dataTransfer.getData('application/wfc-note')
     if (noteId) {
       promoteNoteAt(noteId, rfInstance.screenToFlowPosition({ x: e.clientX, y: e.clientY }))
@@ -3197,7 +3274,7 @@ export default function App() {
     let payload
     try { payload = JSON.parse(e.dataTransfer.getData('application/wfc-node') || '') } catch { return }
     addFromPalette(payload, rfInstance.screenToFlowPosition({ x: e.clientX, y: e.clientY }))
-  }, [rfInstance, addFromPalette, promoteNoteAt])
+  }, [rfInstance, addFromPalette, promoteNoteAt, queueSourceModuleMaterialization])
 
   // Touch fallback: Toolbar's palette has no native drag on touch devices, so
   // tapping a card adds it at the viewport center instead.
@@ -5262,6 +5339,7 @@ export default function App() {
           onSideChange={setNotesSide}
           onClose={closeSourceTwin}
           onLocalGitOperationStateChange={updateLocalGitOperationState}
+          onMaterializeSourceModule={queueSourceModuleMaterialization}
         />
       )}
     </div>

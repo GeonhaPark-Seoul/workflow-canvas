@@ -7,8 +7,8 @@
 
 | 항목 | 값 |
 |---|---|
-| 문서 버전 | **0.4.0** |
-| 최종 수정일 | 2026-07-17 |
+| 문서 버전 | **0.4.2** |
+| 최종 수정일 | 2026-07-18 |
 | 제품 버전 | 0.1.0-alpha.0 (내부 알파) |
 | 관리 규칙 | 이 문서 맨 아래 §13 |
 
@@ -335,7 +335,7 @@ Agent Skill/Agent Policy/Hard Guardrail/Connector/Manifest를 구별한다
 |---|---|---|
 | **Twin Core** | 모든 Lens의 결과를 공통 Asset Graph로 정규화하고 동일 대상을 식별, 현재 캔버스와 대조 | 알파 |
 | **Create Graph** | Asset과 관계를 검증·배치해 실제 캔버스 노드·연결선으로 생성 | 알파 |
-| **Source Lens** | 코드·DB·설정·배포를 분석해 설명하고, 근거에 따라 기능 Asset·Capability·속성의 표현 경계(Feature Boundary Resolver)를 결정. 디지털 소프트웨어 세계 담당 전문 Lens | 알파 0.3 |
+| **Source Lens** | 코드·DB·설정·배포를 분석해 코드 파츠·호출 흐름으로 설명하고, 기능 표현 경계를 판정하며 등록된 UI 상수를 안전 계약으로 왕복 편집. 디지털 소프트웨어 세계 담당 전문 Lens | 알파 0.7 |
 | **Trust Map** | 신뢰영역·게이트웨이·확인되지 않은 통로(unknown-gap) 구별 + 보안 오버레이 렌더링 | 알파 0.2 |
 | **LiveOps** | 확인 가능한 운영 상태, 관측 시각, stale 표시 | 알파 |
 | **Safe Operations** | 계획·승인·실행·검증·감사·복구를 거치는 제한 조작 | 알파 |
@@ -417,15 +417,44 @@ Pipeline / Agent Skill / Agent Policy / Hard Guardrail / Connector / Manifest
 4. **Source Lens 집중 개발 프로그램 (현재 초점, SL-0~SL-5)** — 정적 구조 인벤토리를
    **프로그램 이해 엔진**으로: 실행 흐름·React 컴포넌트 구조 이해, 기능 경계 자기 발견,
    코드 한 줄까지 정확한 자연어 설명.
-   - SL-0: 노트 뷰에서 노드 파츠 표시 (버그)
-   - SL-1: 코드 Asset 계층 정식화 — 모듈=Asset, 컴포넌트 층(엔진=첫 컴포넌트),
-     코드 브라우저에서 컴포넌트·소속 모듈 확인, 내부 kind 10종 사용자 공개
-   - SL-2: 코드 파츠(선언/명령/분기/반복/반환 + 리소스·설정·데이터) + 자연어 번역
-   - SL-3: 조작 가능한 코드 왕복 편집 MVP (ENG-006 착수, 근원 저장소 바인딩)
-   - SL-4: workflow(userflow) 발견 — 파츠로 표현, 승격 시 컴포넌트 Asset
+   - SL-0: ✅ 노트 뷰 시스템 파츠 읽기 상세 + redaction 누출 차단
+   - SL-1: ✅ Source Lens 0.4.0-alpha.0, Source Component Mapper, 코드 Asset 계층 v1,
+     컴포넌트·소속 모듈 탐색, 내부 kind 10종 공개 + legacy wire 호환
+   - SL-2: ✅ Code Part Translator — 선언/명령/분기/반복/반환 + 리소스·설정·데이터,
+     안정 AST 앵커, 결정적 자연어와 근거 링크. 소유자 자기 지도 AI 비교 어댑터는
+     기본 비활성이고 제공자·비용 승인 뒤에만 켠다.
+   - SL-4: ✅ Flow Discovery Engine — UI 이벤트·API·MCP 진입점, import/call,
+     React render·props 흐름. 정적 CODE 근거이며 동적 대상은 unknown, 승격 전 후보는 dimmed.
+   - SL-3: ✅ Safe Roundtrip Editor 내부 MVP — 등록 UI 상수 4종, 별도 로컬 쓰기 동의,
+     격리 worktree·AST literal formatter·검사/build·정확 diff 터미널 승인·provenance 커밋·
+     새 revert 커밋 롤백. LOC-002/005/006/007/008 완료 전 상용 경계가 아니다.
    - SL-5: 외부 도구 통합 평가 (Storybook·DB diagram·mermaid·tree-sitter·Figma dev
      mode·Copilot 등 — 적극 활용 방향 승인됨, 도입은 건별 기록·승인)
    - 상시: Source Lens 자체를 하나의 workflow로 자기 정리 (모듈 목록 유지)
+
+**Source Lens 0.4.1 구현 결정:**
+- 모듈 실체화는 코드 상세의 `캔버스에 올리기`와 코드 브라우저→캔버스 드래그 둘 다
+  지원하며, 두 경로 모두 미리보기→사용자 승인 Proposal을 통과한다. 자동 대량
+  실체화는 금지하고 한 번에 하나 또는 소수만 허용한다.
+- Asset 후보, 근거 미확인, 작동 미확인·실패 노드는 Reality/evidence 상태에 따라
+  `dimmed`로 보인다. 근거가 확인된 declared 이상은 정상 표시한다.
+- 코드 파츠와 설명은 결정적 분석이 기본이다. 외부 AI 보강은 등록 소유자의 Workflow
+  Canvas 자기 시스템 지도·자기 저장소에만 허용하며, AI artifact 배지와 결정적 근거를
+  병렬 표시한다. AI는 관계·권한·Reality Level을 만들 수 없다.
+- 읽기 위험이 낮은 흐름 발견을 쓰기보다 먼저 개발하므로 순서는 SL-2→SL-4→SL-3이다.
+
+**Source Lens 0.7.0-alpha.0 구현 결과:**
+- compact 색인만 브라우저에 두고 코드 파츠·흐름 카탈로그는 서버에서 모듈 단위로 지연
+  로드한다. 코드 본문과 비밀값은 브라우저 번들이나 서버 저장소로 보내지 않는다.
+- 모듈 실체화는 버튼과 단일 드래그 모두 기존 Reconciliation Proposal을 통과하며,
+  자동 대량 실체화 금지는 유지한다.
+- 왕복 편집은 `shared/uiConstants.js`의 명시 등록 literal만 다룬다. 웹 승인만으로는
+  실행되지 않으며 Mac 터미널에서 실제 diff를 확인해야 한다. 자동 push·배포는 하지 않는다.
+- Code Part Translator, Flow Discovery Engine, AI Explanation Pilot, Safe Roundtrip Editor는
+  각자의 코드 근거로 Source Lens 자체 코드 트리에 다시 표현된다.
+  Local Connector 1.3이 별도 소스 쓰기 동의·격리 검증·터미널 재승인을 집행한다.
+- AI 설명 제공자는 비활성 `external-saas` 신뢰영역이며, 코드 본문 없이
+  선언된 제한 메타데이터만 게이트웨이를 통과한다. 제공자·모델·비용 승인 전에는 호출하지 않는다.
 5. Python/FastAPI 두 번째 스택 검증 + 온보딩 마법사 v1 (SL 프로그램에 이어)
 6. 제한 조작 확대 (Engine 1.x), 번들 분리와 성능 예산 CI 고정.
 
@@ -499,12 +528,12 @@ Reality Lens, Decision Lens → 물류·ERP·사업·개인 생활 Lens.
 
 이 프로젝트는 사람 1명 + AI 2종이 고정된 역할로 일한다:
 
-**현재 편성 (2026-07-17~, Codex는 토큰 한도로 당분간 휴무):**
+**현재 편성 (2026-07-18~):**
 
 | 역할 | 담당 | 하는 일 |
 |---|---|---|
-| **기획·계획** | 사용자 + Claude Code | 방향·용어·우선순위 결정, MASTER.md 관리 |
-| **설계·구현·검수·배포** | Claude Code | 설계, 구현, 테스트·빌드·보안 표면 검증, 커밋, GitHub push, Vercel 배포, SQL 실행 안내, MASTER.md 버전 갱신 |
+| **기획·계획** | 사용자 + Claude Code | 방향·용어·우선순위 결정, 설계의뢰서 작성 |
+| **설계·구현·검수·배포** | Codex | 설계, 구현, 테스트·빌드·보안 표면 검증, 커밋, GitHub push, Vercel 배포, SQL 실행 안내, MASTER.md 버전 갱신 |
 | **최종 확인** | 사용자 | 배포 후 실제 화면·E2E 수동 확인, SQL 실행 |
 
 구현자와 검수자가 같아진 만큼 다음을 강제한다:
@@ -513,9 +542,7 @@ Reality Lens, Decision Lens → 물류·ERP·사업·개인 생활 Lens.
   QUAL 항목으로 기록한다 (`docs/AUDIT_PLAYBOOK.md` 상시 규칙).
 - 사용자가 요청하면 언제든 점검일 절차를 실행한다 (AUDIT_PLAYBOOK §2).
 
-Codex가 복귀하면 이전 편성(기획: 사용자+Claude / 구현: Codex / 검수·배포:
-Claude)으로 되돌릴 수 있으며, 그때도 전달 문서 관행(기준 커밋, SHA-256,
-검증 결과)은 유지한다.
+전달 문서 관행(기준 커밋, SHA-256, 검증 결과)은 담당 변경과 무관하게 유지한다.
 
 **시스템 지도 최신성 규칙:** 배치가 시스템 지도 템플릿·모델을 바꾸면 배포 후
 기존 지도를 항상 최신 패치 기준 최선의 상태로 갱신한다 — 그대로 두고 추가만
@@ -542,6 +569,8 @@ Claude)으로 되돌릴 수 있으며, 그때도 전달 문서 관행(기준 커
 
 | 버전 | 날짜 | 변경 |
 |---|---|---|
+| 0.4.2 | 2026-07-18 | Source Lens 0.7.0-alpha.0. SL-2 Code Part Translator와 소유자 자기 지도 AI 비교 어댑터(기본 비활성), SL-4 정적 Flow Discovery Engine, SL-3 Safe Roundtrip Editor 내부 MVP를 구현. 등록 UI 상수 4종만 Local Connector 1.3의 별도 로컬 쓰기 동의·격리 worktree·AST literal formatter·검사/build·터미널 diff 승인·provenance 커밋·revert 롤백으로 변경. 상용 경계는 LOC 부채 완료 전 차단. 새 Source Lens 구성요소의 자기반영 규칙과 declared 외부 AI 신뢰 경계를 지도에 추가. |
+| 0.4.1 | 2026-07-18 | SL-0/1 완료(Source Lens 0.4.0-alpha.0, Source Component Mapper, 코드 Asset 계층 v1, 공개 kind 10종+legacy wire). 모듈 실체화 UX를 버튼+드래그와 공통 Proposal로 확정하고 대량 자동 실체화는 계속 금지. Reality/evidence 기반 dimmed 규칙, 개발 순서 SL-2→SL-4→SL-3, 소유자 자기 지도 한정 AI 설명 파일럿 범위를 확정. Codex가 구현·검수·커밋·push·배포를 담당하는 편성으로 갱신. |
 | 0.3.0 | 2026-07-17 | 층 문법 교정: 층은 자기 지도 전용이 아니라 **모든 캔버스의 사용자 기능**(생성·이름·순서·삭제), L1~L4는 시스템 지도 기본 프리셋 — 배치 A2로 구현. 역할 편성 변경: Codex 휴무, 구현·검수·배포 모두 Claude Code + 자기검수 보완 장치. 시스템 지도 최신성 규칙(§12). 점검 제도 신설: AUDIT_PLAYBOOK.md + QUAL 품질 장부. |
 | 0.4.0 | 2026-07-18 | Source Lens 집중 프로그램(SL-0~5)으로 로드맵 개편. 코드 Asset 계층 문법 신설: 제품 영역>서브시스템>컴포넌트>모듈>코드 파츠 (컴포넌트=정제 분류로 코드 미반영, 기존 '하위 시스템'=서브시스템 계층). 코드 파츠 문법(선언/명령/분기/반복/반환+리소스·설정·데이터, ENG-006 왕복 편집 계약). 내부 구성 분류 10종 사용자 공개 확정. 외부 도구 적극 활용 방향 승인(건별 기록·승인 유지). |
 | 0.3.2 | 2026-07-17 | 배치 C 배포 완료 기록. 보안 오버레이: 자기 지도 신뢰영역 6·게이트웨이 11 근거 선언 + Proposal 실체화, 층 전환기 옆 토글(기본 꺼짐), 노드 테두리+배지·게이트웨이 팝업·unknown-gap 경고, redaction-안전·비밀값 차단. Trust Map 0.2.0-alpha.0 + Security Overlay Projector + Security Overlay Schema v1. 전부 declared(LIVE·침투테스트 아님). |

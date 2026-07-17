@@ -17,6 +17,8 @@ import {
   sourceTwinSubsystemId,
 } from '../../shared/sourceTwinSemantics.js'
 import { sourceComponentsForSubsystem, sourceEntityIsModuleAsset } from '../../shared/sourceAssetHierarchy.js'
+import { SOURCE_CODE_PART_KIND_DEFS } from '../../shared/sourceCodeParts.js'
+import { SOURCE_TWIN_EMPTY_MESSAGE } from '../../shared/uiConstants.js'
 import { systemComponentKindDefinition } from '../../shared/systemOntology.js'
 import {
   compareLocalAndDeployedManifests,
@@ -29,6 +31,13 @@ import {
   compareSourceTwinHistory,
   loadSourceTwinCurrent,
   loadSourceTwinHistory,
+  loadSourceCodeParts,
+  loadSourceFlows,
+  loadSourceAiExplanation,
+  applyLocalSourceEdit,
+  applyLocalSourceEditRollback as requestLocalSourceEditRollback,
+  previewLocalSourceEdit,
+  previewLocalSourceEditRollback as requestLocalSourceEditRollbackPreview,
   previewSourceTwinHistoryCapture,
 } from '../lib/sourceTwinApi.js'
 import {
@@ -81,6 +90,8 @@ const LOCAL_SYNC_ACTION_LABELS = {
   pull_ff_only: '로컬로 fast-forward 반영',
   noop: '이미 동기화됨',
   blocked: '자동 동기화 차단',
+  source_edit: 'UI 상수 편집',
+  source_edit_rollback: 'UI 상수 롤백',
 }
 const LOCAL_OPERATION_STATUS_LABELS = {
   queued: '실행 대기', running: '실행 중', succeeded: '완료', failed: '실패',
@@ -88,6 +99,7 @@ const LOCAL_OPERATION_STATUS_LABELS = {
 const LOCAL_CONNECTOR_STATE_LABELS = {
   online: '연결됨', waiting: '연결 전', offline: '오프라인',
 }
+const CODE_PART_KIND_BY_ID = new Map(SOURCE_CODE_PART_KIND_DEFS.map((item) => [item.id, item]))
 
 function localConnectorShortId(connector) {
   return String(connector?.id ?? '').slice(0, 8) || '미확인'
@@ -146,7 +158,215 @@ function TechnicalFacts({ entity }) {
   )
 }
 
-function EntityDetail({ manifest, entity, commitSha, audienceMode, onClose }) {
+function CodePartsDetail({ manifest, entity, onMaterialize, sourceEditContext, onSourceEditQueued }) {
+  const [result, setResult] = useState(null)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [aiComparison, setAiComparison] = useState(null)
+  const [aiBusyPartId, setAiBusyPartId] = useState('')
+  const [editDrafts, setEditDrafts] = useState({})
+  const [editPreview, setEditPreview] = useState(null)
+  const [editBusy, setEditBusy] = useState(false)
+  const [editError, setEditError] = useState('')
+  const [editStatus, setEditStatus] = useState('')
+  const available = sourceEntityIsModuleAsset(manifest, entity) && Number(entity?.details?.codePartCount) > 0
+
+  useEffect(() => {
+    let cancelled = false
+    setResult(null)
+    setError('')
+    setAiComparison(null)
+    if (!available) return () => { cancelled = true }
+    setLoading(true)
+    Promise.all([loadSourceCodeParts(entity.id), loadSourceFlows(entity.id)])
+      .then(([codeResult, flowResult]) => {
+        if (cancelled) return
+        const module = codeResult.module
+        const flowModule = flowResult.module
+        if (
+          module.sourceManifestId !== manifest.id
+          || module.moduleFingerprint !== entity.fingerprint
+          || flowModule.sourceManifestId !== manifest.id
+          || flowModule.moduleFingerprint !== entity.fingerprint
+        ) {
+          setError('현재 화면과 서버의 코드 기준이 달라졌습니다. 소스 트윈을 새로고침해 주세요.')
+          return
+        }
+        setResult({ ...module, flows: flowModule.flows, relations: flowModule.relations, flowTruncated: flowModule.truncated })
+        setEditDrafts(Object.fromEntries(module.parts
+          .filter((part) => part.editable?.eligible)
+          .map((part) => [part.id, part.editable.currentValue])))
+      })
+      .catch((loadError) => { if (!cancelled) setError(loadError.message) })
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+  }, [available, entity?.fingerprint, entity?.id, manifest.id])
+
+  if (!available) return null
+  const parts = result?.parts ?? []
+  const compareAi = async (part) => {
+    setAiBusyPartId(part.id)
+    setAiComparison(null)
+    try {
+      const comparison = await loadSourceAiExplanation(entity.id, part.id)
+      setAiComparison({ part, ...comparison })
+    } catch (compareError) {
+      setAiComparison({ part, available: false, error: compareError.message })
+    } finally {
+      setAiBusyPartId('')
+    }
+  }
+  const previewEdit = async (part) => {
+    if (!sourceEditContext?.connectorId) return
+    setEditBusy(true)
+    setEditError('')
+    setEditStatus('')
+    try {
+      const preview = await previewLocalSourceEdit(
+        sourceEditContext.connectorId,
+        entity.id,
+        part.id,
+        editDrafts[part.id],
+      )
+      setEditPreview({ part, preview })
+    } catch (previewError) {
+      setEditError(previewError.message)
+    } finally {
+      setEditBusy(false)
+    }
+  }
+  const applyEdit = async () => {
+    if (!editPreview?.preview?.plan_token || !sourceEditContext?.connectorId) return
+    setEditBusy(true)
+    setEditError('')
+    try {
+      const result = await applyLocalSourceEdit(
+        sourceEditContext.connectorId,
+        editPreview.preview.plan_token,
+        editPreview.preview.plan?.confirmation,
+      )
+      setEditPreview(null)
+      setEditStatus('웹 승인이 끝났습니다. 로컬 터미널에서 실제 diff와 확인 문구를 확인하세요.')
+      onSourceEditQueued?.(result)
+    } catch (applyError) {
+      if (['LOCAL_SOURCE_STATE_CHANGED', 'SOURCE_EDIT_PLAN_STALE', 'OPERATION_PLAN_EXPIRED'].includes(applyError.code)) setEditPreview(null)
+      setEditError(applyError.message)
+    } finally {
+      setEditBusy(false)
+    }
+  }
+  return (
+    <section className="source-code-parts" aria-label="자연어 코드 파츠">
+      <header>
+        <div><strong>코드 파츠</strong><span>결정적 AST 설명 · 읽기 전용</span></div>
+        <button
+          type="button"
+          disabled={!parts.length || typeof onMaterialize !== 'function'}
+          onClick={() => onMaterialize({ manifest, entity, codeParts: parts, flows: result?.flows ?? [] })}
+          title="검토함에 미리보기를 만든 뒤 승인하면 캔버스에 추가합니다"
+        >
+          캔버스에 올리기
+        </button>
+      </header>
+      {loading && <p>이 모듈의 코드 파츠를 불러오는 중…</p>}
+      {error && <p className="is-error">{error}</p>}
+      {!loading && !error && parts.map((part) => {
+        const definition = CODE_PART_KIND_BY_ID.get(part.kind)
+        return (
+          <article key={part.id} className={part.editable?.eligible ? 'is-editable' : ''}>
+            <span style={{ '--code-part-color': definition?.color }}>{definition?.label ?? part.kind}</span>
+            <div><strong>{part.summary}</strong><code>{part.evidenceRef}</code></div>
+            <button type="button" className="source-code-ai-button" disabled={!!aiBusyPartId} onClick={() => compareAi(part)} title="결정적 설명과 외부 AI 보강 설명을 나란히 비교">
+              {aiBusyPartId === part.id ? '확인 중…' : 'AI 비교'}
+            </button>
+            {part.editable?.eligible && (
+              <div className="source-code-editable-property">
+                <label>
+                  <span>{part.editable.property.label}</span>
+                  <input
+                    type={part.editable.property.type === 'number' ? 'number' : part.editable.property.type === 'color' ? 'color' : 'text'}
+                    value={editDrafts[part.id] ?? ''}
+                    min={part.editable.property.minimum}
+                    max={part.editable.property.maximum}
+                    maxLength={part.editable.property.maximumLength}
+                    onChange={(event) => setEditDrafts((currentDrafts) => ({ ...currentDrafts, [part.id]: event.target.value }))}
+                  />
+                  {part.editable.property.unit && <small>{part.editable.property.unit}</small>}
+                </label>
+                <button
+                  type="button"
+                  disabled={editBusy || !sourceEditContext?.online || !sourceEditContext?.sourceWriteEnabled || !!editPreview}
+                  onClick={() => previewEdit(part)}
+                  title={sourceEditContext?.sourceWriteEnabled ? '격리 편집 계획을 먼저 확인합니다' : '별도 코드 쓰기 동의로 로컬 커넥터를 연결해야 합니다'}
+                >
+                  변경 계획 보기
+                </button>
+                <p>{part.editable.property.description} · 영향: {part.editable.property.impactScope.join(', ')}</p>
+              </div>
+            )}
+          </article>
+        )
+      })}
+      {editPreview?.preview?.plan && (
+        <section className="source-edit-plan" aria-label="등록 UI 상수 편집 계획">
+          <header><strong>격리 편집 미리보기</strong><span>아직 로컬 파일을 바꾸지 않았습니다</span></header>
+          <div><span>{editPreview.preview.plan.scope.beforeValue}{editPreview.preview.plan.scope.unit}</span><b>→</b><span>{editPreview.preview.plan.scope.afterValue}{editPreview.preview.plan.scope.unit}</span></div>
+          <p>격리 worktree에서 속성 검사·production build·diff 검사를 먼저 수행하고, 실제 파일 diff는 Mac 터미널에서 다시 확인합니다.</p>
+          <small>내부 소유자 MVP · 상용 코드 쓰기 보안 경계가 아닙니다</small>
+          <div className="source-twin-operation-buttons">
+            <button type="button" className="is-secondary" disabled={editBusy} onClick={() => setEditPreview(null)}>취소</button>
+            <button type="button" disabled={editBusy} onClick={applyEdit}>{editBusy ? '요청 중…' : '승인하고 로컬 확인 요청'}</button>
+          </div>
+        </section>
+      )}
+      {editStatus && <p className="source-twin-operation-status">{editStatus}</p>}
+      {editError && <p className="is-error">{editError}</p>}
+      {aiComparison && (
+        <section className="source-ai-comparison" aria-label="템플릿과 AI 설명 비교">
+          <header><strong>설명 비교</strong><span>AI 문장은 근거·관계·Reality Level을 만들지 않습니다</span></header>
+          <div><em>결정적 템플릿</em><p>{aiComparison.part.summary}</p></div>
+          <div>
+            <em>AI 생성 {aiComparison.artifact ? `· ${aiComparison.artifact.provider} / ${aiComparison.artifact.model}` : '· 연결 전'}</em>
+            {aiComparison.artifact
+              ? <p><b>AI</b>{aiComparison.artifact.explanation}</p>
+              : <p>{aiComparison.error || '제공자·모델·키와 명시적 활성화 승인이 아직 설정되지 않았습니다.'}</p>}
+          </div>
+          {(aiComparison.transmission || aiComparison.artifact?.transmission) && <small>전송: AST 종류·심볼·줄 범위·결정적 요약만 · 코드 본문/캔버스/키 값 미포함</small>}
+          {(aiComparison.candidates?.length ?? 0) > 0 && (
+            <nav aria-label="AI 제공자 공식 정책">
+              {aiComparison.candidates.map((candidate) => <a key={candidate.id} href={candidate.pricingUrl} target="_blank" rel="noreferrer">{candidate.label} 공식 가격 ↗</a>)}
+            </nav>
+          )}
+        </section>
+      )}
+      {result?.truncated && <p>안전한 화면 표시 한도를 넘은 나머지 파츠는 모듈을 더 좁혀서 확인하세요.</p>}
+      {(result?.flows?.length ?? 0) > 0 && (
+        <div className="source-flow-list">
+          <header><strong>호출·화면 흐름</strong><span>정적 CODE 근거 · 실제 실행 기록 아님</span></header>
+          {result.flows.slice(0, 8).map((flow) => (
+            <article className="is-candidate" key={flow.id} title={flow.promotion.reason}>
+              <span>{flow.kind === 'ui-event' ? '화면' : flow.kind === 'api-route' ? 'API' : 'MCP'}</span>
+              <div><strong>{flow.label}</strong><code>{flow.moduleCount}개 모듈 경로 · {flow.evidenceRef}</code></div>
+              <em>후보</em>
+            </article>
+          ))}
+          {result.relations.slice(0, 8).map((relation) => (
+            <article key={relation.id}>
+              <span>{relation.kind === 'render' ? '화면 구성' : '호출'}</span>
+              <div>
+                <strong>{relation.label} → {relation.target || '대상 미확인'}</strong>
+                <code>{relation.props?.length ? `props: ${relation.props.join(', ')} · ` : ''}{relation.evidenceRef}</code>
+              </div>
+              <em>{relation.target ? 'CODE' : 'unknown'}</em>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+  )
+}
+
+function EntityDetail({ manifest, entity, commitSha, audienceMode, onClose, onMaterialize, sourceEditContext, onSourceEditQueued }) {
   if (!entity) return null
   const codeUrl = sourceTwinCodeUrl(manifest, entity, commitSha)
   const area = sourceTwinAreaDefinition(sourceTwinAreaId(entity), manifest)
@@ -176,17 +396,33 @@ function EntityDetail({ manifest, entity, commitSha, audienceMode, onClose }) {
       <ExplanationEvidence entity={entity} />
       {audienceMode === 'developer' && entity.path && <code>{entity.path}{entity.lineStart ? `:${entity.lineStart}` : ''}</code>}
       {audienceMode === 'developer' && hasTechnicalFacts && <TechnicalFacts entity={entity} />}
+      <CodePartsDetail manifest={manifest} entity={entity} onMaterialize={onMaterialize} sourceEditContext={sourceEditContext} onSourceEditQueued={onSourceEditQueued} />
       {codeUrl && <a href={codeUrl} target="_blank" rel="noreferrer">GitHub에서 실제 코드 열기 ↗</a>}
     </section>
   )
 }
 
-function EntityRow({ entity, children, expanded, selectedId, audienceMode, onToggle, onSelect }) {
+function startSourceModuleDrag(event, manifest, entity) {
+  event.dataTransfer.effectAllowed = 'copy'
+  event.dataTransfer.setData('application/wfc-source-module', JSON.stringify({
+    manifest: { id: manifest.id, source: { id: manifest.source?.id, label: manifest.source?.label } },
+    entity,
+  }))
+}
+
+function EntityRow({ manifest, entity, children, expanded, selectedId, audienceMode, onToggle, onSelect }) {
   const hasChildren = children.length > 0
   const developerMode = audienceMode === 'developer'
   return (
     <div className="source-twin-tree-block">
-      <button type="button" className={`source-twin-entity-row${selectedId === entity.id ? ' is-selected' : ''}`} onClick={() => onSelect(entity)}>
+      <button
+        type="button"
+        className={`source-twin-entity-row${selectedId === entity.id ? ' is-selected' : ''}`}
+        draggable={sourceEntityIsModuleAsset(manifest, entity)}
+        onDragStart={(event) => startSourceModuleDrag(event, manifest, entity)}
+        onClick={() => onSelect(entity)}
+        title={sourceEntityIsModuleAsset(manifest, entity) ? '선택하거나 캔버스로 드래그해 검토 제안 만들기' : undefined}
+      >
         <span
           className="source-twin-expand"
           onClick={(event) => { event.stopPropagation(); if (hasChildren) onToggle(entity.id) }}
@@ -201,7 +437,7 @@ function EntityRow({ entity, children, expanded, selectedId, audienceMode, onTog
         <span className="source-twin-kind">{sourceEntityIsModuleAsset(null, entity) ? '코드 Asset' : (KIND_LABELS[entity.kind] ?? entity.kind)}</span>
       </button>
       {expanded && children.map((child) => (
-        <button type="button" className={`source-twin-function-row${selectedId === child.id ? ' is-selected' : ''}`} key={child.id} onClick={() => onSelect(child)}>
+        <button type="button" draggable onDragStart={(event) => startSourceModuleDrag(event, manifest, child)} className={`source-twin-function-row${selectedId === child.id ? ' is-selected' : ''}`} key={child.id} onClick={() => onSelect(child)}>
           <span>ƒ</span>
           <span><strong>{child.label}</strong><small>{developerMode ? (child.technicalSummary || child.summary) : child.summary}</small></span>
           {developerMode ? <code>L{child.lineStart}</code> : <span className="source-twin-kind">함수</span>}
@@ -211,7 +447,7 @@ function EntityRow({ entity, children, expanded, selectedId, audienceMode, onTog
   )
 }
 
-function ComponentGroup({ component, entities, childrenByParent, filteredIds, expandedFiles, selectedId, audienceMode, onToggleFile, onSelect }) {
+function ComponentGroup({ manifest, component, entities, childrenByParent, filteredIds, expandedFiles, selectedId, audienceMode, onToggleFile, onSelect }) {
   const [open, setOpen] = useState(false)
   const kind = systemComponentKindDefinition(component.kind)
   return (
@@ -224,13 +460,13 @@ function ComponentGroup({ component, entities, childrenByParent, filteredIds, ex
       </button>
       {open && entities.map((entity) => {
         const children = (childrenByParent.get(entity.id) ?? []).filter((child) => filteredIds.has(child.id))
-        return <EntityRow key={`${component.id}:${entity.id}`} entity={entity} children={children} expanded={expandedFiles.has(entity.id)} selectedId={selectedId} audienceMode={audienceMode} onToggle={onToggleFile} onSelect={onSelect} />
+        return <EntityRow key={`${component.id}:${entity.id}`} manifest={manifest} entity={entity} children={children} expanded={expandedFiles.has(entity.id)} selectedId={selectedId} audienceMode={audienceMode} onToggle={onToggleFile} onSelect={onSelect} />
       })}
     </section>
   )
 }
 
-function StructureView({ current, perspective, setPerspective, query, setQuery, selectedId, setSelectedId, audienceMode, setAudienceMode }) {
+function StructureView({ current, perspective, setPerspective, query, setQuery, selectedId, setSelectedId, audienceMode, setAudienceMode, onMaterialize, sourceEditContext, onSourceEditQueued }) {
   const manifest = current.manifest
   const [expanded, setExpanded] = useState(() => new Set())
   const [expandedSubsystems, setExpandedSubsystems] = useState(() => new Set())
@@ -306,9 +542,9 @@ function StructureView({ current, perspective, setPerspective, query, setQuery, 
         <span aria-hidden="true">⌕</span>
         <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="파일, 함수, DB, 환경변수 검색" aria-label="소스 트윈 검색" />
       </div>
-      <EntityDetail manifest={manifest} entity={selected} commitSha={current.deployment?.commitSha} audienceMode={audienceMode} onClose={() => setSelectedId('')} />
+      <EntityDetail manifest={manifest} entity={selected} commitSha={current.deployment?.commitSha} audienceMode={audienceMode} onClose={() => setSelectedId('')} onMaterialize={onMaterialize} sourceEditContext={sourceEditContext} onSourceEditQueued={onSourceEditQueued} />
       <div className="source-twin-tree">
-        {roots.length === 0 ? <div className="twin-review-empty">일치하는 코드 실체 없음</div> : hierarchy.map((area) => (
+        {roots.length === 0 ? <div className="twin-review-empty">{SOURCE_TWIN_EMPTY_MESSAGE}</div> : hierarchy.map((area) => (
           <section className="source-twin-area-section" key={area.id}>
             <header className="source-twin-area-heading">
               <div>
@@ -335,6 +571,7 @@ function StructureView({ current, perspective, setPerspective, query, setQuery, 
                   {subsystemExpanded && components.map((component) => (
                     <ComponentGroup
                       key={component.id}
+                      manifest={manifest}
                       component={component}
                       entities={component.moduleIds.map((id) => entityMap.get(id)).filter(Boolean)}
                       childrenByParent={childrenByParent}
@@ -351,7 +588,7 @@ function StructureView({ current, perspective, setPerspective, query, setQuery, 
                       <div className="source-twin-component-heading"><span>·</span><span><strong>기타 모듈·리소스</strong><small>Component 근거가 아직 연결되지 않은 코드와 시스템 자원입니다.</small></span><em>{ungrouped.length}</em></div>
                       {ungrouped.map((entity) => {
                         const children = (childrenByParent.get(entity.id) ?? []).filter((child) => filteredIds.has(child.id))
-                        return <EntityRow key={entity.id} entity={entity} children={children} expanded={expanded.has(entity.id) || !!query} selectedId={selectedId} audienceMode={audienceMode} onToggle={toggle} onSelect={(value) => setSelectedId(value.id)} />
+                        return <EntityRow key={entity.id} manifest={manifest} entity={entity} children={children} expanded={expanded.has(entity.id) || !!query} selectedId={selectedId} audienceMode={audienceMode} onToggle={toggle} onSelect={(value) => setSelectedId(value.id)} />
                       })}
                     </section>
                   )}
@@ -477,6 +714,22 @@ function LocalSyncPlanPreview({ preview, busy, onApprove, onCancel }) {
   )
 }
 
+function LocalSourceRollbackPlanPreview({ preview, busy, onApprove, onCancel }) {
+  const plan = preview?.plan
+  if (!plan) return null
+  return (
+    <section className="local-sync-plan source-edit-rollback-plan" aria-label="UI 상수 편집 롤백 계획">
+      <header><div><strong>롤백 미리보기</strong><span>Git 이력을 지우지 않고 새 revert 커밋을 만듭니다</span></div><code>{plan.id.slice(0, 15)}…</code></header>
+      <div className="local-sync-plan-direction"><strong>{plan.scope?.label}</strong><span>{String(plan.scope?.beforeValue)} → {String(plan.scope?.afterValue)}</span></div>
+      <p>격리 worktree 검사와 production build 뒤 Mac 터미널에서 실제 diff를 다시 승인합니다.</p>
+      <div className="source-twin-operation-buttons">
+        <button type="button" className="is-secondary" onClick={onCancel} disabled={busy}>취소</button>
+        <button type="button" onClick={onApprove} disabled={busy}>{busy ? '요청 중…' : '승인하고 롤백 요청'}</button>
+      </div>
+    </section>
+  )
+}
+
 function LocalRepositoryView({
   current,
   localState,
@@ -487,15 +740,21 @@ function LocalRepositoryView({
   onRepositoryPathChange,
   allowGitSync,
   onAllowGitSyncChange,
+  allowSourceWrite,
+  onAllowSourceWriteChange,
   busy,
   error,
   status,
   syncPlan,
+  rollbackPlan,
   onCreate,
   onRevoke,
   onPreviewSync,
   onApplySync,
   onCancelSync,
+  onPreviewRollback,
+  onApplyRollback,
+  onCancelRollback,
   structureProps,
 }) {
   const connectors = localState?.connectors ?? []
@@ -523,6 +782,7 @@ function LocalRepositoryView({
     serverUrl: typeof window === 'undefined' ? '' : window.location.origin,
     repositoryPath,
     allowGitSync,
+    allowSourceWrite,
   }) : ''
 
   return (
@@ -577,6 +837,17 @@ function LocalRepositoryView({
                 <small>꺼두면 구조 읽기만 합니다. 켜도 push·pull마다 터미널에서 다시 확인합니다.</small>
               </span>
             </label>
+            <label className="local-connector-git-permission is-source-write">
+              <input
+                type="checkbox"
+                checked={allowSourceWrite}
+                onChange={(event) => onAllowSourceWriteChange(event.target.checked)}
+              />
+              <span>
+                <strong>등록된 UI 상수 편집 허용</strong>
+                <small>Git 동기화와 별도 권한입니다. 격리 검증 뒤 편집마다 터미널에서 실제 diff를 다시 확인합니다.</small>
+              </span>
+            </label>
             <p>복사한 명령이 먼저 이 폴더로 이동합니다. 표시된 서버·폴더·권한이 맞을 때만 실행하세요.</p>
             <code>{setupCommand || '프로젝트 폴더와 서버 주소를 확인하세요.'}</code>
             <button type="button" disabled={!setupCommand} onClick={() => navigator.clipboard.writeText(setupCommand)}>명령 복사</button>
@@ -596,7 +867,7 @@ function LocalRepositoryView({
               <span>기준 <strong>{online ? '현재 응답' : '마지막 응답'}</strong></span>
               <span>브랜치 <strong>{connector.git?.branch || '미확인'}</strong></span>
               <span>로컬 변경 <strong>{connector.git?.dirty ?? 0}</strong></span>
-              <span>권한 <strong>{connector.git?.syncEnabled ? '읽기 + 승인 동기화' : '읽기 전용'}</strong></span>
+              <span>권한 <strong>{connector.git?.sourceWriteEnabled ? '읽기 + 등록 상수 편집' : connector.git?.syncEnabled ? '읽기 + 승인 동기화' : '읽기 전용'}</strong></span>
               <span>앞섬 <strong>{connector.git?.ahead ?? 0}</strong></span>
               <span>뒤처짐 <strong>{connector.git?.behind ?? 0}</strong></span>
             </div>
@@ -619,10 +890,15 @@ function LocalRepositoryView({
                     <strong className={`is-${operation.status}`}>{LOCAL_OPERATION_STATUS_LABELS[operation.status] ?? operation.status}</strong>
                     <time>{new Date(operation.completedAt || operation.requestedAt).toLocaleString()}</time>
                     {operation.result?.summary && <p>{operation.result.summary}</p>}
+                    {operation.action === 'source_edit' && operation.status === 'succeeded' && operation.result?.rollbackAvailable && !operation.rolledBack && (
+                      <button type="button" disabled={busy || !!rollbackPlan} onClick={() => onPreviewRollback(connector.id, operation.operationId)}>되돌리기</button>
+                    )}
+                    {operation.rolledBack && <small>롤백 완료</small>}
                   </div>
                 ))}
               </div>
             )}
+            <LocalSourceRollbackPlanPreview preview={rollbackPlan} busy={busy} onApprove={() => onApplyRollback(connector.id)} onCancel={onCancelRollback} />
           </>
         )}
 
@@ -772,6 +1048,7 @@ export default function SourceTwinPanel({
   onSideChange,
   onClose,
   onLocalGitOperationStateChange,
+  onMaterializeSourceModule,
 }) {
   const [paneWidth, setPaneWidth] = useState(500)
   const [perspective, setPerspective] = useState('functionality')
@@ -793,10 +1070,12 @@ export default function SourceTwinPanel({
   const [localSetup, setLocalSetup] = useState(null)
   const [localRepositoryPath, setLocalRepositoryPath] = useState('~/workflow-canvas')
   const [localGitSyncEnabled, setLocalGitSyncEnabled] = useState(false)
+  const [localSourceWriteEnabled, setLocalSourceWriteEnabled] = useState(false)
   const [localBusy, setLocalBusy] = useState(false)
   const [localError, setLocalError] = useState('')
   const [localStatus, setLocalStatus] = useState('')
   const [localSyncPlan, setLocalSyncPlan] = useState(null)
+  const [localRollbackPlan, setLocalRollbackPlan] = useState(null)
   const dragRef = useRef(null)
   const view = entry?.view ?? 'structure'
 
@@ -806,6 +1085,7 @@ export default function SourceTwinPanel({
     setCapturePlan(null)
     setCaptureStatus('')
     setLocalSyncPlan(null)
+    setLocalRollbackPlan(null)
     setLocalStatus('')
   }, [view])
 
@@ -949,6 +1229,36 @@ export default function SourceTwinPanel({
     }
   }, [localSyncPlan, onLocalGitOperationStateChange, refreshLocalConnectors])
 
+  const previewSourceEditRollback = useCallback(async (connectorId, operationId) => {
+    setLocalBusy(true)
+    setLocalError('')
+    setLocalStatus('')
+    try {
+      setLocalRollbackPlan(await requestLocalSourceEditRollbackPreview(connectorId, operationId))
+    } catch (rollbackError) {
+      setLocalError(rollbackError.message)
+    } finally {
+      setLocalBusy(false)
+    }
+  }, [])
+
+  const applySourceEditRollback = useCallback(async (connectorId) => {
+    if (!localRollbackPlan?.plan_token) return
+    setLocalBusy(true)
+    setLocalError('')
+    try {
+      await requestLocalSourceEditRollback(connectorId, localRollbackPlan.plan_token, localRollbackPlan.plan?.confirmation)
+      setLocalRollbackPlan(null)
+      setLocalStatus('웹 롤백 승인이 끝났습니다. Mac 터미널에서 실제 diff와 확인 문구를 확인하세요.')
+      await refreshLocalConnectors()
+    } catch (rollbackError) {
+      if (['LOCAL_SOURCE_STATE_CHANGED', 'OPERATION_PLAN_EXPIRED'].includes(rollbackError.code)) setLocalRollbackPlan(null)
+      setLocalError(rollbackError.message)
+    } finally {
+      setLocalBusy(false)
+    }
+  }, [localRollbackPlan, refreshLocalConnectors])
+
   const previewCapture = useCallback(async () => {
     setCaptureBusy(true)
     setHistoryError('')
@@ -1016,6 +1326,27 @@ export default function SourceTwinPanel({
 
   const splitter = <div className="twin-review-splitter source-twin-splitter" title="코드 트리 창 크기 조절" onPointerDown={onSplitterDown} style={{ width: SPLITTER_WIDTH }} />
   const manifest = current?.manifest
+  const selectedSourceConnector = localState?.connectors?.find((connector) => connector.id === selectedConnectorId)
+    ?? localState?.connectors?.[0]
+    ?? null
+  const sourceEditContext = selectedSourceConnector ? {
+    connectorId: selectedSourceConnector.id,
+    online: localConnectorConnectionState(selectedSourceConnector) === 'online',
+    sourceWriteEnabled: selectedSourceConnector.git?.sourceWriteEnabled === true,
+  } : null
+  const sourceStructureProps = {
+    perspective,
+    setPerspective,
+    query,
+    setQuery,
+    selectedId,
+    setSelectedId,
+    audienceMode,
+    setAudienceMode,
+    onMaterialize: onMaterializeSourceModule,
+    sourceEditContext,
+    onSourceEditQueued: () => refreshLocalConnectors().catch((refreshError) => setLocalError(refreshError.message)),
+  }
 
   return (
     <aside className="twin-review-pane source-twin-pane" style={{ width: paneWidth, minWidth: MIN_PANE_WIDTH, maxWidth: `calc(100vw - ${MIN_CANVAS_WIDTH}px)`, order: side === 'left' ? 0 : 2 }} onClick={(event) => event.stopPropagation()}>
@@ -1072,10 +1403,13 @@ export default function SourceTwinPanel({
                 onRepositoryPathChange={setLocalRepositoryPath}
                 allowGitSync={localGitSyncEnabled}
                 onAllowGitSyncChange={setLocalGitSyncEnabled}
+                allowSourceWrite={localSourceWriteEnabled}
+                onAllowSourceWriteChange={setLocalSourceWriteEnabled}
                 busy={localBusy}
                 error={localError}
                 status={localStatus}
                 syncPlan={localSyncPlan}
+                rollbackPlan={localRollbackPlan}
                 onCreate={createConnector}
                 onRevoke={revokeConnector}
                 onPreviewSync={previewGitSync}
@@ -1085,7 +1419,10 @@ export default function SourceTwinPanel({
                   setLocalError('')
                   onLocalGitOperationStateChange?.({ status: 'idle' })
                 }}
-                structureProps={{ perspective, setPerspective, query, setQuery, selectedId, setSelectedId, audienceMode, setAudienceMode }}
+                onPreviewRollback={previewSourceEditRollback}
+                onApplyRollback={applySourceEditRollback}
+                onCancelRollback={() => { setLocalRollbackPlan(null); setLocalError('') }}
+                structureProps={sourceStructureProps}
               />
             : view === 'github-code'
               ? <>
@@ -1103,6 +1440,9 @@ export default function SourceTwinPanel({
                     setSelectedId={setSelectedId}
                     audienceMode={audienceMode}
                     setAudienceMode={setAudienceMode}
+                    onMaterialize={onMaterializeSourceModule}
+                    sourceEditContext={sourceEditContext}
+                    onSourceEditQueued={sourceStructureProps.onSourceEditQueued}
                   />
                 </>
             : view === 'changes'

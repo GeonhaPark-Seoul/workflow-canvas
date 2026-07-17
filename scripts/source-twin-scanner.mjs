@@ -6,6 +6,12 @@ import { parse } from '@babel/parser'
 import { SOURCE_TWIN_SCHEMA_VERSION } from '../shared/sourceTwin.js'
 import { sourceProfileDescriptor } from '../shared/sourceProfileContract.js'
 import { buildSourceAssetHierarchy } from '../shared/sourceAssetHierarchy.js'
+import { compactSourceCodePart, SOURCE_CODE_PART_SCHEMA_VERSION, sourceCodePartSummary } from '../shared/sourceCodeParts.js'
+import {
+  normalizeSourceEditableValue,
+  sourceEditablePropertyForAnchor,
+} from '../shared/workflowSourceEditableProperties.js'
+import { SOURCE_FLOW_SCHEMA_VERSION } from '../shared/sourceFlows.js'
 import { sourceTwinAreaCatalog, sourceTwinSubsystemCatalog } from '../shared/sourceTwinSemantics.js'
 import { DEFAULT_SOURCE_PROFILES, registeredSourceProfile } from './source-profiles/index.mjs'
 import {
@@ -22,6 +28,8 @@ import {
 
 export const SOURCE_TWIN_MANIFEST_PATH = 'shared/sourceTwinManifest.js'
 export const SOURCE_FEATURE_MANIFEST_PATH = 'shared/sourceFeatureManifest.js'
+export const SOURCE_CODE_PART_MANIFEST_PATH = 'shared/sourceCodePartManifest.js'
+export const SOURCE_FLOW_MANIFEST_PATH = 'shared/sourceFlowManifest.js'
 
 const INCLUDED_ROOT_FILES = new Set([
   'README.md', 'Dockerfile', 'index.html', 'package.json', 'pyproject.toml',
@@ -30,6 +38,8 @@ const INCLUDED_ROOT_FILES = new Set([
 const EXCLUDED_FILES = new Set([
   SOURCE_TWIN_MANIFEST_PATH,
   SOURCE_FEATURE_MANIFEST_PATH,
+  SOURCE_CODE_PART_MANIFEST_PATH,
+  SOURCE_FLOW_MANIFEST_PATH,
   'shared/workflowSystemDiscoveryManifest.js',
 ])
 const JAVASCRIPT_EXTENSIONS = ['.js', '.jsx', '.mjs']
@@ -132,6 +142,13 @@ function memberProperty(node) {
     : ''
 }
 
+function jsxName(node) {
+  if (!node) return ''
+  if (node.type === 'JSXIdentifier') return node.name
+  if (node.type === 'JSXMemberExpression') return `${jsxName(node.object)}.${jsxName(node.property)}`
+  return ''
+}
+
 function importedNames(node) {
   return (node.specifiers ?? []).map((specifier) => (
     specifier.type === 'ImportDefaultSpecifier' ? 'default'
@@ -143,7 +160,8 @@ function importedNames(node) {
 function parseJavaScript(relativePath, content) {
   const record = {
     imports: [], functions: [], exports: [], apiRoutes: [], dbTables: [], dbAccess: [], dbFunctions: [],
-    env: [], securitySignals: [], externalApiRoutes: [], parseError: '',
+    env: [], securitySignals: [], externalApiRoutes: [], codeParts: [], importBindings: [], callSites: [],
+    renderSites: [], entrypoints: [], parseError: '',
   }
   let ast
   try {
@@ -159,6 +177,87 @@ function parseJavaScript(relativePath, content) {
 
   const exported = new Set()
   const functionKeys = new Map()
+  const codePartKeys = new Set()
+
+  const enclosingSymbol = (ancestors = []) => {
+    for (let index = ancestors.length - 1; index >= 0; index -= 1) {
+      const ancestor = ancestors[index]
+      if (ancestor.type === 'FunctionDeclaration') return nodeName(ancestor.id) || 'default'
+      if (['ClassMethod', 'ClassPrivateMethod', 'ObjectMethod'].includes(ancestor.type)) return nodeName(ancestor.key) || 'method'
+      if (['ArrowFunctionExpression', 'FunctionExpression'].includes(ancestor.type)) {
+        const owner = ancestors[index - 1]
+        if (owner?.type === 'VariableDeclarator') return nodeName(owner.id) || 'anonymous'
+      }
+    }
+    return 'module'
+  }
+  const nodeSubject = (node, kind) => {
+    if (kind === 'resource') return stringArgument(node.source) || stringArgument(node.arguments?.[0]) || nodeName(node.callee) || memberProperty(node.callee) || '외부 리소스'
+    if (kind === 'config') return memberProperty(node) || '환경 설정'
+    if (kind === 'data') return stringArgument(node.arguments?.[0]) || memberProperty(node.callee) || '저장 데이터'
+    if (node.type === 'VariableDeclaration') return node.declarations?.map((item) => nodeName(item.id)).filter(Boolean).join(', ') || '값'
+    if (node.type === 'FunctionDeclaration') return nodeName(node.id) || '함수'
+    if (node.type === 'ClassDeclaration') return nodeName(node.id) || '클래스'
+    return ''
+  }
+  const addCodePart = (kind, node, ancestors = [], subject = '') => {
+    if (!node?.loc || !Number.isInteger(node.start) || !Number.isInteger(node.end)) return
+    const symbol = enclosingSymbol(ancestors)
+    const lineStart = node.loc.start.line
+    const lineEnd = node.loc.end.line
+    const structureFingerprint = semanticHash({
+      nodeType: node.type,
+      parents: ancestors.slice(-3).map((item) => item.type),
+      children: Object.entries(node).flatMap(([key, child]) => {
+        if (['loc', 'start', 'end'].includes(key)) return []
+        if (Array.isArray(child)) return child.filter((item) => item?.type).map((item) => item.type)
+        return child?.type ? [child.type] : []
+      }).slice(0, 20),
+    }, 20)
+    const fingerprint = semanticHash({
+      path: relativePath,
+      nodeType: node.type,
+      symbol,
+      lineStart,
+      lineEnd,
+      structureFingerprint,
+      sourceFingerprint: hash(redactedForFingerprint(content.slice(node.start, node.end))),
+    }, 24)
+    const key = `${kind}:${node.start}:${node.end}:${subject}`
+    if (codePartKeys.has(key)) return
+    codePartKeys.add(key)
+    const safeSubject = String(subject || nodeSubject(node, kind) || symbol).replace(/\s+/g, ' ').trim().slice(0, 180)
+    let editable = { schemaVersion: 1, eligible: false, propertyId: '', reason: '등록되지 않은 코드는 읽기 전용입니다.' }
+    if (kind === 'declaration' && node.type === 'VariableDeclaration' && node.declarations?.length === 1) {
+      const declaration = node.declarations[0]
+      const definition = sourceEditablePropertyForAnchor(relativePath, nodeName(declaration.id))
+      const literal = declaration.init
+      const rawValue = literal?.type === 'NumericLiteral' || literal?.type === 'StringLiteral'
+        ? literal.value
+        : undefined
+      const normalizedValue = normalizeSourceEditableValue(definition, rawValue)
+      if (definition && normalizedValue.valid) {
+        editable = {
+          schemaVersion: 1,
+          eligible: true,
+          propertyId: definition.id,
+          currentValue: normalizedValue.value,
+          reason: '',
+        }
+      }
+    }
+    record.codeParts.push({
+      schemaVersion: SOURCE_CODE_PART_SCHEMA_VERSION,
+      id: `code-part:${fingerprint}`,
+      kind,
+      label: `${kind}:${safeSubject}`,
+      subject: safeSubject,
+      summary: sourceCodePartSummary(kind, safeSubject),
+      anchor: { path: relativePath, nodeType: node.type, symbol, lineStart, lineEnd, fingerprint, structureFingerprint },
+      evidenceRef: sourceEvidenceRef(relativePath, lineStart, lineEnd),
+      editable,
+    })
+  }
   const addFunction = (name, node, kind = 'function') => {
     if (!name || !node?.loc || !Number.isInteger(node.start) || !Number.isInteger(node.end)) return
     const base = name.slice(0, 180)
@@ -181,6 +280,16 @@ function parseJavaScript(relativePath, content) {
     if (!node || typeof node !== 'object') return
     if (node.type === 'ImportDeclaration') {
       record.imports.push({ source: stringArgument(node.source), names: importedNames(node), dynamic: false })
+      for (const specifier of node.specifiers ?? []) {
+        record.importBindings.push({
+          source: stringArgument(node.source),
+          local: nodeName(specifier.local),
+          imported: specifier.type === 'ImportDefaultSpecifier'
+            ? 'default'
+            : specifier.type === 'ImportNamespaceSpecifier' ? '*' : nodeName(specifier.imported),
+        })
+      }
+      addCodePart('resource', node, ancestors, stringArgument(node.source))
     }
     if (node.type === 'ExportNamedDeclaration' || node.type === 'ExportDefaultDeclaration') {
       const declaration = node.declaration
@@ -193,6 +302,11 @@ function parseJavaScript(relativePath, content) {
       if (node.source) record.imports.push({ source: stringArgument(node.source), names: ['re-export'], dynamic: false })
     }
     if (node.type === 'FunctionDeclaration') addFunction(nodeName(node.id) || 'default', node)
+    if (['VariableDeclaration', 'FunctionDeclaration', 'ClassDeclaration'].includes(node.type)) addCodePart('declaration', node, ancestors)
+    if (['IfStatement', 'ConditionalExpression', 'SwitchStatement'].includes(node.type)) addCodePart('branch', node, ancestors)
+    if (['ForStatement', 'ForInStatement', 'ForOfStatement', 'WhileStatement', 'DoWhileStatement'].includes(node.type)) addCodePart('loop', node, ancestors)
+    if (['ReturnStatement', 'ThrowStatement'].includes(node.type)) addCodePart('return', node, ancestors)
+    if (node.type === 'ExpressionStatement') addCodePart('command', node, ancestors)
     if (node.type === 'VariableDeclarator' && ['ArrowFunctionExpression', 'FunctionExpression'].includes(node.init?.type)) {
       addFunction(nodeName(node.id), node.init, node.init.type === 'ArrowFunctionExpression' ? 'arrow' : 'function')
     }
@@ -204,9 +318,21 @@ function parseJavaScript(relativePath, content) {
     if (node.type === 'CallExpression' || node.type === 'OptionalCallExpression') {
       const calleeName = nodeName(node.callee)
       const property = memberProperty(node.callee)
+      const receiver = nodeName(node.callee?.object)
       const firstString = stringArgument(node.arguments?.[0])
+      record.callSites.push({
+        caller: enclosingSymbol(ancestors),
+        callee: calleeName || property,
+        receiver,
+        line: node.loc?.start?.line ?? 1,
+        dynamic: !!node.callee?.computed && !property,
+      })
+      if (property === 'registerTool' && firstString) {
+        record.entrypoints.push({ kind: 'mcp-tool', label: firstString, handler: enclosingSymbol(ancestors), line: node.loc?.start?.line ?? 1 })
+      }
       if (calleeName === 'require' && firstString) record.imports.push({ source: firstString, names: ['require'], dynamic: true })
       if (calleeName === 'fetch' && firstString.startsWith('/api/')) record.externalApiRoutes.push(firstString.split('?')[0])
+      if ((calleeName === 'fetch' || calleeName === 'require') && firstString) addCodePart('resource', node, ancestors, firstString)
       if (calleeName === 'eval') record.securitySignals.push('dynamic-code-eval')
       if (calleeName === 'Function' && ancestors.some((ancestor) => ancestor.type === 'NewExpression')) record.securitySignals.push('dynamic-function-constructor')
       if (property === 'from' && DATABASE_IDENTIFIER_PATTERN.test(firstString)) {
@@ -214,12 +340,17 @@ function parseJavaScript(relativePath, content) {
         const operation = surroundingMethods.some((name) => WRITE_METHODS.has(name)) ? 'write' : 'read'
         record.dbTables.push(firstString)
         record.dbAccess.push({ table: firstString, operation })
+        addCodePart('data', node, ancestors, firstString)
       }
-      if (property === 'rpc' && DATABASE_IDENTIFIER_PATTERN.test(firstString)) record.dbFunctions.push(firstString)
+      if (property === 'rpc' && DATABASE_IDENTIFIER_PATTERN.test(firstString)) {
+        record.dbFunctions.push(firstString)
+        addCodePart('data', node, ancestors, firstString)
+      }
     }
     if (node.type === 'ImportExpression') {
       const source = stringArgument(node.source)
       if (source) record.imports.push({ source, names: ['dynamic'], dynamic: true })
+      if (source) addCodePart('resource', node, ancestors, source)
     }
     if (node.type === 'MemberExpression' || node.type === 'OptionalMemberExpression') {
       const property = memberProperty(node)
@@ -228,11 +359,39 @@ function parseJavaScript(relativePath, content) {
       if (objectProperty === 'env' && property && (
         nodeName(node.object?.object) === 'process'
         || node.object?.object?.type === 'MetaProperty'
-      )) record.env.push(property)
+      )) {
+        record.env.push(property)
+        addCodePart('config', node, ancestors, property)
+      }
       if (property === 'innerHTML') record.securitySignals.push('raw-inner-html')
     }
     if (node.type === 'JSXAttribute' && nodeName(node.name) === 'dangerouslySetInnerHTML') {
       record.securitySignals.push('dangerously-set-inner-html')
+    }
+    if (node.type === 'JSXAttribute') {
+      const name = nodeName(node.name)
+      if (/^on[A-Z]/.test(name)) {
+        const expression = node.value?.expression
+        const handler = nodeName(expression)
+          || (['ArrowFunctionExpression', 'FunctionExpression'].includes(expression?.type) ? enclosingSymbol(ancestors) : '')
+        record.entrypoints.push({
+          kind: 'ui-event',
+          label: name,
+          handler: handler || enclosingSymbol(ancestors),
+          line: node.loc?.start?.line ?? 1,
+        })
+      }
+    }
+    if (node.type === 'JSXOpeningElement') {
+      const component = jsxName(node.name)
+      if (component && /^[A-Z]/.test(component)) {
+        record.renderSites.push({
+          parent: enclosingSymbol(ancestors),
+          component,
+          props: unique((node.attributes ?? []).map((attribute) => nodeName(attribute.name)).filter(Boolean)),
+          line: node.loc?.start?.line ?? 1,
+        })
+      }
     }
     for (const [key, child] of Object.entries(node)) {
       if (['loc', 'start', 'end', 'leadingComments', 'trailingComments', 'innerComments', 'extra'].includes(key)) continue
@@ -249,10 +408,19 @@ function parseJavaScript(relativePath, content) {
     { ...item, names: unique(item.names) },
   ])).values()].sort((left, right) => compareSourceTwinText(left.source, right.source))
   record.functions.sort((left, right) => left.lineStart - right.lineStart || compareSourceTwinText(left.name, right.name))
+  record.codeParts.sort((left, right) => left.anchor.lineStart - right.anchor.lineStart || compareSourceTwinText(left.id, right.id))
+  record.importBindings.sort((left, right) => compareSourceTwinText(`${left.local}:${left.source}`, `${right.local}:${right.source}`))
+  record.callSites.sort((left, right) => left.line - right.line || compareSourceTwinText(`${left.caller}:${left.callee}`, `${right.caller}:${right.callee}`))
+  record.renderSites.sort((left, right) => left.line - right.line || compareSourceTwinText(left.component, right.component))
+  record.entrypoints.sort((left, right) => left.line - right.line || compareSourceTwinText(`${left.kind}:${left.label}`, `${right.kind}:${right.label}`))
   for (const key of ['dbTables', 'dbFunctions', 'env', 'securitySignals', 'externalApiRoutes']) record[key] = unique(record[key])
   record.dbAccess = [...new Map(record.dbAccess.map((item) => [`${item.table}:${item.operation}`, item])).values()]
     .sort((left, right) => compareSourceTwinText(`${left.table}:${left.operation}`, `${right.table}:${right.operation}`))
-  if (relativePath.startsWith('api/')) record.apiRoutes = [`/api/${relativePath.slice(4).replace(/\.js$/, '')}`]
+  if (relativePath.startsWith('api/')) {
+    record.apiRoutes = [`/api/${relativePath.slice(4).replace(/\.js$/, '')}`]
+    const handler = record.functions.find((item) => item.exported)?.displayName || record.functions[0]?.displayName || 'module'
+    record.entrypoints.push({ kind: 'api-route', label: record.apiRoutes[0], handler, line: 1 })
+  }
   return record
 }
 
@@ -330,6 +498,252 @@ function repositoryUrl(raw) {
   }
 }
 
+function buildSourceCodePartArtifacts(records, entities) {
+  const entityById = new Map(entities.map((item) => [item.id, item]))
+  const files = {}
+  const modules = {}
+  const kindCounts = {}
+  let partCount = 0
+  for (const record of records) {
+    const fileId = `file:${record.path}`
+    const fileParts = record.codeParts ?? []
+    if (!fileParts.length || !entityById.has(fileId)) continue
+    const compactParts = fileParts.map(compactSourceCodePart).filter(Boolean)
+    files[record.path] = { fingerprint: entityById.get(fileId).fingerprint, parts: compactParts }
+    modules[fileId] = {
+      path: record.path,
+      symbol: 'module',
+      lineStart: 1,
+      lineEnd: record.lineCount,
+      count: fileParts.length,
+      fingerprint: entityById.get(fileId).fingerprint,
+    }
+    entityById.get(fileId).details.codePartCount = fileParts.length
+    partCount += fileParts.length
+    for (const part of fileParts) kindCounts[part.kind] = (kindCounts[part.kind] ?? 0) + 1
+    for (const fn of record.functions ?? []) {
+      const functionId = `function:${record.path}:${fn.name}`
+      const entity = entityById.get(functionId)
+      if (!entity) continue
+      const parts = fileParts.filter((part) => (
+        part.anchor.symbol === fn.displayName
+        && part.anchor.lineStart >= fn.lineStart
+        && part.anchor.lineEnd <= fn.lineEnd
+      ))
+      if (!parts.length) continue
+      modules[functionId] = {
+        path: record.path,
+        symbol: fn.displayName,
+        lineStart: fn.lineStart,
+        lineEnd: fn.lineEnd,
+        count: parts.length,
+        fingerprint: entity.fingerprint,
+      }
+      entity.details.codePartCount = parts.length
+    }
+  }
+  const orderedModules = Object.fromEntries(Object.entries(modules).sort(([left], [right]) => compareSourceTwinText(left, right)))
+  return {
+    index: {
+      schemaVersion: SOURCE_CODE_PART_SCHEMA_VERSION,
+      loading: 'module-on-demand',
+      endpoint: '/api/source-twin?mode=code-parts',
+      moduleCount: Object.keys(orderedModules).length,
+      partCount,
+      kindCounts: Object.fromEntries(Object.entries(kindCounts).sort(([left], [right]) => compareSourceTwinText(left, right))),
+    },
+    catalog: {
+      schemaVersion: SOURCE_CODE_PART_SCHEMA_VERSION,
+      modules: orderedModules,
+      files: Object.fromEntries(Object.entries(files).sort(([left], [right]) => compareSourceTwinText(left, right))),
+    },
+  }
+}
+
+function buildSourceFlowArtifacts(records, entities, filePaths) {
+  const entityById = new Map(entities.map((item) => [item.id, item]))
+  const functionByPathAndName = new Map()
+  const parentFileByEntity = new Map()
+  for (const entity of entities) {
+    if (entity.kind === 'function') {
+      const key = `${entity.path}\u0000${entity.name}`
+      if (!functionByPathAndName.has(key)) functionByPathAndName.set(key, entity.id)
+      parentFileByEntity.set(entity.id, entity.parentId)
+    }
+  }
+  const bindings = new Map()
+  for (const record of records) {
+    for (const binding of record.importBindings ?? []) bindings.set(`${record.path}\u0000${binding.local}`, binding)
+  }
+  const moduleIndex = new Map()
+  const relations = {}
+  const registerModule = (moduleId, kind, id) => {
+    if (!moduleId || !entityById.has(moduleId)) return
+    const current = moduleIndex.get(moduleId) ?? {
+      relationIds: new Set(),
+      flowIds: new Set(),
+      fingerprint: entityById.get(moduleId)?.fingerprint ?? '',
+    }
+    current[kind].add(id)
+    moduleIndex.set(moduleId, current)
+    const parent = parentFileByEntity.get(moduleId)
+    if (parent) registerModule(parent, kind, id)
+  }
+  const functionId = (pathName, name) => functionByPathAndName.get(`${pathName}\u0000${name}`) ?? ''
+  const resolveTarget = (record, { callee, receiver }) => {
+    const local = functionId(record.path, callee)
+    if (local && !receiver) return local
+    const binding = bindings.get(`${record.path}\u0000${receiver || callee}`)
+    if (!binding) return ''
+    const resolvedPath = resolveLocalImport(record.path, binding.source, filePaths)
+    if (!resolvedPath) return entityById.has(`dependency:${binding.source}`) ? `dependency:${binding.source}` : ''
+    const importedName = receiver ? callee : binding.imported
+    if (importedName && importedName !== '*' && importedName !== 'default') {
+      return functionId(resolvedPath, importedName) || `file:${resolvedPath}`
+    }
+    return functionId(resolvedPath, callee) || `file:${resolvedPath}`
+  }
+  const addRelation = ({ kind, source, target, label, pathName, line, props = [], dynamic = false }) => {
+    const id = `flow-relation:${semanticHash({ kind, source, target, label, pathName, line, props, dynamic }, 20)}`
+    if (relations[id]) return relations[id]
+    const value = {
+      id,
+      kind,
+      source,
+      target: target || null,
+      label: label || 'unknown',
+      evidenceRef: sourceEvidenceRef(pathName, line, line),
+      evidenceKind: 'code',
+      realityLevel: 'declared',
+      confidence: target && !dynamic ? 'high' : 'unknown',
+      ...(props.length ? { props } : {}),
+      ...(!target ? { unknownReason: dynamic ? '동적 dispatch라 정적 대상을 확정할 수 없습니다.' : '정적 대상 근거를 찾지 못했습니다.' } : {}),
+    }
+    relations[id] = value
+    registerModule(source, 'relationIds', id)
+    if (target) registerModule(target, 'relationIds', id)
+    return value
+  }
+
+  const entrypoints = []
+  for (const record of records) {
+    const fileId = `file:${record.path}`
+    for (const site of record.callSites ?? []) {
+      const source = functionId(record.path, site.caller) || fileId
+      const target = resolveTarget(record, site)
+      addRelation({ kind: 'call', source, target, label: [site.receiver, site.callee].filter(Boolean).join('.'), pathName: record.path, line: site.line, dynamic: site.dynamic })
+    }
+    for (const site of record.renderSites ?? []) {
+      const source = functionId(record.path, site.parent) || fileId
+      const target = resolveTarget(record, { callee: site.component, receiver: '' })
+      addRelation({ kind: 'render', source, target, label: site.component, pathName: record.path, line: site.line, props: site.props })
+    }
+    for (const entry of record.entrypoints ?? []) {
+      const source = functionId(record.path, entry.handler) || fileId
+      entrypoints.push({
+        id: `entrypoint:${semanticHash({ path: record.path, ...entry }, 20)}`,
+        kind: entry.kind,
+        label: entry.label,
+        source,
+        evidenceRef: sourceEvidenceRef(record.path, entry.line, entry.line),
+        evidenceKind: 'code',
+        realityLevel: 'declared',
+      })
+    }
+  }
+
+  const adjacency = new Map()
+  for (const relation of Object.values(relations)) {
+    if (!relation.target) continue
+    const list = adjacency.get(relation.source) ?? []
+    list.push(relation)
+    adjacency.set(relation.source, list)
+  }
+  for (const list of adjacency.values()) list.sort((left, right) => compareSourceTwinText(left.id, right.id))
+  const flows = {}
+  for (const entrypoint of entrypoints.slice(0, 2_000)) {
+    const queue = [{ entityId: entrypoint.source, depth: 0 }]
+    const visited = new Set()
+    const steps = []
+    while (queue.length && steps.length < 80) {
+      const current = queue.shift()
+      if (visited.has(current.entityId) || current.depth > 8) continue
+      visited.add(current.entityId)
+      steps.push({ entityId: current.entityId, depth: current.depth })
+      for (const relation of adjacency.get(current.entityId) ?? []) {
+        if (!visited.has(relation.target)) queue.push({ entityId: relation.target, depth: current.depth + 1 })
+      }
+    }
+    const modules = new Set(steps.map((step) => parentFileByEntity.get(step.entityId) || (step.entityId.startsWith('file:') ? step.entityId : null)).filter(Boolean))
+    const flow = {
+      ...entrypoint,
+      steps,
+      moduleCount: modules.size,
+      promotion: {
+        status: 'candidate',
+        eligible: false,
+        reason: '독립된 상태·책임·사용자 인지가 확인되기 전에는 Component 파츠로만 표시합니다.',
+      },
+    }
+    flows[flow.id] = flow
+    for (const step of steps) registerModule(step.entityId, 'flowIds', flow.id)
+  }
+  const orderedRelations = Object.fromEntries(Object.entries(relations).sort(([left], [right]) => compareSourceTwinText(left, right)))
+  const orderedFlows = Object.fromEntries(Object.entries(flows).sort(([left], [right]) => compareSourceTwinText(left, right)))
+  const orderedModules = Object.fromEntries([...moduleIndex.entries()]
+    .sort(([left], [right]) => compareSourceTwinText(left, right))
+    .map(([id, value]) => [id, {
+      fingerprint: value.fingerprint,
+      relationIds: [...value.relationIds].sort(compareSourceTwinText),
+      flowIds: [...value.flowIds].sort(compareSourceTwinText),
+    }]))
+  const unknownCount = Object.values(orderedRelations).filter((item) => !item.target).length
+  const entityIds = unique([
+    ...Object.values(orderedRelations).flatMap((item) => [item.source, item.target]),
+    ...Object.values(orderedFlows).flatMap((item) => [item.source, ...item.steps.map((step) => step.entityId)]),
+  ].filter(Boolean)).sort(compareSourceTwinText)
+  const entityIndex = new Map(entityIds.map((id, index) => [id, index]))
+  const compactRelations = Object.fromEntries(Object.entries(orderedRelations).map(([id, item]) => [id, [
+    item.kind,
+    entityIndex.get(item.source),
+    item.target ? entityIndex.get(item.target) : -1,
+    item.label,
+    item.evidenceRef,
+    item.confidence,
+    item.unknownReason ?? '',
+    item.props ?? [],
+  ]]))
+  const compactFlows = Object.fromEntries(Object.entries(orderedFlows).map(([id, item]) => [id, [
+    item.kind,
+    item.label,
+    entityIndex.get(item.source),
+    item.evidenceRef,
+    item.steps.map((step) => [entityIndex.get(step.entityId), step.depth]),
+    item.moduleCount,
+  ]]))
+  return {
+    index: {
+      schemaVersion: SOURCE_FLOW_SCHEMA_VERSION,
+      loading: 'module-on-demand',
+      endpoint: '/api/source-twin?mode=flows',
+      entrypointCount: Object.keys(orderedFlows).length,
+      relationCount: Object.keys(orderedRelations).length,
+      unknownCount,
+      promotionCandidateCount: Object.values(orderedFlows).filter((item) => item.moduleCount >= 3).length,
+      evidenceKind: 'code',
+      realityLevel: 'declared',
+    },
+    catalog: {
+      schemaVersion: SOURCE_FLOW_SCHEMA_VERSION,
+      encoding: 'compact-v1',
+      entityIds,
+      modules: orderedModules,
+      relations: compactRelations,
+      flows: compactFlows,
+    },
+  }
+}
+
 export function readSourceRepositoryMetadata(root) {
   let remote = ''
   try {
@@ -363,6 +777,8 @@ export function buildSourceTwinManifest(filesInput, {
   previous = null,
   repository = {},
   sourceProfiles = DEFAULT_SOURCE_PROFILES,
+  includeCodePartCatalog = false,
+  includeFlowCatalog = false,
 } = {}) {
   const files = filesInput instanceof Map ? filesInput : new Map(Object.entries(filesInput ?? {}))
   const project = sourceTwinProjectIdentity(files)
@@ -409,6 +825,11 @@ export function buildSourceTwinManifest(filesInput, {
       policies: parsed.policies ?? [],
       env: parsed.env ?? [],
       securitySignals: parsed.securitySignals ?? [],
+      codeParts: parsed.codeParts ?? [],
+      importBindings: parsed.importBindings ?? [],
+      callSites: parsed.callSites ?? [],
+      renderSites: parsed.renderSites ?? [],
+      entrypoints: parsed.entrypoints ?? [],
       parseError: parsed.parseError ?? '',
       analysisStatus,
     })
@@ -676,6 +1097,8 @@ export function buildSourceTwinManifest(filesInput, {
     } catch {}
   }
 
+  const codePartArtifacts = buildSourceCodePartArtifacts(records, entities)
+  const flowArtifacts = buildSourceFlowArtifacts(records, entities, filePaths)
   entities.sort((left, right) => compareSourceTwinText(left.id, right.id))
   relations.sort((left, right) => compareSourceTwinText(left.id, right.id))
   const entityFingerprintMap = Object.fromEntries(entities.map((item) => [item.id, item.fingerprint]))
@@ -757,6 +1180,8 @@ export function buildSourceTwinManifest(filesInput, {
     entities,
     relations,
     assetHierarchy,
+    codeParts: codePartArtifacts.index,
+    flows: flowArtifacts.index,
     perspectives,
     fingerprints,
     summary: {
@@ -778,6 +1203,9 @@ export function buildSourceTwinManifest(filesInput, {
       structureOnlyFiles: records.filter((record) => record.analysisStatus === 'structure-only').length,
       components: assetHierarchy.components.length,
       moduleAssets: entities.filter((item) => assetHierarchy.moduleEntityKinds.includes(item.kind)).length,
+      codeParts: codePartArtifacts.index.partCount,
+      flowEntrypoints: flowArtifacts.index.entrypointCount,
+      flowRelations: flowArtifacts.index.relationCount,
     },
     changeSet: {
       baseManifestId: previous?.id ?? null,
@@ -798,6 +1226,20 @@ export function buildSourceTwinManifest(filesInput, {
         explanationPaths: explanationChangedPaths.length,
       },
     },
+  }
+  if (includeCodePartCatalog) {
+    manifest.codePartCatalog = {
+      ...codePartArtifacts.catalog,
+      sourceId: manifest.source.id,
+      sourceManifestId: manifest.id,
+    }
+  }
+  if (includeFlowCatalog) {
+    manifest.flowCatalog = {
+      ...flowArtifacts.catalog,
+      sourceId: manifest.source.id,
+      sourceManifestId: manifest.id,
+    }
   }
   return manifest
 }
@@ -899,6 +1341,26 @@ export function serializeSourceTwinManifest(value) {
     '// Generated by scripts/generate-source-twin.mjs. Do not edit by hand.',
     'export const SOURCE_TWIN_MANIFEST = Object.freeze(',
     JSON.stringify(value, null, 2),
+    ')',
+    '',
+  ].join('\n')
+}
+
+export function serializeSourceCodePartManifest(value) {
+  return [
+    '// Generated by scripts/generate-source-twin.mjs. Server-only; do not import into browser code.',
+    'export const SOURCE_CODE_PART_MANIFEST = Object.freeze(',
+    JSON.stringify(value),
+    ')',
+    '',
+  ].join('\n')
+}
+
+export function serializeSourceFlowManifest(value) {
+  return [
+    '// Generated by scripts/generate-source-twin.mjs. Server-only; do not import into browser code.',
+    'export const SOURCE_FLOW_MANIFEST = Object.freeze(',
+    JSON.stringify(value),
     ')',
     '',
   ].join('\n')
