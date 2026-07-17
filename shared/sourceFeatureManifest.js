@@ -23,7 +23,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:src/App.jsx",
           "path": "src/App.jsx",
-          "fingerprint": "e6ed4cc5908ecd437b21",
+          "fingerprint": "75175230338e820421c1",
           "summary": "캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다."
         },
         {
@@ -53,19 +53,19 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:src/components/Toolbar.jsx",
           "path": "src/components/Toolbar.jsx",
-          "fingerprint": "f200ec64d3ac6f333b31",
+          "fingerprint": "ea6ee7d94d97dbcb90eb",
           "summary": "노드 추가, 전체 보기, 되돌리기 같은 캔버스의 주요 명령을 모아 보여줍니다."
         },
         {
           "entityId": "file:src/edges/StubEdge.jsx",
           "path": "src/edges/StubEdge.jsx",
-          "fingerprint": "d7ba836228368a8e9949",
+          "fingerprint": "71485fe4b33fafd66ce2",
           "summary": "노드 사이 연결선, 화살표, 관계 설명과 연결선 위 실행 버튼을 화면에 그립니다."
         },
         {
           "entityId": "file:src/index.css",
           "path": "src/index.css",
-          "fingerprint": "37e5538e5cbe34aae772",
+          "fingerprint": "541f806f7eddd5f033ce",
           "summary": "캔버스, 노드, 연결선, 패널과 팝업의 크기·색·배치·반응형 모양을 결정합니다."
         },
         {
@@ -169,7 +169,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "c80aa74901549dba"
+      "fingerprint": "43f701d076df3b31"
     },
     {
       "key": "area:canvas-model",
@@ -390,7 +390,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:mcp/shareAccess.js",
           "path": "mcp/shareAccess.js",
-          "fingerprint": "47d6a09ef0dc8c9ca568",
+          "fingerprint": "b6d1d0b6cb8193dc13e8",
           "summary": "MCP에서 공유 참여자 목록과 초대 범위를 계산하고 시야 제한을 적용합니다."
         },
         {
@@ -398,6 +398,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "path": "shared/richTextSanitizer.js",
           "fingerprint": "078919aaf8b49844f52a",
           "summary": "텍스트에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
+        },
+        {
+          "entityId": "file:shared/securityOverlay.js",
+          "path": "shared/securityOverlay.js",
+          "fingerprint": "2d1ec75cb05960f0c9e7",
+          "summary": "securityOverlay에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
         },
         {
           "entityId": "file:shared/sharePermissions.js",
@@ -410,6 +416,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "path": "shared/systemLayers.js",
           "fingerprint": "5b0e10f6b9dda60165b8",
           "summary": "시스템에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
+        },
+        {
+          "entityId": "file:shared/workflowTrustTopology.js",
+          "path": "shared/workflowTrustTopology.js",
+          "fingerprint": "3bf9ad58b9ccb8799476",
+          "summary": "워크플로우 · 시스템 연결 구조에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
         },
         {
           "entityId": "file:src/components/InvitePopover.jsx",
@@ -464,8 +476,10 @@ export const SOURCE_FEATURE_MANIFEST = {
         "file:api/shared-canvas.js",
         "file:mcp/shareAccess.js",
         "file:shared/richTextSanitizer.js",
+        "file:shared/securityOverlay.js",
         "file:shared/sharePermissions.js",
         "file:shared/systemLayers.js",
+        "file:shared/workflowTrustTopology.js",
         "file:src/components/InvitePopover.jsx",
         "file:src/components/ParticipantAvatar.jsx",
         "file:src/components/ScopedParticipants.jsx",
@@ -479,8 +493,10 @@ export const SOURCE_FEATURE_MANIFEST = {
         "api/shared-canvas.js",
         "mcp/shareAccess.js",
         "shared/richTextSanitizer.js",
+        "shared/securityOverlay.js",
         "shared/sharePermissions.js",
         "shared/systemLayers.js",
+        "shared/workflowTrustTopology.js",
         "src/components/InvitePopover.jsx",
         "src/components/ParticipantAvatar.jsx",
         "src/components/ScopedParticipants.jsx",
@@ -590,7 +606,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "08a0e1b0bcbfd45e"
+      "fingerprint": "dc81633f5d574fa9"
     },
     {
       "key": "area:identity-profile",
@@ -734,7 +750,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/digitalTwinProposal.js",
           "path": "shared/digitalTwinProposal.js",
-          "fingerprint": "20ab5ae5e7c3b0a87972",
+          "fingerprint": "07999fa042fbd2741aef",
           "summary": "검토가 승인된 디지털 트윈 변경만 캔버스 자료에 적용하고 충돌을 검사합니다."
         },
         {
@@ -752,7 +768,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/engineRegistry.js",
           "path": "shared/engineRegistry.js",
-          "fingerprint": "a3f8a3ab923a330f6c98",
+          "fingerprint": "f3234620e59f7d450819",
           "summary": "Twin Core, Create Graph 같은 제품 엔진의 이름·버전·내부 구성요소·입출력·근거와 향후 담당 에이전트 계약을 한곳에서 관리합니다."
         },
         {
@@ -782,7 +798,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/systemOntology.js",
           "path": "shared/systemOntology.js",
-          "fingerprint": "d078feae0ac5851568f1",
+          "fingerprint": "a53010d0f40c7cea2087",
           "summary": "앱·서버·DB·사람 같은 시스템 노드 종류와 실재성 표시 규칙을 정의합니다."
         },
         {
@@ -818,7 +834,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/twinBuildReconciler.js",
           "path": "shared/twinBuildReconciler.js",
-          "fingerprint": "493fead919d5d6acc812",
+          "fingerprint": "9d3c0e7599592282671b",
           "summary": "새로 발견한 디지털 트윈과 현재 캔버스를 비교해 추가·변경·삭제 검토안을 만듭니다."
         },
         {
@@ -854,7 +870,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/workflowSystemTwinAdapter.js",
           "path": "shared/workflowSystemTwinAdapter.js",
-          "fingerprint": "4fa687e2d935033abf21",
+          "fingerprint": "d9d189a029e3ae81d8cf",
           "summary": "Workflow Canvas 자체를 디지털 트윈으로 검사해 현재 지도와 다른 점을 검토안으로 만듭니다."
         },
         {
@@ -866,7 +882,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/workflowSystemTwinBuild.js",
           "path": "shared/workflowSystemTwinBuild.js",
-          "fingerprint": "cf38ddb2827813136f0e",
+          "fingerprint": "004c80f059ced0b4386c",
           "summary": "Workflow Canvas 시스템 지도를 표준 TwinBuild 자료로 변환하고 검증합니다."
         },
         {
@@ -920,7 +936,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:src/nodes/SystemNode.jsx",
           "path": "src/nodes/SystemNode.jsx",
-          "fingerprint": "b51ec9b1a8eb1655b97a",
+          "fingerprint": "1eae0f4e20eff830fe70",
           "summary": "앱·서버·DB 같은 실제 시스템 노드와 파츠, 운영 상태, 실행 가능한 기능을 화면에 표시합니다."
         },
         {
@@ -1117,7 +1133,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "437549671846f6d7"
+      "fingerprint": "a14c7e02dbbaeeb4"
     },
     {
       "key": "area:source-code-twin",
@@ -1421,7 +1437,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:mcp/store.js",
           "path": "mcp/store.js",
-          "fingerprint": "07d03843a015b8d92916",
+          "fingerprint": "4ab9f5a0d622f25ae715",
           "summary": "AI 도구가 캔버스·노드·연결선을 읽고 바꿀 때 소유권과 공유 범위를 검사하고 Supabase에 반영합니다."
         },
         {
@@ -1554,7 +1570,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "b81cc434300c9f49"
+      "fingerprint": "6b557911d6b81586"
     },
     {
       "key": "area:data-storage-sync",
@@ -1804,13 +1820,19 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/trustTopology.js",
           "path": "shared/trustTopology.js",
-          "fingerprint": "08f30479900055431f2a",
+          "fingerprint": "436042fe8dfe2a131f4d",
           "summary": "로컬·클라우드·외부 SaaS 같은 신뢰 영역과 그 경계를 통과하는 게이트웨이를 검사합니다."
+        },
+        {
+          "entityId": "file:src/components/SecurityOverlayLegend.jsx",
+          "path": "src/components/SecurityOverlayLegend.jsx",
+          "fingerprint": "a702510d7af100ebbbf1",
+          "summary": "SecurityOverlayLegend 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다."
         },
         {
           "entityId": "file:src/lib/sanitizeHtml.js",
           "path": "src/lib/sanitizeHtml.js",
-          "fingerprint": "ffaff6a22acce2e71e20",
+          "fingerprint": "4bb7cac965b73efb5af2",
           "summary": "노드 본문에서 위험한 HTML, 스크립트와 외부 주소를 제거한 뒤 화면에 표시할 자료만 남깁니다."
         },
         {
@@ -1850,6 +1872,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         "file:mcp/systemOperationPlan.js",
         "file:shared/privacyCapabilities.js",
         "file:shared/trustTopology.js",
+        "file:src/components/SecurityOverlayLegend.jsx",
         "file:src/lib/sanitizeHtml.js",
         "file:supabase-canvas-summaries.sql",
         "file:supabase-data-access-audit.sql",
@@ -1863,6 +1886,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         "mcp/systemOperationPlan.js",
         "shared/privacyCapabilities.js",
         "shared/trustTopology.js",
+        "src/components/SecurityOverlayLegend.jsx",
         "src/lib/sanitizeHtml.js",
         "supabase-canvas-summaries.sql",
         "supabase-data-access-audit.sql",
@@ -1893,12 +1917,13 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "targetEntityId": "map-web-app",
           "evidenceEntityIds": [
+            "file:src/components/SecurityOverlayLegend.jsx",
             "file:src/lib/sanitizeHtml.js"
           ]
         }
       ],
       "dataAccess": [],
-      "fingerprint": "2b6885a7c1a4ccfa"
+      "fingerprint": "4c4259cb93369a4e"
     },
     {
       "key": "area:deployment-operations",
@@ -1917,7 +1942,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:package.json",
           "path": "package.json",
-          "fingerprint": "2aae31a4365cd9ae4e88",
+          "fingerprint": "38f83f8f7f37aec89189",
           "summary": "개발 코드를 검사·빌드해 실제 웹 서비스로 실행할 설정과 명령을 정의합니다."
         },
         {
@@ -1945,7 +1970,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "4d12ef6d1ff97b11"
+      "fingerprint": "d073fb39e38018f7"
     },
     {
       "key": "area:testing-quality",
@@ -2006,7 +2031,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:scripts/test-mcp-logic.mjs",
           "path": "scripts/test-mcp-logic.mjs",
-          "fingerprint": "c3fb68a637aa037a4cec",
+          "fingerprint": "4ed7962b21952f2fa664",
           "summary": "mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
         },
         {
@@ -2026,6 +2051,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "path": "scripts/test-security-boundaries.mjs",
           "fingerprint": "3d4c331484f2789624d6",
           "summary": "security boundaries 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
+        },
+        {
+          "entityId": "file:scripts/test-security-overlay.mjs",
+          "path": "scripts/test-security-overlay.mjs",
+          "fingerprint": "b2dcd771cc3dee5f8864",
+          "summary": "security overlay 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
         },
         {
           "entityId": "file:scripts/test-source-feature-model.mjs",
@@ -2066,7 +2097,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:scripts/test-twin-build.mjs",
           "path": "scripts/test-twin-build.mjs",
-          "fingerprint": "59bb0a7e3c02d081a223",
+          "fingerprint": "cf11c15841afe0f22e6a",
           "summary": "twin build 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
         },
         {
@@ -2088,6 +2119,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         "file:scripts/test-operation-lifecycle.mjs",
         "file:scripts/test-performance-boundaries.mjs",
         "file:scripts/test-security-boundaries.mjs",
+        "file:scripts/test-security-overlay.mjs",
         "file:scripts/test-source-feature-model.mjs",
         "file:scripts/test-source-profiles.mjs",
         "file:scripts/test-source-twin.mjs",
@@ -2109,6 +2141,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         "scripts/test-operation-lifecycle.mjs",
         "scripts/test-performance-boundaries.mjs",
         "scripts/test-security-boundaries.mjs",
+        "scripts/test-security-overlay.mjs",
         "scripts/test-source-feature-model.mjs",
         "scripts/test-source-profiles.mjs",
         "scripts/test-source-twin.mjs",
@@ -2120,7 +2153,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "26f6ef186185b08b"
+      "fingerprint": "7559a5b8c9fab55d"
     },
     {
       "key": "area:project-foundation",
@@ -2178,7 +2211,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:src/App.jsx",
           "path": "src/App.jsx",
-          "fingerprint": "e6ed4cc5908ecd437b21",
+          "fingerprint": "75175230338e820421c1",
           "summary": "캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다."
         },
         {
@@ -2202,13 +2235,13 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:src/components/Toolbar.jsx",
           "path": "src/components/Toolbar.jsx",
-          "fingerprint": "f200ec64d3ac6f333b31",
+          "fingerprint": "ea6ee7d94d97dbcb90eb",
           "summary": "노드 추가, 전체 보기, 되돌리기 같은 캔버스의 주요 명령을 모아 보여줍니다."
         },
         {
           "entityId": "file:src/index.css",
           "path": "src/index.css",
-          "fingerprint": "37e5538e5cbe34aae772",
+          "fingerprint": "541f806f7eddd5f033ce",
           "summary": "캔버스, 노드, 연결선, 패널과 팝업의 크기·색·배치·반응형 모양을 결정합니다."
         },
         {
@@ -2274,7 +2307,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "68cdefa0d611f2db"
+      "fingerprint": "79cd253dc5220c5a"
     },
     {
       "key": "subsystem:canvas-elements",
@@ -2299,7 +2332,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:src/edges/StubEdge.jsx",
           "path": "src/edges/StubEdge.jsx",
-          "fingerprint": "d7ba836228368a8e9949",
+          "fingerprint": "71485fe4b33fafd66ce2",
           "summary": "노드 사이 연결선, 화살표, 관계 설명과 연결선 위 실행 버튼을 화면에 그립니다."
         },
         {
@@ -2353,7 +2386,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "166ca9235e7abc73"
+      "fingerprint": "55c8e3e9ca2fd7e1"
     },
     {
       "key": "subsystem:canvas-state",
@@ -2728,7 +2761,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:mcp/shareAccess.js",
           "path": "mcp/shareAccess.js",
-          "fingerprint": "47d6a09ef0dc8c9ca568",
+          "fingerprint": "b6d1d0b6cb8193dc13e8",
           "summary": "MCP에서 공유 참여자 목록과 초대 범위를 계산하고 시야 제한을 적용합니다."
         },
         {
@@ -2736,6 +2769,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "path": "shared/richTextSanitizer.js",
           "fingerprint": "078919aaf8b49844f52a",
           "summary": "텍스트에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
+        },
+        {
+          "entityId": "file:shared/securityOverlay.js",
+          "path": "shared/securityOverlay.js",
+          "fingerprint": "2d1ec75cb05960f0c9e7",
+          "summary": "securityOverlay에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
         },
         {
           "entityId": "file:shared/sharePermissions.js",
@@ -2748,6 +2787,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "path": "shared/systemLayers.js",
           "fingerprint": "5b0e10f6b9dda60165b8",
           "summary": "시스템에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
+        },
+        {
+          "entityId": "file:shared/workflowTrustTopology.js",
+          "path": "shared/workflowTrustTopology.js",
+          "fingerprint": "3bf9ad58b9ccb8799476",
+          "summary": "워크플로우 · 시스템 연결 구조에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
         },
         {
           "entityId": "file:src/lib/sharedCanvasApi.js",
@@ -2771,8 +2816,10 @@ export const SOURCE_FEATURE_MANIFEST = {
       "evidenceEntityIds": [
         "file:mcp/shareAccess.js",
         "file:shared/richTextSanitizer.js",
+        "file:shared/securityOverlay.js",
         "file:shared/sharePermissions.js",
         "file:shared/systemLayers.js",
+        "file:shared/workflowTrustTopology.js",
         "file:src/lib/sharedCanvasApi.js",
         "file:src/lib/shares.js",
         "file:supabase-shares.sql"
@@ -2780,8 +2827,10 @@ export const SOURCE_FEATURE_MANIFEST = {
       "evidencePaths": [
         "mcp/shareAccess.js",
         "shared/richTextSanitizer.js",
+        "shared/securityOverlay.js",
         "shared/sharePermissions.js",
         "shared/systemLayers.js",
+        "shared/workflowTrustTopology.js",
         "src/lib/sharedCanvasApi.js",
         "src/lib/shares.js",
         "supabase-shares.sql"
@@ -2862,7 +2911,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "5e28d0244600d63b"
+      "fingerprint": "cea53dbd7597f664"
     },
     {
       "key": "subsystem:identity-account",
@@ -2982,7 +3031,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/systemOntology.js",
           "path": "shared/systemOntology.js",
-          "fingerprint": "d078feae0ac5851568f1",
+          "fingerprint": "a53010d0f40c7cea2087",
           "summary": "앱·서버·DB·사람 같은 시스템 노드 종류와 실재성 표시 규칙을 정의합니다."
         },
         {
@@ -3006,13 +3055,13 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/workflowSystemTwinBuild.js",
           "path": "shared/workflowSystemTwinBuild.js",
-          "fingerprint": "cf38ddb2827813136f0e",
+          "fingerprint": "004c80f059ced0b4386c",
           "summary": "Workflow Canvas 시스템 지도를 표준 TwinBuild 자료로 변환하고 검증합니다."
         },
         {
           "entityId": "file:src/nodes/SystemNode.jsx",
           "path": "src/nodes/SystemNode.jsx",
-          "fingerprint": "b51ec9b1a8eb1655b97a",
+          "fingerprint": "1eae0f4e20eff830fe70",
           "summary": "앱·서버·DB 같은 실제 시스템 노드와 파츠, 운영 상태, 실행 가능한 기능을 화면에 표시합니다."
         }
       ],
@@ -3061,7 +3110,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "d48f96fdacb88768"
+      "fingerprint": "beecf9faa2cff163"
     },
     {
       "key": "subsystem:engine-product-registry",
@@ -3086,7 +3135,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/engineRegistry.js",
           "path": "shared/engineRegistry.js",
-          "fingerprint": "a3f8a3ab923a330f6c98",
+          "fingerprint": "f3234620e59f7d450819",
           "summary": "Twin Core, Create Graph 같은 제품 엔진의 이름·버전·내부 구성요소·입출력·근거와 향후 담당 에이전트 계약을 한곳에서 관리합니다."
         }
       ],
@@ -3107,7 +3156,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "629839d788d916ce"
+      "fingerprint": "e1e22f5ce9282fbb"
     },
     {
       "key": "subsystem:twin-discovery",
@@ -3173,7 +3222,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/digitalTwinProposal.js",
           "path": "shared/digitalTwinProposal.js",
-          "fingerprint": "20ab5ae5e7c3b0a87972",
+          "fingerprint": "07999fa042fbd2741aef",
           "summary": "검토가 승인된 디지털 트윈 변경만 캔버스 자료에 적용하고 충돌을 검사합니다."
         },
         {
@@ -3185,7 +3234,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/twinBuildReconciler.js",
           "path": "shared/twinBuildReconciler.js",
-          "fingerprint": "493fead919d5d6acc812",
+          "fingerprint": "9d3c0e7599592282671b",
           "summary": "새로 발견한 디지털 트윈과 현재 캔버스를 비교해 추가·변경·삭제 검토안을 만듭니다."
         },
         {
@@ -3222,7 +3271,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "0b1413b6fde31e69"
+      "fingerprint": "1b202dc291458875"
     },
     {
       "key": "subsystem:twin-materialization",
@@ -3416,7 +3465,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/workflowSystemTwinAdapter.js",
           "path": "shared/workflowSystemTwinAdapter.js",
-          "fingerprint": "4fa687e2d935033abf21",
+          "fingerprint": "d9d189a029e3ae81d8cf",
           "summary": "Workflow Canvas 자체를 디지털 트윈으로 검사해 현재 지도와 다른 점을 검토안으로 만듭니다."
         },
         {
@@ -3460,7 +3509,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "b7aad27745553946"
+      "fingerprint": "1232ec025c93925f"
     },
     {
       "key": "subsystem:twin-operations",
@@ -4079,7 +4128,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:mcp/store.js",
           "path": "mcp/store.js",
-          "fingerprint": "07d03843a015b8d92916",
+          "fingerprint": "4ab9f5a0d622f25ae715",
           "summary": "AI 도구가 캔버스·노드·연결선을 읽고 바꿀 때 소유권과 공유 범위를 검사하고 Supabase에 반영합니다."
         }
       ],
@@ -4169,7 +4218,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "ddf184514dfa361a"
+      "fingerprint": "7bb9e3b80e384775"
     },
     {
       "key": "subsystem:browser-persistence",
@@ -4482,7 +4531,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:src/lib/sanitizeHtml.js",
           "path": "src/lib/sanitizeHtml.js",
-          "fingerprint": "ffaff6a22acce2e71e20",
+          "fingerprint": "4bb7cac965b73efb5af2",
           "summary": "노드 본문에서 위험한 HTML, 스크립트와 외부 주소를 제거한 뒤 화면에 표시할 자료만 남깁니다."
         }
       ],
@@ -4509,7 +4558,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "1c59952e10c02e8e"
+      "fingerprint": "c64a61b908710f6d"
     },
     {
       "key": "subsystem:access-privacy",
@@ -4596,8 +4645,14 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/trustTopology.js",
           "path": "shared/trustTopology.js",
-          "fingerprint": "08f30479900055431f2a",
+          "fingerprint": "436042fe8dfe2a131f4d",
           "summary": "로컬·클라우드·외부 SaaS 같은 신뢰 영역과 그 경계를 통과하는 게이트웨이를 검사합니다."
+        },
+        {
+          "entityId": "file:src/components/SecurityOverlayLegend.jsx",
+          "path": "src/components/SecurityOverlayLegend.jsx",
+          "fingerprint": "a702510d7af100ebbbf1",
+          "summary": "SecurityOverlayLegend 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다."
         },
         {
           "entityId": "file:supabase-canvas-summaries.sql",
@@ -4621,6 +4676,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       "evidenceEntityIds": [
         "file:mcp/systemOperationPlan.js",
         "file:shared/trustTopology.js",
+        "file:src/components/SecurityOverlayLegend.jsx",
         "file:supabase-canvas-summaries.sql",
         "file:supabase-relation-metadata-guard.sql",
         "file:supabase-security-hardening.sql"
@@ -4628,6 +4684,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       "evidencePaths": [
         "mcp/systemOperationPlan.js",
         "shared/trustTopology.js",
+        "src/components/SecurityOverlayLegend.jsx",
         "supabase-canvas-summaries.sql",
         "supabase-relation-metadata-guard.sql",
         "supabase-security-hardening.sql"
@@ -4644,10 +4701,16 @@ export const SOURCE_FEATURE_MANIFEST = {
           "evidenceEntityIds": [
             "file:shared/trustTopology.js"
           ]
+        },
+        {
+          "targetEntityId": "map-web-app",
+          "evidenceEntityIds": [
+            "file:src/components/SecurityOverlayLegend.jsx"
+          ]
         }
       ],
       "dataAccess": [],
-      "fingerprint": "6f27afbfa301cc78"
+      "fingerprint": "6b544afea75f61da"
     },
     {
       "key": "subsystem:build-release",
@@ -4666,7 +4729,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:package.json",
           "path": "package.json",
-          "fingerprint": "2aae31a4365cd9ae4e88",
+          "fingerprint": "38f83f8f7f37aec89189",
           "summary": "개발 코드를 검사·빌드해 실제 웹 서비스로 실행할 설정과 명령을 정의합니다."
         },
         {
@@ -4694,7 +4757,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "57ab7d91f2c45ecf"
+      "fingerprint": "b88a8f85f180c311"
     },
     {
       "key": "subsystem:source-tests",
@@ -4792,7 +4855,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:scripts/test-twin-build.mjs",
           "path": "scripts/test-twin-build.mjs",
-          "fingerprint": "59bb0a7e3c02d081a223",
+          "fingerprint": "cf11c15841afe0f22e6a",
           "summary": "twin build 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
         },
         {
@@ -4820,7 +4883,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "ce0de327ba851ccf"
+      "fingerprint": "6d0c3072898d1432"
     },
     {
       "key": "subsystem:app-tests",
@@ -4863,7 +4926,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:scripts/test-mcp-logic.mjs",
           "path": "scripts/test-mcp-logic.mjs",
-          "fingerprint": "c3fb68a637aa037a4cec",
+          "fingerprint": "4ed7962b21952f2fa664",
           "summary": "mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
         },
         {
@@ -4877,6 +4940,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "path": "scripts/test-security-boundaries.mjs",
           "fingerprint": "3d4c331484f2789624d6",
           "summary": "security boundaries 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
+        },
+        {
+          "entityId": "file:scripts/test-security-overlay.mjs",
+          "path": "scripts/test-security-overlay.mjs",
+          "fingerprint": "b2dcd771cc3dee5f8864",
+          "summary": "security overlay 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
         },
         {
           "entityId": "file:scripts/test-sql-security.mjs",
@@ -4899,6 +4968,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         "file:scripts/test-mcp-logic.mjs",
         "file:scripts/test-performance-boundaries.mjs",
         "file:scripts/test-security-boundaries.mjs",
+        "file:scripts/test-security-overlay.mjs",
         "file:scripts/test-sql-security.mjs",
         "file:scripts/test-system-layers.mjs"
       ],
@@ -4910,12 +4980,13 @@ export const SOURCE_FEATURE_MANIFEST = {
         "scripts/test-mcp-logic.mjs",
         "scripts/test-performance-boundaries.mjs",
         "scripts/test-security-boundaries.mjs",
+        "scripts/test-security-overlay.mjs",
         "scripts/test-sql-security.mjs",
         "scripts/test-system-layers.mjs"
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "a3030707cfa75c6c"
+      "fingerprint": "9a0ec942cdca31b7"
     },
     {
       "key": "subsystem:project-config",
@@ -4986,5 +5057,5 @@ export const SOURCE_FEATURE_MANIFEST = {
     "attributes": 22,
     "ineligible": 0
   },
-  "fingerprint": "c0a9469c31cf61a6"
+  "fingerprint": "d77352f55c67949b"
 }

@@ -177,6 +177,7 @@ export default function SystemNode({ data, selected, id }) {
   const componentManaged = !!logicalComponent
   const environment = byId(SYSTEM_ENVIRONMENT_DEFS, data.environment)?.label ?? '환경 미지정'
   const source = byId(SYSTEM_SOURCE_DEFS, data.sourceKind)?.label ?? '수동 모델'
+  const securityOverlay = data.securityOverlay ?? null
   const filled = data.nodeFill !== false
   const darkText = data.theme === 'light' && !filled
   const titleColor = darkText ? '#17191f' : '#edf0f7'
@@ -382,6 +383,7 @@ export default function SystemNode({ data, selected, id }) {
       data-part-proposal-preview={previewPartIds.size ? 'true' : undefined}
       data-binding-proposal-preview={data.digitalTwinProposalPreviewBinding ? 'true' : undefined}
       data-component-proposal-preview={data.digitalTwinProposalPreviewLogicalComponent ? 'true' : undefined}
+      data-security-overlay={securityOverlay ? 'true' : undefined}
       style={{
         width: '100%',
         height: '100%',
@@ -393,8 +395,9 @@ export default function SystemNode({ data, selected, id }) {
         flexDirection: 'column',
         justifyContent: abstract ? 'center' : undefined,
         '--system-accent': kind.color,
+        '--security-zone-color': securityOverlay?.color,
         background: filled ? '#171a21' : 'transparent',
-        border: `2px solid ${selected ? '#ffffff' : kind.color}`,
+        border: `2px solid ${selected ? '#ffffff' : (securityOverlay?.color ?? kind.color)}`,
         borderRadius: 6,
         boxShadow: 'none',
         transition: 'border-color 0.15s, outline-color 0.15s, background-color 0.15s',
@@ -428,8 +431,20 @@ export default function SystemNode({ data, selected, id }) {
       {!data.digitalTwinProposalPreview && !previewPartIds.size && data.digitalTwinProposalPreviewLogicalComponent && (
         <span className="digital-twin-proposal-node-badge">엔진 계약 미리보기</span>
       )}
-      {!data.digitalTwinProposalPreview && !previewPartIds.size && !data.digitalTwinProposalPreviewLogicalComponent && data.digitalTwinProposalPreviewBinding && (
+      {!data.digitalTwinProposalPreview && !previewPartIds.size && !data.digitalTwinProposalPreviewLogicalComponent && data.digitalTwinProposalPreviewTrustZone && (
+        <span className="digital-twin-proposal-node-badge">보안 영역 미리보기</span>
+      )}
+      {!data.digitalTwinProposalPreview && !previewPartIds.size && !data.digitalTwinProposalPreviewLogicalComponent && !data.digitalTwinProposalPreviewTrustZone && data.digitalTwinProposalPreviewBinding && (
         <span className="digital-twin-proposal-node-badge">트윈 연결 미리보기</span>
+      )}
+      {securityOverlay && !shapeOnly && (
+        <span
+          className="security-zone-badge"
+          title={`${securityOverlay.kindLabel} · ${securityOverlay.zone.label || '이름 없음'}`}
+        >
+          <i style={{ background: securityOverlay.color }} />
+          <span>{securityOverlay.zone.label || securityOverlay.kindLabel}</span>
+        </span>
       )}
 
       {PORTS.map((port) => (

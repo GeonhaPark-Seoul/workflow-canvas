@@ -8,6 +8,9 @@ export default function Toolbar({
   onCreateSystemLayer = null,
   onPaletteAdd = () => {},
   systemRuntime = null,
+  securityOverlayAvailable = false,
+  securityOverlayEnabled = false,
+  onToggleSecurityOverlay = () => {},
 }) {
   const viewProps = { views, currentViewId, onSelectView, onRenameView, onDeleteView, mobile }
   const layerProps = { layers: systemLayers, activeLayer: activeSystemLayer, onSelectLayer: onSelectSystemLayer, onCreateLayer: onCreateSystemLayer, mobile }
@@ -42,6 +45,13 @@ export default function Toolbar({
         </div>
         <ViewSelector {...viewProps} />
         {systemLayers.length > 0 && <LayerSwitcher {...layerProps} />}
+        {securityOverlayAvailable && (
+          <SecurityOverlayButton
+            active={securityOverlayEnabled}
+            mobile
+            onClick={onToggleSecurityOverlay}
+          />
+        )}
         <MobileBtn onClick={onUndo} color="#06b6d4" icon="↩︎" label="되돌리기" />
         {systemRuntime && <RuntimeButton runtime={systemRuntime} mobile />}
       </div>
@@ -76,6 +86,15 @@ export default function Toolbar({
         <>
           <div style={{ width: 1, background: '#ffffff18', margin: '0 4px' }} />
           <LayerSwitcher {...layerProps} />
+        </>
+      )}
+      {securityOverlayAvailable && (
+        <>
+          <div style={{ width: 1, background: '#ffffff18', margin: '0 4px' }} />
+          <SecurityOverlayButton
+            active={securityOverlayEnabled}
+            onClick={onToggleSecurityOverlay}
+          />
         </>
       )}
       <ToolBtn onClick={onUndo} color="#06b6d4" icon="↩︎" label="되돌리기" />
@@ -432,6 +451,41 @@ function MobileBtn({ onClick, color, icon, label }) {
     >
       <span style={{ fontSize: 22 }}>{icon}</span>
       <span style={{ fontSize: 10, fontWeight: 600, color: '#aaa' }}>{label}</span>
+    </button>
+  )
+}
+
+function SecurityOverlayButton({ active, mobile = false, onClick }) {
+  const color = active ? '#67e8f9' : '#94a3b8'
+  const title = active ? '보안 오버레이 끄기' : '보안 오버레이 켜기'
+  return (
+    <button
+      type="button"
+      className="main-hover-control security-overlay-toggle"
+      title={title}
+      aria-label={title}
+      aria-pressed={active}
+      onClick={onClick}
+      style={{
+        width: mobile ? 52 : 32,
+        height: mobile ? 42 : 32,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: mobile ? 3 : 0,
+        boxSizing: 'border-box',
+        border: mobile ? 'none' : `1px solid ${active ? '#06b6d4' : '#ffffff22'}`,
+        borderRadius: mobile ? 0 : 7,
+        background: active ? '#06b6d422' : 'transparent',
+        color,
+        padding: 0,
+        cursor: 'pointer',
+        fontFamily: 'inherit',
+      }}
+    >
+      <span aria-hidden="true" style={{ fontSize: mobile ? 20 : 16, lineHeight: 1 }}>◈</span>
+      {mobile && <span style={{ fontSize: 10, fontWeight: 600, color }}>보안</span>}
     </button>
   )
 }

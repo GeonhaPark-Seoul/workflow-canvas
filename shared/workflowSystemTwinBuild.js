@@ -6,6 +6,17 @@ import { WORKFLOW_SYSTEM_DISCOVERY_SOURCE_ID } from './workflowSystemDiscovery.j
 import { WORKFLOW_SYSTEM_DISCOVERY } from './workflowSystemDiscoveryManifest.js'
 import { WORKFLOW_SYSTEM_TWIN_ADAPTER_DESCRIPTOR } from './workflowSystemTwinAdapterDescriptor.js'
 import {
+  applyWorkflowTrustTopologyToCanvas,
+  WORKFLOW_ACCESS_METADATA_CLASS_ID,
+  WORKFLOW_CANVAS_CONTENT_CLASS_ID,
+  WORKFLOW_IMAGE_CONTENT_CLASS_ID,
+  WORKFLOW_PUBLIC_APP_ASSETS_CLASS_ID,
+  WORKFLOW_SOURCE_CODE_CLASS_ID,
+  WORKFLOW_TRUST_GATEWAYS,
+  WORKFLOW_TRUST_TOPOLOGY_EVIDENCE_ID,
+  WORKFLOW_TRUST_ZONES,
+} from './workflowTrustTopology.js'
+import {
   WORKFLOW_GIT_SYNC_AUDIT_CLASS_ID as GIT_SYNC_AUDIT_CLASS_ID,
   WORKFLOW_GIT_SYNC_CONTROL_EVIDENCE_ID as GIT_SYNC_CONTROL_EVIDENCE_ID,
   WORKFLOW_GIT_SYNC_EVIDENCE_ID as GIT_SYNC_EVIDENCE_ID,
@@ -23,6 +34,7 @@ import {
 } from './workflowOperationDefinitions.js'
 
 function createWorkflowSystemTwinBuildResult() {
+  const systemCanvas = applyWorkflowTrustTopologyToCanvas(createWorkflowCanvasSystemMap())
   const baseBuild = createTwinBuildFromCanvasTemplate({
     id: `workflow-system-build:${WORKFLOW_SYSTEM_DISCOVERY.current.id}`,
     source: {
@@ -37,8 +49,16 @@ function createWorkflowSystemTwinBuildResult() {
       observationLevel: 'discovered',
       rootEntityId: 'map-group-experience',
     },
-    canvas: createWorkflowCanvasSystemMap(),
+    canvas: systemCanvas,
+    trustZones: WORKFLOW_TRUST_ZONES,
+    gateways: WORKFLOW_TRUST_GATEWAYS,
     evidence: [{
+      id: WORKFLOW_TRUST_TOPOLOGY_EVIDENCE_ID,
+      kind: 'code',
+      ref: 'shared/workflowTrustTopology.js, shared/trustTopology.js, shared/twinBuild.js',
+      summary: '자기 지도의 신뢰영역, 경계 통로와 보안 오버레이 판정 근거',
+      confidence: 'high',
+    }, {
       id: GIT_SYNC_EVIDENCE_ID,
       kind: 'connector',
       ref: 'scripts/local-connector-agent.mjs, shared/localConnector.js',
@@ -87,6 +107,46 @@ function createWorkflowSystemTwinBuildResult() {
       contentScope: 'metadata',
       retention: 'persistent',
       evidenceIds: [WORKFLOW_SOURCE_SNAPSHOT_EVIDENCE_ID],
+    }, {
+      id: WORKFLOW_PUBLIC_APP_ASSETS_CLASS_ID,
+      label: '공개 웹 앱 자원',
+      description: '브라우저에 전달되는 HTML, JavaScript, CSS와 공개 정적 자원',
+      sensitivity: 'public',
+      contentScope: 'content',
+      retention: 'persistent',
+      evidenceIds: [WORKFLOW_TRUST_TOPOLOGY_EVIDENCE_ID],
+    }, {
+      id: WORKFLOW_CANVAS_CONTENT_CLASS_ID,
+      label: '사용자 캔버스 문서',
+      description: '사용자가 작성한 노드, 연결선, 노트, 이미지 참조와 저장 뷰 본문',
+      sensitivity: 'sensitive',
+      contentScope: 'content',
+      retention: 'persistent',
+      evidenceIds: [WORKFLOW_TRUST_TOPOLOGY_EVIDENCE_ID],
+    }, {
+      id: WORKFLOW_ACCESS_METADATA_CLASS_ID,
+      label: '신원·공유 권한 메타데이터',
+      description: '사용자 식별자, 세션 참조, 공유 범위, 역할과 리비전 정보',
+      sensitivity: 'restricted',
+      contentScope: 'metadata',
+      retention: 'persistent',
+      evidenceIds: [WORKFLOW_TRUST_TOPOLOGY_EVIDENCE_ID],
+    }, {
+      id: WORKFLOW_IMAGE_CONTENT_CLASS_ID,
+      label: '캔버스 이미지 본문',
+      description: '비공개 Storage 버킷에 저장되는 사용자의 캔버스 이미지 파일',
+      sensitivity: 'sensitive',
+      contentScope: 'content',
+      retention: 'persistent',
+      evidenceIds: [WORKFLOW_TRUST_TOPOLOGY_EVIDENCE_ID],
+    }, {
+      id: WORKFLOW_SOURCE_CODE_CLASS_ID,
+      label: '제품 소스 코드',
+      description: '허용된 로컬 저장소와 GitHub 원격 사이에서 동기화되는 버전 관리 소스',
+      sensitivity: 'internal',
+      contentScope: 'content',
+      retention: 'persistent',
+      evidenceIds: [WORKFLOW_TRUST_TOPOLOGY_EVIDENCE_ID],
     }],
     policies: [{
       id: GIT_SYNC_OWNER_POLICY_ID,

@@ -4,6 +4,7 @@ import { sanitizeHtml, sanitizeTextFields } from './sanitize.js'
 import { normalizeEdgeRelationData } from '../shared/relationOntology.js'
 import { normalizeSystemParts } from '../shared/systemPartOntology.js'
 import { normalizeIntentNodeData } from '../shared/intentOntology.js'
+import { normalizeSystemNodeData } from '../shared/systemOntology.js'
 import {
   composeSharePermission,
   editableNodeIdSetForPermission,
@@ -459,11 +460,15 @@ function sanitizeNode(node) {
   delete storedData.onCheckSystemPart
   delete storedData.layerPortals
   delete storedData.onOpenLayerPortal
+  delete storedData.securityOverlay
   let data = sanitizeTextFields({ ...storedData })
   if (Array.isArray(data.parts)) {
     data.parts = data.parts.map((part) => ({ ...part, text: typeof part.text === 'string' ? sanitizeHtml(part.text) : part.text }))
   }
   if (Array.isArray(data.systemParts)) data.systemParts = normalizeSystemParts(data.systemParts)
+  if (node.type === 'system' || data.systemKind != null || data.trustZone != null) {
+    data = normalizeSystemNodeData(data)
+  }
   if (node.type === 'intent' || data.intentSchemaVersion != null || data.intentKind != null || data.statement != null) {
     data = normalizeIntentNodeData(data)
   }

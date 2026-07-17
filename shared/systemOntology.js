@@ -136,6 +136,7 @@ export function normalizeSystemNodeData(data = {}) {
     provider: normalizeSystemPlainText(data.provider, 120),
     externalRef: normalizeSystemPlainText(data.externalRef, 300),
   }
+  delete normalized.securityOverlay
   const trustZone = normalizeTrustZone(data.trustZone)
   if (trustZone) normalized.trustZone = trustZone
   else delete normalized.trustZone

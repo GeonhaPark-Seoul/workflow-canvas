@@ -195,11 +195,15 @@ assert.equal(gitSyncBuildRelation.partsLink, true)
 assert.ok(gitSyncBuildRelation.source.partId)
 assert.ok(gitSyncBuildRelation.target.partId)
 assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.operations.length, 2)
-assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.dataClasses.length, 3)
+assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.dataClasses.length, 8)
 assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.policies.length, 3)
 assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.observations.length, 2)
 assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.controls.length, 3)
 assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.threats.length, 1)
+assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.trustZones.length, 6)
+assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.gateways.length, 11)
+assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.entities.filter((entity) => entity.trustZoneId).length, 58)
+assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.relations.filter((relation) => relation.gatewayId).length, 15)
 assert.equal(WORKFLOW_SOURCE_FEATURE_EXTENSION.entities.length, 17)
 assert.equal(WORKFLOW_SOURCE_FEATURE_EXTENSION.parts.length, 13)
 assert.ok(WORKFLOW_SOURCE_FEATURE_EXTENSION.entities.every((entity) => entity.kind === 'feature'))
@@ -238,6 +242,18 @@ function bindAllTwinEntities(canvas) {
     current = { ...current, nodes: applied.nodes, edges: applied.edges }
   }
   throw new Error('코드 트윈 바인딩 배치가 종료되지 않았습니다.')
+}
+
+function applyAllTrustTopology(canvas) {
+  let current = structuredClone(canvas)
+  for (let index = 0; index < 10; index += 1) {
+    const review = reconcileTwinBuild({ build: WORKFLOW_SYSTEM_TWIN_BUILD, canvas: current })
+    const item = review.items.find((candidate) => ['trust_topology_missing', 'trust_topology_stale'].includes(candidate.status))
+    if (!item) return current
+    const applied = applyDigitalTwinGraphProposal(current, item.proposal)
+    current = { ...current, nodes: applied.nodes, edges: applied.edges }
+  }
+  throw new Error('신뢰경계 동기화 배치가 종료되지 않았습니다.')
 }
 
 const boundWorkflowCanvas = bindAllTwinEntities(expectedWorkflowCanvas)
@@ -306,12 +322,35 @@ for (let index = 0; index < 10; index += 1) {
 }
 assert.ok(relationBatchCount > 1)
 assert.equal(new Set(featureCanvas.nodes.map((node) => node.id)).size, featureCanvas.nodes.length)
+featureCanvas = applyAllTrustTopology(featureCanvas)
 const workflowReview = reconcileTwinBuild({
   build: WORKFLOW_SYSTEM_TWIN_BUILD,
   canvas: featureCanvas,
 })
 assert.equal(workflowReview.summary.pending, 0)
 assert.equal(workflowReview.summary.actionable, 0)
+
+const topologyDrift = structuredClone(featureCanvas)
+const topologyRepository = topologyDrift.nodes.find((node) => node.id === 'map-local-repo')
+topologyRepository.position = { x: 8_888, y: -1_111 }
+topologyRepository.data.manualAnnotation = '보안 경계 적용 뒤에도 보존할 사용자 메모'
+delete topologyRepository.data.trustZone
+const topologyEdge = topologyDrift.edges.find((edge) => edge.id === 'map-edge-app-auth')
+topologyEdge.style = { ...topologyEdge.style, strokeWidth: 7 }
+delete topologyEdge.data.trustGateway
+const zoneRepairItem = reconcileTwinBuild({ build: WORKFLOW_SYSTEM_TWIN_BUILD, canvas: topologyDrift }).items
+  .find((item) => item.status === 'trust_topology_missing')
+assert.equal(zoneRepairItem.proposal.counts.trustZones, 1)
+const zoneRepaired = applyDigitalTwinGraphProposal(topologyDrift, zoneRepairItem.proposal)
+const repairedRepository = zoneRepaired.nodes.find((node) => node.id === 'map-local-repo')
+assert.deepEqual(repairedRepository.position, { x: 8_888, y: -1_111 })
+assert.equal(repairedRepository.data.manualAnnotation, '보안 경계 적용 뒤에도 보존할 사용자 메모')
+const gatewayRepairCanvas = { ...topologyDrift, nodes: zoneRepaired.nodes, edges: zoneRepaired.edges }
+const gatewayRepairItem = reconcileTwinBuild({ build: WORKFLOW_SYSTEM_TWIN_BUILD, canvas: gatewayRepairCanvas }).items
+  .find((item) => item.status === 'trust_topology_missing')
+assert.equal(gatewayRepairItem.proposal.counts.trustGateways, 1)
+const gatewayRepaired = applyDigitalTwinGraphProposal(gatewayRepairCanvas, gatewayRepairItem.proposal)
+assert.equal(gatewayRepaired.edges.find((edge) => edge.id === 'map-edge-app-auth').style.strokeWidth, 7)
 
 const engineNodeIds = new Set(WORKFLOW_ENGINE_REGISTRY.components.map((item) => `map-${item.id}`))
 const topEngineNodeIds = new Set(WORKFLOW_ENGINE_REGISTRY.components
@@ -337,12 +376,12 @@ legacySystemMap.nodes.push(...structuredClone(fullSystemMap.nodes.filter((node) 
 ))))
 const secondEngineStage = inspectWorkflowSystemTwin(legacySystemMap).items
   .find((item) => item.status === 'engine_components_missing')
-assert.deepEqual(secondEngineStage.proposal.counts, { nodes: childEngineNodeIds.size, edges: 0, parts: 0 })
+assert.deepEqual(secondEngineStage.proposal.counts, { nodes: Math.min(childEngineNodeIds.size, 24), edges: 0, parts: 0 })
 
 legacySystemMap.nodes.push(...structuredClone(fullSystemMap.nodes.filter((node) => childEngineNodeIds.has(node.id))))
 const thirdEngineStage = inspectWorkflowSystemTwin(legacySystemMap).items
   .find((item) => item.status === 'engine_relations_missing')
-assert.deepEqual(thirdEngineStage.proposal.counts, { nodes: 0, edges: engineEdgeIds.size, parts: 0 })
+assert.deepEqual(thirdEngineStage.proposal.counts, { nodes: 0, edges: Math.min(engineEdgeIds.size, 24), parts: 0 })
 
 const manuallyChanged = structuredClone(featureCanvas)
 const repository = manuallyChanged.nodes.find((node) => node.id === 'map-local-repo')

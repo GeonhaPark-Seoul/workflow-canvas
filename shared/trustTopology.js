@@ -1,3 +1,5 @@
+import { systemPartContainsSecretLiteral } from './systemPartOntology.js'
+
 export const TRUST_TOPOLOGY_SCHEMA_VERSION = 1
 
 export const TRUST_ZONE_KIND_DEFS = Object.freeze([
@@ -74,7 +76,7 @@ export function normalizeTrustZone(value) {
   if (!plainObject(value)) return null
   const id = safeId(value.id)
   if (!id) return null
-  return {
+  const normalized = {
     schemaVersion: TRUST_TOPOLOGY_SCHEMA_VERSION,
     id,
     kind: ZONE_KIND_IDS.has(value.kind) ? value.kind : 'unknown',
@@ -82,6 +84,10 @@ export function normalizeTrustZone(value) {
     controlOwner: plainText(value.controlOwner, 120),
     evidenceRef: plainText(value.evidenceRef, 500),
   }
+  return [normalized.label, normalized.controlOwner, normalized.evidenceRef]
+    .some(systemPartContainsSecretLiteral)
+    ? null
+    : normalized
 }
 
 export function normalizeTrustGateway(value) {
@@ -90,7 +96,7 @@ export function normalizeTrustGateway(value) {
   const sourceZoneId = safeId(value.sourceZoneId)
   const targetZoneId = safeId(value.targetZoneId)
   if (!id || !sourceZoneId || !targetZoneId || sourceZoneId === targetZoneId) return null
-  return {
+  const normalized = {
     schemaVersion: TRUST_TOPOLOGY_SCHEMA_VERSION,
     id,
     kind: GATEWAY_KIND_IDS.has(value.kind) ? value.kind : 'unknown',
@@ -107,6 +113,18 @@ export function normalizeTrustGateway(value) {
     initiator: plainText(value.initiator, 120),
     evidenceRef: plainText(value.evidenceRef, 500),
   }
+  return [
+    normalized.protocol,
+    normalized.route,
+    normalized.authentication,
+    normalized.authorization,
+    normalized.encryption,
+    normalized.initiator,
+    normalized.evidenceRef,
+    ...normalized.dataClasses,
+  ].some(systemPartContainsSecretLiteral)
+    ? null
+    : normalized
 }
 
 export function analyzeTrustBoundary({ sourceZone, targetZone, gateway } = {}) {

@@ -84,6 +84,13 @@
 - 구조 전용 Python 근거에 같은 기능 3등급 판정을 적용해 Workflow Canvas와 다른 기능 Asset·Capability 집합을 생성한다.
 - Python 함수·호출 분석이나 실제 Twin Adapter 연결을 완료한 것으로 표시하지 않는다.
 
+## Trust Map 0.2.0-alpha.0 - 2026-07-17
+
+- Workflow Canvas 자기 지도에 근거 기반 신뢰영역 6개와 게이트웨이 11개를 선언했다.
+- 기존 Reconciliation 승인 경로로 노드 영역과 연결선 게이트웨이만 동기화하며 사용자 배치·메모·관계 양 끝을 보존한다.
+- redaction 이후 그래프만 입력으로 사용하는 보안 오버레이에 신뢰영역 색, 게이트웨이 상세와 unknown-gap 경고를 추가했다.
+- 오버레이는 declared 구조만 보여주며 실제 트래픽 관측이나 침투 테스트, 전체 공격 경로 분석을 의미하지 않는다.
+
 ## Trust Map 0.1.0-alpha.0 - 2026-07-16
 
 - Trust Topology v1, Gateway 정규화와 `unknown-gap` 판정을 첫 엔진 버전으로 기록했다.

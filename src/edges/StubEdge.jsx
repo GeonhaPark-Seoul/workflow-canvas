@@ -1,8 +1,74 @@
-import { useId } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { BaseEdge, EdgeLabelRenderer } from '@xyflow/react'
 import { getStubEdgeGeometry } from './stubEdgeGeometry'
 import { edgeRelationInfo } from '../../shared/relationOntology.js'
 import { edgeOperationStatusDefinition } from '../../shared/edgeOperation.js'
+
+function SecurityGatewayControl({ overlay, x, y, offset = 0 }) {
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef(null)
+  const gateway = overlay?.gateway
+  const warning = overlay?.warning === true
+  const title = warning
+    ? `${overlay.status === 'unknown-gap' ? '미확인 통로' : '게이트웨이 불일치'} · ${overlay.reason}`
+    : `${gateway?.kindLabel || '게이트웨이'} · ${gateway?.route || overlay.reason}`
+
+  useEffect(() => {
+    if (!open) return undefined
+    const close = (event) => {
+      if (!rootRef.current?.contains(event.target)) setOpen(false)
+    }
+    document.addEventListener('pointerdown', close)
+    return () => document.removeEventListener('pointerdown', close)
+  }, [open])
+
+  return (
+    <EdgeLabelRenderer>
+      <div
+        ref={rootRef}
+        className="security-gateway-anchor nodrag nopan nowheel"
+        style={{ transform: `translate(-50%, -50%) translate(${x}px, ${y + offset}px)` }}
+        onPointerDown={(event) => event.stopPropagation()}
+        onDoubleClick={(event) => event.stopPropagation()}
+      >
+        <button
+          type="button"
+          className={`security-gateway-button ${warning ? 'is-warning' : 'is-modeled'}`}
+          title={title}
+          aria-label={title}
+          aria-expanded={open}
+          onClick={(event) => {
+            event.stopPropagation()
+            setOpen((value) => !value)
+          }}
+        >
+          <span aria-hidden="true">{warning ? '!' : '◈'}</span>
+        </button>
+        {open && (
+          <section className={`security-gateway-popover ${warning ? 'is-warning' : ''}`} aria-label="보안 통로 상세">
+            <header>
+              <strong>{warning ? '확인되지 않은 경계' : (gateway?.kindLabel || '게이트웨이')}</strong>
+              <span>{warning ? '주의' : '선언됨'}</span>
+            </header>
+            <dl>
+              <div><dt>방향</dt><dd>{overlay.source.label} → {overlay.target.label}</dd></div>
+              <div><dt>영역</dt><dd>{overlay.source.zone.label} → {overlay.target.zone.label}</dd></div>
+              <div><dt>판정</dt><dd>{overlay.reason}</dd></div>
+              {gateway && <div><dt>통로</dt><dd>{gateway.route || gateway.kindLabel}</dd></div>}
+              {gateway?.protocol && <div><dt>프로토콜</dt><dd>{gateway.protocol}</dd></div>}
+              {gateway?.dataClasses?.length > 0 && <div><dt>데이터</dt><dd>{gateway.dataClasses.join(' · ')}</dd></div>}
+              {gateway?.authentication && <div><dt>인증</dt><dd>{gateway.authentication}</dd></div>}
+              {gateway?.authorization && <div><dt>권한</dt><dd>{gateway.authorization}</dd></div>}
+              {gateway?.encryption && <div><dt>암호화</dt><dd>{gateway.encryption}</dd></div>}
+              {gateway?.exposureLabel && <div><dt>노출</dt><dd>{gateway.exposureLabel}</dd></div>}
+              {gateway?.evidenceRef && <div><dt>근거</dt><dd>{gateway.evidenceRef}</dd></div>}
+            </dl>
+          </section>
+        )}
+      </div>
+    </EdgeLabelRenderer>
+  )
+}
 
 // Perpendicular stub: the line leaves each connection point straight out
 // (perpendicular to the node side) for a fixed stub length, then curves
@@ -37,6 +103,7 @@ export default function StubEdge({
   const operationTitle = operation
     ? [operation.tooltip || operation.label, operationStatus.label, operation.message].filter(Boolean).join(' · ')
     : ''
+  const securityOverlay = data?.securityOverlay
 
   return (
     <>
@@ -121,6 +188,14 @@ export default function StubEdge({
             <span className="edge-operation-tooltip" role="tooltip">{operation.tooltip || operationTitle}</span>
           </button>
         </EdgeLabelRenderer>
+      )}
+      {securityOverlay && (
+        <SecurityGatewayControl
+          overlay={securityOverlay}
+          x={labelX}
+          y={labelY}
+          offset={operation || showRelation || runtime ? 28 : 0}
+        />
       )}
     </>
   )

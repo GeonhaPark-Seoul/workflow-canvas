@@ -3,6 +3,8 @@ import {
   digitalTwinProposalEdgeFingerprint,
   digitalTwinProposalLogicalComponentFingerprint,
   digitalTwinProposalNodeIdentityFingerprint,
+  digitalTwinProposalTrustGatewayFingerprint,
+  digitalTwinProposalTrustZoneFingerprint,
 } from './digitalTwinProposal.js'
 import {
   DIGITAL_TWIN_REVIEW_SCHEMA_VERSION,
@@ -11,6 +13,7 @@ import {
 } from './digitalTwinReview.js'
 import { normalizeDigitalTwinBinding, normalizeSystemPart, normalizeSystemParts } from './systemPartOntology.js'
 import { normalizeLogicalComponent } from './systemOntology.js'
+import { normalizeTrustGateway, normalizeTrustZone } from './trustTopology.js'
 import { createTwinBuild } from './twinBuild.js'
 import {
   findTwinBuildEntityNode,
@@ -23,6 +26,7 @@ import {
 export const TWIN_BUILD_RECONCILIATION_SCHEMA_VERSION = 1
 const MAX_BINDING_OPERATIONS = 24
 const MAX_COMPONENT_OPERATIONS = 24
+const MAX_TRUST_OPERATIONS = 24
 
 function compactKey(kind, id) {
   const value = `${kind}:${id}`
@@ -233,6 +237,88 @@ function logicalComponentBatchReview(build, candidates) {
   return { ...item, proposal }
 }
 
+function trustTopologyBatchReview(build, canvas, nodeByEntityId) {
+  const zoneById = new Map(build.trustZones.map((zone) => [zone.id, zone]))
+  const gatewayById = new Map(build.gateways.map((gateway) => [gateway.id, gateway]))
+  const zoneCandidates = build.entities.flatMap((entity) => {
+    const node = nodeByEntityId.get(entity.id)
+    const desired = zoneById.get(entity.trustZoneId)
+    if (!node || node.type !== 'system' || !desired) return []
+    const current = normalizeTrustZone(node.data?.trustZone)
+    if (digitalTwinProposalTrustZoneFingerprint(current) === digitalTwinProposalTrustZoneFingerprint(desired)) return []
+    return [{ kind: 'zone', entity, node, current, desired }]
+  })
+  const gatewayCandidates = build.relations.flatMap((relation) => {
+    const edge = (canvas?.edges ?? []).find((candidate) => candidate.id === relation.placement.edgeId)
+    const desired = gatewayById.get(relation.gatewayId)
+    if (!edge || !desired) return []
+    const current = normalizeTrustGateway(edge.data?.trustGateway)
+    if (digitalTwinProposalTrustGatewayFingerprint(current) === digitalTwinProposalTrustGatewayFingerprint(desired)) return []
+    return [{ kind: 'gateway', relation, edge, current, desired }]
+  })
+  const ordered = zoneCandidates.length
+    ? zoneCandidates.sort((left, right) => left.entity.id.localeCompare(right.entity.id))
+    : gatewayCandidates.sort((left, right) => left.relation.id.localeCompare(right.relation.id))
+  const batch = ordered.slice(0, MAX_TRUST_OPERATIONS)
+  if (!batch.length) return null
+  const zoneCount = batch.filter((candidate) => candidate.kind === 'zone').length
+  const gatewayCount = batch.length - zoneCount
+  const missingCount = batch.filter((candidate) => !candidate.current).length
+  const recordIds = batch.map((candidate) => candidate.kind === 'zone' ? candidate.entity.id : candidate.relation.id)
+  const item = createItem(build, {
+    itemKey: compactKey('trust-topology', digitalTwinReviewFingerprint(batch.map((candidate) => (
+      candidate.kind === 'zone' ? candidate.entity.id : candidate.relation.id
+    )))),
+    category: 'security',
+    changeType: 'changed',
+    severity: 'attention',
+    title: `보안 경계 선언 ${batch.length}개`,
+    summary: `신뢰영역 ${zoneCount}개와 게이트웨이 ${gatewayCount}개를 동기화합니다. 기존 배치·크기·설명·메모와 연결선 양 끝은 유지합니다. 누락 ${missingCount}개.`,
+    evidenceIds: [...new Set(batch.flatMap((candidate) => candidate.desired.evidenceIds ?? []))],
+    focus: batch[0].kind === 'zone'
+      ? { nodeId: batch[0].node.id }
+      : { edgeId: batch[0].edge.id, nodeIds: [batch[0].edge.source, batch[0].edge.target] },
+    status: missingCount ? 'trust_topology_missing' : 'trust_topology_stale',
+    observation: {
+      buildFingerprint: build.fingerprint,
+      snapshotId: build.source.snapshotId,
+      totalCandidates: ordered.length,
+      zoneCount,
+      gatewayCount,
+      missingCount,
+      recordIds,
+    },
+  })
+  const operations = batch.map((candidate) => candidate.kind === 'zone'
+    ? {
+        action: 'sync_trust_zone',
+        targetNodeId: candidate.node.id,
+        expectedNodeFingerprint: digitalTwinProposalNodeIdentityFingerprint(candidate.node),
+        expectedTrustZoneFingerprint: digitalTwinProposalTrustZoneFingerprint(candidate.current),
+        trustZone: candidate.desired,
+        label: `${candidate.entity.label} 신뢰영역 동기화`,
+      }
+    : {
+        action: 'sync_trust_gateway',
+        edgeId: candidate.edge.id,
+        expectedEdgeFingerprint: digitalTwinProposalEdgeFingerprint(candidate.edge),
+        expectedTrustGatewayFingerprint: digitalTwinProposalTrustGatewayFingerprint(candidate.current),
+        trustGateway: candidate.desired,
+        label: `${candidate.relation.id} 게이트웨이 동기화`,
+      })
+  const proposal = createDigitalTwinGraphProposal({
+    sourceId: build.source.id,
+    proposalKey: compactKey('sync-trust-topology', digitalTwinReviewFingerprint(recordIds)),
+    itemId: item.id,
+    itemFingerprint: item.fingerprint,
+    snapshotId: build.source.snapshotId,
+    title: item.title,
+    summary: '미리 본 보안 경계 필드만 동기화합니다. 실제 네트워크 설정이나 LIVE 상태를 만들지 않습니다.',
+    operations,
+  })
+  return { ...item, proposal }
+}
+
 function entityReview(build, entity, canvas, nodeByEntityId) {
   const actual = nodeByEntityId.get(entity.id)
   if (!actual) {
@@ -272,7 +358,9 @@ function entityReview(build, entity, canvas, nodeByEntityId) {
 
   const projection = twinBuildEntityCanvasProjection(build, entity, actual)
   const { expected, ...current } = projection
-  if (digitalTwinReviewFingerprint(current) === digitalTwinReviewFingerprint(expected)) return null
+  const { trustZoneId: currentTrustZoneId, ...currentWithoutTrustZone } = current
+  const { trustZoneId: expectedTrustZoneId, ...expectedWithoutTrustZone } = expected
+  if (digitalTwinReviewFingerprint(currentWithoutTrustZone) === digitalTwinReviewFingerprint(expectedWithoutTrustZone)) return null
   return createItem(build, {
     itemKey: compactKey('build-entity-contract', entity.id),
     category: 'entity',
@@ -283,7 +371,11 @@ function entityReview(build, entity, canvas, nodeByEntityId) {
     evidenceIds: entity.evidenceIds,
     focus: { nodeId: actual.id },
     status: 'map_modified',
-    observation: { current, expected, entityFingerprint: entity.fingerprint },
+    observation: {
+      current: currentWithoutTrustZone,
+      expected: expectedWithoutTrustZone,
+      entityFingerprint: entity.fingerprint,
+    },
   })
 }
 
@@ -353,6 +445,11 @@ function partReview(build, part, nodeByEntityId) {
   return { ...item, proposal }
 }
 
+function edgeWithoutTrustGateway(edge) {
+  const { trustGateway, ...data } = edge?.data ?? {}
+  return { ...edge, data }
+}
+
 function relationReview(build, relation, canvas, nodeByEntityId) {
   const sourceNode = nodeByEntityId.get(relation.source.entityId)
   const targetNode = nodeByEntityId.get(relation.target.entityId)
@@ -402,8 +499,9 @@ function relationReview(build, relation, canvas, nodeByEntityId) {
     return { ...item, proposal }
   }
   const currentFingerprint = digitalTwinProposalEdgeFingerprint(actual)
-  const desiredFingerprint = digitalTwinProposalEdgeFingerprint(desired)
-  if (currentFingerprint === desiredFingerprint) return null
+  const currentContractFingerprint = digitalTwinProposalEdgeFingerprint(edgeWithoutTrustGateway(actual))
+  const desiredContractFingerprint = digitalTwinProposalEdgeFingerprint(edgeWithoutTrustGateway(desired))
+  if (currentContractFingerprint === desiredContractFingerprint) return null
   const endpointsMatch = actual.source === desired.source && actual.target === desired.target
   const item = createItem(build, {
     itemKey: compactKey('build-relation-contract', relation.id),
@@ -417,7 +515,7 @@ function relationReview(build, relation, canvas, nodeByEntityId) {
     evidenceIds: relation.evidenceIds,
     focus: { edgeId: actual.id, nodeIds: [actual.source, actual.target] },
     status: 'map_modified',
-    observation: { currentFingerprint, desiredFingerprint, endpointsMatch },
+    observation: { currentFingerprint: currentContractFingerprint, desiredFingerprint: desiredContractFingerprint, endpointsMatch },
   })
   if (!endpointsMatch) return item
   const proposal = createDigitalTwinGraphProposal({
@@ -451,12 +549,14 @@ export function reconcileTwinBuild({ build: inputBuild, canvas }) {
   const logicalComponentReview = logicalComponentBatchReview(build, build.entities
     .map((entity) => logicalComponentCandidate(build, entity, nodeByEntityId.get(entity.id)))
     .filter(Boolean))
+  const trustTopologyReview = trustTopologyBatchReview(build, canvas, nodeByEntityId)
   const entityItems = build.entities.map((entity) => entityReview(build, entity, canvas, nodeByEntityId)).filter(Boolean)
   const partItems = build.parts.map((part) => partReview(build, part, nodeByEntityId)).filter(Boolean)
   const relationItems = build.relations.map((relation) => relationReview(build, relation, canvas, nodeByEntityId)).filter(Boolean)
   const items = [
     ...(bindingReview ? [bindingReview] : []),
     ...(logicalComponentReview ? [logicalComponentReview] : []),
+    ...(trustTopologyReview ? [trustTopologyReview] : []),
     ...entityItems,
     ...partItems,
     ...relationItems,
@@ -473,6 +573,7 @@ export function reconcileTwinBuild({ build: inputBuild, canvas }) {
     blocked: items.filter((item) => item.status === 'blocked_dependency').length,
     entityFindings: entityItems.length + (bindingReview ? 1 : 0) + (logicalComponentReview ? 1 : 0),
     logicalComponentFindings: logicalComponentReview ? 1 : 0,
+    trustTopologyFindings: trustTopologyReview ? 1 : 0,
     partFindings: partItems.length,
     relationFindings: relationItems.length,
     unmanagedCanvasNodes: (canvas?.nodes ?? []).filter((node) => !managedNodeIds.has(node.id)).length,

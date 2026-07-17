@@ -179,8 +179,8 @@ This is the durable ledger for security, reliability, commercialization, and arc
 - Severity: high
 - Gate: engine-v1
 - Status: in-progress
-- Current mitigation: `shared/trustTopology.js` defines normalized zone and gateway records, strips unknown fields at persistence boundaries, and fails cross-zone analysis as `unknown-gap` when no matching gateway exists.
-- Required work: represent local device, local network, intranet, private cloud, public cloud, internet, and external SaaS as trust zones; every crossing must pass through an explicit gateway with direction, protocol, data class, authentication, authorization, exposure, and observed status.
+- Current mitigation: `shared/trustTopology.js` defines normalized zone and gateway records, strips unknown fields and secret-like literals at persistence boundaries, and fails cross-zone analysis as `unknown-gap` when no matching gateway exists. `shared/securityOverlay.js` projects only the viewer's redaction-safe graph into an opt-in overlay. The Workflow Canvas reference twin declares its currently evidenced local, Vercel, Supabase and GitHub boundaries through approval-only Proposals.
+- Required work: extend the same adapter-neutral contract to local network, intranet and private datacenter reference systems; add server-owned observed gateway status and keep normal flows separate from a later attack-path model. Continue auditing every new cross-zone relation for direction, protocol, data class, authentication, authorization and exposure.
 - Exit criteria: the Workflow Canvas reference twin shows normal flows and potential threat paths separately and never equates `local` with `safe`.
 
 ## Operation safety and reliability

@@ -26,6 +26,7 @@ import InvitePopover from './components/InvitePopover'
 import NotesPanel from './components/NotesPanel'
 import DigitalTwinReviewPanel from './components/DigitalTwinReviewPanel'
 import SourceTwinPanel from './components/SourceTwinPanel'
+import SecurityOverlayLegend from './components/SecurityOverlayLegend'
 import EdgeRelationEditor from './components/EdgeRelationEditor'
 import {
   initCanvases, loadCanvasData, saveCanvasData, deleteCanvasData,
@@ -154,6 +155,10 @@ import {
   permissionCanInviteScope,
   visibleNodeIdSetForPermission,
 } from '../shared/sharePermissions.js'
+import {
+  createSecurityOverlayProjection,
+  securityOverlayHasModeledData,
+} from '../shared/securityOverlay.js'
 
 const nodeTypes = { stage: StageNode, memo: MemoNode, group: GroupNode, content: ContentNode, system: SystemNode, intent: IntentNode }
 const edgeTypes = { stub: StubEdge }
@@ -488,7 +493,7 @@ function stripNode(n) {
     onUpdate, onEditStart, onEditEnd, onOpenInNotes, onCheckSystemPart,
     onSelectForPart, stageTypes, imageContext, twinRuntime, systemPartRuntime, canRunSystemChecks,
     intentLibrary, onCreateIntentForWork, onOpenIntentFromWork,
-    groupDropTarget, layerPortals, onOpenLayerPortal, ...data
+    groupDropTarget, layerPortals, onOpenLayerPortal, securityOverlay, ...data
   } = n.data ?? {}
   const { selected, ...rest } = n
   return { ...rest, data }
@@ -553,6 +558,7 @@ export default function App() {
   const [digitalTwinReview, setDigitalTwinReview] = useState(null)
   const [twinProposalPreview, setTwinProposalPreview] = useState(null) // { itemId, itemFingerprint } | null
   const [twinProposalStatus, setTwinProposalStatus] = useState(null) // { type, message } | null
+  const [securityOverlayEnabled, setSecurityOverlayEnabled] = useState(false)
   const [systemPartRuntimeByNode, setSystemPartRuntimeByNode] = useState({})
   const [systemRuntimeDashboard, setSystemRuntimeDashboard] = useState({
     loading: false,
@@ -581,6 +587,7 @@ export default function App() {
     if (next.lodThreshold !== undefined) saveLodThreshold(next.lodThreshold)
   }, [])
   useEffect(() => { document.body.dataset.theme = settings.theme }, [settings.theme])
+  useEffect(() => { setSecurityOverlayEnabled(false) }, [activeCanvasId])
 
   // Saved views (per canvas): [{ id, name, bounds: {x,y,width,height} }]
   const [views, setViews] = useState(initData.views ?? [])
@@ -589,6 +596,16 @@ export default function App() {
   const activeSystemLayer = systemLayerFromView(currentView)
   const systemLayersEnabled = canvasSupportsSystemLayers(nodes, views)
   const systemLayerOptions = useMemo(() => systemLayerOptionsFromViews(views), [views])
+  const securityOverlayAvailable = useMemo(
+    () => securityOverlayHasModeledData(nodes, edges),
+    [edges, nodes],
+  )
+  const securityOverlayProjection = useMemo(
+    () => securityOverlayEnabled
+      ? createSecurityOverlayProjection(nodes, edges)
+      : { nodeById: new Map(), edgeById: new Map(), zones: [] },
+    [edges, nodes, securityOverlayEnabled],
+  )
   // New annotations join the layer you are currently viewing; in fit-all they
   // stay unassigned (visible on every layer, legacy-compatible).
   const annotationCreationLayer = systemLayersEnabled ? activeSystemLayer : null
@@ -599,6 +616,9 @@ export default function App() {
     if (!isSystemMapTemplateCanvas(nodes)) return
     setViews((current) => ensureSystemLayerViews(current))
   }, [nodes, views])
+  useEffect(() => {
+    if (!securityOverlayAvailable) setSecurityOverlayEnabled(false)
+  }, [securityOverlayAvailable])
 
   // Touch / responsive detection
   const [touchDevice] = useState(() => 'ontouchstart' in window || navigator.maxTouchPoints > 0)
@@ -2477,14 +2497,14 @@ export default function App() {
     : null
   const activeTwinProposal = twinProposalPreviewItem?.proposal ?? null
   const twinProposalPlan = useMemo(() => {
-    if (!activeTwinProposal) return { nodes: [], edges: [], nodeBindings: [], logicalComponentUpdates: [], edgeReplacements: [], parts: [], partReplacements: [], partRemovals: [], alreadyPresent: [], error: null }
+    if (!activeTwinProposal) return { nodes: [], edges: [], nodeBindings: [], logicalComponentUpdates: [], trustZoneUpdates: [], trustGatewayUpdates: [], edgeReplacements: [], parts: [], partReplacements: [], partRemovals: [], alreadyPresent: [], error: null }
     try {
       return {
         ...planDigitalTwinGraphProposal({ nodes, edges }, activeTwinProposal),
         error: null,
       }
     } catch (error) {
-      return { nodes: [], edges: [], nodeBindings: [], logicalComponentUpdates: [], edgeReplacements: [], parts: [], partReplacements: [], partRemovals: [], alreadyPresent: [], error: error?.message ?? '수정안을 미리 볼 수 없습니다.' }
+      return { nodes: [], edges: [], nodeBindings: [], logicalComponentUpdates: [], trustZoneUpdates: [], trustGatewayUpdates: [], edgeReplacements: [], parts: [], partReplacements: [], partRemovals: [], alreadyPresent: [], error: error?.message ?? '수정안을 미리 볼 수 없습니다.' }
     }
   }, [activeTwinProposal, nodes, edges])
   const twinProposalPreviewNodes = useMemo(() => twinProposalPlan.nodes.map((node) => ({
@@ -2526,13 +2546,18 @@ export default function App() {
     () => new Map(twinProposalPlan.logicalComponentUpdates.map((planned) => [planned.targetNodeId, planned.logicalComponent])),
     [twinProposalPlan.logicalComponentUpdates],
   )
+  const twinProposalPreviewTrustZonesByNode = useMemo(
+    () => new Map(twinProposalPlan.trustZoneUpdates.map((planned) => [planned.targetNodeId, planned.trustZone])),
+    [twinProposalPlan.trustZoneUpdates],
+  )
   const twinProposalPreviewAugmentedNodeIds = useMemo(
     () => new Set([
       ...twinProposalPreviewPartsByNode.keys(),
       ...twinProposalPreviewBindingsByNode.keys(),
       ...twinProposalPreviewLogicalComponentsByNode.keys(),
+      ...twinProposalPreviewTrustZonesByNode.keys(),
     ]),
-    [twinProposalPreviewBindingsByNode, twinProposalPreviewLogicalComponentsByNode, twinProposalPreviewPartsByNode],
+    [twinProposalPreviewBindingsByNode, twinProposalPreviewLogicalComponentsByNode, twinProposalPreviewPartsByNode, twinProposalPreviewTrustZonesByNode],
   )
   const twinProposalPreviewEdges = useMemo(() => [
     ...twinProposalPlan.edges,
@@ -2540,6 +2565,14 @@ export default function App() {
       ...planned.edge,
       id: `${planned.edge.id}::proposal-preview`,
     })),
+    ...twinProposalPlan.trustGatewayUpdates.map((planned) => {
+      const current = edges.find((edge) => edge.id === planned.edgeId)
+      return current ? {
+        ...current,
+        id: `${current.id}::trust-proposal-preview`,
+        data: { ...current.data, trustGateway: planned.trustGateway },
+      } : null
+    }).filter(Boolean),
   ].map((edge) => ({
     ...edge,
     className: `${edge.className ? `${edge.className} ` : ''}wfc-edge digital-twin-proposal-edge`,
@@ -2549,7 +2582,7 @@ export default function App() {
     zIndex: 1000,
     style: { ...edge.style, stroke: '#f59e0b', strokeWidth: 3, strokeDasharray: '7 5' },
     markerEnd: edge.markerEnd ? { ...edge.markerEnd, color: '#f59e0b' } : undefined,
-  })), [twinProposalPlan.edges, twinProposalPlan.edgeReplacements])
+  })), [edges, twinProposalPlan.edges, twinProposalPlan.edgeReplacements, twinProposalPlan.trustGatewayUpdates])
   const twinProposalFitKey = digitalTwinProposalAutoFitKey(activeCanvasId, activeTwinProposal)
   const lastFittedTwinProposalRef = useRef(null)
 
@@ -2682,7 +2715,7 @@ export default function App() {
       setTwinProposalStatus({
         type: 'success',
         message: result.writesPerformed
-          ? `지도에 노드 ${result.appliedNodeIds.length}개, 연결선 ${result.appliedEdgeIds.length}개, 시스템 파츠 ${result.appliedPartIds.length}개, 코드 트윈 연결 ${result.appliedNodeBindingIds.length}개, 엔진 계약 ${result.appliedLogicalComponentIds.length}개 변경을 적용했습니다.`
+          ? `지도에 노드 ${result.appliedNodeIds.length}개, 연결선 ${result.appliedEdgeIds.length}개, 시스템 파츠 ${result.appliedPartIds.length}개, 코드 트윈 연결 ${result.appliedNodeBindingIds.length}개, 엔진 계약 ${result.appliedLogicalComponentIds.length}개, 신뢰영역 ${result.appliedTrustZoneIds.length}개, 게이트웨이 ${result.appliedTrustGatewayIds.length}개 변경을 적용했습니다.`
           : '같은 수정안이 이미 지도에 적용되어 있습니다.',
       })
     } catch (error) {
@@ -4216,16 +4249,20 @@ export default function App() {
           },
         }
       : runtimeData
+    const securityData = securityOverlayProjection.edgeById.get(e.id)
+    const renderedEdgeData = securityData
+      ? { ...(operationData ?? {}), securityOverlay: securityData }
+      : operationData
     const operationClass = operationEntry
       ? ` edge-operation-edge is-operation-${gitSyncEdgeOperation.status} is-direction-${gitSyncPresentation.direction}`
       : ''
     // Stable hook class so CSS can target `.wfc-edge:hover` for the hover glow.
     const className = `wfc-edge${e.className ? ` ${e.className}` : ''}${runtimeClass}${operationClass}`
-    if (!e.selected) return { ...e, ...baseEdgeStyle(e), data: operationData, deletable, type, className }
+    if (!e.selected) return { ...e, ...baseEdgeStyle(e), data: renderedEdgeData, deletable, type, className }
     if (isPartEdge(e)) {
       return {
         ...e,
-        data: operationData,
+        data: renderedEdgeData,
         deletable,
         type,
         className,
@@ -4240,7 +4277,7 @@ export default function App() {
     const color = isMemo ? '#f59e0b' : '#60a5fa'
     return {
       ...e,
-      data: operationData,
+      data: renderedEdgeData,
       deletable,
       type,
       className,
@@ -4255,8 +4292,9 @@ export default function App() {
     ? nodes.map((node) => {
         const previewBinding = twinProposalPreviewBindingsByNode.get(node.id)
         const previewLogicalComponent = twinProposalPreviewLogicalComponentsByNode.get(node.id)
+        const previewTrustZone = twinProposalPreviewTrustZonesByNode.get(node.id)
         const previewPlan = twinProposalPreviewPartsByNode.get(node.id)
-        if (!previewPlan && !previewBinding && !previewLogicalComponent) return node
+        if (!previewPlan && !previewBinding && !previewLogicalComponent && !previewTrustZone) return node
         const previewPartResult = previewPlan
           ? previewDigitalTwinPartChanges(
               node.data?.systemParts,
@@ -4280,6 +4318,10 @@ export default function App() {
             ...(previewLogicalComponent ? {
               logicalComponent: previewLogicalComponent,
               digitalTwinProposalPreviewLogicalComponent: true,
+            } : {}),
+            ...(previewTrustZone ? {
+              trustZone: previewTrustZone,
+              digitalTwinProposalPreviewTrustZone: true,
             } : {}),
           },
         }
@@ -4444,6 +4486,9 @@ export default function App() {
         onSelectSystemLayer={selectSystemLayer}
         onCreateSystemLayer={canEditFullCanvas ? createSystemLayer : null}
         onPaletteAdd={onPaletteAdd}
+        securityOverlayAvailable={securityOverlayAvailable}
+        securityOverlayEnabled={securityOverlayEnabled}
+        onToggleSecurityOverlay={() => setSecurityOverlayEnabled((enabled) => !enabled)}
         systemRuntime={systemRuntimeSummary ? {
           ...systemRuntimeSummary,
           checking: systemRuntimeDashboard.checking || systemRuntimeDashboard.loading,
@@ -4452,6 +4497,10 @@ export default function App() {
           onCheck: runAllSystemRuntimeChecks,
         } : null}
       />
+
+      {securityOverlayEnabled && (
+        <SecurityOverlayLegend zones={securityOverlayProjection.zones} />
+      )}
 
       <AuthPanel
         user={user}
@@ -4701,6 +4750,7 @@ export default function App() {
                 canManageParticipants: false,
                 scopedParticipants: [],
                 linkedSystemPartHandles,
+                securityOverlay: securityOverlayProjection.nodeById.get(n.id),
               },
             }
           }
@@ -4743,6 +4793,7 @@ export default function App() {
               scopedParticipants: nodeScopedParticipants,
               systemPartRuntime: systemPartRuntimeByNode[n.id] ?? {},
               linkedSystemPartHandles,
+              securityOverlay: securityOverlayProjection.nodeById.get(n.id),
               layerPortals: n.type === 'system' ? (systemLayerProjection.portalsByNode.get(n.id) ?? []) : [],
               onOpenLayerPortal: n.type === 'system' ? openSystemLayerPortal : undefined,
               intentLibrary: n.type === 'system' ? workIntentLibrary : undefined,

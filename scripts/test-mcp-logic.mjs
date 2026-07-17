@@ -1458,6 +1458,28 @@ t('MCP redacted edge representation never exposes relation semantics', () => {
   assert.equal(JSON.stringify(result).includes('security-review'), false)
 })
 
+t('MCP exposes normalized gateway metadata only for visible edges', () => {
+  const edge = {
+    id: 'gateway-edge', source: 'browser', target: 'api',
+    data: {
+      ...createEdgeRelationData('calls'),
+      trustGateway: {
+        id: 'gateway:browser-api', kind: 'browser-api',
+        sourceZoneId: 'zone:browser', targetZoneId: 'zone:api',
+        direction: 'source-to-target', exposure: 'public', protocol: 'HTTPS',
+        route: '/api/shared-canvas', dataClasses: ['data:canvas'],
+        authentication: '사용자 세션 참조', authorization: '서버 범위 검사',
+        encryption: 'TLS', initiator: '브라우저', evidenceRef: 'api/shared-canvas.js',
+      },
+    },
+  }
+  const visible = toExternalCanvasEdge(edge)
+  assert.equal(visible.trust_gateway.id, 'gateway:browser-api')
+  assert.equal(visible.trust_gateway.route, '/api/shared-canvas')
+  const hidden = toExternalCanvasEdge(edge, true)
+  assert.equal(Object.hasOwn(hidden, 'trust_gateway'), false)
+})
+
 console.log('Workflow Canvas self system map')
 
 t('self map creation is disabled without an exact configured owner id', () => {
@@ -3831,6 +3853,10 @@ t('get_canvas represents system ontology without claiming a live twin', () => {
     data: {
       label: '운영 DB', systemKind: 'database', purpose: '업무 원본 저장',
       environment: 'production', sourceKind: 'manual', provider: 'Supabase', externalRef: 'public.canvases',
+      trustZone: {
+        id: 'zone:private-data', kind: 'private-cloud', label: '사설 데이터 경계',
+        controlOwner: '프로젝트 운영자', evidenceRef: 'supabase-schema.sql',
+      },
       systemParts: [{
         id: 'orders-input', kind: 'input', label: '주문 입력', ref: 'orders.id',
         exposure: 'internal', sourceKind: 'manual', evidenceRef: '',
@@ -3842,6 +3868,7 @@ t('get_canvas represents system ontology without claiming a live twin', () => {
   assert.equal(result.environment, 'production')
   assert.equal(result.external_ref, 'public.canvases')
   assert.equal(result.system_parts[0].ref, 'orders.id')
+  assert.equal(result.trust_zone.id, 'zone:private-data')
   assert.equal(result.reality, 'declared')
 })
 }

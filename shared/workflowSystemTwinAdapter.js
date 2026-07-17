@@ -64,6 +64,7 @@ const ENGINE_BATCH_ITEM_IDS = Object.freeze([
   ...ENGINE_COMPONENT_NODE_IDS,
   ...ENGINE_COMPONENT_EDGE_IDS,
 ])
+const MAX_ENGINE_MIGRATION_OPERATIONS = 24
 
 const RESOURCE_PROPOSAL_DEFS = Object.freeze({
   api: {
@@ -157,6 +158,11 @@ function engineCapabilityMigrationItem(canvas) {
   })
   if (!stage) return null
 
+  const allMissingNodeIds = stage.nodeIds.filter((id) => !nodeIds.has(id))
+  const allMissingEdgeIds = stage.edgeIds.filter((id) => !edgeIds.has(id))
+  const missingNodeIds = allMissingNodeIds.slice(0, MAX_ENGINE_MIGRATION_OPERATIONS)
+  const missingEdgeIds = allMissingEdgeIds.slice(0, MAX_ENGINE_MIGRATION_OPERATIONS - missingNodeIds.length)
+
   const evidence = ['shared/engineRegistry.js', 'shared/capabilityMapper.js', 'scripts/test-engine-registry.mjs']
   const item = createDigitalTwinReviewItem({
     sourceId: WORKFLOW_SYSTEM_TWIN_SOURCE_ID,
@@ -165,19 +171,19 @@ function engineCapabilityMigrationItem(canvas) {
     changeType: 'added',
     severity: 'info',
     title: stage.title,
-    summary: stage.summary,
+    summary: `${stage.summary} 이번 묶음 ${missingNodeIds.length + missingEdgeIds.length}개${allMissingNodeIds.length + allMissingEdgeIds.length > MAX_ENGINE_MIGRATION_OPERATIONS ? ` · 남은 항목 ${allMissingNodeIds.length + allMissingEdgeIds.length - MAX_ENGINE_MIGRATION_OPERATIONS}개` : ''}.`,
     evidence,
     focus: null,
     status: stage.status,
     observation: {
       productVersion: WORKFLOW_ENGINE_REGISTRY.product.version,
       registrySchemaVersion: WORKFLOW_ENGINE_REGISTRY.schemaVersion,
-      missingNodeIds: stage.nodeIds.filter((id) => !nodeIds.has(id)),
-      missingEdgeIds: stage.edgeIds.filter((id) => !edgeIds.has(id)),
+      missingNodeIds,
+      missingEdgeIds,
+      totalMissing: allMissingNodeIds.length + allMissingEdgeIds.length,
     },
   })
-  const nodeOperations = stage.nodeIds
-    .filter((id) => !nodeIds.has(id))
+  const nodeOperations = missingNodeIds
     .map((id) => expectedEntityByNodeId.get(id))
     .filter(Boolean)
     .map((entity) => ({
@@ -185,8 +191,7 @@ function engineCapabilityMigrationItem(canvas) {
       label: `${entity.label} 추가`,
       node: materializeTwinBuildEntity(WORKFLOW_SYSTEM_TWIN_BUILD, entity, item),
     }))
-  const edgeOperations = stage.edgeIds
-    .filter((id) => !edgeIds.has(id))
+  const edgeOperations = missingEdgeIds
     .map((id) => expectedRelationByEdgeId.get(id))
     .filter(Boolean)
     .map((relation) => ({

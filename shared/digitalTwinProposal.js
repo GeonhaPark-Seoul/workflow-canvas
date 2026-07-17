@@ -6,6 +6,7 @@ import {
   validateSystemPartInput,
 } from './systemPartOntology.js'
 import { normalizeLogicalComponent } from './systemOntology.js'
+import { normalizeTrustGateway, normalizeTrustZone } from './trustTopology.js'
 
 export const DIGITAL_TWIN_PROPOSAL_SCHEMA_VERSION = 1
 
@@ -128,6 +129,14 @@ export function digitalTwinProposalLogicalComponentFingerprint(value) {
   return digitalTwinReviewFingerprint(normalizeLogicalComponent(value))
 }
 
+export function digitalTwinProposalTrustZoneFingerprint(value) {
+  return digitalTwinReviewFingerprint(normalizeTrustZone(value))
+}
+
+export function digitalTwinProposalTrustGatewayFingerprint(value) {
+  return digitalTwinReviewFingerprint(normalizeTrustGateway(value))
+}
+
 function normalizeOperation(operation) {
   if (!plainObject(operation)) throw new DigitalTwinProposalError('INVALID_OPERATION', '수정안 작업 형식이 올바르지 않습니다.')
   if (operation.action === 'add_node') {
@@ -162,6 +171,34 @@ function normalizeOperation(operation) {
       expectedNodeFingerprint: safeId(operation.expectedNodeFingerprint, '기존 노드 정체성 지문'),
       expectedLogicalComponentFingerprint: safeId(operation.expectedLogicalComponentFingerprint, '기존 엔진 계약 지문'),
       logicalComponent,
+    }
+  }
+  if (operation.action === 'sync_trust_zone') {
+    const trustZone = normalizeTrustZone(operation.trustZone)
+    if (!trustZone) {
+      throw new DigitalTwinProposalError('INVALID_TRUST_ZONE', '동기화할 신뢰영역 정보가 올바르지 않습니다.')
+    }
+    return {
+      action: 'sync_trust_zone',
+      label: safeText(operation.label, 180),
+      targetNodeId: safeId(operation.targetNodeId, '신뢰영역 대상 노드'),
+      expectedNodeFingerprint: safeId(operation.expectedNodeFingerprint, '기존 노드 정체성 지문'),
+      expectedTrustZoneFingerprint: safeId(operation.expectedTrustZoneFingerprint, '기존 신뢰영역 지문'),
+      trustZone,
+    }
+  }
+  if (operation.action === 'sync_trust_gateway') {
+    const trustGateway = normalizeTrustGateway(operation.trustGateway)
+    if (!trustGateway) {
+      throw new DigitalTwinProposalError('INVALID_TRUST_GATEWAY', '동기화할 게이트웨이 정보가 올바르지 않습니다.')
+    }
+    return {
+      action: 'sync_trust_gateway',
+      label: safeText(operation.label, 180),
+      edgeId: safeId(operation.edgeId, '게이트웨이 대상 연결선'),
+      expectedEdgeFingerprint: safeId(operation.expectedEdgeFingerprint, '기존 연결선 지문'),
+      expectedTrustGatewayFingerprint: safeId(operation.expectedTrustGatewayFingerprint, '기존 게이트웨이 지문'),
+      trustGateway,
     }
   }
   if (operation.action === 'add_part') {
@@ -221,7 +258,7 @@ function normalizeOperation(operation) {
   }
   throw new DigitalTwinProposalError(
     'UNSAFE_OPERATION',
-    '디지털 트윈 수정안은 새 노드·연결선·파츠 추가, 제한된 노드 근거·엔진 계약 동기화와 지문이 일치하는 파츠 제거·교체 및 연결선 교체만 허용합니다.',
+    '디지털 트윈 수정안은 새 노드·연결선·파츠 추가, 제한된 노드 근거·엔진 계약·신뢰경계 동기화와 지문이 일치하는 파츠 제거·교체 및 연결선 교체만 허용합니다.',
   )
 }
 
@@ -252,6 +289,8 @@ export function createDigitalTwinGraphProposal({
   const replacedEdgeIds = normalizedOperations.filter((operation) => operation.action === 'replace_edge').map((operation) => operation.edge.id)
   const bindingNodeIds = normalizedOperations.filter((operation) => operation.action === 'bind_node').map((operation) => operation.targetNodeId)
   const componentNodeIds = normalizedOperations.filter((operation) => operation.action === 'sync_logical_component').map((operation) => operation.targetNodeId)
+  const trustZoneNodeIds = normalizedOperations.filter((operation) => operation.action === 'sync_trust_zone').map((operation) => operation.targetNodeId)
+  const trustGatewayEdgeIds = normalizedOperations.filter((operation) => operation.action === 'sync_trust_gateway').map((operation) => operation.edgeId)
   const partIds = normalizedOperations
     .filter((operation) => ['add_part', 'replace_part', 'remove_part'].includes(operation.action))
     .map((operation) => `${operation.targetNodeId}:${operation.part?.id ?? operation.partId}`)
@@ -262,6 +301,10 @@ export function createDigitalTwinGraphProposal({
     || bindingNodeIds.some((id) => nodeIds.includes(id))
     || new Set(componentNodeIds).size !== componentNodeIds.length
     || componentNodeIds.some((id) => nodeIds.includes(id) || bindingNodeIds.includes(id))
+    || new Set(trustZoneNodeIds).size !== trustZoneNodeIds.length
+    || trustZoneNodeIds.some((id) => nodeIds.includes(id) || bindingNodeIds.includes(id) || componentNodeIds.includes(id))
+    || new Set(trustGatewayEdgeIds).size !== trustGatewayEdgeIds.length
+    || trustGatewayEdgeIds.some((id) => edgeIds.includes(id) || replacedEdgeIds.includes(id))
     || new Set(partIds).size !== partIds.length
   ) {
     throw new DigitalTwinProposalError('DUPLICATE_OPERATION', '수정안 안에 중복된 노드, 연결선 또는 시스템 파츠가 있습니다.')
@@ -282,6 +325,8 @@ export function createDigitalTwinGraphProposal({
       parts: partIds.length,
       ...(bindingNodeIds.length ? { bindings: bindingNodeIds.length } : {}),
       ...(componentNodeIds.length ? { components: componentNodeIds.length } : {}),
+      ...(trustZoneNodeIds.length ? { trustZones: trustZoneNodeIds.length } : {}),
+      ...(trustGatewayEdgeIds.length ? { trustGateways: trustGatewayEdgeIds.length } : {}),
     },
   }
   return {
@@ -373,7 +418,7 @@ export function planDigitalTwinGraphProposal(graph, proposal) {
   if (digitalTwinReviewFingerprint(proposalBody) !== fingerprint) {
     throw new DigitalTwinProposalError('PROPOSAL_CHANGED', '미리보기 이후 수정안 내용이 달라졌습니다. 다시 검토해야 합니다.')
   }
-  if (proposal.operations.some((operation) => !['add_node', 'add_edge', 'bind_node', 'sync_logical_component', 'add_part', 'replace_part', 'remove_part', 'replace_edge'].includes(operation?.action))) {
+  if (proposal.operations.some((operation) => !['add_node', 'add_edge', 'bind_node', 'sync_logical_component', 'sync_trust_zone', 'sync_trust_gateway', 'add_part', 'replace_part', 'remove_part', 'replace_edge'].includes(operation?.action))) {
     throw new DigitalTwinProposalError('UNSAFE_OPERATION', '허용되지 않은 수정안 작업은 적용할 수 없습니다.')
   }
   const currentNodes = Array.isArray(graph?.nodes) ? graph.nodes : []
@@ -397,6 +442,22 @@ export function planDigitalTwinGraphProposal(graph, proposal) {
       expectedNodeFingerprint: operation.expectedNodeFingerprint,
       expectedLogicalComponentFingerprint: operation.expectedLogicalComponentFingerprint,
       logicalComponent: operation.logicalComponent,
+    }))
+  const plannedTrustZones = proposal.operations
+    .filter((operation) => operation.action === 'sync_trust_zone')
+    .map((operation) => ({
+      targetNodeId: operation.targetNodeId,
+      expectedNodeFingerprint: operation.expectedNodeFingerprint,
+      expectedTrustZoneFingerprint: operation.expectedTrustZoneFingerprint,
+      trustZone: operation.trustZone,
+    }))
+  const plannedTrustGateways = proposal.operations
+    .filter((operation) => operation.action === 'sync_trust_gateway')
+    .map((operation) => ({
+      edgeId: operation.edgeId,
+      expectedEdgeFingerprint: operation.expectedEdgeFingerprint,
+      expectedTrustGatewayFingerprint: operation.expectedTrustGatewayFingerprint,
+      trustGateway: operation.trustGateway,
     }))
   const plannedEdgeReplacements = proposal.operations
     .filter((operation) => operation.action === 'replace_edge')
@@ -427,6 +488,8 @@ export function planDigitalTwinGraphProposal(graph, proposal) {
   const addEdges = []
   const nodeBindings = []
   const logicalComponentUpdates = []
+  const trustZoneUpdates = []
+  const trustGatewayUpdates = []
   const addParts = []
   const replaceParts = []
   const removeParts = []
@@ -508,6 +571,28 @@ export function planDigitalTwinGraphProposal(graph, proposal) {
     logicalComponentUpdates.push(planned)
   }
 
+  for (const planned of plannedTrustZones) {
+    const existing = currentNodeById.get(planned.targetNodeId)
+    if (!existing) {
+      throw new DigitalTwinProposalError('NODE_MISSING', `신뢰영역을 동기화할 노드 ${planned.targetNodeId}를 찾을 수 없습니다.`)
+    }
+    if (existing.type !== 'system') {
+      throw new DigitalTwinProposalError('INVALID_TRUST_ZONE_TARGET', '신뢰영역은 시스템 Asset 노드에만 동기화할 수 있습니다.')
+    }
+    const currentZone = normalizeTrustZone(existing.data?.trustZone)
+    if (digitalTwinProposalTrustZoneFingerprint(currentZone) === digitalTwinProposalTrustZoneFingerprint(planned.trustZone)) {
+      alreadyPresent.push(planned.targetNodeId)
+      continue
+    }
+    if (digitalTwinProposalNodeIdentityFingerprint(existing) !== planned.expectedNodeFingerprint) {
+      throw new DigitalTwinProposalError('NODE_CHANGED', `노드 ${planned.targetNodeId}의 정체성 정보가 미리보기 이후 달라졌습니다. 수정안을 다시 확인해야 합니다.`)
+    }
+    if (digitalTwinProposalTrustZoneFingerprint(currentZone) !== planned.expectedTrustZoneFingerprint) {
+      throw new DigitalTwinProposalError('TRUST_ZONE_CHANGED', `노드 ${planned.targetNodeId}의 신뢰영역이 미리보기 이후 달라졌습니다. 수정안을 다시 확인해야 합니다.`)
+    }
+    trustZoneUpdates.push(planned)
+  }
+
   const availableNodeIds = new Set([...currentNodeById.keys(), ...plannedNodes.map((node) => node.id)])
   for (const node of plannedNodes) {
     if (node.parentId && !availableNodeIds.has(node.parentId)) {
@@ -539,6 +624,31 @@ export function planDigitalTwinGraphProposal(graph, proposal) {
       throw new DigitalTwinProposalError('EDGE_CHANGED', `연결선 ${planned.edgeId}가 미리보기 이후 달라졌습니다. 수정안을 다시 확인해야 합니다.`)
     }
     replaceEdges.push(planned)
+  }
+
+  for (const planned of plannedTrustGateways) {
+    const existing = currentEdgeById.get(planned.edgeId)
+    if (!existing) throw new DigitalTwinProposalError('EDGE_MISSING', `게이트웨이를 동기화할 연결선 ${planned.edgeId}를 찾을 수 없습니다.`)
+    const currentGateway = normalizeTrustGateway(existing.data?.trustGateway)
+    if (digitalTwinProposalTrustGatewayFingerprint(currentGateway) === digitalTwinProposalTrustGatewayFingerprint(planned.trustGateway)) {
+      alreadyPresent.push(planned.edgeId)
+      continue
+    }
+    if (digitalTwinProposalEdgeFingerprint(existing) !== planned.expectedEdgeFingerprint) {
+      throw new DigitalTwinProposalError('EDGE_CHANGED', `연결선 ${planned.edgeId}가 미리보기 이후 달라졌습니다. 수정안을 다시 확인해야 합니다.`)
+    }
+    if (digitalTwinProposalTrustGatewayFingerprint(currentGateway) !== planned.expectedTrustGatewayFingerprint) {
+      throw new DigitalTwinProposalError('TRUST_GATEWAY_CHANGED', `연결선 ${planned.edgeId}의 게이트웨이가 미리보기 이후 달라졌습니다. 수정안을 다시 확인해야 합니다.`)
+    }
+    const sourceZone = normalizeTrustZone(currentNodeById.get(existing.source)?.data?.trustZone)
+    const targetZone = normalizeTrustZone(currentNodeById.get(existing.target)?.data?.trustZone)
+    if (
+      sourceZone?.id !== planned.trustGateway.sourceZoneId
+      || targetZone?.id !== planned.trustGateway.targetZoneId
+    ) {
+      throw new DigitalTwinProposalError('TRUST_GATEWAY_ZONE_MISMATCH', `연결선 ${planned.edgeId}의 양쪽 신뢰영역과 게이트웨이 계약이 일치하지 않습니다.`)
+    }
+    trustGatewayUpdates.push(planned)
   }
 
   for (const planned of plannedParts) {
@@ -605,12 +715,14 @@ export function planDigitalTwinGraphProposal(graph, proposal) {
     edges: addEdges,
     nodeBindings,
     logicalComponentUpdates,
+    trustZoneUpdates,
+    trustGatewayUpdates,
     edgeReplacements: replaceEdges,
     parts: addParts,
     partReplacements: replaceParts,
     partRemovals: removeParts,
     alreadyPresent,
-    writesRequired: addNodes.length > 0 || addEdges.length > 0 || nodeBindings.length > 0 || logicalComponentUpdates.length > 0 || replaceEdges.length > 0 || addParts.length > 0 || replaceParts.length > 0 || removeParts.length > 0,
+    writesRequired: addNodes.length > 0 || addEdges.length > 0 || nodeBindings.length > 0 || logicalComponentUpdates.length > 0 || trustZoneUpdates.length > 0 || trustGatewayUpdates.length > 0 || replaceEdges.length > 0 || addParts.length > 0 || replaceParts.length > 0 || removeParts.length > 0,
   }
 }
 
@@ -637,7 +749,9 @@ export function applyDigitalTwinGraphProposal(graph, proposal) {
   const currentNodes = Array.isArray(graph?.nodes) ? graph.nodes : []
   const bindingByNode = new Map(plan.nodeBindings.map((planned) => [planned.targetNodeId, planned.binding]))
   const logicalComponentByNode = new Map(plan.logicalComponentUpdates.map((planned) => [planned.targetNodeId, planned.logicalComponent]))
+  const trustZoneByNode = new Map(plan.trustZoneUpdates.map((planned) => [planned.targetNodeId, planned.trustZone]))
   const edgeReplacementById = new Map(plan.edgeReplacements.map((planned) => [planned.edgeId, planned.edge]))
+  const trustGatewayByEdge = new Map(plan.trustGatewayUpdates.map((planned) => [planned.edgeId, planned.trustGateway]))
   const nodesWithBindings = currentNodes.map((node) => {
     const binding = bindingByNode.get(node.id)
     if (!binding) return node
@@ -648,7 +762,12 @@ export function applyDigitalTwinGraphProposal(graph, proposal) {
     if (!logicalComponent) return node
     return { ...node, data: { ...node.data, logicalComponent } }
   })
-  const nodesWithParts = nodesWithLogicalComponents.map((node) => {
+  const nodesWithTrustZones = nodesWithLogicalComponents.map((node) => {
+    const trustZone = trustZoneByNode.get(node.id)
+    if (!trustZone) return node
+    return { ...node, data: { ...node.data, trustZone } }
+  })
+  const nodesWithParts = nodesWithTrustZones.map((node) => {
     const additions = partsByNode.get(node.id)
     const replacements = replacementsByNode.get(node.id)
     const removals = removalsByNode.get(node.id)
@@ -670,13 +789,25 @@ export function applyDigitalTwinGraphProposal(graph, proposal) {
   return {
     nodes: [...nodesWithParts, ...plan.nodes],
     edges: [
-      ...(Array.isArray(graph?.edges) ? graph.edges : []).map((edge) => edgeReplacementById.get(edge.id) ?? edge),
+      ...(Array.isArray(graph?.edges) ? graph.edges : []).map((edge) => {
+        const replaced = edgeReplacementById.get(edge.id) ?? edge
+        const trustGateway = trustGatewayByEdge.get(edge.id)
+        return trustGateway
+          ? { ...replaced, data: { ...replaced.data, trustGateway } }
+          : replaced
+      }),
       ...plan.edges,
     ],
     appliedNodeIds: plan.nodes.map((node) => node.id),
     appliedNodeBindingIds: plan.nodeBindings.map((planned) => planned.targetNodeId),
     appliedLogicalComponentIds: plan.logicalComponentUpdates.map((planned) => planned.targetNodeId),
-    appliedEdgeIds: [...plan.edges.map((edge) => edge.id), ...plan.edgeReplacements.map((planned) => planned.edgeId)],
+    appliedTrustZoneIds: plan.trustZoneUpdates.map((planned) => planned.targetNodeId),
+    appliedTrustGatewayIds: plan.trustGatewayUpdates.map((planned) => planned.edgeId),
+    appliedEdgeIds: [
+      ...plan.edges.map((edge) => edge.id),
+      ...plan.edgeReplacements.map((planned) => planned.edgeId),
+      ...plan.trustGatewayUpdates.map((planned) => planned.edgeId),
+    ],
     appliedPartIds: [
       ...plan.parts.map((planned) => `${planned.targetNodeId}:${planned.part.id}`),
       ...plan.partReplacements.map((planned) => `${planned.targetNodeId}:${planned.part.id}`),

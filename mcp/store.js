@@ -494,6 +494,7 @@ export function toExternalCanvasNode(node, byId, hidden = false) {
       ...(data.provider ? { provider: data.provider } : {}),
       ...(data.externalRef ? { external_ref: data.externalRef } : {}),
       ...(data.systemParts?.length ? { system_parts: data.systemParts } : {}),
+      ...(data.trustZone ? { trust_zone: data.trustZone } : {}),
       reality: 'declared',
     }
   }
@@ -569,6 +570,7 @@ export function toExternalCanvasEdge(edge, hidden = false, trustedRuntime = null
     relation_confidence: relation.provenance.confidence.id,
     ...(relation.provenance.evidence ? { relation_evidence: relation.provenance.evidence } : {}),
     ...(relation.provenance.evidenceRef ? { relation_evidence_ref: relation.provenance.evidenceRef } : {}),
+    ...(safeData.trustGateway ? { trust_gateway: safeData.trustGateway } : {}),
     server_verified: relation.provenance.reality.id === 'verified',
     ...(relation.provenance.verifiedAt ? { verified_at: relation.provenance.verifiedAt } : {}),
   }
@@ -1030,6 +1032,7 @@ function applyPatch(n, patch, types) {
   delete data.systemPartRuntime
   delete data.canRunSystemChecks
   delete data.onCheckSystemPart
+  delete data.securityOverlay
   if (patch.label != null) data.label = patch.label
   if (patch.description != null) data.description = patch.description
   if (n.type === 'stage' && (patch.stageTypeIdx != null || patch.colorIdx != null)) {
