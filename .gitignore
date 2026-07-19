@@ -22,6 +22,9 @@ dist-ssr/
 # Claude Code workspace
 .claude/
 
+# graphify (local knowledge graph tool output)
+graphify-out/
+
 # Logs
 *.log
 npm-debug.log*

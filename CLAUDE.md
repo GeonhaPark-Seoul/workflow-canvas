@@ -13,6 +13,15 @@ Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-s
 - If direction or terminology in any other document conflicts with MASTER.md, MASTER.md wins; report the conflict instead of silently picking one.
 - Fixed role split (MASTER.md §12): the user + Claude Code do planning and write design briefs; **Codex designs and implements** from a brief and produces a patch + handoff document (base commit, SHA-256, verification results — keep the existing handoff conventions); **Claude Code reviews, commits, pushes, deploys**, guides SQL execution, and bumps the MASTER.md version. Codex does not commit, push, deploy, or run production SQL.
 
+## 0.5. Graphify Knowledge Graph (Local Tool)
+
+**Before grepping or opening many files to understand structure, query the local knowledge graph first.**
+
+- `graphify-out/graph.json` holds the extracted code+docs+SQL graph (git-ignored, local only).
+- Explore with: `graphify query "<question>"`, `graphify explain "<node>"`, `graphify path "A" "B"`, `graphify affected "<node>"` (impact of a change).
+- After code changes, refresh with `graphify update .` (local AST, no API cost). If `graphify-out/` is missing or stale, ask the user before a full re-extract (doc semantic pass uses the claude CLI).
+- The graph is a navigation aid, not a source of truth: MASTER.md still wins for direction; code wins for behavior. Do not cite INFERRED edges as fact.
+
 ## 1. Think Before Coding
 
 **Don't assume. Don't hide confusion. Surface tradeoffs.**
