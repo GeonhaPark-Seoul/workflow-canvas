@@ -31,7 +31,7 @@
       "lockedVersion": "12.11.1",
       "license": "MIT",
       "status": "approved-existing",
-      "decision": "Canvas graph rendering and interaction"
+      "decision": "Canvas map rendering and interaction"
     },
     {
       "name": "react",

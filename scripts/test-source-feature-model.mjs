@@ -2,7 +2,14 @@ import assert from 'node:assert/strict'
 
 import { deriveSourceFeatureModel } from '../shared/sourceFeatureModel.js'
 import { SOURCE_TWIN_MANIFEST } from '../shared/sourceTwinManifest.js'
-import { buildSourceTwinManifest } from './source-twin-scanner.mjs'
+import { runSourceLensWorkflow } from './source-lens-engine.mjs'
+
+const buildSourceTwinManifest = (files, options = {}) => runSourceLensWorkflow({
+  files,
+  previous: options.previous,
+  repository: options.repository,
+  sourceProfiles: options.sourceProfiles,
+}).manifest
 
 const workflowModel = deriveSourceFeatureModel(SOURCE_TWIN_MANIFEST)
 assert.deepEqual(workflowModel.summary, {

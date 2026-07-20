@@ -31,9 +31,9 @@
 
 ## 성능·payload
 
-- Component 설명을 각 파일 엔티티에 복제하지 않고, manifest에 Component 목록과 `moduleIds`만 한 번 저장했다.
+- Component 설명을 각 파일 Asset에 복제하지 않고, manifest에 Component 목록과 `moduleIds`만 한 번 저장했다.
 - `shared/sourceTwinManifest.js`: 2,654,132 bytes → 2,709,785 bytes, 55,653 bytes 증가(약 2.10%).
-- 브라우저의 기존 엔티티 조회 한도와 지연 열기 방식은 유지했다.
+- 브라우저의 기존 Asset 조회 한도와 지연 열기 방식은 유지했다.
 - Vite 출력의 기존 대형 chunk 경고는 남아 있으며 이번 변경으로 새 의존성이나 별도 chunk를 추가하지 않았다.
 
 ## SL-2 ~ SL-4 설계 방향

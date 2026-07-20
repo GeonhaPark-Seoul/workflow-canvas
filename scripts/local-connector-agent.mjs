@@ -8,11 +8,10 @@ import process from 'node:process'
 import { createInterface } from 'node:readline/promises'
 import { pathToFileURL } from 'node:url'
 import {
-  buildSourceTwinManifest,
-  readSourceRepositoryMetadata,
-  readSourceTwinWorkingTree,
-} from './source-twin-scanner.mjs'
+  runSourceLensRepositoryWorkflow,
+} from './source-lens-engine.mjs'
 import { localGitSyncDecision, normalizeLocalSourceManifest } from '../shared/localConnector.js'
+import { WORKFLOW_SOURCE_EDIT_CODE_PART_ADAPTER } from '../shared/workflowSourceEditCodePartAdapter.js'
 import {
   applyRegisteredSourceProperty,
   inspectRegisteredSourceProperty,
@@ -150,9 +149,10 @@ export function observeLocalGit(root, {
 }
 
 export function buildLocalConnectorManifest(root, previous = null) {
-  const manifest = buildSourceTwinManifest(readSourceTwinWorkingTree(root), {
+  const { manifest } = runSourceLensRepositoryWorkflow({
+    root,
     previous,
-    repository: readSourceRepositoryMetadata(root),
+    artifactAdapters: { codePartAnnotation: WORKFLOW_SOURCE_EDIT_CODE_PART_ADAPTER },
   })
   const normalized = normalizeLocalSourceManifest({
     ...manifest,

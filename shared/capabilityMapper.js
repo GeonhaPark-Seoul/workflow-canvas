@@ -8,7 +8,7 @@ export const ENGINE_CAPABILITY_MAP_GROUP = Object.freeze({
   x: 0,
   y: 1240,
   width: 3280,
-  height: 2040,
+  height: 2700,
 })
 
 const CLUSTER_WIDTH = 1070
@@ -62,11 +62,17 @@ function validateRegistry(registry, agentManifest) {
     agentsById.set(agent.id, agent)
   }
   for (const component of registry.components) {
+    if (!component.parentId && component.kind !== 'engine') {
+      throw new Error(`${component.id} 같은 상위 구성요소만 Engine일 수 있습니다.`)
+    }
+    if (component.parentId && component.kind === 'engine') {
+      throw new Error(`${component.id}은 Engine 안에 중첩된 Engine일 수 없습니다.`)
+    }
     if (component.parentId && !byId.has(component.parentId)) {
       throw new Error(`${component.id}의 상위 엔진을 찾을 수 없습니다.`)
     }
-    if (component.parentId && byId.get(component.parentId)?.parentId) {
-      throw new Error(`${component.id}은 현재 지원하는 2단계 제품 구성보다 깊습니다.`)
+    if (component.parentId && (byId.get(component.parentId)?.parentId || byId.get(component.parentId)?.kind !== 'engine')) {
+      throw new Error(`${component.id}의 상위 항목은 최상위 Engine이어야 합니다.`)
     }
     if (!component.parentId && (!Number.isInteger(component.display?.row) || !Number.isInteger(component.display?.column))) {
       throw new Error(`${component.id}의 제품 구성도 위치가 없습니다.`)

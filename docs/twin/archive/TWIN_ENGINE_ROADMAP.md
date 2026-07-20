@@ -1,21 +1,36 @@
-# Universal Twin Engine Roadmap
+# Universal Asset Engine Roadmap
+
+> **상태 안내:** 이 문서는 장기 제품 아이디어와 과거 설계를 보존하는 보조
+> 로드맵이다. 시스템 가져오기의 현재/목표 전체 순서와 Engine·AI·코드 책임은
+> [`SYSTEM_ONBOARDING_PROTOCOL.md`](../../protocols/SYSTEM_ONBOARDING_PROTOCOL.md)가 정본이다. 아래
+> `Engine pipeline`과 광범위한 Adapter 설명을 현재 단일 실행기나 최신 소유권 계약으로 읽지
+> 않는다. 남은 정합화는 [`TECHNICAL_DEBT.md`](../../governance/TECHNICAL_DEBT.md)의 `DOC-001`에서 추적한다.
 
 ## Product language
 
 - **System onboarding / 시스템 가져오기**: the user-facing act of connecting software or another operating system to Workflow Canvas.
-- **Twin adapter / 트윈 어댑터**: a provider-specific module that knows how to discover and operate one stack, such as GitHub + Vercel + Supabase.
-- **Twin build / 트윈 빌드**: deterministic discovery and normalization that produces a proposed digital twin.
-- **CODE / 코드 트윈**: a canvas entity bound to a versioned code, manifest, or Connector snapshot. It is a digital-twin identity link, not proof that the target is currently running.
+- **Adapter**: a provider-specific module that knows how to discover and operate one stack, such as GitHub + Vercel + Supabase.
+- **Asset Build**: deterministic discovery and normalization that produces a proposed Asset 원장.
+- **CODE / 코드 연결**: a canvas Asset bound to a versioned code, manifest, or Connector snapshot. It is a versioned identity link, not proof that the target is currently running.
 - **LIVE / 실행 관측**: a server-verified observation of an allowlisted external resource with a resource id and observation time. Browser-authored data cannot create it.
-- **Materialization / 지도 실체화**: applying an approved twin proposal to visible nodes, parts, edges, boundaries, and overlays.
+- **Materialization / 지도 실체화**: applying an approved proposal to visible nodes, parts, edges, boundaries, and overlays.
 - **Reconciliation / 상태 대조**: comparing observed reality with the current canvas and creating review items.
 - **Operation capability / 조작 능력**: a bounded action that can be planned, approved, executed, verified, and audited.
 
-The recommended user-facing phrase is **시스템 가져오기**. Internally, adapters perform a **twin build** and then **materialize** the result.
+The recommended user-facing phrase is **시스템 가져오기**. Internally, adapters perform an
+**Asset Build** and then **materialize** the result.
 
-User-facing engine names stay short: `Twin Core`, `Create Graph`, `Source Lens`, `Trust Map`, `LiveOps`, `Safe Operations`, and `Connector Bridge`. Internally, the registry distinguishes Engine, Contract, Resolver, Builder, Pipeline, Agent Skill, Hard Guardrail, Connector, and Manifest so a convenient product word does not erase technical responsibility. Logical-vs-physical representation and CODE-vs-LIVE evidence are independent axes; see [`architecture/TWIN_IDENTITY_AND_OBSERVATION.md`](architecture/TWIN_IDENTITY_AND_OBSERVATION.md).
+User-facing engine names stay short: `Asset Core`, `Draw Map`, `Source Lens`, `Trust Map`,
+`LiveOps`, `Safe Operations`, and `Connector Bridge`. Internally, the registry distinguishes
+Engine, Contract, Resolver, Builder, Pipeline, Agent Skill, Hard Guardrail, Connector, and
+Manifest so a convenient product word does not erase technical responsibility.
+Logical-vs-physical representation and CODE-vs-LIVE evidence are independent axes; see
+[`Asset Identity and Observation`](../architecture/TWIN_IDENTITY_AND_OBSERVATION.md).
 
-Twin Core 0.3 treats the registry-managed engine contract as a continuously reconcilable product record. Opening a supported system twin automatically compares version, maturity, inputs, outputs, compatibility and code/test evidence, then creates a bounded approval proposal when the canvas is stale. User-authored layout and narrative fields remain outside that automatic contract.
+Asset Core 0.3 treats the registry-managed engine contract as a continuously reconcilable product
+record. Opening a supported system map automatically compares version, maturity, inputs, outputs,
+compatibility and code/test evidence, then creates a bounded approval proposal when the canvas is
+stale. User-authored layout and narrative fields remain outside that automatic contract.
 
 ## Current commercial focus
 
@@ -23,19 +38,23 @@ The long-term ontology remains general enough for business and life operations, 
 
 ## Core principle
 
-The engine must not ask an AI to draw a plausible architecture from scratch. It first collects deterministic evidence, builds a canonical fact graph, marks unknowns, and then lets AI explain or organize those facts. A canvas element is never `live` merely because code declares it.
+The engine must not ask an AI to draw a plausible architecture from scratch. It first collects
+deterministic evidence, builds a canonical fact map, marks unknowns, and then lets AI explain or
+organize those facts. A canvas element is never `LIVE` merely because code declares it.
 
 Workflow Canvas is the first reference system. Engine code must remain reusable so a second application can be onboarded by adding an adapter rather than rewriting the canvas, review, security, or operation engines.
 
 ## Canonical ontology
 
-### Entity
+### Asset
 
 A thing with identity: application, service, process, database, table, queue, repository, deployment, user, device, warehouse, account, document, or physical asset. It is rendered primarily as a node.
 
 ### Capability
 
-Something an entity exposes or can do: data output, input, API endpoint, event source, status, control, credential requirement, or operation. It is rendered as a typed part/port attached to an entity.
+Something an Asset exposes or can do: data output, input, API endpoint, event source, status,
+control, credential requirement, or operation. It is rendered as a typed part/port attached to an
+Asset.
 
 ### Relation
 
@@ -65,7 +84,9 @@ Each crossing records direction, protocol, port/route, data classes, authenticat
 
 ### Evidence and observation
 
-Evidence says why the graph believes a fact: source path, schema declaration, provider API response, signed event, runtime trace, or human declaration. Observation records time-bound state. Reality levels remain distinct:
+Evidence says why the Asset 원장 believes a fact: source path, schema declaration, provider API
+response, signed event, runtime trace, or human declaration. Observation records time-bound state.
+Reality levels remain distinct:
 
 - declared
 - discovered
@@ -77,7 +98,8 @@ Evidence says why the graph believes a fact: source path, schema declaration, pr
 
 ### Policy and permission
 
-Rules that decide who or what may read, write, execute, share, or administer an entity/capability. Policies attach to gateways, capabilities, operations, and data classes.
+Rules that decide who or what may read, write, execute, share, or administer an Asset/capability.
+Policies attach to gateways, capabilities, operations, and data classes.
 
 ### Operation
 
@@ -91,15 +113,15 @@ A time-stamped occurrence such as heartbeat, fetch, build, deployment, request, 
 
 A threat is a potential misuse route, not a normal operational edge. A control blocks, detects, limits, or recovers from a threat. Threat overlays can answer “how could data leave this zone?” without mixing hypothetical paths with observed traffic.
 
-## Engine pipeline
+## 과거 목표 Engine pipeline — System Onboarding Protocol로 대체
 
 1. **Connect**: pair an adapter using the minimum permissions and select its scope.
 2. **Discover**: read code structure, schemas, infrastructure, provider metadata, and optional runtime telemetry without changing the target.
 3. **Normalize**: convert provider-specific findings into the canonical ontology.
 4. **Resolve identity**: preserve stable identities across renames, moves, deployments, and rescans.
-5. **Build topology**: derive entities, parts, relations, zones, gateways, policies, evidence, and unknown gaps.
+5. **Build topology**: derive Assets, parts, relations, zones, gateways, policies, evidence, and unknown gaps.
 6. **Explain**: generate evidence-bound labels for easy and developer modes.
-7. **Reconcile**: compare the twin build with the current canvas and preserve manual layout and annotations.
+7. **Reconcile**: compare the Asset Build result with the current canvas and preserve manual layout and annotations.
 8. **Review**: show additions, changes, removals, contradictions, risks, and operation capability changes.
 9. **Materialize**: apply only approved proposals and record engine/schema versions.
 10. **Observe**: ingest events, health, traces, metrics, and deployment state to verify declared behavior.
@@ -107,11 +129,11 @@ A threat is a potential misuse route, not a normal operational edge. A control b
 
 ## Adapter contract
 
-Every twin adapter eventually implements these bounded interfaces:
+Every Adapter eventually implements these bounded interfaces:
 
 - `describe`: provider, version, supported evidence, data classes, permissions, and operation capabilities
 - `discover`: read-only observations and evidence
-- `normalize`: provider findings to canonical graph records
+- `normalize`: provider findings to canonical Asset 원장 records
 - `reconcile`: stable identity hints and change proposals
 - `planOperation`: exact target, input, writes, exclusions, risk, expiry, and recovery
 - `executeOperation`: capability allowlist only; no arbitrary shell or URL from the cloud
@@ -124,7 +146,7 @@ The engine validates adapter output. Adapters cannot directly mutate canvas JSON
 
 ## Explanation modes
 
-One canonical fact graph supports two presentation modes selected by the user, not guessed by AI.
+One canonical fact map supports two presentation modes selected by the user, not guessed by AI.
 
 ### Easy mode
 
@@ -150,7 +172,7 @@ AI may translate canonical facts and suggest groupings. It may not create verifi
 
 ### Current source-code explanation baseline
 
-The source-code twin now uses deterministic explanations before active AI integration:
+The source-code view now uses deterministic explanations before active AI integration:
 
 - the main sentence states what a file does in the product rather than reporting function or import counts
 - a separate user-impact sentence explains what changes for the person using the product
@@ -159,14 +181,17 @@ The source-code twin now uses deterministic explanations before active AI integr
 - product-area and subsystem classification groups functionality before showing individual files and functions
 - Source Profile Contract v1 keeps Workflow Canvas-specific roles outside the common scanner and selects a versioned product profile from deterministic repository evidence
 - a FastAPI order-service reference profile validates different product areas and subsystems at file level while honestly marking Python as `structure-only`
-- each entity records the explanation rule plus bounded relative source-range and structural references
+- each Asset records the explanation rule plus bounded relative source-range and structural references
 - local connector payloads preserve explanations, classifications, and allowlisted evidence while excluding source bodies, absolute paths, and credential values
 
 This is the deterministic explanation baseline, not the completed semantic engine. A later version must split evidence per sentence, validate parsed evidence and runtime integration on a real second software stack, support additional languages, measure fallback quality, and persist user audience preferences. AI can improve wording only after the user grants the necessary source scope; its output remains an explanation artifact rather than verified system truth.
 
-### Future manipulable code twin
+### Future manipulable code model
 
-The repository browser should eventually become a **round-trip visual editor**: selected, explicitly supported code values appear as typed controls, and a control change produces a bounded source patch. A later direct-manipulation renderer can provide a Figma-like WYSIWYG surface over the same property schema. This is called a **조작 가능한 코드 디지털 트윈** in product language.
+The repository browser should eventually become a **round-trip visual editor**: selected,
+explicitly supported code values appear as typed controls, and a control change produces a bounded
+source patch. A later direct-manipulation renderer can provide a Figma-like WYSIWYG surface over the
+same property schema. This is called a **조작 가능한 코드 모델** in product language.
 
 The evolution order is read hierarchy, evidence-bound explanation, typed read-only properties, editable property controls, component preview, bidirectional direct manipulation, and finally AI-assisted multi-property changes. Every write remains AST/CST anchored, diff-first, branch-isolated, test-and-build verified, auditable, and recoverable. The visual editor never performs regex source replacement or edits production code directly.
 
@@ -224,7 +249,9 @@ Freedom grows by adding typed capabilities, not by exposing arbitrary code execu
 
 ## AI-ready orchestration model
 
-Active AI integration is intentionally deferred until deterministic twin reconciliation, trust boundaries, and the operation contract are reliable. The engine must still reserve the following execution model now so a future AI layer does not force a rewrite of the graph or security model.
+Active AI integration is intentionally deferred until deterministic Asset reconciliation, trust
+boundaries, and the operation contract are reliable. The engine must still reserve the following
+execution model now so a future AI layer does not force a rewrite of the map or security model.
 
 ### Execution modes
 
@@ -235,7 +262,8 @@ Active AI integration is intentionally deferred until deterministic twin reconci
 - **Continuous**: an explicitly approved long-running agent holds a renewable lease and heartbeat. It is reserved for work that truly needs ongoing observation or coordination.
 - **Human/manual**: a person performs or confirms the step. Human transfer is modeled as a real gateway rather than an invisible exception.
 
-These are execution policies over the same entity, capability, event, and operation graph. They must not become unrelated node types with incompatible safety rules.
+These are execution policies over the same Asset, capability, event, and operation map. They must
+not become unrelated node types with incompatible safety rules.
 
 ### Canonical AI orchestration records
 
@@ -245,7 +273,7 @@ The future schema must support stable, provider-neutral records for:
 - `Trigger`: manual, schedule, event, threshold, webhook, or upstream operation
 - `ExecutionPolicy`: mode, concurrency, timeout, approval policy, retry, and recovery
 - `CapabilityGrant`: short-lived, least-privilege permissions issued for one run
-- `ContextSnapshot`: exact twin revision, evidence, and redacted data supplied to the AI
+- `ContextSnapshot`: exact Asset 원장 revision, evidence, and redacted data supplied to the AI
 - `AgentRun`: immutable run identity, state transitions, inputs, outputs, and verification
 - `Lease` and `Heartbeat`: exclusive ownership and liveness for continuous workers
 - `Budget`: token, money, time, API-call, and mutation limits with a kill switch
@@ -253,11 +281,13 @@ The future schema must support stable, provider-neutral records for:
 - `MemoryReference`: scoped, retained knowledge with provenance, expiry, and deletion rules
 - `Handoff`: a typed transfer between AI, automation, and people
 
-Prompts and model output are proposals or run artifacts, not system truth. Only deterministic evidence and independently verified operation results may promote a twin fact to runtime-verified status.
+Prompts and model output are proposals or run artifacts, not system truth. Only deterministic
+evidence and independently verified operation results may promote an Asset fact to
+runtime-verified status.
 
 ### AI run lifecycle
 
-1. Accept an approved trigger and bind it to a tenant, system, and twin revision.
+1. Accept an approved trigger and bind it to a tenant, system, and Asset 원장 revision.
 2. Capture a minimum, redacted context snapshot.
 3. Issue short-lived capability grants; never expose arbitrary shell, database, or URL access.
 4. Ask the AI for a typed plan or bounded result.
@@ -286,7 +316,9 @@ An external AI provider is an `external-saas` trust zone. Every context transfer
 
 ### AI activation gates
 
-Do not begin active AI execution until the engine has versioned twin identities, trustworthy reconciliation, gateway-aware data boundaries, the universal operation contract, event/run audit, tenant isolation, and budget enforcement. Then open capability in this order:
+Do not begin active AI execution until the engine has versioned Asset identities, trustworthy
+reconciliation, gateway-aware data boundaries, the universal operation contract, event/run audit,
+tenant isolation, and budget enforcement. Then open capability in this order:
 
 1. one-shot read and explanation
 2. one-shot proposal generation
@@ -299,7 +331,7 @@ This ordering preserves the commercial goal that users can eventually connect th
 
 ## Reference implementation sequence
 
-### Phase A - Secure Workflow Canvas reference twin
+### Phase A - Secure Workflow Canvas reference system map
 
 - harden the local connector
 - replace the copied terminal command with a separately signed desktop helper, native folder picker, short-lived pairing, stable device identity, login auto-start, and signed background updates
@@ -322,13 +354,27 @@ The future AI does not replace this helper or receive direct Mac access. Direct 
 
 ### Phase C - Extract the engine core
 
-Current progress: C1 establishes adapter contract v1 and a provider-neutral registry. C2 adds deterministic normalization, reference and trust-boundary validation, and a common reconciliation engine. C3 upgrades the canonical model to `TwinBuild v3`, adds sequential v0-to-v1-to-v2-to-v3 migration, separates data classes, policies, observations, events, threats, and controls, and preserves explicit logical-component metadata. It also establishes the universal operation lifecycle for direct UI, deterministic automation, and future AI initiators. Workflow Canvas is normalized as 54 entities, 9 parts, 56 relations, 3 data classes, 3 policies, 2 executable operations, 2 observations, 3 controls, and one threat. Twenty-five entities and eighteen containment relations form the registry-backed product-engine logical layer; they are never promoted to LIVE resources. Git synchronization and append-only system snapshots bind their signed plans to canonical operation-definition fingerprints. A second order-service fixture still reaches zero findings through staged common proposals while manual layout, notes, extra parts, and review decisions survive rescans. C4 adds Source Profile Contract v1: Workflow Canvas semantics now live outside the common scanner, and a FastAPI order-service profile proves a second product vocabulary without pretending that Python functions were parsed.
+Current progress: C1 establishes adapter contract v1 and a provider-neutral registry. C2 adds
+deterministic normalization, reference and trust-boundary validation, and a common reconciliation
+engine. C3 upgrades the canonical model to Asset 원장 v3; its wire schema code name is
+`TwinBuild v3`. It adds sequential v0-to-v1-to-v2-to-v3 migration, separates data classes, policies,
+observations, events, threats, and controls, and preserves explicit logical-component metadata. It
+also establishes the universal operation lifecycle for direct UI, deterministic automation, and
+future AI initiators. Workflow Canvas is normalized as 54 Assets, 9 parts, 56 relations, 3 data
+classes, 3 policies, 2 executable operations, 2 observations, 3 controls, and one threat.
+Twenty-five Assets and eighteen containment relations form the registry-backed product-engine
+logical layer; they are never promoted to LIVE resources. Git synchronization and append-only
+system snapshots bind their signed plans to canonical operation-definition fingerprints. A second
+order-service fixture still reaches zero findings through staged common proposals while manual
+layout, notes, extra parts, and review decisions survive rescans. C4 adds Source Profile Contract
+v1: Workflow Canvas semantics now live outside the common scanner, and a FastAPI order-service
+profile proves a second product vocabulary without pretending that Python functions were parsed.
 
 The future orchestration map's human approval, execution connector, test/review gate, runtime status/log, audit, stop/retry, and recovery concepts now share this operation contract. Conversation/context/planning and agent assignment remain deferred; when added, they cannot bypass the contract.
 
 - keep Workflow Canvas-specific source meaning behind its versioned Source Profile
 - create versioned canonical records and migrations
-- add golden fixture repositories and expected twin snapshots
+- add golden fixture repositories and expected Asset 원장 snapshots
 - prove manual layout and review decisions survive rescans
 
 ### Phase D - Onboard a second software stack

@@ -1,11 +1,15 @@
 import assert from 'node:assert/strict'
-import { buildSourceTwinManifest } from './source-twin-scanner.mjs'
+import { runSourceLensWorkflow } from './source-lens-engine.mjs'
 import { sourceCodePartsForModule } from '../shared/sourceCodeParts.js'
 import { sourceFlowsForModule } from '../shared/sourceFlows.js'
 import { createSourceModuleMaterializationItem } from '../shared/sourceModuleProposal.js'
 import { systemNodeShouldDim } from '../shared/systemOntology.js'
 import { deriveDefaultSystemLayer } from '../shared/systemLayers.js'
 import { explainSourceCodePartWithAi } from '../shared/sourceAiExplanation.js'
+import {
+  sourceCodePartsForModuleWithWorkflowEditPolicy,
+  WORKFLOW_SOURCE_EDIT_CODE_PART_ADAPTER,
+} from '../shared/workflowSourceEditCodePartAdapter.js'
 
 const files = new Map([
   ['package.json', JSON.stringify({ name: 'fixture-app', dependencies: { react: '^18.0.0' } })],
@@ -33,11 +37,15 @@ export const SOURCE_TWIN_EMPTY_MESSAGE = '일치하는 코드 실체 없음'
 `],
 ])
 
-const build = () => buildSourceTwinManifest(files, {
+const build = () => {
+  const result = runSourceLensWorkflow({
+    files,
   repository: { repositoryUrl: 'https://github.com/example/fixture-app', defaultBranch: 'main' },
-  includeCodePartCatalog: true,
-  includeFlowCatalog: true,
-})
+    outputs: { codeParts: true, flows: true },
+    artifactAdapters: { codePartAnnotation: WORKFLOW_SOURCE_EDIT_CODE_PART_ADAPTER },
+  })
+  return { ...result.manifest, codePartCatalog: result.codePartCatalog, flowCatalog: result.flowCatalog }
+}
 
 const first = build()
 const second = build()
@@ -56,10 +64,13 @@ assert.ok(module.parts.every((part) => part.evidenceRef.startsWith('source:src/e
 assert.equal(sourceCodePartsForModule(first.codePartCatalog, '__proto__'), null)
 const editableModule = sourceCodePartsForModule(first.codePartCatalog, 'file:shared/uiConstants.js')
 assert.equal(editableModule.parts.filter((part) => part.editable.eligible).length, 4)
+assert.ok(editableModule.parts.filter((part) => part.editable.eligible).every((part) => part.editable.property === null))
 assert.deepEqual(
   editableModule.parts.filter((part) => part.editable.eligible).map((part) => part.editable.propertyId).sort(),
   ['ui.source-twin.empty-message', 'ui.system-module.color', 'ui.system-node.default-height', 'ui.system-node.default-width'],
 )
+const editableView = sourceCodePartsForModuleWithWorkflowEditPolicy(first.codePartCatalog, 'file:shared/uiConstants.js')
+assert.ok(editableView.parts.filter((part) => part.editable.eligible).every((part) => part.editable.property?.id))
 
 const flowModule = sourceFlowsForModule(first.flowCatalog, moduleId)
 assert.ok(flowModule)

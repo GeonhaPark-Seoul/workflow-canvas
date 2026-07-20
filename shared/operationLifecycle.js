@@ -369,7 +369,7 @@ export function createOperationPlan(definitionValue, request, {
     capability: definition.capability,
     definitionFingerprint: definition.fingerprint,
     targetKey: nonSecretText(request.targetKey, '조작 대상 키', 300),
-    twinRevision: nonSecretText(request.twinRevision, '트윈 리비전', 180),
+    twinRevision: nonSecretText(request.twinRevision, 'Asset 원장 리비전', 180),
     stateFingerprint: safeFingerprint(request.stateFingerprint, '대상 상태'),
     inputFingerprint: safeFingerprint(request.inputFingerprint, '조작 입력'),
     inputSummary: nonSecretText(request.inputSummary, '조작 입력 요약', 500),
@@ -394,7 +394,7 @@ export function createOperationPlan(definitionValue, request, {
     nonce: nonSecretText(nonce || request.nonce, '조작 계획 nonce', 180),
   }
   if (!base.targetKey || !base.twinRevision || !base.nonce) {
-    throw new OperationContractError('INCOMPLETE_OPERATION_PLAN', '조작 계획에는 대상, 트윈 리비전, 고유 nonce가 필요합니다.')
+    throw new OperationContractError('INCOMPLETE_OPERATION_PLAN', '조작 계획에는 대상, Asset 원장 리비전, 고유 nonce가 필요합니다.')
   }
   const fingerprint = digitalTwinReviewFingerprint(base)
   return deepFreeze({ ...base, id: `plan:${fingerprint}`, fingerprint })

@@ -1,8 +1,3 @@
-import {
-  publicSourceEditableProperty,
-  sourceEditablePropertyDefinition,
-} from './workflowSourceEditableProperties.js'
-
 export const SOURCE_CODE_PART_SCHEMA_VERSION = 1
 
 export const SOURCE_CODE_PART_KIND_DEFS = Object.freeze([
@@ -56,10 +51,10 @@ export function normalizeSourceCodePart(value) {
   const lineStart = Math.max(1, Number(value.anchor?.lineStart) || 1)
   const lineEnd = Math.max(lineStart, Number(value.anchor?.lineEnd) || lineStart)
   if (!SAFE_ID.test(id) || !kind || !path || !nodeType || !/^[a-f0-9]{12,80}$/i.test(fingerprint)) return null
-  const editableDefinition = sourceEditablePropertyDefinition(value.editable?.propertyId)
-  const editableProperty = editableDefinition
-    ? publicSourceEditableProperty(editableDefinition, value.editable?.currentValue)
-    : null
+  const propertyId = text(value.editable?.propertyId, 180)
+  const currentValue = typeof value.editable?.currentValue === 'number' && Number.isFinite(value.editable.currentValue)
+    ? value.editable.currentValue
+    : typeof value.editable?.currentValue === 'string' ? text(value.editable.currentValue, 500) : undefined
   return {
     schemaVersion: SOURCE_CODE_PART_SCHEMA_VERSION,
     id,
@@ -79,11 +74,11 @@ export function normalizeSourceCodePart(value) {
     evidenceRef: `source:${path}#L${lineStart}${lineEnd > lineStart ? `-L${lineEnd}` : ''}`,
     editable: {
       schemaVersion: 1,
-      eligible: value.editable?.eligible === true && !!editableProperty,
-      propertyId: editableProperty?.id ?? '',
-      currentValue: editableProperty?.currentValue,
-      property: editableProperty,
-      reason: text(value.editable?.reason, 240) || (editableProperty ? '' : '현재 버전은 읽기 전용입니다.'),
+      eligible: value.editable?.eligible === true && !!propertyId,
+      propertyId,
+      currentValue,
+      property: null,
+      reason: text(value.editable?.reason, 240) || (propertyId ? '' : '현재 버전은 읽기 전용입니다.'),
     },
   }
 }

@@ -45,7 +45,7 @@ export function sanitizeTextFields(obj) {
   if (hasTrustZone || systemPlainFields.some((key) => Object.hasOwn(obj, key))) {
     const normalized = normalizeSystemNodeData(obj)
     // A patch must not gain defaults for fields it did not provide, otherwise
-    // editing only externalRef could silently reset the entity kind/source.
+    // Editing only externalRef could silently reset the Asset kind/source.
     for (const key of systemPlainFields) {
       if (Object.hasOwn(obj, key)) obj[key] = normalized[key]
     }

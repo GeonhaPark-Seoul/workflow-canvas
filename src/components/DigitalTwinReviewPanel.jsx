@@ -7,7 +7,7 @@ const SPLITTER_WIDTH = 6
 
 const CATEGORY_LABELS = {
   all: '전체',
-  entity: '실체',
+  entity: 'Asset',
   relation: '관계',
   resource: '자원',
   security: '보안',
@@ -31,7 +31,7 @@ const SEVERITY_COLORS = {
 const PROPOSAL_OPERATION_LABELS = {
   add_node: '노드 추가',
   add_edge: '관계 추가',
-  bind_node: '코드 트윈 연결',
+  bind_node: 'Asset 원장 근거 연결',
   sync_logical_component: '엔진 계약 동기화',
   add_part: '파츠 추가',
   replace_part: '파츠 교체',
@@ -86,7 +86,7 @@ function ReviewRow({
             <strong>{replacesExisting ? '변경 전 미리보기' : '추가 전 미리보기'}</strong>
             <span>
               노드 {item.proposal.counts.nodes} · 연결선 {item.proposal.counts.edges} · 파츠 {item.proposal.counts.parts ?? 0}
-              {(item.proposal.counts.bindings ?? 0) > 0 && ` · 트윈 연결 ${item.proposal.counts.bindings}`}
+              {(item.proposal.counts.bindings ?? 0) > 0 && ` · Asset 원장 근거 연결 ${item.proposal.counts.bindings}`}
               {(item.proposal.counts.components ?? 0) > 0 && ` · 엔진 계약 ${item.proposal.counts.components}`}
             </span>
           </div>
@@ -103,7 +103,7 @@ function ReviewRow({
             {syncsLogicalComponent && !replacesPart && !removesPart && !replacesEdge && !bindsNode
               ? '표시된 노드와 기존 엔진 계약의 지문이 미리보기와 같을 때만 Registry 관리 계약을 동기화합니다. 제목, 설명, 위치, 크기, 메모, 파츠, 연결선과 실행 상태는 바꾸지 않습니다.'
               : bindsNode && !replacesPart && !removesPart && !replacesEdge
-              ? '표시된 노드의 정체성 지문이 미리보기와 같을 때만 코드 근거 연결을 기록합니다. 위치, 크기, 설명, 메모와 파츠는 바꾸지 않습니다.'
+              ? '표시된 노드의 정체성 지문이 미리보기와 같을 때만 Asset 원장의 코드 근거 연결을 기록합니다. 위치, 크기, 설명, 메모와 파츠는 바꾸지 않습니다.'
               : replacesExisting
                 ? '표시된 파츠나 연결선의 현재 지문이 미리보기와 정확히 같을 때만 교체하거나 퇴역시키며, 양 끝 노드와 다른 지도 요소는 바꾸지 않습니다.'
               : '기존 필드는 바꾸거나 삭제하지 않고 표시된 노드·연결선·파츠만 덧붙입니다.'}
@@ -116,7 +116,7 @@ function ReviewRow({
                 type="button"
                 className="is-apply"
                 disabled={!!proposalPlanError}
-                title={syncsLogicalComponent ? '표시된 기존 노드의 엔진 계약만 안전하게 동기화' : bindsNode ? '표시된 기존 노드에 코드 트윈 근거만 안전하게 연결' : replacesExisting ? '표시된 파츠 또는 연결선만 안전하게 교체하거나 퇴역' : '표시된 새 노드, 연결선, 파츠만 현재 지도에 추가'}
+                title={syncsLogicalComponent ? '표시된 기존 노드의 엔진 계약만 안전하게 동기화' : bindsNode ? '표시된 기존 노드에 Asset 원장 근거만 안전하게 연결' : replacesExisting ? '표시된 파츠 또는 연결선만 안전하게 교체하거나 퇴역' : '표시된 새 노드, 연결선, 파츠만 현재 지도에 추가'}
                 onClick={() => onApplyProposal(item)}
               >
                 지도에 적용
@@ -135,7 +135,7 @@ function ReviewRow({
           <button
             type="button"
             className={proposalPreviewed ? 'is-proposal-active' : ''}
-            title="적용될 노드, 연결선, 파츠, 코드 트윈 연결과 엔진 계약을 저장하지 않고 캔버스에서 확인"
+            title="적용될 노드, 연결선, 파츠, Asset 원장 근거 연결과 엔진 계약을 저장하지 않고 캔버스에서 확인"
             onClick={() => onPreviewProposal(item)}
           >
             {proposalPreviewed ? '미리보기 중' : '수정안 보기'}
@@ -273,7 +273,7 @@ export default function DigitalTwinReviewPanel({
         </div>
 
         <div className="twin-review-counts">
-          <span>실체 <strong>{review.summary.node_findings}</strong></span>
+          <span>Asset <strong>{review.summary.node_findings}</strong></span>
           <span>관계 <strong>{review.summary.relation_findings}</strong></span>
           <span>미모델 <strong>{review.summary.unmodeled_resources}</strong></span>
         </div>

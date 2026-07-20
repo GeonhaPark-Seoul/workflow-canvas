@@ -136,7 +136,7 @@ function deepFreeze(value, seen = new WeakSet()) {
 }
 
 export function createTwinAdapterDescriptor(value) {
-  if (!plainObject(value)) throw new TwinAdapterContractError('INVALID_DESCRIPTOR', '트윈 어댑터 설명서가 없습니다.')
+  if (!plainObject(value)) throw new TwinAdapterContractError('INVALID_DESCRIPTOR', 'Twin Adapter Contract 설명서가 없습니다.')
   const contractVersion = positiveInteger(value.contractVersion, '어댑터 계약')
   if (contractVersion !== TWIN_ADAPTER_CONTRACT_VERSION) {
     throw new TwinAdapterContractError('CONTRACT_VERSION_MISMATCH', `어댑터 계약 v${contractVersion}은 현재 엔진에서 지원하지 않습니다.`)
@@ -148,12 +148,12 @@ export function createTwinAdapterDescriptor(value) {
     || TWIN_ENGINE_SCHEMA_VERSION < minimumEngineSchemaVersion
     || TWIN_ENGINE_SCHEMA_VERSION > maximumEngineSchemaVersion
   ) {
-    throw new TwinAdapterContractError('ENGINE_SCHEMA_INCOMPATIBLE', '트윈 어댑터와 현재 엔진 스키마 버전이 호환되지 않습니다.')
+    throw new TwinAdapterContractError('ENGINE_SCHEMA_INCOMPATIBLE', 'Twin Adapter Contract와 현재 엔진 스키마 버전이 호환되지 않습니다.')
   }
   const interfaces = uniqueIds(value.interfaces, '인터페이스', INTERFACE_IDS)
   for (const required of REQUIRED_INTERFACES) {
     if (!interfaces.includes(required)) {
-      throw new TwinAdapterContractError('MISSING_INTERFACE', `트윈 어댑터에 필수 인터페이스 ${required}가 없습니다.`)
+      throw new TwinAdapterContractError('MISSING_INTERFACE', `Twin Adapter Contract에 필수 인터페이스 ${required}가 없습니다.`)
     }
   }
   const descriptor = {
@@ -183,7 +183,7 @@ export function createTwinAdapterDescriptor(value) {
 export function createTwinAdapterRegistration({ descriptor, canInspect, load }) {
   const normalizedDescriptor = createTwinAdapterDescriptor(descriptor)
   if (typeof canInspect !== 'function' || typeof load !== 'function') {
-    throw new TwinAdapterContractError('INVALID_REGISTRATION', '트윈 어댑터 등록에는 검사 대상 판별기와 지연 로더가 필요합니다.')
+    throw new TwinAdapterContractError('INVALID_REGISTRATION', 'Twin Adapter Contract 등록에는 검사 대상 판별기와 지연 로더가 필요합니다.')
   }
   return Object.freeze({
     id: normalizedDescriptor.id,
@@ -247,7 +247,7 @@ export function createTwinAdapterRegistry(registrations) {
   ))
   const ids = normalized.map((registration) => registration.id)
   if (new Set(ids).size !== ids.length) {
-    throw new TwinAdapterContractError('DUPLICATE_ADAPTER', '같은 식별자의 트윈 어댑터를 두 번 등록할 수 없습니다.')
+    throw new TwinAdapterContractError('DUPLICATE_ADAPTER', '같은 식별자의 Twin Adapter Contract를 두 번 등록할 수 없습니다.')
   }
   const frozenRegistrations = Object.freeze(normalized)
   const descriptors = Object.freeze(normalized.map((registration) => registration.descriptor))

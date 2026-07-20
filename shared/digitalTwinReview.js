@@ -83,7 +83,7 @@ export function createDigitalTwinReviewItem({
 }) {
   const safeSourceId = safeKey(sourceId)
   const safeItemKey = safeKey(itemKey)
-  if (!safeSourceId || !safeItemKey) throw new Error('Digital twin review items require safe sourceId and itemKey values.')
+  if (!safeSourceId || !safeItemKey) throw new Error('Asset review items require safe sourceId and itemKey values.')
   const id = `${safeSourceId}::${safeItemKey}`
   const normalized = {
     id,

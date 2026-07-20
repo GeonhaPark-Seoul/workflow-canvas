@@ -140,7 +140,7 @@ function normalizeSource(value) {
     label: safeText(value.label, 160),
     systemKind: safeId(value.systemKind, '시스템 종류'),
     observationLevel: OBSERVATION_LEVELS.has(value.observationLevel) ? value.observationLevel : 'discovered',
-    rootEntityId: value.rootEntityId ? safeId(value.rootEntityId, '루트 엔티티') : null,
+    rootEntityId: value.rootEntityId ? safeId(value.rootEntityId, '루트 Asset') : null,
   }
   if (!source.adapterVersion || !source.label) {
     throw new TwinBuildError('INCOMPLETE_SOURCE', 'TwinBuild 출처에는 어댑터 버전과 이름이 필요합니다.')
@@ -188,11 +188,11 @@ function normalizePlacement(value, fallbackId) {
 }
 
 function normalizeEntity(value) {
-  if (!plainObject(value)) throw new TwinBuildError('INVALID_ENTITY', '엔티티 기록 형식이 올바르지 않습니다.')
-  const id = safeId(value.id, '엔티티')
+  if (!plainObject(value)) throw new TwinBuildError('INVALID_ENTITY', 'Asset 기록 형식이 올바르지 않습니다.')
+  const id = safeId(value.id, 'Asset')
   return withFingerprint({
     id,
-    kind: safeId(value.kind || 'service', '엔티티 종류'),
+    kind: safeId(value.kind || 'service', 'Asset 종류'),
     label: safeText(value.label, 180) || id,
     description: safeText(value.description, 500),
     purpose: safeText(value.purpose, 500),
@@ -203,7 +203,7 @@ function normalizeEntity(value) {
     sourceKind: ENTITY_SOURCE_IDS.has(value.sourceKind) ? value.sourceKind : 'manual',
     provider: safeText(value.provider, 160),
     externalRef: safeText(value.externalRef, 500),
-    parentId: value.parentId ? safeId(value.parentId, '부모 엔티티') : null,
+    parentId: value.parentId ? safeId(value.parentId, '부모 Asset') : null,
     trustZoneId: value.trustZoneId ? safeId(value.trustZoneId, '신뢰영역') : null,
     logicalComponent: normalizeLogicalComponent(value.logicalComponent),
     evidenceIds: uniqueIds(value.evidenceIds, '근거'),
@@ -239,7 +239,7 @@ function normalizePart(value) {
   }
   return withFingerprint({
     id,
-    entityId: safeId(value.entityId, '파츠 소유 엔티티'),
+    entityId: safeId(value.entityId, '파츠 소유 Asset'),
     kind: PART_KIND_IDS.has(value.kind) ? value.kind : 'connection',
     label: safeText(value.label, 120) || id,
     ref,
@@ -257,7 +257,7 @@ function normalizePart(value) {
 function normalizeEndpoint(value, label) {
   if (!plainObject(value)) throw new TwinBuildError('INVALID_RELATION_ENDPOINT', `${label} 정보가 없습니다.`)
   return {
-    entityId: safeId(value.entityId, `${label} 엔티티`),
+    entityId: safeId(value.entityId, `${label} Asset`),
     partId: value.partId ? safeId(value.partId, `${label} 파츠`) : null,
   }
 }
@@ -462,13 +462,13 @@ function requireReferences(build) {
       throw new TwinBuildError('DUPLICATE_PLACEMENT', `${label} 캔버스 식별자가 중복되었습니다.`)
     }
   }
-  requireUniquePlacement(build.entities, (item) => item.placement.nodeId, '엔티티')
+  requireUniquePlacement(build.entities, (item) => item.placement.nodeId, 'Asset')
   requireUniquePlacement(build.relations, (item) => item.placement.edgeId, '관계')
   const partPlacements = new Set()
   for (const part of build.parts) {
     const key = `${part.entityId}:${part.placement.partId}`
     if (partPlacements.has(key)) {
-      throw new TwinBuildError('DUPLICATE_PLACEMENT', `엔티티 ${part.entityId}의 파츠 캔버스 식별자가 중복되었습니다.`)
+      throw new TwinBuildError('DUPLICATE_PLACEMENT', `Asset ${part.entityId}의 파츠 캔버스 식별자가 중복되었습니다.`)
     }
     partPlacements.add(key)
   }
@@ -497,11 +497,11 @@ function requireReferences(build) {
     requireEvidence(record)
   }
   if (build.source.rootEntityId && !entityById.has(build.source.rootEntityId)) {
-    throw new TwinBuildError('MISSING_ROOT_ENTITY', 'TwinBuild 루트 엔티티를 찾을 수 없습니다.')
+    throw new TwinBuildError('MISSING_ROOT_ENTITY', 'Asset 원장의 루트 Asset을 찾을 수 없습니다.')
   }
   for (const entity of build.entities) {
     if (entity.parentId && !entityById.has(entity.parentId)) {
-      throw new TwinBuildError('MISSING_PARENT_ENTITY', `${entity.id}의 부모 엔티티 ${entity.parentId}가 없습니다.`)
+      throw new TwinBuildError('MISSING_PARENT_ENTITY', `${entity.id}의 부모 Asset ${entity.parentId}가 없습니다.`)
     }
     if (entity.trustZoneId && !zoneById.has(entity.trustZoneId)) {
       throw new TwinBuildError('MISSING_TRUST_ZONE', `${entity.id}의 신뢰영역 ${entity.trustZoneId}가 없습니다.`)
@@ -512,7 +512,7 @@ function requireReferences(build) {
     let parentId = entity.parentId
     while (parentId) {
       if (seen.has(parentId)) {
-        throw new TwinBuildError('CYCLIC_ENTITY_PARENT', `${entity.id}의 부모 계층이 순환합니다.`)
+        throw new TwinBuildError('CYCLIC_ENTITY_PARENT', `${entity.id}의 부모 Asset 계층이 순환합니다.`)
       }
       seen.add(parentId)
       parentId = entityById.get(parentId)?.parentId ?? null
@@ -525,7 +525,7 @@ function requireReferences(build) {
   }
   for (const part of build.parts) {
     if (!entityById.has(part.entityId)) {
-      throw new TwinBuildError('MISSING_PART_ENTITY', `${part.id}의 소유 엔티티 ${part.entityId}가 없습니다.`)
+      throw new TwinBuildError('MISSING_PART_ENTITY', `${part.id}의 소유 Asset ${part.entityId}가 없습니다.`)
     }
     for (const operationId of part.operationIds) {
       if (!operationIds.has(operationId)) {
@@ -537,13 +537,13 @@ function requireReferences(build) {
     const sourceEntity = entityById.get(relation.source.entityId)
     const targetEntity = entityById.get(relation.target.entityId)
     if (!sourceEntity || !targetEntity) {
-      throw new TwinBuildError('MISSING_RELATION_ENTITY', `${relation.id}의 양 끝 엔티티를 찾을 수 없습니다.`)
+      throw new TwinBuildError('MISSING_RELATION_ENTITY', `${relation.id}의 양 끝 Asset을 찾을 수 없습니다.`)
     }
     for (const [endpoint, entity] of [[relation.source, sourceEntity], [relation.target, targetEntity]]) {
       if (!endpoint.partId) continue
       const part = partById.get(endpoint.partId)
       if (!part || part.entityId !== entity.id) {
-        throw new TwinBuildError('INVALID_RELATION_PART', `${relation.id}의 파츠 연결점이 해당 엔티티에 속하지 않습니다.`)
+        throw new TwinBuildError('INVALID_RELATION_PART', `${relation.id}의 파츠 연결점이 해당 Asset에 속하지 않습니다.`)
       }
     }
     if (relation.gatewayId && !gatewayById.has(relation.gatewayId)) {
@@ -650,7 +650,7 @@ export function createTwinBuild(value) {
     gateways: recordList(value.gateways, '게이트웨이', normalizeGateway),
     dataClasses: recordList(value.dataClasses, '데이터 종류', normalizeDataClass),
     policies: recordList(value.policies, '정책', normalizePolicy),
-    entities: recordList(value.entities, '엔티티', normalizeEntity),
+    entities: recordList(value.entities, 'Asset', normalizeEntity),
     operations: recordList(value.operations, '조작', normalizeOperation),
     parts: recordList(value.parts, '파츠', normalizePart),
     relations: recordList(value.relations, '관계', normalizeRelation),

@@ -130,7 +130,7 @@ function engineCapabilityMigrationItem(canvas) {
     id: 'engine-layer',
     status: 'engine_layer_missing',
     title: '제품·엔진 구성층 추가',
-    summary: '논리 구성요소 전용 층과 Twin Core, Create Graph 등 상위 엔진을 추가합니다.',
+    summary: '논리 구성요소 전용 층과 Asset Core, Draw Map 등 상위 엔진을 추가합니다.',
     nodeIds: [ENGINE_CAPABILITY_MAP_GROUP_ID, ...ENGINE_TOP_NODE_IDS],
     edgeIds: [],
   }, {
@@ -503,7 +503,7 @@ function resourceProposal(resource, item, canvas) {
     data: {
       ...createSystemNodeData(definition.systemKind),
       label: normalizeSystemPlainText(resource.label || resource.key, 180),
-      description: '디지털 트윈 변경 검토에서 추가한 발견 자원',
+      description: 'Asset 원장 변경 검토에서 추가한 발견 자원',
       purpose: copy.purpose,
       responsibility: copy.responsibility,
       constraints: copy.constraints,
@@ -821,7 +821,7 @@ function resourceReviewItem(resource, canvas) {
     changeType: 'added',
     severity: resource.kind === 'credential-reference' ? 'attention' : 'info',
     title: `${resource.label ?? resource.key} · ${STATUS_LABELS.unmodeled}`,
-    summary: '현재 소스에서 발견됐지만 캔버스의 시스템 실체와 연결되지 않았습니다.',
+    summary: '현재 소스에서 발견됐지만 캔버스의 Asset과 연결되지 않았습니다.',
     evidence: resource.source_refs,
     focus: null,
     status: 'unmodeled',

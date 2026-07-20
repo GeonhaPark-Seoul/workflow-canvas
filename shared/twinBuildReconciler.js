@@ -123,7 +123,7 @@ function entityBindingBatchReview(build, candidates) {
     category: 'entity',
     changeType: 'changed',
     severity: 'attention',
-    title: `코드 트윈 연결 ${batch.length}개`,
+    title: `코드 Asset 연결 ${batch.length}개`,
     summary: `기존 노드의 위치, 크기, 설명과 메모는 유지하고 코드 근거 연결만 추가하거나 갱신합니다. 누락 ${missingCount}개${staleCount ? ` · 갱신 ${staleCount}개` : ''}.`,
     evidenceIds: [...new Set(batch.flatMap((candidate) => candidate.entity.evidenceIds ?? []))],
     focus: { nodeId: batch.find((candidate) => candidate.node.id === 'map-canvas-engine')?.node.id ?? batch[0].node.id },
@@ -143,7 +143,7 @@ function entityBindingBatchReview(build, candidates) {
       action: 'bind_node',
       targetNodeId: candidate.node.id,
       expectedNodeFingerprint: digitalTwinProposalNodeIdentityFingerprint(candidate.node),
-      label: `${candidate.entity.label} 코드 트윈 연결`,
+      label: `${candidate.entity.label} 코드 Asset 연결`,
       binding: expectedNode.data.digitalTwinBinding,
     }
   })
@@ -330,8 +330,8 @@ function entityReview(build, entity, canvas, nodeByEntityId) {
       severity: entity.placement.nodeType === 'group' ? 'attention' : 'info',
       title: `${entity.label} 지도 추가`,
       summary: parentPresent
-        ? '정규화된 시스템 실체가 현재 캔버스에 없습니다.'
-        : '부모 실체를 먼저 지도에 추가해야 이 실체를 안전하게 배치할 수 있습니다.',
+        ? '정규화된 시스템 Asset이 현재 캔버스에 없습니다.'
+        : '부모 Asset을 먼저 지도에 추가해야 이 Asset을 안전하게 배치할 수 있습니다.',
       evidenceIds: entity.evidenceIds,
       focus: null,
       status: parentPresent ? 'missing_on_canvas' : 'blocked_dependency',

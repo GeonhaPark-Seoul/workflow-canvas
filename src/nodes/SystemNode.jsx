@@ -437,7 +437,7 @@ export default function SystemNode({ data, selected, id }) {
         <span className="digital-twin-proposal-node-badge">보안 영역 미리보기</span>
       )}
       {!data.digitalTwinProposalPreview && !previewPartIds.size && !data.digitalTwinProposalPreviewLogicalComponent && !data.digitalTwinProposalPreviewTrustZone && data.digitalTwinProposalPreviewBinding && (
-        <span className="digital-twin-proposal-node-badge">트윈 연결 미리보기</span>
+        <span className="digital-twin-proposal-node-badge">Asset 원장 근거 연결 미리보기</span>
       )}
       {securityOverlay && !shapeOnly && (
         <span

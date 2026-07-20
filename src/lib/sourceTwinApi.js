@@ -1,5 +1,5 @@
 import { supabase } from './supabase.js'
-import { SOURCE_TWIN_OPERATION_CONFIRMATION } from '../../shared/sourceTwin.js'
+import { SOURCE_TWIN_OPERATION_CONFIRMATION } from '../../shared/systemStateSnapshot.js'
 
 async function sourceTwinRequest(path = '', options = {}) {
   const { data: { session } } = await supabase.auth.getSession()
@@ -14,7 +14,7 @@ async function sourceTwinRequest(path = '', options = {}) {
   })
   const body = await response.json().catch(() => ({}))
   if (!response.ok) {
-    const error = new Error(body.error || '소스 트윈 요청에 실패했습니다.')
+    const error = new Error(body.error || '소스 분석 요청에 실패했습니다.')
     error.code = body.code || 'SOURCE_TWIN_REQUEST_FAILED'
     error.status = response.status
     throw error

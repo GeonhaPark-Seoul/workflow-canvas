@@ -98,7 +98,7 @@ const findDuplicateEdge = (edges, source, target, relationIdentity) =>
     && storedEdgeRelationIdentity(edge) === relationIdentity
   ))
 
-// Teaching warning: for a radial graph, check whether same-depth stage nodes
+// Teaching warning: for a radial map, check whether same-depth stage nodes
 // share a single stageTypeIdx. Returns a warning string if mixing is detected,
 // or null when all levels are uniform. Pure function — no side effects.
 export function checkRadialLevelMixing(nodeInputs, edgeInputs) {
@@ -1193,7 +1193,7 @@ function buildEdge({
 
 // Auto heuristic: pick 'radial' when there is exactly one in-degree-0
 // structural node, it has out-degree >= 3, and there are at least 5 structural
-// nodes. Structural means a hierarchy stage or a system entity.
+// nodes. Structural means a hierarchy stage or a system Asset.
 function autoPreset(nodeInputs, edgeInputs) {
   const stageIds = new Set(nodeInputs.filter(isStructuralNode).map((n) => n.tmp_id))
   const stageEdges = (edgeInputs ?? []).filter((e) => stageIds.has(e.source) && stageIds.has(e.target))
@@ -1208,7 +1208,7 @@ function autoPreset(nodeInputs, edgeInputs) {
   return 'right'
 }
 
-// ── create_graph: whole graph in one call (1 read + 1 write) ─────────────────
+// ── create_graph: whole map in one call (1 read + 1 write) ───────────────────
 export async function createGraph(userId, canvasId, { nodes: nodeInputs, edges: edgeInputs = [], layout }) {
   const access = await resolveCanvasAccess(userId, canvasId)
   assertRegionEdit(access, access.row.nodes, { kind: 'graph' })

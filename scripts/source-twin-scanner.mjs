@@ -7,11 +7,8 @@ import { SOURCE_TWIN_SCHEMA_VERSION } from '../shared/sourceTwin.js'
 import { sourceProfileDescriptor } from '../shared/sourceProfileContract.js'
 import { buildSourceAssetHierarchy } from '../shared/sourceAssetHierarchy.js'
 import { compactSourceCodePart, SOURCE_CODE_PART_SCHEMA_VERSION, sourceCodePartSummary } from '../shared/sourceCodeParts.js'
-import {
-  normalizeSourceEditableValue,
-  sourceEditablePropertyForAnchor,
-} from '../shared/workflowSourceEditableProperties.js'
 import { SOURCE_FLOW_SCHEMA_VERSION } from '../shared/sourceFlows.js'
+import { SOURCE_FUNCTIONAL_CONTEXT_MANIFEST_PATH } from '../shared/sourceFunctionalContext.js'
 import { sourceTwinAreaCatalog, sourceTwinSubsystemCatalog } from '../shared/sourceTwinSemantics.js'
 import { DEFAULT_SOURCE_PROFILES, registeredSourceProfile } from './source-profiles/index.mjs'
 import {
@@ -40,10 +37,14 @@ const EXCLUDED_FILES = new Set([
   SOURCE_FEATURE_MANIFEST_PATH,
   SOURCE_CODE_PART_MANIFEST_PATH,
   SOURCE_FLOW_MANIFEST_PATH,
+  SOURCE_FUNCTIONAL_CONTEXT_MANIFEST_PATH,
   'shared/workflowSystemDiscoveryManifest.js',
 ])
 const JAVASCRIPT_EXTENSIONS = ['.js', '.jsx', '.mjs']
 const WRITE_METHODS = new Set(['insert', 'update', 'upsert', 'delete'])
+const UI_TEXT_ATTRIBUTE_NAMES = new Set(['aria-label', 'alt', 'placeholder', 'title'])
+const SCREEN_PATH_ATTRIBUTE_NAMES = new Set(['href', 'path', 'to'])
+const SCREEN_NAVIGATION_METHODS = new Set(['navigate', 'push', 'replace'])
 const DATABASE_IDENTIFIER_PATTERN = /^[a-zA-Z_][a-zA-Z0-9_]*$/
 const CREDENTIAL_PATTERN = /(?:KEY|TOKEN|SECRET|PASSWORD|CREDENTIAL)/i
 const MAX_SOURCE_FILE_BYTES = 2 * 1024 * 1024
@@ -53,6 +54,7 @@ function shouldInspect(relativePath) {
   if (EXCLUDED_FILES.has(relativePath)) return false
   if (relativePath.startsWith('scripts/fixtures/')) return false
   if (INCLUDED_ROOT_FILES.has(relativePath)) return true
+  if (/^(?:[^/]+|docs\/.+)\.mdx?$/i.test(relativePath)) return true
   if (/^[^/]+\.sql$/i.test(relativePath)) return true
   return /^(api|app|mcp|scripts|shared|src|tests)\/.*\.(css|js|jsx|mjs|py)$/i.test(relativePath)
 }
@@ -157,11 +159,11 @@ function importedNames(node) {
   )).filter(Boolean)
 }
 
-function parseJavaScript(relativePath, content) {
+function parseJavaScript(relativePath, content, codePartAnnotation = null) {
   const record = {
     imports: [], functions: [], exports: [], apiRoutes: [], dbTables: [], dbAccess: [], dbFunctions: [],
     env: [], securitySignals: [], externalApiRoutes: [], codeParts: [], importBindings: [], callSites: [],
-    renderSites: [], entrypoints: [], parseError: '',
+    renderSites: [], entrypoints: [], uiTexts: [], screenPaths: [], parseError: '',
   }
   let ast
   try {
@@ -230,21 +232,16 @@ function parseJavaScript(relativePath, content) {
     let editable = { schemaVersion: 1, eligible: false, propertyId: '', reason: '등록되지 않은 코드는 읽기 전용입니다.' }
     if (kind === 'declaration' && node.type === 'VariableDeclaration' && node.declarations?.length === 1) {
       const declaration = node.declarations[0]
-      const definition = sourceEditablePropertyForAnchor(relativePath, nodeName(declaration.id))
       const literal = declaration.init
       const rawValue = literal?.type === 'NumericLiteral' || literal?.type === 'StringLiteral'
         ? literal.value
         : undefined
-      const normalizedValue = normalizeSourceEditableValue(definition, rawValue)
-      if (definition && normalizedValue.valid) {
-        editable = {
-          schemaVersion: 1,
-          eligible: true,
-          propertyId: definition.id,
-          currentValue: normalizedValue.value,
-          reason: '',
-        }
-      }
+      const annotation = codePartAnnotation?.annotateDeclaration?.({
+        path: relativePath,
+        exportName: nodeName(declaration.id),
+        rawValue,
+      })
+      if (annotation?.eligible === true && annotation.propertyId) editable = annotation
     }
     record.codeParts.push({
       schemaVersion: SOURCE_CODE_PART_SCHEMA_VERSION,
@@ -274,6 +271,27 @@ function parseJavaScript(relativePath, content) {
       lineEnd: node.loc.end.line,
       fingerprint: hash(redactedForFingerprint(content.slice(node.start, node.end))),
     })
+  }
+  const addUiText = (value, node) => {
+    const text = String(value ?? '').replace(/\s+/g, ' ').trim().slice(0, 180)
+    if (text.length < 2 || !/[\p{L}\p{N}]/u.test(text)) return
+    if (
+      /^#[0-9a-f]{3,8}$/i.test(text)
+      || /^(?:\d+(?:\.\d+)?(?:px|rem|em|%)\s+)?(?:solid|dashed|dotted)\s+#[0-9a-f]{3,8}$/i.test(text)
+    ) return
+    record.uiTexts.push({ text, line: node?.loc?.start?.line ?? 1 })
+  }
+  const addScreenPath = (value, node) => {
+    const route = String(value ?? '').trim().split(/[?#]/)[0]
+    if (
+      route.length < 2
+      || route.length > 180
+      || !route.startsWith('/')
+      || route.startsWith('//')
+      || /^\/api(?:\/|$)/i.test(route)
+      || /\s/.test(route)
+    ) return
+    record.screenPaths.push({ path: route, line: node?.loc?.start?.line ?? 1 })
   }
 
   const visit = (node, ancestors = []) => {
@@ -332,6 +350,9 @@ function parseJavaScript(relativePath, content) {
       }
       if (calleeName === 'require' && firstString) record.imports.push({ source: firstString, names: ['require'], dynamic: true })
       if (calleeName === 'fetch' && firstString.startsWith('/api/')) record.externalApiRoutes.push(firstString.split('?')[0])
+      if (SCREEN_NAVIGATION_METHODS.has(calleeName) || SCREEN_NAVIGATION_METHODS.has(property)) {
+        addScreenPath(firstString, node)
+      }
       if ((calleeName === 'fetch' || calleeName === 'require') && firstString) addCodePart('resource', node, ancestors, firstString)
       if (calleeName === 'eval') record.securitySignals.push('dynamic-code-eval')
       if (calleeName === 'Function' && ancestors.some((ancestor) => ancestor.type === 'NewExpression')) record.securitySignals.push('dynamic-function-constructor')
@@ -370,6 +391,9 @@ function parseJavaScript(relativePath, content) {
     }
     if (node.type === 'JSXAttribute') {
       const name = nodeName(node.name)
+      const literal = stringArgument(node.value)
+      if (UI_TEXT_ATTRIBUTE_NAMES.has(name) && literal) addUiText(literal, node)
+      if (SCREEN_PATH_ATTRIBUTE_NAMES.has(name) && literal) addScreenPath(literal, node)
       if (/^on[A-Z]/.test(name)) {
         const expression = node.value?.expression
         const handler = nodeName(expression)
@@ -382,6 +406,13 @@ function parseJavaScript(relativePath, content) {
         })
       }
     }
+    if (node.type === 'JSXText') addUiText(node.value, node)
+    if (
+      node.type === 'StringLiteral'
+      && ancestors.some((ancestor) => ancestor.type === 'JSXExpressionContainer')
+      && !ancestors.some((ancestor) => ancestor.type === 'JSXAttribute')
+      && !ancestors.some((ancestor) => ['ObjectExpression', 'ObjectProperty'].includes(ancestor.type))
+    ) addUiText(node.value, node)
     if (node.type === 'JSXOpeningElement') {
       const component = jsxName(node.name)
       if (component && /^[A-Z]/.test(component)) {
@@ -413,6 +444,12 @@ function parseJavaScript(relativePath, content) {
   record.callSites.sort((left, right) => left.line - right.line || compareSourceTwinText(`${left.caller}:${left.callee}`, `${right.caller}:${right.callee}`))
   record.renderSites.sort((left, right) => left.line - right.line || compareSourceTwinText(left.component, right.component))
   record.entrypoints.sort((left, right) => left.line - right.line || compareSourceTwinText(`${left.kind}:${left.label}`, `${right.kind}:${right.label}`))
+  record.uiTexts = [...new Map(record.uiTexts.map((item) => [`${item.text}:${item.line}`, item])).values()]
+    .sort((left, right) => left.line - right.line || compareSourceTwinText(left.text, right.text))
+    .slice(0, 120)
+  record.screenPaths = [...new Map(record.screenPaths.map((item) => [`${item.path}:${item.line}`, item])).values()]
+    .sort((left, right) => left.line - right.line || compareSourceTwinText(left.path, right.path))
+    .slice(0, 80)
   for (const key of ['dbTables', 'dbFunctions', 'env', 'securitySignals', 'externalApiRoutes']) record[key] = unique(record[key])
   record.dbAccess = [...new Map(record.dbAccess.map((item) => [`${item.table}:${item.operation}`, item])).values()]
     .sort((left, right) => compareSourceTwinText(`${left.table}:${left.operation}`, `${right.table}:${right.operation}`))
@@ -779,6 +816,7 @@ export function buildSourceTwinManifest(filesInput, {
   sourceProfiles = DEFAULT_SOURCE_PROFILES,
   includeCodePartCatalog = false,
   includeFlowCatalog = false,
+  codePartAnnotation = null,
 } = {}) {
   const files = filesInput instanceof Map ? filesInput : new Map(Object.entries(filesInput ?? {}))
   const project = sourceTwinProjectIdentity(files)
@@ -800,7 +838,7 @@ export function buildSourceTwinManifest(filesInput, {
       throw new Error(`Source Profile ${profile.id}@${profile.version}이 ${language} 분석을 선언했지만 등록된 parser가 없습니다.`)
     }
     const parsed = declaredAnalysisLevel === 'parsed' && JAVASCRIPT_EXTENSIONS.includes(path.posix.extname(relativePath))
-      ? parseJavaScript(relativePath, content)
+      ? parseJavaScript(relativePath, content, codePartAnnotation)
       : declaredAnalysisLevel === 'parsed' && language === 'sql' ? parseSql(content) : {}
     const analysisStatus = declaredAnalysisLevel === 'parsed'
       ? (parsed.parseError ? 'failed' : 'parsed')
@@ -830,6 +868,8 @@ export function buildSourceTwinManifest(filesInput, {
       callSites: parsed.callSites ?? [],
       renderSites: parsed.renderSites ?? [],
       entrypoints: parsed.entrypoints ?? [],
+      uiTexts: parsed.uiTexts ?? [],
+      screenPaths: parsed.screenPaths ?? [],
       parseError: parsed.parseError ?? '',
       analysisStatus,
     })
@@ -893,6 +933,8 @@ export function buildSourceTwinManifest(filesInput, {
         dbFunctions: unique(record.dbFunctions),
         environmentVariables: unique(record.env),
         securitySignals: unique(record.securitySignals),
+        uiTexts: record.uiTexts,
+        screenPaths: record.screenPaths,
         parseStatus: record.analysisStatus,
       },
     }))
@@ -1206,6 +1248,8 @@ export function buildSourceTwinManifest(filesInput, {
       codeParts: codePartArtifacts.index.partCount,
       flowEntrypoints: flowArtifacts.index.entrypointCount,
       flowRelations: flowArtifacts.index.relationCount,
+      uiTexts: records.reduce((total, record) => total + record.uiTexts.length, 0),
+      screenPaths: unique(records.flatMap((record) => record.screenPaths.map((item) => item.path))).length,
     },
     changeSet: {
       baseManifestId: previous?.id ?? null,

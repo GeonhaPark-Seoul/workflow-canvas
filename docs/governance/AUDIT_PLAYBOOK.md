@@ -6,7 +6,7 @@
 
 ## 1. 상시 규칙 (매 배치마다 — 점검일이 아니어도)
 
-구현·검수 중 다음을 발견하면 **그 자리에서** `docs/TECHNICAL_DEBT.md`의
+구현·검수 중 다음을 발견하면 **그 자리에서** `docs/governance/TECHNICAL_DEBT.md`의
 `Code quality` 섹션에 `QUAL-NNN` 항목으로 기록한다 (지우지 않고 상태만 갱신 —
 장부 규칙 동일):
 

@@ -2,7 +2,7 @@ import { normalizeOperationDefinition } from './operationLifecycle.js'
 import {
   SOURCE_TWIN_OPERATION_CONFIRMATION,
   SOURCE_TWIN_SNAPSHOT_OPERATION,
-} from './sourceTwin.js'
+} from './systemStateSnapshot.js'
 
 export const WORKFLOW_GIT_SYNC_OPERATION_ID = 'operation:workflow-git-sync'
 export const WORKFLOW_GIT_SYNC_CONFIRMATION = 'QUEUE_LOCAL_GIT_SYNC'

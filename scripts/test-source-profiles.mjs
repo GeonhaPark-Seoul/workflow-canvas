@@ -7,12 +7,19 @@ import {
   SOURCE_PROFILE_CONTRACT_VERSION,
 } from '../shared/sourceProfileContract.js'
 import { groupSourceTwinEntitiesByArea, groupSourceTwinEntitiesBySubsystem } from '../shared/sourceTwinSemantics.js'
-import { buildSourceTwinManifest } from './source-twin-scanner.mjs'
+import { runSourceLensWorkflow } from './source-lens-engine.mjs'
 import {
   DEFAULT_SOURCE_PROFILES,
   GENERIC_SOURCE_PROFILE,
   registeredSourceProfile,
 } from './source-profiles/index.mjs'
+
+const buildSourceTwinManifest = (files, options = {}) => runSourceLensWorkflow({
+  files,
+  previous: options.previous,
+  repository: options.repository,
+  sourceProfiles: options.sourceProfiles,
+}).manifest
 
 const workflowFiles = new Map([
   ['package.json', JSON.stringify({ name: 'workflow-canvas' })],
@@ -20,11 +27,13 @@ const workflowFiles = new Map([
 ])
 const workflowSelection = registeredSourceProfile({ project: { name: 'workflow-canvas' }, files: workflowFiles })
 assert.equal(workflowSelection.profile.id, 'workflow-canvas')
-assert.equal(workflowSelection.profile.version, '0.7.0')
+assert.equal(workflowSelection.profile.version, '0.9.0')
 assert.ok(workflowSelection.profile.components.some((item) => item.id === 'engine-source-lens'))
+assert.ok(workflowSelection.profile.capabilities.includes('source-analysis-workflow-v1'))
 assert.ok(workflowSelection.profile.capabilities.includes('code-part-translation'))
 assert.ok(workflowSelection.profile.capabilities.includes('static-flow-discovery'))
-assert.ok(workflowSelection.profile.capabilities.includes('registered-property-roundtrip'))
+assert.ok(workflowSelection.profile.capabilities.includes('functional-context-bootstrap'))
+assert.equal(workflowSelection.profile.capabilities.includes('registered-property-roundtrip'), false)
 assert.equal(workflowSelection.profile.featureModel.schemaVersion, 1)
 assert.deepEqual(workflowSelection.matchEvidence, ['package:workflow-canvas'])
 

@@ -849,7 +849,7 @@ export function layoutGraph({ newNodes, newEdges, existingNodes, colGap = 320, r
   // rules, so we only need to pass BFS level info (for radial) or null (others).
   {
     // For radial, reconstruct BFS level from the pos entries: root has no dir
-    // and level 0; other nodes' levels are inferred by BFS on the stage graph.
+    // and level 0; other nodes' levels are inferred by BFS on the stage map.
     let avoidLevel = null
     let avoidRootId = null
     if (preset === 'radial') {

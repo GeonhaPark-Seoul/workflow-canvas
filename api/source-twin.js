@@ -1,6 +1,6 @@
 import { admin, resolveBrowserUser } from '../mcp/shareAccess.js'
 import { SOURCE_CODE_PART_MANIFEST } from '../shared/sourceCodePartManifest.js'
-import { sourceCodePartsForModule } from '../shared/sourceCodeParts.js'
+import { sourceCodePartsForModuleWithWorkflowEditPolicy } from '../shared/workflowSourceEditCodePartAdapter.js'
 import { SOURCE_FLOW_MANIFEST } from '../shared/sourceFlowManifest.js'
 import { sourceFlowsForModule } from '../shared/sourceFlows.js'
 import { explainSourceCodePartWithAi } from '../shared/sourceAiExplanation.js'
@@ -57,7 +57,7 @@ export default async function handler(req, res) {
     }
     if (req.method === 'GET' && req.query.mode === 'code-parts') {
       const moduleId = typeof req.query.module_id === 'string' ? req.query.module_id : ''
-      const module = sourceCodePartsForModule(SOURCE_CODE_PART_MANIFEST, moduleId)
+      const module = sourceCodePartsForModuleWithWorkflowEditPolicy(SOURCE_CODE_PART_MANIFEST, moduleId)
       if (!module) return send(res, 404, { error: '코드 모듈을 찾을 수 없습니다.', code: 'SOURCE_MODULE_NOT_FOUND' })
       return send(res, 200, { module })
     }
@@ -73,7 +73,7 @@ export default async function handler(req, res) {
     }
     if (req.body?.action === 'explain_code_part') {
       if (!allowAiRequest(user.id)) return send(res, 429, { error: 'AI 설명 요청은 분당 6회까지 가능합니다.', code: 'SOURCE_AI_RATE_LIMIT' })
-      const module = sourceCodePartsForModule(SOURCE_CODE_PART_MANIFEST, typeof req.body.module_id === 'string' ? req.body.module_id : '')
+      const module = sourceCodePartsForModuleWithWorkflowEditPolicy(SOURCE_CODE_PART_MANIFEST, typeof req.body.module_id === 'string' ? req.body.module_id : '')
       const part = module?.parts?.find((item) => item.id === req.body.part_id)
       if (!part) return send(res, 404, { error: '설명할 코드 파츠를 찾을 수 없습니다.', code: 'SOURCE_CODE_PART_NOT_FOUND' })
       try {
@@ -123,12 +123,12 @@ export default async function handler(req, res) {
       })
       return send(res, result.created ? 201 : 200, result)
     }
-    return send(res, 400, { error: '지원하지 않는 소스 트윈 작업입니다.', code: 'INVALID_ACTION' })
+    return send(res, 400, { error: '지원하지 않는 소스 분석 작업입니다.', code: 'INVALID_ACTION' })
   } catch (error) {
     if (error instanceof SourceTwinError || error instanceof LocalConnectorError || error instanceof SystemOperationPlanError) {
       return send(res, error.status, { error: error.message, code: error.code })
     }
     console.error('[source-twin] request failed:', error)
-    return send(res, 500, { error: '소스 트윈을 처리하지 못했습니다.', code: 'INTERNAL_ERROR' })
+    return send(res, 500, { error: '소스 분석 요청을 처리하지 못했습니다.', code: 'INTERNAL_ERROR' })
   }
 }

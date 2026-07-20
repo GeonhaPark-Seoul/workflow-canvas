@@ -221,7 +221,7 @@ function mapNodes(engineCapabilityMap) {
     }),
     systemNode('map-canvas-engine', 'map-group-experience', 675, 65, 'frontend', 'React Flow 캔버스 엔진', {
       purpose: '노드·연결선의 배치, 선택, 이동, 확대·축소를 렌더링한다.',
-      responsibility: '2D 그래프 상호작용과 화면 좌표계',
+      responsibility: '2D 지도 상호작용과 화면 좌표계',
       constraints: '저장·권한의 최종 판정자가 아님',
       evidence: 'ReactFlow nodeTypes·edgeTypes 구성',
       provider: '@xyflow/react',

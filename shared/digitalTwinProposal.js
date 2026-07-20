@@ -148,12 +148,12 @@ function normalizeOperation(operation) {
   if (operation.action === 'bind_node') {
     const binding = normalizeDigitalTwinBinding(operation.binding)
     if (!binding) {
-      throw new DigitalTwinProposalError('INVALID_TWIN_BINDING', '노드에 연결할 디지털 트윈 근거가 올바르지 않습니다.')
+      throw new DigitalTwinProposalError('INVALID_TWIN_BINDING', '노드에 연결할 Asset 근거가 올바르지 않습니다.')
     }
     return {
       action: 'bind_node',
       label: safeText(operation.label, 180),
-      targetNodeId: safeId(operation.targetNodeId, '트윈 연결 대상 노드'),
+      targetNodeId: safeId(operation.targetNodeId, 'Asset 연결 대상 노드'),
       expectedNodeFingerprint: safeId(operation.expectedNodeFingerprint, '기존 노드 정체성 지문'),
       binding,
     }
@@ -167,7 +167,7 @@ function normalizeOperation(operation) {
       action: 'sync_logical_component',
       label: safeText(operation.label, 180),
       targetNodeId: safeId(operation.targetNodeId, '엔진 계약 대상 노드'),
-      expectedEntityKey: safeId(operation.expectedEntityKey, '엔진 계약 실체'),
+      expectedEntityKey: safeId(operation.expectedEntityKey, '엔진 계약 Asset'),
       expectedNodeFingerprint: safeId(operation.expectedNodeFingerprint, '기존 노드 정체성 지문'),
       expectedLogicalComponentFingerprint: safeId(operation.expectedLogicalComponentFingerprint, '기존 엔진 계약 지문'),
       logicalComponent,
@@ -258,7 +258,7 @@ function normalizeOperation(operation) {
   }
   throw new DigitalTwinProposalError(
     'UNSAFE_OPERATION',
-    '디지털 트윈 수정안은 새 노드·연결선·파츠 추가, 제한된 노드 근거·엔진 계약·신뢰경계 동기화와 지문이 일치하는 파츠 제거·교체 및 연결선 교체만 허용합니다.',
+    'Asset 원장 수정안은 새 노드·연결선·파츠 추가, 제한된 노드 근거·엔진 계약·신뢰경계 동기화와 지문이 일치하는 파츠 제거·교체 및 연결선 교체만 허용합니다.',
   )
 }
 
@@ -412,7 +412,7 @@ function matchingAppliedPart(existing, planned) {
 
 export function planDigitalTwinGraphProposal(graph, proposal) {
   if (proposal?.schemaVersion !== DIGITAL_TWIN_PROPOSAL_SCHEMA_VERSION || !Array.isArray(proposal.operations)) {
-    throw new DigitalTwinProposalError('INVALID_PROPOSAL', '지원하지 않는 디지털 트윈 수정안입니다.')
+    throw new DigitalTwinProposalError('INVALID_PROPOSAL', '지원하지 않는 Asset 원장 수정안입니다.')
   }
   const { fingerprint, ...proposalBody } = proposal
   if (digitalTwinReviewFingerprint(proposalBody) !== fingerprint) {
@@ -506,7 +506,7 @@ export function planDigitalTwinGraphProposal(graph, proposal) {
   for (const planned of plannedNodeBindings) {
     const existing = currentNodeById.get(planned.targetNodeId)
     if (!existing) {
-      throw new DigitalTwinProposalError('NODE_MISSING', `트윈에 연결할 노드 ${planned.targetNodeId}를 찾을 수 없습니다.`)
+      throw new DigitalTwinProposalError('NODE_MISSING', `Asset에 연결할 노드 ${planned.targetNodeId}를 찾을 수 없습니다.`)
     }
     const currentBinding = normalizeDigitalTwinBinding(existing.data?.digitalTwinBinding)
     if (
@@ -523,7 +523,7 @@ export function planDigitalTwinGraphProposal(graph, proposal) {
         || currentBinding.entityKey !== planned.binding.entityKey
       )
     ) {
-      throw new DigitalTwinProposalError('NODE_BINDING_CONFLICT', `노드 ${planned.targetNodeId}가 다른 디지털 트윈 실체에 연결되어 있습니다.`)
+      throw new DigitalTwinProposalError('NODE_BINDING_CONFLICT', `노드 ${planned.targetNodeId}가 다른 Asset 정체성에 연결되어 있습니다.`)
     }
     if (digitalTwinProposalNodeIdentityFingerprint(existing) !== planned.expectedNodeFingerprint) {
       throw new DigitalTwinProposalError('NODE_CHANGED', `노드 ${planned.targetNodeId}의 정체성 정보가 미리보기 이후 달라졌습니다. 수정안을 다시 확인해야 합니다.`)
@@ -549,7 +549,7 @@ export function planDigitalTwinGraphProposal(graph, proposal) {
     if (!currentComponent) {
       const currentBinding = normalizeDigitalTwinBinding(existing.data?.digitalTwinBinding)
       if (currentBinding?.sourceId !== proposal.sourceId || currentBinding.entityKey !== planned.expectedEntityKey) {
-        throw new DigitalTwinProposalError('LOGICAL_COMPONENT_IDENTITY_UNPROVEN', `노드 ${planned.targetNodeId}가 해당 엔진 실체라는 근거가 없습니다.`)
+        throw new DigitalTwinProposalError('LOGICAL_COMPONENT_IDENTITY_UNPROVEN', `노드 ${planned.targetNodeId}가 해당 엔진 Asset이라는 근거가 없습니다.`)
       }
     }
     if (

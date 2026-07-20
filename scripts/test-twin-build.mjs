@@ -204,7 +204,7 @@ assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.controls.length, 6)
 assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.threats.length, 2)
 assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.trustZones.length, 7)
 assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.gateways.length, 13)
-assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.entities.filter((entity) => entity.trustZoneId).length, 65)
+assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.entities.filter((entity) => entity.trustZoneId).length, 80)
 assert.equal(WORKFLOW_SYSTEM_TWIN_BUILD.relations.filter((relation) => relation.gatewayId).length, 17)
 assert.equal(WORKFLOW_SOURCE_FEATURE_EXTENSION.entities.length, 17)
 assert.equal(WORKFLOW_SOURCE_FEATURE_EXTENSION.parts.length, 13)
@@ -252,7 +252,7 @@ function bindAllTwinEntities(canvas) {
     const applied = applyDigitalTwinGraphProposal(current, item.proposal)
     current = { ...current, nodes: applied.nodes, edges: applied.edges }
   }
-  throw new Error('코드 트윈 바인딩 배치가 종료되지 않았습니다.')
+  throw new Error('코드 Asset 바인딩 배치가 종료되지 않았습니다.')
 }
 
 function applyAllTrustTopology(canvas) {
@@ -292,13 +292,13 @@ assert.equal(componentDriftItem.proposal.counts.components, 5)
 assert.equal(componentDriftItem.focus.nodeId, 'map-engine-source-lens')
 assert.ok(componentDriftItem.proposal.operations.some((operation) => (
       operation.targetNodeId === 'map-engine-source-lens'
-      && operation.logicalComponent.technicalVersion === '0.7.0-alpha.0'
+      && operation.logicalComponent.technicalVersion === '0.9.0-alpha.0'
 )))
 const componentDriftApplied = applyDigitalTwinGraphProposal(staleEngineContracts, componentDriftItem.proposal)
 assert.equal(componentDriftApplied.appliedLogicalComponentIds.length, 5)
 assert.equal(
   componentDriftApplied.nodes.find((node) => node.id === 'map-engine-source-lens').data.logicalComponent.technicalVersion,
-  '0.7.0-alpha.0',
+  '0.9.0-alpha.0',
 )
 assert.equal(
   componentDriftApplied.nodes.find((node) => node.id === 'map-engine-source-lens').data.manualAnnotation,

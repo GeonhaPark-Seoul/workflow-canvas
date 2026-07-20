@@ -5,18 +5,20 @@ import { mkdtemp, mkdir, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import {
-  buildSourceTwinManifest,
   compareSourceTwinText,
+  runSourceLensWorkflow,
   readSourceTwinWorkingTree,
   serializeSourceTwinManifest,
   parseGeneratedSourceTwin,
-} from './source-twin-scanner.mjs'
+} from './source-lens-engine.mjs'
 import {
   compareSourceTwinSnapshots,
   createSourceTwinSnapshot,
-  SOURCE_TWIN_AUDIENCE_MODES,
   SOURCE_TWIN_OPERATION_CONFIRMATION,
   SOURCE_TWIN_SNAPSHOT_OPERATION,
+} from '../shared/systemStateSnapshot.js'
+import {
+  SOURCE_TWIN_AUDIENCE_MODES,
   sourceTwinAudienceMode,
   sourceTwinCodeUrl,
   sourceTwinEntities,
@@ -26,6 +28,7 @@ import {
   groupSourceTwinEntitiesByArea,
   groupSourceTwinEntitiesBySubsystem,
 } from '../shared/sourceTwinSemantics.js'
+import { WORKFLOW_SOURCE_EDIT_CODE_PART_ADAPTER } from '../shared/workflowSourceEditCodePartAdapter.js'
 import {
   APPLY_SOURCE_TWIN_OPERATION_RPC,
   applySourceTwinSnapshotOperation,
@@ -37,6 +40,25 @@ import {
   createSignedSystemOperationPlan,
   verifySignedSystemOperationPlan,
 } from '../mcp/systemOperationPlan.js'
+
+const buildSourceTwinManifest = (files, options = {}) => {
+  const result = runSourceLensWorkflow({
+    files,
+    previous: options.previous,
+    repository: options.repository,
+    sourceProfiles: options.sourceProfiles,
+    outputs: {
+      codeParts: options.includeCodePartCatalog === true,
+      flows: options.includeFlowCatalog === true,
+    },
+    artifactAdapters: { codePartAnnotation: WORKFLOW_SOURCE_EDIT_CODE_PART_ADAPTER },
+  })
+  return {
+    ...result.manifest,
+    ...(result.codePartCatalog ? { codePartCatalog: result.codePartCatalog } : {}),
+    ...(result.flowCatalog ? { flowCatalog: result.flowCatalog } : {}),
+  }
+}
 import {
   applyLocalGitSync as applyLocalGitSyncOperation,
   completeLocalGitSyncOperation,
@@ -217,7 +239,7 @@ const workflowCanvasSemanticManifest = buildSourceTwinManifest(new Map([
   ['src/components/IntentWorkspace.jsx', 'export default function IntentWorkspace() { return null }\n'],
 ]))
 assert.equal(workflowCanvasSemanticManifest.source.profile.id, 'workflow-canvas')
-assert.equal(workflowCanvasSemanticManifest.source.profile.version, '0.7.0')
+assert.equal(workflowCanvasSemanticManifest.source.profile.version, '0.9.0')
 const appSemanticEntity = workflowCanvasSemanticManifest.entities.find((entity) => entity.id === 'file:src/App.jsx')
 const sourcePanelSemanticEntity = workflowCanvasSemanticManifest.entities.find((entity) => entity.id === 'file:src/components/SourceTwinPanel.jsx')
 assert.equal(appSemanticEntity.area, 'canvas-interface')

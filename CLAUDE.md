@@ -6,21 +6,21 @@ Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-s
 
 ## 0. Master Document, Roles, And Reading Protocol
 
-**`docs/MASTER.md` is the single source of direction, terminology, features, and roadmap.**
+**`docs/MASTER.md` is the human-owned product source of direction. `docs/AI_MASTER.md` is the shared AI routing entry point.**
 
-- Before any task, read this file (CLAUDE.md) plus MASTER.md — for MASTER.md, §2 (terminology) and §4 (principles) plus only the sections relevant to the task are enough.
-- Do NOT read other docs by default. MASTER.md §11 defines a tiered reading protocol: contracts, ledgers, and appendix docs are read only when the task touches them. Saving tokens is a rule, not an optimization.
+- Before any task, read this file plus `docs/AI_MASTER.md`, then follow its routing table to MASTER.md §2 (terminology), §4 (principles), and only the sections relevant to the task.
+- Do NOT read other docs by default. `docs/AI_MASTER.md` and MASTER.md §11 define the tiered reading protocol: contracts, ledgers, and appendix docs are read only when the task touches them. Saving tokens is a rule, not an optimization.
 - If direction or terminology in any other document conflicts with MASTER.md, MASTER.md wins; report the conflict instead of silently picking one.
-- Fixed role split (MASTER.md §12): the user + Claude Code do planning and write design briefs; **Codex designs and implements** from a brief and produces a patch + handoff document (base commit, SHA-256, verification results — keep the existing handoff conventions); **Claude Code reviews, commits, pushes, deploys**, guides SQL execution, and bumps the MASTER.md version. Codex does not commit, push, deploy, or run production SQL.
+- Do not copy the current role split into this file. Read MASTER.md §12 and the user's current instruction before committing, pushing, deploying, or performing production writes.
 
-## 0.5. Graphify Knowledge Graph (Local Tool)
+## 0.5. Graphify Knowledge Map (Local Tool)
 
-**Before grepping or opening many files to understand structure, query the local knowledge graph first.**
+**Before grepping or opening many files to understand structure, query the local knowledge map first.**
 
-- `graphify-out/graph.json` holds the extracted code+docs+SQL graph (git-ignored, local only).
+- `graphify-out/graph.json` holds the extracted code+docs+SQL map (git-ignored, local only; the filename is a legacy wire name).
 - Explore with: `graphify query "<question>"`, `graphify explain "<node>"`, `graphify path "A" "B"`, `graphify affected "<node>"` (impact of a change).
 - After code changes, refresh with `graphify update .` (local AST, no API cost). If `graphify-out/` is missing or stale, ask the user before a full re-extract (doc semantic pass uses the claude CLI).
-- The graph is a navigation aid, not a source of truth: MASTER.md still wins for direction; code wins for behavior. Do not cite INFERRED edges as fact.
+- The map is a navigation aid, not a source of truth: MASTER.md still wins for direction; code wins for behavior. Do not cite INFERRED edges as fact.
 
 ## 1. Think Before Coding
 
@@ -84,10 +84,10 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ## 5. Canvas Spatial UX
 
-**Keep actions attached to the system entity they operate on.**
+**Keep actions attached to the system Asset they operate on.**
 
 - Open repository code from repository nodes, deployment state from deployment nodes, and database operations from database nodes or their connected parts.
-- Do not add an entity-specific feature to a global rail, toolbar, or right-side tab unless the user explicitly approves that placement.
+- Do not add an Asset-specific feature to a global rail, toolbar, or right-side tab unless the user explicitly approves that placement.
 - Do not move or replace an existing menu, toggle, or icon without asking first.
 - A side pane may present details after a contextual node action opens it; the global pane launcher is the part to avoid.
 
@@ -95,11 +95,11 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 **Do not let security or commercialization obligations disappear between AI sessions.**
 
-- Read `docs/TECHNICAL_DEBT.md` before changing authentication, sharing, encryption, local connectors, external integrations, operations, deployment, telemetry, or public trust claims.
-- Read `docs/TWIN_ENGINE_ROADMAP.md` before adding a system node, part, relation, adapter, trust zone, gateway, operation capability, or AI explanation feature.
+- Read `docs/governance/TECHNICAL_DEBT.md` before changing authentication, sharing, encryption, local connectors, external integrations, operations, deployment, telemetry, or public trust claims.
+- Read `docs/protocols/SYSTEM_ONBOARDING_PROTOCOL.md` and the relevant contract before adding a system node, part, relation, adapter, trust zone, gateway, operation capability, or AI explanation feature. The archived legacy roadmap is background only.
 - Record newly discovered release debt in the ledger with a stable ID, severity, status, context, and verifiable exit criteria.
 - Do not mark debt complete because code exists locally. Require tests and deployment or operational evidence appropriate to the item.
-- Keep Workflow Canvas-specific discovery and operations inside its adapter. The graph, review, security-boundary, and operation contracts must remain reusable for other systems.
+- Keep Workflow Canvas-specific discovery and operations inside its adapter. The map, review, security-boundary, and operation contracts must remain reusable for other systems.
 - A cross-zone relation must identify its gateway and data contract. Never equate `local`, `intranet`, or `private` with automatically safe.
 
 ## 7. Product Engines And Versions
@@ -107,7 +107,8 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 **Treat engines as versioned product capabilities, not accidental file groups.**
 
 - Read `docs/product/PRODUCT_CATALOG.md`, `docs/product/ENGINE_AGENT_REGISTRY.md`, and `shared/engineRegistry.js` before adding, renaming, or changing an engine or its internal component.
-- Keep user-facing names short (`Twin Core`, `Create Graph`). Use the manifest's internal kind to distinguish Engine, Contract, Resolver, Builder, Pipeline, Agent Skill, Hard Guardrail, Connector, and Manifest.
+- Keep user-facing names short (`Asset Core`, `Draw Map`). Use the manifest's internal kind to distinguish Engine, Contract, Resolver, Builder, Pipeline, Agent Skill, Agent Policy, Hard Guardrail, Connector, and Manifest.
+- `kind: engine` is top-level only. Never nest an Engine under another Engine; use another component kind or create a separately versioned top-level Engine and connect it through a Workflow.
 - Update the affected engine version, compatibility declaration, code and test evidence, and `docs/product/ENGINE_CHANGELOG.md` together. Product version, engine version, schema version, and contract version are separate.
 - A logical engine component is not an independent server or runtime process. It must display `논리 구성`, never `LIVE`, even if runtime-looking fields are present.
 - Do not assign a Maintainer Agent by name alone. Its manifest must define scope, allowed tools, required tests, escalation conditions, and human-approval boundaries, and the engine registry must reference that validated manifest ID.
@@ -117,7 +118,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 **Evaluate existing standards and proven libraries before inventing foundational infrastructure.**
 
-- Read `docs/architecture/OPEN_SOURCE_POLICY.md` and `docs/architecture/DEPENDENCY_DECISIONS.md` before adding a direct dependency or implementing a new parser, layout engine, authorization engine, workflow runtime, graph store, or agent protocol.
+- Read `docs/architecture/decisions/OPEN_SOURCE_POLICY.md` and `docs/architecture/decisions/DEPENDENCY_DECISIONS.md` before adding a direct dependency or implementing a new parser, layout engine, authorization engine, workflow runtime, map store, or agent protocol.
 - Record every direct dependency in `docs/architecture/dependency-registry.json` and keep `THIRD_PARTY_NOTICES.md` current.
 - Run `npm run governance:check` before tests and production builds.
 - Do not add a large library or external authorization/service dependency such as elkjs, OpenFGA, or SpiceDB without explaining the concrete benefit, bundle or operations cost, migration path, and license, then obtaining explicit user approval.

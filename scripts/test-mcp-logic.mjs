@@ -227,7 +227,7 @@ t('system entities participate in the same structural layout as stages', () => {
   assert.equal(pos.get('APP').y, pos.get('DB').y)
 })
 
-t('mixed stage and system graph can be laid out radially with a linked memo', () => {
+t('mixed stage and system map can be laid out radially with a linked memo', () => {
   const nodes = [
     stage('ROOT'), system('WEB', 'frontend'), system('AUTH', 'auth'),
     system('API', 'api'), system('DB', 'database'), memo('WHY'),
@@ -281,7 +281,7 @@ t('memos alternate above then below their stage', () => {
   assert.equal(pos.get('M1').x, pos.get('A').x)
 })
 
-t('memo-only graph places memos without error', () => {
+t('memo-only map places memos without error', () => {
   const pos = layoutGraph({ newNodes: [memo('M1'), memo('M2')], newEdges: [], existingNodes: [] })
   assert.ok(pos.has('M1') && pos.has('M2'))
   assert.notDeepEqual(pos.get('M1'), pos.get('M2'))
@@ -1752,7 +1752,7 @@ t('inspection distinguishes erased relation metadata from an intentional semanti
   assert.equal(finding.repair_eligible, true)
 })
 
-console.log('digital twin change review')
+console.log('Asset change review')
 
 t('review fingerprints are deterministic and independent of object key order', () => {
   const first = digitalTwinReviewFingerprint({ alpha: 1, nested: { beta: 2, gamma: [3, 4] } })
@@ -1862,7 +1862,7 @@ t('Workflow Canvas adapter ignores ordinary canvases instead of coupling the rev
   }), null)
 })
 
-t('digital twin proposals reject generic update and delete operations before they reach the canvas', () => {
+t('Asset proposals reject generic update and delete operations before they reach the canvas', () => {
   const item = createDigitalTwinReviewItem({
     sourceId: 'source-one', itemKey: 'resource:orders', title: 'orders found', observation: { version: 1 },
   })
@@ -1923,7 +1923,7 @@ t('node binding proposals preserve node content and reject stale identity change
       targetNodeId: 'web-app',
       expectedNodeFingerprint: digitalTwinProposalNodeIdentityFingerprint(graph.nodes[0]),
       binding,
-      label: '웹 앱 코드 트윈 연결',
+      label: '웹 앱 코드 Asset 연결',
     }],
   })
 
@@ -2070,7 +2070,7 @@ t('engine contract proposals update only registry-managed metadata and reject st
   )
 })
 
-t('proposal preview is read-only and explicit apply adds only the planned graph entities', () => {
+t('proposal preview is read-only and explicit apply adds only the planned map records', () => {
   const item = createDigitalTwinReviewItem({
     sourceId: 'source-one', itemKey: 'resource:orders', title: 'orders found', observation: { version: 1 },
   })
@@ -2793,7 +2793,7 @@ console.log('validateGraphInput')
 
 const types5 = [0, 1, 2, 3, 4].map((i) => ({ label: `t${i}` }))
 
-t('accepts a valid graph', () => {
+t('accepts a valid map', () => {
   validateGraphInput({ nodes: [stage('A'), stage('B')], edges: [edge('A', 'B')] }, [], types5)
 })
 

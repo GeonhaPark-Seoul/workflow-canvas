@@ -8,23 +8,23 @@ const WORD_LABELS = Object.freeze({
   access: '접근 권한', active: '현재 선택', admin: '서버 관리자 연결', agent: '로컬 연결 프로그램', api: '서버 기능',
   anchor: '연결점', anchors: '연결점', approved: '승인된 상태', array: '목록 자료', async: '응답 대기 작업',
   all: '전체', apply: '승인된 변경 적용', audit: '접근 감사', auth: '로그인 인증', avatar: '아바타',
-  base: '기준', bearer: '요청 인증', body: '요청 본문', boolean: '참·거짓 값', bounds: '화면 범위', branch: 'Git 브랜치', browser: '브라우저', build: '트윈 구성',
+  analysis: '분석', asset: 'Asset', base: '기준', bearer: '요청 인증', body: '요청 본문', boolean: '참·거짓 값', bounds: '화면 범위', branch: 'Git 브랜치', browser: '브라우저', build: 'Asset Build',
   canvas: '캔버스', canvases: '캔버스 목록', capture: '상태 기록', catalog: '조회 가능 정보 목록',
   change: '변경', changes: '변경 내역', child: '하위 항목', children: '하위 항목', clear: '비우기',
   claim: '실행 권한 선점', code: '코드', compact: '필요한 정보만 남기기', config: '설정', connector: '로컬 커넥터', content: '본문', context: '실행 문맥', create: '새 항목', credential: '비밀정보 참조', crossing: '경계 통과', crossings: '경계 통과',
   current: '현재 상태', data: '데이터', decision: '검토 결정', delete: '삭제', deployment: '배포',
-  default: '기본값', definition: '기능 정의', detail: '상세 정보', direction: '방향', edge: '연결선', edges: '연결선', encoded: '인코딩된 자료', entity: '시스템 실체', error: '오류', event: '이벤트',
+  default: '기본값', definition: '기능 정의', detail: '상세 정보', direction: '방향', edge: '연결선', edges: '연결선', encoded: '인코딩된 자료', entity: 'Asset', error: '오류', event: '이벤트',
   evidence: '근거', external: '외부 공개 자료', file: '파일', filter: '조건에 맞는 항목', fingerprint: '변경 식별값',
-  function: '함수', gateway: '신뢰 경계 통로', git: 'Git 상태', github: 'GitHub', graph: '노드·연결선 구조', group: '그룹', guard: '보호 규칙',
+  function: '함수', gateway: '신뢰 경계 통로', git: 'Git 상태', github: 'GitHub', graph: '지도 구조', group: '그룹', guard: '보호 규칙',
   handler: '서버 요청 진입점', hash: '변경 식별값', heartbeat: '연결 생존 신호', history: '상태 이력', host: '배포 주소', html: '본문 HTML', id: '식별자', image: '이미지', import: '코드 연결', input: '입력 자료',
   inspect: '시스템 검사', invite: '초대', item: '검토 항목', layout: '자동 배치', link: '공유 링크',
-  label: '화면 이름', layered: '계층형', list: '목록', local: '로컬 저장소', manifest: '코드 구조 목록', map: '시스템 지도', merge: '동시 변경 병합', metadata: '설명 메타데이터',
+  label: '화면 이름', layered: '계층형', ledger: '원장', list: '목록', local: '로컬 저장소', manifest: '코드 구조 목록', map: '시스템 지도', merge: '동시 변경 병합', metadata: '설명 메타데이터',
   mcp: 'AI 도구 연결', metric: '운영 수치', metrics: '운영 수치', node: '노드', nodes: '노드', normalize: '안전한 공통 형식', note: '노트', observation: '운영 관측',
   operation: '실제 조작', parent: '상위 항목', part: '시스템 파츠', permission: '권한', plan: '실행 계획',
   preview: '실행 전 미리보기', profile: '프로필', proposal: '수정 제안', radial: '방사형', raw: '가공 전 자료', rect: '노드 경계 상자', relation: '관계', repository: '코드 저장소', request: '요청', response: '응답', result: '결과', results: '결과',
   resolve: '대상 판정', revoke: '권한 해제', role: '역할', route: '서버 경로', runtime: '실제 운영 상태', safe: '허용 범위로 제한', sanitize: '위험한 입력 제거', save: '저장',
   schema: '데이터 구조', select: '선택', service: '서버 기능', sha: 'Git 커밋 식별값', share: '공유', side: '연결 방향', signature: '요청 서명', snapshot: '상태 스냅샷', source: '소스 코드',
-  stage: '단계', state: '상태', status: '상태', structural: '구조용', sync: '동기화', system: '시스템', table: 'DB 테이블', target: '대상', text: '텍스트', twin: '디지털 트윈',
+  stage: '단계', state: '상태', status: '상태', structural: '구조용', sync: '동기화', system: '시스템', table: 'DB 테이블', target: '대상', text: '텍스트', twin: 'Asset 원장',
   token: '연결 토큰', topology: '시스템 연결 구조', url: '웹 주소', update: '변경', user: '사용자', valid: '유효성', validate: '유효성 검사', value: '값',
   verification: '실행 결과 확인', view: '화면 상태', visible: '볼 수 있는 범위', webhook: '외부 변경 알림', workflow: '워크플로우', zone: '신뢰 영역',
 })
@@ -45,8 +45,8 @@ const ACTIONS = Object.freeze({
 function identifierWords(value) {
   return String(value ?? '')
     .replace(/GitHub/g, ' github ')
-    .replace(/SourceTwin/g, ' source twin ')
-    .replace(/DigitalTwin/g, ' digital twin ')
+    .replace(/SourceTwin/g, ' source analysis ')
+    .replace(/DigitalTwin/g, ' asset ledger ')
     .replace(/MCP/g, ' mcp ')
     .replace(/API/g, ' api ')
     .replace(/URL/g, ' url ')
@@ -300,6 +300,6 @@ export function explainEnvironmentVariable(name) {
   const value = String(name ?? '')
   if (value === 'SUPABASE_SERVICE_ROLE_KEY') return '서버가 제한된 관리자 DB 작업을 할 때 사용하는 비밀 키의 이름입니다. 실제 값은 수집하지 않습니다.'
   if (value === 'WORKFLOW_CANVAS_OWNER_USER_ID') return '내부 시스템 지도와 운영 도구를 사용할 제품 소유자 계정을 지정합니다.'
-  if (/TOKEN|SECRET|PASSWORD|CREDENTIAL|KEY/i.test(value)) return `${value} 비밀 설정의 이름 참조입니다. 실제 값은 소스 트윈에 포함하지 않습니다.`
+  if (/TOKEN|SECRET|PASSWORD|CREDENTIAL|KEY/i.test(value)) return `${value} 비밀 설정의 이름 참조입니다. 실제 값은 소스 분석 결과에 포함하지 않습니다.`
   return `${value} 배포 환경 설정의 이름과 사용 위치입니다. 실제 값은 수집하지 않습니다.`
 }

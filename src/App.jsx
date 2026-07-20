@@ -231,7 +231,7 @@ function nodeDisplayName(node) {
   if (plain) return plain
   if (node.type === 'memo') return '메모'
   if (node.type === 'content') return '콘텐츠'
-  if (node.type === 'system') return '시스템 실체'
+  if (node.type === 'system') return '시스템 Asset'
   if (node.type === 'intent') return '의도'
   if (node.type === 'group') return '그룹'
   return '단계 노드'
@@ -2719,7 +2719,7 @@ export default function App() {
       setTwinProposalStatus({
         type: 'success',
         message: result.writesPerformed
-          ? `지도에 노드 ${result.appliedNodeIds.length}개, 연결선 ${result.appliedEdgeIds.length}개, 시스템 파츠 ${result.appliedPartIds.length}개, 코드 트윈 연결 ${result.appliedNodeBindingIds.length}개, 엔진 계약 ${result.appliedLogicalComponentIds.length}개, 신뢰영역 ${result.appliedTrustZoneIds.length}개, 게이트웨이 ${result.appliedTrustGatewayIds.length}개 변경을 적용했습니다.`
+          ? `지도에 노드 ${result.appliedNodeIds.length}개, 연결선 ${result.appliedEdgeIds.length}개, 시스템 파츠 ${result.appliedPartIds.length}개, Asset 원장 근거 연결 ${result.appliedNodeBindingIds.length}개, 엔진 계약 ${result.appliedLogicalComponentIds.length}개, 신뢰영역 ${result.appliedTrustZoneIds.length}개, 게이트웨이 ${result.appliedTrustGatewayIds.length}개 변경을 적용했습니다.`
           : '같은 수정안이 이미 지도에 적용되어 있습니다.',
       })
     } catch (error) {
@@ -3221,7 +3221,7 @@ export default function App() {
         || flowResult?.moduleId !== payload.entity.id
         || flowResult?.moduleFingerprint !== payload.entity.fingerprint
       ) {
-        throw new Error('코드 기준이 바뀌었습니다. 소스 트윈을 새로고침한 뒤 다시 시도해 주세요.')
+        throw new Error('코드 기준이 바뀌었습니다. 소스 분석을 새로고침한 뒤 다시 시도해 주세요.')
       }
       const position = requestedPosition ?? rfInstance?.screenToFlowPosition({
         x: Math.max(180, window.innerWidth / 2),
@@ -5012,7 +5012,7 @@ export default function App() {
           ['stage', '단계·계층 노트', '☷'],
           ['memo', '참고·메모 노트', '※'],
           ['content', '콘텐츠 노트', '▣'],
-          ['system', '시스템·트윈 노트', '⌬'],
+          ['system', '시스템 Asset 노트', '⌬'],
           ['intent', '의도 자산', '◇'],
         ].map(([t, label, icon]) => (
           <button
@@ -5103,7 +5103,7 @@ export default function App() {
               <div style={{ padding: '6px 12px 2px', color: '#555', fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
                 시스템 모델
               </div>
-              <ContextItem icon="◆" label="시스템 실체" color="#06b6d4" indent onClick={handleContextAddSystem} />
+              <ContextItem icon="◆" label="시스템 Asset" color="#06b6d4" indent onClick={handleContextAddSystem} />
               <div style={{ padding: '6px 12px 2px', color: '#555', fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
                 의도 자산
               </div>

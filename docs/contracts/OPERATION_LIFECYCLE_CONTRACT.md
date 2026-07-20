@@ -64,7 +64,7 @@ recovery_pending -> recovering -> recovered 또는 recovery_failed
 범용 계획은 원본 입력 본문을 저장하지 않고 다음을 묶는다.
 
 - 조작 정의 지문
-- 정확한 대상과 트윈 리비전
+- 정확한 대상과 Asset 원장 리비전
 - 실행 전 상태 지문과 입력 지문
 - 시작 주체와 경로
 - 쓰기·제외 범위

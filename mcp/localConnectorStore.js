@@ -20,7 +20,7 @@ import {
   WORKFLOW_SOURCE_EDIT_ROLLBACK_OPERATION_DEFINITION,
 } from '../shared/workflowOperationDefinitions.js'
 import { SOURCE_CODE_PART_MANIFEST } from '../shared/sourceCodePartManifest.js'
-import { sourceCodePartsForModule } from '../shared/sourceCodeParts.js'
+import { sourceCodePartsForModuleWithWorkflowEditPolicy } from '../shared/workflowSourceEditCodePartAdapter.js'
 import { normalizeSourceEditableValue } from '../shared/workflowSourceEditableProperties.js'
 
 export const LOCAL_GIT_SYNC_CONFIRMATION = WORKFLOW_GIT_SYNC_CONFIRMATION
@@ -403,7 +403,7 @@ function requireSourceEditOwner(userId, env) {
 }
 
 function sourceEditPart(moduleId, partId) {
-  const module = sourceCodePartsForModule(SOURCE_CODE_PART_MANIFEST, cleanText(moduleId, 800))
+  const module = sourceCodePartsForModuleWithWorkflowEditPolicy(SOURCE_CODE_PART_MANIFEST, cleanText(moduleId, 800))
   const part = module?.parts?.find((item) => item.id === cleanText(partId, 240))
   if (!module || !part) throw new LocalConnectorError(404, 'SOURCE_EDIT_PART_NOT_FOUND', '편집할 코드 파츠를 찾을 수 없습니다.')
   if (!part.editable?.eligible || !part.editable?.property) {

@@ -18,4 +18,4 @@
 | `vite` | `6.4.3` | MIT | development |
 | `vite-plugin-pwa` | `1.3.0` | MIT | development |
 
-이 초기 목록은 법률 검토나 전이 의존성 전체 고지를 대신하지 않는다. 공개 출시 전에는 같은 lockfile에서 생성한 SBOM과 전이 라이선스 보고서를 보존하고, 필요한 저작권 고지를 배포물에 포함해야 한다. 진행 상태는 `docs/TECHNICAL_DEBT.md`의 `OPS-006`에서 관리한다.
+이 초기 목록은 법률 검토나 전이 의존성 전체 고지를 대신하지 않는다. 공개 출시 전에는 같은 lockfile에서 생성한 SBOM과 전이 라이선스 보고서를 보존하고, 필요한 저작권 고지를 배포물에 포함해야 한다. 진행 상태는 `docs/governance/TECHNICAL_DEBT.md`의 `OPS-006`에서 관리한다.

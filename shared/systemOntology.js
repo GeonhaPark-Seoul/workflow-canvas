@@ -178,7 +178,7 @@ export function createSystemNodeData(systemKind = 'service') {
 }
 
 // A persisted canvas node can describe a real system, but it only becomes a
-// verified digital twin when server-supplied runtime evidence is present.
+// runtime-verified Asset when server-supplied runtime evidence is present.
 // `twinRuntime` is stripped before canvas persistence and must never be treated
 // as user-authored proof by a control action.
 export function systemNodeReality(data = {}) {
@@ -236,6 +236,6 @@ export function systemNodeTwinLink(data = {}) {
     entityKey: binding.entityKey,
     observedFingerprint: binding.observedFingerprint,
     observedSnapshotId: binding.observedSnapshotId,
-    title: '코드 또는 manifest 근거에 연결된 디지털 트윈 스냅샷입니다. 실제 실행 상태를 확인한 LIVE와는 다릅니다.',
+    title: '코드 또는 manifest 근거에 연결된 Asset 스냅샷입니다. 실제 실행 상태를 확인한 LIVE와는 다릅니다.',
   }
 }

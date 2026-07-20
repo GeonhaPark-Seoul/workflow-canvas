@@ -189,7 +189,7 @@ function CodePartsDetail({ manifest, entity, onMaterialize, sourceEditContext, o
           || flowModule.sourceManifestId !== manifest.id
           || flowModule.moduleFingerprint !== entity.fingerprint
         ) {
-          setError('현재 화면과 서버의 코드 기준이 달라졌습니다. 소스 트윈을 새로고침해 주세요.')
+          setError('현재 화면과 서버의 코드 기준이 달라졌습니다. 소스 분석을 새로고침해 주세요.')
           return
         }
         setResult({ ...module, flows: flowModule.flows, relations: flowModule.relations, flowTruncated: flowModule.truncated })
@@ -378,7 +378,7 @@ function EntityDetail({ manifest, entity, commitSha, audienceMode, onClose, onMa
     || (details.environmentVariables?.length ?? 0) > 0
     || (details.securitySignals?.length ?? 0) > 0
   return (
-    <section className="source-twin-detail" aria-label="선택한 코드 실체">
+    <section className="source-twin-detail" aria-label="선택한 코드 Asset">
       <div className="source-twin-detail-heading">
         <div>
           <strong>{entity.label}</strong>
@@ -540,7 +540,7 @@ function StructureView({ current, perspective, setPerspective, query, setQuery, 
       </div>
       <div className="source-twin-search">
         <span aria-hidden="true">⌕</span>
-        <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="파일, 함수, DB, 환경변수 검색" aria-label="소스 트윈 검색" />
+        <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="파일, 함수, DB, 환경변수 검색" aria-label="소스 분석 검색" />
       </div>
       <EntityDetail manifest={manifest} entity={selected} commitSha={current.deployment?.commitSha} audienceMode={audienceMode} onClose={() => setSelectedId('')} onMaterialize={onMaterialize} sourceEditContext={sourceEditContext} onSourceEditQueued={onSourceEditQueued} />
       <div className="source-twin-tree">
@@ -1353,9 +1353,9 @@ export default function SourceTwinPanel({
       {side === 'right' && splitter}
       <div className="twin-review-content">
         <header className="twin-review-header source-twin-header">
-          <div className="twin-review-header-title"><strong>{entry?.panelTitle ?? '소스 트윈'}</strong>{manifest && <span>{manifest.summary.files}</span>}</div>
+          <div className="twin-review-header-title"><strong>{entry?.panelTitle ?? '소스 분석'}</strong>{manifest && <span>{manifest.summary.files}</span>}</div>
           <div className="twin-review-header-actions">
-            <IconButton title="소스 트윈 새로고침" onClick={() => { setLoading(true); Promise.all([refreshCurrent(), refreshHistory()]).catch((loadError) => setError(loadError.message)).finally(() => setLoading(false)) }}>↻</IconButton>
+            <IconButton title="소스 분석 새로고침" onClick={() => { setLoading(true); Promise.all([refreshCurrent(), refreshHistory()]).catch((loadError) => setError(loadError.message)).finally(() => setLoading(false)) }}>↻</IconButton>
             <IconButton title={side === 'right' ? '코드 트리 창을 왼쪽으로 이동' : '코드 트리 창을 오른쪽으로 이동'} onClick={() => onSideChange(side === 'right' ? 'left' : 'right')}>{side === 'right' ? '←' : '→'}</IconButton>
             <IconButton title="코드 트리 닫기" onClick={onClose}>✕</IconButton>
           </div>
@@ -1386,7 +1386,7 @@ export default function SourceTwinPanel({
             <span>커밋 <strong>{current.deployment?.commitSha?.slice(0, 7) || 'local'}</strong></span>
           </div>
         )}
-        {loading && !current ? <div className="twin-review-empty">소스 트윈 불러오는 중…</div> : error ? <div className="source-twin-error">{error}</div> : current && (
+        {loading && !current ? <div className="twin-review-empty">소스 분석 불러오는 중…</div> : error ? <div className="source-twin-error">{error}</div> : current && (
           view === 'structure'
             ? <LocalRepositoryView
                 current={current}

@@ -3,7 +3,7 @@ export const SOURCE_FEATURE_MANIFEST = {
   "schemaVersion": 1,
   "profile": {
     "id": "workflow-canvas",
-    "version": "0.7.0"
+    "version": "0.9.0"
   },
   "candidates": [
     {
@@ -23,7 +23,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:src/App.jsx",
           "path": "src/App.jsx",
-          "fingerprint": "655a18297aa6e51cdc24",
+          "fingerprint": "b7e1a9c4cb13f382dbf6",
           "summary": "캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다."
         },
         {
@@ -47,7 +47,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:src/components/NodePalette.jsx",
           "path": "src/components/NodePalette.jsx",
-          "fingerprint": "25ad9ddfd216d8ff50bb",
+          "fingerprint": "30642800e15400d67bda",
           "summary": "새로 만들 수 있는 노드 종류를 보여주고 드래그해 캔버스에 놓을 자료를 준비합니다."
         },
         {
@@ -169,7 +169,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "2e030ac961dc13ce"
+      "fingerprint": "37e8ec71a098cc12"
     },
     {
       "key": "area:canvas-model",
@@ -188,7 +188,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:mcp/layout.js",
           "path": "mcp/layout.js",
-          "fingerprint": "a1c4cd1bfc0a345acee3",
+          "fingerprint": "51ef3c9ac2a3e0f5e435",
           "summary": "여러 노드와 연결선을 계층·방사형 같은 배치로 정리할 좌표를 계산합니다."
         },
         {
@@ -278,7 +278,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "617a9413a73c6622"
+      "fingerprint": "f365dd6293c07621"
     },
     {
       "key": "area:notes-content",
@@ -365,7 +365,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "027091d6285be11c"
+      "fingerprint": "99f56da4e130a76e"
     },
     {
       "key": "area:sharing-collaboration",
@@ -394,6 +394,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "summary": "MCP에서 공유 참여자 목록과 초대 범위를 계산하고 시야 제한을 적용합니다."
         },
         {
+          "entityId": "file:shared/aiContextGate.js",
+          "path": "shared/aiContextGate.js",
+          "fingerprint": "b03fc3077c717278489b",
+          "summary": "실행 문맥에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
+        },
+        {
           "entityId": "file:shared/richTextSanitizer.js",
           "path": "shared/richTextSanitizer.js",
           "fingerprint": "078919aaf8b49844f52a",
@@ -415,7 +421,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           "entityId": "file:shared/sourceAssetHierarchy.js",
           "path": "shared/sourceAssetHierarchy.js",
           "fingerprint": "b99fe97d0264036f5724",
-          "summary": "소스 코드에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
+          "summary": "소스 코드 · Asset에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
         },
         {
           "entityId": "file:shared/systemLayers.js",
@@ -487,6 +493,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       "evidenceEntityIds": [
         "file:api/shared-canvas.js",
         "file:mcp/shareAccess.js",
+        "file:shared/aiContextGate.js",
         "file:shared/richTextSanitizer.js",
         "file:shared/securityOverlay.js",
         "file:shared/sharePermissions.js",
@@ -506,6 +513,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       "evidencePaths": [
         "api/shared-canvas.js",
         "mcp/shareAccess.js",
+        "shared/aiContextGate.js",
         "shared/richTextSanitizer.js",
         "shared/securityOverlay.js",
         "shared/sharePermissions.js",
@@ -622,7 +630,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "8b7a5846a4c8a8ba"
+      "fingerprint": "81f68be047a0b4b9"
     },
     {
       "key": "area:identity-profile",
@@ -717,7 +725,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "fa4785d66d9c4609"
+      "fingerprint": "fcaaf134985bb8df"
     },
     {
       "key": "area:digital-twin-engine",
@@ -725,8 +733,8 @@ export const SOURCE_FEATURE_MANIFEST = {
       "id": "digital-twin-engine",
       "areaId": "digital-twin-engine",
       "ownerKey": null,
-      "label": "디지털 트윈 엔진",
-      "description": "실제 시스템을 발견하고 표준 구조로 바꿔 캔버스와 대조하는 영역",
+      "label": "Asset 원장 엔진",
+      "description": "실제 시스템의 근거를 발견해 Asset 원장으로 정규화하고 캔버스와 대조하는 영역",
       "order": 5,
       "classification": "feature-asset",
       "rationale": "실제 시스템을 발견하고 검토 가능한 지도로 유지하는 독립 제품 능력입니다.",
@@ -754,26 +762,26 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:scripts/system-discovery.mjs",
           "path": "scripts/system-discovery.mjs",
-          "fingerprint": "e0e83dc4a5bce78d085b",
+          "fingerprint": "b40e6bc252a510412650",
           "summary": "코드·SQL·MCP 도구·환경변수 이름을 스캔해 Workflow Canvas 시스템 자원 목록을 만듭니다."
         },
         {
           "entityId": "file:shared/capabilityMapper.js",
           "path": "shared/capabilityMapper.js",
-          "fingerprint": "f23169ecfc93c9de2a68",
+          "fingerprint": "a6deeda3ae5353e28aca",
           "summary": "제품 엔진 레지스트리를 논리 엔진 노드와 내부 구성 관계로 변환합니다."
         },
         {
           "entityId": "file:shared/digitalTwinProposal.js",
           "path": "shared/digitalTwinProposal.js",
-          "fingerprint": "07999fa042fbd2741aef",
-          "summary": "검토가 승인된 디지털 트윈 변경만 캔버스 자료에 적용하고 충돌을 검사합니다."
+          "fingerprint": "c93bf4fa215796debc8f",
+          "summary": "검토가 승인된 Asset 원장 변경만 캔버스 자료에 적용하고 충돌을 검사합니다."
         },
         {
           "entityId": "file:shared/digitalTwinReview.js",
           "path": "shared/digitalTwinReview.js",
-          "fingerprint": "ba6025ee7407452fc88b",
-          "summary": "트윈 변경안의 적용·무시·보류 결정을 저장하고 새 검사에서도 같은 결정을 찾습니다."
+          "fingerprint": "c69d1bab7ae5c4e13152",
+          "summary": "Asset 원장 변경안의 적용·무시·보류 결정을 저장하고 새 검사에서도 같은 결정을 찾습니다."
         },
         {
           "entityId": "file:shared/edgeOperation.js",
@@ -784,8 +792,8 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/engineRegistry.js",
           "path": "shared/engineRegistry.js",
-          "fingerprint": "83c8dd70edc7edfee145",
-          "summary": "Twin Core, Create Graph 같은 제품 엔진의 이름·버전·내부 구성요소·입출력·근거와 향후 담당 에이전트 계약을 한곳에서 관리합니다."
+          "fingerprint": "75e578f1056e19cd556f",
+          "summary": "Asset Core, Draw Map 같은 제품 엔진의 이름·버전·내부 구성요소·입출력·근거와 향후 담당 에이전트 계약을 한곳에서 관리합니다."
         },
         {
           "entityId": "file:shared/intentOntology.js",
@@ -796,7 +804,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/operationLifecycle.js",
           "path": "shared/operationLifecycle.js",
-          "fingerprint": "072796be78f3c94f42cc",
+          "fingerprint": "545ebee0a269773760ea",
           "summary": "직접 클릭·자동화·미래 AI가 실행하는 조작을 계획, 승인, 실행, 확인, 감사, 복구 순서로 제한합니다."
         },
         {
@@ -814,7 +822,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/systemOntology.js",
           "path": "shared/systemOntology.js",
-          "fingerprint": "a1b314ed02d825530a10",
+          "fingerprint": "6cf7d40d89f92199c383",
           "summary": "앱·서버·DB·사람 같은 시스템 노드 종류와 실재성 표시 규칙을 정의합니다."
         },
         {
@@ -830,40 +838,52 @@ export const SOURCE_FEATURE_MANIFEST = {
           "summary": "운영 상태 검사 요청과 결과, 관측 신선도와 LIVE 판정 기준을 표준화합니다."
         },
         {
+          "entityId": "file:shared/systemStateSnapshot.js",
+          "path": "shared/systemStateSnapshot.js",
+          "fingerprint": "d1cf08625efd6ab099f8",
+          "summary": "코드·DB·배포·운영·보안 상태를 한 시점의 호환 스냅샷으로 합성하고 두 시점을 비교합니다."
+        },
+        {
           "entityId": "file:shared/twinAdapterContract.js",
           "path": "shared/twinAdapterContract.js",
-          "fingerprint": "a34e0669d4ab1ffad5c6",
+          "fingerprint": "703d737d12fad2c02f35",
           "summary": "새 프로그램 종류를 연결하는 어댑터가 제공해야 할 발견·권한·조작 계약을 검증합니다."
         },
         {
           "entityId": "file:shared/twinBuild.js",
           "path": "shared/twinBuild.js",
-          "fingerprint": "5df6347a0e8a79e2036b",
-          "summary": "서로 다른 앱에서 발견한 시스템을 엔티티·파츠·관계·신뢰 경계·증거라는 공통 형식으로 정규화합니다."
+          "fingerprint": "e289a45a46627518b08e",
+          "summary": "서로 다른 앱에서 발견한 시스템을 Asset·파츠·관계·신뢰 경계·증거라는 Asset 원장 공통 형식으로 정규화합니다."
         },
         {
           "entityId": "file:shared/twinBuildCanvas.js",
           "path": "shared/twinBuildCanvas.js",
           "fingerprint": "679a9a5768fe97b009cf",
-          "summary": "표준 트윈의 엔티티·파츠·관계를 실제 캔버스 노드와 연결선으로 바꾸고 다시 대응시킵니다."
+          "summary": "Asset 원장의 Asset·파츠·관계를 실제 캔버스 노드와 연결선에 대응시킵니다."
         },
         {
           "entityId": "file:shared/twinBuildReconciler.js",
           "path": "shared/twinBuildReconciler.js",
-          "fingerprint": "9d3c0e7599592282671b",
-          "summary": "새로 발견한 디지털 트윈과 현재 캔버스를 비교해 추가·변경·삭제 검토안을 만듭니다."
+          "fingerprint": "ffd56851ca2255798d5b",
+          "summary": "새로 발견한 Asset 원장과 현재 캔버스를 비교해 추가·변경·삭제 검토안을 만듭니다."
         },
         {
           "entityId": "file:shared/workflowCanvasSystemMap.js",
           "path": "shared/workflowCanvasSystemMap.js",
-          "fingerprint": "fb32bfed8abf4e3446a8",
+          "fingerprint": "53f58539e325ef0ea240",
           "summary": "Workflow Canvas 앱의 브라우저·서버·DB·저장소·배포 구조를 나타내는 기준 시스템 지도를 정의합니다."
         },
         {
           "entityId": "file:shared/workflowOperationDefinitions.js",
           "path": "shared/workflowOperationDefinitions.js",
-          "fingerprint": "ee52a52d0c23344ffafb",
+          "fingerprint": "694a2fae63884c756813",
           "summary": "Git 동기화, 상태 스냅샷, 등록 UI 속성 편집·롤백의 대상·위험·승인·검증·복구 계약을 선언합니다."
+        },
+        {
+          "entityId": "file:shared/workflowSourceEditCodePartAdapter.js",
+          "path": "shared/workflowSourceEditCodePartAdapter.js",
+          "fingerprint": "db311afc6c9583ee901e",
+          "summary": "Source Lens의 안정 anchor에 Safe Operations의 편집 허용 Manifest를 선택적으로 결합하고 서버 응답에서 다시 검증합니다."
         },
         {
           "entityId": "file:shared/workflowSourceFeatureBuild.js",
@@ -886,8 +906,8 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/workflowSystemTwinAdapter.js",
           "path": "shared/workflowSystemTwinAdapter.js",
-          "fingerprint": "d9d189a029e3ae81d8cf",
-          "summary": "Workflow Canvas 자체를 디지털 트윈으로 검사해 현재 지도와 다른 점을 검토안으로 만듭니다."
+          "fingerprint": "7a365346bdf832eee71d",
+          "summary": "Workflow Canvas 자체를 Asset 원장 기준으로 검사해 현재 지도와 다른 점을 검토안으로 만듭니다."
         },
         {
           "entityId": "file:shared/workflowSystemTwinAdapterDescriptor.js",
@@ -899,7 +919,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           "entityId": "file:shared/workflowSystemTwinBuild.js",
           "path": "shared/workflowSystemTwinBuild.js",
           "fingerprint": "7f8e28832b37c0419534",
-          "summary": "Workflow Canvas 시스템 지도를 표준 TwinBuild 자료로 변환하고 검증합니다."
+          "summary": "Workflow Canvas 시스템 지도를 표준 Asset 원장 자료로 변환하고 검증합니다."
         },
         {
           "entityId": "file:shared/workOntology.js",
@@ -910,7 +930,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:src/components/DigitalTwinReviewPanel.jsx",
           "path": "src/components/DigitalTwinReviewPanel.jsx",
-          "fingerprint": "e8524a21f00b811214ec",
+          "fingerprint": "8f1ad75bdc15437c98ac",
           "summary": "실제 시스템에서 발견한 변경안을 미리 보고 적용·무시·보류하도록 검토 목록을 보여줍니다."
         },
         {
@@ -935,7 +955,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           "entityId": "file:src/lib/digitalTwinAdapters.js",
           "path": "src/lib/digitalTwinAdapters.js",
           "fingerprint": "b6c275d81e80e4e913a4",
-          "summary": "화면에서 사용할 디지털 트윈 어댑터를 등록하고 대상 캔버스에 맞는 어댑터를 고릅니다."
+          "summary": "화면에서 사용할 Asset 원장 어댑터를 등록하고 대상 캔버스에 맞는 어댑터를 고릅니다."
         },
         {
           "entityId": "file:src/lib/systemRuntimeApi.js",
@@ -952,7 +972,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:src/nodes/SystemNode.jsx",
           "path": "src/nodes/SystemNode.jsx",
-          "fingerprint": "e1fafe89bf35e6b48dd1",
+          "fingerprint": "89e6a96d65543cf3ceaf",
           "summary": "앱·서버·DB 같은 실제 시스템 노드와 파츠, 운영 상태, 실행 가능한 기능을 화면에 표시합니다."
         },
         {
@@ -985,12 +1005,14 @@ export const SOURCE_FEATURE_MANIFEST = {
         "file:shared/systemOntology.js",
         "file:shared/systemPartOntology.js",
         "file:shared/systemRuntime.js",
+        "file:shared/systemStateSnapshot.js",
         "file:shared/twinAdapterContract.js",
         "file:shared/twinBuild.js",
         "file:shared/twinBuildCanvas.js",
         "file:shared/twinBuildReconciler.js",
         "file:shared/workflowCanvasSystemMap.js",
         "file:shared/workflowOperationDefinitions.js",
+        "file:shared/workflowSourceEditCodePartAdapter.js",
         "file:shared/workflowSourceFeatureBuild.js",
         "file:shared/workflowSystemDiscovery.js",
         "file:shared/workflowSystemMapRepair.js",
@@ -1026,12 +1048,14 @@ export const SOURCE_FEATURE_MANIFEST = {
         "shared/systemOntology.js",
         "shared/systemPartOntology.js",
         "shared/systemRuntime.js",
+        "shared/systemStateSnapshot.js",
         "shared/twinAdapterContract.js",
         "shared/twinBuild.js",
         "shared/twinBuildCanvas.js",
         "shared/twinBuildReconciler.js",
         "shared/workflowCanvasSystemMap.js",
         "shared/workflowOperationDefinitions.js",
+        "shared/workflowSourceEditCodePartAdapter.js",
         "shared/workflowSourceFeatureBuild.js",
         "shared/workflowSystemDiscovery.js",
         "shared/workflowSystemMapRepair.js",
@@ -1061,6 +1085,18 @@ export const SOURCE_FEATURE_MANIFEST = {
           "targetEntityId": "map-component-capability-mapper",
           "evidenceEntityIds": [
             "file:shared/capabilityMapper.js"
+          ]
+        },
+        {
+          "targetEntityId": "map-component-operation-definitions",
+          "evidenceEntityIds": [
+            "file:shared/systemStateSnapshot.js"
+          ]
+        },
+        {
+          "targetEntityId": "map-component-source-roundtrip-editor",
+          "evidenceEntityIds": [
+            "file:shared/workflowSourceEditCodePartAdapter.js"
           ]
         },
         {
@@ -1149,7 +1185,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "0000c6bedfd8fe47"
+      "fingerprint": "c999f92e5261ead2"
     },
     {
       "key": "area:source-code-twin",
@@ -1174,37 +1210,37 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:api/source-twin-webhook.js",
           "path": "api/source-twin-webhook.js",
-          "fingerprint": "ec021669ff5e4c768141",
+          "fingerprint": "ba21d0160c29a0d98a9b",
           "summary": "GitHub push 웹훅의 서명을 검증하고 변경된 커밋과 파일 경로만 기록합니다."
         },
         {
           "entityId": "file:api/source-twin.js",
           "path": "api/source-twin.js",
-          "fingerprint": "4865721ebe94a52aa445",
+          "fingerprint": "84e3d27ef435f909a13f",
           "summary": "소유자에게 배포 코드 구조·코드 파츠·정적 흐름을 제공하고, 등록 UI 속성 편집·롤백의 미리보기와 승인 요청을 중계합니다."
         },
         {
           "entityId": "file:mcp/localConnectorStore.js",
           "path": "mcp/localConnectorStore.js",
-          "fingerprint": "79078628da6f25cfeab0",
+          "fingerprint": "3615bf005d9857342fe8",
           "summary": "로컬 커넥터 등록, heartbeat, Git 동기화 계획과 실행 결과를 서버에 보관합니다."
         },
         {
           "entityId": "file:mcp/sourceTwinStore.js",
           "path": "mcp/sourceTwinStore.js",
-          "fingerprint": "6b67b11c4e6b8cc66a2e",
-          "summary": "소스 트윈 상태 스냅샷의 미리보기·승인·저장·비교를 서버에서 수행합니다."
+          "fingerprint": "800ce7d5f9c6cbb99005",
+          "summary": "소스 분석·Asset 원장 상태 스냅샷의 미리보기·승인·저장·비교를 서버에서 수행합니다."
         },
         {
           "entityId": "file:scripts/generate-source-twin.mjs",
           "path": "scripts/generate-source-twin.mjs",
-          "fingerprint": "eb54e9331761a734edb9",
-          "summary": "현재 저장소를 스캔해 배포에 포함할 소스 트윈 manifest를 생성하고 오래되지 않았는지 검사합니다."
+          "fingerprint": "60486ce5827d1487b62b",
+          "summary": "현재 저장소를 스캔해 배포에 포함할 소스 분석 manifest를 생성하고 오래되지 않았는지 검사합니다."
         },
         {
           "entityId": "file:scripts/local-connector-agent.mjs",
           "path": "scripts/local-connector-agent.mjs",
-          "fingerprint": "53a05f2fdb41c09ca65e",
+          "fingerprint": "e66969f8f39b22ddd049",
           "summary": "사용자 Mac에서 허용된 저장소만 읽어 코드·Git 상태를 보고하고, 별도 허용된 Git 동기화와 등록 UI 상수 편집·롤백만 실행합니다."
         },
         {
@@ -1212,6 +1248,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "path": "scripts/source-edit-executor.mjs",
           "fingerprint": "ea3f090c474db262a004",
           "summary": "등록된 상대 경로의 정확한 export literal을 AST로 찾아 stale·타입·범위를 검사하고 하나의 값만 교체합니다."
+        },
+        {
+          "entityId": "file:scripts/source-lens-engine.mjs",
+          "path": "scripts/source-lens-engine.mjs",
+          "fingerprint": "62505590959d295b4636",
+          "summary": "Source Lens의 유일한 공개 진입점과 단일 Source Analysis Workflow 계약·물리적 소유 경계를 정의합니다."
         },
         {
           "entityId": "file:scripts/source-profiles/fastapi-order-service.mjs",
@@ -1228,19 +1270,19 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:scripts/source-profiles/workflow-canvas.mjs",
           "path": "scripts/source-profiles/workflow-canvas.mjs",
-          "fingerprint": "3e5e4b3a8d4f75367872",
+          "fingerprint": "26b6e3e196ce5075d5b1",
           "summary": "Workflow Canvas 코드에만 해당하는 제품 역할과 하위 시스템 설명을 선언합니다."
         },
         {
           "entityId": "file:scripts/source-twin-scanner.mjs",
           "path": "scripts/source-twin-scanner.mjs",
-          "fingerprint": "04a592d8f81ad716dd94",
+          "fingerprint": "54d6560e4885ab9aaef4",
           "summary": "저장소 파일을 AST로 읽어 파일·Component·모듈·코드 파츠·import·호출·React·API·MCP·DB 참조를 분리된 근거로 수집합니다."
         },
         {
           "entityId": "file:scripts/source-twin-semantics.mjs",
           "path": "scripts/source-twin-semantics.mjs",
-          "fingerprint": "6fda26ee273392dfb481",
+          "fingerprint": "f52476720eea6bff6c4f",
           "summary": "발견된 코드 증거를 비개발자가 이해할 역할 설명과 제품 영역으로 바꾸는 규칙을 제공합니다."
         },
         {
@@ -1258,7 +1300,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/sourceCodeParts.js",
           "path": "shared/sourceCodeParts.js",
-          "fingerprint": "93581401a6a94fdac700",
+          "fingerprint": "25d78497fee6d68fd039",
           "summary": "JavaScript AST 근거를 선언·명령·분기·반복·반환·리소스·설정·데이터 참조 파츠로 분류하고 쉬운 한국어 문장으로 바꿉니다."
         },
         {
@@ -1280,6 +1322,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "summary": "import·함수 호출·React 렌더·props·UI 이벤트·API·MCP 진입점을 서로 다른 정적 근거 흐름으로 정규화합니다."
         },
         {
+          "entityId": "file:shared/sourceFunctionalContext.js",
+          "path": "shared/sourceFunctionalContext.js",
+          "fingerprint": "05bf75d9436b14eb99c5",
+          "summary": "README·기획 문서의 최신성을 실제 소스와 대조하고 UI 문구·화면 경로·API·DB·테스트·정적 Flow에서 제한된 기능 어휘 Pack을 만듭니다."
+        },
+        {
           "entityId": "file:shared/sourceModuleProposal.js",
           "path": "shared/sourceModuleProposal.js",
           "fingerprint": "4f2204419bfcdac513b1",
@@ -1294,13 +1342,13 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/sourceTwin.js",
           "path": "shared/sourceTwin.js",
-          "fingerprint": "6b06c5ca5a7d7434d148",
-          "summary": "코드 구조 관점, 검색, GitHub 코드 링크와 배포별 상태 스냅샷 형식을 정의합니다."
+          "fingerprint": "3f398e85e9381be27922",
+          "summary": "Source Analysis Artifact의 코드 구조 관점, 검색, 근거 표시와 GitHub 코드 링크 형식을 정의합니다."
         },
         {
           "entityId": "file:shared/sourceTwinSemantics.js",
           "path": "shared/sourceTwinSemantics.js",
-          "fingerprint": "f0305dbf5294dc742759",
+          "fingerprint": "6838e13115807932f126",
           "summary": "코드 파일을 제품 영역별로 묶는 공통 분류 이름과 표시 순서를 정의합니다."
         },
         {
@@ -1318,7 +1366,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:src/components/SourceTwinPanel.jsx",
           "path": "src/components/SourceTwinPanel.jsx",
-          "fingerprint": "c5c87e28cdb99fc5c7f8",
+          "fingerprint": "9c48cae2b232cc030120",
           "summary": "코드 트리, 모듈·코드 파츠 설명, 정적 호출 흐름, 등록 UI 상수 편집과 Git 상태를 한 창에서 보여줍니다."
         },
         {
@@ -1330,7 +1378,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:src/lib/sourceTwinApi.js",
           "path": "src/lib/sourceTwinApi.js",
-          "fingerprint": "a880c92c7cc5f5422503",
+          "fingerprint": "3a935a24ea833efc58a1",
           "summary": "배포된 코드 구조, GitHub 변경과 상태 스냅샷을 서버에서 불러오고 기록 요청을 보냅니다."
         },
         {
@@ -1355,6 +1403,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         "file:scripts/generate-source-twin.mjs",
         "file:scripts/local-connector-agent.mjs",
         "file:scripts/source-edit-executor.mjs",
+        "file:scripts/source-lens-engine.mjs",
         "file:scripts/source-profiles/fastapi-order-service.mjs",
         "file:scripts/source-profiles/index.mjs",
         "file:scripts/source-profiles/workflow-canvas.mjs",
@@ -1366,6 +1415,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         "file:shared/sourceEditableProperties.js",
         "file:shared/sourceFeatureModel.js",
         "file:shared/sourceFlows.js",
+        "file:shared/sourceFunctionalContext.js",
         "file:shared/sourceModuleProposal.js",
         "file:shared/sourceProfileContract.js",
         "file:shared/sourceTwin.js",
@@ -1387,6 +1437,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         "scripts/generate-source-twin.mjs",
         "scripts/local-connector-agent.mjs",
         "scripts/source-edit-executor.mjs",
+        "scripts/source-lens-engine.mjs",
         "scripts/source-profiles/fastapi-order-service.mjs",
         "scripts/source-profiles/index.mjs",
         "scripts/source-profiles/workflow-canvas.mjs",
@@ -1398,6 +1449,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         "shared/sourceEditableProperties.js",
         "shared/sourceFeatureModel.js",
         "shared/sourceFlows.js",
+        "shared/sourceFunctionalContext.js",
         "shared/sourceModuleProposal.js",
         "shared/sourceProfileContract.js",
         "shared/sourceTwin.js",
@@ -1421,8 +1473,13 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "targetEntityId": "map-component-source-ai-explanation",
           "evidenceEntityIds": [
-            "file:api/source-twin.js",
             "file:shared/sourceAiExplanation.js"
+          ]
+        },
+        {
+          "targetEntityId": "map-component-source-analysis-contract",
+          "evidenceEntityIds": [
+            "file:scripts/source-lens-engine.mjs"
           ]
         },
         {
@@ -1441,6 +1498,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "targetEntityId": "map-component-source-flow-discovery",
           "evidenceEntityIds": [
             "file:shared/sourceFlows.js"
+          ]
+        },
+        {
+          "targetEntityId": "map-component-source-functional-context-builder",
+          "evidenceEntityIds": [
+            "file:shared/sourceFunctionalContext.js"
           ]
         },
         {
@@ -1472,8 +1535,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           "targetEntityId": "map-engine-source-lens",
           "evidenceEntityIds": [
             "file:shared/sourceTwin.js",
-            "file:shared/sourceTwinSemantics.js",
-            "file:src/components/SourceTwinPanel.jsx"
+            "file:shared/sourceTwinSemantics.js"
           ]
         },
         {
@@ -1486,19 +1548,21 @@ export const SOURCE_FEATURE_MANIFEST = {
           "targetEntityId": "map-shared-api",
           "evidenceEntityIds": [
             "file:api/local-connector.js",
-            "file:api/source-twin-webhook.js"
+            "file:api/source-twin-webhook.js",
+            "file:api/source-twin.js"
           ]
         },
         {
           "targetEntityId": "map-web-app",
           "evidenceEntityIds": [
+            "file:src/components/SourceTwinPanel.jsx",
             "file:src/lib/localConnectorApi.js",
             "file:src/lib/sourceTwinApi.js"
           ]
         }
       ],
       "dataAccess": [],
-      "fingerprint": "ce0f3857638d0073"
+      "fingerprint": "42170797edd05dfd"
     },
     {
       "key": "area:ai-integration",
@@ -1529,13 +1593,13 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:mcp/server.js",
           "path": "mcp/server.js",
-          "fingerprint": "2aae3c10c2ae5dd1f89e",
+          "fingerprint": "cf3038a595e1cc056261",
           "summary": "AI에게 공개할 캔버스 도구의 이름, 입력 형식과 실행 함수를 등록합니다."
         },
         {
           "entityId": "file:mcp/store.js",
           "path": "mcp/store.js",
-          "fingerprint": "4ab9f5a0d622f25ae715",
+          "fingerprint": "ef8151ab288f29a35434",
           "summary": "AI 도구가 캔버스·노드·연결선을 읽고 바꿀 때 소유권과 공유 범위를 검사하고 Supabase에 반영합니다."
         },
         {
@@ -1668,7 +1732,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "11f882edcbb89b82"
+      "fingerprint": "e099fbe3b6115270"
     },
     {
       "key": "area:data-storage-sync",
@@ -1828,7 +1892,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "bc66f809ce09df85"
+      "fingerprint": "cc2a515bde019b3f"
     },
     {
       "key": "area:media-files",
@@ -1883,7 +1947,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "42589a9899738ef3"
+      "fingerprint": "7e75a56e9023d521"
     },
     {
       "key": "area:security-privacy",
@@ -1908,7 +1972,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:mcp/sanitize.js",
           "path": "mcp/sanitize.js",
-          "fingerprint": "6eb70868f3b2d335efb5",
+          "fingerprint": "814ef6a98b9ea82e680f",
           "summary": "AI나 외부 요청에서 들어온 텍스트·HTML·URL의 위험한 내용을 서버에서도 제거합니다."
         },
         {
@@ -2029,7 +2093,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "d6f02c9f064ae5fa"
+      "fingerprint": "f2fa6d5f9970f5a8"
     },
     {
       "key": "area:deployment-operations",
@@ -2048,7 +2112,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:package.json",
           "path": "package.json",
-          "fingerprint": "800ad171cb9402512d98",
+          "fingerprint": "923715e44d1bcf9ebce4",
           "summary": "개발 코드를 검사·빌드해 실제 웹 서비스로 실행할 설정과 명령을 정의합니다."
         },
         {
@@ -2076,7 +2140,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "c0db8447e33ebe11"
+      "fingerprint": "0dc3f230441d1fdc"
     },
     {
       "key": "area:testing-quality",
@@ -2105,6 +2169,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "summary": "배포 전에 개인정보 감사 설정과 사용자 본문 접근 경로의 필수 보호 장치를 검사합니다."
         },
         {
+          "entityId": "file:scripts/test-ai-context-gate.mjs",
+          "path": "scripts/test-ai-context-gate.mjs",
+          "fingerprint": "4547d6a50cf8b870b990",
+          "summary": "ai context gate 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
+        },
+        {
           "entityId": "file:scripts/test-collaboration-permissions.mjs",
           "path": "scripts/test-collaboration-permissions.mjs",
           "fingerprint": "c0d8c49fb226a494f184",
@@ -2113,7 +2183,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:scripts/test-engine-registry.mjs",
           "path": "scripts/test-engine-registry.mjs",
-          "fingerprint": "b6d778a868d6c91b60a4",
+          "fingerprint": "c27b3dd5cd0113a89c9a",
           "summary": "제품 엔진 레지스트리의 필수 정보, 코드·테스트 근거, 지도 변환과 논리 구성 표시를 자동 검사합니다."
         },
         {
@@ -2137,7 +2207,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:scripts/test-mcp-logic.mjs",
           "path": "scripts/test-mcp-logic.mjs",
-          "fingerprint": "c40b4ca38101bbfef0da",
+          "fingerprint": "745cef391c781b701cd6",
           "summary": "mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
         },
         {
@@ -2167,7 +2237,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:scripts/test-source-code-parts.mjs",
           "path": "scripts/test-source-code-parts.mjs",
-          "fingerprint": "d54f0e0a24f0fde3deec",
+          "fingerprint": "af370f3bd5e423a56754",
           "summary": "source code parts 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
         },
         {
@@ -2179,20 +2249,32 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:scripts/test-source-feature-model.mjs",
           "path": "scripts/test-source-feature-model.mjs",
-          "fingerprint": "19167f551d9c7d4d8517",
+          "fingerprint": "c0445a9cdd7d36907d28",
           "summary": "기능 Asset·Capability·속성 판정, 근거 부족 차단과 두 번째 소프트웨어 재사용성을 검사합니다."
+        },
+        {
+          "entityId": "file:scripts/test-source-functional-context.mjs",
+          "path": "scripts/test-source-functional-context.mjs",
+          "fingerprint": "baf4695e4e46539eed10",
+          "summary": "문서 최신성, 문서 부재 fallback, 제한 기능 어휘, 실제 소스 검증과 이전 Pack 재사용을 검사합니다."
+        },
+        {
+          "entityId": "file:scripts/test-source-lens-engine.mjs",
+          "path": "scripts/test-source-lens-engine.mjs",
+          "fingerprint": "0da48039ffdfe658607b",
+          "summary": "source lens engine 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
         },
         {
           "entityId": "file:scripts/test-source-profiles.mjs",
           "path": "scripts/test-source-profiles.mjs",
-          "fingerprint": "b70431d433e7a1290f59",
+          "fingerprint": "a7338fa85ef65787f062",
           "summary": "Source Profile 계약, 선택 우선순위와 두 번째 소프트웨어의 구조 전용 분석을 검사합니다."
         },
         {
           "entityId": "file:scripts/test-source-twin.mjs",
           "path": "scripts/test-source-twin.mjs",
-          "fingerprint": "e157d0e776e2db87e0ac",
-          "summary": "source twin 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
+          "fingerprint": "d688ff39caf8cfc195e7",
+          "summary": "소스 분석 manifest의 정규화·비밀값 제외·설명 근거와 변경 비교를 검사합니다."
         },
         {
           "entityId": "file:scripts/test-sql-security.mjs",
@@ -2210,13 +2292,13 @@ export const SOURCE_FEATURE_MANIFEST = {
           "entityId": "file:scripts/test-twin-adapter-contract.mjs",
           "path": "scripts/test-twin-adapter-contract.mjs",
           "fingerprint": "5981c800b0d94483c871",
-          "summary": "twin adapter contract 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
+          "summary": "레거시 현행 코드명인 Twin Adapter Contract의 등록·권한·인터페이스 경계를 검사합니다."
         },
         {
           "entityId": "file:scripts/test-twin-build.mjs",
           "path": "scripts/test-twin-build.mjs",
-          "fingerprint": "444c6b33ba4c48f308e1",
-          "summary": "twin build 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
+          "fingerprint": "9a87209f6f4c0d8a6774",
+          "summary": "Asset 원장 정규형·마이그레이션·참조 무결성·대조 규칙을 검사합니다."
         },
         {
           "entityId": "file:scripts/test-work-intent-parts.mjs",
@@ -2228,6 +2310,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       "evidenceEntityIds": [
         "file:scripts/check-governance.mjs",
         "file:scripts/check-privacy-release.mjs",
+        "file:scripts/test-ai-context-gate.mjs",
         "file:scripts/test-collaboration-permissions.mjs",
         "file:scripts/test-engine-registry.mjs",
         "file:scripts/test-group-membership.mjs",
@@ -2241,6 +2324,8 @@ export const SOURCE_FEATURE_MANIFEST = {
         "file:scripts/test-source-code-parts.mjs",
         "file:scripts/test-source-editable-properties.mjs",
         "file:scripts/test-source-feature-model.mjs",
+        "file:scripts/test-source-functional-context.mjs",
+        "file:scripts/test-source-lens-engine.mjs",
         "file:scripts/test-source-profiles.mjs",
         "file:scripts/test-source-twin.mjs",
         "file:scripts/test-sql-security.mjs",
@@ -2252,6 +2337,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       "evidencePaths": [
         "scripts/check-governance.mjs",
         "scripts/check-privacy-release.mjs",
+        "scripts/test-ai-context-gate.mjs",
         "scripts/test-collaboration-permissions.mjs",
         "scripts/test-engine-registry.mjs",
         "scripts/test-group-membership.mjs",
@@ -2265,6 +2351,8 @@ export const SOURCE_FEATURE_MANIFEST = {
         "scripts/test-source-code-parts.mjs",
         "scripts/test-source-editable-properties.mjs",
         "scripts/test-source-feature-model.mjs",
+        "scripts/test-source-functional-context.mjs",
+        "scripts/test-source-lens-engine.mjs",
         "scripts/test-source-profiles.mjs",
         "scripts/test-source-twin.mjs",
         "scripts/test-sql-security.mjs",
@@ -2275,7 +2363,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "3ba2b079a95ccd2b"
+      "fingerprint": "4f76e3eb5b9b7400"
     },
     {
       "key": "area:project-foundation",
@@ -2292,6 +2380,210 @@ export const SOURCE_FEATURE_MANIFEST = {
       "diagnostics": [],
       "evidence": [
         {
+          "entityId": "file:AGENTS.md",
+          "path": "AGENTS.md",
+          "fingerprint": "a868e05a66483fadffa5",
+          "summary": "AGENTS에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:CLAUDE.md",
+          "path": "CLAUDE.md",
+          "fingerprint": "ca354a35adb81ffcd6ac",
+          "summary": "CLAUDE에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/AI_MASTER.md",
+          "path": "docs/AI_MASTER.md",
+          "fingerprint": "6b1bc056b349685a69bf",
+          "summary": "AI_MASTER에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/architecture/decisions/DEPENDENCY_DECISIONS.md",
+          "path": "docs/architecture/decisions/DEPENDENCY_DECISIONS.md",
+          "fingerprint": "018214b25f3cb4650358",
+          "summary": "DEPENDENCY_DECISIONS에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/architecture/decisions/OPEN_SOURCE_POLICY.md",
+          "path": "docs/architecture/decisions/OPEN_SOURCE_POLICY.md",
+          "fingerprint": "70ebadee0929f41e9e1f",
+          "summary": "OPEN_SOURCE_POLICY에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/architecture/evaluations/source-lens/SOURCE_LENS_AI_PROVIDER_PILOT.md",
+          "path": "docs/architecture/evaluations/source-lens/SOURCE_LENS_AI_PROVIDER_PILOT.md",
+          "fingerprint": "9589338f7b80d51ad60c",
+          "summary": "SOURCE_LENS_AI_PROVIDER_PILOT에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/architecture/evaluations/source-lens/SOURCE_LENS_FLOW_VISUALIZATION_EVALUATION.md",
+          "path": "docs/architecture/evaluations/source-lens/SOURCE_LENS_FLOW_VISUALIZATION_EVALUATION.md",
+          "fingerprint": "fae4b9537db906893bb0",
+          "summary": "SOURCE_LENS_FLOW_VISUALIZATION_EVALUATION에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/architecture/evaluations/source-lens/SOURCE_LENS_TREE_SITTER_EVALUATION.md",
+          "path": "docs/architecture/evaluations/source-lens/SOURCE_LENS_TREE_SITTER_EVALUATION.md",
+          "fingerprint": "aa89c9de9c5bb8739a3e",
+          "summary": "SOURCE_LENS_TREE_SITTER_EVALUATION에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/architecture/FOUNDRY_MODEL.md",
+          "path": "docs/architecture/FOUNDRY_MODEL.md",
+          "fingerprint": "65b45cd65a83c48bf9a2",
+          "summary": "FOUNDRY_MODEL에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/archive/handoffs/CODEX_HANDOFF_SOURCE_LENS_SL0_SL1_KO.md",
+          "path": "docs/archive/handoffs/CODEX_HANDOFF_SOURCE_LENS_SL0_SL1_KO.md",
+          "fingerprint": "b515e6fc602151a7263d",
+          "summary": "CODEX_HANDOFF_SOURCE_LENS_SL0_SL1_KO에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/archive/handoffs/SOURCE_LENS_SL2_HANDOFF_KO.md",
+          "path": "docs/archive/handoffs/SOURCE_LENS_SL2_HANDOFF_KO.md",
+          "fingerprint": "0686ff6ae5ac0324405f",
+          "summary": "SOURCE_LENS_SL2_HANDOFF_KO에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/archive/handoffs/SOURCE_LENS_SL2_SL4_SL3_FINAL_KO.md",
+          "path": "docs/archive/handoffs/SOURCE_LENS_SL2_SL4_SL3_FINAL_KO.md",
+          "fingerprint": "9aaec707fe213ffdd56e",
+          "summary": "SOURCE_LENS_SL2_SL4_SL3_FINAL_KO에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/archive/handoffs/SOURCE_LENS_SL3_HANDOFF_KO.md",
+          "path": "docs/archive/handoffs/SOURCE_LENS_SL3_HANDOFF_KO.md",
+          "fingerprint": "ed17b367dbb4a0962b5a",
+          "summary": "SOURCE_LENS_SL3_HANDOFF_KO에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/archive/handoffs/SOURCE_LENS_SL4_HANDOFF_KO.md",
+          "path": "docs/archive/handoffs/SOURCE_LENS_SL4_HANDOFF_KO.md",
+          "fingerprint": "f5ddbaefbdb5e1d02a85",
+          "summary": "SOURCE_LENS_SL4_HANDOFF_KO에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/contracts/OPERATION_LIFECYCLE_CONTRACT.md",
+          "path": "docs/contracts/OPERATION_LIFECYCLE_CONTRACT.md",
+          "fingerprint": "0aa1bd20aba2b101de6b",
+          "summary": "OPERATION_LIFECYCLE_CONTRACT에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/contracts/SOURCE_PROFILE_CONTRACT.md",
+          "path": "docs/contracts/SOURCE_PROFILE_CONTRACT.md",
+          "fingerprint": "4d80e8395b600f466664",
+          "summary": "SOURCE_PROFILE_CONTRACT에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/engines/AI_CONTEXT_GATE_MASTER.md",
+          "path": "docs/engines/AI_CONTEXT_GATE_MASTER.md",
+          "fingerprint": "6d698f9440361e42ac83",
+          "summary": "AI_CONTEXT_GATE_MASTER에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/engines/CONNECTOR_BRIDGE_MASTER.md",
+          "path": "docs/engines/CONNECTOR_BRIDGE_MASTER.md",
+          "fingerprint": "eb67c1e07a71deae0d48",
+          "summary": "CONNECTOR_BRIDGE_MASTER에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/engines/SOURCE_LENS_MASTER.md",
+          "path": "docs/engines/SOURCE_LENS_MASTER.md",
+          "fingerprint": "6eaaae65b4663d44548d",
+          "summary": "SOURCE_LENS_MASTER에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/governance/AUDIT_PLAYBOOK.md",
+          "path": "docs/governance/AUDIT_PLAYBOOK.md",
+          "fingerprint": "b9cea524c63a4b8c1bdc",
+          "summary": "AUDIT_PLAYBOOK에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/governance/TECHNICAL_DEBT.md",
+          "path": "docs/governance/TECHNICAL_DEBT.md",
+          "fingerprint": "1f03e39e8ad04821ada1",
+          "summary": "TECHNICAL_DEBT에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/MASTER.md",
+          "path": "docs/MASTER.md",
+          "fingerprint": "a715b63a03a05a293d92",
+          "summary": "MASTER에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/product/ENGINE_AGENT_REGISTRY.md",
+          "path": "docs/product/ENGINE_AGENT_REGISTRY.md",
+          "fingerprint": "7b5fa6876de274046817",
+          "summary": "ENGINE_AGENT_REGISTRY에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/product/ENGINE_CHANGELOG.md",
+          "path": "docs/product/ENGINE_CHANGELOG.md",
+          "fingerprint": "bc9c95ffe0dfbef77d23",
+          "summary": "ENGINE_CHANGELOG에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/product/PRODUCT_CATALOG.md",
+          "path": "docs/product/PRODUCT_CATALOG.md",
+          "fingerprint": "5b82231d08d293d98409",
+          "summary": "PRODUCT_CATALOG에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/protocols/STARTING_PROTOCOL.md",
+          "path": "docs/protocols/STARTING_PROTOCOL.md",
+          "fingerprint": "9c1c87838b486a4e686c",
+          "summary": "STARTING_PROTOCOL에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/protocols/SYSTEM_ONBOARDING_PROTOCOL.md",
+          "path": "docs/protocols/SYSTEM_ONBOARDING_PROTOCOL.md",
+          "fingerprint": "2b3e372b15b26719bd5c",
+          "summary": "SYSTEM_ONBOARDING_PROTOCOL에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/protocols/WORKFLOW_CATALOG.md",
+          "path": "docs/protocols/WORKFLOW_CATALOG.md",
+          "fingerprint": "ed92c27fff77a3d130f9",
+          "summary": "WORKFLOW_CATALOG에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/README.md",
+          "path": "docs/README.md",
+          "fingerprint": "8bb924d846563bbbc57b",
+          "summary": "README에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/twin/architecture/TWIN_IDENTITY_AND_OBSERVATION.md",
+          "path": "docs/twin/architecture/TWIN_IDENTITY_AND_OBSERVATION.md",
+          "fingerprint": "fdd2c951f0637caa1b04",
+          "summary": "TWIN_IDENTITY_AND_OBSERVATION에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/twin/archive/TWIN_ENGINE_ROADMAP.md",
+          "path": "docs/twin/archive/TWIN_ENGINE_ROADMAP.md",
+          "fingerprint": "fdc183c8258b351ff059",
+          "summary": "TWIN_ENGINE_ROADMAP에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/twin/contracts/TWIN_ADAPTER_CONTRACT.md",
+          "path": "docs/twin/contracts/TWIN_ADAPTER_CONTRACT.md",
+          "fingerprint": "e2bbb60d983436cf4cce",
+          "summary": "TWIN_ADAPTER_CONTRACT에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/twin/contracts/TWIN_BUILD_SCHEMA.md",
+          "path": "docs/twin/contracts/TWIN_BUILD_SCHEMA.md",
+          "fingerprint": "0d7846b3fa166fb731a4",
+          "summary": "TWIN_BUILD_SCHEMA에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/twin/README.md",
+          "path": "docs/twin/README.md",
+          "fingerprint": "e8d01fd7484abd7d7c70",
+          "summary": "README에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
           "entityId": "file:index.html",
           "path": "index.html",
           "fingerprint": "093cb8feece3994550d3",
@@ -2300,21 +2592,105 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:README.md",
           "path": "README.md",
-          "fingerprint": "f89394f151835d85e849",
+          "fingerprint": "7678aaa8c2ab9c80c47d",
           "summary": "README에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:scripts/ai-context-gate-engine.mjs",
+          "path": "scripts/ai-context-gate-engine.mjs",
+          "fingerprint": "8ae2b3f9286d79e3a4e9",
+          "summary": "ai-context-gate-engine에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:THIRD_PARTY_NOTICES.md",
+          "path": "THIRD_PARTY_NOTICES.md",
+          "fingerprint": "23639bfb6e37252199e6",
+          "summary": "THIRD_PARTY_NOTICES에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
         }
       ],
       "evidenceEntityIds": [
+        "file:AGENTS.md",
+        "file:CLAUDE.md",
+        "file:docs/AI_MASTER.md",
+        "file:docs/architecture/decisions/DEPENDENCY_DECISIONS.md",
+        "file:docs/architecture/decisions/OPEN_SOURCE_POLICY.md",
+        "file:docs/architecture/evaluations/source-lens/SOURCE_LENS_AI_PROVIDER_PILOT.md",
+        "file:docs/architecture/evaluations/source-lens/SOURCE_LENS_FLOW_VISUALIZATION_EVALUATION.md",
+        "file:docs/architecture/evaluations/source-lens/SOURCE_LENS_TREE_SITTER_EVALUATION.md",
+        "file:docs/architecture/FOUNDRY_MODEL.md",
+        "file:docs/archive/handoffs/CODEX_HANDOFF_SOURCE_LENS_SL0_SL1_KO.md",
+        "file:docs/archive/handoffs/SOURCE_LENS_SL2_HANDOFF_KO.md",
+        "file:docs/archive/handoffs/SOURCE_LENS_SL2_SL4_SL3_FINAL_KO.md",
+        "file:docs/archive/handoffs/SOURCE_LENS_SL3_HANDOFF_KO.md",
+        "file:docs/archive/handoffs/SOURCE_LENS_SL4_HANDOFF_KO.md",
+        "file:docs/contracts/OPERATION_LIFECYCLE_CONTRACT.md",
+        "file:docs/contracts/SOURCE_PROFILE_CONTRACT.md",
+        "file:docs/engines/AI_CONTEXT_GATE_MASTER.md",
+        "file:docs/engines/CONNECTOR_BRIDGE_MASTER.md",
+        "file:docs/engines/SOURCE_LENS_MASTER.md",
+        "file:docs/governance/AUDIT_PLAYBOOK.md",
+        "file:docs/governance/TECHNICAL_DEBT.md",
+        "file:docs/MASTER.md",
+        "file:docs/product/ENGINE_AGENT_REGISTRY.md",
+        "file:docs/product/ENGINE_CHANGELOG.md",
+        "file:docs/product/PRODUCT_CATALOG.md",
+        "file:docs/protocols/STARTING_PROTOCOL.md",
+        "file:docs/protocols/SYSTEM_ONBOARDING_PROTOCOL.md",
+        "file:docs/protocols/WORKFLOW_CATALOG.md",
+        "file:docs/README.md",
+        "file:docs/twin/architecture/TWIN_IDENTITY_AND_OBSERVATION.md",
+        "file:docs/twin/archive/TWIN_ENGINE_ROADMAP.md",
+        "file:docs/twin/contracts/TWIN_ADAPTER_CONTRACT.md",
+        "file:docs/twin/contracts/TWIN_BUILD_SCHEMA.md",
+        "file:docs/twin/README.md",
         "file:index.html",
-        "file:README.md"
+        "file:README.md",
+        "file:scripts/ai-context-gate-engine.mjs",
+        "file:THIRD_PARTY_NOTICES.md"
       ],
       "evidencePaths": [
+        "AGENTS.md",
+        "CLAUDE.md",
+        "docs/AI_MASTER.md",
+        "docs/architecture/decisions/DEPENDENCY_DECISIONS.md",
+        "docs/architecture/decisions/OPEN_SOURCE_POLICY.md",
+        "docs/architecture/evaluations/source-lens/SOURCE_LENS_AI_PROVIDER_PILOT.md",
+        "docs/architecture/evaluations/source-lens/SOURCE_LENS_FLOW_VISUALIZATION_EVALUATION.md",
+        "docs/architecture/evaluations/source-lens/SOURCE_LENS_TREE_SITTER_EVALUATION.md",
+        "docs/architecture/FOUNDRY_MODEL.md",
+        "docs/archive/handoffs/CODEX_HANDOFF_SOURCE_LENS_SL0_SL1_KO.md",
+        "docs/archive/handoffs/SOURCE_LENS_SL2_HANDOFF_KO.md",
+        "docs/archive/handoffs/SOURCE_LENS_SL2_SL4_SL3_FINAL_KO.md",
+        "docs/archive/handoffs/SOURCE_LENS_SL3_HANDOFF_KO.md",
+        "docs/archive/handoffs/SOURCE_LENS_SL4_HANDOFF_KO.md",
+        "docs/contracts/OPERATION_LIFECYCLE_CONTRACT.md",
+        "docs/contracts/SOURCE_PROFILE_CONTRACT.md",
+        "docs/engines/AI_CONTEXT_GATE_MASTER.md",
+        "docs/engines/CONNECTOR_BRIDGE_MASTER.md",
+        "docs/engines/SOURCE_LENS_MASTER.md",
+        "docs/governance/AUDIT_PLAYBOOK.md",
+        "docs/governance/TECHNICAL_DEBT.md",
+        "docs/MASTER.md",
+        "docs/product/ENGINE_AGENT_REGISTRY.md",
+        "docs/product/ENGINE_CHANGELOG.md",
+        "docs/product/PRODUCT_CATALOG.md",
+        "docs/protocols/STARTING_PROTOCOL.md",
+        "docs/protocols/SYSTEM_ONBOARDING_PROTOCOL.md",
+        "docs/protocols/WORKFLOW_CATALOG.md",
+        "docs/README.md",
+        "docs/twin/architecture/TWIN_IDENTITY_AND_OBSERVATION.md",
+        "docs/twin/archive/TWIN_ENGINE_ROADMAP.md",
+        "docs/twin/contracts/TWIN_ADAPTER_CONTRACT.md",
+        "docs/twin/contracts/TWIN_BUILD_SCHEMA.md",
+        "docs/twin/README.md",
         "index.html",
-        "README.md"
+        "README.md",
+        "scripts/ai-context-gate-engine.mjs",
+        "THIRD_PARTY_NOTICES.md"
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "3752be8cab3463ed"
+      "fingerprint": "cd9ccfb115ae0a6c"
     },
     {
       "key": "subsystem:canvas-workspace",
@@ -2333,7 +2709,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:src/App.jsx",
           "path": "src/App.jsx",
-          "fingerprint": "655a18297aa6e51cdc24",
+          "fingerprint": "b7e1a9c4cb13f382dbf6",
           "summary": "캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다."
         },
         {
@@ -2351,7 +2727,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:src/components/NodePalette.jsx",
           "path": "src/components/NodePalette.jsx",
-          "fingerprint": "25ad9ddfd216d8ff50bb",
+          "fingerprint": "30642800e15400d67bda",
           "summary": "새로 만들 수 있는 노드 종류를 보여주고 드래그해 캔버스에 놓을 자료를 준비합니다."
         },
         {
@@ -2429,7 +2805,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "ccf9a2cea900d5c9"
+      "fingerprint": "47efa0b895f10a71"
     },
     {
       "key": "subsystem:canvas-elements",
@@ -2508,7 +2884,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "1dd818d5c672048d"
+      "fingerprint": "fd7168e7caed3a87"
     },
     {
       "key": "subsystem:canvas-state",
@@ -2527,7 +2903,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:mcp/layout.js",
           "path": "mcp/layout.js",
-          "fingerprint": "a1c4cd1bfc0a345acee3",
+          "fingerprint": "51ef3c9ac2a3e0f5e435",
           "summary": "여러 노드와 연결선을 계층·방사형 같은 배치로 정리할 좌표를 계산합니다."
         },
         {
@@ -2617,7 +2993,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "e340017eda9ecea7"
+      "fingerprint": "9a8ab98f315423ea"
     },
     {
       "key": "subsystem:notes-workspace",
@@ -2672,7 +3048,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "77cde7a89a8f4a0b"
+      "fingerprint": "e19ca4ea0de32ca1"
     },
     {
       "key": "subsystem:content-editing",
@@ -2733,7 +3109,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "dc1b5f86fd6d0804"
+      "fingerprint": "5874ed8895fcb31e"
     },
     {
       "key": "subsystem:sharing-entry",
@@ -2808,7 +3184,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "c2411c76888ec99c"
+      "fingerprint": "de9d872cc7ce8042"
     },
     {
       "key": "subsystem:participants-presence",
@@ -2864,7 +3240,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "1f734856ece13745"
+      "fingerprint": "32973e3c1b98b5df"
     },
     {
       "key": "subsystem:sharing-policy",
@@ -2885,6 +3261,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "path": "mcp/shareAccess.js",
           "fingerprint": "b6d1d0b6cb8193dc13e8",
           "summary": "MCP에서 공유 참여자 목록과 초대 범위를 계산하고 시야 제한을 적용합니다."
+        },
+        {
+          "entityId": "file:shared/aiContextGate.js",
+          "path": "shared/aiContextGate.js",
+          "fingerprint": "b03fc3077c717278489b",
+          "summary": "실행 문맥에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
         },
         {
           "entityId": "file:shared/richTextSanitizer.js",
@@ -2908,7 +3290,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           "entityId": "file:shared/sourceAssetHierarchy.js",
           "path": "shared/sourceAssetHierarchy.js",
           "fingerprint": "b99fe97d0264036f5724",
-          "summary": "소스 코드에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
+          "summary": "소스 코드 · Asset에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
         },
         {
           "entityId": "file:shared/systemLayers.js",
@@ -2949,6 +3331,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       ],
       "evidenceEntityIds": [
         "file:mcp/shareAccess.js",
+        "file:shared/aiContextGate.js",
         "file:shared/richTextSanitizer.js",
         "file:shared/securityOverlay.js",
         "file:shared/sharePermissions.js",
@@ -2962,6 +3345,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       ],
       "evidencePaths": [
         "mcp/shareAccess.js",
+        "shared/aiContextGate.js",
         "shared/richTextSanitizer.js",
         "shared/securityOverlay.js",
         "shared/sharePermissions.js",
@@ -3049,7 +3433,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "21fbd592b3ee0073"
+      "fingerprint": "e4119b54c37e8eac"
     },
     {
       "key": "subsystem:identity-account",
@@ -3144,7 +3528,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "3785a775c5bf4bf4"
+      "fingerprint": "1664e9fb7dbcdf2a"
     },
     {
       "key": "subsystem:twin-core",
@@ -3152,8 +3536,8 @@ export const SOURCE_FEATURE_MANIFEST = {
       "id": "twin-core",
       "areaId": "digital-twin-engine",
       "ownerKey": "area:digital-twin-engine",
-      "label": "엔진 공통 규격",
-      "description": "모든 프로그램을 같은 엔티티·파츠·관계·증거 형식으로 표현하는 중심 모델",
+      "label": "Asset Core",
+      "description": "모든 프로그램을 같은 Asset·파츠·관계·증거 형식으로 표현하는 중심 모델",
       "order": 9,
       "classification": "attribute",
       "rationale": "Source Profile 기본 판정",
@@ -3169,7 +3553,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/systemOntology.js",
           "path": "shared/systemOntology.js",
-          "fingerprint": "a1b314ed02d825530a10",
+          "fingerprint": "6cf7d40d89f92199c383",
           "summary": "앱·서버·DB·사람 같은 시스템 노드 종류와 실재성 표시 규칙을 정의합니다."
         },
         {
@@ -3179,27 +3563,33 @@ export const SOURCE_FEATURE_MANIFEST = {
           "summary": "시스템 노드 파츠의 종류, 연결점과 운영 상태 필드를 공통 규칙으로 정의합니다."
         },
         {
+          "entityId": "file:shared/systemStateSnapshot.js",
+          "path": "shared/systemStateSnapshot.js",
+          "fingerprint": "d1cf08625efd6ab099f8",
+          "summary": "코드·DB·배포·운영·보안 상태를 한 시점의 호환 스냅샷으로 합성하고 두 시점을 비교합니다."
+        },
+        {
           "entityId": "file:shared/twinAdapterContract.js",
           "path": "shared/twinAdapterContract.js",
-          "fingerprint": "a34e0669d4ab1ffad5c6",
+          "fingerprint": "703d737d12fad2c02f35",
           "summary": "새 프로그램 종류를 연결하는 어댑터가 제공해야 할 발견·권한·조작 계약을 검증합니다."
         },
         {
           "entityId": "file:shared/twinBuild.js",
           "path": "shared/twinBuild.js",
-          "fingerprint": "5df6347a0e8a79e2036b",
-          "summary": "서로 다른 앱에서 발견한 시스템을 엔티티·파츠·관계·신뢰 경계·증거라는 공통 형식으로 정규화합니다."
+          "fingerprint": "e289a45a46627518b08e",
+          "summary": "서로 다른 앱에서 발견한 시스템을 Asset·파츠·관계·신뢰 경계·증거라는 Asset 원장 공통 형식으로 정규화합니다."
         },
         {
           "entityId": "file:shared/workflowSystemTwinBuild.js",
           "path": "shared/workflowSystemTwinBuild.js",
           "fingerprint": "7f8e28832b37c0419534",
-          "summary": "Workflow Canvas 시스템 지도를 표준 TwinBuild 자료로 변환하고 검증합니다."
+          "summary": "Workflow Canvas 시스템 지도를 표준 Asset 원장 자료로 변환하고 검증합니다."
         },
         {
           "entityId": "file:src/nodes/SystemNode.jsx",
           "path": "src/nodes/SystemNode.jsx",
-          "fingerprint": "e1fafe89bf35e6b48dd1",
+          "fingerprint": "89e6a96d65543cf3ceaf",
           "summary": "앱·서버·DB 같은 실제 시스템 노드와 파츠, 운영 상태, 실행 가능한 기능을 화면에 표시합니다."
         }
       ],
@@ -3207,6 +3597,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         "file:shared/relationOntology.js",
         "file:shared/systemOntology.js",
         "file:shared/systemPartOntology.js",
+        "file:shared/systemStateSnapshot.js",
         "file:shared/twinAdapterContract.js",
         "file:shared/twinBuild.js",
         "file:shared/workflowSystemTwinBuild.js",
@@ -3216,6 +3607,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         "shared/relationOntology.js",
         "shared/systemOntology.js",
         "shared/systemPartOntology.js",
+        "shared/systemStateSnapshot.js",
         "shared/twinAdapterContract.js",
         "shared/twinBuild.js",
         "shared/workflowSystemTwinBuild.js",
@@ -3226,6 +3618,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "targetEntityId": "map-canvas-engine",
           "evidenceEntityIds": [
             "file:src/nodes/SystemNode.jsx"
+          ]
+        },
+        {
+          "targetEntityId": "map-component-operation-definitions",
+          "evidenceEntityIds": [
+            "file:shared/systemStateSnapshot.js"
           ]
         },
         {
@@ -3248,7 +3646,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "349e6ca0622af231"
+      "fingerprint": "ae28864f48f714df"
     },
     {
       "key": "subsystem:engine-product-registry",
@@ -3267,14 +3665,14 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/capabilityMapper.js",
           "path": "shared/capabilityMapper.js",
-          "fingerprint": "f23169ecfc93c9de2a68",
+          "fingerprint": "a6deeda3ae5353e28aca",
           "summary": "제품 엔진 레지스트리를 논리 엔진 노드와 내부 구성 관계로 변환합니다."
         },
         {
           "entityId": "file:shared/engineRegistry.js",
           "path": "shared/engineRegistry.js",
-          "fingerprint": "83c8dd70edc7edfee145",
-          "summary": "Twin Core, Create Graph 같은 제품 엔진의 이름·버전·내부 구성요소·입출력·근거와 향후 담당 에이전트 계약을 한곳에서 관리합니다."
+          "fingerprint": "75e578f1056e19cd556f",
+          "summary": "Asset Core, Draw Map 같은 제품 엔진의 이름·버전·내부 구성요소·입출력·근거와 향후 담당 에이전트 계약을 한곳에서 관리합니다."
         }
       ],
       "evidenceEntityIds": [
@@ -3294,7 +3692,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "91cdf9c4cd9e076b"
+      "fingerprint": "105fb735bdb1b1df"
     },
     {
       "key": "subsystem:twin-discovery",
@@ -3306,7 +3704,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       "description": "코드·DB·설정에서 실제 구성 요소를 찾고 표준 자료로 변환",
       "order": 11,
       "classification": "capability",
-      "rationale": "디지털 트윈 기능 안에서 구성요소 발견 능력을 노출합니다.",
+      "rationale": "Asset 원장 기능 안에서 구성요소 발견 능력을 노출합니다.",
       "eligible": true,
       "diagnostics": [],
       "evidence": [
@@ -3319,7 +3717,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:scripts/system-discovery.mjs",
           "path": "scripts/system-discovery.mjs",
-          "fingerprint": "e0e83dc4a5bce78d085b",
+          "fingerprint": "b40e6bc252a510412650",
           "summary": "코드·SQL·MCP 도구·환경변수 이름을 스캔해 Workflow Canvas 시스템 자원 목록을 만듭니다."
         },
         {
@@ -3341,7 +3739,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "ba46df34d8d282e9"
+      "fingerprint": "36adecb5703ddd3f"
     },
     {
       "key": "subsystem:twin-reconciliation",
@@ -3360,25 +3758,25 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/digitalTwinProposal.js",
           "path": "shared/digitalTwinProposal.js",
-          "fingerprint": "07999fa042fbd2741aef",
-          "summary": "검토가 승인된 디지털 트윈 변경만 캔버스 자료에 적용하고 충돌을 검사합니다."
+          "fingerprint": "c93bf4fa215796debc8f",
+          "summary": "검토가 승인된 Asset 원장 변경만 캔버스 자료에 적용하고 충돌을 검사합니다."
         },
         {
           "entityId": "file:shared/digitalTwinReview.js",
           "path": "shared/digitalTwinReview.js",
-          "fingerprint": "ba6025ee7407452fc88b",
-          "summary": "트윈 변경안의 적용·무시·보류 결정을 저장하고 새 검사에서도 같은 결정을 찾습니다."
+          "fingerprint": "c69d1bab7ae5c4e13152",
+          "summary": "Asset 원장 변경안의 적용·무시·보류 결정을 저장하고 새 검사에서도 같은 결정을 찾습니다."
         },
         {
           "entityId": "file:shared/twinBuildReconciler.js",
           "path": "shared/twinBuildReconciler.js",
-          "fingerprint": "9d3c0e7599592282671b",
-          "summary": "새로 발견한 디지털 트윈과 현재 캔버스를 비교해 추가·변경·삭제 검토안을 만듭니다."
+          "fingerprint": "ffd56851ca2255798d5b",
+          "summary": "새로 발견한 Asset 원장과 현재 캔버스를 비교해 추가·변경·삭제 검토안을 만듭니다."
         },
         {
           "entityId": "file:src/components/DigitalTwinReviewPanel.jsx",
           "path": "src/components/DigitalTwinReviewPanel.jsx",
-          "fingerprint": "e8524a21f00b811214ec",
+          "fingerprint": "8f1ad75bdc15437c98ac",
           "summary": "실제 시스템에서 발견한 변경안을 미리 보고 적용·무시·보류하도록 검토 목록을 보여줍니다."
         }
       ],
@@ -3409,7 +3807,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "e6bbf1eebd195f41"
+      "fingerprint": "faf1e2b0e57c5a42"
     },
     {
       "key": "subsystem:twin-materialization",
@@ -3417,11 +3815,11 @@ export const SOURCE_FEATURE_MANIFEST = {
       "id": "twin-materialization",
       "areaId": "digital-twin-engine",
       "ownerKey": "area:digital-twin-engine",
-      "label": "지도 실체화",
-      "description": "승인된 엔티티·파츠·관계를 실제 캔버스 요소로 반영",
+      "label": "Draw Map",
+      "description": "온톨로지·사실 판정과 무관하게 승인된 배치·연결선·그룹만 가시화",
       "order": 13,
       "classification": "capability",
-      "rationale": "디지털 트윈 기능 안에서 승인된 지도 실체화 능력을 노출합니다.",
+      "rationale": "Asset 원장 기능 안에서 승인된 지도 배치·연결선·그룹 가시화 능력을 노출합니다.",
       "eligible": true,
       "diagnostics": [],
       "evidence": [
@@ -3429,12 +3827,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "entityId": "file:shared/twinBuildCanvas.js",
           "path": "shared/twinBuildCanvas.js",
           "fingerprint": "679a9a5768fe97b009cf",
-          "summary": "표준 트윈의 엔티티·파츠·관계를 실제 캔버스 노드와 연결선으로 바꾸고 다시 대응시킵니다."
+          "summary": "Asset 원장의 Asset·파츠·관계를 실제 캔버스 노드와 연결선에 대응시킵니다."
         },
         {
           "entityId": "file:shared/workflowCanvasSystemMap.js",
           "path": "shared/workflowCanvasSystemMap.js",
-          "fingerprint": "fb32bfed8abf4e3446a8",
+          "fingerprint": "53f58539e325ef0ea240",
           "summary": "Workflow Canvas 앱의 브라우저·서버·DB·저장소·배포 구조를 나타내는 기준 시스템 지도를 정의합니다."
         },
         {
@@ -3456,7 +3854,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "b05767eeb15088d4"
+      "fingerprint": "3542bec70b2ef4ec"
     },
     {
       "key": "subsystem:twin-runtime",
@@ -3578,7 +3976,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "aeb657c629a36a38"
+      "fingerprint": "393fc97018cf1fb6"
     },
     {
       "key": "subsystem:twin-workflow-adapter",
@@ -3587,7 +3985,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       "areaId": "digital-twin-engine",
       "ownerKey": "area:digital-twin-engine",
       "label": "Workflow Canvas 어댑터",
-      "description": "현재 앱을 범용 트윈 엔진 계약에 연결하는 번역층",
+      "description": "현재 앱을 Asset 원장 계약에 연결하는 번역층",
       "order": 15,
       "classification": "attribute",
       "rationale": "Source Profile 기본 판정",
@@ -3603,8 +4001,8 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/workflowSystemTwinAdapter.js",
           "path": "shared/workflowSystemTwinAdapter.js",
-          "fingerprint": "d9d189a029e3ae81d8cf",
-          "summary": "Workflow Canvas 자체를 디지털 트윈으로 검사해 현재 지도와 다른 점을 검토안으로 만듭니다."
+          "fingerprint": "7a365346bdf832eee71d",
+          "summary": "Workflow Canvas 자체를 Asset 원장 기준으로 검사해 현재 지도와 다른 점을 검토안으로 만듭니다."
         },
         {
           "entityId": "file:shared/workflowSystemTwinAdapterDescriptor.js",
@@ -3616,7 +4014,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           "entityId": "file:src/lib/digitalTwinAdapters.js",
           "path": "src/lib/digitalTwinAdapters.js",
           "fingerprint": "b6c275d81e80e4e913a4",
-          "summary": "화면에서 사용할 디지털 트윈 어댑터를 등록하고 대상 캔버스에 맞는 어댑터를 고릅니다."
+          "summary": "화면에서 사용할 Asset 원장 어댑터를 등록하고 대상 캔버스에 맞는 어댑터를 고릅니다."
         }
       ],
       "evidenceEntityIds": [
@@ -3647,7 +4045,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "c7cd959eaaac6e43"
+      "fingerprint": "a5d41da62b0624d6"
     },
     {
       "key": "subsystem:twin-operations",
@@ -3659,7 +4057,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       "description": "미리보기, 승인, 실행, 확인, 감사와 복구의 공통 절차",
       "order": 16,
       "classification": "capability",
-      "rationale": "디지털 트윈 기능 안에서 안전한 조작 수명주기를 노출합니다.",
+      "rationale": "Asset 원장 기능 안에서 안전한 조작 수명주기를 노출합니다.",
       "eligible": true,
       "diagnostics": [],
       "evidence": [
@@ -3672,27 +4070,41 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/operationLifecycle.js",
           "path": "shared/operationLifecycle.js",
-          "fingerprint": "072796be78f3c94f42cc",
+          "fingerprint": "545ebee0a269773760ea",
           "summary": "직접 클릭·자동화·미래 AI가 실행하는 조작을 계획, 승인, 실행, 확인, 감사, 복구 순서로 제한합니다."
         },
         {
           "entityId": "file:shared/workflowOperationDefinitions.js",
           "path": "shared/workflowOperationDefinitions.js",
-          "fingerprint": "ee52a52d0c23344ffafb",
+          "fingerprint": "694a2fae63884c756813",
           "summary": "Git 동기화, 상태 스냅샷, 등록 UI 속성 편집·롤백의 대상·위험·승인·검증·복구 계약을 선언합니다."
+        },
+        {
+          "entityId": "file:shared/workflowSourceEditCodePartAdapter.js",
+          "path": "shared/workflowSourceEditCodePartAdapter.js",
+          "fingerprint": "db311afc6c9583ee901e",
+          "summary": "Source Lens의 안정 anchor에 Safe Operations의 편집 허용 Manifest를 선택적으로 결합하고 서버 응답에서 다시 검증합니다."
         }
       ],
       "evidenceEntityIds": [
         "file:shared/edgeOperation.js",
         "file:shared/operationLifecycle.js",
-        "file:shared/workflowOperationDefinitions.js"
+        "file:shared/workflowOperationDefinitions.js",
+        "file:shared/workflowSourceEditCodePartAdapter.js"
       ],
       "evidencePaths": [
         "shared/edgeOperation.js",
         "shared/operationLifecycle.js",
-        "shared/workflowOperationDefinitions.js"
+        "shared/workflowOperationDefinitions.js",
+        "shared/workflowSourceEditCodePartAdapter.js"
       ],
       "implementations": [
+        {
+          "targetEntityId": "map-component-source-roundtrip-editor",
+          "evidenceEntityIds": [
+            "file:shared/workflowSourceEditCodePartAdapter.js"
+          ]
+        },
         {
           "targetEntityId": "map-engine-safe-operations",
           "evidenceEntityIds": [
@@ -3702,7 +4114,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "d9d2728d7037c582"
+      "fingerprint": "385bd2d68188854e"
     },
     {
       "key": "subsystem:work-intent-governance",
@@ -3781,7 +4193,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "a8e5eea4a6c1cf16"
+      "fingerprint": "04784c7a4e0a0e28"
     },
     {
       "key": "subsystem:source-analysis",
@@ -3800,14 +4212,20 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:scripts/generate-source-twin.mjs",
           "path": "scripts/generate-source-twin.mjs",
-          "fingerprint": "eb54e9331761a734edb9",
-          "summary": "현재 저장소를 스캔해 배포에 포함할 소스 트윈 manifest를 생성하고 오래되지 않았는지 검사합니다."
+          "fingerprint": "60486ce5827d1487b62b",
+          "summary": "현재 저장소를 스캔해 배포에 포함할 소스 분석 manifest를 생성하고 오래되지 않았는지 검사합니다."
         },
         {
           "entityId": "file:scripts/source-edit-executor.mjs",
           "path": "scripts/source-edit-executor.mjs",
           "fingerprint": "ea3f090c474db262a004",
           "summary": "등록된 상대 경로의 정확한 export literal을 AST로 찾아 stale·타입·범위를 검사하고 하나의 값만 교체합니다."
+        },
+        {
+          "entityId": "file:scripts/source-lens-engine.mjs",
+          "path": "scripts/source-lens-engine.mjs",
+          "fingerprint": "62505590959d295b4636",
+          "summary": "Source Lens의 유일한 공개 진입점과 단일 Source Analysis Workflow 계약·물리적 소유 경계를 정의합니다."
         },
         {
           "entityId": "file:scripts/source-profiles/fastapi-order-service.mjs",
@@ -3824,19 +4242,19 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:scripts/source-profiles/workflow-canvas.mjs",
           "path": "scripts/source-profiles/workflow-canvas.mjs",
-          "fingerprint": "3e5e4b3a8d4f75367872",
+          "fingerprint": "26b6e3e196ce5075d5b1",
           "summary": "Workflow Canvas 코드에만 해당하는 제품 역할과 하위 시스템 설명을 선언합니다."
         },
         {
           "entityId": "file:scripts/source-twin-scanner.mjs",
           "path": "scripts/source-twin-scanner.mjs",
-          "fingerprint": "04a592d8f81ad716dd94",
+          "fingerprint": "54d6560e4885ab9aaef4",
           "summary": "저장소 파일을 AST로 읽어 파일·Component·모듈·코드 파츠·import·호출·React·API·MCP·DB 참조를 분리된 근거로 수집합니다."
         },
         {
           "entityId": "file:scripts/source-twin-semantics.mjs",
           "path": "scripts/source-twin-semantics.mjs",
-          "fingerprint": "6fda26ee273392dfb481",
+          "fingerprint": "f52476720eea6bff6c4f",
           "summary": "발견된 코드 증거를 비개발자가 이해할 역할 설명과 제품 영역으로 바꾸는 규칙을 제공합니다."
         },
         {
@@ -3848,7 +4266,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/sourceCodeParts.js",
           "path": "shared/sourceCodeParts.js",
-          "fingerprint": "93581401a6a94fdac700",
+          "fingerprint": "25d78497fee6d68fd039",
           "summary": "JavaScript AST 근거를 선언·명령·분기·반복·반환·리소스·설정·데이터 참조 파츠로 분류하고 쉬운 한국어 문장으로 바꿉니다."
         },
         {
@@ -3870,6 +4288,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "summary": "import·함수 호출·React 렌더·props·UI 이벤트·API·MCP 진입점을 서로 다른 정적 근거 흐름으로 정규화합니다."
         },
         {
+          "entityId": "file:shared/sourceFunctionalContext.js",
+          "path": "shared/sourceFunctionalContext.js",
+          "fingerprint": "05bf75d9436b14eb99c5",
+          "summary": "README·기획 문서의 최신성을 실제 소스와 대조하고 UI 문구·화면 경로·API·DB·테스트·정적 Flow에서 제한된 기능 어휘 Pack을 만듭니다."
+        },
+        {
           "entityId": "file:shared/sourceModuleProposal.js",
           "path": "shared/sourceModuleProposal.js",
           "fingerprint": "4f2204419bfcdac513b1",
@@ -3884,7 +4308,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/sourceTwinSemantics.js",
           "path": "shared/sourceTwinSemantics.js",
-          "fingerprint": "f0305dbf5294dc742759",
+          "fingerprint": "6838e13115807932f126",
           "summary": "코드 파일을 제품 영역별로 묶는 공통 분류 이름과 표시 순서를 정의합니다."
         },
         {
@@ -3897,6 +4321,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       "evidenceEntityIds": [
         "file:scripts/generate-source-twin.mjs",
         "file:scripts/source-edit-executor.mjs",
+        "file:scripts/source-lens-engine.mjs",
         "file:scripts/source-profiles/fastapi-order-service.mjs",
         "file:scripts/source-profiles/index.mjs",
         "file:scripts/source-profiles/workflow-canvas.mjs",
@@ -3907,6 +4332,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         "file:shared/sourceEditableProperties.js",
         "file:shared/sourceFeatureModel.js",
         "file:shared/sourceFlows.js",
+        "file:shared/sourceFunctionalContext.js",
         "file:shared/sourceModuleProposal.js",
         "file:shared/sourceProfileContract.js",
         "file:shared/sourceTwinSemantics.js",
@@ -3915,6 +4341,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       "evidencePaths": [
         "scripts/generate-source-twin.mjs",
         "scripts/source-edit-executor.mjs",
+        "scripts/source-lens-engine.mjs",
         "scripts/source-profiles/fastapi-order-service.mjs",
         "scripts/source-profiles/index.mjs",
         "scripts/source-profiles/workflow-canvas.mjs",
@@ -3925,6 +4352,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         "shared/sourceEditableProperties.js",
         "shared/sourceFeatureModel.js",
         "shared/sourceFlows.js",
+        "shared/sourceFunctionalContext.js",
         "shared/sourceModuleProposal.js",
         "shared/sourceProfileContract.js",
         "shared/sourceTwinSemantics.js",
@@ -3935,6 +4363,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "targetEntityId": "map-component-source-ai-explanation",
           "evidenceEntityIds": [
             "file:shared/sourceAiExplanation.js"
+          ]
+        },
+        {
+          "targetEntityId": "map-component-source-analysis-contract",
+          "evidenceEntityIds": [
+            "file:scripts/source-lens-engine.mjs"
           ]
         },
         {
@@ -3953,6 +4387,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "targetEntityId": "map-component-source-flow-discovery",
           "evidenceEntityIds": [
             "file:shared/sourceFlows.js"
+          ]
+        },
+        {
+          "targetEntityId": "map-component-source-functional-context-builder",
+          "evidenceEntityIds": [
+            "file:shared/sourceFunctionalContext.js"
           ]
         },
         {
@@ -3987,7 +4427,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "aa1d91b0d63dc673"
+      "fingerprint": "a19ab12d0a7923f3"
     },
     {
       "key": "subsystem:source-browser-history",
@@ -4006,31 +4446,31 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:api/source-twin.js",
           "path": "api/source-twin.js",
-          "fingerprint": "4865721ebe94a52aa445",
+          "fingerprint": "84e3d27ef435f909a13f",
           "summary": "소유자에게 배포 코드 구조·코드 파츠·정적 흐름을 제공하고, 등록 UI 속성 편집·롤백의 미리보기와 승인 요청을 중계합니다."
         },
         {
           "entityId": "file:mcp/sourceTwinStore.js",
           "path": "mcp/sourceTwinStore.js",
-          "fingerprint": "6b67b11c4e6b8cc66a2e",
-          "summary": "소스 트윈 상태 스냅샷의 미리보기·승인·저장·비교를 서버에서 수행합니다."
+          "fingerprint": "800ce7d5f9c6cbb99005",
+          "summary": "소스 분석·Asset 원장 상태 스냅샷의 미리보기·승인·저장·비교를 서버에서 수행합니다."
         },
         {
           "entityId": "file:shared/sourceTwin.js",
           "path": "shared/sourceTwin.js",
-          "fingerprint": "6b06c5ca5a7d7434d148",
-          "summary": "코드 구조 관점, 검색, GitHub 코드 링크와 배포별 상태 스냅샷 형식을 정의합니다."
+          "fingerprint": "3f398e85e9381be27922",
+          "summary": "Source Analysis Artifact의 코드 구조 관점, 검색, 근거 표시와 GitHub 코드 링크 형식을 정의합니다."
         },
         {
           "entityId": "file:src/components/SourceTwinPanel.jsx",
           "path": "src/components/SourceTwinPanel.jsx",
-          "fingerprint": "c5c87e28cdb99fc5c7f8",
+          "fingerprint": "9c48cae2b232cc030120",
           "summary": "코드 트리, 모듈·코드 파츠 설명, 정적 호출 흐름, 등록 UI 상수 편집과 Git 상태를 한 창에서 보여줍니다."
         },
         {
           "entityId": "file:src/lib/sourceTwinApi.js",
           "path": "src/lib/sourceTwinApi.js",
-          "fingerprint": "a880c92c7cc5f5422503",
+          "fingerprint": "3a935a24ea833efc58a1",
           "summary": "배포된 코드 구조, GitHub 변경과 상태 스냅샷을 서버에서 불러오고 기록 요청을 보냅니다."
         },
         {
@@ -4058,16 +4498,9 @@ export const SOURCE_FEATURE_MANIFEST = {
       ],
       "implementations": [
         {
-          "targetEntityId": "map-component-source-ai-explanation",
-          "evidenceEntityIds": [
-            "file:api/source-twin.js"
-          ]
-        },
-        {
           "targetEntityId": "map-engine-source-lens",
           "evidenceEntityIds": [
-            "file:shared/sourceTwin.js",
-            "file:src/components/SourceTwinPanel.jsx"
+            "file:shared/sourceTwin.js"
           ]
         },
         {
@@ -4077,14 +4510,21 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         },
         {
+          "targetEntityId": "map-shared-api",
+          "evidenceEntityIds": [
+            "file:api/source-twin.js"
+          ]
+        },
+        {
           "targetEntityId": "map-web-app",
           "evidenceEntityIds": [
+            "file:src/components/SourceTwinPanel.jsx",
             "file:src/lib/sourceTwinApi.js"
           ]
         }
       ],
       "dataAccess": [],
-      "fingerprint": "64f602497d5b8376"
+      "fingerprint": "66f41dbff1200526"
     },
     {
       "key": "subsystem:local-connector",
@@ -4109,13 +4549,13 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:mcp/localConnectorStore.js",
           "path": "mcp/localConnectorStore.js",
-          "fingerprint": "79078628da6f25cfeab0",
+          "fingerprint": "3615bf005d9857342fe8",
           "summary": "로컬 커넥터 등록, heartbeat, Git 동기화 계획과 실행 결과를 서버에 보관합니다."
         },
         {
           "entityId": "file:scripts/local-connector-agent.mjs",
           "path": "scripts/local-connector-agent.mjs",
-          "fingerprint": "53a05f2fdb41c09ca65e",
+          "fingerprint": "e66969f8f39b22ddd049",
           "summary": "사용자 Mac에서 허용된 저장소만 읽어 코드·Git 상태를 보고하고, 별도 허용된 Git 동기화와 등록 UI 상수 편집·롤백만 실행합니다."
         },
         {
@@ -4181,7 +4621,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "dbd9efe5236ad4c2"
+      "fingerprint": "ad73e91dddd79f42"
     },
     {
       "key": "subsystem:git-delivery",
@@ -4200,7 +4640,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:api/source-twin-webhook.js",
           "path": "api/source-twin-webhook.js",
-          "fingerprint": "ec021669ff5e4c768141",
+          "fingerprint": "ba21d0160c29a0d98a9b",
           "summary": "GitHub push 웹훅의 서명을 검증하고 변경된 커밋과 파일 경로만 기록합니다."
         },
         {
@@ -4227,7 +4667,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "726f6d8e4cdfed1e"
+      "fingerprint": "3068e06176bb1bd3"
     },
     {
       "key": "subsystem:mcp-transport",
@@ -4252,7 +4692,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:mcp/server.js",
           "path": "mcp/server.js",
-          "fingerprint": "2aae3c10c2ae5dd1f89e",
+          "fingerprint": "cf3038a595e1cc056261",
           "summary": "AI에게 공개할 캔버스 도구의 이름, 입력 형식과 실행 함수를 등록합니다."
         },
         {
@@ -4323,7 +4763,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "cc94b6677cf442a8"
+      "fingerprint": "2612832335392ca0"
     },
     {
       "key": "subsystem:mcp-tools",
@@ -4348,7 +4788,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:mcp/store.js",
           "path": "mcp/store.js",
-          "fingerprint": "4ab9f5a0d622f25ae715",
+          "fingerprint": "ef8151ab288f29a35434",
           "summary": "AI 도구가 캔버스·노드·연결선을 읽고 바꿀 때 소유권과 공유 범위를 검사하고 Supabase에 반영합니다."
         }
       ],
@@ -4438,7 +4878,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "d559445461e44da1"
+      "fingerprint": "f2a36224cf06c239"
     },
     {
       "key": "subsystem:browser-persistence",
@@ -4476,7 +4916,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "f7d9686a961d8181"
+      "fingerprint": "b51636e0310b20f7"
     },
     {
       "key": "subsystem:cloud-persistence",
@@ -4603,7 +5043,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "d60d017e86ed193f"
+      "fingerprint": "87f7d75c4d556b5d"
     },
     {
       "key": "subsystem:database-schema",
@@ -4650,7 +5090,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "97172e9e4cd38b63"
+      "fingerprint": "62ceb97c2da0f6f9"
     },
     {
       "key": "subsystem:media-presentation",
@@ -4688,7 +5128,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "658a1063bb289eb3"
+      "fingerprint": "7cb97ae595fa00d9"
     },
     {
       "key": "subsystem:media-storage",
@@ -4734,7 +5174,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "0efc7d18b32d2aec"
+      "fingerprint": "67e697c6e9b72d6a"
     },
     {
       "key": "subsystem:input-safety",
@@ -4753,7 +5193,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:mcp/sanitize.js",
           "path": "mcp/sanitize.js",
-          "fingerprint": "6eb70868f3b2d335efb5",
+          "fingerprint": "814ef6a98b9ea82e680f",
           "summary": "AI나 외부 요청에서 들어온 텍스트·HTML·URL의 위험한 내용을 서버에서도 제거합니다."
         },
         {
@@ -4786,7 +5226,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "4cf6a585fe876a11"
+      "fingerprint": "5bd6f1317a9eb513"
     },
     {
       "key": "subsystem:access-privacy",
@@ -4848,7 +5288,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "beaf5737d072d13e"
+      "fingerprint": "a9caab4d076b3db8"
     },
     {
       "key": "subsystem:trust-controls",
@@ -4938,7 +5378,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "bd49eae23fd06006"
+      "fingerprint": "6179f348777bf94c"
     },
     {
       "key": "subsystem:build-release",
@@ -4957,7 +5397,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:package.json",
           "path": "package.json",
-          "fingerprint": "800ad171cb9402512d98",
+          "fingerprint": "923715e44d1bcf9ebce4",
           "summary": "개발 코드를 검사·빌드해 실제 웹 서비스로 실행할 설정과 명령을 정의합니다."
         },
         {
@@ -4985,7 +5425,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "51ca0b1bfe236b6b"
+      "fingerprint": "677d7f7c2ba5d4e0"
     },
     {
       "key": "subsystem:source-tests",
@@ -4993,7 +5433,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       "id": "source-tests",
       "areaId": "testing-quality",
       "ownerKey": "area:testing-quality",
-      "label": "코드 트윈·커넥터 검사",
+      "label": "코드 구조·커넥터 검사",
       "description": "코드 발견, 로컬 연결과 Git 동기화 회귀 테스트",
       "order": 33,
       "classification": "attribute",
@@ -5010,37 +5450,45 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:scripts/test-source-feature-model.mjs",
           "path": "scripts/test-source-feature-model.mjs",
-          "fingerprint": "19167f551d9c7d4d8517",
+          "fingerprint": "c0445a9cdd7d36907d28",
           "summary": "기능 Asset·Capability·속성 판정, 근거 부족 차단과 두 번째 소프트웨어 재사용성을 검사합니다."
+        },
+        {
+          "entityId": "file:scripts/test-source-functional-context.mjs",
+          "path": "scripts/test-source-functional-context.mjs",
+          "fingerprint": "baf4695e4e46539eed10",
+          "summary": "문서 최신성, 문서 부재 fallback, 제한 기능 어휘, 실제 소스 검증과 이전 Pack 재사용을 검사합니다."
         },
         {
           "entityId": "file:scripts/test-source-profiles.mjs",
           "path": "scripts/test-source-profiles.mjs",
-          "fingerprint": "b70431d433e7a1290f59",
+          "fingerprint": "a7338fa85ef65787f062",
           "summary": "Source Profile 계약, 선택 우선순위와 두 번째 소프트웨어의 구조 전용 분석을 검사합니다."
         },
         {
           "entityId": "file:scripts/test-source-twin.mjs",
           "path": "scripts/test-source-twin.mjs",
-          "fingerprint": "e157d0e776e2db87e0ac",
-          "summary": "source twin 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
+          "fingerprint": "d688ff39caf8cfc195e7",
+          "summary": "소스 분석 manifest의 정규화·비밀값 제외·설명 근거와 변경 비교를 검사합니다."
         }
       ],
       "evidenceEntityIds": [
         "file:scripts/test-local-connector-agent.mjs",
         "file:scripts/test-source-feature-model.mjs",
+        "file:scripts/test-source-functional-context.mjs",
         "file:scripts/test-source-profiles.mjs",
         "file:scripts/test-source-twin.mjs"
       ],
       "evidencePaths": [
         "scripts/test-local-connector-agent.mjs",
         "scripts/test-source-feature-model.mjs",
+        "scripts/test-source-functional-context.mjs",
         "scripts/test-source-profiles.mjs",
         "scripts/test-source-twin.mjs"
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "f0567f85ad2466e0"
+      "fingerprint": "a7732323a8b06eec"
     },
     {
       "key": "subsystem:engine-tests",
@@ -5048,7 +5496,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       "id": "engine-tests",
       "areaId": "testing-quality",
       "ownerKey": "area:testing-quality",
-      "label": "트윈 엔진 검사",
+      "label": "Asset 원장 엔진 검사",
       "description": "공통 모델, 어댑터, 대조와 조작 수명주기 테스트",
       "order": 34,
       "classification": "attribute",
@@ -5059,7 +5507,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:scripts/test-engine-registry.mjs",
           "path": "scripts/test-engine-registry.mjs",
-          "fingerprint": "b6d778a868d6c91b60a4",
+          "fingerprint": "c27b3dd5cd0113a89c9a",
           "summary": "제품 엔진 레지스트리의 필수 정보, 코드·테스트 근거, 지도 변환과 논리 구성 표시를 자동 검사합니다."
         },
         {
@@ -5078,13 +5526,13 @@ export const SOURCE_FEATURE_MANIFEST = {
           "entityId": "file:scripts/test-twin-adapter-contract.mjs",
           "path": "scripts/test-twin-adapter-contract.mjs",
           "fingerprint": "5981c800b0d94483c871",
-          "summary": "twin adapter contract 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
+          "summary": "레거시 현행 코드명인 Twin Adapter Contract의 등록·권한·인터페이스 경계를 검사합니다."
         },
         {
           "entityId": "file:scripts/test-twin-build.mjs",
           "path": "scripts/test-twin-build.mjs",
-          "fingerprint": "444c6b33ba4c48f308e1",
-          "summary": "twin build 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
+          "fingerprint": "9a87209f6f4c0d8a6774",
+          "summary": "Asset 원장 정규형·마이그레이션·참조 무결성·대조 규칙을 검사합니다."
         },
         {
           "entityId": "file:scripts/test-work-intent-parts.mjs",
@@ -5111,7 +5559,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "066e62e7b601d8e9"
+      "fingerprint": "8c84f28355c8c3f1"
     },
     {
       "key": "subsystem:app-tests",
@@ -5140,6 +5588,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "summary": "배포 전에 개인정보 감사 설정과 사용자 본문 접근 경로의 필수 보호 장치를 검사합니다."
         },
         {
+          "entityId": "file:scripts/test-ai-context-gate.mjs",
+          "path": "scripts/test-ai-context-gate.mjs",
+          "fingerprint": "4547d6a50cf8b870b990",
+          "summary": "ai context gate 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
+        },
+        {
           "entityId": "file:scripts/test-collaboration-permissions.mjs",
           "path": "scripts/test-collaboration-permissions.mjs",
           "fingerprint": "c0d8c49fb226a494f184",
@@ -5154,7 +5608,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:scripts/test-mcp-logic.mjs",
           "path": "scripts/test-mcp-logic.mjs",
-          "fingerprint": "c40b4ca38101bbfef0da",
+          "fingerprint": "745cef391c781b701cd6",
           "summary": "mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
         },
         {
@@ -5178,7 +5632,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:scripts/test-source-code-parts.mjs",
           "path": "scripts/test-source-code-parts.mjs",
-          "fingerprint": "d54f0e0a24f0fde3deec",
+          "fingerprint": "af370f3bd5e423a56754",
           "summary": "source code parts 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
         },
         {
@@ -5186,6 +5640,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "path": "scripts/test-source-editable-properties.mjs",
           "fingerprint": "029a76d7b4fd921cba74",
           "summary": "source editable properties 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
+        },
+        {
+          "entityId": "file:scripts/test-source-lens-engine.mjs",
+          "path": "scripts/test-source-lens-engine.mjs",
+          "fingerprint": "0da48039ffdfe658607b",
+          "summary": "source lens engine 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
         },
         {
           "entityId": "file:scripts/test-sql-security.mjs",
@@ -5203,6 +5663,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       "evidenceEntityIds": [
         "file:scripts/check-governance.mjs",
         "file:scripts/check-privacy-release.mjs",
+        "file:scripts/test-ai-context-gate.mjs",
         "file:scripts/test-collaboration-permissions.mjs",
         "file:scripts/test-group-membership.mjs",
         "file:scripts/test-mcp-logic.mjs",
@@ -5211,12 +5672,14 @@ export const SOURCE_FEATURE_MANIFEST = {
         "file:scripts/test-security-overlay.mjs",
         "file:scripts/test-source-code-parts.mjs",
         "file:scripts/test-source-editable-properties.mjs",
+        "file:scripts/test-source-lens-engine.mjs",
         "file:scripts/test-sql-security.mjs",
         "file:scripts/test-system-layers.mjs"
       ],
       "evidencePaths": [
         "scripts/check-governance.mjs",
         "scripts/check-privacy-release.mjs",
+        "scripts/test-ai-context-gate.mjs",
         "scripts/test-collaboration-permissions.mjs",
         "scripts/test-group-membership.mjs",
         "scripts/test-mcp-logic.mjs",
@@ -5225,12 +5688,13 @@ export const SOURCE_FEATURE_MANIFEST = {
         "scripts/test-security-overlay.mjs",
         "scripts/test-source-code-parts.mjs",
         "scripts/test-source-editable-properties.mjs",
+        "scripts/test-source-lens-engine.mjs",
         "scripts/test-sql-security.mjs",
         "scripts/test-system-layers.mjs"
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "f9fdf59d8bc2ce6c"
+      "fingerprint": "bf553dbae8493b33"
     },
     {
       "key": "subsystem:project-config",
@@ -5247,21 +5711,53 @@ export const SOURCE_FEATURE_MANIFEST = {
       "diagnostics": [],
       "evidence": [
         {
+          "entityId": "file:AGENTS.md",
+          "path": "AGENTS.md",
+          "fingerprint": "a868e05a66483fadffa5",
+          "summary": "AGENTS에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:CLAUDE.md",
+          "path": "CLAUDE.md",
+          "fingerprint": "ca354a35adb81ffcd6ac",
+          "summary": "CLAUDE에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
           "entityId": "file:index.html",
           "path": "index.html",
           "fingerprint": "093cb8feece3994550d3",
           "summary": "index에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:scripts/ai-context-gate-engine.mjs",
+          "path": "scripts/ai-context-gate-engine.mjs",
+          "fingerprint": "8ae2b3f9286d79e3a4e9",
+          "summary": "ai-context-gate-engine에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:THIRD_PARTY_NOTICES.md",
+          "path": "THIRD_PARTY_NOTICES.md",
+          "fingerprint": "23639bfb6e37252199e6",
+          "summary": "THIRD_PARTY_NOTICES에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
         }
       ],
       "evidenceEntityIds": [
-        "file:index.html"
+        "file:AGENTS.md",
+        "file:CLAUDE.md",
+        "file:index.html",
+        "file:scripts/ai-context-gate-engine.mjs",
+        "file:THIRD_PARTY_NOTICES.md"
       ],
       "evidencePaths": [
-        "index.html"
+        "AGENTS.md",
+        "CLAUDE.md",
+        "index.html",
+        "scripts/ai-context-gate-engine.mjs",
+        "THIRD_PARTY_NOTICES.md"
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "d4172304c322fbc7"
+      "fingerprint": "0732db29d5845c67"
     },
     {
       "key": "subsystem:project-docs",
@@ -5278,21 +5774,277 @@ export const SOURCE_FEATURE_MANIFEST = {
       "diagnostics": [],
       "evidence": [
         {
+          "entityId": "file:docs/AI_MASTER.md",
+          "path": "docs/AI_MASTER.md",
+          "fingerprint": "6b1bc056b349685a69bf",
+          "summary": "AI_MASTER에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/architecture/decisions/DEPENDENCY_DECISIONS.md",
+          "path": "docs/architecture/decisions/DEPENDENCY_DECISIONS.md",
+          "fingerprint": "018214b25f3cb4650358",
+          "summary": "DEPENDENCY_DECISIONS에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/architecture/decisions/OPEN_SOURCE_POLICY.md",
+          "path": "docs/architecture/decisions/OPEN_SOURCE_POLICY.md",
+          "fingerprint": "70ebadee0929f41e9e1f",
+          "summary": "OPEN_SOURCE_POLICY에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/architecture/evaluations/source-lens/SOURCE_LENS_AI_PROVIDER_PILOT.md",
+          "path": "docs/architecture/evaluations/source-lens/SOURCE_LENS_AI_PROVIDER_PILOT.md",
+          "fingerprint": "9589338f7b80d51ad60c",
+          "summary": "SOURCE_LENS_AI_PROVIDER_PILOT에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/architecture/evaluations/source-lens/SOURCE_LENS_FLOW_VISUALIZATION_EVALUATION.md",
+          "path": "docs/architecture/evaluations/source-lens/SOURCE_LENS_FLOW_VISUALIZATION_EVALUATION.md",
+          "fingerprint": "fae4b9537db906893bb0",
+          "summary": "SOURCE_LENS_FLOW_VISUALIZATION_EVALUATION에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/architecture/evaluations/source-lens/SOURCE_LENS_TREE_SITTER_EVALUATION.md",
+          "path": "docs/architecture/evaluations/source-lens/SOURCE_LENS_TREE_SITTER_EVALUATION.md",
+          "fingerprint": "aa89c9de9c5bb8739a3e",
+          "summary": "SOURCE_LENS_TREE_SITTER_EVALUATION에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/architecture/FOUNDRY_MODEL.md",
+          "path": "docs/architecture/FOUNDRY_MODEL.md",
+          "fingerprint": "65b45cd65a83c48bf9a2",
+          "summary": "FOUNDRY_MODEL에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/archive/handoffs/CODEX_HANDOFF_SOURCE_LENS_SL0_SL1_KO.md",
+          "path": "docs/archive/handoffs/CODEX_HANDOFF_SOURCE_LENS_SL0_SL1_KO.md",
+          "fingerprint": "b515e6fc602151a7263d",
+          "summary": "CODEX_HANDOFF_SOURCE_LENS_SL0_SL1_KO에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/archive/handoffs/SOURCE_LENS_SL2_HANDOFF_KO.md",
+          "path": "docs/archive/handoffs/SOURCE_LENS_SL2_HANDOFF_KO.md",
+          "fingerprint": "0686ff6ae5ac0324405f",
+          "summary": "SOURCE_LENS_SL2_HANDOFF_KO에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/archive/handoffs/SOURCE_LENS_SL2_SL4_SL3_FINAL_KO.md",
+          "path": "docs/archive/handoffs/SOURCE_LENS_SL2_SL4_SL3_FINAL_KO.md",
+          "fingerprint": "9aaec707fe213ffdd56e",
+          "summary": "SOURCE_LENS_SL2_SL4_SL3_FINAL_KO에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/archive/handoffs/SOURCE_LENS_SL3_HANDOFF_KO.md",
+          "path": "docs/archive/handoffs/SOURCE_LENS_SL3_HANDOFF_KO.md",
+          "fingerprint": "ed17b367dbb4a0962b5a",
+          "summary": "SOURCE_LENS_SL3_HANDOFF_KO에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/archive/handoffs/SOURCE_LENS_SL4_HANDOFF_KO.md",
+          "path": "docs/archive/handoffs/SOURCE_LENS_SL4_HANDOFF_KO.md",
+          "fingerprint": "f5ddbaefbdb5e1d02a85",
+          "summary": "SOURCE_LENS_SL4_HANDOFF_KO에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/contracts/OPERATION_LIFECYCLE_CONTRACT.md",
+          "path": "docs/contracts/OPERATION_LIFECYCLE_CONTRACT.md",
+          "fingerprint": "0aa1bd20aba2b101de6b",
+          "summary": "OPERATION_LIFECYCLE_CONTRACT에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/contracts/SOURCE_PROFILE_CONTRACT.md",
+          "path": "docs/contracts/SOURCE_PROFILE_CONTRACT.md",
+          "fingerprint": "4d80e8395b600f466664",
+          "summary": "SOURCE_PROFILE_CONTRACT에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/engines/AI_CONTEXT_GATE_MASTER.md",
+          "path": "docs/engines/AI_CONTEXT_GATE_MASTER.md",
+          "fingerprint": "6d698f9440361e42ac83",
+          "summary": "AI_CONTEXT_GATE_MASTER에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/engines/CONNECTOR_BRIDGE_MASTER.md",
+          "path": "docs/engines/CONNECTOR_BRIDGE_MASTER.md",
+          "fingerprint": "eb67c1e07a71deae0d48",
+          "summary": "CONNECTOR_BRIDGE_MASTER에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/engines/SOURCE_LENS_MASTER.md",
+          "path": "docs/engines/SOURCE_LENS_MASTER.md",
+          "fingerprint": "6eaaae65b4663d44548d",
+          "summary": "SOURCE_LENS_MASTER에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/governance/AUDIT_PLAYBOOK.md",
+          "path": "docs/governance/AUDIT_PLAYBOOK.md",
+          "fingerprint": "b9cea524c63a4b8c1bdc",
+          "summary": "AUDIT_PLAYBOOK에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/governance/TECHNICAL_DEBT.md",
+          "path": "docs/governance/TECHNICAL_DEBT.md",
+          "fingerprint": "1f03e39e8ad04821ada1",
+          "summary": "TECHNICAL_DEBT에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/MASTER.md",
+          "path": "docs/MASTER.md",
+          "fingerprint": "a715b63a03a05a293d92",
+          "summary": "MASTER에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/product/ENGINE_AGENT_REGISTRY.md",
+          "path": "docs/product/ENGINE_AGENT_REGISTRY.md",
+          "fingerprint": "7b5fa6876de274046817",
+          "summary": "ENGINE_AGENT_REGISTRY에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/product/ENGINE_CHANGELOG.md",
+          "path": "docs/product/ENGINE_CHANGELOG.md",
+          "fingerprint": "bc9c95ffe0dfbef77d23",
+          "summary": "ENGINE_CHANGELOG에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/product/PRODUCT_CATALOG.md",
+          "path": "docs/product/PRODUCT_CATALOG.md",
+          "fingerprint": "5b82231d08d293d98409",
+          "summary": "PRODUCT_CATALOG에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/protocols/STARTING_PROTOCOL.md",
+          "path": "docs/protocols/STARTING_PROTOCOL.md",
+          "fingerprint": "9c1c87838b486a4e686c",
+          "summary": "STARTING_PROTOCOL에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/protocols/SYSTEM_ONBOARDING_PROTOCOL.md",
+          "path": "docs/protocols/SYSTEM_ONBOARDING_PROTOCOL.md",
+          "fingerprint": "2b3e372b15b26719bd5c",
+          "summary": "SYSTEM_ONBOARDING_PROTOCOL에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/protocols/WORKFLOW_CATALOG.md",
+          "path": "docs/protocols/WORKFLOW_CATALOG.md",
+          "fingerprint": "ed92c27fff77a3d130f9",
+          "summary": "WORKFLOW_CATALOG에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/README.md",
+          "path": "docs/README.md",
+          "fingerprint": "8bb924d846563bbbc57b",
+          "summary": "README에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/twin/architecture/TWIN_IDENTITY_AND_OBSERVATION.md",
+          "path": "docs/twin/architecture/TWIN_IDENTITY_AND_OBSERVATION.md",
+          "fingerprint": "fdd2c951f0637caa1b04",
+          "summary": "TWIN_IDENTITY_AND_OBSERVATION에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/twin/archive/TWIN_ENGINE_ROADMAP.md",
+          "path": "docs/twin/archive/TWIN_ENGINE_ROADMAP.md",
+          "fingerprint": "fdc183c8258b351ff059",
+          "summary": "TWIN_ENGINE_ROADMAP에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/twin/contracts/TWIN_ADAPTER_CONTRACT.md",
+          "path": "docs/twin/contracts/TWIN_ADAPTER_CONTRACT.md",
+          "fingerprint": "e2bbb60d983436cf4cce",
+          "summary": "TWIN_ADAPTER_CONTRACT에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/twin/contracts/TWIN_BUILD_SCHEMA.md",
+          "path": "docs/twin/contracts/TWIN_BUILD_SCHEMA.md",
+          "fingerprint": "0d7846b3fa166fb731a4",
+          "summary": "TWIN_BUILD_SCHEMA에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/twin/README.md",
+          "path": "docs/twin/README.md",
+          "fingerprint": "e8d01fd7484abd7d7c70",
+          "summary": "README에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
           "entityId": "file:README.md",
           "path": "README.md",
-          "fingerprint": "f89394f151835d85e849",
+          "fingerprint": "7678aaa8c2ab9c80c47d",
           "summary": "README에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
         }
       ],
       "evidenceEntityIds": [
+        "file:docs/AI_MASTER.md",
+        "file:docs/architecture/decisions/DEPENDENCY_DECISIONS.md",
+        "file:docs/architecture/decisions/OPEN_SOURCE_POLICY.md",
+        "file:docs/architecture/evaluations/source-lens/SOURCE_LENS_AI_PROVIDER_PILOT.md",
+        "file:docs/architecture/evaluations/source-lens/SOURCE_LENS_FLOW_VISUALIZATION_EVALUATION.md",
+        "file:docs/architecture/evaluations/source-lens/SOURCE_LENS_TREE_SITTER_EVALUATION.md",
+        "file:docs/architecture/FOUNDRY_MODEL.md",
+        "file:docs/archive/handoffs/CODEX_HANDOFF_SOURCE_LENS_SL0_SL1_KO.md",
+        "file:docs/archive/handoffs/SOURCE_LENS_SL2_HANDOFF_KO.md",
+        "file:docs/archive/handoffs/SOURCE_LENS_SL2_SL4_SL3_FINAL_KO.md",
+        "file:docs/archive/handoffs/SOURCE_LENS_SL3_HANDOFF_KO.md",
+        "file:docs/archive/handoffs/SOURCE_LENS_SL4_HANDOFF_KO.md",
+        "file:docs/contracts/OPERATION_LIFECYCLE_CONTRACT.md",
+        "file:docs/contracts/SOURCE_PROFILE_CONTRACT.md",
+        "file:docs/engines/AI_CONTEXT_GATE_MASTER.md",
+        "file:docs/engines/CONNECTOR_BRIDGE_MASTER.md",
+        "file:docs/engines/SOURCE_LENS_MASTER.md",
+        "file:docs/governance/AUDIT_PLAYBOOK.md",
+        "file:docs/governance/TECHNICAL_DEBT.md",
+        "file:docs/MASTER.md",
+        "file:docs/product/ENGINE_AGENT_REGISTRY.md",
+        "file:docs/product/ENGINE_CHANGELOG.md",
+        "file:docs/product/PRODUCT_CATALOG.md",
+        "file:docs/protocols/STARTING_PROTOCOL.md",
+        "file:docs/protocols/SYSTEM_ONBOARDING_PROTOCOL.md",
+        "file:docs/protocols/WORKFLOW_CATALOG.md",
+        "file:docs/README.md",
+        "file:docs/twin/architecture/TWIN_IDENTITY_AND_OBSERVATION.md",
+        "file:docs/twin/archive/TWIN_ENGINE_ROADMAP.md",
+        "file:docs/twin/contracts/TWIN_ADAPTER_CONTRACT.md",
+        "file:docs/twin/contracts/TWIN_BUILD_SCHEMA.md",
+        "file:docs/twin/README.md",
         "file:README.md"
       ],
       "evidencePaths": [
+        "docs/AI_MASTER.md",
+        "docs/architecture/decisions/DEPENDENCY_DECISIONS.md",
+        "docs/architecture/decisions/OPEN_SOURCE_POLICY.md",
+        "docs/architecture/evaluations/source-lens/SOURCE_LENS_AI_PROVIDER_PILOT.md",
+        "docs/architecture/evaluations/source-lens/SOURCE_LENS_FLOW_VISUALIZATION_EVALUATION.md",
+        "docs/architecture/evaluations/source-lens/SOURCE_LENS_TREE_SITTER_EVALUATION.md",
+        "docs/architecture/FOUNDRY_MODEL.md",
+        "docs/archive/handoffs/CODEX_HANDOFF_SOURCE_LENS_SL0_SL1_KO.md",
+        "docs/archive/handoffs/SOURCE_LENS_SL2_HANDOFF_KO.md",
+        "docs/archive/handoffs/SOURCE_LENS_SL2_SL4_SL3_FINAL_KO.md",
+        "docs/archive/handoffs/SOURCE_LENS_SL3_HANDOFF_KO.md",
+        "docs/archive/handoffs/SOURCE_LENS_SL4_HANDOFF_KO.md",
+        "docs/contracts/OPERATION_LIFECYCLE_CONTRACT.md",
+        "docs/contracts/SOURCE_PROFILE_CONTRACT.md",
+        "docs/engines/AI_CONTEXT_GATE_MASTER.md",
+        "docs/engines/CONNECTOR_BRIDGE_MASTER.md",
+        "docs/engines/SOURCE_LENS_MASTER.md",
+        "docs/governance/AUDIT_PLAYBOOK.md",
+        "docs/governance/TECHNICAL_DEBT.md",
+        "docs/MASTER.md",
+        "docs/product/ENGINE_AGENT_REGISTRY.md",
+        "docs/product/ENGINE_CHANGELOG.md",
+        "docs/product/PRODUCT_CATALOG.md",
+        "docs/protocols/STARTING_PROTOCOL.md",
+        "docs/protocols/SYSTEM_ONBOARDING_PROTOCOL.md",
+        "docs/protocols/WORKFLOW_CATALOG.md",
+        "docs/README.md",
+        "docs/twin/architecture/TWIN_IDENTITY_AND_OBSERVATION.md",
+        "docs/twin/archive/TWIN_ENGINE_ROADMAP.md",
+        "docs/twin/contracts/TWIN_ADAPTER_CONTRACT.md",
+        "docs/twin/contracts/TWIN_BUILD_SCHEMA.md",
+        "docs/twin/README.md",
         "README.md"
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "5750ff0e6ec36316"
+      "fingerprint": "6c05f00efd737adc"
     }
   ],
   "summary": {
@@ -5301,5 +6053,5 @@ export const SOURCE_FEATURE_MANIFEST = {
     "attributes": 22,
     "ineligible": 0
   },
-  "fingerprint": "219f06f686455454"
+  "fingerprint": "fb89f7469d7ad51b"
 }

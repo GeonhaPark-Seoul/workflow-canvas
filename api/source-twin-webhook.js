@@ -88,10 +88,10 @@ export default async function handler(req, res) {
     const event = compactGitHubPush(payload, deliveryId)
     const expectedRepository = sourceTwinRepositoryName()
     if (!expectedRepository) {
-      throw new SourceTwinError(503, 'SOURCE_REPOSITORY_UNAVAILABLE', '소스 트윈 GitHub 저장소 설정을 확인할 수 없습니다.')
+      throw new SourceTwinError(503, 'SOURCE_REPOSITORY_UNAVAILABLE', '소스 분석 대상 GitHub 저장소 설정을 확인할 수 없습니다.')
     }
     if (event.repository.toLocaleLowerCase() !== expectedRepository) {
-      return send(res, 403, { error: '이 소스 트윈의 GitHub 저장소 이벤트가 아닙니다.', code: 'REPOSITORY_MISMATCH' })
+      return send(res, 403, { error: '소스 분석 대상 GitHub 저장소의 이벤트가 아닙니다.', code: 'REPOSITORY_MISMATCH' })
     }
     const result = await recordSourceTwinPushEvent(admin(), event)
     return send(res, result.duplicate ? 200 : 202, { accepted: true, ...result })

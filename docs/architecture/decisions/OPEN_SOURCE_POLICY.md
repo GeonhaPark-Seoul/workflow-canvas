@@ -2,7 +2,7 @@
 
 ## 목적
 
-Workflow Canvas OS의 차별점은 이미 잘 해결된 기반 기술을 다시 만드는 데 있지 않다. 차별점은 서로 다른 소프트웨어를 근거 기반 디지털 트윈으로 만들고, 비개발자가 이해하고 제한적으로 조작하게 하는 제품 경험에 있다. 파서, 그래프 배치, 권한 판정, 작업 실행, 프로토콜처럼 일반적으로 검증된 기반 영역은 새 코드를 만들기 전에 표준과 성숙한 오픈소스를 먼저 비교한다.
+Workflow Canvas OS의 차별점은 이미 잘 해결된 기반 기술을 다시 만드는 데 있지 않다. 차별점은 서로 다른 소프트웨어를 근거 기반 Asset 원장과 시스템 지도로 정리하고, 비개발자가 이해하고 제한적으로 조작하게 하는 제품 경험에 있다. 파서, 지도 배치, 권한 판정, 작업 실행, 프로토콜처럼 일반적으로 검증된 기반 영역은 새 코드를 만들기 전에 표준과 성숙한 오픈소스를 먼저 비교한다.
 
 이 정책은 오픈소스를 무조건 도입하라는 뜻이 아니다. 작은 자체 구현이 더 명확하고 안전할 수 있으며, 새 의존성은 번들 크기, 공급망, 라이선스, 운영 복잡도와 마이그레이션 비용을 만든다.
 
@@ -11,9 +11,9 @@ Workflow Canvas OS의 차별점은 이미 잘 해결된 기반 기술을 다시 
 1. 해결하려는 사용자 문제와 필요한 계약을 먼저 적는다.
 2. 관련 표준, 브라우저·Node 기본 기능, 현재 의존성, 검증된 오픈소스 후보를 조사한다.
 3. 자체 구현 유지와 후보 도입을 정확성, 성능, 보안, 유지보수, 번들·운영 비용, 라이선스, 교체 가능성으로 비교한다.
-4. 결과를 [`DEPENDENCY_DECISIONS.md`](DEPENDENCY_DECISIONS.md)에 기록한다.
+4. 결과를 [`DEPENDENCY_DECISIONS.md`](./DEPENDENCY_DECISIONS.md)에 기록한다.
 5. 대형 라이브러리, 외부 권한 서비스, 상주 Worker 또는 새 데이터 저장소는 사용자에게 효과와 비용을 설명하고 명시적 승인을 받는다.
-6. 승인된 직접 의존성만 [`dependency-registry.json`](dependency-registry.json), `package.json`, lockfile과 [`../../THIRD_PARTY_NOTICES.md`](../../THIRD_PARTY_NOTICES.md)에 함께 반영한다.
+6. 승인된 직접 의존성만 [`dependency-registry.json`](../dependency-registry.json), `package.json`, lockfile과 [`../../THIRD_PARTY_NOTICES.md`](../../../THIRD_PARTY_NOTICES.md)에 함께 반영한다.
 7. 테스트와 빌드에서 `npm run governance:check`를 통과한다.
 
 ## 도입 판단 기준

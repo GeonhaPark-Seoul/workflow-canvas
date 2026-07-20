@@ -4,8 +4,10 @@ import {
   createSourceTwinSnapshot,
   SOURCE_TWIN_OPERATION_CONFIRMATION,
   SOURCE_TWIN_SNAPSHOT_OPERATION,
-  SOURCE_TWIN_SOURCE_ID,
   sourceTwinFingerprint,
+} from '../shared/systemStateSnapshot.js'
+import {
+  SOURCE_TWIN_SOURCE_ID,
   sourceTwinEntities,
 } from '../shared/sourceTwin.js'
 import { CANVAS_PRIVACY_CAPABILITIES } from '../shared/privacyCapabilities.js'
@@ -35,8 +37,8 @@ export class SourceTwinError extends Error {
 }
 
 export function requireSourceTwinOwner(actorUserId, ownerUserId) {
-  if (!ownerUserId) throw new SourceTwinError(503, 'SOURCE_TWIN_DISABLED', '소스 트윈 운영자 설정이 없습니다.')
-  if (actorUserId !== ownerUserId) throw new SourceTwinError(403, 'SOURCE_TWIN_FORBIDDEN', '제품 소유자만 소스 트윈을 조회할 수 있습니다.')
+  if (!ownerUserId) throw new SourceTwinError(503, 'SOURCE_TWIN_DISABLED', '소스 분석 운영자 설정이 없습니다.')
+  if (actorUserId !== ownerUserId) throw new SourceTwinError(403, 'SOURCE_TWIN_FORBIDDEN', '제품 소유자만 소스 분석 결과를 조회할 수 있습니다.')
   return actorUserId
 }
 
@@ -351,7 +353,7 @@ export async function listSourceTwinSnapshots(db, limit = 30) {
     .limit(safeLimit)
   if (error) {
     if (unavailable(error)) return { available: false, snapshots: [], errorCode: 'SOURCE_TWIN_HISTORY_UNAVAILABLE' }
-    throw new SourceTwinError(500, 'SOURCE_TWIN_HISTORY_READ_FAILED', '소스 트윈 이력을 불러오지 못했습니다.')
+    throw new SourceTwinError(500, 'SOURCE_TWIN_HISTORY_READ_FAILED', '통합 상태 이력을 불러오지 못했습니다.')
   }
   return { available: true, snapshots: (data ?? []).map(snapshotSummary).filter(Boolean) }
 }
@@ -398,6 +400,6 @@ export async function recordSourceTwinPushEvent(db, event) {
   const { error } = await db.from(SOURCE_TWIN_EVENT_TABLE).insert(row)
   if (!error) return { recorded: true, duplicate: false }
   if (String(error.code ?? '') === '23505') return { recorded: false, duplicate: true }
-  if (unavailable(error)) throw new SourceTwinError(503, 'SOURCE_TWIN_EVENTS_UNAVAILABLE', '소스 트윈 webhook SQL이 아직 적용되지 않았습니다.')
+  if (unavailable(error)) throw new SourceTwinError(503, 'SOURCE_TWIN_EVENTS_UNAVAILABLE', '소스 분석 GitHub webhook SQL이 아직 적용되지 않았습니다.')
   throw new SourceTwinError(500, 'SOURCE_TWIN_EVENT_WRITE_FAILED', 'GitHub 변경 이벤트를 기록하지 못했습니다.')
 }
