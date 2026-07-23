@@ -21,7 +21,7 @@ Policy·Guardrail·Connector·Host/사람 검토를 조합할 수 있다.
 | 제품 표시·변경 이력 | [`Product Catalog`](../product/PRODUCT_CATALOG.md), [`Engine Changelog`](../product/ENGINE_CHANGELOG.md) | 사용자용 Engine 설명과 버전별 변경 기록 |
 | 정규형 | [`Asset 원장 v3`](./contracts/TWIN_BUILD_SCHEMA.md) | 공급자 중립 중간 형식·검증·마이그레이션 |
 | 호환 계약 | [`Twin Adapter Contract v1`](./contracts/TWIN_ADAPTER_CONTRACT.md) | 레거시 현행 코드명으로 유지되는 시스템별 Adapter의 발견·정규화·대조·조작 경계 |
-| 정체성·현실성 | [`Asset 정체성과 관측 상태`](./architecture/TWIN_IDENTITY_AND_OBSERVATION.md) | 논리/설계/실행 실체와 CODE/LIVE 근거 상태를 분리하는 안전 규칙 |
+| 표현·현실성 | [`Asset 표현과 관측 상태`](./architecture/TWIN_IDENTITY_AND_OBSERVATION.md) | 논리/설계/실행 실체와 Reality Level 근거 상태를 분리하는 안전 규칙 |
 | 교차 Workflow | [`Workflow Catalog`](../protocols/WORKFLOW_CATALOG.md) | Source-to-Map Proposal, State Snapshot 등 재사용 가능한 Engine 조합 |
 | 과거 이력 | [`과거 Engine Roadmap`](./archive/TWIN_ENGINE_ROADMAP.md) | 레거시 파일에 남은 과거 단계와 배경. 현재 목표의 정본이 아님 |
 
@@ -58,7 +58,7 @@ Engine Registry를 따른다.
 1. 전체 과정이 필요하면 System Onboarding Protocol을 읽는다.
 2. 데이터 구조·검증 규칙을 바꾸면 Asset 원장 v3를 읽는다.
 3. 새 시스템 연동이나 Adapter 호환성을 다루면 레거시 현행 코드명인 Twin Adapter Contract를 읽는다.
-4. CODE/LIVE 표기, 바인딩 또는 관측을 다루면 Asset 정체성과 관측 상태를 읽는다.
+4. CODE/LIVE 표기, 바인딩 또는 관측을 다루면 Asset 표현과 관측 상태를 읽는다.
 5. 실제 구현 범위는 Engine Registry와 관련 코드·테스트로 재검증한다.
 
 Asset 원장은 시스템 구조에 대한 검증 가능한 스냅샷이다. “디지털 트윈”은 제품을

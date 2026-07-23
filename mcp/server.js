@@ -3,11 +3,13 @@
 // Exposes the canvas as MCP tools over Streamable HTTP (stateless, JSON
 // responses) so an MCP client like Claude can read and write nodes/edges. Auth
 // is per-request: the Bearer token resolves to a user id and every tool is
-// scoped to that user's own canvases. Deployed as a Vercel function (api/mcp.js).
+// scoped to canvases that user owns or has joined. Deployed as a Vercel
+// function (api/mcp.js).
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
 import { z } from 'zod'
 import * as store from './store.js'
+import * as defaultWorkshopStore from './workshopStore.js'
 import {
   SYSTEM_ENVIRONMENT_DEFS,
   SYSTEM_KIND_DEFS,
@@ -23,6 +25,11 @@ import {
   SOURCE_TWIN_PERSPECTIVES,
 } from '../shared/sourceTwin.js'
 import { SOURCE_TWIN_OPERATION_CONFIRMATION } from '../shared/systemStateSnapshot.js'
+import {
+  WORKSHOP_ASSIGNEE_KINDS,
+  WORKSHOP_LIMITS,
+  WORKSHOP_STAGES,
+} from '../shared/workshop.js'
 
 const SYSTEM_KIND_IDS = SYSTEM_KIND_DEFS.map(({ id }) => id)
 const SYSTEM_ENVIRONMENT_IDS = SYSTEM_ENVIRONMENT_DEFS.map(({ id }) => id)
@@ -30,6 +37,15 @@ const SYSTEM_SOURCE_IDS = SYSTEM_SOURCE_DEFS.map(({ id }) => id)
 const RELATION_SOURCE_IDS = RELATION_SOURCE_DEFS.map(({ id }) => id)
 const RELATION_CONFIDENCE_IDS = RELATION_CONFIDENCE_DEFS.map(({ id }) => id)
 const SOURCE_TWIN_PERSPECTIVE_IDS = Object.keys(SOURCE_TWIN_PERSPECTIVES)
+const WORKSHOP_TERMINAL_STAGES = WORKSHOP_STAGES.filter((stage) => stage !== 'backlog')
+
+export const WORKSHOP_AGENT_TOOL_NAMES = Object.freeze([
+  'list_workshop_board',
+  'create_workshop_goal',
+  'create_workshop_task',
+  'post_workshop_message',
+  'attach_workshop_artifact',
+])
 
 // Reused across create/update schemas. These fields describe a declared system
 // Asset; no MCP input can supply the server-owned proof required for LIVE.
@@ -201,11 +217,17 @@ sourceHandle/targetHandle은 생략 가능 — 생략하면 실제 좌표 기반
 - 공유 캔버스에서는 먼저 get_canvas 응답의 my_permission(editable_node_ids)을 확인하세요. 구역 밖 수정 시도는 에러가 됩니다.
 - 그룹/노드 초대 권한에서는 Draw Map과 단계 종류 편집을 쓸 수 없습니다.
 
+### 작업장 보드
+- list_workshop_board로 현재 목표·작업·대화·산출물·게이트 이력을 먼저 읽습니다.
+- 에이전트는 목표/작업 생성과 메시지/산출물 보고만 기록할 수 있습니다.
+- 게이트 승인, 기존 카드의 단계 이동, 완료·아카이브 처리는 사람 전용입니다. MCP 도구로 우회할 수 없습니다.
+- 산출물 external_ref에는 경로·커밋 SHA·공개 URL 같은 식별자만 기록하고 실제 키·토큰·비밀번호는 넣지 않습니다.
+
 ### 반영
 로그인된 브라우저는 MCP 변경을 몇 초 내 자동으로 반영합니다 (새로고침 불필요).
 `.trim()
 
-export function buildServer(getUserId) {
+export function buildServer(getUserId, { workshopStore = defaultWorkshopStore } = {}) {
   const server = new McpServer(
     { name: 'workflow-canvas', version: '1.0.0' },
     { instructions: SERVER_INSTRUCTIONS }
@@ -225,6 +247,82 @@ export function buildServer(getUserId) {
       '포함되니 편집 전에 반드시 확인할 것.',
     inputSchema: { canvas_id: z.string().describe('캔버스 ID (get_canvases로 조회)') },
   }, g(async (userId, a) => ok(await store.getCanvas(userId, a.canvas_id))))
+
+  server.registerTool('list_workshop_board', {
+    description:
+      '캔버스에 연결된 작업장 보드를 조회합니다. 목표, 작업 트리 관계, 대화/메시지, 산출물, 단계 계약과 ' +
+      '사람이 남긴 게이트 이력을 반환합니다. 캔버스 소유자와 수락 참여자 모두 같은 보드 기록에 접근합니다.',
+    inputSchema: {
+      canvas_id: z.string().min(1).max(200).describe('보드가 연결된 캔버스 ID'),
+    },
+  }, g(async (userId, a) => ok(await workshopStore.listWorkshopBoard(userId, a.canvas_id))))
+
+  server.registerTool('create_workshop_goal', {
+    description:
+      '새 목표를 백로그에 기록합니다. 현재 단계는 항상 backlog로 서버가 정하며, 이 도구는 기존 목표의 단계 이동·' +
+      '게이트 승인·완료 처리를 할 수 없습니다.',
+    inputSchema: {
+      canvas_id: z.string().min(1).max(200),
+      title: z.string().min(1).max(WORKSHOP_LIMITS.title).describe('목표 한 줄'),
+      reason: z.string().min(1).max(WORKSHOP_LIMITS.reason).describe('왜 이 목표가 필요한지'),
+      terminal_stage: z.enum(WORKSHOP_TERMINAL_STAGES).describe('이 목표가 완료되는 종착 열 (A~H)'),
+    },
+  }, g(async (userId, a) => okh(
+    await workshopStore.createWorkshopGoal(userId, a.canvas_id, a),
+    '목표가 백로그에 기록되었습니다. 단계 이동과 완료 승인은 사용자가 보드에서 수행합니다.',
+  )))
+
+  server.registerTool('create_workshop_task', {
+    description:
+      '목표 아래에 새 작업을 기록합니다. parent_task_id는 작업 트리, spawned_from_task_id는 발견에서 파생된 가지를 ' +
+      '표현합니다. 새 작업은 목표의 현재 stage에만 생성되며 기존 작업을 이동하거나 완료할 수는 없습니다.',
+    inputSchema: {
+      goal_id: z.string().uuid(),
+      title: z.string().min(1).max(WORKSHOP_LIMITS.title),
+      parent_task_id: z.string().uuid().optional().describe('트리의 상위 작업 ID'),
+      spawned_from_task_id: z.string().uuid().optional().describe('이 작업을 낳은 원본 작업 ID'),
+      assignee_kind: z.enum(WORKSHOP_ASSIGNEE_KINDS).optional().describe('manual/yescode/nocode. 기본 manual.'),
+      assignee_label: z.string().max(WORKSHOP_LIMITS.assigneeLabel).optional().describe('담당자 또는 에이전트 이름'),
+    },
+  }, g(async (userId, a) => okh(
+    await workshopStore.createWorkshopTask(userId, a.goal_id, a),
+    '작업이 기록되었습니다. 단계 이동과 완료 승인은 사용자가 보드에서 수행합니다.',
+  )))
+
+  server.registerTool('post_workshop_message', {
+    description:
+      '목표 또는 작업 대화에 에이전트 보고를 기록합니다. thread_id를 생략하면 해당 목표/작업의 기본 대화를 찾아 ' +
+      '사용하고, 없으면 만듭니다. parent_message_id로 대화 가지를 연결할 수 있습니다.',
+    inputSchema: {
+      goal_id: z.string().uuid(),
+      task_id: z.string().uuid().optional(),
+      thread_id: z.string().uuid().optional(),
+      parent_message_id: z.string().uuid().optional(),
+      author_label: z.string().min(1).max(WORKSHOP_LIMITS.authorLabel).describe('보고한 에이전트 또는 담당자 이름'),
+      body: z.string().min(1).max(WORKSHOP_LIMITS.messageBody).describe('결과·검증·다음 판단을 포함한 보고 본문'),
+    },
+  }, g(async (userId, a) => okh(
+    await workshopStore.postWorkshopMessage(userId, a.goal_id, a),
+    '대화 기록이 저장되었습니다. 필요한 결과 파일은 attach_workshop_artifact로 별도 첨부하세요.',
+  )))
+
+  server.registerTool('attach_workshop_artifact', {
+    description:
+      '목표 또는 작업에 산출물을 첨부합니다. 본문이나 external_ref 중 하나 이상이 필요합니다. external_ref에는 ' +
+      '경로·커밋 SHA·공개 URL 같은 식별자만 넣고 API 키·토큰·비밀번호 실제 값은 넣을 수 없습니다. ' +
+      '산출물 단계는 대상 목표/작업의 현재 단계로 서버가 기록합니다.',
+    inputSchema: {
+      goal_id: z.string().uuid(),
+      task_id: z.string().uuid().optional(),
+      kind: z.string().min(1).max(WORKSHOP_LIMITS.artifactKind).describe('기획서, patch, 검증 결과, 배포 기록 등 자유 문자열'),
+      title: z.string().min(1).max(WORKSHOP_LIMITS.title),
+      body: z.string().max(WORKSHOP_LIMITS.artifactBody).optional(),
+      external_ref: z.string().max(WORKSHOP_LIMITS.externalRef).optional().describe('경로·커밋 SHA·공개 URL 등. 비밀값 금지.'),
+    },
+  }, g(async (userId, a) => okh(
+    await workshopStore.attachWorkshopArtifact(userId, a.goal_id, a),
+    '산출물이 현재 단계 기록에 첨부되었습니다. 게이트 판단과 단계 이동은 사용자가 수행합니다.',
+  )))
 
   server.registerTool('get_stage_types', {
     description:

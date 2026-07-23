@@ -10,8 +10,8 @@
 
 | 항목 | 값 |
 |---|---|
-| 문서 버전 | **0.14.0** |
-| 최종 수정일 | 2026-07-20 |
+| 문서 버전 | **0.15.0** |
+| 최종 수정일 | 2026-07-23 |
 | 제품 버전 | 0.1.0-alpha.0 (내부 알파) |
 | 관리 규칙 | 이 문서 맨 아래 §13 |
 
@@ -885,6 +885,7 @@ Reality Lens, Decision Lens → 물류·ERP·사업·개인 생활 Lens.
 
 | 버전 | 날짜 | 변경 |
 |---|---|---|
+| 0.15.0 | 2026-07-23 | 작업장 MVP 1차 “기록 먼저”를 구현했다. 기존 시스템 노드를 권한과 분리된 관제 노드 진입점으로 지정하고, 캔버스별 백로그+A~H 보드에서 병렬 목표·작업 트리·대화 가지·산출물·수동 소프트 게이트와 종착 승인을 기록한다. 전용 Supabase RLS/Realtime 저장 계약, 제한 컨텍스트 팩, 에이전트 보고 전용 MCP 도구 5개를 추가했으며, 게이트 승인·단계 이동·완료는 사람 전용으로 유지했다. §3 정체성과 기능 목록의 작업장 개정은 별도 용어 결정 배치로 남겼다. |
 | 0.14.0 | 2026-07-20 | 파운드리 정렬에 따라 사람용 개념과 표시 이름을 Asset 원장(Asset Base)·Asset Build·Asset Core·Draw Map·지도로 통일했다. Draw Map을 배치·연결선·그룹만 담당하고 온톨로지·사실 판정과 무관한 순수 가시화 Engine으로 고정했으며, 디지털 트윈은 대외 소개 문장에만 남기고 정식 검증 상태를 Reality Level `runtime-verified`(화면 LIVE)로 재확인했다. wire·파일·저장 필드 개명은 `ENG-009`의 v4 마이그레이션으로 분리했다. |
 | 0.13.0 | 2026-07-20 | Source Lens 0.9 / Workflow 1.1에 G10-0 Functional Context Bootstrap을 구현했다. 최신 README·기획 문서를 실제 소스 변경과 대조하고, 문서가 없거나 오래됐으면 UI 문구·화면 경로·API·DB·테스트·정적 Flow에서 기능 어휘를 구성해 제한 `FunctionalContextPack` v1로 보존·재사용한다. Graphify와 F1~F7 Functional Community Resolution은 계획 상태로 유지한다. |
 | 0.12.0 | 2026-07-20 | System Onboarding 이전의 Starting Protocol을 신설했다. 최초 가동 시작점과 웹·로컬·IDE 등 최종 앱 형태는 미정으로 보존하고, 사용자가 소유하는 Project Master 생성·교정·상대 AI Enrollment·Starting Bundle 인계를 정의했다. AI Context Gate 0.1을 Starting Protocol의 직접 참여 Engine으로 옮기고 프로젝트 전체 기획 정본, Planning Context Pack과 planning/none Handoff를 적용했다. System Onboarding은 Starting Bundle을 받아 7개 Engine으로 실제 근거를 분석하며 기획과 코드·설정 불일치는 Documentation Debt로 남긴다. |

@@ -35,6 +35,7 @@ import {
   normalizeWorkIntentBindings,
   WORK_TRIGGER_DEFS,
 } from '../../shared/workOntology.js'
+import { WORKSHOP_DISPLAY_NAMES } from '../../shared/uiConstants.js'
 
 const PORTS = [
   { id: 'left', position: Position.Left },
@@ -438,6 +439,20 @@ export default function SystemNode({ data, selected, id }) {
       )}
       {!data.digitalTwinProposalPreview && !previewPartIds.size && !data.digitalTwinProposalPreviewLogicalComponent && !data.digitalTwinProposalPreviewTrustZone && data.digitalTwinProposalPreviewBinding && (
         <span className="digital-twin-proposal-node-badge">Asset 원장 근거 연결 미리보기</span>
+      )}
+      {data.workshopRole === 'control-node' && (
+        <button
+          type="button"
+          className="workshop-control-node-badge nodrag nopan"
+          title={`${WORKSHOP_DISPLAY_NAMES.board} 열기`}
+          onClick={(event) => {
+            event.stopPropagation()
+            data.onOpenWorkshop?.()
+          }}
+        >
+          <span aria-hidden="true">▦</span>
+          {WORKSHOP_DISPLAY_NAMES['control-node']}
+        </button>
       )}
       {securityOverlay && !shapeOnly && (
         <span

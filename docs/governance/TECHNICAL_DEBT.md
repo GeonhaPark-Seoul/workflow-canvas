@@ -496,6 +496,16 @@ This is the durable ledger for security, reliability, commercialization, and arc
 - Required work: define versioned trigger, executor, input artifact, process step, output artifact, success metric, time/cost/resource measurement, clause evaluation, approval, cancellation, retry, recovery and audit contracts. Reuse Safe Operations for mutations and the future provider-neutral Agent Run schema for AI execution. Keep manual human Work representable without pretending it is automatically observed.
 - Exit criteria: supported Work types produce attributable input-to-output run records, efficiency can be calculated from declared and observed evidence, Intent violations are surfaced without invisible resolution, and failed or interrupted mutations follow the universal operation lifecycle.
 
+### WORK-002 - Workshop participant redaction and context bridge
+
+- Severity: high
+- Gate: workshop-v2
+- Status: open
+- Current evidence: Workshop MVP 1차 stores goals, tasks, conversation branches, artifacts and human gate events in dedicated Supabase tables. RLS grants the canvas owner and every accepted participant the same board read/write surface, while control-node appearance grants no authority. A bounded deterministic context pack supports the manual CLI bridge, and MCP exposes reporting tools without gate, move, completion or archive authority.
+- Current limitation: the board deliberately does not apply the canvas grant's node/group scope or `restrict_view` redaction, so an accepted participant who can open the board can read every board record. The Workshop context-pack formatter is a small independent implementation rather than the AI Context Gate Planning Context Pack selector and receipt path. Automatic session execution, live terminal display, task-session lineage and canvas Asset binding remain outside this slice.
+- Required work: define board record visibility by data class and canvas grant, apply server/RLS-safe redaction without turning visual scope into authority, and add participant fixtures for owner, full member, restricted member, revoked member and outsider. Reuse or explicitly version the AI Context Gate bounded selector, fingerprint, outbound preview, consent and Handoff receipt before any automatic provider or CLI delivery. Keep gate approval, stage movement, completion and archive human-owned unless a later user-approved authority contract changes that invariant.
+- Exit criteria: restricted participants receive only authorized board records and cannot infer hidden content through counts, Realtime, errors or relations; revocation stops reads and writes; context delivery is bounded, fingerprinted, consented and receipt-backed through the shared Engine contract; and no agent or MCP client can approve a gate or advance, complete or archive a goal.
+
 ### INT-003 - Durable append-only Intent version ledger
 
 - Severity: medium

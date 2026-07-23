@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 
 const read = (name) => readFile(new URL(`../${name}`, import.meta.url), 'utf8')
-const [shares, profiles, profilePrivacy, images, tokens, notes, relationGuard, runtimeRead, runtimeObservations, dataAccessAudit, sourceTwinHistory, localConnectors, canvasSummaries, securityHardening] = await Promise.all([
+const [shares, profiles, profilePrivacy, images, tokens, notes, relationGuard, runtimeRead, runtimeObservations, dataAccessAudit, sourceTwinHistory, localConnectors, canvasSummaries, securityHardening, workshop] = await Promise.all([
   read('supabase-shares.sql'),
   read('supabase-profiles.sql'),
   read('supabase-profile-privacy.sql'),
@@ -17,6 +17,7 @@ const [shares, profiles, profilePrivacy, images, tokens, notes, relationGuard, r
   read('supabase-local-connectors.sql'),
   read('supabase-canvas-summaries.sql'),
   read('supabase-security-hardening.sql'),
+  read('supabase-workshop.sql'),
 ])
 
 const restrictedFunctions = [
@@ -202,5 +203,234 @@ assert.match(localConnectors, /create unique index if not exists local_connector
 assert.doesNotMatch(localConnectors, /force.push|reset --hard|automatic.commit/i)
 assert.match(localConnectors, /before update or delete on public\.local_connector_operation_events/i)
 assert.match(localConnectors, /raise exception 'local connector operation events are append-only'/i)
+
+const workshopTables = [
+  'workshop_stage_contracts',
+  'workshop_goals',
+  'workshop_tasks',
+  'workshop_threads',
+  'workshop_messages',
+  'workshop_artifacts',
+  'workshop_gate_events',
+]
+for (const table of workshopTables) {
+  assert.match(workshop, new RegExp(`create table if not exists public\\.${table}`, 'i'), `${table} table is required`)
+  assert.match(workshop, new RegExp(`alter table public\\.${table} enable row level security`, 'i'), `${table} must enable RLS`)
+  assert.match(workshop, new RegExp(`revoke all on table public\\.${table}[\\s\\S]*?from public, anon, authenticated, service_role`, 'i'), `${table} must start from explicit least privilege`)
+}
+
+assert.match(
+  workshop,
+  /create or replace function private\.workshop_canvas_participant_for_user\([\s\S]*?join public\.share_members member on member\.share_id = share\.id[\s\S]*?member\.user_id = p_user/i,
+  'Workshop access must require an accepted share_members row',
+)
+assert.doesNotMatch(
+  workshop.match(/create or replace function private\.workshop_canvas_participant_for_user\([\s\S]*?\$\$;/i)?.[0] ?? '',
+  /invitee_email|auth\.email/i,
+  'pending email invitations must never authorize Workshop access',
+)
+assert.match(
+  workshop,
+  /create or replace function private\.workshop_canvas_participant\([\s\S]*?\(select auth\.uid\(\)\)/i,
+  'the RLS helper must bind the caller instead of accepting a forgeable user id',
+)
+for (const signature of [
+  'private.workshop_canvas_participant_for_user\\(uuid, text, uuid\\)',
+  'private.workshop_canvas_participant\\(uuid, text\\)',
+]) {
+  assert.match(workshop, new RegExp(`revoke execute on function ${signature}[\\s\\S]*?from public, anon`, 'i'))
+}
+assert.match(workshop, /security definer[\s\S]*?set search_path = ''/i, 'privileged Workshop helpers need a fixed empty search_path')
+
+assert.match(
+  workshop,
+  /create policy "workshop participants insert goals"[\s\S]*?with check \([\s\S]*?created_by = \(select auth\.uid\(\)\)[\s\S]*?stage = 'backlog'[\s\S]*?status = 'active'/i,
+  'browser goal inserts must be caller-bound and pinned to backlog/active',
+)
+assert.match(workshop, /create or replace function public\.pin_workshop_goal_initial_state\(\)[\s\S]*?new\.stage := 'backlog'[\s\S]*?new\.status := 'active'/i)
+assert.match(workshop, /create trigger workshop_goals_pin_initial_state[\s\S]*?before insert on public\.workshop_goals/i)
+assert.match(
+  workshop,
+  /grant update \(title, reason, terminal_stage\)[\s\S]*?on table public\.workshop_goals to authenticated/i,
+  'authenticated callers must not update goal stage/status directly',
+)
+const goalUpdateGrant = workshop.match(
+  /grant update \(([^)]*)\)[\s\S]*?on table public\.workshop_goals to authenticated/i,
+)
+assert.ok(goalUpdateGrant, 'goal column-level UPDATE grant is required')
+const goalUpdateColumns = goalUpdateGrant[1].split(',').map((value) => value.trim())
+for (const forbidden of ['stage', 'status', 'created_by', 'canvas_owner_id', 'canvas_id']) {
+  assert.equal(goalUpdateColumns.includes(forbidden), false, `goal ${forbidden} must stay RPC-only`)
+}
+assert.doesNotMatch(
+  workshop,
+  /grant [^;]*insert[^;]*workshop_gate_events[^;]*to authenticated/i,
+  'gate history inserts must stay behind the atomic human RPC',
+)
+assert.match(workshop, /grant select on table public\.workshop_gate_events to authenticated/i)
+
+for (const table of ['goals', 'tasks', 'threads']) {
+  assert.match(
+    workshop,
+    new RegExp(`create policy "workshop participants update ${table}"[\\s\\S]*?using \\([\\s\\S]*?\\)[\\s\\S]*?with check \\(`, 'i'),
+    `${table} UPDATE policy requires USING and WITH CHECK`,
+  )
+}
+for (const table of ['goals', 'tasks', 'threads', 'messages', 'artifacts', 'gate events']) {
+  assert.match(
+    workshop,
+    new RegExp(`create policy "workshop participants insert ${table}"[\\s\\S]*?with check \\(`, 'i'),
+    `${table} INSERT policy requires WITH CHECK`,
+  )
+}
+
+assert.match(workshop, /create or replace function public\.validate_workshop_task_links\(\)/i)
+assert.match(workshop, /referenced_goal <> new\.goal_id/i, 'task parent/spawn links must remain inside one goal')
+assert.match(workshop, /raise exception 'workshop_task_parent_cycle'/i)
+assert.match(workshop, /raise exception 'workshop_task_spawn_cycle'/i)
+assert.match(
+  workshop,
+  /create or replace function public\.validate_workshop_task_links\(\)[\s\S]*?from public\.workshop_goals goal[\s\S]*?where goal\.id = new\.goal_id[\s\S]*?for update;/i,
+  'task link validation must serialize concurrent mutations on the goal row',
+)
+assert.match(workshop, /create trigger workshop_threads_validate_task_goal/i)
+assert.match(workshop, /create trigger workshop_artifacts_validate_task_goal/i)
+assert.match(workshop, /create trigger workshop_gate_events_validate_task_goal/i)
+assert.match(
+  workshop,
+  /create table if not exists public\.workshop_threads[\s\S]*?task_id uuid references public\.workshop_tasks\(id\) on delete cascade/i,
+  'task-scoped threads must cascade rather than collide with the unique goal thread',
+)
+assert.match(
+  workshop,
+  /create or replace function public\.validate_workshop_message_author\(\)[\s\S]*?parent\.thread_id = new\.thread_id/i,
+  'message parent must belong to the same thread',
+)
+assert.match(workshop, /create trigger workshop_messages_append_only[\s\S]*?before update or delete/i)
+assert.match(workshop, /create trigger workshop_gate_events_append_only[\s\S]*?before update or delete/i)
+assert.match(workshop, /create trigger workshop_artifacts_append_only[\s\S]*?before update or delete/i)
+assert.match(workshop, /raise exception '% is append-only', tg_table_name/i)
+assert.match(
+  workshop,
+  /create or replace function public\.reject_workshop_append_only_mutation\(\)[\s\S]*?if pg_trigger_depth\(\) > 1 then[\s\S]*?if tg_op = 'DELETE' then return old;/i,
+  'append-only records must still permit FK cascades initiated by a parent mutation',
+)
+for (const table of ['goals', 'tasks', 'threads', 'artifacts']) {
+  assert.match(workshop, new RegExp(`create trigger workshop_${table}_protect_identity`, 'i'), `${table} identity must be immutable`)
+}
+
+assert.match(workshop, /constraint workshop_artifacts_secret_boundary/i)
+assert.match(workshop, /create or replace function public\.workshop_external_ref_is_safe\(value text\)/i)
+assert.match(
+  workshop,
+  /create or replace function public\.workshop_decode_ascii_percent\(value text\)[\s\S]*?regexp_match\(decoded, '%\(\[0-7\]\[0-9A-Fa-f\]\)'[\s\S]*?overlay\(decoded placing chr\(byte_value\)/i,
+  'SQL must recursively reveal percent-encoded ASCII without rejecting benign encoded URLs',
+)
+assert.match(workshop, /\^\(javascript\|data\|vbscript\)/i)
+assert.ok(workshop.includes('x-(amz|goog)-'), 'signed cloud query keys must be blocked')
+assert.match(
+  workshop,
+  /candidate\.decoded !~\* '\^\[a-z\]\[a-z0-9\+\.\-\]\*:'[\s\S]*?candidate\.decoded ~\* '\^https\?:\/\//i,
+  'decoded secret paths and non-http URL schemes must be rejected at the SQL boundary',
+)
+assert.match(workshop, /select public\.workshop_decode_ascii_percent\(value\) as decoded/i)
+assert.doesNotMatch(workshop, /candidate\.decoded !~\* '%\[0-9a-f\]\{2\}'/i)
+assert.ok(
+  workshop.includes('^https?://hooks\\.slack\\.com/services/[^/?#]+'),
+  'Slack webhook secret prefixes must be blocked without assuming three path segments',
+)
+assert.ok(workshop.includes('discord(app)?'), 'Discord webhook paths must be blocked')
+assert.ok(workshop.includes('api\\.telegram\\.org/bot'), 'Telegram bot-token paths must be blocked')
+assert.match(
+  workshop,
+  /\/\(webhooks\?\|hooks\?\|tokens\?\|secrets\?\|credentials\?\|authorization\)\(\/\|=\)\[\^\/\?#\[:space:\]\]\{12,\}/i,
+  'generic secret-bearing webhook/hook/token/secret/credential/authorization paths must be blocked',
+)
+
+for (const table of ['goals', 'tasks', 'threads', 'artifacts']) {
+  assert.doesNotMatch(
+    workshop,
+    new RegExp(`grant[^;]*delete[^;]*on table public\\.workshop_${table} to authenticated`, 'i'),
+    `authenticated callers must not receive direct DELETE on workshop_${table}`,
+  )
+  assert.doesNotMatch(
+    workshop,
+    new RegExp(`create policy "workshop participants delete ${table}"`, 'i'),
+    `workshop_${table} must not retain a direct DELETE policy`,
+  )
+}
+assert.doesNotMatch(
+  workshop,
+  /grant[^;]*update[^;]*on table public\.workshop_artifacts to authenticated/i,
+  'authenticated callers must not receive direct artifact UPDATE',
+)
+assert.doesNotMatch(
+  workshop,
+  /create policy "workshop participants update artifacts"/i,
+  'artifacts must not retain a direct UPDATE policy',
+)
+assert.doesNotMatch(workshop, /grant all on table[\s\S]*?to service_role/i)
+assert.doesNotMatch(workshop, /grant[^;]*(truncate|delete|update)[^;]*to service_role/i)
+assert.match(workshop, /grant select on table public\.workshop_stage_contracts to service_role/i)
+assert.match(
+  workshop,
+  /grant select, insert on table[\s\S]*?public\.workshop_goals,[\s\S]*?public\.workshop_tasks,[\s\S]*?public\.workshop_threads,[\s\S]*?public\.workshop_messages,[\s\S]*?public\.workshop_artifacts[\s\S]*?to service_role/i,
+)
+assert.match(workshop, /grant select on table public\.workshop_gate_events to service_role/i)
+
+for (const index of [
+  ['workshop_tasks_created_by_idx', 'workshop_tasks', 'created_by'],
+  ['workshop_threads_task_idx', 'workshop_threads', 'task_id'],
+  ['workshop_threads_created_by_idx', 'workshop_threads', 'created_by'],
+  ['workshop_messages_author_user_idx', 'workshop_messages', 'author_user_id'],
+  ['workshop_messages_created_by_idx', 'workshop_messages', 'created_by'],
+  ['workshop_artifacts_created_by_idx', 'workshop_artifacts', 'created_by'],
+  ['workshop_gate_events_approved_by_idx', 'workshop_gate_events', 'approved_by'],
+]) {
+  const [name, table, column] = index
+  assert.match(
+    workshop,
+    new RegExp(`create index if not exists ${name}[\\s\\S]*?on public\\.${table} \\(${column}\\)`, 'i'),
+    `${table}.${column} needs a leading foreign-key index`,
+  )
+}
+
+assert.match(
+  workshop,
+  /create or replace function private\.advance_workshop_goal_internal\([\s\S]*?for update;/i,
+  'gate approval must lock the goal row',
+)
+assert.match(workshop, /from unnest\(contract\.recommended_artifact_kinds\) required_kind/i)
+assert.match(workshop, /computed_forced := cardinality\(missing\) > 0/i)
+assert.match(workshop, /if computed_forced and not coalesce\(p_forced, false\)/i)
+assert.match(
+  workshop,
+  /values \([\s\S]*?current_goal\.id,[\s\S]*?current_goal\.stage,[\s\S]*?destination,[\s\S]*?actor,[\s\S]*?computed_forced,[\s\S]*?missing[\s\S]*?\)/i,
+  'gate audit forced value must come from server-side evidence',
+)
+assert.match(workshop, /when destination = 'done' then 'done'/i)
+assert.match(workshop, /revoke execute on function public\.advance_workshop_goal\(uuid, boolean\)[\s\S]*?from public, anon, service_role/i)
+assert.match(workshop, /grant execute on function public\.advance_workshop_goal\(uuid, boolean\)[\s\S]*?to authenticated/i)
+
+assert.match(workshop, /create unique index if not exists workshop_threads_goal_default_unique_idx[\s\S]*?where task_id is null/i)
+assert.match(workshop, /create unique index if not exists workshop_threads_goal_task_unique_idx[\s\S]*?where task_id is not null/i)
+assert.match(
+  workshop,
+  /create or replace function public\.ensure_workshop_thread\([\s\S]*?p_created_by uuid default null[\s\S]*?returns public\.workshop_threads/i,
+)
+assert.match(workshop, /caller <> p_created_by[\s\S]*?raise exception 'workshop_actor_mismatch'/i)
+assert.match(workshop, /insert into public\.workshop_threads[\s\S]*?on conflict do nothing/i)
+assert.match(workshop, /grant execute on function public\.ensure_workshop_thread\(uuid, uuid, uuid\)[\s\S]*?to authenticated, service_role/i)
+
+for (const table of ['workshop_goals', 'workshop_tasks', 'workshop_threads', 'workshop_messages', 'workshop_artifacts', 'workshop_gate_events']) {
+  assert.match(workshop, new RegExp(`alter table public\\.${table} replica identity full`, 'i'))
+  assert.match(
+    workshop,
+    new RegExp(`alter publication supabase_realtime add table public\\.${table}`, 'i'),
+    `${table} must be published to Realtime`,
+  )
+}
+assert.match(workshop, /pg_publication_tables/i, 'Realtime publication changes must be idempotent')
+assert.match(workshop, /notify pgrst, 'reload schema';/i)
 
 console.log('SQL security checks passed')

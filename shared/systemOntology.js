@@ -143,6 +143,8 @@ export function normalizeSystemNodeData(data = {}) {
     provider: normalizeSystemPlainText(data.provider, 120),
     externalRef: normalizeSystemPlainText(data.externalRef, 300),
   }
+  if (data.workshopRole === 'control-node') normalized.workshopRole = 'control-node'
+  else delete normalized.workshopRole
   delete normalized.securityOverlay
   const trustZone = normalizeTrustZone(data.trustZone)
   if (trustZone) normalized.trustZone = trustZone

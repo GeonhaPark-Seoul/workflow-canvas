@@ -27,6 +27,7 @@ export function sanitizeNodeData(data) {
   delete next.onCheckSystemPart
   delete next.layerPortals
   delete next.onOpenLayerPortal
+  delete next.onOpenWorkshop
   delete next.securityOverlay
   for (const key of new Set(['label', 'description', 'header', 'text', ...SYSTEM_ONTOLOGY_TEXT_FIELDS])) {
     if (typeof next[key] === 'string') next[key] = sanitizeHtml(next[key])

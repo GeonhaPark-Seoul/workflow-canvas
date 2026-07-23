@@ -23,7 +23,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:src/App.jsx",
           "path": "src/App.jsx",
-          "fingerprint": "b7e1a9c4cb13f382dbf6",
+          "fingerprint": "3518c7150762538ab773",
           "summary": "캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다."
         },
         {
@@ -65,7 +65,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:src/index.css",
           "path": "src/index.css",
-          "fingerprint": "ed027db7bbd485344d77",
+          "fingerprint": "96a4234acd7e45b35fc0",
           "summary": "캔버스, 노드, 연결선, 패널과 팝업의 크기·색·배치·반응형 모양을 결정합니다."
         },
         {
@@ -169,7 +169,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "37e8ec71a098cc12"
+      "fingerprint": "54afd4d947dd146c"
     },
     {
       "key": "area:canvas-model",
@@ -432,7 +432,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/uiConstants.js",
           "path": "shared/uiConstants.js",
-          "fingerprint": "78152172ec5cdb02f6a6",
+          "fingerprint": "a57d5e571cb02a185a0d",
           "summary": "uiConstants에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
         },
         {
@@ -440,6 +440,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "path": "shared/workflowTrustTopology.js",
           "fingerprint": "6f9807af88898defc611",
           "summary": "워크플로우 · 시스템 연결 구조에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
+        },
+        {
+          "entityId": "file:shared/workshop.js",
+          "path": "shared/workshop.js",
+          "fingerprint": "a1918b9134df1de940cd",
+          "summary": "workshop에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
         },
         {
           "entityId": "file:src/components/InvitePopover.jsx",
@@ -458,6 +464,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "path": "src/components/ScopedParticipants.jsx",
           "fingerprint": "913a3f211bec0858f918",
           "summary": "캔버스·그룹·노드별 참여자를 초대된 위치와 권한 범위에 맞춰 보여줍니다."
+        },
+        {
+          "entityId": "file:src/components/WorkshopBoard.jsx",
+          "path": "src/components/WorkshopBoard.jsx",
+          "fingerprint": "5db83bf520ace8d567ce",
+          "summary": "WorkshopBoard 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다."
         },
         {
           "entityId": "file:src/lib/presence.js",
@@ -484,6 +496,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "summary": "초대, 공유 링크, 참여자 권한과 나가기·추방 요청을 서버와 주고받습니다."
         },
         {
+          "entityId": "file:src/lib/workshopApi.js",
+          "path": "src/lib/workshopApi.js",
+          "fingerprint": "07888413c14bdc902619",
+          "summary": "서버 기능 기능을 화면의 여러 부분에서 다시 쓸 수 있게 제공합니다."
+        },
+        {
           "entityId": "file:supabase-shares.sql",
           "path": "supabase-shares.sql",
           "fingerprint": "e503e83469dd59a8ddc5",
@@ -501,13 +519,16 @@ export const SOURCE_FEATURE_MANIFEST = {
         "file:shared/systemLayers.js",
         "file:shared/uiConstants.js",
         "file:shared/workflowTrustTopology.js",
+        "file:shared/workshop.js",
         "file:src/components/InvitePopover.jsx",
         "file:src/components/ParticipantAvatar.jsx",
         "file:src/components/ScopedParticipants.jsx",
+        "file:src/components/WorkshopBoard.jsx",
         "file:src/lib/presence.js",
         "file:src/lib/sharedCanvasApi.js",
         "file:src/lib/shareLaunchCoordinator.js",
         "file:src/lib/shares.js",
+        "file:src/lib/workshopApi.js",
         "file:supabase-shares.sql"
       ],
       "evidencePaths": [
@@ -521,13 +542,16 @@ export const SOURCE_FEATURE_MANIFEST = {
         "shared/systemLayers.js",
         "shared/uiConstants.js",
         "shared/workflowTrustTopology.js",
+        "shared/workshop.js",
         "src/components/InvitePopover.jsx",
         "src/components/ParticipantAvatar.jsx",
         "src/components/ScopedParticipants.jsx",
+        "src/components/WorkshopBoard.jsx",
         "src/lib/presence.js",
         "src/lib/sharedCanvasApi.js",
         "src/lib/shareLaunchCoordinator.js",
         "src/lib/shares.js",
+        "src/lib/workshopApi.js",
         "supabase-shares.sql"
       ],
       "implementations": [
@@ -549,10 +573,12 @@ export const SOURCE_FEATURE_MANIFEST = {
             "file:src/components/InvitePopover.jsx",
             "file:src/components/ParticipantAvatar.jsx",
             "file:src/components/ScopedParticipants.jsx",
+            "file:src/components/WorkshopBoard.jsx",
             "file:src/lib/presence.js",
             "file:src/lib/sharedCanvasApi.js",
             "file:src/lib/shareLaunchCoordinator.js",
-            "file:src/lib/shares.js"
+            "file:src/lib/shares.js",
+            "file:src/lib/workshopApi.js"
           ]
         }
       ],
@@ -630,7 +656,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "81f68be047a0b4b9"
+      "fingerprint": "48c606042f48ff1c"
     },
     {
       "key": "area:identity-profile",
@@ -822,7 +848,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/systemOntology.js",
           "path": "shared/systemOntology.js",
-          "fingerprint": "6cf7d40d89f92199c383",
+          "fingerprint": "d31f7a1c3b42b6d3a9f4",
           "summary": "앱·서버·DB·사람 같은 시스템 노드 종류와 실재성 표시 규칙을 정의합니다."
         },
         {
@@ -972,7 +998,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:src/nodes/SystemNode.jsx",
           "path": "src/nodes/SystemNode.jsx",
-          "fingerprint": "89e6a96d65543cf3ceaf",
+          "fingerprint": "adbd0ed8c50d269045a7",
           "summary": "앱·서버·DB 같은 실제 시스템 노드와 파츠, 운영 상태, 실행 가능한 기능을 화면에 표시합니다."
         },
         {
@@ -1185,7 +1211,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "c999f92e5261ead2"
+      "fingerprint": "453d7db46a87803a"
     },
     {
       "key": "area:source-code-twin",
@@ -1593,7 +1619,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:mcp/server.js",
           "path": "mcp/server.js",
-          "fingerprint": "cf3038a595e1cc056261",
+          "fingerprint": "deb95826cdc4a3933b59",
           "summary": "AI에게 공개할 캔버스 도구의 이름, 입력 형식과 실행 함수를 등록합니다."
         },
         {
@@ -1601,6 +1627,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "path": "mcp/store.js",
           "fingerprint": "ef8151ab288f29a35434",
           "summary": "AI 도구가 캔버스·노드·연결선을 읽고 바꿀 때 소유권과 공유 범위를 검사하고 Supabase에 반영합니다."
+        },
+        {
+          "entityId": "file:mcp/workshopStore.js",
+          "path": "mcp/workshopStore.js",
+          "fingerprint": "05756feaf5e337f07588",
+          "summary": "workshopStore 관련 AI 도구 요청을 권한 범위 안에서 실행하거나 검증합니다."
         },
         {
           "entityId": "file:src/lib/mcpTokens.js",
@@ -1620,6 +1652,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         "file:mcp/canvasSummaries.js",
         "file:mcp/server.js",
         "file:mcp/store.js",
+        "file:mcp/workshopStore.js",
         "file:src/lib/mcpTokens.js",
         "file:supabase-mcp-schema.sql"
       ],
@@ -1628,6 +1661,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         "mcp/canvasSummaries.js",
         "mcp/server.js",
         "mcp/store.js",
+        "mcp/workshopStore.js",
         "src/lib/mcpTokens.js",
         "supabase-mcp-schema.sql"
       ],
@@ -1638,7 +1672,8 @@ export const SOURCE_FEATURE_MANIFEST = {
             "file:api/mcp.js",
             "file:mcp/canvasSummaries.js",
             "file:mcp/server.js",
-            "file:mcp/store.js"
+            "file:mcp/store.js",
+            "file:mcp/workshopStore.js"
           ]
         },
         {
@@ -1657,9 +1692,11 @@ export const SOURCE_FEATURE_MANIFEST = {
           "targetEntityId": "map-canvases-table",
           "evidenceEntityIds": [
             "file:mcp/canvasSummaries.js",
-            "file:mcp/store.js"
+            "file:mcp/store.js",
+            "file:mcp/workshopStore.js"
           ],
           "evidenceRelationIds": [
+            "relation:0dae3b9f70526938",
             "relation:61549947ac7bb27d",
             "relation:99eb54cbe976c2d8"
           ]
@@ -1732,7 +1769,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "e099fbe3b6115270"
+      "fingerprint": "3b862c95c010c6bd"
     },
     {
       "key": "area:data-storage-sync",
@@ -2002,7 +2039,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:src/lib/sanitizeHtml.js",
           "path": "src/lib/sanitizeHtml.js",
-          "fingerprint": "4bb7cac965b73efb5af2",
+          "fingerprint": "b07b99d29ec161f4bc2c",
           "summary": "노드 본문에서 위험한 HTML, 스크립트와 외부 주소를 제거한 뒤 화면에 표시할 자료만 남깁니다."
         },
         {
@@ -2034,6 +2071,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "path": "supabase-security-hardening.sql",
           "fingerprint": "a0918f92f5be3035f7e9",
           "summary": "데이터베이스 자료의 저장 구조, 서버 함수 또는 사용자별 접근 규칙을 정의합니다."
+        },
+        {
+          "entityId": "file:supabase-workshop.sql",
+          "path": "supabase-workshop.sql",
+          "fingerprint": "b453e83e69b114d8682c",
+          "summary": "workshop_stage_contracts, workshop_goals, workshop_tasks 자료의 저장 구조, 서버 함수 또는 사용자별 접근 규칙을 정의합니다."
         }
       ],
       "evidenceEntityIds": [
@@ -2048,7 +2091,8 @@ export const SOURCE_FEATURE_MANIFEST = {
         "file:supabase-data-access-audit.sql",
         "file:supabase-profile-privacy.sql",
         "file:supabase-relation-metadata-guard.sql",
-        "file:supabase-security-hardening.sql"
+        "file:supabase-security-hardening.sql",
+        "file:supabase-workshop.sql"
       ],
       "evidencePaths": [
         "mcp/dataAccessAudit.js",
@@ -2062,7 +2106,8 @@ export const SOURCE_FEATURE_MANIFEST = {
         "supabase-data-access-audit.sql",
         "supabase-profile-privacy.sql",
         "supabase-relation-metadata-guard.sql",
-        "supabase-security-hardening.sql"
+        "supabase-security-hardening.sql",
+        "supabase-workshop.sql"
       ],
       "implementations": [
         {
@@ -2093,7 +2138,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "f2fa6d5f9970f5a8"
+      "fingerprint": "6decd7b2193dba88"
     },
     {
       "key": "area:deployment-operations",
@@ -2112,7 +2157,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:package.json",
           "path": "package.json",
-          "fingerprint": "923715e44d1bcf9ebce4",
+          "fingerprint": "f0f5aa8a4d79b7860bf0",
           "summary": "개발 코드를 검사·빌드해 실제 웹 서비스로 실행할 설정과 명령을 정의합니다."
         },
         {
@@ -2140,7 +2185,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "0dc3f230441d1fdc"
+      "fingerprint": "66ba1069dbaf4e21"
     },
     {
       "key": "area:testing-quality",
@@ -2279,7 +2324,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:scripts/test-sql-security.mjs",
           "path": "scripts/test-sql-security.mjs",
-          "fingerprint": "aeda763700ac070ab40a",
+          "fingerprint": "8a1d152ca4a6ee880de4",
           "summary": "sql security 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
         },
         {
@@ -2305,6 +2350,18 @@ export const SOURCE_FEATURE_MANIFEST = {
           "path": "scripts/test-work-intent-parts.mjs",
           "fingerprint": "a4dbf99c928f4bd38882",
           "summary": "Work 필수 계약, 다중 Intent 장착, 버전 고정과 일반 파츠·비밀값 경계를 검사합니다."
+        },
+        {
+          "entityId": "file:scripts/test-workshop-domain.mjs",
+          "path": "scripts/test-workshop-domain.mjs",
+          "fingerprint": "7940f33f58ba4c2dd5d4",
+          "summary": "workshop domain 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
+        },
+        {
+          "entityId": "file:scripts/test-workshop-mcp.mjs",
+          "path": "scripts/test-workshop-mcp.mjs",
+          "fingerprint": "571f8dbbaf1c23419f96",
+          "summary": "workshop mcp 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
         }
       ],
       "evidenceEntityIds": [
@@ -2332,7 +2389,9 @@ export const SOURCE_FEATURE_MANIFEST = {
         "file:scripts/test-system-layers.mjs",
         "file:scripts/test-twin-adapter-contract.mjs",
         "file:scripts/test-twin-build.mjs",
-        "file:scripts/test-work-intent-parts.mjs"
+        "file:scripts/test-work-intent-parts.mjs",
+        "file:scripts/test-workshop-domain.mjs",
+        "file:scripts/test-workshop-mcp.mjs"
       ],
       "evidencePaths": [
         "scripts/check-governance.mjs",
@@ -2359,11 +2418,13 @@ export const SOURCE_FEATURE_MANIFEST = {
         "scripts/test-system-layers.mjs",
         "scripts/test-twin-adapter-contract.mjs",
         "scripts/test-twin-build.mjs",
-        "scripts/test-work-intent-parts.mjs"
+        "scripts/test-work-intent-parts.mjs",
+        "scripts/test-workshop-domain.mjs",
+        "scripts/test-workshop-mcp.mjs"
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "4f76e3eb5b9b7400"
+      "fingerprint": "af04187a33d579fd"
     },
     {
       "key": "area:project-foundation",
@@ -2380,22 +2441,10 @@ export const SOURCE_FEATURE_MANIFEST = {
       "diagnostics": [],
       "evidence": [
         {
-          "entityId": "file:AGENTS.md",
-          "path": "AGENTS.md",
-          "fingerprint": "a868e05a66483fadffa5",
-          "summary": "AGENTS에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
-        },
-        {
           "entityId": "file:CLAUDE.md",
           "path": "CLAUDE.md",
           "fingerprint": "ca354a35adb81ffcd6ac",
           "summary": "CLAUDE에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
-        },
-        {
-          "entityId": "file:docs/AI_MASTER.md",
-          "path": "docs/AI_MASTER.md",
-          "fingerprint": "6b1bc056b349685a69bf",
-          "summary": "AI_MASTER에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
         },
         {
           "entityId": "file:docs/architecture/decisions/DEPENDENCY_DECISIONS.md",
@@ -2430,8 +2479,14 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:docs/architecture/FOUNDRY_MODEL.md",
           "path": "docs/architecture/FOUNDRY_MODEL.md",
-          "fingerprint": "65b45cd65a83c48bf9a2",
+          "fingerprint": "73e40a1c2b151025b4c4",
           "summary": "FOUNDRY_MODEL에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/architecture/WORKSHOP_BLUEPRINT.md",
+          "path": "docs/architecture/WORKSHOP_BLUEPRINT.md",
+          "fingerprint": "5912e714ef85ebc45d7c",
+          "summary": "WORKSHOP_BLUEPRINT에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
         },
         {
           "entityId": "file:docs/archive/handoffs/CODEX_HANDOFF_SOURCE_LENS_SL0_SL1_KO.md",
@@ -2502,13 +2557,13 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:docs/governance/TECHNICAL_DEBT.md",
           "path": "docs/governance/TECHNICAL_DEBT.md",
-          "fingerprint": "1f03e39e8ad04821ada1",
+          "fingerprint": "a577356960a950bb7937",
           "summary": "TECHNICAL_DEBT에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
         },
         {
           "entityId": "file:docs/MASTER.md",
           "path": "docs/MASTER.md",
-          "fingerprint": "a715b63a03a05a293d92",
+          "fingerprint": "db4b0392d9d5ea411e51",
           "summary": "MASTER에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
         },
         {
@@ -2556,7 +2611,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:docs/twin/architecture/TWIN_IDENTITY_AND_OBSERVATION.md",
           "path": "docs/twin/architecture/TWIN_IDENTITY_AND_OBSERVATION.md",
-          "fingerprint": "fdd2c951f0637caa1b04",
+          "fingerprint": "cc4e7de81654c1a74590",
           "summary": "TWIN_IDENTITY_AND_OBSERVATION에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
         },
         {
@@ -2580,7 +2635,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:docs/twin/README.md",
           "path": "docs/twin/README.md",
-          "fingerprint": "e8d01fd7484abd7d7c70",
+          "fingerprint": "07531b119be090535822",
           "summary": "README에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
         },
         {
@@ -2609,15 +2664,14 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "evidenceEntityIds": [
-        "file:AGENTS.md",
         "file:CLAUDE.md",
-        "file:docs/AI_MASTER.md",
         "file:docs/architecture/decisions/DEPENDENCY_DECISIONS.md",
         "file:docs/architecture/decisions/OPEN_SOURCE_POLICY.md",
         "file:docs/architecture/evaluations/source-lens/SOURCE_LENS_AI_PROVIDER_PILOT.md",
         "file:docs/architecture/evaluations/source-lens/SOURCE_LENS_FLOW_VISUALIZATION_EVALUATION.md",
         "file:docs/architecture/evaluations/source-lens/SOURCE_LENS_TREE_SITTER_EVALUATION.md",
         "file:docs/architecture/FOUNDRY_MODEL.md",
+        "file:docs/architecture/WORKSHOP_BLUEPRINT.md",
         "file:docs/archive/handoffs/CODEX_HANDOFF_SOURCE_LENS_SL0_SL1_KO.md",
         "file:docs/archive/handoffs/SOURCE_LENS_SL2_HANDOFF_KO.md",
         "file:docs/archive/handoffs/SOURCE_LENS_SL2_SL4_SL3_FINAL_KO.md",
@@ -2649,15 +2703,14 @@ export const SOURCE_FEATURE_MANIFEST = {
         "file:THIRD_PARTY_NOTICES.md"
       ],
       "evidencePaths": [
-        "AGENTS.md",
         "CLAUDE.md",
-        "docs/AI_MASTER.md",
         "docs/architecture/decisions/DEPENDENCY_DECISIONS.md",
         "docs/architecture/decisions/OPEN_SOURCE_POLICY.md",
         "docs/architecture/evaluations/source-lens/SOURCE_LENS_AI_PROVIDER_PILOT.md",
         "docs/architecture/evaluations/source-lens/SOURCE_LENS_FLOW_VISUALIZATION_EVALUATION.md",
         "docs/architecture/evaluations/source-lens/SOURCE_LENS_TREE_SITTER_EVALUATION.md",
         "docs/architecture/FOUNDRY_MODEL.md",
+        "docs/architecture/WORKSHOP_BLUEPRINT.md",
         "docs/archive/handoffs/CODEX_HANDOFF_SOURCE_LENS_SL0_SL1_KO.md",
         "docs/archive/handoffs/SOURCE_LENS_SL2_HANDOFF_KO.md",
         "docs/archive/handoffs/SOURCE_LENS_SL2_SL4_SL3_FINAL_KO.md",
@@ -2690,7 +2743,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "cd9ccfb115ae0a6c"
+      "fingerprint": "d23200711881edca"
     },
     {
       "key": "subsystem:canvas-workspace",
@@ -2709,7 +2762,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:src/App.jsx",
           "path": "src/App.jsx",
-          "fingerprint": "b7e1a9c4cb13f382dbf6",
+          "fingerprint": "3518c7150762538ab773",
           "summary": "캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다."
         },
         {
@@ -2739,7 +2792,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:src/index.css",
           "path": "src/index.css",
-          "fingerprint": "ed027db7bbd485344d77",
+          "fingerprint": "96a4234acd7e45b35fc0",
           "summary": "캔버스, 노드, 연결선, 패널과 팝업의 크기·색·배치·반응형 모양을 결정합니다."
         },
         {
@@ -2805,7 +2858,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "47efa0b895f10a71"
+      "fingerprint": "4ca030f4f84ec8ef"
     },
     {
       "key": "subsystem:canvas-elements",
@@ -3301,7 +3354,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/uiConstants.js",
           "path": "shared/uiConstants.js",
-          "fingerprint": "78152172ec5cdb02f6a6",
+          "fingerprint": "a57d5e571cb02a185a0d",
           "summary": "uiConstants에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
         },
         {
@@ -3309,6 +3362,18 @@ export const SOURCE_FEATURE_MANIFEST = {
           "path": "shared/workflowTrustTopology.js",
           "fingerprint": "6f9807af88898defc611",
           "summary": "워크플로우 · 시스템 연결 구조에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
+        },
+        {
+          "entityId": "file:shared/workshop.js",
+          "path": "shared/workshop.js",
+          "fingerprint": "a1918b9134df1de940cd",
+          "summary": "workshop에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
+        },
+        {
+          "entityId": "file:src/components/WorkshopBoard.jsx",
+          "path": "src/components/WorkshopBoard.jsx",
+          "fingerprint": "5db83bf520ace8d567ce",
+          "summary": "WorkshopBoard 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다."
         },
         {
           "entityId": "file:src/lib/sharedCanvasApi.js",
@@ -3321,6 +3386,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "path": "src/lib/shares.js",
           "fingerprint": "9042bc57cc50b00ccd3b",
           "summary": "초대, 공유 링크, 참여자 권한과 나가기·추방 요청을 서버와 주고받습니다."
+        },
+        {
+          "entityId": "file:src/lib/workshopApi.js",
+          "path": "src/lib/workshopApi.js",
+          "fingerprint": "07888413c14bdc902619",
+          "summary": "서버 기능 기능을 화면의 여러 부분에서 다시 쓸 수 있게 제공합니다."
         },
         {
           "entityId": "file:supabase-shares.sql",
@@ -3339,8 +3410,11 @@ export const SOURCE_FEATURE_MANIFEST = {
         "file:shared/systemLayers.js",
         "file:shared/uiConstants.js",
         "file:shared/workflowTrustTopology.js",
+        "file:shared/workshop.js",
+        "file:src/components/WorkshopBoard.jsx",
         "file:src/lib/sharedCanvasApi.js",
         "file:src/lib/shares.js",
+        "file:src/lib/workshopApi.js",
         "file:supabase-shares.sql"
       ],
       "evidencePaths": [
@@ -3353,8 +3427,11 @@ export const SOURCE_FEATURE_MANIFEST = {
         "shared/systemLayers.js",
         "shared/uiConstants.js",
         "shared/workflowTrustTopology.js",
+        "shared/workshop.js",
+        "src/components/WorkshopBoard.jsx",
         "src/lib/sharedCanvasApi.js",
         "src/lib/shares.js",
+        "src/lib/workshopApi.js",
         "supabase-shares.sql"
       ],
       "implementations": [
@@ -3367,8 +3444,10 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "targetEntityId": "map-web-app",
           "evidenceEntityIds": [
+            "file:src/components/WorkshopBoard.jsx",
             "file:src/lib/sharedCanvasApi.js",
-            "file:src/lib/shares.js"
+            "file:src/lib/shares.js",
+            "file:src/lib/workshopApi.js"
           ]
         }
       ],
@@ -3433,7 +3512,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "e4119b54c37e8eac"
+      "fingerprint": "d0e32d5c8ce4ead5"
     },
     {
       "key": "subsystem:identity-account",
@@ -3553,7 +3632,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/systemOntology.js",
           "path": "shared/systemOntology.js",
-          "fingerprint": "6cf7d40d89f92199c383",
+          "fingerprint": "d31f7a1c3b42b6d3a9f4",
           "summary": "앱·서버·DB·사람 같은 시스템 노드 종류와 실재성 표시 규칙을 정의합니다."
         },
         {
@@ -3589,7 +3668,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:src/nodes/SystemNode.jsx",
           "path": "src/nodes/SystemNode.jsx",
-          "fingerprint": "89e6a96d65543cf3ceaf",
+          "fingerprint": "adbd0ed8c50d269045a7",
           "summary": "앱·서버·DB 같은 실제 시스템 노드와 파츠, 운영 상태, 실행 가능한 기능을 화면에 표시합니다."
         }
       ],
@@ -3646,7 +3725,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "ae28864f48f714df"
+      "fingerprint": "30813511510f70c7"
     },
     {
       "key": "subsystem:engine-product-registry",
@@ -4692,7 +4771,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:mcp/server.js",
           "path": "mcp/server.js",
-          "fingerprint": "cf3038a595e1cc056261",
+          "fingerprint": "deb95826cdc4a3933b59",
           "summary": "AI에게 공개할 캔버스 도구의 이름, 입력 형식과 실행 함수를 등록합니다."
         },
         {
@@ -4763,7 +4842,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "2612832335392ca0"
+      "fingerprint": "c6f93eb6c572e841"
     },
     {
       "key": "subsystem:mcp-tools",
@@ -4790,22 +4869,31 @@ export const SOURCE_FEATURE_MANIFEST = {
           "path": "mcp/store.js",
           "fingerprint": "ef8151ab288f29a35434",
           "summary": "AI 도구가 캔버스·노드·연결선을 읽고 바꿀 때 소유권과 공유 범위를 검사하고 Supabase에 반영합니다."
+        },
+        {
+          "entityId": "file:mcp/workshopStore.js",
+          "path": "mcp/workshopStore.js",
+          "fingerprint": "05756feaf5e337f07588",
+          "summary": "workshopStore 관련 AI 도구 요청을 권한 범위 안에서 실행하거나 검증합니다."
         }
       ],
       "evidenceEntityIds": [
         "file:mcp/canvasSummaries.js",
-        "file:mcp/store.js"
+        "file:mcp/store.js",
+        "file:mcp/workshopStore.js"
       ],
       "evidencePaths": [
         "mcp/canvasSummaries.js",
-        "mcp/store.js"
+        "mcp/store.js",
+        "mcp/workshopStore.js"
       ],
       "implementations": [
         {
           "targetEntityId": "map-mcp-api",
           "evidenceEntityIds": [
             "file:mcp/canvasSummaries.js",
-            "file:mcp/store.js"
+            "file:mcp/store.js",
+            "file:mcp/workshopStore.js"
           ]
         }
       ],
@@ -4818,9 +4906,11 @@ export const SOURCE_FEATURE_MANIFEST = {
           "targetEntityId": "map-canvases-table",
           "evidenceEntityIds": [
             "file:mcp/canvasSummaries.js",
-            "file:mcp/store.js"
+            "file:mcp/store.js",
+            "file:mcp/workshopStore.js"
           ],
           "evidenceRelationIds": [
+            "relation:0dae3b9f70526938",
             "relation:61549947ac7bb27d",
             "relation:99eb54cbe976c2d8"
           ]
@@ -4878,7 +4968,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "f2a36224cf06c239"
+      "fingerprint": "f53de9bffd44f4a7"
     },
     {
       "key": "subsystem:browser-persistence",
@@ -5199,7 +5289,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:src/lib/sanitizeHtml.js",
           "path": "src/lib/sanitizeHtml.js",
-          "fingerprint": "4bb7cac965b73efb5af2",
+          "fingerprint": "b07b99d29ec161f4bc2c",
           "summary": "노드 본문에서 위험한 HTML, 스크립트와 외부 주소를 제거한 뒤 화면에 표시할 자료만 남깁니다."
         }
       ],
@@ -5226,7 +5316,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "5bd6f1317a9eb513"
+      "fingerprint": "845096d0be00620a"
     },
     {
       "key": "subsystem:access-privacy",
@@ -5339,6 +5429,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "path": "supabase-security-hardening.sql",
           "fingerprint": "a0918f92f5be3035f7e9",
           "summary": "데이터베이스 자료의 저장 구조, 서버 함수 또는 사용자별 접근 규칙을 정의합니다."
+        },
+        {
+          "entityId": "file:supabase-workshop.sql",
+          "path": "supabase-workshop.sql",
+          "fingerprint": "b453e83e69b114d8682c",
+          "summary": "workshop_stage_contracts, workshop_goals, workshop_tasks 자료의 저장 구조, 서버 함수 또는 사용자별 접근 규칙을 정의합니다."
         }
       ],
       "evidenceEntityIds": [
@@ -5347,7 +5443,8 @@ export const SOURCE_FEATURE_MANIFEST = {
         "file:src/components/SecurityOverlayLegend.jsx",
         "file:supabase-canvas-summaries.sql",
         "file:supabase-relation-metadata-guard.sql",
-        "file:supabase-security-hardening.sql"
+        "file:supabase-security-hardening.sql",
+        "file:supabase-workshop.sql"
       ],
       "evidencePaths": [
         "mcp/systemOperationPlan.js",
@@ -5355,7 +5452,8 @@ export const SOURCE_FEATURE_MANIFEST = {
         "src/components/SecurityOverlayLegend.jsx",
         "supabase-canvas-summaries.sql",
         "supabase-relation-metadata-guard.sql",
-        "supabase-security-hardening.sql"
+        "supabase-security-hardening.sql",
+        "supabase-workshop.sql"
       ],
       "implementations": [
         {
@@ -5378,7 +5476,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "6179f348777bf94c"
+      "fingerprint": "7272242c85534efd"
     },
     {
       "key": "subsystem:build-release",
@@ -5397,7 +5495,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:package.json",
           "path": "package.json",
-          "fingerprint": "923715e44d1bcf9ebce4",
+          "fingerprint": "f0f5aa8a4d79b7860bf0",
           "summary": "개발 코드를 검사·빌드해 실제 웹 서비스로 실행할 설정과 명령을 정의합니다."
         },
         {
@@ -5425,7 +5523,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "677d7f7c2ba5d4e0"
+      "fingerprint": "ac84e7b55aa01787"
     },
     {
       "key": "subsystem:source-tests",
@@ -5650,7 +5748,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:scripts/test-sql-security.mjs",
           "path": "scripts/test-sql-security.mjs",
-          "fingerprint": "aeda763700ac070ab40a",
+          "fingerprint": "8a1d152ca4a6ee880de4",
           "summary": "sql security 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
         },
         {
@@ -5658,6 +5756,18 @@ export const SOURCE_FEATURE_MANIFEST = {
           "path": "scripts/test-system-layers.mjs",
           "fingerprint": "15a79a1f0abf3f784732",
           "summary": "system layers 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
+        },
+        {
+          "entityId": "file:scripts/test-workshop-domain.mjs",
+          "path": "scripts/test-workshop-domain.mjs",
+          "fingerprint": "7940f33f58ba4c2dd5d4",
+          "summary": "workshop domain 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
+        },
+        {
+          "entityId": "file:scripts/test-workshop-mcp.mjs",
+          "path": "scripts/test-workshop-mcp.mjs",
+          "fingerprint": "571f8dbbaf1c23419f96",
+          "summary": "workshop mcp 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
         }
       ],
       "evidenceEntityIds": [
@@ -5674,7 +5784,9 @@ export const SOURCE_FEATURE_MANIFEST = {
         "file:scripts/test-source-editable-properties.mjs",
         "file:scripts/test-source-lens-engine.mjs",
         "file:scripts/test-sql-security.mjs",
-        "file:scripts/test-system-layers.mjs"
+        "file:scripts/test-system-layers.mjs",
+        "file:scripts/test-workshop-domain.mjs",
+        "file:scripts/test-workshop-mcp.mjs"
       ],
       "evidencePaths": [
         "scripts/check-governance.mjs",
@@ -5690,11 +5802,13 @@ export const SOURCE_FEATURE_MANIFEST = {
         "scripts/test-source-editable-properties.mjs",
         "scripts/test-source-lens-engine.mjs",
         "scripts/test-sql-security.mjs",
-        "scripts/test-system-layers.mjs"
+        "scripts/test-system-layers.mjs",
+        "scripts/test-workshop-domain.mjs",
+        "scripts/test-workshop-mcp.mjs"
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "bf553dbae8493b33"
+      "fingerprint": "22a3fa0bea00aff0"
     },
     {
       "key": "subsystem:project-config",
@@ -5710,12 +5824,6 @@ export const SOURCE_FEATURE_MANIFEST = {
       "eligible": false,
       "diagnostics": [],
       "evidence": [
-        {
-          "entityId": "file:AGENTS.md",
-          "path": "AGENTS.md",
-          "fingerprint": "a868e05a66483fadffa5",
-          "summary": "AGENTS에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
-        },
         {
           "entityId": "file:CLAUDE.md",
           "path": "CLAUDE.md",
@@ -5742,14 +5850,12 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "evidenceEntityIds": [
-        "file:AGENTS.md",
         "file:CLAUDE.md",
         "file:index.html",
         "file:scripts/ai-context-gate-engine.mjs",
         "file:THIRD_PARTY_NOTICES.md"
       ],
       "evidencePaths": [
-        "AGENTS.md",
         "CLAUDE.md",
         "index.html",
         "scripts/ai-context-gate-engine.mjs",
@@ -5757,7 +5863,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "0732db29d5845c67"
+      "fingerprint": "b4f42a802b99eeef"
     },
     {
       "key": "subsystem:project-docs",
@@ -5773,12 +5879,6 @@ export const SOURCE_FEATURE_MANIFEST = {
       "eligible": false,
       "diagnostics": [],
       "evidence": [
-        {
-          "entityId": "file:docs/AI_MASTER.md",
-          "path": "docs/AI_MASTER.md",
-          "fingerprint": "6b1bc056b349685a69bf",
-          "summary": "AI_MASTER에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
-        },
         {
           "entityId": "file:docs/architecture/decisions/DEPENDENCY_DECISIONS.md",
           "path": "docs/architecture/decisions/DEPENDENCY_DECISIONS.md",
@@ -5812,8 +5912,14 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:docs/architecture/FOUNDRY_MODEL.md",
           "path": "docs/architecture/FOUNDRY_MODEL.md",
-          "fingerprint": "65b45cd65a83c48bf9a2",
+          "fingerprint": "73e40a1c2b151025b4c4",
           "summary": "FOUNDRY_MODEL에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/architecture/WORKSHOP_BLUEPRINT.md",
+          "path": "docs/architecture/WORKSHOP_BLUEPRINT.md",
+          "fingerprint": "5912e714ef85ebc45d7c",
+          "summary": "WORKSHOP_BLUEPRINT에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
         },
         {
           "entityId": "file:docs/archive/handoffs/CODEX_HANDOFF_SOURCE_LENS_SL0_SL1_KO.md",
@@ -5884,13 +5990,13 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:docs/governance/TECHNICAL_DEBT.md",
           "path": "docs/governance/TECHNICAL_DEBT.md",
-          "fingerprint": "1f03e39e8ad04821ada1",
+          "fingerprint": "a577356960a950bb7937",
           "summary": "TECHNICAL_DEBT에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
         },
         {
           "entityId": "file:docs/MASTER.md",
           "path": "docs/MASTER.md",
-          "fingerprint": "a715b63a03a05a293d92",
+          "fingerprint": "db4b0392d9d5ea411e51",
           "summary": "MASTER에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
         },
         {
@@ -5938,7 +6044,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:docs/twin/architecture/TWIN_IDENTITY_AND_OBSERVATION.md",
           "path": "docs/twin/architecture/TWIN_IDENTITY_AND_OBSERVATION.md",
-          "fingerprint": "fdd2c951f0637caa1b04",
+          "fingerprint": "cc4e7de81654c1a74590",
           "summary": "TWIN_IDENTITY_AND_OBSERVATION에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
         },
         {
@@ -5962,7 +6068,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:docs/twin/README.md",
           "path": "docs/twin/README.md",
-          "fingerprint": "e8d01fd7484abd7d7c70",
+          "fingerprint": "07531b119be090535822",
           "summary": "README에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
         },
         {
@@ -5973,13 +6079,13 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "evidenceEntityIds": [
-        "file:docs/AI_MASTER.md",
         "file:docs/architecture/decisions/DEPENDENCY_DECISIONS.md",
         "file:docs/architecture/decisions/OPEN_SOURCE_POLICY.md",
         "file:docs/architecture/evaluations/source-lens/SOURCE_LENS_AI_PROVIDER_PILOT.md",
         "file:docs/architecture/evaluations/source-lens/SOURCE_LENS_FLOW_VISUALIZATION_EVALUATION.md",
         "file:docs/architecture/evaluations/source-lens/SOURCE_LENS_TREE_SITTER_EVALUATION.md",
         "file:docs/architecture/FOUNDRY_MODEL.md",
+        "file:docs/architecture/WORKSHOP_BLUEPRINT.md",
         "file:docs/archive/handoffs/CODEX_HANDOFF_SOURCE_LENS_SL0_SL1_KO.md",
         "file:docs/archive/handoffs/SOURCE_LENS_SL2_HANDOFF_KO.md",
         "file:docs/archive/handoffs/SOURCE_LENS_SL2_SL4_SL3_FINAL_KO.md",
@@ -6008,13 +6114,13 @@ export const SOURCE_FEATURE_MANIFEST = {
         "file:README.md"
       ],
       "evidencePaths": [
-        "docs/AI_MASTER.md",
         "docs/architecture/decisions/DEPENDENCY_DECISIONS.md",
         "docs/architecture/decisions/OPEN_SOURCE_POLICY.md",
         "docs/architecture/evaluations/source-lens/SOURCE_LENS_AI_PROVIDER_PILOT.md",
         "docs/architecture/evaluations/source-lens/SOURCE_LENS_FLOW_VISUALIZATION_EVALUATION.md",
         "docs/architecture/evaluations/source-lens/SOURCE_LENS_TREE_SITTER_EVALUATION.md",
         "docs/architecture/FOUNDRY_MODEL.md",
+        "docs/architecture/WORKSHOP_BLUEPRINT.md",
         "docs/archive/handoffs/CODEX_HANDOFF_SOURCE_LENS_SL0_SL1_KO.md",
         "docs/archive/handoffs/SOURCE_LENS_SL2_HANDOFF_KO.md",
         "docs/archive/handoffs/SOURCE_LENS_SL2_SL4_SL3_FINAL_KO.md",
@@ -6044,7 +6150,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "6c05f00efd737adc"
+      "fingerprint": "af4cdb0fcbfcab51"
     }
   ],
   "summary": {
@@ -6053,5 +6159,5 @@ export const SOURCE_FEATURE_MANIFEST = {
     "attributes": 22,
     "ineligible": 0
   },
-  "fingerprint": "fb89f7469d7ad51b"
+  "fingerprint": "2c4df42c4cf3a79a"
 }

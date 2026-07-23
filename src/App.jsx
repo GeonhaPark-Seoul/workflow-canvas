@@ -12,7 +12,12 @@ import {
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 
-import { SYSTEM_NODE_DEFAULT_HEIGHT, SYSTEM_NODE_DEFAULT_WIDTH } from '../shared/uiConstants.js'
+import {
+  SYSTEM_NODE_DEFAULT_HEIGHT,
+  SYSTEM_NODE_DEFAULT_WIDTH,
+  WORKSHOP_DISPLAY_NAMES,
+} from '../shared/uiConstants.js'
+import { designateWorkshopControlNode } from '../shared/workshop.js'
 
 import StageNode from './nodes/StageNode'
 import MemoNode from './nodes/MemoNode'
@@ -30,6 +35,7 @@ import DigitalTwinReviewPanel from './components/DigitalTwinReviewPanel'
 import SourceTwinPanel from './components/SourceTwinPanel'
 import SecurityOverlayLegend from './components/SecurityOverlayLegend'
 import EdgeRelationEditor from './components/EdgeRelationEditor'
+import { WorkshopBoard } from './components/WorkshopBoard'
 import {
   initCanvases, loadCanvasData, saveCanvasData, deleteCanvasData,
   saveCanvasList, saveActiveId, uid,
@@ -496,7 +502,7 @@ function stripNode(n) {
   const {
     onUpdate, onEditStart, onEditEnd, onOpenInNotes, onCheckSystemPart,
     onSelectForPart, stageTypes, imageContext, twinRuntime, systemPartRuntime, canRunSystemChecks,
-    intentLibrary, onCreateIntentForWork, onOpenIntentFromWork,
+    intentLibrary, onCreateIntentForWork, onOpenIntentFromWork, onOpenWorkshop,
     groupDropTarget, layerPortals, onOpenLayerPortal, securityOverlay, ...data
   } = n.data ?? {}
   const { selected, ...rest } = n
@@ -563,6 +569,7 @@ export default function App() {
   const [twinProposalPreview, setTwinProposalPreview] = useState(null) // { itemId, itemFingerprint } | null
   const [twinProposalStatus, setTwinProposalStatus] = useState(null) // { type, message } | null
   const [securityOverlayEnabled, setSecurityOverlayEnabled] = useState(false)
+  const [workshopOpen, setWorkshopOpen] = useState(false)
   const [systemPartRuntimeByNode, setSystemPartRuntimeByNode] = useState({})
   const [systemRuntimeDashboard, setSystemRuntimeDashboard] = useState({
     loading: false,
@@ -591,7 +598,10 @@ export default function App() {
     if (next.lodThreshold !== undefined) saveLodThreshold(next.lodThreshold)
   }, [])
   useEffect(() => { document.body.dataset.theme = settings.theme }, [settings.theme])
-  useEffect(() => { setSecurityOverlayEnabled(false) }, [activeCanvasId])
+  useEffect(() => {
+    setSecurityOverlayEnabled(false)
+    setWorkshopOpen(false)
+  }, [activeCanvasId])
 
   // Saved views (per canvas): [{ id, name, bounds: {x,y,width,height} }]
   const [views, setViews] = useState(initData.views ?? [])
@@ -4507,6 +4517,31 @@ export default function App() {
     : false
   const ctxEdgeSourceLabel = nodeDisplayName(nodes.find((node) => node.id === ctxEdge?.source))
   const ctxEdgeTargetLabel = nodeDisplayName(nodes.find((node) => node.id === ctxEdge?.target))
+  const ctxWorkshopNode = ctxNodes.length === 1 && ctxNodes[0]?.type === 'system'
+    ? ctxNodes[0]
+    : null
+  const ctxIsWorkshopControlNode = ctxWorkshopNode?.data?.workshopRole === 'control-node'
+  const ctxCanAssignWorkshopControlNode = !!ctxWorkshopNode
+    && ctxFullEdit
+
+  const openWorkshop = () => {
+    setWorkshopOpen(true)
+    closeContext()
+  }
+
+  const assignWorkshopControlNode = () => {
+    if (!ctxCanAssignWorkshopControlNode) return
+    const targetId = ctxWorkshopNode.id
+    setNodes((currentNodes) => {
+      const nextNodes = designateWorkshopControlNode(currentNodes, targetId)
+      return nextNodes.map((node, index) => (
+        node === currentNodes[index]
+          ? node
+          : { ...node, data: sanitizeNodeData(node.data) }
+      ))
+    })
+    closeContext()
+  }
 
   return (
     <div
@@ -4875,6 +4910,9 @@ export default function App() {
               onOpenLayerPortal: n.type === 'system' ? openSystemLayerPortal : undefined,
               intentLibrary: n.type === 'system' ? workIntentLibrary : undefined,
               onOpenIntentFromWork: n.type === 'system' ? openIntentFromWork : undefined,
+              onOpenWorkshop: n.type === 'system' && n.data?.workshopRole === 'control-node'
+                ? () => setWorkshopOpen(true)
+                : undefined,
               onCreateIntentForWork: n.type === 'system' && structureEditable
                 ? (draft) => createIntentForWork(n.id, draft)
                 : undefined,
@@ -5274,9 +5312,29 @@ export default function App() {
             <ContextItem icon="🗑" label={ctxMulti ? '전체 삭제' : '노드 삭제'} color="#ef4444" onClick={handleContextDeleteNode} />
           )}
 
-          {/* System node: ontology fields live in the notes panel; context menu only deletes. */}
-          {contextMenu.nodeId && contextMenu.nodeType === 'system' && ctxCanDelete && (
-            <ContextItem icon="🗑" label={ctxMulti ? '전체 삭제' : '노드 삭제'} color="#ef4444" onClick={handleContextDeleteNode} />
+          {/* System node: the board stays attached to its designated control node. */}
+          {contextMenu.nodeId && contextMenu.nodeType === 'system' && (
+            <>
+              {ctxIsWorkshopControlNode && (
+                <ContextItem
+                  icon="▦"
+                  label={`${WORKSHOP_DISPLAY_NAMES.board} 열기`}
+                  color="#14b8a6"
+                  onClick={openWorkshop}
+                />
+              )}
+              {!ctxIsWorkshopControlNode && ctxCanAssignWorkshopControlNode && (
+                <ContextItem
+                  icon="⌘"
+                  label={`${WORKSHOP_DISPLAY_NAMES['control-node']}로 지정`}
+                  color="#14b8a6"
+                  onClick={assignWorkshopControlNode}
+                />
+              )}
+              {ctxCanDelete && (
+                <ContextItem icon="🗑" label={ctxMulti ? '전체 삭제' : '노드 삭제'} color="#ef4444" onClick={handleContextDeleteNode} />
+              )}
+            </>
           )}
 
           {/* Intent node: editing and version history live in the notes panel. */}
@@ -5286,6 +5344,15 @@ export default function App() {
         </div>
       )}
       </div>
+
+      {workshopOpen && (
+        <WorkshopBoard
+          canvasOwnerId={parseSharedId(activeCanvasId)?.ownerId ?? user?.id ?? ''}
+          canvasId={parseSharedId(activeCanvasId)?.canvasId ?? activeCanvasId}
+          currentUserId={user?.id ?? ''}
+          onClose={() => setWorkshopOpen(false)}
+        />
+      )}
 
       {notesPanel && (
         <NotesPanel
