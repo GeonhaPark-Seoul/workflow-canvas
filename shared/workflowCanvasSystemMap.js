@@ -2,7 +2,6 @@ import { createEdgeRelationData, edgeRelationInfo } from './relationOntology.js'
 import { createSystemNodeData } from './systemOntology.js'
 import { createEngineCapabilityMap } from './capabilityMapper.js'
 import { MAINTAINER_AGENT_MANIFEST, WORKFLOW_ENGINE_REGISTRY } from './engineRegistry.js'
-import { createSystemLayerViews } from './systemLayers.js'
 import { WORKFLOW_SYSTEM_DISCOVERY } from './workflowSystemDiscoveryManifest.js'
 import {
   WORKFLOW_SOURCE_TWIN_PART_IDS,
@@ -10,10 +9,10 @@ import {
 } from './workflowSourceTwinCanvas.js'
 
 const GROUPS = Object.freeze([
-  { id: 'map-group-experience', label: '사용자 인터페이스층', x: 0, y: 0, width: 1000, height: 560 },
-  { id: 'map-group-runtime', label: 'Vercel·서버 경계층', x: 1080, y: 0, width: 940, height: 560 },
-  { id: 'map-group-data', label: 'Supabase 데이터·보안층', x: 2100, y: 0, width: 1180, height: 1160 },
-  { id: 'map-group-development', label: '개발·검증·배포층', x: 0, y: 650, width: 2020, height: 510 },
+  { id: 'map-group-experience', label: '사용자 접점 영역', x: 0, y: 0, width: 1000, height: 560 },
+  { id: 'map-group-runtime', label: '실행 서비스 영역', x: 1080, y: 0, width: 940, height: 560 },
+  { id: 'map-group-data', label: '데이터·보안 영역', x: 2100, y: 0, width: 1180, height: 1160 },
+  { id: 'map-group-development', label: '개발 도구·검증 영역', x: 0, y: 650, width: 2020, height: 510 },
 ])
 
 function runtimePart({ id, kind, label, ref, evidenceRef }) {
@@ -492,7 +491,7 @@ export function createWorkflowCanvasSystemMap() {
     nodes: mapNodes(engineCapabilityMap),
     edges: mapEdges(engineCapabilityMap),
     notes: [],
-    views: createSystemLayerViews().concat(GROUPS.map((group) => ({
+    views: GROUPS.map((group) => ({
       id: `view-${group.id}`,
       name: group.label,
       bounds: { x: group.x, y: group.y, width: group.width, height: group.height },
@@ -505,7 +504,7 @@ export function createWorkflowCanvasSystemMap() {
         width: engineCapabilityMap.group.width,
         height: engineCapabilityMap.group.height,
       },
-    })),
+    }),
     stageTypes: null,
   }
 }

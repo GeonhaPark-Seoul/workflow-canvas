@@ -399,7 +399,7 @@ const repository = manuallyChanged.nodes.find((node) => node.id === 'map-local-r
 repository.position = { x: 9_999, y: -2_000 }
 repository.width = 444
 repository.data.manualAnnotation = '사용자 전용 메모'
-repository.data.presentation = { layerOverride: 'L1' }
+repository.data.presentation = { layerOverride: 'uwork' }
 manuallyChanged.nodes.push({
   id: 'manual-unmanaged-node',
   type: 'system',
@@ -415,7 +415,7 @@ assert.equal(preservedReview.summary.unmanagedCanvasNodes, 1)
 assert.deepEqual(repository.position, { x: 9_999, y: -2_000 })
 assert.equal(repository.width, 444)
 assert.equal(repository.data.manualAnnotation, '사용자 전용 메모')
-assert.deepEqual(repository.data.presentation, { layerOverride: 'L1' })
+assert.deepEqual(repository.data.presentation, { layerOverride: 'uwork' })
 
 const sourceFeatureNode = manuallyChanged.nodes.find((node) => node.id === 'map-source-feature-area-source-code-twin')
 sourceFeatureNode.position = { x: 7_777, y: -7_777 }

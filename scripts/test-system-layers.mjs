@@ -5,79 +5,93 @@ import {
   canvasSupportsSystemLayers,
   createCustomSystemLayerView,
   createSystemLayerProjection,
-  createSystemLayerViews,
-  deriveDefaultSystemLayer,
   effectiveSystemLayerForNode,
-  ensureSystemLayerViews,
-  isCustomSystemLayerView,
-  isSystemMapTemplateCanvas,
   normalizeNodePresentation,
   normalizeSystemLayerId,
+  pruneLegacyOfficialSystemLayerViews,
   removeSystemLayerFromNodes,
   systemLayerOptionsFromViews,
-  SYSTEM_LAYER_DEFINITIONS,
   withSystemLayerOverride,
 } from '../shared/systemLayers.js'
-import { SYSTEM_KIND_DEFS } from '../shared/systemOntology.js'
 
-const expectedKinds = {
-  actor: 'L1',
-  feature: 'L1',
-  engine: 'L2',
-  module: 'L2',
-  frontend: 'L2',
-  service: 'L2',
-  api: 'L2',
-  function: 'L2',
-  auth: 'L2',
-  queue: 'L2',
-  mcp: 'L2',
-  database: 'L3',
-  table: 'L3',
-  storage: 'L3',
-  policy: 'L3',
-  deployment: 'L4',
-  external: 'L4',
-  credential: 'L4',
+const FIRST_LAYER_ID = 'uwork'
+const SECOND_LAYER_ID = 'ucode'
+const firstLayerView = {
+  id: `view:system-layer:custom:${FIRST_LAYER_ID}`,
+  name: '업무 흐름',
+  viewKind: 'system-layer',
+  systemLayer: FIRST_LAYER_ID,
+}
+const secondLayerView = {
+  id: `view:system-layer:custom:${SECOND_LAYER_ID}`,
+  name: '코드 흐름',
+  viewKind: 'system-layer',
+  systemLayer: SECOND_LAYER_ID,
 }
 
-assert.equal(SYSTEM_LAYER_DEFINITIONS.length, 4)
-assert.deepEqual(Object.keys(expectedKinds).sort(), SYSTEM_KIND_DEFS.map((item) => item.id).sort())
-for (const [systemKind, layer] of Object.entries(expectedKinds)) {
-  assert.equal(deriveDefaultSystemLayer({ systemKind }), layer, `${systemKind} 기본 층`)
-}
-assert.equal(deriveDefaultSystemLayer({ systemKind: 'unknown', trustZone: { kind: 'local-device' } }), 'L4')
-assert.equal(deriveDefaultSystemLayer({ systemKind: 'database', trustZone: { kind: 'public-cloud' } }), 'L3')
-assert.equal(deriveDefaultSystemLayer({ systemKind: 'unknown', trustZone: { kind: 'unknown' } }), null)
-assert.equal(deriveDefaultSystemLayer({}), null)
+assert.equal(normalizeSystemLayerId('L1'), null, '폐기된 공식 층 id를 다시 활성화하면 안 됩니다.')
+assert.equal(normalizeSystemLayerId(FIRST_LAYER_ID), FIRST_LAYER_ID)
+assert.equal(normalizeSystemLayerId('u123'), null)
 
-const actor = { id: 'actor', type: 'system', data: { systemKind: 'actor' } }
-assert.equal(effectiveSystemLayerForNode(actor), 'L1')
-assert.equal(effectiveSystemLayerForNode({ ...actor, data: withSystemLayerOverride(actor.data, 'L3') }), 'L3')
-assert.deepEqual(normalizeNodePresentation({ layerOverride: 'L2', ignored: 'drop' }), { layerOverride: 'L2' })
-assert.equal(normalizeNodePresentation({ layerOverride: 'L9' }), null)
-assert.deepEqual(annotationDataForSystemLayer({ header: '메모' }, 'L4'), {
-  header: '메모', presentation: { layerOverride: 'L4' },
+const unassignedActor = {
+  id: 'actor',
+  type: 'system',
+  data: { systemKind: 'actor', trustZone: { kind: 'public-cloud' } },
+}
+assert.equal(effectiveSystemLayerForNode(unassignedActor), null,
+  '노드 종류나 신뢰영역으로 층을 자동 배정하면 안 됩니다.')
+assert.equal(
+  effectiveSystemLayerForNode({
+    ...unassignedActor,
+    data: withSystemLayerOverride(unassignedActor.data, FIRST_LAYER_ID),
+  }),
+  FIRST_LAYER_ID,
+)
+assert.deepEqual(
+  normalizeNodePresentation({ layerOverride: FIRST_LAYER_ID, ignored: 'drop' }),
+  { layerOverride: FIRST_LAYER_ID },
+)
+assert.equal(normalizeNodePresentation({ layerOverride: 'L2' }), null)
+assert.deepEqual(annotationDataForSystemLayer({ header: '메모' }, FIRST_LAYER_ID), {
+  header: '메모', presentation: { layerOverride: FIRST_LAYER_ID },
 })
 assert.deepEqual(annotationDataForSystemLayer({
-  header: '메모', presentation: { layerOverride: 'L2' },
-}, 'L4'), {
-  header: '메모', presentation: { layerOverride: 'L2' },
+  header: '메모', presentation: { layerOverride: SECOND_LAYER_ID },
+}, FIRST_LAYER_ID), {
+  header: '메모', presentation: { layerOverride: SECOND_LAYER_ID },
 }, '노트를 다른 층에서 캔버스로 올려도 생성 시점의 층을 보존해야 합니다.')
 
-const layerViews = createSystemLayerViews()
-assert.deepEqual(layerViews.map((view) => view.systemLayer), ['L1', 'L2', 'L3', 'L4'])
 const userView = { id: 'user-view', name: '사용자 뷰', bounds: { x: 0, y: 0, width: 10, height: 10 } }
-const ensured = ensureSystemLayerViews([userView])
-assert.equal(ensured[0], userView)
-assert.equal(ensured.length, 5)
-assert.equal(ensureSystemLayerViews(ensured), ensured, '이미 완성된 층 뷰는 같은 배열을 보존해야 합니다.')
+const legacyViews = [
+  userView,
+  { id: 'view:system-layer:L1', name: 'L1 경험 층', viewKind: 'system-layer', systemLayer: 'L1' },
+  firstLayerView,
+  { id: 'view:system-layer:L4', name: 'L4 인프라 층', viewKind: 'system-layer', systemLayer: 'L4' },
+]
+const prunedViews = pruneLegacyOfficialSystemLayerViews(legacyViews)
+assert.deepEqual(prunedViews, [userView, firstLayerView])
+assert.equal(pruneLegacyOfficialSystemLayerViews(prunedViews), prunedViews,
+  '정리할 뷰가 없으면 React 상태 안정성을 위해 같은 배열을 반환해야 합니다.')
 
 const graphNodes = [
   { id: 'group', type: 'group', position: { x: 0, y: 0 }, data: { label: '기존 공간 그룹' } },
-  { id: 'experience', type: 'system', parentId: 'group', data: { label: '사용자', systemKind: 'actor' } },
-  { id: 'app', type: 'system', parentId: 'group', data: { label: '앱', systemKind: 'frontend' } },
-  { id: 'hidden-app', type: 'system', data: { redacted: true } },
+  {
+    id: 'experience',
+    type: 'system',
+    parentId: 'group',
+    data: withSystemLayerOverride({ label: '사용자', systemKind: 'actor' }, FIRST_LAYER_ID),
+  },
+  {
+    id: 'app',
+    type: 'system',
+    parentId: 'group',
+    data: withSystemLayerOverride({ label: '앱', systemKind: 'frontend' }, SECOND_LAYER_ID),
+  },
+  {
+    id: 'hidden-app',
+    type: 'system',
+    data: { ...withSystemLayerOverride({ label: '숨은 앱' }, SECOND_LAYER_ID), redacted: true },
+  },
   { id: 'note', type: 'memo', data: { header: '과거 미분류 메모' } },
 ]
 const graphEdges = [
@@ -88,76 +102,63 @@ const graphEdges = [
 
 const unrestricted = createSystemLayerProjection(
   graphNodes.map((node) => node.id === 'hidden-app'
-    ? { ...node, data: { label: '숨은 앱', systemKind: 'frontend' } }
+    ? { ...node, data: withSystemLayerOverride({ label: '숨은 앱' }, SECOND_LAYER_ID) }
     : node),
   graphEdges.map((edge) => ({ ...edge, redacted: false })),
-  'L1',
+  FIRST_LAYER_ID,
 )
 assert.equal(unrestricted.portalsByNode.get('experience')[0].count, 2)
 
-const restricted = createSystemLayerProjection(graphNodes, graphEdges, 'L1')
+const layerOptions = systemLayerOptionsFromViews([firstLayerView, secondLayerView])
+const layerMeta = new Map(layerOptions.map((option) => [option.id, option]))
+const restricted = createSystemLayerProjection(graphNodes, graphEdges, FIRST_LAYER_ID, layerMeta)
 assert.deepEqual([...restricted.visibleNodeIds].sort(), ['experience', 'group', 'note'])
 assert.deepEqual([...restricted.visibleEdgeIds], [])
 assert.equal(restricted.portalsByNode.get('experience')[0].count, 1)
 assert.deepEqual(restricted.portalsByNode.get('experience')[0].targets.map((target) => target.nodeId), ['app'])
 assert.equal(JSON.stringify([...restricted.portalsByNode.values()]).includes('hidden-app'), false)
 
-const layerTwo = createSystemLayerProjection(graphNodes, graphEdges, 'L2')
+const layerTwo = createSystemLayerProjection(graphNodes, graphEdges, SECOND_LAYER_ID, layerMeta)
 assert.equal(layerTwo.visibleNodeIds.has('app'), true)
 assert.equal(layerTwo.visibleNodeIds.has('group'), true, '보이는 자식의 기존 공간 그룹은 문맥으로 남아야 합니다.')
-assert.equal(layerTwo.portalsByNode.get('app')[0].targetLayer, 'L1')
+assert.equal(layerTwo.portalsByNode.get('app')[0].targetLayer, FIRST_LAYER_ID)
 
-// Regression: a self system map created before the `systemMapSnapshot`
-// metadata field existed (e.g. the production canvas c-mrjix1ks-vhdpfn) has
-// no such field on map-group-experience and no system-layer saved views yet.
-// Detection must still recognize it via the template's stable group ids.
+// Stable self-map group ids remain compatible layout data, but no longer imply
+// or backfill a built-in layer contract.
 const legacyMapNodes = [
   { id: 'map-group-experience', type: 'group', data: {} },
   { id: 'map-group-runtime', type: 'group', data: {} },
   { id: 'map-web-app', type: 'system', parentId: 'map-group-experience', data: { systemKind: 'frontend' } },
 ]
-assert.equal(canvasSupportsSystemLayers(legacyMapNodes, []), true,
-  'systemMapSnapshot 메타데이터가 없는 기존 자기 시스템 지도도 안정적인 그룹 id로 인식해야 합니다.')
-assert.equal(canvasSupportsSystemLayers([{ id: 'map-group-experience', type: 'group', data: { redacted: true } }], []), false,
-  'redacted 표시가 있으면 legacy 그룹 id도 활성화 근거로 쓰지 않아야 합니다.')
-assert.equal(canvasSupportsSystemLayers([{ id: 'random-node', type: 'stage', data: {} }], []), false,
-  '일반 사용자 캔버스는 층 기능이 활성화되지 않아야 합니다.')
+assert.equal(canvasSupportsSystemLayers(legacyMapNodes, []), false)
+assert.equal(canvasSupportsSystemLayers(legacyMapNodes, [firstLayerView]), true)
 
-// Custom (user-created) layers: a general canvas feature, not self-map only.
 const customView = createCustomSystemLayerView('  업무 흐름  ')
 assert.equal(customView.name, '업무 흐름')
 assert.equal(customView.viewKind, 'system-layer')
-assert.equal(isCustomSystemLayerView(customView), true)
 assert.ok(customView.id.includes(':custom:'))
 const customId = customView.systemLayer
 assert.equal(normalizeSystemLayerId(customId), customId, '커스텀 층 id는 유효한 층으로 인식되어야 합니다.')
 assert.equal(createCustomSystemLayerView('   '), null, '빈 이름은 층을 만들지 않습니다.')
 
-// A generic canvas (no system map template) enables layers purely via a
-// user-created layer view, and presets are NOT force-added there.
-assert.equal(isSystemMapTemplateCanvas([{ id: 'n1', type: 'stage', data: {} }]), false)
-assert.equal(canvasSupportsSystemLayers([{ id: 'n1', type: 'stage', data: {} }], [customView]), true,
-  '사용자가 만든 층 뷰가 있으면 일반 캔버스에서도 층이 활성화되어야 합니다.')
-
-// Options: official presets ordered first, then custom layers with names/order.
-const options = systemLayerOptionsFromViews([...createSystemLayerViews(), customView])
-assert.deepEqual(options.slice(0, 4).map((o) => o.id), ['L1', 'L2', 'L3', 'L4'])
-assert.equal(options[0].official, true)
-const customOption = options.find((o) => o.id === customId)
-assert.equal(customOption.official, false)
-assert.equal(customOption.label, '업무 흐름')
-assert.ok(customOption.order >= 100, '커스텀 층은 프리셋 뒤에 정렬되어야 합니다.')
+assert.deepEqual(layerOptions.map((option) => option.id), [FIRST_LAYER_ID, SECOND_LAYER_ID])
+assert.deepEqual(layerOptions.map((option) => option.order), [1, 2])
+assert.equal(layerOptions[0].label, '업무 흐름')
+assert.equal(
+  systemLayerOptionsFromViews([secondLayerView, firstLayerView])[1].color,
+  layerOptions[0].color,
+  '레이어 색은 목록 위치가 바뀌어도 안정적이어야 합니다.',
+)
 
 // Assigning a node to a custom layer, then a projection on that layer.
 const nodeOnCustom = { id: 'cn', type: 'system', data: withSystemLayerOverride({ systemKind: 'frontend' }, customId) }
 assert.equal(effectiveSystemLayerForNode(nodeOnCustom), customId)
 const customProjection = createSystemLayerProjection([nodeOnCustom], [], customId,
-  new Map(options.map((o) => [o.id, o])))
+  new Map(systemLayerOptionsFromViews([customView]).map((option) => [option.id, option])))
 assert.equal(customProjection.visibleNodeIds.has('cn'), true)
 
-// Deleting a custom layer clears its overrides so the node returns to its
-// derived default instead of a dead layer id.
+// Deleting a layer clears its override instead of assigning a hidden default.
 const cleared = removeSystemLayerFromNodes([nodeOnCustom], customId)
-assert.equal(effectiveSystemLayerForNode(cleared[0]), 'L2', '커스텀 층 삭제 후 노드는 결정적 기본값으로 돌아가야 합니다.')
+assert.equal(effectiveSystemLayerForNode(cleared[0]), null)
 
-console.log('System layer derivation, saved views, custom layers and redaction-safe portal checks passed')
+console.log('User-defined layer views, legacy pruning and redaction-safe portal checks passed')

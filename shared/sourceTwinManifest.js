@@ -2,7 +2,7 @@
 export const SOURCE_TWIN_MANIFEST = Object.freeze(
 {
   "schemaVersion": 1,
-  "id": "source-twin-v1-9a1a5c5b95a7",
+  "id": "source-twin-v1-1f64eaacf6a6",
   "source": {
     "id": "workflow-canvas:self-source",
     "label": "Workflow Canvas 소스 코드",
@@ -2727,7 +2727,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "dependency",
       "label": "./workflowSystemDiscoveryManifest.js",
       "fingerprint": "ba5207fe8b5057a443b8",
-      "explanationFingerprint": "0208f8874da1ac098c9d",
+      "explanationFingerprint": "4da5796942caa91263cb",
       "name": "./workflowSystemDiscoveryManifest.js",
       "layer": "code",
       "area": "project-foundation",
@@ -2736,7 +2736,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "explanationBasis": {
         "method": "dependency-reference",
         "refs": [
-          "source:shared/workflowCanvasSystemMap.js#L1-L512"
+          "source:shared/workflowCanvasSystemMap.js#L1-L511"
         ]
       },
       "tags": [
@@ -2864,7 +2864,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "dependency",
       "label": "@xyflow/react",
       "fingerprint": "b9b7bd59bafb20c578e9",
-      "explanationFingerprint": "04ce8359f5a6347dca16",
+      "explanationFingerprint": "ed44029ce70bb7adb67d",
       "name": "@xyflow/react",
       "layer": "code",
       "area": "project-foundation",
@@ -2874,7 +2874,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "dependency-reference",
         "refs": [
           "dependency:@xyflow/react",
-          "source:src/App.jsx#L1-L5472"
+          "source:src/App.jsx#L1-L5484"
         ]
       },
       "tags": [
@@ -2887,7 +2887,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "dependency",
       "label": "@xyflow/react/dist/style.css",
       "fingerprint": "792b45b3b431554457ad",
-      "explanationFingerprint": "6b053e368ac395f49b7c",
+      "explanationFingerprint": "1e8c8dc72faf07723375",
       "name": "@xyflow/react/dist/style.css",
       "layer": "code",
       "area": "project-foundation",
@@ -2897,7 +2897,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "dependency-reference",
         "refs": [
           "dependency:@xyflow/react/dist/style.css",
-          "source:src/App.jsx#L1-L5472"
+          "source:src/App.jsx#L1-L5484"
         ]
       },
       "tags": [
@@ -3140,7 +3140,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "dependency",
       "label": "react",
       "fingerprint": "5bb5f79b5812a3a75b62",
-      "explanationFingerprint": "b2fa62f0e09b322e6213",
+      "explanationFingerprint": "d2b59a1bea67513a9220",
       "name": "react",
       "layer": "code",
       "area": "project-foundation",
@@ -3150,7 +3150,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "dependency-reference",
         "refs": [
           "dependency:react",
-          "source:src/App.jsx#L1-L5472"
+          "source:src/App.jsx#L1-L5484"
         ]
       },
       "tags": [
@@ -3209,7 +3209,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "dependency",
       "label": "vite",
       "fingerprint": "bcfc99e6cc3ecf9796b0",
-      "explanationFingerprint": "e2f2d3778f27d995bc04",
+      "explanationFingerprint": "6dd7991fe0c2b559e3f0",
       "name": "vite",
       "layer": "code",
       "area": "project-foundation",
@@ -3219,7 +3219,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "dependency-reference",
         "refs": [
           "dependency:vite",
-          "source:vite.config.js#L1-L48"
+          "source:scripts/test-source-code-world-workspace.mjs#L1-L132"
         ]
       },
       "tags": [
@@ -3277,7 +3277,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "deployment:vercel-web",
       "kind": "deployment",
       "label": "Vercel 웹 배포",
-      "fingerprint": "bea1a15ae6839541a56e",
+      "fingerprint": "df15a695e5c040232d73",
       "explanationFingerprint": "725aed4771e9de5ae614",
       "layer": "deployment",
       "area": "deployment-operations",
@@ -3297,6 +3297,34 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "vite",
         "deployment-operations"
       ]
+    },
+    {
+      "id": "env:DEV",
+      "kind": "environment-variable",
+      "label": "DEV",
+      "fingerprint": "c7d0fe9d73ac34ef2df9",
+      "explanationFingerprint": "1b9f5e8465e8953a23aa",
+      "name": "DEV",
+      "layer": "deployment",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "summary": "DEV 배포 환경 설정의 이름과 사용 위치입니다. 실제 값은 수집하지 않습니다.",
+      "explanationBasis": {
+        "method": "environment-reference",
+        "refs": [
+          "env:DEV",
+          "source:src/App.jsx#L1-L5484"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "configuration",
+        "environment"
+      ],
+      "details": {
+        "credentialReference": false
+      }
     },
     {
       "id": "env:NODE_ENV",
@@ -4130,23 +4158,23 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:docs/MASTER.md",
       "kind": "file",
       "label": "docs/MASTER.md",
-      "fingerprint": "db4b0392d9d5ea411e51",
-      "explanationFingerprint": "b65fa3370085040e93ac",
+      "fingerprint": "cd57e46c93aa491add2b",
+      "explanationFingerprint": "d7b9fd35bad78fd463e7",
       "path": "docs/MASTER.md",
       "layer": "documentation",
       "language": "markdown",
       "lineStart": 1,
-      "lineEnd": 909,
+      "lineEnd": 908,
       "area": "project-foundation",
       "subsystem": "project-docs",
       "summary": "MASTER에 필요한 프로젝트 구조와 참고 정보를 제공합니다.",
       "userImpact": "다른 기능이 같은 기준과 설정을 사용하게 합니다.",
-      "technicalSummary": "909줄의 markdown 파일 · 현재 분석 지원 범위 밖",
+      "technicalSummary": "908줄의 markdown 파일 · 현재 분석 지원 범위 밖",
       "explanationBasis": {
         "method": "deterministic-source-rule",
         "refs": [
           "profile:workflow-canvas@0.9.0",
-          "source:docs/MASTER.md#L1-L909"
+          "source:docs/MASTER.md#L1-L908"
         ]
       },
       "tags": [
@@ -4214,23 +4242,107 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:docs/architecture/FOUNDRY_MODEL.md",
       "kind": "file",
       "label": "docs/architecture/FOUNDRY_MODEL.md",
-      "fingerprint": "73e40a1c2b151025b4c4",
-      "explanationFingerprint": "5edce7cbe2b22db01824",
+      "fingerprint": "d430e9a521eff3167fea",
+      "explanationFingerprint": "93d131de735f9da9e5f9",
       "path": "docs/architecture/FOUNDRY_MODEL.md",
       "layer": "documentation",
       "language": "markdown",
       "lineStart": 1,
-      "lineEnd": 314,
+      "lineEnd": 317,
       "area": "project-foundation",
       "subsystem": "project-docs",
       "summary": "FOUNDRY_MODEL에 필요한 프로젝트 구조와 참고 정보를 제공합니다.",
       "userImpact": "다른 기능이 같은 기준과 설정을 사용하게 합니다.",
-      "technicalSummary": "314줄의 markdown 파일 · 현재 분석 지원 범위 밖",
+      "technicalSummary": "317줄의 markdown 파일 · 현재 분석 지원 범위 밖",
       "explanationBasis": {
         "method": "deterministic-source-rule",
         "refs": [
           "profile:workflow-canvas@0.9.0",
-          "source:docs/architecture/FOUNDRY_MODEL.md#L1-L314"
+          "source:docs/architecture/FOUNDRY_MODEL.md#L1-L317"
+        ]
+      },
+      "tags": [
+        "documentation",
+        "project-docs",
+        "project-foundation"
+      ],
+      "details": {
+        "functionCount": 0,
+        "importCount": 0,
+        "exports": [],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "uiTexts": [],
+        "screenPaths": [],
+        "parseStatus": "unsupported"
+      }
+    },
+    {
+      "id": "file:docs/architecture/LIVE_EDIT_OBSERVATION.md",
+      "kind": "file",
+      "label": "docs/architecture/LIVE_EDIT_OBSERVATION.md",
+      "fingerprint": "bc4a954f25fb05380e7b",
+      "explanationFingerprint": "54bacd8681d2081935ff",
+      "path": "docs/architecture/LIVE_EDIT_OBSERVATION.md",
+      "layer": "documentation",
+      "language": "markdown",
+      "lineStart": 1,
+      "lineEnd": 52,
+      "area": "project-foundation",
+      "subsystem": "project-docs",
+      "summary": "LIVE_EDIT_OBSERVATION에 필요한 프로젝트 구조와 참고 정보를 제공합니다.",
+      "userImpact": "다른 기능이 같은 기준과 설정을 사용하게 합니다.",
+      "technicalSummary": "52줄의 markdown 파일 · 현재 분석 지원 범위 밖",
+      "explanationBasis": {
+        "method": "deterministic-source-rule",
+        "refs": [
+          "profile:workflow-canvas@0.9.0",
+          "source:docs/architecture/LIVE_EDIT_OBSERVATION.md#L1-L52"
+        ]
+      },
+      "tags": [
+        "documentation",
+        "project-docs",
+        "project-foundation"
+      ],
+      "details": {
+        "functionCount": 0,
+        "importCount": 0,
+        "exports": [],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "uiTexts": [],
+        "screenPaths": [],
+        "parseStatus": "unsupported"
+      }
+    },
+    {
+      "id": "file:docs/architecture/SYSTEM_MAP_BLUEPRINT.md",
+      "kind": "file",
+      "label": "docs/architecture/SYSTEM_MAP_BLUEPRINT.md",
+      "fingerprint": "6ae958aeca505fe62684",
+      "explanationFingerprint": "317e74ca88b017439e35",
+      "path": "docs/architecture/SYSTEM_MAP_BLUEPRINT.md",
+      "layer": "documentation",
+      "language": "markdown",
+      "lineStart": 1,
+      "lineEnd": 302,
+      "area": "project-foundation",
+      "subsystem": "project-docs",
+      "summary": "SYSTEM_MAP_BLUEPRINT에 필요한 프로젝트 구조와 참고 정보를 제공합니다.",
+      "userImpact": "다른 기능이 같은 기준과 설정을 사용하게 합니다.",
+      "technicalSummary": "302줄의 markdown 파일 · 현재 분석 지원 범위 밖",
+      "explanationBasis": {
+        "method": "deterministic-source-rule",
+        "refs": [
+          "profile:workflow-canvas@0.9.0",
+          "source:docs/architecture/SYSTEM_MAP_BLUEPRINT.md#L1-L302"
         ]
       },
       "tags": [
@@ -4256,23 +4368,23 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:docs/architecture/WORKSHOP_BLUEPRINT.md",
       "kind": "file",
       "label": "docs/architecture/WORKSHOP_BLUEPRINT.md",
-      "fingerprint": "5912e714ef85ebc45d7c",
-      "explanationFingerprint": "d82317c07cc2ea67aaac",
+      "fingerprint": "dc2367ab300d3e5af5ed",
+      "explanationFingerprint": "590eb21473aa5b00e31f",
       "path": "docs/architecture/WORKSHOP_BLUEPRINT.md",
       "layer": "documentation",
       "language": "markdown",
       "lineStart": 1,
-      "lineEnd": 195,
+      "lineEnd": 204,
       "area": "project-foundation",
       "subsystem": "project-docs",
       "summary": "WORKSHOP_BLUEPRINT에 필요한 프로젝트 구조와 참고 정보를 제공합니다.",
       "userImpact": "다른 기능이 같은 기준과 설정을 사용하게 합니다.",
-      "technicalSummary": "195줄의 markdown 파일 · 현재 분석 지원 범위 밖",
+      "technicalSummary": "204줄의 markdown 파일 · 현재 분석 지원 범위 밖",
       "explanationBasis": {
         "method": "deterministic-source-rule",
         "refs": [
           "profile:workflow-canvas@0.9.0",
-          "source:docs/architecture/WORKSHOP_BLUEPRINT.md#L1-L195"
+          "source:docs/architecture/WORKSHOP_BLUEPRINT.md#L1-L204"
         ]
       },
       "tags": [
@@ -6277,7 +6389,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:package.json",
       "kind": "file",
       "label": "package.json",
-      "fingerprint": "f0f5aa8a4d79b7860bf0",
+      "fingerprint": "c39626b6a51053b1b46c",
       "explanationFingerprint": "fd9d1ef9bb9aa45d872a",
       "path": "package.json",
       "layer": "deployment",
@@ -7280,23 +7392,23 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:scripts/test-mcp-logic.mjs",
       "kind": "file",
       "label": "scripts/test-mcp-logic.mjs",
-      "fingerprint": "745cef391c781b701cd6",
-      "explanationFingerprint": "b2a816fae6c53da55a75",
+      "fingerprint": "80e89b7a1dfda87647ad",
+      "explanationFingerprint": "1c82cf738a9e7584b5ca",
       "path": "scripts/test-mcp-logic.mjs",
       "layer": "test",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 3886,
+      "lineEnd": 3884,
       "area": "testing-quality",
       "subsystem": "app-tests",
       "summary": "mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.",
       "userImpact": "회귀나 보안 약화가 있는 빌드의 배포를 막습니다.",
-      "technicalSummary": "함수 32개 · 코드 연결 38개",
+      "technicalSummary": "함수 32개 · 코드 연결 37개",
       "explanationBasis": {
         "method": "test-file-rule",
         "refs": [
           "profile:workflow-canvas@0.9.0",
-          "source:scripts/test-mcp-logic.mjs#L1-L3886"
+          "source:scripts/test-mcp-logic.mjs#L1-L3884"
         ]
       },
       "tags": [
@@ -7306,7 +7418,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "functionCount": 32,
-        "importCount": 38,
+        "importCount": 37,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [],
@@ -7316,7 +7428,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "uiTexts": [],
         "screenPaths": [],
         "parseStatus": "parsed",
-        "codePartCount": 1896
+        "codePartCount": 1894
       }
     },
     {
@@ -7495,23 +7607,23 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:scripts/test-source-code-parts.mjs",
       "kind": "file",
       "label": "scripts/test-source-code-parts.mjs",
-      "fingerprint": "af370f3bd5e423a56754",
-      "explanationFingerprint": "854c27b0ff3a9b0a39c7",
+      "fingerprint": "8c336bbbbb9fbc03a41c",
+      "explanationFingerprint": "18db8ec7418ad821f6dc",
       "path": "scripts/test-source-code-parts.mjs",
       "layer": "test",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 135,
+      "lineEnd": 133,
       "area": "testing-quality",
       "subsystem": "app-tests",
       "summary": "source code parts 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.",
       "userImpact": "회귀나 보안 약화가 있는 빌드의 배포를 막습니다.",
-      "technicalSummary": "함수 1개 · 코드 연결 9개",
+      "technicalSummary": "함수 1개 · 코드 연결 8개",
       "explanationBasis": {
         "method": "test-file-rule",
         "refs": [
           "profile:workflow-canvas@0.9.0",
-          "source:scripts/test-source-code-parts.mjs#L1-L135"
+          "source:scripts/test-source-code-parts.mjs#L1-L133"
         ]
       },
       "tags": [
@@ -7521,7 +7633,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "functionCount": 1,
-        "importCount": 9,
+        "importCount": 8,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [],
@@ -7531,7 +7643,93 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "uiTexts": [],
         "screenPaths": [],
         "parseStatus": "parsed",
-        "codePartCount": 71
+        "codePartCount": 69
+      }
+    },
+    {
+      "id": "file:scripts/test-source-code-world-workspace.mjs",
+      "kind": "file",
+      "label": "scripts/test-source-code-world-workspace.mjs",
+      "fingerprint": "9b423795d5909d63389c",
+      "explanationFingerprint": "a25c89a78b3ee2f78d80",
+      "path": "scripts/test-source-code-world-workspace.mjs",
+      "layer": "test",
+      "language": "javascript",
+      "lineStart": 1,
+      "lineEnd": 132,
+      "area": "testing-quality",
+      "subsystem": "app-tests",
+      "summary": "source code world workspace 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.",
+      "userImpact": "회귀나 보안 약화가 있는 빌드의 배포를 막습니다.",
+      "technicalSummary": "코드 연결 4개",
+      "explanationBasis": {
+        "method": "test-file-rule",
+        "refs": [
+          "profile:workflow-canvas@0.9.0",
+          "source:scripts/test-source-code-world-workspace.mjs#L1-L132"
+        ]
+      },
+      "tags": [
+        "app-tests",
+        "test",
+        "testing-quality"
+      ],
+      "details": {
+        "functionCount": 0,
+        "importCount": 4,
+        "exports": [],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "uiTexts": [],
+        "screenPaths": [],
+        "parseStatus": "parsed",
+        "codePartCount": 43
+      }
+    },
+    {
+      "id": "file:scripts/test-source-code-world.mjs",
+      "kind": "file",
+      "label": "scripts/test-source-code-world.mjs",
+      "fingerprint": "6ec5ce28238368f4462f",
+      "explanationFingerprint": "86399228a90748ec4b9b",
+      "path": "scripts/test-source-code-world.mjs",
+      "layer": "test",
+      "language": "javascript",
+      "lineStart": 1,
+      "lineEnd": 146,
+      "area": "testing-quality",
+      "subsystem": "app-tests",
+      "summary": "source code world 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.",
+      "userImpact": "회귀나 보안 약화가 있는 빌드의 배포를 막습니다.",
+      "technicalSummary": "코드 연결 4개",
+      "explanationBasis": {
+        "method": "test-file-rule",
+        "refs": [
+          "profile:workflow-canvas@0.9.0",
+          "source:scripts/test-source-code-world.mjs#L1-L146"
+        ]
+      },
+      "tags": [
+        "app-tests",
+        "test",
+        "testing-quality"
+      ],
+      "details": {
+        "functionCount": 0,
+        "importCount": 4,
+        "exports": [],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "uiTexts": [],
+        "screenPaths": [],
+        "parseStatus": "parsed",
+        "codePartCount": 86
       }
     },
     {
@@ -7839,23 +8037,23 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:scripts/test-system-layers.mjs",
       "kind": "file",
       "label": "scripts/test-system-layers.mjs",
-      "fingerprint": "15a79a1f0abf3f784732",
-      "explanationFingerprint": "2ee05dfe44df43287e4e",
+      "fingerprint": "dceaf8f270891e82040d",
+      "explanationFingerprint": "63ed42edb6fd9eba54e7",
       "path": "scripts/test-system-layers.mjs",
       "layer": "test",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 164,
+      "lineEnd": 165,
       "area": "testing-quality",
       "subsystem": "app-tests",
       "summary": "system layers 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.",
       "userImpact": "회귀나 보안 약화가 있는 빌드의 배포를 막습니다.",
-      "technicalSummary": "코드 연결 3개",
+      "technicalSummary": "코드 연결 2개",
       "explanationBasis": {
         "method": "test-file-rule",
         "refs": [
           "profile:workflow-canvas@0.9.0",
-          "source:scripts/test-system-layers.mjs#L1-L164"
+          "source:scripts/test-system-layers.mjs#L1-L165"
         ]
       },
       "tags": [
@@ -7865,7 +8063,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "functionCount": 0,
-        "importCount": 3,
+        "importCount": 2,
         "exports": [],
         "apiRoutes": [],
         "dbTables": [],
@@ -7875,7 +8073,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "uiTexts": [],
         "screenPaths": [],
         "parseStatus": "parsed",
-        "codePartCount": 70
+        "codePartCount": 59
       }
     },
     {
@@ -7925,7 +8123,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:scripts/test-twin-build.mjs",
       "kind": "file",
       "label": "scripts/test-twin-build.mjs",
-      "fingerprint": "9a87209f6f4c0d8a6774",
+      "fingerprint": "fb2a72b582b950e60fd7",
       "explanationFingerprint": "6e9fc01808cba7a8f715",
       "path": "scripts/test-twin-build.mjs",
       "layer": "test",
@@ -9001,6 +9199,55 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "file:shared/sourceCodeWorldProjection.js",
+      "kind": "file",
+      "label": "shared/sourceCodeWorldProjection.js",
+      "fingerprint": "7dfe96688db66b892019",
+      "explanationFingerprint": "b0b24ef71b928e8c4854",
+      "path": "shared/sourceCodeWorldProjection.js",
+      "layer": "shared",
+      "language": "javascript",
+      "lineStart": 1,
+      "lineEnd": 691,
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "summary": "소스 코드 · 코드에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다.",
+      "userImpact": "같은 자료를 서로 다른 화면과 서버가 다르게 해석하는 일을 줄입니다.",
+      "technicalSummary": "함수 21개 · 코드 연결 4개",
+      "explanationBasis": {
+        "method": "deterministic-source-rule",
+        "refs": [
+          "profile:workflow-canvas@0.9.0",
+          "source:shared/sourceCodeWorldProjection.js#L1-L691"
+        ]
+      },
+      "tags": [
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionCount": 21,
+        "importCount": 4,
+        "exports": [
+          "SOURCE_CODE_WORLD_LODS",
+          "SOURCE_CODE_WORLD_PROJECTION_SCHEMA_VERSION",
+          "createSourceCodeWorldProjection",
+          "sourceCodeWorldSelection",
+          "traceSourceCodeWorld"
+        ],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "uiTexts": [],
+        "screenPaths": [],
+        "parseStatus": "parsed",
+        "codePartCount": 286
+      }
+    },
+    {
       "id": "file:shared/sourceEditableProperties.js",
       "kind": "file",
       "label": "shared/sourceEditableProperties.js",
@@ -9193,7 +9440,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:shared/sourceModuleProposal.js",
       "kind": "file",
       "label": "shared/sourceModuleProposal.js",
-      "fingerprint": "4f2204419bfcdac513b1",
+      "fingerprint": "782bb807b32cb6be4abb",
       "explanationFingerprint": "b29a13d31003a7ba727a",
       "path": "shared/sourceModuleProposal.js",
       "layer": "shared",
@@ -9397,23 +9644,23 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:shared/systemLayers.js",
       "kind": "file",
       "label": "shared/systemLayers.js",
-      "fingerprint": "91d56e491b6735405f3e",
-      "explanationFingerprint": "fc536ba9b9413e89c524",
+      "fingerprint": "c2de6188f4438ea52906",
+      "explanationFingerprint": "b138738c27b4fe703ad6",
       "path": "shared/systemLayers.js",
       "layer": "shared",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 345,
+      "lineEnd": 251,
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
       "summary": "시스템에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다.",
       "userImpact": "같은 자료를 서로 다른 화면과 서버가 다르게 해석하는 일을 줄입니다.",
-      "technicalSummary": "함수 28개",
+      "technicalSummary": "함수 23개",
       "explanationBasis": {
         "method": "deterministic-source-rule",
         "refs": [
           "profile:workflow-canvas@0.9.0",
-          "source:shared/systemLayers.js#L1-L345"
+          "source:shared/systemLayers.js#L1-L251"
         ]
       },
       "tags": [
@@ -9422,28 +9669,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "sharing-policy"
       ],
       "details": {
-        "functionCount": 28,
+        "functionCount": 23,
         "importCount": 0,
         "exports": [
-          "SYSTEM_LAYER_CONTRACT_VERSION",
-          "SYSTEM_LAYER_DEFINITIONS",
           "annotationDataForSystemLayer",
           "canvasSupportsSystemLayers",
           "createCustomSystemLayerView",
           "createSystemLayerProjection",
-          "createSystemLayerViews",
-          "deriveDefaultSystemLayer",
           "effectiveSystemLayerForNode",
-          "ensureSystemLayerViews",
           "isCanvasAnnotationNode",
-          "isCustomSystemLayerView",
-          "isOfficialSystemLayerId",
           "isSystemLayerView",
-          "isSystemMapTemplateCanvas",
           "normalizeNodePresentation",
           "normalizeSystemLayerId",
+          "pruneLegacyOfficialSystemLayerViews",
           "removeSystemLayerFromNodes",
-          "systemLayerDefinition",
           "systemLayerFromView",
           "systemLayerOptionsFromViews",
           "withSystemLayerOverride"
@@ -9456,7 +9695,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "uiTexts": [],
         "screenPaths": [],
         "parseStatus": "parsed",
-        "codePartCount": 183
+        "codePartCount": 157
       }
     },
     {
@@ -10094,23 +10333,23 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:shared/workflowCanvasSystemMap.js",
       "kind": "file",
       "label": "shared/workflowCanvasSystemMap.js",
-      "fingerprint": "53f58539e325ef0ea240",
-      "explanationFingerprint": "abf132591ee266233de1",
+      "fingerprint": "516094710e5ab23ea768",
+      "explanationFingerprint": "62bdbd668d51299e204e",
       "path": "shared/workflowCanvasSystemMap.js",
       "layer": "shared",
       "language": "javascript",
       "lineStart": 1,
-      "lineEnd": 512,
+      "lineEnd": 511,
       "area": "digital-twin-engine",
       "subsystem": "twin-materialization",
       "summary": "Workflow Canvas 앱의 브라우저·서버·DB·저장소·배포 구조를 나타내는 기준 시스템 지도를 정의합니다.",
       "userImpact": "앱 자체를 캔버스에서 개발·점검할 출발 지도를 만듭니다.",
-      "technicalSummary": "함수 8개 · 코드 연결 7개",
+      "technicalSummary": "함수 8개 · 코드 연결 6개",
       "explanationBasis": {
         "method": "curated-product-profile",
         "refs": [
           "profile:workflow-canvas@0.9.0",
-          "source:shared/workflowCanvasSystemMap.js#L1-L512"
+          "source:shared/workflowCanvasSystemMap.js#L1-L511"
         ]
       },
       "tags": [
@@ -10120,7 +10359,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "functionCount": 8,
-        "importCount": 7,
+        "importCount": 6,
         "exports": [
           "createWorkflowCanvasSystemMap"
         ],
@@ -10132,7 +10371,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "uiTexts": [],
         "screenPaths": [],
         "parseStatus": "parsed",
-        "codePartCount": 47
+        "codePartCount": 46
       }
     },
     {
@@ -10768,27 +11007,29 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:src/App.jsx",
       "kind": "file",
       "label": "src/App.jsx",
-      "fingerprint": "3518c7150762538ab773",
-      "explanationFingerprint": "62a1d52e6fc269612aa7",
+      "fingerprint": "e1b307140827f26542aa",
+      "explanationFingerprint": "ab8b926252cc84d686c7",
       "path": "src/App.jsx",
       "layer": "frontend",
       "language": "jsx",
       "lineStart": 1,
-      "lineEnd": 5472,
+      "lineEnd": 5484,
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
       "summary": "캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.",
       "userImpact": "사용자가 캔버스에서 보고 클릭하는 대부분의 동작이 이 파일을 거쳐 함께 작동합니다.",
-      "technicalSummary": "함수 89개 · 코드 연결 58개 · DB 테이블 1개 참조",
+      "technicalSummary": "함수 89개 · 코드 연결 59개 · DB 테이블 1개 참조",
       "explanationBasis": {
         "method": "curated-product-profile",
         "refs": [
           "db-table:canvases",
+          "env:DEV",
           "profile:workflow-canvas@0.9.0",
-          "source:src/App.jsx#L1-L5472"
+          "source:src/App.jsx#L1-L5484"
         ]
       },
       "tags": [
+        "DEV",
         "canvas-interface",
         "canvas-workspace",
         "canvases",
@@ -10796,7 +11037,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ],
       "details": {
         "functionCount": 89,
-        "importCount": 58,
+        "importCount": 59,
         "exports": [
           "App"
         ],
@@ -10805,241 +11046,247 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
           "canvases"
         ],
         "dbFunctions": [],
-        "environmentVariables": [],
+        "environmentVariables": [
+          "DEV"
+        ],
         "securitySignals": [],
         "uiTexts": [
           {
             "text": "닫기",
-            "line": 4657
+            "line": 4659
           },
           {
             "text": "공유받은 캔버스를 보려면 로그인이 필요합니다",
-            "line": 4662
+            "line": 4664
           },
           {
             "text": "오른쪽 위 로그인 패널에서 로그인하거나 가입하면",
-            "line": 4665
+            "line": 4667
           },
           {
             "text": "초대된 캔버스로 바로 이동합니다.",
-            "line": 4666
+            "line": 4668
           },
           {
             "text": "공유 캔버스를 열 수 없습니다",
-            "line": 4683
+            "line": 4685
           },
           {
             "text": "확인",
-            "line": 4690
+            "line": 4692
           },
           {
             "text": "동시 편집 충돌",
-            "line": 4705
+            "line": 4707
           },
           {
             "text": "같은 항목을 다른 브라우저나 AI도 수정했습니다. 서로 다른 항목의 변경은 이미 합쳤고, 겹친",
-            "line": 4708
-          },
-          {
-            "text": "개 변경만 선택이 필요합니다.",
             "line": 4710
           },
           {
+            "text": "개 변경만 선택이 필요합니다.",
+            "line": 4712
+          },
+          {
             "text": "서버 최신 내용 사용",
-            "line": 4722
+            "line": 4724
           },
           {
             "text": "내 변경 우선 병합",
-            "line": 4729
+            "line": 4731
           },
           {
             "text": "안전을 위해 저장을 중단했습니다",
-            "line": 4747
+            "line": 4749
           },
           {
             "text": "현재 탭에서 관계 정보가 사라질 수 있는 저장이 감지되어 서버가 변경을 거부했습니다.",
-            "line": 4750
+            "line": 4752
           },
           {
             "text": "최신 앱 다시 불러오기",
-            "line": 4761
+            "line": 4763
           },
           {
             "text": "브라우저 로컬 저장에 실패했습니다. 로그인 상태라면 클라우드 동기화 여부를 확인해 주세요.",
-            "line": 4777
+            "line": 4779
           },
           {
             "text": "닫기",
-            "line": 4780
+            "line": 4782
           },
           {
             "text": "캔버스",
-            "line": 4788
+            "line": 4790
           },
           {
             "text": "새 공유 초대",
-            "line": 4800
-          },
-          {
-            "text": "에 초대받았습니다.",
             "line": 4802
           },
           {
+            "text": "에 초대받았습니다.",
+            "line": 4804
+          },
+          {
             "text": "거절",
-            "line": 4809
+            "line": 4811
           },
           {
             "text": "열기",
-            "line": 4814
+            "line": 4816
           },
           {
             "text": "캔버스",
-            "line": 4824
+            "line": 4826
           },
           {
             "text": "공유 캔버스 참여",
-            "line": 4829
+            "line": 4831
           },
           {
             "text": "공유 캔버스",
-            "line": 4831
+            "line": 4833
           },
           {
             "text": "에 참여할까요?",
-            "line": 4831
+            "line": 4833
           },
           {
             "text": "거절",
-            "line": 4834
+            "line": 4836
           },
           {
             "text": "참여",
-            "line": 4835
+            "line": 4837
           },
           {
             "text": "배포·소스 변경 검토",
-            "line": 5029
+            "line": 5032
           },
           {
             "text": "배포·소스 변경 검토",
-            "line": 5030
+            "line": 5033
           },
           {
             "text": "검토",
-            "line": 5038
+            "line": 5041
           },
           {
             "text": "99+",
-            "line": 5042
+            "line": 5045
           },
           {
             "text": "stage",
-            "line": 5050
+            "line": 5053
           },
           {
             "text": "단계·계층 노트",
-            "line": 5050
+            "line": 5053
           },
           {
             "text": "memo",
-            "line": 5051
+            "line": 5054
           },
           {
             "text": "참고·메모 노트",
-            "line": 5051
+            "line": 5054
           },
           {
             "text": "content",
-            "line": 5052
+            "line": 5055
           },
           {
             "text": "콘텐츠 노트",
-            "line": 5052
+            "line": 5055
           },
           {
             "text": "system",
-            "line": 5053
+            "line": 5056
           },
           {
             "text": "시스템 Asset 노트",
-            "line": 5053
+            "line": 5056
           },
           {
             "text": "intent",
-            "line": 5054
+            "line": 5057
           },
           {
             "text": "의도 자산",
-            "line": 5054
+            "line": 5057
           },
           {
             "text": "시스템 모델",
-            "line": 5141
+            "line": 5144
           },
           {
             "text": "의도 자산",
-            "line": 5145
+            "line": 5148
           },
           {
             "text": "컨텐츠 추가",
-            "line": 5149
+            "line": 5152
           },
           {
             "text": "층 지정",
-            "line": 5198
+            "line": 5201
           },
           {
             "text": "group",
-            "line": 5223
+            "line": 5226
           },
           {
             "text": "stage",
-            "line": 5231
+            "line": 5234
           },
           {
             "text": "종류 선택",
-            "line": 5236
+            "line": 5239
           },
           {
             "text": "종류 일괄 변경",
-            "line": 5236
+            "line": 5239
           },
           {
             "text": "종류 이름",
-            "line": 5244
+            "line": 5247
           },
           {
             "text": "이름 변경",
-            "line": 5274
+            "line": 5277
           },
           {
             "text": "삭제",
-            "line": 5280
+            "line": 5283
           },
           {
             "text": "+ 새 종류 추가",
-            "line": 5298
+            "line": 5301
           },
           {
             "text": "memo",
-            "line": 5311
+            "line": 5314
           },
           {
             "text": "system",
-            "line": 5316
+            "line": 5319
           },
           {
             "text": "intent",
-            "line": 5341
+            "line": 5344
           },
           {
             "text": "owner",
-            "line": 5402
+            "line": 5405
+          },
+          {
+            "text": "owner",
+            "line": 5414
           }
         ],
         "screenPaths": [],
         "parseStatus": "parsed",
-        "codePartCount": 3006
+        "codePartCount": 3012
       }
     },
     {
@@ -11470,6 +11717,450 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "screenPaths": [],
         "parseStatus": "parsed",
         "codePartCount": 205
+      }
+    },
+    {
+      "id": "file:src/components/CodeWorldScreen.css",
+      "kind": "file",
+      "label": "src/components/CodeWorldScreen.css",
+      "fingerprint": "c3a597bb6a6436e59a79",
+      "explanationFingerprint": "74999ee13fd5b3a98328",
+      "path": "src/components/CodeWorldScreen.css",
+      "layer": "frontend",
+      "language": "css",
+      "lineStart": 1,
+      "lineEnd": 1108,
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "summary": "코드 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다.",
+      "userImpact": "사용자가 화면에서 해당 기능을 보고 조작하는 방식에 영향을 줍니다.",
+      "technicalSummary": "1108줄의 css 파일 · 현재 분석 지원 범위 밖",
+      "explanationBasis": {
+        "method": "deterministic-source-rule",
+        "refs": [
+          "profile:workflow-canvas@0.9.0",
+          "source:src/components/CodeWorldScreen.css#L1-L1108"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend"
+      ],
+      "details": {
+        "functionCount": 0,
+        "importCount": 0,
+        "exports": [],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "uiTexts": [],
+        "screenPaths": [],
+        "parseStatus": "unsupported"
+      }
+    },
+    {
+      "id": "file:src/components/CodeWorldScreen.jsx",
+      "kind": "file",
+      "label": "src/components/CodeWorldScreen.jsx",
+      "fingerprint": "63f8108a21f06d48f0dd",
+      "explanationFingerprint": "d34122bc7a980fb5461c",
+      "path": "src/components/CodeWorldScreen.jsx",
+      "layer": "frontend",
+      "language": "jsx",
+      "lineStart": 1,
+      "lineEnd": 1101,
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "summary": "코드 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다.",
+      "userImpact": "사용자가 화면에서 해당 기능을 보고 조작하는 방식에 영향을 줍니다.",
+      "technicalSummary": "함수 25개 · 코드 연결 4개",
+      "explanationBasis": {
+        "method": "deterministic-source-rule",
+        "refs": [
+          "profile:workflow-canvas@0.9.0",
+          "source:src/components/CodeWorldScreen.jsx#L1-L1101"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend"
+      ],
+      "details": {
+        "functionCount": 25,
+        "importCount": 4,
+        "exports": [
+          "CodeWorldScreen"
+        ],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "uiTexts": [
+          {
+            "text": "코드 영역",
+            "line": 178
+          },
+          {
+            "text": "이름 없는 컴포넌트",
+            "line": 213
+          },
+          {
+            "text": "developer",
+            "line": 222
+          },
+          {
+            "text": "코드 파트",
+            "line": 235
+          },
+          {
+            "text": "developer",
+            "line": 237
+          },
+          {
+            "text": "나머지",
+            "line": 246
+          },
+          {
+            "text": "개 보기",
+            "line": 247
+          },
+          {
+            "text": "연결된 코드 파트 없음",
+            "line": 251
+          },
+          {
+            "text": "Git 전달",
+            "line": 267
+          },
+          {
+            "text": "변경이 원격 저장소와 운영 환경으로 전달되는 흐름",
+            "line": 268
+          },
+          {
+            "text": "전달 단계",
+            "line": 296
+          },
+          {
+            "text": "단계 파트",
+            "line": 310
+          },
+          {
+            "text": "외부 시스템",
+            "line": 338
+          },
+          {
+            "text": "코드 세계 경로",
+            "line": 825
+          },
+          {
+            "text": "시스템 지도",
+            "line": 826
+          },
+          {
+            "text": "코드 세계",
+            "line": 828
+          },
+          {
+            "text": "Source Lens",
+            "line": 832
+          },
+          {
+            "text": "상위로",
+            "line": 839
+          },
+          {
+            "text": "코드 세계",
+            "line": 843
+          },
+          {
+            "text": "검색",
+            "line": 848
+          },
+          {
+            "text": "컴포넌트, 파일 검색",
+            "line": 853
+          },
+          {
+            "text": "코드 세계 검색",
+            "line": 854
+          },
+          {
+            "text": "설명 수준",
+            "line": 857
+          },
+          {
+            "text": "닫기",
+            "line": 871
+          },
+          {
+            "text": "코드 세계 도구",
+            "line": 879
+          },
+          {
+            "text": "노드",
+            "line": 884
+          },
+          {
+            "text": "전체 보기",
+            "line": 887
+          },
+          {
+            "text": "관계 보기",
+            "line": 893
+          },
+          {
+            "text": "돌아가기",
+            "line": 896
+          },
+          {
+            "text": "표시할 코드 구조가 없습니다.",
+            "line": 930
+          },
+          {
+            "text": "Source Lens 분석 결과가 준비되면 영역과 컴포넌트가 여기에 나타납니다.",
+            "line": 931
+          },
+          {
+            "text": "다시 분석",
+            "line": 937
+          },
+          {
+            "text": "선택한 코드 상세",
+            "line": 945
+          },
+          {
+            "text": "저장소",
+            "line": 948
+          },
+          {
+            "text": "코드 파트",
+            "line": 948
+          },
+          {
+            "text": "선택한 코드",
+            "line": 949
+          },
+          {
+            "text": "선택 해제",
+            "line": 952
+          },
+          {
+            "text": "관측",
+            "line": 959
+          },
+          {
+            "text": "무엇을 하는가",
+            "line": 963
+          },
+          {
+            "text": "이 저장소에서 Source Lens가 발견한 코드 구조와 관계를 보여줍니다.",
+            "line": 967
+          },
+          {
+            "text": "설명 근거가 아직 연결되지 않았습니다.",
+            "line": 968
+          },
+          {
+            "text": "developer",
+            "line": 970
+          },
+          {
+            "text": "코드 근거",
+            "line": 976
+          },
+          {
+            "text": "연결된 코드 근거 없음",
+            "line": 987
+          },
+          {
+            "text": "영향 받는 컴포넌트",
+            "line": 992
+          },
+          {
+            "text": "연결 대상",
+            "line": 997
+          },
+          {
+            "text": "코드 파트를 선택하면 영향 관계를 표시합니다.",
+            "line": 1004
+          },
+          {
+            "text": "현재 분석 결과에서 직접 연결된 영향 대상 없음",
+            "line": 1004
+          },
+          {
+            "text": "작업",
+            "line": 1010
+          },
+          {
+            "text": "다시 관측",
+            "line": 1015
+          },
+          {
+            "text": "현재 Source Lens 결과를 갱신합니다.",
+            "line": 1017
+          },
+          {
+            "text": "영향 강조 해제",
+            "line": 1020
+          },
+          {
+            "text": "영향 관계 따라가기",
+            "line": 1020
+          },
+          {
+            "text": "직접 연결된 관계를 코드에서 추적합니다.",
+            "line": 1021
+          },
+          {
+            "text": "변경 비교",
+            "line": 1027
+          },
+          {
+            "text": "이전 관측과 현재 구조를 비교합니다.",
+            "line": 1029
+          },
+          {
+            "text": "수정 제안",
+            "line": 1035
+          },
+          {
+            "text": "실행 전에 변경 계획과 근거를 확인합니다.",
+            "line": 1037
+          },
+          {
+            "text": "실제 반영은 연결 권한과 승인 정책을 따릅니다.",
+            "line": 1044
+          },
+          {
+            "text": "관측 기록",
+            "line": 1058
+          },
+          {
+            "text": "자동 갱신 켜짐",
+            "line": 1063
+          },
+          {
+            "text": "기록 모두 보기",
+            "line": 1064
+          },
+          {
+            "text": "declared",
+            "line": 1072
+          },
+          {
+            "text": "관측 기록",
+            "line": 1077
+          },
+          {
+            "text": "string",
+            "line": 1082
+          },
+          {
+            "text": "아직 관측 기록이 없습니다. Source Lens 또는 로컬 커넥터가 새 상태를 보내면 여기에 쌓입니다.",
+            "line": 1093
+          }
+        ],
+        "screenPaths": [],
+        "parseStatus": "parsed",
+        "codePartCount": 357
+      }
+    },
+    {
+      "id": "file:src/components/CodeWorldWorkspace.css",
+      "kind": "file",
+      "label": "src/components/CodeWorldWorkspace.css",
+      "fingerprint": "57285e518b10f3894af2",
+      "explanationFingerprint": "7bab6799987fca013dfb",
+      "path": "src/components/CodeWorldWorkspace.css",
+      "layer": "frontend",
+      "language": "css",
+      "lineStart": 1,
+      "lineEnd": 18,
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "summary": "코드 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다.",
+      "userImpact": "사용자가 화면에서 해당 기능을 보고 조작하는 방식에 영향을 줍니다.",
+      "technicalSummary": "18줄의 css 파일 · 현재 분석 지원 범위 밖",
+      "explanationBasis": {
+        "method": "deterministic-source-rule",
+        "refs": [
+          "profile:workflow-canvas@0.9.0",
+          "source:src/components/CodeWorldWorkspace.css#L1-L18"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend"
+      ],
+      "details": {
+        "functionCount": 0,
+        "importCount": 0,
+        "exports": [],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [],
+        "securitySignals": [],
+        "uiTexts": [],
+        "screenPaths": [],
+        "parseStatus": "unsupported"
+      }
+    },
+    {
+      "id": "file:src/components/CodeWorldWorkspace.jsx",
+      "kind": "file",
+      "label": "src/components/CodeWorldWorkspace.jsx",
+      "fingerprint": "b09e107f6073becaf500",
+      "explanationFingerprint": "50f11065d811d5559833",
+      "path": "src/components/CodeWorldWorkspace.jsx",
+      "layer": "frontend",
+      "language": "jsx",
+      "lineStart": 1,
+      "lineEnd": 828,
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "summary": "코드 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다.",
+      "userImpact": "사용자가 화면에서 해당 기능을 보고 조작하는 방식에 영향을 줍니다.",
+      "technicalSummary": "함수 20개 · 코드 연결 7개",
+      "explanationBasis": {
+        "method": "deterministic-source-rule",
+        "refs": [
+          "env:DEV",
+          "profile:workflow-canvas@0.9.0",
+          "source:src/components/CodeWorldWorkspace.jsx#L1-L828"
+        ]
+      },
+      "tags": [
+        "DEV",
+        "frontend",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionCount": 20,
+        "importCount": 7,
+        "exports": [
+          "CodeWorldWorkspace",
+          "buildCodeWorldModel"
+        ],
+        "apiRoutes": [],
+        "dbTables": [],
+        "dbFunctions": [],
+        "environmentVariables": [
+          "DEV"
+        ],
+        "securitySignals": [],
+        "uiTexts": [],
+        "screenPaths": [],
+        "parseStatus": "parsed",
+        "codePartCount": 303
       }
     },
     {
@@ -13567,13 +14258,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "file:src/components/Toolbar.jsx",
       "kind": "file",
       "label": "src/components/Toolbar.jsx",
-      "fingerprint": "ea6ee7d94d97dbcb90eb",
-      "explanationFingerprint": "231fe6895bc1db7ab5aa",
+      "fingerprint": "6056f597cdffceb8b432",
+      "explanationFingerprint": "f3af1874e70493d10b5f",
       "path": "src/components/Toolbar.jsx",
       "layer": "frontend",
       "language": "jsx",
       "lineStart": 1,
-      "lineEnd": 530,
+      "lineEnd": 521,
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
       "summary": "노드 추가, 전체 보기, 되돌리기 같은 캔버스의 주요 명령을 모아 보여줍니다.",
@@ -13583,7 +14274,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "method": "curated-product-profile",
         "refs": [
           "profile:workflow-canvas@0.9.0",
-          "source:src/components/Toolbar.jsx#L1-L530"
+          "source:src/components/Toolbar.jsx#L1-L521"
         ]
       },
       "tags": [
@@ -13612,65 +14303,61 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
             "line": 161
           },
           {
-            "text": ":custom:",
-            "line": 167
+            "text": "뷰 이름",
+            "line": 170
           },
           {
             "text": "system-layer",
-            "line": 167
-          },
-          {
-            "text": "뷰 이름",
-            "line": 174
+            "line": 188
           },
           {
             "text": "이름 변경",
-            "line": 197
+            "line": 191
           },
           {
             "text": "삭제",
-            "line": 199
+            "line": 193
           },
           {
             "text": "저장된 뷰",
-            "line": 226
+            "line": 217
           },
           {
             "text": "현재 뷰로 이동",
-            "line": 237
+            "line": 228
           },
           {
             "text": "저장된 뷰",
-            "line": 265
+            "line": 256
           },
           {
             "text": "현재 뷰로 이동",
-            "line": 279
+            "line": 270
           },
           {
             "text": "캔버스 층",
-            "line": 305
+            "line": 296
           },
           {
             "text": "새 층 만들기",
-            "line": 344
+            "line": 335
           },
           {
             "text": "새 층 만들기",
-            "line": 345
+            "line": 336
           },
           {
             "text": "보안",
-            "line": 488
+            "line": 479
           },
           {
             "text": "전체 운영 상태 확인",
-            "line": 500
+            "line": 491
           }
         ],
         "screenPaths": [],
         "parseStatus": "parsed",
-        "codePartCount": 125
+        "codePartCount": 122
       }
     },
     {
@@ -32923,21 +33610,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "bigStage",
       "fingerprint": "3fe7ffaf423322773b27",
-      "explanationFingerprint": "09bb4dc3bfc9b82626cb",
+      "explanationFingerprint": "4111249ad0133c51b4e4",
       "name": "bigStage",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 3357,
-      "lineEnd": 3357,
+      "lineStart": 3355,
+      "lineEnd": 3355,
       "summary": "단계에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L3357",
+          "source:scripts/test-mcp-logic.mjs#L3355",
           "symbol:bigStage"
         ]
       },
@@ -32958,21 +33645,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "db.abortSignal",
       "fingerprint": "d74ba7e8480f01bde801",
-      "explanationFingerprint": "5493ba486b2f5586c0c2",
+      "explanationFingerprint": "5b1cf13d7d778ec64cb1",
       "name": "db.abortSignal",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 1085,
-      "lineEnd": 1112,
+      "lineStart": 1084,
+      "lineEnd": 1111,
       "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L1085-L1112",
+          "source:scripts/test-mcp-logic.mjs#L1084-L1111",
           "symbol:db.abortSignal"
         ]
       },
@@ -32993,21 +33680,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "db.rpc",
       "fingerprint": "a9a08e0756555fbd4b90",
-      "explanationFingerprint": "5b0148fa5801ed2a67aa",
+      "explanationFingerprint": "d22ab510ceb1477c7523",
       "name": "db.rpc",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 1082,
-      "lineEnd": 1114,
+      "lineStart": 1081,
+      "lineEnd": 1113,
       "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L1082-L1114",
+          "source:scripts/test-mcp-logic.mjs#L1081-L1113",
           "symbol:db.rpc"
         ]
       },
@@ -33028,21 +33715,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "deniedWriteDb.from",
       "fingerprint": "75d4907cffd9c8e7a79f",
-      "explanationFingerprint": "52f5738b60ab1b11b75b",
+      "explanationFingerprint": "30cc6c3b910b5fbb0e9f",
       "name": "deniedWriteDb.from",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 1187,
-      "lineEnd": 1189,
+      "lineStart": 1186,
+      "lineEnd": 1188,
       "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L1187-L1189",
+          "source:scripts/test-mcp-logic.mjs#L1186-L1188",
           "symbol:deniedWriteDb.from"
         ]
       },
@@ -33063,21 +33750,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "edge",
       "fingerprint": "fc732cd52f8440cc5b6f",
-      "explanationFingerprint": "8975865e120a10cd5ce3",
+      "explanationFingerprint": "6b3ef21e8a4b953cc3f7",
       "name": "edge",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 172,
-      "lineEnd": 172,
+      "lineStart": 171,
+      "lineEnd": 171,
       "summary": "연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L172",
+          "source:scripts/test-mcp-logic.mjs#L171",
           "symbol:edge"
         ]
       },
@@ -33098,21 +33785,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "fakeElement",
       "fingerprint": "3b536e1fc1b1f2b2485a",
-      "explanationFingerprint": "a458e1f6adf62e94cd0e",
+      "explanationFingerprint": "feeb22fc0edca5f2a8a4",
       "name": "fakeElement",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 3522,
-      "lineEnd": 3533,
+      "lineStart": 3520,
+      "lineEnd": 3531,
       "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L3522-L3533",
+          "source:scripts/test-mcp-logic.mjs#L3520-L3531",
           "symbol:fakeElement"
         ]
       },
@@ -33134,21 +33821,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "getRect",
       "fingerprint": "a214e5f55beb656a1aed",
-      "explanationFingerprint": "dbfa522d77b823c15984",
+      "explanationFingerprint": "088e44c0de595c1bd2ff",
       "name": "getRect",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 3287,
-      "lineEnd": 3293,
+      "lineStart": 3285,
+      "lineEnd": 3291,
       "summary": "노드 경계 상자 정보를 불러옵니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L3287-L3293",
+          "source:scripts/test-mcp-logic.mjs#L3285-L3291",
           "symbol:getRect"
         ]
       },
@@ -33170,21 +33857,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "getRect",
       "fingerprint": "c1108ced2abd48d68094",
-      "explanationFingerprint": "a1c07599ae7c1e7b846c",
+      "explanationFingerprint": "d3594b79914486ed8e70",
       "name": "getRect",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 3381,
-      "lineEnd": 3385,
+      "lineStart": 3379,
+      "lineEnd": 3383,
       "summary": "노드 경계 상자 정보를 불러옵니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L3381-L3385",
+          "source:scripts/test-mcp-logic.mjs#L3379-L3383",
           "symbol:getRect"
         ]
       },
@@ -33206,21 +33893,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "memo",
       "fingerprint": "b93f37687696cbf4f2eb",
-      "explanationFingerprint": "ad1f33cbdbb4c50814ff",
+      "explanationFingerprint": "327c736b3641909739c9",
       "name": "memo",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 170,
-      "lineEnd": 170,
+      "lineStart": 169,
+      "lineEnd": 169,
       "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L170",
+          "source:scripts/test-mcp-logic.mjs#L169",
           "symbol:memo"
         ]
       },
@@ -33241,21 +33928,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "paddedRect",
       "fingerprint": "445f1654b561010bbec7",
-      "explanationFingerprint": "e480f808029ea6d78fc0",
+      "explanationFingerprint": "93d425108e44854d0889",
       "name": "paddedRect",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 3324,
-      "lineEnd": 3324,
+      "lineStart": 3322,
+      "lineEnd": 3322,
       "summary": "노드 경계 상자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L3324",
+          "source:scripts/test-mcp-logic.mjs#L3322",
           "symbol:paddedRect"
         ]
       },
@@ -33276,21 +33963,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "paddedRect",
       "fingerprint": "445f1654b561010bbec7",
-      "explanationFingerprint": "f6090307ae99df07069b",
+      "explanationFingerprint": "5b8c6c065e7e7d5c83fb",
       "name": "paddedRect",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 3402,
-      "lineEnd": 3402,
+      "lineStart": 3400,
+      "lineEnd": 3400,
       "summary": "노드 경계 상자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L3402",
+          "source:scripts/test-mcp-logic.mjs#L3400",
           "symbol:paddedRect"
         ]
       },
@@ -33311,21 +33998,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "query.eq",
       "fingerprint": "a4ce9df382c2db291239",
-      "explanationFingerprint": "30e00bc852aad73fb84e",
+      "explanationFingerprint": "1556583d7f0ce86a890e",
       "name": "query.eq",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 1170,
-      "lineEnd": 1170,
+      "lineStart": 1169,
+      "lineEnd": 1169,
       "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L1170",
+          "source:scripts/test-mcp-logic.mjs#L1169",
           "symbol:query.eq"
         ]
       },
@@ -33346,21 +34033,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "query.eq",
       "fingerprint": "c20abd8506e1047e3fc4",
-      "explanationFingerprint": "233aa04f6262e32c1b41",
+      "explanationFingerprint": "e3ee36382285bee49c0a",
       "name": "query.eq",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 1222,
-      "lineEnd": 1222,
+      "lineStart": 1221,
+      "lineEnd": 1221,
       "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L1222",
+          "source:scripts/test-mcp-logic.mjs#L1221",
           "symbol:query.eq"
         ]
       },
@@ -33381,21 +34068,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "query.eq",
       "fingerprint": "c20abd8506e1047e3fc4",
-      "explanationFingerprint": "a8f10c362e5e14177bc6",
+      "explanationFingerprint": "c541b2ad1cf68604defc",
       "name": "query.eq",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 1243,
-      "lineEnd": 1243,
+      "lineStart": 1242,
+      "lineEnd": 1242,
       "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L1243",
+          "source:scripts/test-mcp-logic.mjs#L1242",
           "symbol:query.eq"
         ]
       },
@@ -33416,21 +34103,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "query.limit",
       "fingerprint": "0bab697e9d09e72fbceb",
-      "explanationFingerprint": "bfc4d9336d030bf10938",
+      "explanationFingerprint": "510811427dc04c14efba",
       "name": "query.limit",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 1224,
-      "lineEnd": 1224,
+      "lineStart": 1223,
+      "lineEnd": 1223,
       "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L1224",
+          "source:scripts/test-mcp-logic.mjs#L1223",
           "symbol:query.limit"
         ]
       },
@@ -33451,21 +34138,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "query.limit",
       "fingerprint": "fe4f9bcdd9d34696fad1",
-      "explanationFingerprint": "7a03d9d0b20824990b2f",
+      "explanationFingerprint": "faedf78c62279ef858b7",
       "name": "query.limit",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 1245,
-      "lineEnd": 1245,
+      "lineStart": 1244,
+      "lineEnd": 1244,
       "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L1245",
+          "source:scripts/test-mcp-logic.mjs#L1244",
           "symbol:query.limit"
         ]
       },
@@ -33486,21 +34173,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "query.lt",
       "fingerprint": "106ec5dade6ddf196eee",
-      "explanationFingerprint": "8ff379b12dbb93d50a48",
+      "explanationFingerprint": "e26b891cbc22261644df",
       "name": "query.lt",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 1171,
-      "lineEnd": 1171,
+      "lineStart": 1170,
+      "lineEnd": 1170,
       "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L1171",
+          "source:scripts/test-mcp-logic.mjs#L1170",
           "symbol:query.lt"
         ]
       },
@@ -33521,21 +34208,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "query.order",
       "fingerprint": "2f2d9e8047ee035ef97f",
-      "explanationFingerprint": "712936e1e6d47dd177b6",
+      "explanationFingerprint": "162bb63e16ff8dad051d",
       "name": "query.order",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 1223,
-      "lineEnd": 1223,
+      "lineStart": 1222,
+      "lineEnd": 1222,
       "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L1223",
+          "source:scripts/test-mcp-logic.mjs#L1222",
           "symbol:query.order"
         ]
       },
@@ -33556,21 +34243,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "query.order",
       "fingerprint": "2f2d9e8047ee035ef97f",
-      "explanationFingerprint": "a53493d3e25c2886e9aa",
+      "explanationFingerprint": "94ef8231ab9778f1136f",
       "name": "query.order",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 1244,
-      "lineEnd": 1244,
+      "lineStart": 1243,
+      "lineEnd": 1243,
       "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L1244",
+          "source:scripts/test-mcp-logic.mjs#L1243",
           "symbol:query.order"
         ]
       },
@@ -33591,21 +34278,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "query.select",
       "fingerprint": "dedace1dccaed54abac0",
-      "explanationFingerprint": "e51c928179c961dd4f57",
+      "explanationFingerprint": "45271d959672eb24440a",
       "name": "query.select",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 1221,
-      "lineEnd": 1221,
+      "lineStart": 1220,
+      "lineEnd": 1220,
       "summary": "선택에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L1221",
+          "source:scripts/test-mcp-logic.mjs#L1220",
           "symbol:query.select"
         ]
       },
@@ -33626,21 +34313,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "query.select",
       "fingerprint": "dedace1dccaed54abac0",
-      "explanationFingerprint": "37175ed9f5acad3f4444",
+      "explanationFingerprint": "07dd84c1622cb4db86c8",
       "name": "query.select",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 1242,
-      "lineEnd": 1242,
+      "lineStart": 1241,
+      "lineEnd": 1241,
       "summary": "선택에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L1242",
+          "source:scripts/test-mcp-logic.mjs#L1241",
           "symbol:query.select"
         ]
       },
@@ -33661,21 +34348,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "readDb.from",
       "fingerprint": "efcac093a0c5cd5d9b24",
-      "explanationFingerprint": "cadec95b6973f141a8ca",
+      "explanationFingerprint": "787136d525c45b7d4a2c",
       "name": "readDb.from",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 1218,
-      "lineEnd": 1227,
+      "lineStart": 1217,
+      "lineEnd": 1226,
       "summary": "이 기능 정보를 읽습니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L1218-L1227",
+          "source:scripts/test-mcp-logic.mjs#L1217-L1226",
           "symbol:readDb.from"
         ]
       },
@@ -33696,21 +34383,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "result.text",
       "fingerprint": "d812f24918c543dd2dab",
-      "explanationFingerprint": "f733b4a4424c9dfa361a",
+      "explanationFingerprint": "e3236484cc63c5e0999f",
       "name": "result.text",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 979,
-      "lineEnd": 979,
+      "lineStart": 978,
+      "lineEnd": 978,
       "summary": "결과 · 텍스트에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L979",
+          "source:scripts/test-mcp-logic.mjs#L978",
           "symbol:result.text"
         ]
       },
@@ -33731,21 +34418,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "scan",
       "fingerprint": "45b4d5f6a19de7b1ce1f",
-      "explanationFingerprint": "843efade73cfc13a46b7",
+      "explanationFingerprint": "bd69a0206ed6d1882a67",
       "name": "scan",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 1580,
-      "lineEnd": 1586,
+      "lineStart": 1578,
+      "lineEnd": 1584,
       "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L1580-L1586",
+          "source:scripts/test-mcp-logic.mjs#L1578-L1584",
           "symbol:scan"
         ]
       },
@@ -33766,21 +34453,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "stage",
       "fingerprint": "145800ad3000055e4bd2",
-      "explanationFingerprint": "f9dc0ae95849af9d8367",
+      "explanationFingerprint": "bcc8b5e13c16309860a0",
       "name": "stage",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 169,
-      "lineEnd": 169,
+      "lineStart": 168,
+      "lineEnd": 168,
       "summary": "단계에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L169",
+          "source:scripts/test-mcp-logic.mjs#L168",
           "symbol:stage"
         ]
       },
@@ -33801,21 +34488,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "system",
       "fingerprint": "70faffcabb630e8a1f82",
-      "explanationFingerprint": "51d5fdecdc454cac4d4a",
+      "explanationFingerprint": "090a181115f78ad2c197",
       "name": "system",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 171,
-      "lineEnd": 171,
+      "lineStart": 170,
+      "lineEnd": 170,
       "summary": "시스템에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L171",
+          "source:scripts/test-mcp-logic.mjs#L170",
           "symbol:system"
         ]
       },
@@ -33836,21 +34523,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "t",
       "fingerprint": "2b45f90d6241f1f56c9f",
-      "explanationFingerprint": "6f021b1ff1aebac92076",
+      "explanationFingerprint": "0866b00def507d25e62f",
       "name": "t",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 159,
-      "lineEnd": 162,
+      "lineStart": 158,
+      "lineEnd": 161,
       "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L159-L162",
+          "source:scripts/test-mcp-logic.mjs#L158-L161",
           "symbol:t"
         ]
       },
@@ -33872,21 +34559,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "ta",
       "fingerprint": "c2554b910d30ac656f58",
-      "explanationFingerprint": "cd7e85d0c1079119eadd",
+      "explanationFingerprint": "f6c58f3b8c1d372b1a3f",
       "name": "ta",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 164,
-      "lineEnd": 167,
+      "lineStart": 163,
+      "lineEnd": 166,
       "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L164-L167",
+          "source:scripts/test-mcp-logic.mjs#L163-L166",
           "symbol:ta"
         ]
       },
@@ -33909,21 +34596,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "unavailableDb.from",
       "fingerprint": "04ce82394b80ae895904",
-      "explanationFingerprint": "2d42f70cda95c2a93b61",
+      "explanationFingerprint": "551a86812f64372a36b5",
       "name": "unavailableDb.from",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 1240,
-      "lineEnd": 1248,
+      "lineStart": 1239,
+      "lineEnd": 1247,
       "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L1240-L1248",
+          "source:scripts/test-mcp-logic.mjs#L1239-L1247",
           "symbol:unavailableDb.from"
         ]
       },
@@ -33944,21 +34631,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "writeDb.delete",
       "fingerprint": "a3f6f6c7b35317bb3bde",
-      "explanationFingerprint": "6e432a56489f458979e8",
+      "explanationFingerprint": "9de49a5cfbdf366ce2b0",
       "name": "writeDb.delete",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 1168,
-      "lineEnd": 1174,
+      "lineStart": 1167,
+      "lineEnd": 1173,
       "summary": "삭제에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L1168-L1174",
+          "source:scripts/test-mcp-logic.mjs#L1167-L1173",
           "symbol:writeDb.delete"
         ]
       },
@@ -33979,21 +34666,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "writeDb.from",
       "fingerprint": "787fbe007422f050af32",
-      "explanationFingerprint": "64f19cf3a4935b9c1fb4",
+      "explanationFingerprint": "d2afa692787d6fbac55d",
       "name": "writeDb.from",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 1161,
-      "lineEnd": 1176,
+      "lineStart": 1160,
+      "lineEnd": 1175,
       "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L1161-L1176",
+          "source:scripts/test-mcp-logic.mjs#L1160-L1175",
           "symbol:writeDb.from"
         ]
       },
@@ -34014,21 +34701,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "writeDb.insert",
       "fingerprint": "f0d3f00309def9cb97d4",
-      "explanationFingerprint": "dcabd8f873f8b005e211",
+      "explanationFingerprint": "ca948c4acc9858c5b16c",
       "name": "writeDb.insert",
       "path": "scripts/test-mcp-logic.mjs",
       "parentId": "file:scripts/test-mcp-logic.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 1164,
-      "lineEnd": 1167,
+      "lineStart": 1163,
+      "lineEnd": 1166,
       "summary": "이 파일이 맡은 “mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-mcp-logic.mjs#L1164-L1167",
+          "source:scripts/test-mcp-logic.mjs#L1163-L1166",
           "symbol:writeDb.insert"
         ]
       },
@@ -34192,21 +34879,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "build",
       "fingerprint": "d41f5948bf5e84d5b78a",
-      "explanationFingerprint": "19dea04a201a7ead6f8c",
+      "explanationFingerprint": "abe3ae2ff9265680dbc8",
       "name": "build",
       "path": "scripts/test-source-code-parts.mjs",
       "parentId": "file:scripts/test-source-code-parts.mjs",
       "layer": "test",
       "area": "testing-quality",
       "subsystem": "app-tests",
-      "lineStart": 40,
-      "lineEnd": 48,
+      "lineStart": 39,
+      "lineEnd": 47,
       "summary": "Asset Build 항목이나 구조를 구성합니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:scripts/test-source-code-parts.mjs#L40-L48",
+          "source:scripts/test-source-code-parts.mjs#L39-L47",
           "symbol:build"
         ]
       },
@@ -44251,6 +44938,764 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:shared/sourceCodeWorldProjection.js:add",
+      "kind": "function",
+      "label": "add",
+      "fingerprint": "1f97c572b18958bf4226",
+      "explanationFingerprint": "f7bcd093a6b7ca5245fc",
+      "name": "add",
+      "path": "shared/sourceCodeWorldProjection.js",
+      "parentId": "file:shared/sourceCodeWorldProjection.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 642,
+      "lineEnd": 646,
+      "summary": "이 기능 항목이나 구조를 추가합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/sourceCodeWorldProjection.js#L642-L646",
+          "symbol:add"
+        ]
+      },
+      "tags": [
+        "arrow",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "arrow",
+        "exported": false,
+        "async": false,
+        "codePartCount": 3
+      }
+    },
+    {
+      "id": "function:shared/sourceCodeWorldProjection.js:baseProjection",
+      "kind": "function",
+      "label": "baseProjection",
+      "fingerprint": "585b394590171afc0161",
+      "explanationFingerprint": "73cb50ba1d5de9bcb451",
+      "name": "baseProjection",
+      "path": "shared/sourceCodeWorldProjection.js",
+      "parentId": "file:shared/sourceCodeWorldProjection.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 128,
+      "lineEnd": 166,
+      "summary": "기준에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/sourceCodeWorldProjection.js#L128-L166",
+          "symbol:baseProjection"
+        ]
+      },
+      "tags": [
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 4
+      }
+    },
+    {
+      "id": "function:shared/sourceCodeWorldProjection.js:boundedInteger",
+      "kind": "function",
+      "label": "boundedInteger",
+      "fingerprint": "56cfdb49a973651d2fcb",
+      "explanationFingerprint": "dfe227f0885f7c380c2e",
+      "name": "boundedInteger",
+      "path": "shared/sourceCodeWorldProjection.js",
+      "parentId": "file:shared/sourceCodeWorldProjection.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 76,
+      "lineEnd": 80,
+      "summary": "이 파일이 맡은 “소스 코드 · 코드에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/sourceCodeWorldProjection.js#L76-L80",
+          "symbol:boundedInteger"
+        ]
+      },
+      "tags": [
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 4
+      }
+    },
+    {
+      "id": "function:shared/sourceCodeWorldProjection.js:compareEntities",
+      "kind": "function",
+      "label": "compareEntities",
+      "fingerprint": "f9ed1dc3d5dd36bda796",
+      "explanationFingerprint": "ed0a60fae5bdaa7c78a4",
+      "name": "compareEntities",
+      "path": "shared/sourceCodeWorldProjection.js",
+      "parentId": "file:shared/sourceCodeWorldProjection.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 347,
+      "lineEnd": 349,
+      "summary": "이 기능 상태나 허용 여부를 서로 비교합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/sourceCodeWorldProjection.js#L347-L349",
+          "symbol:compareEntities"
+        ]
+      },
+      "tags": [
+        "arrow",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "arrow",
+        "exported": false,
+        "async": false
+      }
+    },
+    {
+      "id": "function:shared/sourceCodeWorldProjection.js:createSourceCodeWorldProjection",
+      "kind": "function",
+      "label": "createSourceCodeWorldProjection",
+      "fingerprint": "9e2ac32659e3e6a97a4d",
+      "explanationFingerprint": "39f585749959f5975bac",
+      "name": "createSourceCodeWorldProjection",
+      "path": "shared/sourceCodeWorldProjection.js",
+      "parentId": "file:shared/sourceCodeWorldProjection.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 311,
+      "lineEnd": 562,
+      "summary": "소스 코드 · 코드 항목이나 구조를 새로 만듭니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/sourceCodeWorldProjection.js#L311-L562",
+          "symbol:createSourceCodeWorldProjection"
+        ]
+      },
+      "tags": [
+        "exported",
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false,
+        "codePartCount": 102
+      }
+    },
+    {
+      "id": "function:shared/sourceCodeWorldProjection.js:emptyProjection",
+      "kind": "function",
+      "label": "emptyProjection",
+      "fingerprint": "d8b52423b33599f2ed1c",
+      "explanationFingerprint": "aa9473bc121e9a9d13a7",
+      "name": "emptyProjection",
+      "path": "shared/sourceCodeWorldProjection.js",
+      "parentId": "file:shared/sourceCodeWorldProjection.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 168,
+      "lineEnd": 177,
+      "summary": "이 파일이 맡은 “소스 코드 · 코드에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/sourceCodeWorldProjection.js#L168-L177",
+          "symbol:emptyProjection"
+        ]
+      },
+      "tags": [
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 4
+      }
+    },
+    {
+      "id": "function:shared/sourceCodeWorldProjection.js:entitySortKey",
+      "kind": "function",
+      "label": "entitySortKey",
+      "fingerprint": "93b5a5974113f8a7bd6b",
+      "explanationFingerprint": "2bf2673348e5519cc7eb",
+      "name": "entitySortKey",
+      "path": "shared/sourceCodeWorldProjection.js",
+      "parentId": "file:shared/sourceCodeWorldProjection.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 179,
+      "lineEnd": 193,
+      "summary": "Asset에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/sourceCodeWorldProjection.js#L179-L193",
+          "symbol:entitySortKey"
+        ]
+      },
+      "tags": [
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 6
+      }
+    },
+    {
+      "id": "function:shared/sourceCodeWorldProjection.js:focusEntityIds",
+      "kind": "function",
+      "label": "focusEntityIds",
+      "fingerprint": "fe761273a7b1b6e5ee53",
+      "explanationFingerprint": "d9d1dbe69d797e9747fa",
+      "name": "focusEntityIds",
+      "path": "shared/sourceCodeWorldProjection.js",
+      "parentId": "file:shared/sourceCodeWorldProjection.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 236,
+      "lineEnd": 255,
+      "summary": "Asset에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/sourceCodeWorldProjection.js#L236-L255",
+          "symbol:focusEntityIds"
+        ]
+      },
+      "tags": [
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 19
+      }
+    },
+    {
+      "id": "function:shared/sourceCodeWorldProjection.js:normalizeLod",
+      "kind": "function",
+      "label": "normalizeLod",
+      "fingerprint": "105997bc7cf056deb483",
+      "explanationFingerprint": "d9b1de7705b63f169ba7",
+      "name": "normalizeLod",
+      "path": "shared/sourceCodeWorldProjection.js",
+      "parentId": "file:shared/sourceCodeWorldProjection.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 82,
+      "lineEnd": 97,
+      "summary": "안전한 공통 형식 자료를 안전한 공통 형식으로 정리합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/sourceCodeWorldProjection.js#L82-L97",
+          "symbol:normalizeLod"
+        ]
+      },
+      "tags": [
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 4
+      }
+    },
+    {
+      "id": "function:shared/sourceCodeWorldProjection.js:projectEdge",
+      "kind": "function",
+      "label": "projectEdge",
+      "fingerprint": "9ed63a5304f05aafe9b5",
+      "explanationFingerprint": "d2e54bc78089e5a32c49",
+      "name": "projectEdge",
+      "path": "shared/sourceCodeWorldProjection.js",
+      "parentId": "file:shared/sourceCodeWorldProjection.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 265,
+      "lineEnd": 275,
+      "summary": "연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/sourceCodeWorldProjection.js#L265-L275",
+          "symbol:projectEdge"
+        ]
+      },
+      "tags": [
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 2
+      }
+    },
+    {
+      "id": "function:shared/sourceCodeWorldProjection.js:projectPart",
+      "kind": "function",
+      "label": "projectPart",
+      "fingerprint": "cd4ff2ce196b310fad06",
+      "explanationFingerprint": "ebaba8077942268fdeff",
+      "name": "projectPart",
+      "path": "shared/sourceCodeWorldProjection.js",
+      "parentId": "file:shared/sourceCodeWorldProjection.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 277,
+      "lineEnd": 305,
+      "summary": "시스템 파츠에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/sourceCodeWorldProjection.js#L277-L305",
+          "symbol:projectPart"
+        ]
+      },
+      "tags": [
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 7
+      }
+    },
+    {
+      "id": "function:shared/sourceCodeWorldProjection.js:relationSortKey",
+      "kind": "function",
+      "label": "relationSortKey",
+      "fingerprint": "be0e1579c19d92f2c63c",
+      "explanationFingerprint": "a8bd34baac4a42e5a039",
+      "name": "relationSortKey",
+      "path": "shared/sourceCodeWorldProjection.js",
+      "parentId": "file:shared/sourceCodeWorldProjection.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 195,
+      "lineEnd": 202,
+      "summary": "관계에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/sourceCodeWorldProjection.js#L195-L202",
+          "symbol:relationSortKey"
+        ]
+      },
+      "tags": [
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 1
+      }
+    },
+    {
+      "id": "function:shared/sourceCodeWorldProjection.js:repositoryMetadata",
+      "kind": "function",
+      "label": "repositoryMetadata",
+      "fingerprint": "6b975cbeea07ecb4f90f",
+      "explanationFingerprint": "f89e2a5cf4da1cd4fa9c",
+      "name": "repositoryMetadata",
+      "path": "shared/sourceCodeWorldProjection.js",
+      "parentId": "file:shared/sourceCodeWorldProjection.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 99,
+      "lineEnd": 126,
+      "summary": "코드 저장소 · 설명 메타데이터에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/sourceCodeWorldProjection.js#L99-L126",
+          "symbol:repositoryMetadata"
+        ]
+      },
+      "tags": [
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 11
+      }
+    },
+    {
+      "id": "function:shared/sourceCodeWorldProjection.js:scopeAllowsEntity",
+      "kind": "function",
+      "label": "scopeAllowsEntity",
+      "fingerprint": "9ad22aacc34cccb69d4b",
+      "explanationFingerprint": "64cbc731648402f5af19",
+      "name": "scopeAllowsEntity",
+      "path": "shared/sourceCodeWorldProjection.js",
+      "parentId": "file:shared/sourceCodeWorldProjection.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 230,
+      "lineEnd": 234,
+      "summary": "Asset에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/sourceCodeWorldProjection.js#L230-L234",
+          "symbol:scopeAllowsEntity"
+        ]
+      },
+      "tags": [
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 5
+      }
+    },
+    {
+      "id": "function:shared/sourceCodeWorldProjection.js:selectGroupsWithFocus",
+      "kind": "function",
+      "label": "selectGroupsWithFocus",
+      "fingerprint": "7970753570c5f0a58c13",
+      "explanationFingerprint": "ac9fd812a359638b4be4",
+      "name": "selectGroupsWithFocus",
+      "path": "shared/sourceCodeWorldProjection.js",
+      "parentId": "file:shared/sourceCodeWorldProjection.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 257,
+      "lineEnd": 263,
+      "summary": "선택에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/sourceCodeWorldProjection.js#L257-L263",
+          "symbol:selectGroupsWithFocus"
+        ]
+      },
+      "tags": [
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 6
+      }
+    },
+    {
+      "id": "function:shared/sourceCodeWorldProjection.js:sourceCodeWorldSelection",
+      "kind": "function",
+      "label": "sourceCodeWorldSelection",
+      "fingerprint": "b2ca9583d64ee3b37590",
+      "explanationFingerprint": "750d4112a08ca697593d",
+      "name": "sourceCodeWorldSelection",
+      "path": "shared/sourceCodeWorldProjection.js",
+      "parentId": "file:shared/sourceCodeWorldProjection.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 568,
+      "lineEnd": 608,
+      "summary": "소스 코드 · 코드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/sourceCodeWorldProjection.js#L568-L608",
+          "symbol:sourceCodeWorldSelection"
+        ]
+      },
+      "tags": [
+        "exported",
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false,
+        "codePartCount": 8
+      }
+    },
+    {
+      "id": "function:shared/sourceCodeWorldProjection.js:stringList",
+      "kind": "function",
+      "label": "stringList",
+      "fingerprint": "af498966fc451c9a24e4",
+      "explanationFingerprint": "70daf48087b3891edc80",
+      "name": "stringList",
+      "path": "shared/sourceCodeWorldProjection.js",
+      "parentId": "file:shared/sourceCodeWorldProjection.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 71,
+      "lineEnd": 74,
+      "summary": "목록에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/sourceCodeWorldProjection.js#L71-L74",
+          "symbol:stringList"
+        ]
+      },
+      "tags": [
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 3
+      }
+    },
+    {
+      "id": "function:shared/sourceCodeWorldProjection.js:text",
+      "kind": "function",
+      "label": "text",
+      "fingerprint": "5e09d83784d4a2c0527b",
+      "explanationFingerprint": "67dcd3bc4987c9244ba1",
+      "name": "text",
+      "path": "shared/sourceCodeWorldProjection.js",
+      "parentId": "file:shared/sourceCodeWorldProjection.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 65,
+      "lineEnd": 69,
+      "summary": "텍스트에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/sourceCodeWorldProjection.js#L65-L69",
+          "symbol:text"
+        ]
+      },
+      "tags": [
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 2
+      }
+    },
+    {
+      "id": "function:shared/sourceCodeWorldProjection.js:traceSourceCodeWorld",
+      "kind": "function",
+      "label": "traceSourceCodeWorld",
+      "fingerprint": "abbdfaf38cfdbba7c56c",
+      "explanationFingerprint": "e217cc8a018bd843625a",
+      "name": "traceSourceCodeWorld",
+      "path": "shared/sourceCodeWorldProjection.js",
+      "parentId": "file:shared/sourceCodeWorldProjection.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 613,
+      "lineEnd": 690,
+      "summary": "소스 코드 · 코드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/sourceCodeWorldProjection.js#L613-L690",
+          "symbol:traceSourceCodeWorld"
+        ]
+      },
+      "tags": [
+        "exported",
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false,
+        "codePartCount": 46
+      }
+    },
+    {
+      "id": "function:shared/sourceCodeWorldProjection.js:uniqueEntities",
+      "kind": "function",
+      "label": "uniqueEntities",
+      "fingerprint": "e7dfc95d5d48bcb9d11a",
+      "explanationFingerprint": "089c9e8fea99d7a32f2d",
+      "name": "uniqueEntities",
+      "path": "shared/sourceCodeWorldProjection.js",
+      "parentId": "file:shared/sourceCodeWorldProjection.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 204,
+      "lineEnd": 212,
+      "summary": "이 파일이 맡은 “소스 코드 · 코드에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/sourceCodeWorldProjection.js#L204-L212",
+          "symbol:uniqueEntities"
+        ]
+      },
+      "tags": [
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 7
+      }
+    },
+    {
+      "id": "function:shared/sourceCodeWorldProjection.js:validRelations",
+      "kind": "function",
+      "label": "validRelations",
+      "fingerprint": "b104a54a0d64c8267f16",
+      "explanationFingerprint": "af31dfe789c4564bbe80",
+      "name": "validRelations",
+      "path": "shared/sourceCodeWorldProjection.js",
+      "parentId": "file:shared/sourceCodeWorldProjection.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 214,
+      "lineEnd": 228,
+      "summary": "유효성에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/sourceCodeWorldProjection.js#L214-L228",
+          "symbol:validRelations"
+        ]
+      },
+      "tags": [
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 13
+      }
+    },
+    {
       "id": "function:shared/sourceEditableProperties.js:createSourceEditablePropertyRegistry",
       "kind": "function",
       "label": "createSourceEditablePropertyRegistry",
@@ -46060,7 +47505,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:shared/sourceModuleProposal.js:createSourceModuleMaterializationItem",
       "kind": "function",
       "label": "createSourceModuleMaterializationItem",
-      "fingerprint": "08450366329179d2647e",
+      "fingerprint": "487d3aaa068b69f55fde",
       "explanationFingerprint": "acebd75b4ef6e72f3fee",
       "name": "createSourceModuleMaterializationItem",
       "path": "shared/sourceModuleProposal.js",
@@ -47556,21 +49001,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "addAncestorIds",
       "fingerprint": "1f043a903c6d6da91616",
-      "explanationFingerprint": "a2fe54fb82279ef58ad1",
+      "explanationFingerprint": "8f3e5b4da602f5bdbb59",
       "name": "addAncestorIds",
       "path": "shared/systemLayers.js",
       "parentId": "file:shared/systemLayers.js",
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 237,
-      "lineEnd": 247,
+      "lineStart": 144,
+      "lineEnd": 154,
       "summary": "이 기능 항목이나 구조를 추가합니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/systemLayers.js#L237-L247",
+          "source:shared/systemLayers.js#L144-L154",
           "symbol:addAncestorIds"
         ]
       },
@@ -47592,21 +49037,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "addPortal",
       "fingerprint": "ec6e104e5a80317e611b",
-      "explanationFingerprint": "1d68641c683c1c838700",
+      "explanationFingerprint": "d173485f87072363f369",
       "name": "addPortal",
       "path": "shared/systemLayers.js",
       "parentId": "file:shared/systemLayers.js",
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 285,
-      "lineEnd": 310,
+      "lineStart": 191,
+      "lineEnd": 216,
       "summary": "이 기능 항목이나 구조를 추가합니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/systemLayers.js#L285-L310",
+          "source:shared/systemLayers.js#L191-L216",
           "symbol:addPortal"
         ]
       },
@@ -47628,21 +49073,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "annotationDataForSystemLayer",
       "fingerprint": "73ca3f70f0f403e4cdf1",
-      "explanationFingerprint": "85079e682a7360d747fb",
+      "explanationFingerprint": "2aa288626bbbe6fb1280",
       "name": "annotationDataForSystemLayer",
       "path": "shared/systemLayers.js",
       "parentId": "file:shared/systemLayers.js",
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 80,
-      "lineEnd": 85,
+      "lineStart": 29,
+      "lineEnd": 34,
       "summary": "데이터 · 시스템에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/systemLayers.js#L80-L85",
+          "source:shared/systemLayers.js#L29-L34",
           "symbol:annotationDataForSystemLayer"
         ]
       },
@@ -47664,22 +49109,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:shared/systemLayers.js:canvasSupportsSystemLayers",
       "kind": "function",
       "label": "canvasSupportsSystemLayers",
-      "fingerprint": "c106fe6d8f3bfb5f53cd",
-      "explanationFingerprint": "ca29dc23a1591741fa3f",
+      "fingerprint": "c7309545bf1655d09645",
+      "explanationFingerprint": "ced0900f91f8cb6f4ef1",
       "name": "canvasSupportsSystemLayers",
       "path": "shared/systemLayers.js",
       "parentId": "file:shared/systemLayers.js",
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 211,
-      "lineEnd": 214,
+      "lineStart": 119,
+      "lineEnd": 121,
       "summary": "캔버스 · 시스템에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/systemLayers.js#L211-L214",
+          "source:shared/systemLayers.js#L119-L121",
           "symbol:canvasSupportsSystemLayers"
         ]
       },
@@ -47694,7 +49139,43 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "functionKind": "function",
         "exported": true,
         "async": false,
-        "codePartCount": 3
+        "codePartCount": 1
+      }
+    },
+    {
+      "id": "function:shared/systemLayers.js:colorForLayerId",
+      "kind": "function",
+      "label": "colorForLayerId",
+      "fingerprint": "26abfde8c24cacf1bceb",
+      "explanationFingerprint": "83da4389233ba6e225e1",
+      "name": "colorForLayerId",
+      "path": "shared/systemLayers.js",
+      "parentId": "file:shared/systemLayers.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 64,
+      "lineEnd": 68,
+      "summary": "식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/systemLayers.js#L64-L68",
+          "symbol:colorForLayerId"
+        ]
+      },
+      "tags": [
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 5
       }
     },
     {
@@ -47702,21 +49183,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "createCustomSystemLayerView",
       "fingerprint": "0e388b27c635330905ba",
-      "explanationFingerprint": "6b47a70ad07538dd2598",
+      "explanationFingerprint": "fbef41550da915447520",
       "name": "createCustomSystemLayerView",
       "path": "shared/systemLayers.js",
       "parentId": "file:shared/systemLayers.js",
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 127,
-      "lineEnd": 137,
+      "lineStart": 52,
+      "lineEnd": 62,
       "summary": "시스템 · 화면 상태 항목이나 구조를 새로 만듭니다",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/systemLayers.js#L127-L137",
+          "source:shared/systemLayers.js#L52-L62",
           "symbol:createCustomSystemLayerView"
         ]
       },
@@ -47738,22 +49219,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:shared/systemLayers.js:createSystemLayerProjection",
       "kind": "function",
       "label": "createSystemLayerProjection",
-      "fingerprint": "d7660b96c7b9a8957062",
-      "explanationFingerprint": "7ba035c5a2147039be36",
+      "fingerprint": "10f0a3c4ca40685928c7",
+      "explanationFingerprint": "79dc990be3aefe76d49b",
       "name": "createSystemLayerProjection",
       "path": "shared/systemLayers.js",
       "parentId": "file:shared/systemLayers.js",
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 252,
-      "lineEnd": 344,
+      "lineStart": 158,
+      "lineEnd": 250,
       "summary": "시스템 항목이나 구조를 새로 만듭니다",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/systemLayers.js#L252-L344",
+          "source:shared/systemLayers.js#L158-L250",
           "symbol:createSystemLayerProjection"
         ]
       },
@@ -47772,99 +49253,25 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
-      "id": "function:shared/systemLayers.js:createSystemLayerViews",
-      "kind": "function",
-      "label": "createSystemLayerViews",
-      "fingerprint": "ce371405e24c43922309",
-      "explanationFingerprint": "13a9b3ca8ae6c7fb3333",
-      "name": "createSystemLayerViews",
-      "path": "shared/systemLayers.js",
-      "parentId": "file:shared/systemLayers.js",
-      "layer": "shared",
-      "area": "sharing-collaboration",
-      "subsystem": "sharing-policy",
-      "lineStart": 103,
-      "lineEnd": 110,
-      "summary": "시스템 항목이나 구조를 새로 만듭니다",
-      "technicalSummary": "다른 파일에서 사용 가능",
-      "explanationBasis": {
-        "method": "symbol-and-source-range",
-        "refs": [
-          "source:shared/systemLayers.js#L103-L110",
-          "symbol:createSystemLayerViews"
-        ]
-      },
-      "tags": [
-        "exported",
-        "function",
-        "shared",
-        "sharing-collaboration",
-        "sharing-policy"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": true,
-        "async": false,
-        "codePartCount": 1
-      }
-    },
-    {
-      "id": "function:shared/systemLayers.js:deriveDefaultSystemLayer",
-      "kind": "function",
-      "label": "deriveDefaultSystemLayer",
-      "fingerprint": "30d3b5214be310c7f887",
-      "explanationFingerprint": "6b560b8631371e66ef4a",
-      "name": "deriveDefaultSystemLayer",
-      "path": "shared/systemLayers.js",
-      "parentId": "file:shared/systemLayers.js",
-      "layer": "shared",
-      "area": "sharing-collaboration",
-      "subsystem": "sharing-policy",
-      "lineStart": 93,
-      "lineEnd": 96,
-      "summary": "기본값 · 시스템에 필요한 한 단계의 판단이나 변환을 수행합니다.",
-      "technicalSummary": "다른 파일에서 사용 가능",
-      "explanationBasis": {
-        "method": "symbol-and-source-range",
-        "refs": [
-          "source:shared/systemLayers.js#L93-L96",
-          "symbol:deriveDefaultSystemLayer"
-        ]
-      },
-      "tags": [
-        "exported",
-        "function",
-        "shared",
-        "sharing-collaboration",
-        "sharing-policy"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": true,
-        "async": false,
-        "codePartCount": 4
-      }
-    },
-    {
       "id": "function:shared/systemLayers.js:edgeIsVisible",
       "kind": "function",
       "label": "edgeIsVisible",
       "fingerprint": "552b414d2c812c4a1b9c",
-      "explanationFingerprint": "af139d4d3400e2bc6269",
+      "explanationFingerprint": "aaf2384f7d9a8203800c",
       "name": "edgeIsVisible",
       "path": "shared/systemLayers.js",
       "parentId": "file:shared/systemLayers.js",
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 220,
-      "lineEnd": 226,
+      "lineStart": 127,
+      "lineEnd": 133,
       "summary": "연결선 · 볼 수 있는 범위에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/systemLayers.js#L220-L226",
+          "source:shared/systemLayers.js#L127-L133",
           "symbol:edgeIsVisible"
         ]
       },
@@ -47885,22 +49292,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:shared/systemLayers.js:effectiveSystemLayerForNode",
       "kind": "function",
       "label": "effectiveSystemLayerForNode",
-      "fingerprint": "7d12a54ed7eed7119241",
-      "explanationFingerprint": "920e87dcc2e981d448d8",
+      "fingerprint": "bb0e374d3dd21e6fae5c",
+      "explanationFingerprint": "1baecf6cdc17eaf8af8b",
       "name": "effectiveSystemLayerForNode",
       "path": "shared/systemLayers.js",
       "parentId": "file:shared/systemLayers.js",
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 98,
-      "lineEnd": 101,
+      "lineStart": 40,
+      "lineEnd": 42,
       "summary": "시스템 · 노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/systemLayers.js#L98-L101",
+          "source:shared/systemLayers.js#L40-L42",
           "symbol:effectiveSystemLayerForNode"
         ]
       },
@@ -47915,44 +49322,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "functionKind": "function",
         "exported": true,
         "async": false,
-        "codePartCount": 2
-      }
-    },
-    {
-      "id": "function:shared/systemLayers.js:ensureSystemLayerViews",
-      "kind": "function",
-      "label": "ensureSystemLayerViews",
-      "fingerprint": "49a3dccffe13af9da14e",
-      "explanationFingerprint": "72b9272710b89f026b83",
-      "name": "ensureSystemLayerViews",
-      "path": "shared/systemLayers.js",
-      "parentId": "file:shared/systemLayers.js",
-      "layer": "shared",
-      "area": "sharing-collaboration",
-      "subsystem": "sharing-policy",
-      "lineStart": 120,
-      "lineEnd": 125,
-      "summary": "시스템에 필요한 한 단계의 판단이나 변환을 수행합니다.",
-      "technicalSummary": "다른 파일에서 사용 가능",
-      "explanationBasis": {
-        "method": "symbol-and-source-range",
-        "refs": [
-          "source:shared/systemLayers.js#L120-L125",
-          "symbol:ensureSystemLayerViews"
-        ]
-      },
-      "tags": [
-        "exported",
-        "function",
-        "shared",
-        "sharing-collaboration",
-        "sharing-policy"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": true,
-        "async": false,
-        "codePartCount": 6
+        "codePartCount": 1
       }
     },
     {
@@ -47960,96 +49330,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "isCanvasAnnotationNode",
       "fingerprint": "d5c836ee74dc5661b468",
-      "explanationFingerprint": "8d90b6341be33c869718",
+      "explanationFingerprint": "e38ce2a991736992d04b",
       "name": "isCanvasAnnotationNode",
       "path": "shared/systemLayers.js",
       "parentId": "file:shared/systemLayers.js",
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 87,
-      "lineEnd": 89,
+      "lineStart": 36,
+      "lineEnd": 38,
       "summary": "캔버스 · 노드 상태나 허용 여부를 해당 상태인지 판단합니다",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/systemLayers.js#L87-L89",
+          "source:shared/systemLayers.js#L36-L38",
           "symbol:isCanvasAnnotationNode"
-        ]
-      },
-      "tags": [
-        "exported",
-        "function",
-        "shared",
-        "sharing-collaboration",
-        "sharing-policy"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": true,
-        "async": false,
-        "codePartCount": 1
-      }
-    },
-    {
-      "id": "function:shared/systemLayers.js:isCustomSystemLayerView",
-      "kind": "function",
-      "label": "isCustomSystemLayerView",
-      "fingerprint": "4bd8d0b0713638c6d3a5",
-      "explanationFingerprint": "bb7635d727d35057f14e",
-      "name": "isCustomSystemLayerView",
-      "path": "shared/systemLayers.js",
-      "parentId": "file:shared/systemLayers.js",
-      "layer": "shared",
-      "area": "sharing-collaboration",
-      "subsystem": "sharing-policy",
-      "lineStart": 139,
-      "lineEnd": 141,
-      "summary": "시스템 · 화면 상태 상태나 허용 여부를 해당 상태인지 판단합니다",
-      "technicalSummary": "다른 파일에서 사용 가능",
-      "explanationBasis": {
-        "method": "symbol-and-source-range",
-        "refs": [
-          "source:shared/systemLayers.js#L139-L141",
-          "symbol:isCustomSystemLayerView"
-        ]
-      },
-      "tags": [
-        "exported",
-        "function",
-        "shared",
-        "sharing-collaboration",
-        "sharing-policy"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": true,
-        "async": false,
-        "codePartCount": 1
-      }
-    },
-    {
-      "id": "function:shared/systemLayers.js:isOfficialSystemLayerId",
-      "kind": "function",
-      "label": "isOfficialSystemLayerId",
-      "fingerprint": "d84c6f815ed148d1a3b1",
-      "explanationFingerprint": "0c31fb752ad35dc2d76c",
-      "name": "isOfficialSystemLayerId",
-      "path": "shared/systemLayers.js",
-      "parentId": "file:shared/systemLayers.js",
-      "layer": "shared",
-      "area": "sharing-collaboration",
-      "subsystem": "sharing-policy",
-      "lineStart": 52,
-      "lineEnd": 54,
-      "summary": "시스템 · 식별자 상태나 허용 여부를 해당 상태인지 판단합니다",
-      "technicalSummary": "다른 파일에서 사용 가능",
-      "explanationBasis": {
-        "method": "symbol-and-source-range",
-        "refs": [
-          "source:shared/systemLayers.js#L52-L54",
-          "symbol:isOfficialSystemLayerId"
         ]
       },
       "tags": [
@@ -48071,59 +49367,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "isSystemLayerView",
       "fingerprint": "3051850924bcd3113766",
-      "explanationFingerprint": "618be1ba2228760f67f5",
+      "explanationFingerprint": "b2cb20f8794b14cae5ac",
       "name": "isSystemLayerView",
       "path": "shared/systemLayers.js",
       "parentId": "file:shared/systemLayers.js",
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 112,
-      "lineEnd": 114,
+      "lineStart": 44,
+      "lineEnd": 46,
       "summary": "시스템 · 화면 상태 상태나 허용 여부를 해당 상태인지 판단합니다",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/systemLayers.js#L112-L114",
+          "source:shared/systemLayers.js#L44-L46",
           "symbol:isSystemLayerView"
-        ]
-      },
-      "tags": [
-        "exported",
-        "function",
-        "shared",
-        "sharing-collaboration",
-        "sharing-policy"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": true,
-        "async": false,
-        "codePartCount": 1
-      }
-    },
-    {
-      "id": "function:shared/systemLayers.js:isSystemMapTemplateCanvas",
-      "kind": "function",
-      "label": "isSystemMapTemplateCanvas",
-      "fingerprint": "7b3ac78c4ca52c378e20",
-      "explanationFingerprint": "2a1416a324de2e05cd84",
-      "name": "isSystemMapTemplateCanvas",
-      "path": "shared/systemLayers.js",
-      "parentId": "file:shared/systemLayers.js",
-      "layer": "shared",
-      "area": "sharing-collaboration",
-      "subsystem": "sharing-policy",
-      "lineStart": 199,
-      "lineEnd": 207,
-      "summary": "시스템 · 시스템 지도 · 캔버스 상태나 허용 여부를 해당 상태인지 판단합니다",
-      "technicalSummary": "다른 파일에서 사용 가능",
-      "explanationBasis": {
-        "method": "symbol-and-source-range",
-        "refs": [
-          "source:shared/systemLayers.js#L199-L207",
-          "symbol:isSystemMapTemplateCanvas"
         ]
       },
       "tags": [
@@ -48144,22 +49403,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:shared/systemLayers.js:metaFor",
       "kind": "function",
       "label": "metaFor",
-      "fingerprint": "8e8fdd8cd744da685092",
-      "explanationFingerprint": "fa58ece9cf31c4f543ab",
+      "fingerprint": "d6011a81aabd56a3b1c8",
+      "explanationFingerprint": "f81b5b78965bdf554051",
       "name": "metaFor",
       "path": "shared/systemLayers.js",
       "parentId": "file:shared/systemLayers.js",
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 253,
-      "lineEnd": 253,
+      "lineStart": 159,
+      "lineEnd": 159,
       "summary": "이 파일이 맡은 “시스템에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/systemLayers.js#L253",
+          "source:shared/systemLayers.js#L159",
           "symbol:metaFor"
         ]
       },
@@ -48180,21 +49439,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "nodeIsRedacted",
       "fingerprint": "ef9fcc574704028923f9",
-      "explanationFingerprint": "5268c156ac5a116ce53f",
+      "explanationFingerprint": "f5043bbb3f48d14842ac",
       "name": "nodeIsRedacted",
       "path": "shared/systemLayers.js",
       "parentId": "file:shared/systemLayers.js",
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 216,
-      "lineEnd": 218,
+      "lineStart": 123,
+      "lineEnd": 125,
       "summary": "노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/systemLayers.js#L216-L218",
+          "source:shared/systemLayers.js#L123-L125",
           "symbol:nodeIsRedacted"
         ]
       },
@@ -48216,21 +49475,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "normalizeNodePresentation",
       "fingerprint": "4344b660d229328f969d",
-      "explanationFingerprint": "8038fa34132086b971d6",
+      "explanationFingerprint": "1da2a24ce57a2409f75f",
       "name": "normalizeNodePresentation",
       "path": "shared/systemLayers.js",
       "parentId": "file:shared/systemLayers.js",
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 66,
-      "lineEnd": 70,
+      "lineStart": 15,
+      "lineEnd": 19,
       "summary": "노드 자료를 안전한 공통 형식으로 정리합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/systemLayers.js#L66-L70",
+          "source:shared/systemLayers.js#L15-L19",
           "symbol:normalizeNodePresentation"
         ]
       },
@@ -48252,22 +49511,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:shared/systemLayers.js:normalizeSystemLayerId",
       "kind": "function",
       "label": "normalizeSystemLayerId",
-      "fingerprint": "04a7ed2718efb3a53b41",
-      "explanationFingerprint": "fdbf7a644f209c9c2ad4",
+      "fingerprint": "120e8905adb93841774b",
+      "explanationFingerprint": "6b892096b0a00b04b2c4",
       "name": "normalizeSystemLayerId",
       "path": "shared/systemLayers.js",
       "parentId": "file:shared/systemLayers.js",
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 56,
-      "lineEnd": 60,
+      "lineStart": 11,
+      "lineEnd": 13,
       "summary": "시스템 · 식별자 자료를 안전한 공통 형식으로 정리합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/systemLayers.js#L56-L60",
+          "source:shared/systemLayers.js#L11-L13",
           "symbol:normalizeSystemLayerId"
         ]
       },
@@ -48282,7 +49541,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "functionKind": "function",
         "exported": true,
         "async": false,
-        "codePartCount": 6
+        "codePartCount": 2
       }
     },
     {
@@ -48290,21 +49549,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "orderOf",
       "fingerprint": "30aae0eeefaf4d67ef74",
-      "explanationFingerprint": "4cc852266453b2ce3a33",
+      "explanationFingerprint": "54e19844a66f6f09f9c8",
       "name": "orderOf",
       "path": "shared/systemLayers.js",
       "parentId": "file:shared/systemLayers.js",
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 254,
-      "lineEnd": 254,
+      "lineStart": 160,
+      "lineEnd": 160,
       "summary": "이 파일이 맡은 “시스템에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/systemLayers.js#L254",
+          "source:shared/systemLayers.js#L160",
           "symbol:orderOf"
         ]
       },
@@ -48325,21 +49584,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "plainNodeLabel",
       "fingerprint": "f7660892a17f7e526543",
-      "explanationFingerprint": "573a0943dc4a1f2b82c7",
+      "explanationFingerprint": "2432b7b7785f2a8a84e4",
       "name": "plainNodeLabel",
       "path": "shared/systemLayers.js",
       "parentId": "file:shared/systemLayers.js",
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 228,
-      "lineEnd": 231,
+      "lineStart": 135,
+      "lineEnd": 138,
       "summary": "노드 · 화면 이름에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/systemLayers.js#L228-L231",
+          "source:shared/systemLayers.js#L135-L138",
           "symbol:plainNodeLabel"
         ]
       },
@@ -48357,25 +49616,62 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
+      "id": "function:shared/systemLayers.js:pruneLegacyOfficialSystemLayerViews",
+      "kind": "function",
+      "label": "pruneLegacyOfficialSystemLayerViews",
+      "fingerprint": "d0633da1ccaa66ae37f8",
+      "explanationFingerprint": "d0751dffbc95db5fa443",
+      "name": "pruneLegacyOfficialSystemLayerViews",
+      "path": "shared/systemLayers.js",
+      "parentId": "file:shared/systemLayers.js",
+      "layer": "shared",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 96,
+      "lineEnd": 103,
+      "summary": "시스템에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:shared/systemLayers.js#L96-L103",
+          "symbol:pruneLegacyOfficialSystemLayerViews"
+        ]
+      },
+      "tags": [
+        "exported",
+        "function",
+        "shared",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false,
+        "codePartCount": 5
+      }
+    },
+    {
       "id": "function:shared/systemLayers.js:relationLabel",
       "kind": "function",
       "label": "relationLabel",
       "fingerprint": "407d37007a54271bdf0a",
-      "explanationFingerprint": "0c1d5ea89a1b84bf683c",
+      "explanationFingerprint": "111481088eaf80aacaf0",
       "name": "relationLabel",
       "path": "shared/systemLayers.js",
       "parentId": "file:shared/systemLayers.js",
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 233,
-      "lineEnd": 235,
+      "lineStart": 140,
+      "lineEnd": 142,
       "summary": "관계 · 화면 이름에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/systemLayers.js#L233-L235",
+          "source:shared/systemLayers.js#L140-L142",
           "symbol:relationLabel"
         ]
       },
@@ -48397,21 +49693,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "removeSystemLayerFromNodes",
       "fingerprint": "00bbca5ef90b80eb4cb0",
-      "explanationFingerprint": "1773b5acb38a35f36d24",
+      "explanationFingerprint": "a6c1c6b2480a84e6490b",
       "name": "removeSystemLayerFromNodes",
       "path": "shared/systemLayers.js",
       "parentId": "file:shared/systemLayers.js",
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 179,
-      "lineEnd": 187,
+      "lineStart": 107,
+      "lineEnd": 115,
       "summary": "시스템 · 노드 대상을 제거합니다",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/systemLayers.js#L179-L187",
+          "source:shared/systemLayers.js#L107-L115",
           "symbol:removeSystemLayerFromNodes"
         ]
       },
@@ -48430,62 +49726,25 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       }
     },
     {
-      "id": "function:shared/systemLayers.js:systemLayerDefinition",
-      "kind": "function",
-      "label": "systemLayerDefinition",
-      "fingerprint": "8573d3b5af297c5df655",
-      "explanationFingerprint": "8b3ddfcb2aaaeef4ac6c",
-      "name": "systemLayerDefinition",
-      "path": "shared/systemLayers.js",
-      "parentId": "file:shared/systemLayers.js",
-      "layer": "shared",
-      "area": "sharing-collaboration",
-      "subsystem": "sharing-policy",
-      "lineStart": 62,
-      "lineEnd": 64,
-      "summary": "시스템 · 기능 정의에 필요한 한 단계의 판단이나 변환을 수행합니다.",
-      "technicalSummary": "다른 파일에서 사용 가능",
-      "explanationBasis": {
-        "method": "symbol-and-source-range",
-        "refs": [
-          "source:shared/systemLayers.js#L62-L64",
-          "symbol:systemLayerDefinition"
-        ]
-      },
-      "tags": [
-        "exported",
-        "function",
-        "shared",
-        "sharing-collaboration",
-        "sharing-policy"
-      ],
-      "details": {
-        "functionKind": "function",
-        "exported": true,
-        "async": false,
-        "codePartCount": 1
-      }
-    },
-    {
       "id": "function:shared/systemLayers.js:systemLayerFromView",
       "kind": "function",
       "label": "systemLayerFromView",
       "fingerprint": "f7307fa9dcc0c39d8c96",
-      "explanationFingerprint": "b0947c0f449856ce298d",
+      "explanationFingerprint": "ad028874939ff70201a1",
       "name": "systemLayerFromView",
       "path": "shared/systemLayers.js",
       "parentId": "file:shared/systemLayers.js",
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 116,
-      "lineEnd": 118,
+      "lineStart": 48,
+      "lineEnd": 50,
       "summary": "시스템 · 화면 상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/systemLayers.js#L116-L118",
+          "source:shared/systemLayers.js#L48-L50",
           "symbol:systemLayerFromView"
         ]
       },
@@ -48507,22 +49766,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:shared/systemLayers.js:systemLayerOptionsFromViews",
       "kind": "function",
       "label": "systemLayerOptionsFromViews",
-      "fingerprint": "efd9b4b0f14c3e266734",
-      "explanationFingerprint": "a78a603e3f905611dbc6",
+      "fingerprint": "74eb73965d677ac43e02",
+      "explanationFingerprint": "4598d1bf4aab3716e633",
       "name": "systemLayerOptionsFromViews",
       "path": "shared/systemLayers.js",
       "parentId": "file:shared/systemLayers.js",
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 146,
-      "lineEnd": 174,
+      "lineStart": 72,
+      "lineEnd": 91,
       "summary": "시스템에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/systemLayers.js#L146-L174",
+          "source:shared/systemLayers.js#L72-L91",
           "symbol:systemLayerOptionsFromViews"
         ]
       },
@@ -48537,7 +49796,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "functionKind": "function",
         "exported": true,
         "async": false,
-        "codePartCount": 16
+        "codePartCount": 12
       }
     },
     {
@@ -48545,21 +49804,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "withSystemLayerOverride",
       "fingerprint": "9fd226778e4632616ddf",
-      "explanationFingerprint": "3a3cb3eaa2467c658b7d",
+      "explanationFingerprint": "4f8b610c12aa02f15acd",
       "name": "withSystemLayerOverride",
       "path": "shared/systemLayers.js",
       "parentId": "file:shared/systemLayers.js",
       "layer": "shared",
       "area": "sharing-collaboration",
       "subsystem": "sharing-policy",
-      "lineStart": 72,
-      "lineEnd": 78,
+      "lineStart": 21,
+      "lineEnd": 27,
       "summary": "시스템에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/systemLayers.js#L72-L78",
+          "source:shared/systemLayers.js#L21-L27",
           "symbol:withSystemLayerOverride"
         ]
       },
@@ -54793,22 +56052,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:shared/workflowCanvasSystemMap.js:createWorkflowCanvasSystemMap",
       "kind": "function",
       "label": "createWorkflowCanvasSystemMap",
-      "fingerprint": "f7fe0d9ebdc4f398ea5a",
-      "explanationFingerprint": "45c780a7c9a28e37db23",
+      "fingerprint": "3dbee082700ac06e62e8",
+      "explanationFingerprint": "c76cd8824cd1f7d1390d",
       "name": "createWorkflowCanvasSystemMap",
       "path": "shared/workflowCanvasSystemMap.js",
       "parentId": "file:shared/workflowCanvasSystemMap.js",
       "layer": "shared",
       "area": "digital-twin-engine",
       "subsystem": "twin-materialization",
-      "lineStart": 488,
-      "lineEnd": 511,
+      "lineStart": 487,
+      "lineEnd": 510,
       "summary": "워크플로우 · 캔버스 · 시스템 · 시스템 지도 항목이나 구조를 새로 만듭니다",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/workflowCanvasSystemMap.js#L488-L511",
+          "source:shared/workflowCanvasSystemMap.js#L487-L510",
           "symbol:createWorkflowCanvasSystemMap"
         ]
       },
@@ -54831,21 +56090,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "groupNode",
       "fingerprint": "ff61d1914085177d34d6",
-      "explanationFingerprint": "2191aed8110306d74c02",
+      "explanationFingerprint": "4103805ec70be34415b4",
       "name": "groupNode",
       "path": "shared/workflowCanvasSystemMap.js",
       "parentId": "file:shared/workflowCanvasSystemMap.js",
       "layer": "shared",
       "area": "digital-twin-engine",
       "subsystem": "twin-materialization",
-      "lineStart": 123,
-      "lineEnd": 144,
+      "lineStart": 122,
+      "lineEnd": 143,
       "summary": "그룹 · 노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/workflowCanvasSystemMap.js#L123-L144",
+          "source:shared/workflowCanvasSystemMap.js#L122-L143",
           "symbol:groupNode"
         ]
       },
@@ -54867,21 +56126,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "mapEdges",
       "fingerprint": "763995b36ef7d3b65bdd",
-      "explanationFingerprint": "62b1c471a617448d645f",
+      "explanationFingerprint": "3ff5d01af2563d5adb42",
       "name": "mapEdges",
       "path": "shared/workflowCanvasSystemMap.js",
       "parentId": "file:shared/workflowCanvasSystemMap.js",
       "layer": "shared",
       "area": "digital-twin-engine",
       "subsystem": "twin-materialization",
-      "lineStart": 435,
-      "lineEnd": 486,
+      "lineStart": 434,
+      "lineEnd": 485,
       "summary": "시스템 지도 · 연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/workflowCanvasSystemMap.js#L435-L486",
+          "source:shared/workflowCanvasSystemMap.js#L434-L485",
           "symbol:mapEdges"
         ]
       },
@@ -54903,21 +56162,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "mapNodes",
       "fingerprint": "236a946d6e94759aeb70",
-      "explanationFingerprint": "41867742b12566e306cb",
+      "explanationFingerprint": "18baf34acb539c310ab1",
       "name": "mapNodes",
       "path": "shared/workflowCanvasSystemMap.js",
       "parentId": "file:shared/workflowCanvasSystemMap.js",
       "layer": "shared",
       "area": "digital-twin-engine",
       "subsystem": "twin-materialization",
-      "lineStart": 200,
-      "lineEnd": 433,
+      "lineStart": 199,
+      "lineEnd": 432,
       "summary": "시스템 지도 · 노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/workflowCanvasSystemMap.js#L200-L433",
+          "source:shared/workflowCanvasSystemMap.js#L199-L432",
           "symbol:mapNodes"
         ]
       },
@@ -54939,21 +56198,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "relationEdge",
       "fingerprint": "85b7e5d0c27a0cf0a108",
-      "explanationFingerprint": "c727b82118de1eedc85c",
+      "explanationFingerprint": "9ca4bce964048b7d7532",
       "name": "relationEdge",
       "path": "shared/workflowCanvasSystemMap.js",
       "parentId": "file:shared/workflowCanvasSystemMap.js",
       "layer": "shared",
       "area": "digital-twin-engine",
       "subsystem": "twin-materialization",
-      "lineStart": 175,
-      "lineEnd": 198,
+      "lineStart": 174,
+      "lineEnd": 197,
       "summary": "관계 · 연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/workflowCanvasSystemMap.js#L175-L198",
+          "source:shared/workflowCanvasSystemMap.js#L174-L197",
           "symbol:relationEdge"
         ]
       },
@@ -54975,21 +56234,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "runtimePart",
       "fingerprint": "34b07988ca59ae69fc0e",
-      "explanationFingerprint": "b694f13368cd8049c5e1",
+      "explanationFingerprint": "6933059c7799ccbb8457",
       "name": "runtimePart",
       "path": "shared/workflowCanvasSystemMap.js",
       "parentId": "file:shared/workflowCanvasSystemMap.js",
       "layer": "shared",
       "area": "digital-twin-engine",
       "subsystem": "twin-materialization",
-      "lineStart": 19,
-      "lineEnd": 37,
+      "lineStart": 18,
+      "lineEnd": 36,
       "summary": "실제 운영 상태 · 시스템 파츠에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/workflowCanvasSystemMap.js#L19-L37",
+          "source:shared/workflowCanvasSystemMap.js#L18-L36",
           "symbol:runtimePart"
         ]
       },
@@ -55011,21 +56270,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "sourceTwinViewPart",
       "fingerprint": "403be746f3913ccb2985",
-      "explanationFingerprint": "50fee8253293dc0b6988",
+      "explanationFingerprint": "b14933654fdc8a2a716b",
       "name": "sourceTwinViewPart",
       "path": "shared/workflowCanvasSystemMap.js",
       "parentId": "file:shared/workflowCanvasSystemMap.js",
       "layer": "shared",
       "area": "digital-twin-engine",
       "subsystem": "twin-materialization",
-      "lineStart": 47,
-      "lineEnd": 57,
+      "lineStart": 46,
+      "lineEnd": 56,
       "summary": "소스 코드 · Asset 원장 · 화면 상태 · 시스템 파츠에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/workflowCanvasSystemMap.js#L47-L57",
+          "source:shared/workflowCanvasSystemMap.js#L46-L56",
           "symbol:sourceTwinViewPart"
         ]
       },
@@ -55047,21 +56306,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "systemNode",
       "fingerprint": "d577b1ad5c6301a3c9c0",
-      "explanationFingerprint": "7c94c5dbc300d969815e",
+      "explanationFingerprint": "cd2a3103396d606f702e",
       "name": "systemNode",
       "path": "shared/workflowCanvasSystemMap.js",
       "parentId": "file:shared/workflowCanvasSystemMap.js",
       "layer": "shared",
       "area": "digital-twin-engine",
       "subsystem": "twin-materialization",
-      "lineStart": 146,
-      "lineEnd": 173,
+      "lineStart": 145,
+      "lineEnd": 172,
       "summary": "시스템 · 노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:shared/workflowCanvasSystemMap.js#L146-L173",
+          "source:shared/workflowCanvasSystemMap.js#L145-L172",
           "symbol:systemNode"
         ]
       },
@@ -58458,22 +59717,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/App.jsx:App",
       "kind": "function",
       "label": "App",
-      "fingerprint": "ad2e8cc03131977f7d55",
-      "explanationFingerprint": "232ef87df9e90568106c",
+      "fingerprint": "98e7e07c6326b6ad14fb",
+      "explanationFingerprint": "75f6993b61fea1366295",
       "name": "App",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 553,
-      "lineEnd": 5414,
+      "lineStart": 558,
+      "lineEnd": 5426,
       "summary": "App 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
       "technicalSummary": "다른 파일에서 사용 가능",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L553-L5414",
+          "source:src/App.jsx#L558-L5426",
           "symbol:App"
         ]
       },
@@ -58488,7 +59747,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "functionKind": "function",
         "exported": true,
         "async": false,
-        "codePartCount": 2212
+        "codePartCount": 2215
       }
     },
     {
@@ -58496,21 +59755,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "ContextItem",
       "fingerprint": "fdeb31b728e83fc3238e",
-      "explanationFingerprint": "51b12ae807517ae28304",
+      "explanationFingerprint": "2eac450835b8751da565",
       "name": "ContextItem",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 5417,
-      "lineEnd": 5434,
+      "lineStart": 5429,
+      "lineEnd": 5446,
       "summary": "실행 문맥 · 검토 항목 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L5417-L5434",
+          "source:src/App.jsx#L5429-L5446",
           "symbol:ContextItem"
         ]
       },
@@ -58532,21 +59791,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "IconBtn",
       "fingerprint": "2e991772b227d303be7d",
-      "explanationFingerprint": "68497f4bbd8be0dbd9a6",
+      "explanationFingerprint": "7b2e6293fabc8cc1e6f5",
       "name": "IconBtn",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 5455,
-      "lineEnd": 5471,
+      "lineStart": 5467,
+      "lineEnd": 5483,
       "summary": "IconBtn 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L5455-L5471",
+          "source:src/App.jsx#L5467-L5483",
           "symbol:IconBtn"
         ]
       },
@@ -58568,21 +59827,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "TypeItem",
       "fingerprint": "68abc0d7712f461ab54e",
-      "explanationFingerprint": "434961655ee9dc8ff19a",
+      "explanationFingerprint": "42cc190e15920115b74b",
       "name": "TypeItem",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 5436,
-      "lineEnd": 5453,
+      "lineStart": 5448,
+      "lineEnd": 5465,
       "summary": "검토 항목 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L5436-L5453",
+          "source:src/App.jsx#L5448-L5465",
           "symbol:TypeItem"
         ]
       },
@@ -58604,21 +59863,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "absPos",
       "fingerprint": "852c89de5c9f5c0fae52",
-      "explanationFingerprint": "4c236012f8c4a7204682",
+      "explanationFingerprint": "c930c81843f0fd8679de",
       "name": "absPos",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1010,
-      "lineEnd": 1018,
+      "lineStart": 1014,
+      "lineEnd": 1022,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1010-L1018",
+          "source:src/App.jsx#L1014-L1022",
           "symbol:absPos"
         ]
       },
@@ -58640,21 +59899,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "afterLogin",
       "fingerprint": "360d192738561adcf439",
-      "explanationFingerprint": "d49f93696a75bb980221",
+      "explanationFingerprint": "6535bf5dd4f6343b9a26",
       "name": "afterLogin",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1856,
-      "lineEnd": 1932,
+      "lineStart": 1860,
+      "lineEnd": 1936,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1856-L1932",
+          "source:src/App.jsx#L1860-L1936",
           "symbol:afterLogin"
         ]
       },
@@ -58677,21 +59936,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "aggregateSystemNodeRuntime",
       "fingerprint": "4a97f3c722535e66a833",
-      "explanationFingerprint": "d667c96c09ff58821ccc",
+      "explanationFingerprint": "0fb2de2bf1ca6a116cf3",
       "name": "aggregateSystemNodeRuntime",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 297,
-      "lineEnd": 317,
+      "lineStart": 296,
+      "lineEnd": 316,
       "summary": "시스템 · 노드 · 실제 운영 상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L297-L317",
+          "source:src/App.jsx#L296-L316",
           "symbol:aggregateSystemNodeRuntime"
         ]
       },
@@ -58713,21 +59972,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "assignWorkshopControlNode",
       "fingerprint": "7ada9a7bb4f6d165f303",
-      "explanationFingerprint": "d3a99de132e4233f075c",
+      "explanationFingerprint": "8a8740b93cf056bb7c6a",
       "name": "assignWorkshopControlNode",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 4532,
-      "lineEnd": 4544,
+      "lineStart": 4531,
+      "lineEnd": 4543,
       "summary": "노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L4532-L4544",
+          "source:src/App.jsx#L4531-L4543",
           "symbol:assignWorkshopControlNode"
         ]
       },
@@ -58749,21 +60008,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "baseEdgeStyle",
       "fingerprint": "19b657c4aac656ff1af3",
-      "explanationFingerprint": "db41604cfbfe29638275",
+      "explanationFingerprint": "ff362b61fae4ce48d77a",
       "name": "baseEdgeStyle",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 485,
-      "lineEnd": 498,
+      "lineStart": 484,
+      "lineEnd": 497,
       "summary": "기준 · 연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L485-L498",
+          "source:src/App.jsx#L484-L497",
           "symbol:baseEdgeStyle"
         ]
       },
@@ -58785,21 +60044,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "cancelEdgeLp",
       "fingerprint": "8e18e0733ba6830c8bcb",
-      "explanationFingerprint": "14df0546365b25f91bfd",
+      "explanationFingerprint": "62e43193e4144e0f1547",
       "name": "cancelEdgeLp",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 959,
-      "lineEnd": 964,
+      "lineStart": 963,
+      "lineEnd": 968,
       "summary": "연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L959-L964",
+          "source:src/App.jsx#L963-L968",
           "symbol:cancelEdgeLp"
         ]
       },
@@ -58821,21 +60080,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "canvasSnapshot",
       "fingerprint": "7f60b40a530076b0c3f0",
-      "explanationFingerprint": "21f76af5f76f01ea51e5",
+      "explanationFingerprint": "28081b2ce242bcefc414",
       "name": "canvasSnapshot",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 522,
-      "lineEnd": 531,
+      "lineStart": 521,
+      "lineEnd": 530,
       "summary": "캔버스 · 상태 스냅샷에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L522-L531",
+          "source:src/App.jsx#L521-L530",
           "symbol:canvasSnapshot"
         ]
       },
@@ -58857,21 +60116,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "centerInFrame",
       "fingerprint": "e037693af7f729d0d8b3",
-      "explanationFingerprint": "b9fcaf93094b4e5e17fb",
+      "explanationFingerprint": "7c8498f8c00c0dd01b89",
       "name": "centerInFrame",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 428,
-      "lineEnd": 437,
+      "lineStart": 427,
+      "lineEnd": 436,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L428-L437",
+          "source:src/App.jsx#L427-L436",
           "symbol:centerInFrame"
         ]
       },
@@ -58892,8 +60151,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/App.jsx:changeContextSystemLayer",
       "kind": "function",
       "label": "changeContextSystemLayer",
-      "fingerprint": "a630f9f5b5c83d62c6d2",
-      "explanationFingerprint": "bf5b29d3e60578ccd6df",
+      "fingerprint": "a8c19cfb413abc8d5d4d",
+      "explanationFingerprint": "0af6e80f8dbb4911b0b6",
       "name": "changeContextSystemLayer",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
@@ -58901,13 +60160,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
       "lineStart": 4498,
-      "lineEnd": 4507,
+      "lineEnd": 4506,
       "summary": "변경 · 실행 문맥 · 시스템에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L4498-L4507",
+          "source:src/App.jsx#L4498-L4506",
           "symbol:changeContextSystemLayer"
         ]
       },
@@ -58921,7 +60180,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "functionKind": "arrow",
         "exported": false,
         "async": false,
-        "codePartCount": 10
+        "codePartCount": 8
       }
     },
     {
@@ -58929,21 +60188,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "cleanup",
       "fingerprint": "31dded95ae2501741162",
-      "explanationFingerprint": "27085e20657b759970b6",
+      "explanationFingerprint": "728de989a0eda23933b2",
       "name": "cleanup",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 934,
-      "lineEnd": 939,
+      "lineStart": 938,
+      "lineEnd": 943,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L934-L939",
+          "source:src/App.jsx#L938-L943",
           "symbol:cleanup"
         ]
       },
@@ -58965,21 +60224,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "closeContext",
       "fingerprint": "2a59e32f45d65c4e1805",
-      "explanationFingerprint": "db91ce33a531a1b56a03",
+      "explanationFingerprint": "3a8d6b26d881a5fab301",
       "name": "closeContext",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3746,
-      "lineEnd": 3746,
+      "lineStart": 3750,
+      "lineEnd": 3750,
       "summary": "실행 문맥 작업을 화면을 닫습니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3746",
+          "source:src/App.jsx#L3750",
           "symbol:closeContext"
         ]
       },
@@ -59001,21 +60260,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "closestHandles",
       "fingerprint": "b55b25d4e13346a56ddf",
-      "explanationFingerprint": "735d37d20368f405283e",
+      "explanationFingerprint": "624461e5dd39faa2d030",
       "name": "closestHandles",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 403,
-      "lineEnd": 414,
+      "lineStart": 402,
+      "lineEnd": 413,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L403-L414",
+          "source:src/App.jsx#L402-L413",
           "symbol:closestHandles"
         ]
       },
@@ -59037,21 +60296,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "cloudRowSnapshot",
       "fingerprint": "9f581b5158d168c04a4e",
-      "explanationFingerprint": "6747f18df3479b21d6ea",
+      "explanationFingerprint": "052bbd5749077f1b389c",
       "name": "cloudRowSnapshot",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 533,
-      "lineEnd": 541,
+      "lineStart": 532,
+      "lineEnd": 540,
       "summary": "상태 스냅샷에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L533-L541",
+          "source:src/App.jsx#L532-L540",
           "symbol:cloudRowSnapshot"
         ]
       },
@@ -59073,21 +60332,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "commitRename",
       "fingerprint": "a506679eab2e3d727289",
-      "explanationFingerprint": "25589f71f799f2c778c2",
+      "explanationFingerprint": "0ca2924366f4dc5ee4ab",
       "name": "commitRename",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 4453,
-      "lineEnd": 4456,
+      "lineStart": 4456,
+      "lineEnd": 4459,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L4453-L4456",
+          "source:src/App.jsx#L4456-L4459",
           "symbol:commitRename"
         ]
       },
@@ -59109,21 +60368,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "creationPosition",
       "fingerprint": "811ea535ee667311bd1e",
-      "explanationFingerprint": "a497268d57c8d5efe9a4",
+      "explanationFingerprint": "23c019a0c27d6565b391",
       "name": "creationPosition",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 439,
-      "lineEnd": 443,
+      "lineStart": 438,
+      "lineEnd": 442,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L439-L443",
+          "source:src/App.jsx#L438-L442",
           "symbol:creationPosition"
         ]
       },
@@ -59145,21 +60404,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "dedupeParticipants",
       "fingerprint": "90aee76075c1a61798e0",
-      "explanationFingerprint": "66929b1a7a72246b1eb3",
+      "explanationFingerprint": "c9386f8e3a8490b63112",
       "name": "dedupeParticipants",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 366,
-      "lineEnd": 373,
+      "lineStart": 365,
+      "lineEnd": 372,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L366-L373",
+          "source:src/App.jsx#L365-L372",
           "symbol:dedupeParticipants"
         ]
       },
@@ -59181,21 +60440,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "detachDigitalTwinBinding",
       "fingerprint": "dcc646ae07b6701cce09",
-      "explanationFingerprint": "e9f48ebeb589d1e12d07",
+      "explanationFingerprint": "2f07525af7abd4adefe1",
       "name": "detachDigitalTwinBinding",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 511,
-      "lineEnd": 515,
+      "lineStart": 510,
+      "lineEnd": 514,
       "summary": "Asset · 원장에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L511-L515",
+          "source:src/App.jsx#L510-L514",
           "symbol:detachDigitalTwinBinding"
         ]
       },
@@ -59217,21 +60476,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "dim",
       "fingerprint": "e95e6e2a04b81f8c9cb5",
-      "explanationFingerprint": "1d75d397f2d0c8a70ff2",
+      "explanationFingerprint": "97d01ee4bcddd1bf68ab",
       "name": "dim",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 404,
-      "lineEnd": 404,
+      "lineStart": 403,
+      "lineEnd": 403,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L404",
+          "source:src/App.jsx#L403",
           "symbol:dim"
         ]
       },
@@ -59252,21 +60511,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "dim",
       "fingerprint": "ac0af8f60af0838a0fcc",
-      "explanationFingerprint": "b8ac7b1bbca3c35b0f1f",
+      "explanationFingerprint": "7ca7ce1ee7e7d08df1d0",
       "name": "dim",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3517,
-      "lineEnd": 3517,
+      "lineStart": 3521,
+      "lineEnd": 3521,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3517",
+          "source:src/App.jsx#L3521",
           "symbol:dim"
         ]
       },
@@ -59287,21 +60546,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "dim",
       "fingerprint": "ac0af8f60af0838a0fcc",
-      "explanationFingerprint": "c43384b74076379933d4",
+      "explanationFingerprint": "fa070505276839c16aeb",
       "name": "dim",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3603,
-      "lineEnd": 3603,
+      "lineStart": 3607,
+      "lineEnd": 3607,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3603",
+          "source:src/App.jsx#L3607",
           "symbol:dim"
         ]
       },
@@ -59322,21 +60581,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "distOf",
       "fingerprint": "9381f300575ebbdf1c0d",
-      "explanationFingerprint": "8461dd2fa8ee7a15d4d7",
+      "explanationFingerprint": "725e5ed98e49a062a403",
       "name": "distOf",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1210,
-      "lineEnd": 1210,
+      "lineStart": 1214,
+      "lineEnd": 1214,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1210",
+          "source:src/App.jsx#L1214",
           "symbol:distOf"
         ]
       },
@@ -59357,21 +60616,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "findAxisSnap",
       "fingerprint": "1147a6a4ab14ba649dba",
-      "explanationFingerprint": "50bea444536f85899f9a",
+      "explanationFingerprint": "27f146c59e598a8dd65a",
       "name": "findAxisSnap",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3518,
-      "lineEnd": 3525,
+      "lineStart": 3522,
+      "lineEnd": 3529,
       "summary": "이 기능 상태나 허용 여부를 대상을 찾습니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3518-L3525",
+          "source:src/App.jsx#L3522-L3529",
           "symbol:findAxisSnap"
         ]
       },
@@ -59393,21 +60652,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "fn",
       "fingerprint": "7d317f1663f5bd6de241",
-      "explanationFingerprint": "dad72d640b0b7f626c64",
+      "explanationFingerprint": "c17d54b5052b864d2f76",
       "name": "fn",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 642,
-      "lineEnd": 642,
+      "lineStart": 646,
+      "lineEnd": 646,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L642",
+          "source:src/App.jsx#L646",
           "symbol:fn"
         ]
       },
@@ -59428,21 +60687,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handleContextAddContent",
       "fingerprint": "d2dbe62d39b97b9d733d",
-      "explanationFingerprint": "d0ec15b4234728384f59",
+      "explanationFingerprint": "05283f5ed7aafdf5aeff",
       "name": "handleContextAddContent",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3776,
-      "lineEnd": 3781,
+      "lineStart": 3780,
+      "lineEnd": 3785,
       "summary": "실행 문맥 · 본문 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3776-L3781",
+          "source:src/App.jsx#L3780-L3785",
           "symbol:handleContextAddContent"
         ]
       },
@@ -59464,21 +60723,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handleContextAddGroup",
       "fingerprint": "b089a9891bef8943923e",
-      "explanationFingerprint": "917d5bbb0381d003f902",
+      "explanationFingerprint": "fb9b483e471dbec535dd",
       "name": "handleContextAddGroup",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3760,
-      "lineEnd": 3774,
+      "lineStart": 3764,
+      "lineEnd": 3778,
       "summary": "실행 문맥 · 그룹 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3760-L3774",
+          "source:src/App.jsx#L3764-L3778",
           "symbol:handleContextAddGroup"
         ]
       },
@@ -59500,21 +60759,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handleContextAddIntent",
       "fingerprint": "54f7592f83d3ed95ff65",
-      "explanationFingerprint": "8ce8bfe8aecc8f7dc281",
+      "explanationFingerprint": "7974117296a50f4ba5ea",
       "name": "handleContextAddIntent",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3790,
-      "lineEnd": 3795,
+      "lineStart": 3794,
+      "lineEnd": 3799,
       "summary": "실행 문맥 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3790-L3795",
+          "source:src/App.jsx#L3794-L3799",
           "symbol:handleContextAddIntent"
         ]
       },
@@ -59536,21 +60795,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handleContextAddMemo",
       "fingerprint": "e0001baacb407bdb396b",
-      "explanationFingerprint": "200fd4a57ea3b41bd060",
+      "explanationFingerprint": "1137003bfebfa6058058",
       "name": "handleContextAddMemo",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3754,
-      "lineEnd": 3758,
+      "lineStart": 3758,
+      "lineEnd": 3762,
       "summary": "실행 문맥 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3754-L3758",
+          "source:src/App.jsx#L3758-L3762",
           "symbol:handleContextAddMemo"
         ]
       },
@@ -59572,21 +60831,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handleContextAddStage",
       "fingerprint": "6a90426944cdb78075b4",
-      "explanationFingerprint": "3411e40cdfd00c6e6498",
+      "explanationFingerprint": "0238ad8def641497bd75",
       "name": "handleContextAddStage",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3748,
-      "lineEnd": 3752,
+      "lineStart": 3752,
+      "lineEnd": 3756,
       "summary": "실행 문맥 · 단계 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3748-L3752",
+          "source:src/App.jsx#L3752-L3756",
           "symbol:handleContextAddStage"
         ]
       },
@@ -59608,21 +60867,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handleContextAddSystem",
       "fingerprint": "5b18ad0040bef1488f25",
-      "explanationFingerprint": "6d53ce21ab37eb4834e6",
+      "explanationFingerprint": "55e38aa4eb8adb7b18ef",
       "name": "handleContextAddSystem",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3783,
-      "lineEnd": 3788,
+      "lineStart": 3787,
+      "lineEnd": 3792,
       "summary": "실행 문맥 · 시스템 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3783-L3788",
+          "source:src/App.jsx#L3787-L3792",
           "symbol:handleContextAddSystem"
         ]
       },
@@ -59644,21 +60903,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handleContextCleanupEdges",
       "fingerprint": "ddd2b97b3b2964b42d85",
-      "explanationFingerprint": "da770e1b3b0543d9efcb",
+      "explanationFingerprint": "6f936399ef7f486a9562",
       "name": "handleContextCleanupEdges",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3849,
-      "lineEnd": 3865,
+      "lineStart": 3853,
+      "lineEnd": 3869,
       "summary": "실행 문맥 · 연결선 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3849-L3865",
+          "source:src/App.jsx#L3853-L3869",
           "symbol:handleContextCleanupEdges"
         ]
       },
@@ -59680,21 +60939,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handleContextDeleteEdge",
       "fingerprint": "1236d107787239951c65",
-      "explanationFingerprint": "b66d8c4647b84b04c1b7",
+      "explanationFingerprint": "31678d0c2d831c62ebaa",
       "name": "handleContextDeleteEdge",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3817,
-      "lineEnd": 3823,
+      "lineStart": 3821,
+      "lineEnd": 3827,
       "summary": "실행 문맥 · 삭제 · 연결선 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3817-L3823",
+          "source:src/App.jsx#L3821-L3827",
           "symbol:handleContextDeleteEdge"
         ]
       },
@@ -59716,21 +60975,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handleContextDeleteNode",
       "fingerprint": "c40f2104b46f827da76e",
-      "explanationFingerprint": "dd3a08471f1ffea4f1b1",
+      "explanationFingerprint": "921ed1b277436f766347",
       "name": "handleContextDeleteNode",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3807,
-      "lineEnd": 3815,
+      "lineStart": 3811,
+      "lineEnd": 3819,
       "summary": "실행 문맥 · 삭제 · 노드 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3807-L3815",
+          "source:src/App.jsx#L3811-L3819",
           "symbol:handleContextDeleteNode"
         ]
       },
@@ -59752,21 +61011,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handleContextGroupSelection",
       "fingerprint": "37c3c5b81e3053212b15",
-      "explanationFingerprint": "08d93e1896538e3c7a73",
+      "explanationFingerprint": "c9842740220279eaacae",
       "name": "handleContextGroupSelection",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3838,
-      "lineEnd": 3844,
+      "lineStart": 3842,
+      "lineEnd": 3848,
       "summary": "실행 문맥 · 그룹 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3838-L3844",
+          "source:src/App.jsx#L3842-L3848",
           "symbol:handleContextGroupSelection"
         ]
       },
@@ -59788,21 +61047,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handleContextPaste",
       "fingerprint": "50cb94187db65bf4ca6f",
-      "explanationFingerprint": "d050fd99e93f5b508b43",
+      "explanationFingerprint": "5fdc92bc9e924204ed05",
       "name": "handleContextPaste",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3797,
-      "lineEnd": 3805,
+      "lineStart": 3801,
+      "lineEnd": 3809,
       "summary": "실행 문맥 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3797-L3805",
+          "source:src/App.jsx#L3801-L3809",
           "symbol:handleContextPaste"
         ]
       },
@@ -59824,21 +61083,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handleContextUngroup",
       "fingerprint": "ec5959c4960ca9e36788",
-      "explanationFingerprint": "9439aca2b2f88196afe1",
+      "explanationFingerprint": "623141eb0d39c1032988",
       "name": "handleContextUngroup",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3867,
-      "lineEnd": 3872,
+      "lineStart": 3871,
+      "lineEnd": 3876,
       "summary": "실행 문맥 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3867-L3872",
+          "source:src/App.jsx#L3871-L3876",
           "symbol:handleContextUngroup"
         ]
       },
@@ -59860,21 +61119,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handleContextUpdateEdgeRelation",
       "fingerprint": "34a1d59fe7f511fb1cac",
-      "explanationFingerprint": "0deb2611fca91324e6db",
+      "explanationFingerprint": "ad6e3253e9c322aa4d96",
       "name": "handleContextUpdateEdgeRelation",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3825,
-      "lineEnd": 3836,
+      "lineStart": 3829,
+      "lineEnd": 3840,
       "summary": "실행 문맥 · 변경 · 연결선 · 관계 관련 요청을 받아 필요한 절차를 실행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3825-L3836",
+          "source:src/App.jsx#L3829-L3840",
           "symbol:handleContextUpdateEdgeRelation"
         ]
       },
@@ -59896,21 +61155,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handler",
       "fingerprint": "29018ca7bde2ce517231",
-      "explanationFingerprint": "fa173b9f9154c5ee63db",
+      "explanationFingerprint": "6a9e538aec0f5f450a6c",
       "name": "handler",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 868,
-      "lineEnd": 875,
+      "lineStart": 872,
+      "lineEnd": 879,
       "summary": "이 서버 경로로 들어온 요청의 로그인과 입력을 확인하고 결과를 돌려줍니다. 이 요청은 다음 역할을 맡습니다: 캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L868-L875",
+          "source:src/App.jsx#L872-L879",
           "symbol:handler"
         ]
       },
@@ -59932,21 +61191,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handler",
       "fingerprint": "8e4941c0c81a4fb770cd",
-      "explanationFingerprint": "a22787b25abfce13da04",
+      "explanationFingerprint": "154852b6ff04407048ad",
       "name": "handler",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1993,
-      "lineEnd": 2066,
+      "lineStart": 1997,
+      "lineEnd": 2070,
       "summary": "이 서버 경로로 들어온 요청의 로그인과 입력을 확인하고 결과를 돌려줍니다. 이 요청은 다음 역할을 맡습니다: 캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1993-L2066",
+          "source:src/App.jsx#L1997-L2070",
           "symbol:handler"
         ]
       },
@@ -59969,21 +61228,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "handler",
       "fingerprint": "01364bf7f0b1454f6d73",
-      "explanationFingerprint": "ce4dce4fa18888fdd559",
+      "explanationFingerprint": "8fcef135ea25c79d2930",
       "name": "handler",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3431,
-      "lineEnd": 3441,
+      "lineStart": 3435,
+      "lineEnd": 3445,
       "summary": "이 서버 경로로 들어온 요청의 로그인과 입력을 확인하고 결과를 돌려줍니다. 이 요청은 다음 역할을 맡습니다: 캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3431-L3441",
+          "source:src/App.jsx#L3435-L3445",
           "symbol:handler"
         ]
       },
@@ -60005,21 +61264,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "isPartEdge",
       "fingerprint": "2906822e4e5bf89fb1eb",
-      "explanationFingerprint": "c0fd2623f8c32f293fe8",
+      "explanationFingerprint": "51fa25040abbfc2e6786",
       "name": "isPartEdge",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 472,
-      "lineEnd": 474,
+      "lineStart": 471,
+      "lineEnd": 473,
       "summary": "시스템 파츠 · 연결선 상태나 허용 여부를 해당 상태인지 판단합니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L472-L474",
+          "source:src/App.jsx#L471-L473",
           "symbol:isPartEdge"
         ]
       },
@@ -60041,21 +61300,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "isTypingTarget",
       "fingerprint": "8c9fd8a51d49bf6611b4",
-      "explanationFingerprint": "0ae0cd02615822117062",
+      "explanationFingerprint": "cf874f8cbe51faa96ab1",
       "name": "isTypingTarget",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 418,
-      "lineEnd": 423,
+      "lineStart": 417,
+      "lineEnd": 422,
       "summary": "대상 상태나 허용 여부를 해당 상태인지 판단합니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L418-L423",
+          "source:src/App.jsx#L417-L422",
           "symbol:isTypingTarget"
         ]
       },
@@ -60077,21 +61336,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "maxNodeId",
       "fingerprint": "31ac3e378c02147d4652",
-      "explanationFingerprint": "6a65285414478c579bef",
+      "explanationFingerprint": "112be652e5a1409deae8",
       "name": "maxNodeId",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 225,
-      "lineEnd": 227,
+      "lineStart": 224,
+      "lineEnd": 226,
       "summary": "노드 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L225-L227",
+          "source:src/App.jsx#L224-L226",
           "symbol:maxNodeId"
         ]
       },
@@ -60113,21 +61372,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "midOf",
       "fingerprint": "6fd54bf55fd65dc8d4ed",
-      "explanationFingerprint": "0edeb0da28f424c72575",
+      "explanationFingerprint": "48d5318958edc596f6ef",
       "name": "midOf",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1211,
-      "lineEnd": 1211,
+      "lineStart": 1215,
+      "lineEnd": 1215,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1211",
+          "source:src/App.jsx#L1215",
           "symbol:midOf"
         ]
       },
@@ -60148,21 +61407,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "nextId",
       "fingerprint": "2bc694efc53d29c83803",
-      "explanationFingerprint": "780549b57d8a946d0d1c",
+      "explanationFingerprint": "38c6d730002d083ad136",
       "name": "nextId",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 759,
-      "lineEnd": 759,
+      "lineStart": 763,
+      "lineEnd": 763,
       "summary": "식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L759",
+          "source:src/App.jsx#L763",
           "symbol:nextId"
         ]
       },
@@ -60183,21 +61442,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "nodeDisplayName",
       "fingerprint": "35bf80a709c61350b809",
-      "explanationFingerprint": "03558d0dc088627bee1d",
+      "explanationFingerprint": "25aca80d12242ac6aa69",
       "name": "nodeDisplayName",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 229,
-      "lineEnd": 244,
+      "lineStart": 228,
+      "lineEnd": 243,
       "summary": "노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L229-L244",
+          "source:src/App.jsx#L228-L243",
           "symbol:nodeDisplayName"
         ]
       },
@@ -60219,21 +61478,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "normalizeEdges",
       "fingerprint": "fd0da109757d11e4b74c",
-      "explanationFingerprint": "2c089474f00d70ac0e9b",
+      "explanationFingerprint": "6e0b99c9f98225264ac4",
       "name": "normalizeEdges",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 218,
-      "lineEnd": 223,
+      "lineStart": 217,
+      "lineEnd": 222,
       "summary": "연결선 자료를 안전한 공통 형식으로 정리합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L218-L223",
+          "source:src/App.jsx#L217-L222",
           "symbol:normalizeEdges"
         ]
       },
@@ -60255,21 +61514,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onClickCapture",
       "fingerprint": "5cc27122a144f356ca8a",
-      "explanationFingerprint": "73b3f60b2aeddea0bdca",
+      "explanationFingerprint": "d812d2b7da4c2c53a36b",
       "name": "onClickCapture",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1119,
-      "lineEnd": 1145,
+      "lineStart": 1123,
+      "lineEnd": 1149,
       "summary": "상태 기록에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1119-L1145",
+          "source:src/App.jsx#L1123-L1149",
           "symbol:onClickCapture"
         ]
       },
@@ -60291,21 +61550,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onDown",
       "fingerprint": "5df7cec80842793707aa",
-      "explanationFingerprint": "c4f9f673b639b6d0c18e",
+      "explanationFingerprint": "8aa23574b19a435bed2a",
       "name": "onDown",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 946,
-      "lineEnd": 984,
+      "lineStart": 950,
+      "lineEnd": 988,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L946-L984",
+          "source:src/App.jsx#L950-L988",
           "symbol:onDown"
         ]
       },
@@ -60327,21 +61586,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onDown",
       "fingerprint": "6bfdc06d728dcf70d34f",
-      "explanationFingerprint": "dd678b142a0980cbca21",
+      "explanationFingerprint": "33e855237891b03ff821",
       "name": "onDown",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 2762,
-      "lineEnd": 2766,
+      "lineStart": 2766,
+      "lineEnd": 2770,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L2762-L2766",
+          "source:src/App.jsx#L2766-L2770",
           "symbol:onDown"
         ]
       },
@@ -60363,21 +61622,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onEdgeLpMove",
       "fingerprint": "4393c599a492086a5bbb",
-      "explanationFingerprint": "8720fa6be76cdd36eb68",
+      "explanationFingerprint": "51e29eca6bf53edd9084",
       "name": "onEdgeLpMove",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 965,
-      "lineEnd": 967,
+      "lineStart": 969,
+      "lineEnd": 971,
       "summary": "연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L965-L967",
+          "source:src/App.jsx#L969-L971",
           "symbol:onEdgeLpMove"
         ]
       },
@@ -60399,21 +61658,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onEnd",
       "fingerprint": "300b3548269d1b04140d",
-      "explanationFingerprint": "0d6d37ad2c846cfd1b9d",
+      "explanationFingerprint": "acb1e391648704d82c1d",
       "name": "onEnd",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1234,
-      "lineEnd": 1234,
+      "lineStart": 1238,
+      "lineEnd": 1238,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1234",
+          "source:src/App.jsx#L1238",
           "symbol:onEnd"
         ]
       },
@@ -60435,21 +61694,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onHashChange",
       "fingerprint": "1209b241f91052ace185",
-      "explanationFingerprint": "4b626ebbae0585d21a6b",
+      "explanationFingerprint": "d38b2998b05ff3e6e4fb",
       "name": "onHashChange",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1807,
-      "lineEnd": 1809,
+      "lineStart": 1811,
+      "lineEnd": 1813,
       "summary": "변경 식별값 · 변경에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1807-L1809",
+          "source:src/App.jsx#L1811-L1813",
           "symbol:onHashChange"
         ]
       },
@@ -60471,21 +61730,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onKey",
       "fingerprint": "ae703cc818d7e55ce461",
-      "explanationFingerprint": "68cbb78848a0ac98c872",
+      "explanationFingerprint": "0931ef7f528a447905cc",
       "name": "onKey",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 2767,
-      "lineEnd": 2767,
+      "lineStart": 2771,
+      "lineEnd": 2771,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L2767",
+          "source:src/App.jsx#L2771",
           "symbol:onKey"
         ]
       },
@@ -60507,21 +61766,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onMouseDown",
       "fingerprint": "52fbc5f0664e2ad8f081",
-      "explanationFingerprint": "a919fb69846fc9a83323",
+      "explanationFingerprint": "d92c11afa8f6edcab8df",
       "name": "onMouseDown",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1170,
-      "lineEnd": 1194,
+      "lineStart": 1174,
+      "lineEnd": 1198,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1170-L1194",
+          "source:src/App.jsx#L1174-L1198",
           "symbol:onMouseDown"
         ]
       },
@@ -60543,21 +61802,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onMove",
       "fingerprint": "f1127e9b71a8b7462c38",
-      "explanationFingerprint": "d9881186c95472c01e5d",
+      "explanationFingerprint": "2a782aa5c7c1ce572484",
       "name": "onMove",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 985,
-      "lineEnd": 997,
+      "lineStart": 989,
+      "lineEnd": 1001,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L985-L997",
+          "source:src/App.jsx#L989-L1001",
           "symbol:onMove"
         ]
       },
@@ -60579,21 +61838,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onMove",
       "fingerprint": "c665198e647d0e0b2fba",
-      "explanationFingerprint": "19f9a3cdb4415e8baa70",
+      "explanationFingerprint": "88fcd8c56e5270940998",
       "name": "onMove",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1225,
-      "lineEnd": 1233,
+      "lineStart": 1229,
+      "lineEnd": 1237,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1225-L1233",
+          "source:src/App.jsx#L1229-L1237",
           "symbol:onMove"
         ]
       },
@@ -60615,21 +61874,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onSecondPointer",
       "fingerprint": "42c7eca6dfc7ef76d053",
-      "explanationFingerprint": "fe42500f6a65c4329589",
+      "explanationFingerprint": "06f1d0ee2efd3bd15f43",
       "name": "onSecondPointer",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 941,
-      "lineEnd": 945,
+      "lineStart": 945,
+      "lineEnd": 949,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L941-L945",
+          "source:src/App.jsx#L945-L949",
           "symbol:onSecondPointer"
         ]
       },
@@ -60651,21 +61910,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onStart",
       "fingerprint": "04946cc7b4db4aca064b",
-      "explanationFingerprint": "5af17c24ec3786e14353",
+      "explanationFingerprint": "97c19354a7cea9152425",
       "name": "onStart",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1213,
-      "lineEnd": 1224,
+      "lineStart": 1217,
+      "lineEnd": 1228,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1213-L1224",
+          "source:src/App.jsx#L1217-L1228",
           "symbol:onStart"
         ]
       },
@@ -60687,21 +61946,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onStorageError",
       "fingerprint": "5e43e999ca2d2c95c4a0",
-      "explanationFingerprint": "c076b66a69e15d4f101f",
+      "explanationFingerprint": "37066a83ee1ebb49f26b",
       "name": "onStorageError",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 789,
-      "lineEnd": 789,
+      "lineStart": 793,
+      "lineEnd": 793,
       "summary": "오류에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L789",
+          "source:src/App.jsx#L793",
           "symbol:onStorageError"
         ]
       },
@@ -60722,21 +61981,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onTouchStart",
       "fingerprint": "43cde29e4db05eeddf1f",
-      "explanationFingerprint": "f1985dd34e98ddc037b3",
+      "explanationFingerprint": "0ccee1cf1053f0bb857f",
       "name": "onTouchStart",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1073,
-      "lineEnd": 1098,
+      "lineStart": 1077,
+      "lineEnd": 1102,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1073-L1098",
+          "source:src/App.jsx#L1077-L1102",
           "symbol:onTouchStart"
         ]
       },
@@ -60758,21 +62017,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "onUp",
       "fingerprint": "50f93ca91521024d41d4",
-      "explanationFingerprint": "58595661eb406188d0d1",
+      "explanationFingerprint": "4bee1da67bb496927e83",
       "name": "onUp",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 998,
-      "lineEnd": 1048,
+      "lineStart": 1002,
+      "lineEnd": 1052,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L998-L1048",
+          "source:src/App.jsx#L1002-L1052",
           "symbol:onUp"
         ]
       },
@@ -60794,21 +62053,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "openWorkshop",
       "fingerprint": "2c8461aad0159077da9d",
-      "explanationFingerprint": "1d66609bc5cea466f256",
+      "explanationFingerprint": "d69ab6eed76146d04b97",
       "name": "openWorkshop",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 4527,
-      "lineEnd": 4530,
+      "lineStart": 4526,
+      "lineEnd": 4529,
       "summary": "이 기능 작업을 화면을 엽니다",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L4527-L4530",
+          "source:src/App.jsx#L4526-L4529",
           "symbol:openWorkshop"
         ]
       },
@@ -60830,21 +62089,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "parseSharedId",
       "fingerprint": "b1cffa4f158a45a120cb",
-      "explanationFingerprint": "b14c0e5638ecbe5179d0",
+      "explanationFingerprint": "46d4029cf8629b0d4d78",
       "name": "parseSharedId",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 251,
-      "lineEnd": 257,
+      "lineStart": 250,
+      "lineEnd": 256,
       "summary": "식별자 자료의 구조를 읽어냅니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L251-L257",
+          "source:src/App.jsx#L250-L256",
           "symbol:parseSharedId"
         ]
       },
@@ -60866,21 +62125,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "partIdFromHandle",
       "fingerprint": "4181a437b8481df32df0",
-      "explanationFingerprint": "94b21c53d967486230b4",
+      "explanationFingerprint": "1850deae9754ba1baa8c",
       "name": "partIdFromHandle",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 476,
-      "lineEnd": 479,
+      "lineStart": 475,
+      "lineEnd": 478,
       "summary": "시스템 파츠 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L476-L479",
+          "source:src/App.jsx#L475-L478",
           "symbol:partIdFromHandle"
         ]
       },
@@ -60902,21 +62161,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "participantKey",
       "fingerprint": "c8aa9b0f25cec8e68b39",
-      "explanationFingerprint": "b772a6fc63ac3f70cae9",
+      "explanationFingerprint": "c70298e130c157c32c36",
       "name": "participantKey",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 362,
-      "lineEnd": 364,
+      "lineStart": 361,
+      "lineEnd": 363,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L362-L364",
+          "source:src/App.jsx#L361-L363",
           "symbol:participantKey"
         ]
       },
@@ -60938,21 +62197,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "poll",
       "fingerprint": "c57f30c13b5b3d70dad4",
-      "explanationFingerprint": "dfe86b1ef88566796d75",
+      "explanationFingerprint": "f05f9d99bd3868673d13",
       "name": "poll",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 4092,
-      "lineEnd": 4111,
+      "lineStart": 4104,
+      "lineEnd": 4123,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L4092-L4111",
+          "source:src/App.jsx#L4104-L4123",
           "symbol:poll"
         ]
       },
@@ -60975,21 +62234,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "positionMenu",
       "fingerprint": "0a35e9a1e46189535290",
-      "explanationFingerprint": "c4ae7ba292f65e443011",
+      "explanationFingerprint": "a4815cad389201ab7cc3",
       "name": "positionMenu",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 4465,
-      "lineEnd": 4474,
+      "lineStart": 4468,
+      "lineEnd": 4477,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L4465-L4474",
+          "source:src/App.jsx#L4468-L4477",
           "symbol:positionMenu"
         ]
       },
@@ -61011,21 +62270,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "refreshDecision",
       "fingerprint": "40d5642e646662427b3e",
-      "explanationFingerprint": "3c370171711edb477243",
+      "explanationFingerprint": "a91eac6466219462026b",
       "name": "refreshDecision",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 4068,
-      "lineEnd": 4079,
+      "lineStart": 4080,
+      "lineEnd": 4091,
       "summary": "검토 결정에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L4068-L4079",
+          "source:src/App.jsx#L4080-L4091",
           "symbol:refreshDecision"
         ]
       },
@@ -61048,21 +62307,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "remapPartHandle",
       "fingerprint": "2d5b143a1d0a28bec0f7",
-      "explanationFingerprint": "480c20da312d0e433131",
+      "explanationFingerprint": "c2371c50cbdac29c3e87",
       "name": "remapPartHandle",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 3330,
-      "lineEnd": 3336,
+      "lineStart": 3334,
+      "lineEnd": 3340,
       "summary": "시스템 파츠에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L3330-L3336",
+          "source:src/App.jsx#L3334-L3340",
           "symbol:remapPartHandle"
         ]
       },
@@ -61084,21 +62343,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "sanitizeNodes",
       "fingerprint": "e023cc6334fec514ae9f",
-      "explanationFingerprint": "d5fef0e8c856a8a953aa",
+      "explanationFingerprint": "a589d83a020dce42b6ba",
       "name": "sanitizeNodes",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 462,
-      "lineEnd": 464,
+      "lineStart": 461,
+      "lineEnd": 463,
       "summary": "노드에서 위험한 내용을 제거합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L462-L464",
+          "source:src/App.jsx#L461-L463",
           "symbol:sanitizeNodes"
         ]
       },
@@ -61120,21 +62379,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "sanitizeNotes",
       "fingerprint": "60858a3d183b49b1f544",
-      "explanationFingerprint": "3cc0806efd31540d7ed7",
+      "explanationFingerprint": "30bdb6b4d8be37a1aa7d",
       "name": "sanitizeNotes",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 466,
-      "lineEnd": 468,
+      "lineStart": 465,
+      "lineEnd": 467,
       "summary": "위험한 입력 제거에서 위험한 내용을 제거합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L466-L468",
+          "source:src/App.jsx#L465-L467",
           "symbol:sanitizeNotes"
         ]
       },
@@ -61156,21 +62415,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "scopedParticipants",
       "fingerprint": "b5cffd9f2da133a4a472",
-      "explanationFingerprint": "0e2872cfe4bed73a3221",
+      "explanationFingerprint": "4632900c4269221de5a5",
       "name": "scopedParticipants",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 375,
-      "lineEnd": 399,
+      "lineStart": 374,
+      "lineEnd": 398,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L375-L399",
+          "source:src/App.jsx#L374-L398",
           "symbol:scopedParticipants"
         ]
       },
@@ -61192,21 +62451,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "sharedCanvasId",
       "fingerprint": "731d8ec8a267334c4cbc",
-      "explanationFingerprint": "581ae9f407811bc0c59a",
+      "explanationFingerprint": "e8ce89b5d302c2f107ec",
       "name": "sharedCanvasId",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 250,
-      "lineEnd": 250,
+      "lineStart": 249,
+      "lineEnd": 249,
       "summary": "캔버스 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L250",
+          "source:src/App.jsx#L249",
           "symbol:sharedCanvasId"
         ]
       },
@@ -61228,21 +62487,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "sortParentsFirst",
       "fingerprint": "208fc381926a17d201ac",
-      "explanationFingerprint": "a12691558601acbf2b72",
+      "explanationFingerprint": "d9935bda3e7d6b2c0ec1",
       "name": "sortParentsFirst",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 448,
-      "lineEnd": 460,
+      "lineStart": 447,
+      "lineEnd": 459,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L448-L460",
+          "source:src/App.jsx#L447-L459",
           "symbol:sortParentsFirst"
         ]
       },
@@ -61264,21 +62523,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "stripEdge",
       "fingerprint": "f0160f2b894de58713a1",
-      "explanationFingerprint": "d5cffdcdaef25060ca30",
+      "explanationFingerprint": "e0d9a7d6bd555f2dda51",
       "name": "stripEdge",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 517,
-      "lineEnd": 520,
+      "lineStart": 516,
+      "lineEnd": 519,
       "summary": "연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L517-L520",
+          "source:src/App.jsx#L516-L519",
           "symbol:stripEdge"
         ]
       },
@@ -61300,21 +62559,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "stripNode",
       "fingerprint": "63ad73cf6d367f8a2051",
-      "explanationFingerprint": "a9262e3a2d59bb399c93",
+      "explanationFingerprint": "9391bc2e55dcc78ce4b9",
       "name": "stripNode",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 501,
-      "lineEnd": 510,
+      "lineStart": 500,
+      "lineEnd": 509,
       "summary": "노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L501-L510",
+          "source:src/App.jsx#L500-L509",
           "symbol:stripNode"
         ]
       },
@@ -61336,21 +62595,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "stripNote",
       "fingerprint": "158d18f1acc1ddb82994",
-      "explanationFingerprint": "0d3120488b2a7c140e36",
+      "explanationFingerprint": "02ed64e3c444391733eb",
       "name": "stripNote",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 516,
-      "lineEnd": 516,
+      "lineStart": 515,
+      "lineEnd": 515,
       "summary": "노트에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L516",
+          "source:src/App.jsx#L515",
           "symbol:stripNote"
         ]
       },
@@ -61371,21 +62630,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "swallow",
       "fingerprint": "c568e29a032066a1adc0",
-      "explanationFingerprint": "21438d1d5228d658dec7",
+      "explanationFingerprint": "91f7ac824df4d30fec04",
       "name": "swallow",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1028,
-      "lineEnd": 1028,
+      "lineStart": 1032,
+      "lineEnd": 1032,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1028",
+          "source:src/App.jsx#L1032",
           "symbol:swallow"
         ]
       },
@@ -61407,21 +62666,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "swallow",
       "fingerprint": "c568e29a032066a1adc0",
-      "explanationFingerprint": "26545295643dfb9b52b9",
+      "explanationFingerprint": "a347f0b14e857ba424ed",
       "name": "swallow",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 1037,
-      "lineEnd": 1037,
+      "lineStart": 1041,
+      "lineEnd": 1041,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L1037",
+          "source:src/App.jsx#L1041",
           "symbol:swallow"
         ]
       },
@@ -61443,21 +62702,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "systemRuntimeByEdge",
       "fingerprint": "a014cb3eed3d0c181aea",
-      "explanationFingerprint": "c5f6c8e5c345b37daa41",
+      "explanationFingerprint": "6aa975d2ec30438c3447",
       "name": "systemRuntimeByEdge",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 347,
-      "lineEnd": 360,
+      "lineStart": 346,
+      "lineEnd": 359,
       "summary": "시스템 · 실제 운영 상태 · 연결선에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L347-L360",
+          "source:src/App.jsx#L346-L359",
           "symbol:systemRuntimeByEdge"
         ]
       },
@@ -61479,21 +62738,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "systemRuntimeDashboardSummary",
       "fingerprint": "9477c1831c9ea5ebf65c",
-      "explanationFingerprint": "9704ef480aa73dbfeb29",
+      "explanationFingerprint": "c44454ce74ed62a15751",
       "name": "systemRuntimeDashboardSummary",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 319,
-      "lineEnd": 345,
+      "lineStart": 318,
+      "lineEnd": 344,
       "summary": "시스템 · 실제 운영 상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L319-L345",
+          "source:src/App.jsx#L318-L344",
           "symbol:systemRuntimeDashboardSummary"
         ]
       },
@@ -61515,21 +62774,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "systemRuntimeMapFromRecords",
       "fingerprint": "6d2f353c52ce44cbda78",
-      "explanationFingerprint": "840eb9d25b6385487e17",
+      "explanationFingerprint": "679f57ae34e11b8a9863",
       "name": "systemRuntimeMapFromRecords",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 271,
-      "lineEnd": 277,
+      "lineStart": 270,
+      "lineEnd": 276,
       "summary": "시스템 · 실제 운영 상태 · 시스템 지도에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L271-L277",
+          "source:src/App.jsx#L270-L276",
           "symbol:systemRuntimeMapFromRecords"
         ]
       },
@@ -61551,21 +62810,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "systemRuntimePersistenceError",
       "fingerprint": "173e8d3dacadba70951d",
-      "explanationFingerprint": "35e96bb3e2d7c8ab2a65",
+      "explanationFingerprint": "07ec9bbb397195ad58c2",
       "name": "systemRuntimePersistenceError",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 279,
-      "lineEnd": 286,
+      "lineStart": 278,
+      "lineEnd": 285,
       "summary": "시스템 · 실제 운영 상태 · 오류에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L279-L286",
+          "source:src/App.jsx#L278-L285",
           "symbol:systemRuntimePersistenceError"
         ]
       },
@@ -61587,21 +62846,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "systemRuntimeTargetsForNodes",
       "fingerprint": "d5303106a4f1752c2bd1",
-      "explanationFingerprint": "421d68b6ed4b41a7fbbd",
+      "explanationFingerprint": "a0e716b9457dfce856f4",
       "name": "systemRuntimeTargetsForNodes",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 259,
-      "lineEnd": 269,
+      "lineStart": 258,
+      "lineEnd": 268,
       "summary": "시스템 · 실제 운영 상태 · 노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L259-L269",
+          "source:src/App.jsx#L258-L268",
           "symbol:systemRuntimeTargetsForNodes"
         ]
       },
@@ -61623,21 +62882,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "visit",
       "fingerprint": "6dc3fe3727f9ee0df825",
-      "explanationFingerprint": "73fbd54fb0cd209c9e78",
+      "explanationFingerprint": "2883b0b8fa455b3a7d66",
       "name": "visit",
       "path": "src/App.jsx",
       "parentId": "file:src/App.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 452,
-      "lineEnd": 457,
+      "lineStart": 451,
+      "lineEnd": 456,
       "summary": "이 파일이 맡은 “캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/App.jsx#L452-L457",
+          "source:src/App.jsx#L451-L456",
           "symbol:visit"
         ]
       },
@@ -63028,6 +64287,1630 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "exported": false,
         "async": false,
         "codePartCount": 4
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldScreen.jsx:CodeWorldScreen",
+      "kind": "function",
+      "label": "CodeWorldScreen",
+      "fingerprint": "2889c6903c8a456599a0",
+      "explanationFingerprint": "49533f88e0c688090e5a",
+      "name": "CodeWorldScreen",
+      "path": "src/components/CodeWorldScreen.jsx",
+      "parentId": "file:src/components/CodeWorldScreen.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 685,
+      "lineEnd": 1100,
+      "summary": "코드 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldScreen.jsx#L685-L1100",
+          "symbol:CodeWorldScreen"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "exported",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false,
+        "codePartCount": 94
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldScreen.jsx:ComponentNode",
+      "kind": "function",
+      "label": "ComponentNode",
+      "fingerprint": "82a85c4f5efba156bb41",
+      "explanationFingerprint": "d1b76a854977045d5e4f",
+      "name": "ComponentNode",
+      "path": "src/components/CodeWorldScreen.jsx",
+      "parentId": "file:src/components/CodeWorldScreen.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 189,
+      "lineEnd": 257,
+      "summary": "노드 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldScreen.jsx#L189-L257",
+          "symbol:ComponentNode"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 15
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldScreen.jsx:DeliveryFrameNode",
+      "kind": "function",
+      "label": "DeliveryFrameNode",
+      "fingerprint": "b1f2ee342b5ef47df930",
+      "explanationFingerprint": "1e8e1d2b33aafe17377e",
+      "name": "DeliveryFrameNode",
+      "path": "src/components/CodeWorldScreen.jsx",
+      "parentId": "file:src/components/CodeWorldScreen.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 261,
+      "lineEnd": 274,
+      "summary": "노드 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldScreen.jsx#L261-L274",
+          "symbol:DeliveryFrameNode"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 2
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldScreen.jsx:DeliveryStageNode",
+      "kind": "function",
+      "label": "DeliveryStageNode",
+      "fingerprint": "8a63bf5f51ca6768598c",
+      "explanationFingerprint": "6661cdf25520c0f25987",
+      "name": "DeliveryStageNode",
+      "path": "src/components/CodeWorldScreen.jsx",
+      "parentId": "file:src/components/CodeWorldScreen.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 278,
+      "lineEnd": 318,
+      "summary": "단계 · 노드 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldScreen.jsx#L278-L318",
+          "symbol:DeliveryStageNode"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 7
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldScreen.jsx:DistrictNode",
+      "kind": "function",
+      "label": "DistrictNode",
+      "fingerprint": "3c8862f020b31a7a39de",
+      "explanationFingerprint": "da9029099ad4289b5fa3",
+      "name": "DistrictNode",
+      "path": "src/components/CodeWorldScreen.jsx",
+      "parentId": "file:src/components/CodeWorldScreen.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 172,
+      "lineEnd": 185,
+      "summary": "노드 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldScreen.jsx#L172-L185",
+          "symbol:DistrictNode"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 3
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldScreen.jsx:ExternalSystemNode",
+      "kind": "function",
+      "label": "ExternalSystemNode",
+      "fingerprint": "7a1dd68bd06c987cd792",
+      "explanationFingerprint": "5e9220269f495ea57faa",
+      "name": "ExternalSystemNode",
+      "path": "src/components/CodeWorldScreen.jsx",
+      "parentId": "file:src/components/CodeWorldScreen.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 322,
+      "lineEnd": 345,
+      "summary": "외부 공개 자료 · 시스템 · 노드 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldScreen.jsx#L322-L345",
+          "symbol:ExternalSystemNode"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 6
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldScreen.jsx:actionCallback",
+      "kind": "function",
+      "label": "actionCallback",
+      "fingerprint": "e84302eb2bb7cfa019b3",
+      "explanationFingerprint": "b682a7a740167228f4ca",
+      "name": "actionCallback",
+      "path": "src/components/CodeWorldScreen.jsx",
+      "parentId": "file:src/components/CodeWorldScreen.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 654,
+      "lineEnd": 658,
+      "summary": "이 파일이 맡은 “코드 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldScreen.jsx#L654-L658",
+          "symbol:actionCallback"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 5
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldScreen.jsx:connectionView",
+      "kind": "function",
+      "label": "connectionView",
+      "fingerprint": "0a37256a62d5f3435cd3",
+      "explanationFingerprint": "c6a347ef3d2ed8c5e204",
+      "name": "connectionView",
+      "path": "src/components/CodeWorldScreen.jsx",
+      "parentId": "file:src/components/CodeWorldScreen.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 149,
+      "lineEnd": 170,
+      "summary": "화면 상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldScreen.jsx#L149-L170",
+          "symbol:connectionView"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 8
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldScreen.jsx:districtComponents",
+      "kind": "function",
+      "label": "districtComponents",
+      "fingerprint": "02c71965315c65167917",
+      "explanationFingerprint": "bfc7be7c3cafb3a5ae15",
+      "name": "districtComponents",
+      "path": "src/components/CodeWorldScreen.jsx",
+      "parentId": "file:src/components/CodeWorldScreen.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 85,
+      "lineEnd": 87,
+      "summary": "이 파일이 맡은 “코드 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldScreen.jsx#L85-L87",
+          "symbol:districtComponents"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 1
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldScreen.jsx:endpointNode",
+      "kind": "function",
+      "label": "endpointNode",
+      "fingerprint": "7b13050f6cb3282556a0",
+      "explanationFingerprint": "e5afeae07cda9f0da2bf",
+      "name": "endpointNode",
+      "path": "src/components/CodeWorldScreen.jsx",
+      "parentId": "file:src/components/CodeWorldScreen.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 564,
+      "lineEnd": 569,
+      "summary": "노드에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldScreen.jsx#L564-L569",
+          "symbol:endpointNode"
+        ]
+      },
+      "tags": [
+        "arrow",
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend"
+      ],
+      "details": {
+        "functionKind": "arrow",
+        "exported": false,
+        "async": false,
+        "codePartCount": 5
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldScreen.jsx:evidenceRows",
+      "kind": "function",
+      "label": "evidenceRows",
+      "fingerprint": "a850793e8f7d92f57256",
+      "explanationFingerprint": "5943b9e0bf17e6d2e1ae",
+      "name": "evidenceRows",
+      "path": "src/components/CodeWorldScreen.jsx",
+      "parentId": "file:src/components/CodeWorldScreen.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 102,
+      "lineEnd": 126,
+      "summary": "근거에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldScreen.jsx#L102-L126",
+          "symbol:evidenceRows"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 18
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldScreen.jsx:formatRelativeTime",
+      "kind": "function",
+      "label": "formatRelativeTime",
+      "fingerprint": "48f026cd1f02e841928c",
+      "explanationFingerprint": "5d9db396bf8da6a7c285",
+      "name": "formatRelativeTime",
+      "path": "src/components/CodeWorldScreen.jsx",
+      "parentId": "file:src/components/CodeWorldScreen.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 64,
+      "lineEnd": 75,
+      "summary": "이 파일이 맡은 “코드 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldScreen.jsx#L64-L75",
+          "symbol:formatRelativeTime"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 15
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldScreen.jsx:graphProjection",
+      "kind": "function",
+      "label": "graphProjection",
+      "fingerprint": "85a01f1a6df260e5dd2b",
+      "explanationFingerprint": "757a945c67c91269b57a",
+      "name": "graphProjection",
+      "path": "src/components/CodeWorldScreen.jsx",
+      "parentId": "file:src/components/CodeWorldScreen.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 357,
+      "lineEnd": 638,
+      "summary": "지도 구조에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldScreen.jsx#L357-L638",
+          "symbol:graphProjection"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 99
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldScreen.jsx:idOf",
+      "kind": "function",
+      "label": "idOf",
+      "fingerprint": "7432810a5bc99dfdf548",
+      "explanationFingerprint": "711b2ae4c5348fc6f5af",
+      "name": "idOf",
+      "path": "src/components/CodeWorldScreen.jsx",
+      "parentId": "file:src/components/CodeWorldScreen.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 48,
+      "lineEnd": 52,
+      "summary": "식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldScreen.jsx#L48-L52",
+          "symbol:idOf"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 5
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldScreen.jsx:itemDescription",
+      "kind": "function",
+      "label": "itemDescription",
+      "fingerprint": "a3e450ef4aca576e90a2",
+      "explanationFingerprint": "ac099f48295ccbb1ed61",
+      "name": "itemDescription",
+      "path": "src/components/CodeWorldScreen.jsx",
+      "parentId": "file:src/components/CodeWorldScreen.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 89,
+      "lineEnd": 100,
+      "summary": "검토 항목에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldScreen.jsx#L89-L100",
+          "symbol:itemDescription"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 3
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldScreen.jsx:moduleItems",
+      "kind": "function",
+      "label": "moduleItems",
+      "fingerprint": "80a1fe3ba227787ebbe7",
+      "explanationFingerprint": "169b08d04dfd514eb2c9",
+      "name": "moduleItems",
+      "path": "src/components/CodeWorldScreen.jsx",
+      "parentId": "file:src/components/CodeWorldScreen.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 77,
+      "lineEnd": 83,
+      "summary": "이 파일이 맡은 “코드 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldScreen.jsx#L77-L83",
+          "symbol:moduleItems"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 2
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldScreen.jsx:normalizedPosition",
+      "kind": "function",
+      "label": "normalizedPosition",
+      "fingerprint": "6c7a4f9dd6615ae8e9a3",
+      "explanationFingerprint": "19f59946d7a26ab01695",
+      "name": "normalizedPosition",
+      "path": "src/components/CodeWorldScreen.jsx",
+      "parentId": "file:src/components/CodeWorldScreen.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 128,
+      "lineEnd": 131,
+      "summary": "이 파일이 맡은 “코드 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldScreen.jsx#L128-L131",
+          "symbol:normalizedPosition"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 3
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldScreen.jsx:normalizedSize",
+      "kind": "function",
+      "label": "normalizedSize",
+      "fingerprint": "c794fd253dde799513af",
+      "explanationFingerprint": "e0030db027bb0611fde5",
+      "name": "normalizedSize",
+      "path": "src/components/CodeWorldScreen.jsx",
+      "parentId": "file:src/components/CodeWorldScreen.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 133,
+      "lineEnd": 140,
+      "summary": "이 파일이 맡은 “코드 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldScreen.jsx#L133-L140",
+          "symbol:normalizedSize"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 5
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldScreen.jsx:observationRows",
+      "kind": "function",
+      "label": "observationRows",
+      "fingerprint": "d3afb98236d52f6824dd",
+      "explanationFingerprint": "f95a1e6a29095134f184",
+      "name": "observationRows",
+      "path": "src/components/CodeWorldScreen.jsx",
+      "parentId": "file:src/components/CodeWorldScreen.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 640,
+      "lineEnd": 652,
+      "summary": "운영 관측에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldScreen.jsx#L640-L652",
+          "symbol:observationRows"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 6
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldScreen.jsx:registerAsset",
+      "kind": "function",
+      "label": "registerAsset",
+      "fingerprint": "c20dd75666aadff69e1b",
+      "explanationFingerprint": "663241794f8699833b94",
+      "name": "registerAsset",
+      "path": "src/components/CodeWorldScreen.jsx",
+      "parentId": "file:src/components/CodeWorldScreen.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 374,
+      "lineEnd": 379,
+      "summary": "Asset에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldScreen.jsx#L374-L379",
+          "symbol:registerAsset"
+        ]
+      },
+      "tags": [
+        "arrow",
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend"
+      ],
+      "details": {
+        "functionKind": "arrow",
+        "exported": false,
+        "async": false,
+        "codePartCount": 5
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldScreen.jsx:safeArray",
+      "kind": "function",
+      "label": "safeArray",
+      "fingerprint": "c62d7c270d15d64e9ebd",
+      "explanationFingerprint": "b4447ba18605cebd59a8",
+      "name": "safeArray",
+      "path": "src/components/CodeWorldScreen.jsx",
+      "parentId": "file:src/components/CodeWorldScreen.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 40,
+      "lineEnd": 42,
+      "summary": "허용 범위로 제한 · 목록 자료에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldScreen.jsx#L40-L42",
+          "symbol:safeArray"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 2
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldScreen.jsx:safeText",
+      "kind": "function",
+      "label": "safeText",
+      "fingerprint": "fad583f9bcf59bddec7d",
+      "explanationFingerprint": "ffe0677444efd487a627",
+      "name": "safeText",
+      "path": "src/components/CodeWorldScreen.jsx",
+      "parentId": "file:src/components/CodeWorldScreen.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 44,
+      "lineEnd": 46,
+      "summary": "허용 범위로 제한 · 텍스트에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldScreen.jsx#L44-L46",
+          "symbol:safeText"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 2
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldScreen.jsx:selectedConnector",
+      "kind": "function",
+      "label": "selectedConnector",
+      "fingerprint": "dd5d6a643ba0ae3897c7",
+      "explanationFingerprint": "eb23f528da6eca835012",
+      "name": "selectedConnector",
+      "path": "src/components/CodeWorldScreen.jsx",
+      "parentId": "file:src/components/CodeWorldScreen.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 142,
+      "lineEnd": 147,
+      "summary": "로컬 커넥터에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldScreen.jsx#L142-L147",
+          "symbol:selectedConnector"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 5
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldScreen.jsx:statusId",
+      "kind": "function",
+      "label": "statusId",
+      "fingerprint": "4e9ebc4fe797b8bde15e",
+      "explanationFingerprint": "f65b9452ddafb23c2a71",
+      "name": "statusId",
+      "path": "src/components/CodeWorldScreen.jsx",
+      "parentId": "file:src/components/CodeWorldScreen.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 54,
+      "lineEnd": 57,
+      "summary": "상태 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldScreen.jsx#L54-L57",
+          "symbol:statusId"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 3
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldScreen.jsx:statusLabel",
+      "kind": "function",
+      "label": "statusLabel",
+      "fingerprint": "e2519c8ad0ba4a0a1c5d",
+      "explanationFingerprint": "9b47091790180aa0f164",
+      "name": "statusLabel",
+      "path": "src/components/CodeWorldScreen.jsx",
+      "parentId": "file:src/components/CodeWorldScreen.jsx",
+      "layer": "frontend",
+      "area": "canvas-interface",
+      "subsystem": "canvas-workspace",
+      "lineStart": 59,
+      "lineEnd": 62,
+      "summary": "상태 · 화면 이름에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldScreen.jsx#L59-L62",
+          "symbol:statusLabel"
+        ]
+      },
+      "tags": [
+        "canvas-interface",
+        "canvas-workspace",
+        "frontend",
+        "function"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 2
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldWorkspace.jsx:CodeWorldWorkspace",
+      "kind": "function",
+      "label": "CodeWorldWorkspace",
+      "fingerprint": "0b0341c10466edce493e",
+      "explanationFingerprint": "603bbfb545a9a9e34e5a",
+      "name": "CodeWorldWorkspace",
+      "path": "src/components/CodeWorldWorkspace.jsx",
+      "parentId": "file:src/components/CodeWorldWorkspace.jsx",
+      "layer": "frontend",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 530,
+      "lineEnd": 827,
+      "summary": "코드 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldWorkspace.jsx#L530-L827",
+          "symbol:CodeWorldWorkspace"
+        ]
+      },
+      "tags": [
+        "exported",
+        "frontend",
+        "function",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false,
+        "codePartCount": 103
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldWorkspace.jsx:buildCodeWorldModel",
+      "kind": "function",
+      "label": "buildCodeWorldModel",
+      "fingerprint": "eb4f218905b1a9a8784e",
+      "explanationFingerprint": "e4100356957f879ba714",
+      "name": "buildCodeWorldModel",
+      "path": "src/components/CodeWorldWorkspace.jsx",
+      "parentId": "file:src/components/CodeWorldWorkspace.jsx",
+      "layer": "frontend",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 394,
+      "lineEnd": 514,
+      "summary": "코드 항목이나 구조를 구성합니다",
+      "technicalSummary": "다른 파일에서 사용 가능",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldWorkspace.jsx#L394-L514",
+          "symbol:buildCodeWorldModel"
+        ]
+      },
+      "tags": [
+        "exported",
+        "frontend",
+        "function",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": true,
+        "async": false,
+        "codePartCount": 32
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldWorkspace.jsx:changedPartStatus",
+      "kind": "function",
+      "label": "changedPartStatus",
+      "fingerprint": "2e0c77390ec0a101a482",
+      "explanationFingerprint": "3aa62d42ed878243b307",
+      "name": "changedPartStatus",
+      "path": "src/components/CodeWorldWorkspace.jsx",
+      "parentId": "file:src/components/CodeWorldWorkspace.jsx",
+      "layer": "frontend",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 271,
+      "lineEnd": 280,
+      "summary": "시스템 파츠 · 상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldWorkspace.jsx#L271-L280",
+          "symbol:changedPartStatus"
+        ]
+      },
+      "tags": [
+        "frontend",
+        "function",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 12
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldWorkspace.jsx:connectorWithFreshState",
+      "kind": "function",
+      "label": "connectorWithFreshState",
+      "fingerprint": "3eeb4fcdd6f6afb70e7d",
+      "explanationFingerprint": "69182c3dfb5f979ed4bb",
+      "name": "connectorWithFreshState",
+      "path": "src/components/CodeWorldWorkspace.jsx",
+      "parentId": "file:src/components/CodeWorldWorkspace.jsx",
+      "layer": "frontend",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 67,
+      "lineEnd": 74,
+      "summary": "로컬 커넥터 · 상태에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldWorkspace.jsx#L67-L74",
+          "symbol:connectorWithFreshState"
+        ]
+      },
+      "tags": [
+        "frontend",
+        "function",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 3
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldWorkspace.jsx:deliveryModel",
+      "kind": "function",
+      "label": "deliveryModel",
+      "fingerprint": "6d12ee059f35423ddbb4",
+      "explanationFingerprint": "c5df7f73553fa66c0486",
+      "name": "deliveryModel",
+      "path": "src/components/CodeWorldWorkspace.jsx",
+      "parentId": "file:src/components/CodeWorldWorkspace.jsx",
+      "layer": "frontend",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 304,
+      "lineEnd": 369,
+      "summary": "이 파일이 맡은 “코드 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldWorkspace.jsx#L304-L369",
+          "symbol:deliveryModel"
+        ]
+      },
+      "tags": [
+        "frontend",
+        "function",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 12
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldWorkspace.jsx:deliveryRelations",
+      "kind": "function",
+      "label": "deliveryRelations",
+      "fingerprint": "09978d26c9b9539109ba",
+      "explanationFingerprint": "af4d8c71c44b94c54b2d",
+      "name": "deliveryRelations",
+      "path": "src/components/CodeWorldWorkspace.jsx",
+      "parentId": "file:src/components/CodeWorldWorkspace.jsx",
+      "layer": "frontend",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 371,
+      "lineEnd": 392,
+      "summary": "이 파일이 맡은 “코드 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldWorkspace.jsx#L371-L392",
+          "symbol:deliveryRelations"
+        ]
+      },
+      "tags": [
+        "frontend",
+        "function",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 7
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldWorkspace.jsx:districtHeight",
+      "kind": "function",
+      "label": "districtHeight",
+      "fingerprint": "05c950d78dd48b115dc6",
+      "explanationFingerprint": "3df74eea37e81a4862b4",
+      "name": "districtHeight",
+      "path": "src/components/CodeWorldWorkspace.jsx",
+      "parentId": "file:src/components/CodeWorldWorkspace.jsx",
+      "layer": "frontend",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 228,
+      "lineEnd": 232,
+      "summary": "이 파일이 맡은 “코드 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldWorkspace.jsx#L228-L232",
+          "symbol:districtHeight"
+        ]
+      },
+      "tags": [
+        "frontend",
+        "function",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 1
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldWorkspace.jsx:errorMessage",
+      "kind": "function",
+      "label": "errorMessage",
+      "fingerprint": "47856c19d6c1db6fb216",
+      "explanationFingerprint": "bfaaaf7cdc62672e5946",
+      "name": "errorMessage",
+      "path": "src/components/CodeWorldWorkspace.jsx",
+      "parentId": "file:src/components/CodeWorldWorkspace.jsx",
+      "layer": "frontend",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 27,
+      "lineEnd": 29,
+      "summary": "오류에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldWorkspace.jsx#L27-L29",
+          "symbol:errorMessage"
+        ]
+      },
+      "tags": [
+        "frontend",
+        "function",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 1
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldWorkspace.jsx:initialPartIdForEntry",
+      "kind": "function",
+      "label": "initialPartIdForEntry",
+      "fingerprint": "17b743c390c3b6ab560e",
+      "explanationFingerprint": "7d44b3ff5b432fbdcdbc",
+      "name": "initialPartIdForEntry",
+      "path": "src/components/CodeWorldWorkspace.jsx",
+      "parentId": "file:src/components/CodeWorldWorkspace.jsx",
+      "layer": "frontend",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 516,
+      "lineEnd": 528,
+      "summary": "시스템 파츠 · 식별자에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldWorkspace.jsx#L516-L528",
+          "symbol:initialPartIdForEntry"
+        ]
+      },
+      "tags": [
+        "frontend",
+        "function",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 9
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldWorkspace.jsx:isAuthenticationFailure",
+      "kind": "function",
+      "label": "isAuthenticationFailure",
+      "fingerprint": "e4fcc628cc25b2cd47e4",
+      "explanationFingerprint": "1dfb1506f036da4526a3",
+      "name": "isAuthenticationFailure",
+      "path": "src/components/CodeWorldWorkspace.jsx",
+      "parentId": "file:src/components/CodeWorldWorkspace.jsx",
+      "layer": "frontend",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 36,
+      "lineEnd": 40,
+      "summary": "이 기능 상태나 허용 여부를 해당 상태인지 판단합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldWorkspace.jsx#L36-L40",
+          "symbol:isAuthenticationFailure"
+        ]
+      },
+      "tags": [
+        "frontend",
+        "function",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 1
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldWorkspace.jsx:isPreviewRequest",
+      "kind": "function",
+      "label": "isPreviewRequest",
+      "fingerprint": "167b075c7fefb1b1c019",
+      "explanationFingerprint": "453eab3d7738f60db168",
+      "name": "isPreviewRequest",
+      "path": "src/components/CodeWorldWorkspace.jsx",
+      "parentId": "file:src/components/CodeWorldWorkspace.jsx",
+      "layer": "frontend",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 31,
+      "lineEnd": 34,
+      "summary": "실행 전 미리보기 · 요청 상태나 허용 여부를 해당 상태인지 판단합니다",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldWorkspace.jsx#L31-L34",
+          "symbol:isPreviewRequest"
+        ]
+      },
+      "tags": [
+        "frontend",
+        "function",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 3
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldWorkspace.jsx:layoutDistricts",
+      "kind": "function",
+      "label": "layoutDistricts",
+      "fingerprint": "a1af24dc313ba9a0777c",
+      "explanationFingerprint": "afc8437559812b759907",
+      "name": "layoutDistricts",
+      "path": "src/components/CodeWorldWorkspace.jsx",
+      "parentId": "file:src/components/CodeWorldWorkspace.jsx",
+      "layer": "frontend",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 234,
+      "lineEnd": 269,
+      "summary": "자동 배치에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldWorkspace.jsx#L234-L269",
+          "symbol:layoutDistricts"
+        ]
+      },
+      "tags": [
+        "frontend",
+        "function",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 17
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldWorkspace.jsx:loadDevelopmentPreview",
+      "kind": "function",
+      "label": "loadDevelopmentPreview",
+      "fingerprint": "779663eac2f87aaf5705",
+      "explanationFingerprint": "14f3365156961cdb7ba1",
+      "name": "loadDevelopmentPreview",
+      "path": "src/components/CodeWorldWorkspace.jsx",
+      "parentId": "file:src/components/CodeWorldWorkspace.jsx",
+      "layer": "frontend",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 42,
+      "lineEnd": 65,
+      "summary": "실행 전 미리보기 정보를 불러옵니다",
+      "technicalSummary": "이 파일 내부에서 사용 · 서버나 저장소 응답을 기다림",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldWorkspace.jsx#L42-L65",
+          "symbol:loadDevelopmentPreview"
+        ]
+      },
+      "tags": [
+        "async",
+        "frontend",
+        "function",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": true,
+        "codePartCount": 7
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldWorkspace.jsx:observationRows",
+      "kind": "function",
+      "label": "observationRows",
+      "fingerprint": "d64c661723de3c44a9cf",
+      "explanationFingerprint": "23831e06c52acc8f3638",
+      "name": "observationRows",
+      "path": "src/components/CodeWorldWorkspace.jsx",
+      "parentId": "file:src/components/CodeWorldWorkspace.jsx",
+      "layer": "frontend",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 106,
+      "lineEnd": 226,
+      "summary": "운영 관측에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldWorkspace.jsx#L106-L226",
+          "symbol:observationRows"
+        ]
+      },
+      "tags": [
+        "frontend",
+        "function",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 40
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldWorkspace.jsx:safeArray",
+      "kind": "function",
+      "label": "safeArray",
+      "fingerprint": "1617a76d8626e6696d30",
+      "explanationFingerprint": "84039560b0e39a16d3c4",
+      "name": "safeArray",
+      "path": "src/components/CodeWorldWorkspace.jsx",
+      "parentId": "file:src/components/CodeWorldWorkspace.jsx",
+      "layer": "frontend",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 23,
+      "lineEnd": 25,
+      "summary": "허용 범위로 제한 · 목록 자료에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldWorkspace.jsx#L23-L25",
+          "symbol:safeArray"
+        ]
+      },
+      "tags": [
+        "frontend",
+        "function",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 2
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldWorkspace.jsx:screenPart",
+      "kind": "function",
+      "label": "screenPart",
+      "fingerprint": "68e079f65cfe7582e2b7",
+      "explanationFingerprint": "53b6ce1e59ef916faa9a",
+      "name": "screenPart",
+      "path": "src/components/CodeWorldWorkspace.jsx",
+      "parentId": "file:src/components/CodeWorldWorkspace.jsx",
+      "layer": "frontend",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 282,
+      "lineEnd": 302,
+      "summary": "시스템 파츠에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldWorkspace.jsx#L282-L302",
+          "symbol:screenPart"
+        ]
+      },
+      "tags": [
+        "frontend",
+        "function",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 5
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldWorkspace.jsx:selectedConnector",
+      "kind": "function",
+      "label": "selectedConnector",
+      "fingerprint": "af7cb19375ab5bc7379c",
+      "explanationFingerprint": "d00dfe29cbbc0004dc99",
+      "name": "selectedConnector",
+      "path": "src/components/CodeWorldWorkspace.jsx",
+      "parentId": "file:src/components/CodeWorldWorkspace.jsx",
+      "layer": "frontend",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 76,
+      "lineEnd": 79,
+      "summary": "로컬 커넥터에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldWorkspace.jsx#L76-L79",
+          "symbol:selectedConnector"
+        ]
+      },
+      "tags": [
+        "frontend",
+        "function",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 2
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldWorkspace.jsx:shaLabel",
+      "kind": "function",
+      "label": "shaLabel",
+      "fingerprint": "87567ffee64a79fe4f0b",
+      "explanationFingerprint": "a3605fcf852f25cb602f",
+      "name": "shaLabel",
+      "path": "src/components/CodeWorldWorkspace.jsx",
+      "parentId": "file:src/components/CodeWorldWorkspace.jsx",
+      "layer": "frontend",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 81,
+      "lineEnd": 83,
+      "summary": "Git 커밋 식별값 · 화면 이름에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldWorkspace.jsx#L81-L83",
+          "symbol:shaLabel"
+        ]
+      },
+      "tags": [
+        "frontend",
+        "function",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 2
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldWorkspace.jsx:sourceEventRows",
+      "kind": "function",
+      "label": "sourceEventRows",
+      "fingerprint": "968f10f57f2dc6f6c632",
+      "explanationFingerprint": "a2f71d84900ada7f6876",
+      "name": "sourceEventRows",
+      "path": "src/components/CodeWorldWorkspace.jsx",
+      "parentId": "file:src/components/CodeWorldWorkspace.jsx",
+      "layer": "frontend",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 85,
+      "lineEnd": 104,
+      "summary": "소스 코드 · 이벤트에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldWorkspace.jsx#L85-L104",
+          "symbol:sourceEventRows"
+        ]
+      },
+      "tags": [
+        "frontend",
+        "function",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 9
+      }
+    },
+    {
+      "id": "function:src/components/CodeWorldWorkspace.jsx:text",
+      "kind": "function",
+      "label": "text",
+      "fingerprint": "f60184c0874751a329a4",
+      "explanationFingerprint": "d489dbec9ee232384717",
+      "name": "text",
+      "path": "src/components/CodeWorldWorkspace.jsx",
+      "parentId": "file:src/components/CodeWorldWorkspace.jsx",
+      "layer": "frontend",
+      "area": "sharing-collaboration",
+      "subsystem": "sharing-policy",
+      "lineStart": 19,
+      "lineEnd": 21,
+      "summary": "텍스트에 필요한 한 단계의 판단이나 변환을 수행합니다.",
+      "technicalSummary": "이 파일 내부에서 사용",
+      "explanationBasis": {
+        "method": "symbol-and-source-range",
+        "refs": [
+          "source:src/components/CodeWorldWorkspace.jsx#L19-L21",
+          "symbol:text"
+        ]
+      },
+      "tags": [
+        "frontend",
+        "function",
+        "sharing-collaboration",
+        "sharing-policy"
+      ],
+      "details": {
+        "functionKind": "function",
+        "exported": false,
+        "async": false,
+        "codePartCount": 2
       }
     },
     {
@@ -67294,22 +70177,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/components/Toolbar.jsx:LayerSwitcher",
       "kind": "function",
       "label": "LayerSwitcher",
-      "fingerprint": "6d658a9f0945a0b6fb14",
-      "explanationFingerprint": "2417cf0e08df68e6673f",
+      "fingerprint": "9feb904e58904c2aee91",
+      "explanationFingerprint": "0c230bf4232cb6e915ee",
       "name": "LayerSwitcher",
       "path": "src/components/Toolbar.jsx",
       "parentId": "file:src/components/Toolbar.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 295,
-      "lineEnd": 367,
+      "lineStart": 286,
+      "lineEnd": 358,
       "summary": "LayerSwitcher 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/Toolbar.jsx#L295-L367",
+          "source:src/components/Toolbar.jsx#L286-L358",
           "symbol:LayerSwitcher"
         ]
       },
@@ -67323,7 +70206,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "functionKind": "function",
         "exported": false,
         "async": false,
-        "codePartCount": 12
+        "codePartCount": 11
       }
     },
     {
@@ -67331,21 +70214,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "MobileBtn",
       "fingerprint": "8c001e268805606d6d0a",
-      "explanationFingerprint": "1821b687ea3e217e88bc",
+      "explanationFingerprint": "ecad155852feed52a291",
       "name": "MobileBtn",
       "path": "src/components/Toolbar.jsx",
       "parentId": "file:src/components/Toolbar.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 433,
-      "lineEnd": 456,
+      "lineStart": 424,
+      "lineEnd": 447,
       "summary": "MobileBtn 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/Toolbar.jsx#L433-L456",
+          "source:src/components/Toolbar.jsx#L424-L447",
           "symbol:MobileBtn"
         ]
       },
@@ -67367,21 +70250,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "RuntimeButton",
       "fingerprint": "9572cc6041c4af1354b0",
-      "explanationFingerprint": "ca4f35608b3b2a00d06f",
+      "explanationFingerprint": "1198f8876afae781743e",
       "name": "RuntimeButton",
       "path": "src/components/Toolbar.jsx",
       "parentId": "file:src/components/Toolbar.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 493,
-      "lineEnd": 529,
+      "lineStart": 484,
+      "lineEnd": 520,
       "summary": "실제 운영 상태 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/Toolbar.jsx#L493-L529",
+          "source:src/components/Toolbar.jsx#L484-L520",
           "symbol:RuntimeButton"
         ]
       },
@@ -67403,21 +70286,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "SecurityOverlayButton",
       "fingerprint": "c8e01c005a86f68dcd57",
-      "explanationFingerprint": "d310f91e4074a6e6c5e0",
+      "explanationFingerprint": "0cf1067346e8269c69d2",
       "name": "SecurityOverlayButton",
       "path": "src/components/Toolbar.jsx",
       "parentId": "file:src/components/Toolbar.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 458,
-      "lineEnd": 491,
+      "lineStart": 449,
+      "lineEnd": 482,
       "summary": "SecurityOverlayButton 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/Toolbar.jsx#L458-L491",
+          "source:src/components/Toolbar.jsx#L449-L482",
           "symbol:SecurityOverlayButton"
         ]
       },
@@ -67439,21 +70322,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "SmallIcon",
       "fingerprint": "6838d981f1ac343e0fb9",
-      "explanationFingerprint": "9aa85ef6bc4cd7cc665d",
+      "explanationFingerprint": "a5473c821e7e3e44dc55",
       "name": "SmallIcon",
       "path": "src/components/Toolbar.jsx",
       "parentId": "file:src/components/Toolbar.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 378,
-      "lineEnd": 394,
+      "lineStart": 369,
+      "lineEnd": 385,
       "summary": "SmallIcon 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/Toolbar.jsx#L378-L394",
+          "source:src/components/Toolbar.jsx#L369-L385",
           "symbol:SmallIcon"
         ]
       },
@@ -67475,21 +70358,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "ToolBtn",
       "fingerprint": "985657cddccfa02c2b24",
-      "explanationFingerprint": "a4b60a70e8103b5f7d8f",
+      "explanationFingerprint": "7ca83dd2db958f476b3a",
       "name": "ToolBtn",
       "path": "src/components/Toolbar.jsx",
       "parentId": "file:src/components/Toolbar.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 396,
-      "lineEnd": 431,
+      "lineStart": 387,
+      "lineEnd": 422,
       "summary": "ToolBtn 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/Toolbar.jsx#L396-L431",
+          "source:src/components/Toolbar.jsx#L387-L422",
           "symbol:ToolBtn"
         ]
       },
@@ -67510,7 +70393,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/components/Toolbar.jsx:Toolbar",
       "kind": "function",
       "label": "Toolbar",
-      "fingerprint": "84f43ccea7fa0a288dba",
+      "fingerprint": "1a064b94c227b1916f5d",
       "explanationFingerprint": "193f0efb1f4d914f13da",
       "name": "Toolbar",
       "path": "src/components/Toolbar.jsx",
@@ -67547,8 +70430,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "function:src/components/Toolbar.jsx:ViewSelector",
       "kind": "function",
       "label": "ViewSelector",
-      "fingerprint": "efd36952977136eaa8fc",
-      "explanationFingerprint": "ef04b257e0f96da66a2e",
+      "fingerprint": "2a73af3b93ad1d710b1d",
+      "explanationFingerprint": "aff6ba49028948131eba",
       "name": "ViewSelector",
       "path": "src/components/Toolbar.jsx",
       "parentId": "file:src/components/Toolbar.jsx",
@@ -67556,13 +70439,13 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
       "lineStart": 114,
-      "lineEnd": 293,
+      "lineEnd": 284,
       "summary": "화면 상태 화면을 그리고 사용자의 입력과 화면 상태를 연결합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/Toolbar.jsx#L114-L293",
+          "source:src/components/Toolbar.jsx#L114-L284",
           "symbol:ViewSelector"
         ]
       },
@@ -67576,7 +70459,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "functionKind": "function",
         "exported": false,
         "async": false,
-        "codePartCount": 42
+        "codePartCount": 40
       }
     },
     {
@@ -67763,21 +70646,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "promptNewLayer",
       "fingerprint": "848be3c0481612fe1e9c",
-      "explanationFingerprint": "5eba391240abb88377e2",
+      "explanationFingerprint": "bade3fcbd08c34caff42",
       "name": "promptNewLayer",
       "path": "src/components/Toolbar.jsx",
       "parentId": "file:src/components/Toolbar.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 296,
-      "lineEnd": 300,
+      "lineStart": 287,
+      "lineEnd": 291,
       "summary": "이 파일이 맡은 “노드 추가, 전체 보기, 되돌리기 같은 캔버스의 주요 명령을 모아 보여줍니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/Toolbar.jsx#L296-L300",
+          "source:src/components/Toolbar.jsx#L287-L291",
           "symbol:promptNewLayer"
         ]
       },
@@ -67799,21 +70682,21 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "kind": "function",
       "label": "rowBtn",
       "fingerprint": "a31e5051eeabe742dd76",
-      "explanationFingerprint": "31c51f5e44bef6465600",
+      "explanationFingerprint": "6176d5581d7f67c3b21b",
       "name": "rowBtn",
       "path": "src/components/Toolbar.jsx",
       "parentId": "file:src/components/Toolbar.jsx",
       "layer": "frontend",
       "area": "canvas-interface",
       "subsystem": "canvas-workspace",
-      "lineStart": 369,
-      "lineEnd": 376,
+      "lineStart": 360,
+      "lineEnd": 367,
       "summary": "이 파일이 맡은 “노드 추가, 전체 보기, 되돌리기 같은 캔버스의 주요 명령을 모아 보여줍니다.” 작업 안에서 필요한 내부 판단이나 변환을 수행합니다.",
       "technicalSummary": "이 파일 내부에서 사용",
       "explanationBasis": {
         "method": "symbol-and-source-range",
         "refs": [
-          "source:src/components/Toolbar.jsx#L369-L376",
+          "source:src/components/Toolbar.jsx#L360-L367",
           "symbol:rowBtn"
         ]
       },
@@ -79293,7 +82176,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "id": "npm-script:test",
       "kind": "npm-script",
       "label": "npm run test",
-      "fingerprint": "39e3b041f68c0b777bdf",
+      "fingerprint": "65d0c52a5db10d9a2acd",
       "explanationFingerprint": "6851e7e792fc68eb20b4",
       "name": "test",
       "path": "package.json",
@@ -80844,6 +83727,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:045bdb7a2944cc61",
+      "type": "imports",
+      "source": "file:shared/sourceCodeWorldProjection.js",
+      "target": "file:shared/sourceAssetHierarchy.js",
+      "names": [
+        "sourceComponentsForSubsystem",
+        "sourceEntityIsModuleAsset"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:046e9d4a9820430f",
       "type": "contains",
       "source": "file:shared/aiContextGate.js",
@@ -80928,12 +83822,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/App.jsx",
       "target": "function:src/App.jsx:scopedParticipants"
-    },
-    {
-      "id": "relation:059fcee8bbc4a2a0",
-      "type": "contains",
-      "source": "file:shared/systemLayers.js",
-      "target": "function:shared/systemLayers.js:createSystemLayerViews"
     },
     {
       "id": "relation:05aea4c28cb331dd",
@@ -81180,6 +84068,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:0932a928e45c4be4",
+      "type": "contains",
+      "source": "file:shared/sourceCodeWorldProjection.js",
+      "target": "function:shared/sourceCodeWorldProjection.js:selectGroupsWithFocus"
+    },
+    {
       "id": "relation:0998c4f7e5f4da85",
       "type": "contains",
       "source": "file:shared/workshop.js",
@@ -81206,12 +84100,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "default"
       ],
       "dynamic": false
-    },
-    {
-      "id": "relation:09b2c4376373ee70",
-      "type": "contains",
-      "source": "file:shared/systemLayers.js",
-      "target": "function:shared/systemLayers.js:systemLayerDefinition"
     },
     {
       "id": "relation:09be53c1981bf2bb",
@@ -81268,6 +84156,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:scripts/test-source-profiles.mjs",
       "target": "function:scripts/test-source-profiles.mjs:buildSourceTwinManifest"
+    },
+    {
+      "id": "relation:0a5695de95b318d6",
+      "type": "imports",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "dependency:@xyflow/react/dist/style.css",
+      "names": [],
+      "dynamic": false
     },
     {
       "id": "relation:0a5a0c982f8ef837",
@@ -81606,6 +84502,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:scripts/local-connector-agent.mjs:pinnedGitHubOrigin"
     },
     {
+      "id": "relation:0fe80b773d45bd3d",
+      "type": "imports",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "file:src/lib/localConnectorApi.js",
+      "names": [
+        "loadLocalConnectors"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:0fe8bb4dfa7b0c1b",
       "type": "contains",
       "source": "file:src/components/EditToolbar.jsx",
@@ -81644,6 +84550,14 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/store.js",
       "target": "function:mcp/store.js:repairWorkflowSystemMapRelations"
+    },
+    {
+      "id": "relation:104230a89a96e089",
+      "type": "imports",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "file:src/components/CodeWorldScreen.css",
+      "names": [],
+      "dynamic": false
     },
     {
       "id": "relation:105d796ad0913a88",
@@ -81705,6 +84619,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/store.js:deleteEdge"
     },
     {
+      "id": "relation:10fe4a42346abac4",
+      "type": "contains",
+      "source": "file:shared/sourceCodeWorldProjection.js",
+      "target": "function:shared/sourceCodeWorldProjection.js:uniqueEntities"
+    },
+    {
       "id": "relation:111f786cfb2705d6",
       "type": "contains",
       "source": "file:src/lib/groupMembership.js",
@@ -81743,6 +84663,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:scripts/system-discovery.mjs",
       "target": "function:scripts/system-discovery.mjs:readWorkingTree"
+    },
+    {
+      "id": "relation:11d7a8f3b6c8d6b3",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "function:src/components/CodeWorldWorkspace.jsx:shaLabel"
     },
     {
       "id": "relation:11fc189c0c06ce29",
@@ -81911,6 +84837,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "read",
         "write"
       ]
+    },
+    {
+      "id": "relation:142d38ae92322157",
+      "type": "imports",
+      "source": "file:scripts/test-source-code-world.mjs",
+      "target": "dependency:node:assert/strict",
+      "names": [
+        "default"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:144fa338f0201e3a",
@@ -82095,6 +85031,27 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/components/SourceTwinPanel.jsx",
       "target": "function:src/components/SourceTwinPanel.jsx:ExplanationEvidence"
+    },
+    {
+      "id": "relation:1709fdca01232048",
+      "type": "imports",
+      "source": "file:src/App.jsx",
+      "target": "file:shared/systemLayers.js",
+      "names": [
+        "annotationDataForSystemLayer",
+        "canvasSupportsSystemLayers",
+        "createCustomSystemLayerView",
+        "createSystemLayerProjection",
+        "effectiveSystemLayerForNode",
+        "isSystemLayerView",
+        "normalizeSystemLayerId",
+        "pruneLegacyOfficialSystemLayerViews",
+        "removeSystemLayerFromNodes",
+        "systemLayerFromView",
+        "systemLayerOptionsFromViews",
+        "withSystemLayerOverride"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:170fa2df1821a061",
@@ -82372,10 +85329,34 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "npm-script:local-connector"
     },
     {
+      "id": "relation:1aee515ac7089619",
+      "type": "imports",
+      "source": "file:scripts/test-source-code-world-workspace.mjs",
+      "target": "dependency:node:assert/strict",
+      "names": [
+        "default"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:1af86a37e69d4f05",
       "type": "contains",
       "source": "file:shared/twinAdapterContract.js",
       "target": "function:shared/twinAdapterContract.js:validateTwinAdapterReview"
+    },
+    {
+      "id": "relation:1b1cffd38446a7ac",
+      "type": "imports",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "dependency:react",
+      "names": [
+        "memo",
+        "useCallback",
+        "useEffect",
+        "useMemo",
+        "useState"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:1b1faf84344909fb",
@@ -82517,6 +85498,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/components/NotesPanel.jsx:onKeyDown"
     },
     {
+      "id": "relation:1cff9b3880788f2c",
+      "type": "contains",
+      "source": "file:shared/sourceCodeWorldProjection.js",
+      "target": "function:shared/sourceCodeWorldProjection.js:baseProjection"
+    },
+    {
       "id": "relation:1d2c981105b48702",
       "type": "contains",
       "source": "file:src/nodes/SystemNode.jsx",
@@ -82579,6 +85566,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "normalizeEdgeRelationData"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:1d94feefa47954f4",
+      "type": "contains",
+      "source": "file:shared/sourceCodeWorldProjection.js",
+      "target": "function:shared/sourceCodeWorldProjection.js:repositoryMetadata"
     },
     {
       "id": "relation:1d99f9243ca1d88f",
@@ -82693,12 +85686,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/twinBuildReconciler.js:priority#2"
     },
     {
-      "id": "relation:1efcd19cb481a899",
-      "type": "contains",
-      "source": "file:shared/systemLayers.js",
-      "target": "function:shared/systemLayers.js:isCustomSystemLayerView"
-    },
-    {
       "id": "relation:1efe5f7ee372c645",
       "type": "defines-policy",
       "source": "file:supabase-profiles.sql",
@@ -82799,6 +85786,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/workflowSystemTwinBuild.js",
       "target": "function:shared/workflowSystemTwinBuild.js:createWorkflowSystemTwinBuildResult"
+    },
+    {
+      "id": "relation:209814b679fab935",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "function:src/components/CodeWorldScreen.jsx:districtComponents"
     },
     {
       "id": "relation:20a4d91a206532e2",
@@ -82906,6 +85899,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/workshopStore.js",
       "target": "function:mcp/workshopStore.js:assembleWorkshopBoard"
+    },
+    {
+      "id": "relation:216ba9045b3f0961",
+      "type": "imports",
+      "source": "file:scripts/test-source-code-world-workspace.mjs",
+      "target": "dependency:../shared/sourceTwinManifest.js",
+      "names": [
+        "SOURCE_TWIN_MANIFEST"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:219ef5acc2129b8d",
@@ -83103,6 +86106,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:239f43b43c4dcfd5",
+      "type": "imports",
+      "source": "file:scripts/test-source-code-world-workspace.mjs",
+      "target": "file:shared/sourceCodeWorldProjection.js",
+      "names": [
+        "createSourceCodeWorldProjection"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:23a0407b5c02d0c3",
       "type": "calls-db-function",
       "source": "file:src/lib/shares.js",
@@ -83197,6 +86210,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/lib/shareLaunchCoordinator.js",
       "target": "function:src/lib/shareLaunchCoordinator.js:claimShareLaunchFallback.release#2"
+    },
+    {
+      "id": "relation:25770c92c9bca681",
+      "type": "contains",
+      "source": "file:shared/sourceCodeWorldProjection.js",
+      "target": "function:shared/sourceCodeWorldProjection.js:projectPart"
     },
     {
       "id": "relation:257bd0d286ceef1e",
@@ -83938,6 +86957,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/lib/canvasSchemaGuard.js:canvasWriteError"
     },
     {
+      "id": "relation:2f8048dff6a36462",
+      "type": "imports",
+      "source": "file:scripts/test-source-code-world.mjs",
+      "target": "file:shared/sourceCodeWorldProjection.js",
+      "names": [
+        "SOURCE_CODE_WORLD_LODS",
+        "SOURCE_CODE_WORLD_PROJECTION_SCHEMA_VERSION",
+        "createSourceCodeWorldProjection",
+        "sourceCodeWorldSelection",
+        "traceSourceCodeWorld"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:2f844247d26097c2",
       "type": "contains",
       "source": "file:src/App.jsx",
@@ -84297,6 +87330,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:api/source-twin-webhook.js",
       "target": "function:api/source-twin-webhook.js:compactGitHubPush"
+    },
+    {
+      "id": "relation:36043230ef45316e",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "function:src/components/CodeWorldWorkspace.jsx:isPreviewRequest"
     },
     {
       "id": "relation:3621fbea9038c30f",
@@ -84854,6 +87893,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/sourceModuleProposal.js:createSourceModuleMaterializationItem"
     },
     {
+      "id": "relation:3edebdc3634b1c0b",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "function:src/components/CodeWorldWorkspace.jsx:selectedConnector"
+    },
+    {
       "id": "relation:3f30d31fc7f8a820",
       "type": "contains",
       "source": "file:src/components/Toolbar.jsx",
@@ -84926,6 +87971,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/store.js",
       "target": "function:mcp/store.js:deleteNode"
+    },
+    {
+      "id": "relation:3ffbca5851cded41",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "function:src/components/CodeWorldScreen.jsx:ComponentNode"
     },
     {
       "id": "relation:402cc579ae2f3491",
@@ -85480,6 +88531,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/components/SourceTwinPanel.jsx:localConnectorOptionLabel"
     },
     {
+      "id": "relation:46be4d8b41bb70c1",
+      "type": "imports",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "file:shared/sourceCodeWorldProjection.js",
+      "names": [
+        "createSourceCodeWorldProjection"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:46f0cb777587c129",
       "type": "imports",
       "source": "file:src/components/SourceTwinPanel.jsx",
@@ -85856,6 +88917,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/store.js:clearCanvas"
     },
     {
+      "id": "relation:4b4957e77971029e",
+      "type": "contains",
+      "source": "file:shared/sourceCodeWorldProjection.js",
+      "target": "function:shared/sourceCodeWorldProjection.js:projectEdge"
+    },
+    {
       "id": "relation:4b585e392df3cca1",
       "type": "contains",
       "source": "file:src/App.jsx",
@@ -86062,6 +89129,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "timingSafeEqual"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:4dcd4f9fda0270c6",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "function:src/components/CodeWorldWorkspace.jsx:screenPart"
     },
     {
       "id": "relation:4dd241c97927c221",
@@ -86433,6 +89506,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/sourceFunctionalContext.js:compareText"
     },
     {
+      "id": "relation:52c28161e05d30cb",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "function:src/components/CodeWorldWorkspace.jsx:layoutDistricts"
+    },
+    {
       "id": "relation:52c3b9b9f3add2ef",
       "type": "imports",
       "source": "file:scripts/source-edit-executor.mjs",
@@ -86541,6 +89620,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/intentOntology.js",
       "target": "function:shared/intentOntology.js:sameSnapshot"
+    },
+    {
+      "id": "relation:54050336c6b097f4",
+      "type": "contains",
+      "source": "file:shared/sourceCodeWorldProjection.js",
+      "target": "function:shared/sourceCodeWorldProjection.js:text"
     },
     {
       "id": "relation:541749469de3f4d3",
@@ -86710,6 +89795,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/App.jsx:App"
     },
     {
+      "id": "relation:566e56988774cd3c",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "function:src/components/CodeWorldScreen.jsx:selectedConnector"
+    },
+    {
       "id": "relation:56773bb8cf6ca449",
       "type": "contains",
       "source": "file:src/components/WorkshopBoard.jsx",
@@ -86791,6 +89882,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/workflowSystemTwinAdapter.js",
       "target": "function:shared/workflowSystemTwinAdapter.js:expectedSystemPartProposal"
+    },
+    {
+      "id": "relation:57770312e63ba5e4",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "function:src/components/CodeWorldWorkspace.jsx:loadDevelopmentPreview"
     },
     {
       "id": "relation:5778bef4fa3d5f12",
@@ -87213,6 +90310,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/store.js:writeConflict"
     },
     {
+      "id": "relation:5c5bb359c55c1b0d",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "function:src/components/CodeWorldScreen.jsx:normalizedPosition"
+    },
+    {
       "id": "relation:5c6963d510ab66ad",
       "type": "contains",
       "source": "file:shared/digitalTwinProposal.js",
@@ -87284,6 +90387,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/engineRegistry.js",
       "target": "function:shared/engineRegistry.js:deepFreeze"
+    },
+    {
+      "id": "relation:5d0bbae108188557",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "function:src/components/CodeWorldWorkspace.jsx:isAuthenticationFailure"
     },
     {
       "id": "relation:5d2e85f0d5454735",
@@ -87444,6 +90553,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:5fe0b129400ca32e",
+      "type": "contains",
+      "source": "file:shared/sourceCodeWorldProjection.js",
+      "target": "function:shared/sourceCodeWorldProjection.js:focusEntityIds"
+    },
+    {
       "id": "relation:5feb841f8c284efb",
       "type": "contains",
       "source": "file:src/lib/sharedCanvasApi.js",
@@ -87599,6 +90714,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/twinBuild.js",
       "target": "function:shared/twinBuild.js:requireTarget"
+    },
+    {
+      "id": "relation:61e9ecfeac0345e2",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "function:src/components/CodeWorldWorkspace.jsx:buildCodeWorldModel"
     },
     {
       "id": "relation:61f98c0329bf3ded",
@@ -87839,6 +90960,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:663e646cf9541f72",
+      "type": "imports",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "file:src/lib/sourceTwinApi.js",
+      "names": [
+        "loadSourceTwinCurrent"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:664bf6702ad47487",
       "type": "contains",
       "source": "file:src/nodes/SystemNode.jsx",
@@ -87855,6 +90986,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/trustTopology.js",
       "target": "function:shared/trustTopology.js:analyzeTrustBoundary"
+    },
+    {
+      "id": "relation:675828509e9c617f",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "function:src/components/CodeWorldScreen.jsx:connectionView"
     },
     {
       "id": "relation:67b32d4305adeb22",
@@ -88079,6 +91216,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/components/IntentWorkspace.jsx:commitClauses"
     },
     {
+      "id": "relation:6aa6c89fed8a3dcf",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "function:src/components/CodeWorldWorkspace.jsx:text"
+    },
+    {
       "id": "relation:6aa7f44a8158d995",
       "type": "imports",
       "source": "file:src/App.jsx",
@@ -88127,6 +91270,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:6b629af08decbc05",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "function:src/components/CodeWorldWorkspace.jsx:initialPartIdForEntry"
+    },
+    {
       "id": "relation:6b6f3a9d97ca665f",
       "type": "contains",
       "source": "file:mcp/server.js",
@@ -88139,6 +91288,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/components/EdgeRelationEditor.jsx:selectRelation"
     },
     {
+      "id": "relation:6b9a747a6bd2ccc2",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "function:src/components/CodeWorldScreen.jsx:registerAsset"
+    },
+    {
+      "id": "relation:6b9cfd351b4289b3",
+      "type": "imports",
+      "source": "file:scripts/test-source-code-world.mjs",
+      "target": "dependency:../shared/sourceFlowManifest.js",
+      "names": [
+        "SOURCE_FLOW_MANIFEST"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:6bb94cb44d745ec5",
       "type": "imports",
       "source": "file:api/source-twin.js",
@@ -88147,6 +91312,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "SOURCE_FLOW_MANIFEST"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:6bbe6bf6450bf02d",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "function:src/components/CodeWorldScreen.jsx:DeliveryStageNode"
     },
     {
       "id": "relation:6bf15da9d7024307",
@@ -88221,6 +91392,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "default"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:6d1cef42b1220f58",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "function:src/components/CodeWorldWorkspace.jsx:deliveryModel"
     },
     {
       "id": "relation:6d36634991a445c6",
@@ -88420,6 +91597,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/workflowSourceFeatureBuild.js:extendWorkflowTwinBuildWithSourceFeatures"
     },
     {
+      "id": "relation:6f3d7f331af657fb",
+      "type": "contains",
+      "source": "file:shared/systemLayers.js",
+      "target": "function:shared/systemLayers.js:colorForLayerId"
+    },
+    {
       "id": "relation:6f40c5fe948fa80c",
       "type": "contains",
       "source": "file:shared/operationLifecycle.js",
@@ -88517,6 +91700,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:mcp/store.js",
       "target": "function:mcp/store.js:previewSourceTwinSnapshot"
+    },
+    {
+      "id": "relation:7025f4d482cb7545",
+      "type": "imports",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "dependency:@xyflow/react",
+      "names": [
+        "Background",
+        "BackgroundVariant",
+        "Controls",
+        "Handle",
+        "MarkerType",
+        "Position",
+        "ReactFlow"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:7048ecd665d37910",
@@ -88712,6 +91911,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/sourceTwin.js:sourceTwinEntityMap"
     },
     {
+      "id": "relation:72ad73bdf0be98fa",
+      "type": "contains",
+      "source": "file:shared/sourceCodeWorldProjection.js",
+      "target": "function:shared/sourceCodeWorldProjection.js:compareEntities"
+    },
+    {
       "id": "relation:72ae7c66ff030155",
       "type": "contains",
       "source": "file:mcp/shareAccess.js",
@@ -88748,6 +91953,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/aiContextGate.js",
       "target": "function:shared/aiContextGate.js:compactList"
+    },
+    {
+      "id": "relation:732d9e58939206b2",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "function:src/components/CodeWorldWorkspace.jsx:districtHeight"
     },
     {
       "id": "relation:736b6ab347073bfa",
@@ -89275,12 +92486,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/sourceTwinSemantics.js:sourceTwinSubsystemDefinition"
     },
     {
-      "id": "relation:7893ac69b02e09d3",
-      "type": "contains",
-      "source": "file:shared/systemLayers.js",
-      "target": "function:shared/systemLayers.js:isSystemMapTemplateCanvas"
-    },
-    {
       "id": "relation:78a8ed85e7691e05",
       "type": "imports",
       "source": "file:scripts/test-intent-node.mjs",
@@ -89570,6 +92775,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:7bd48ea3cfddb709",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "function:src/components/CodeWorldScreen.jsx:CodeWorldScreen"
+    },
+    {
       "id": "relation:7be9fc25f8f5aeb4",
       "type": "contains",
       "source": "file:shared/operationLifecycle.js",
@@ -89586,6 +92797,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:scripts/source-twin-semantics.mjs",
       "target": "function:scripts/source-twin-semantics.mjs:ROLE"
+    },
+    {
+      "id": "relation:7c32c3293e0c6707",
+      "type": "imports",
+      "source": "file:scripts/test-source-code-world.mjs",
+      "target": "dependency:../shared/sourceTwinManifest.js",
+      "names": [
+        "SOURCE_TWIN_MANIFEST"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:7c789d13b090d25d",
@@ -89693,6 +92914,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/operationLifecycle.js",
       "target": "function:shared/operationLifecycle.js:retryOperationRun"
+    },
+    {
+      "id": "relation:7e6e0b5d159481d0",
+      "type": "contains",
+      "source": "file:shared/sourceCodeWorldProjection.js",
+      "target": "function:shared/sourceCodeWorldProjection.js:relationSortKey"
     },
     {
       "id": "relation:7e76821a165d5ffd",
@@ -89809,6 +93036,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/App.jsx",
       "target": "function:src/App.jsx:handleContextAddGroup"
+    },
+    {
+      "id": "relation:7fb8dc882c22955c",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "function:src/components/CodeWorldScreen.jsx:idOf"
     },
     {
       "id": "relation:7fb8f5f499adb1a2",
@@ -90073,6 +93306,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/layout.js:getRect"
     },
     {
+      "id": "relation:824443c65e7779e0",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "function:src/components/CodeWorldScreen.jsx:itemDescription"
+    },
+    {
       "id": "relation:827ba2581a05461a",
       "type": "contains",
       "source": "file:shared/operationLifecycle.js",
@@ -90097,12 +93336,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/edgeOperation.js:edgeOperationIsTerminal"
     },
     {
-      "id": "relation:82c6005bf9875607",
-      "type": "contains",
-      "source": "file:shared/systemLayers.js",
-      "target": "function:shared/systemLayers.js:isOfficialSystemLayerId"
-    },
-    {
       "id": "relation:82d9e5a7fded9d4a",
       "type": "imports",
       "source": "file:mcp/store.js",
@@ -90111,6 +93344,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "sanitizeTextFields"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:82e4af2adf339cbe",
+      "type": "contains",
+      "source": "file:shared/sourceCodeWorldProjection.js",
+      "target": "function:shared/sourceCodeWorldProjection.js:entitySortKey"
     },
     {
       "id": "relation:82fd71f8ef440c72",
@@ -90189,6 +93428,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/sourceProfileContract.js",
       "target": "function:shared/sourceProfileContract.js:rule"
+    },
+    {
+      "id": "relation:83ef0182a0af3915",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "function:src/components/CodeWorldScreen.jsx:DistrictNode"
     },
     {
       "id": "relation:83facdb62cc15261",
@@ -90356,6 +93601,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ]
     },
     {
+      "id": "relation:85537f5a2b08a1d6",
+      "type": "contains",
+      "source": "file:shared/sourceCodeWorldProjection.js",
+      "target": "function:shared/sourceCodeWorldProjection.js:emptyProjection"
+    },
+    {
       "id": "relation:857447f0dee4c012",
       "type": "contains",
       "source": "file:scripts/source-twin-scanner.mjs",
@@ -90420,6 +93671,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:scripts/test-mcp-logic.mjs",
       "target": "function:scripts/test-mcp-logic.mjs:writeDb.from"
+    },
+    {
+      "id": "relation:8673e442a2d2cdd4",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "function:src/components/CodeWorldWorkspace.jsx:errorMessage"
     },
     {
       "id": "relation:867df1e7e6c85151",
@@ -91096,6 +94353,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:90068ca588421687",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "function:src/components/CodeWorldWorkspace.jsx:connectorWithFreshState"
+    },
+    {
       "id": "relation:9019b990ac6f6499",
       "type": "imports",
       "source": "file:shared/workflowSourceFeatureBuild.js",
@@ -91320,6 +94583,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/operationLifecycle.js:completeOperationVerification"
     },
     {
+      "id": "relation:92e227c1871b1898",
+      "type": "reads-env",
+      "source": "file:src/App.jsx",
+      "target": "env:DEV"
+    },
+    {
       "id": "relation:92ee25449a8e8d7e",
       "type": "imports",
       "source": "file:scripts/test-source-code-parts.mjs",
@@ -91398,16 +94667,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/lib/localConnectorApi.js:previewLocalGitSync"
     },
     {
-      "id": "relation:93d60a4dcb0ff9b7",
-      "type": "imports",
-      "source": "file:scripts/test-system-layers.mjs",
-      "target": "file:shared/systemOntology.js",
-      "names": [
-        "SYSTEM_KIND_DEFS"
-      ],
-      "dynamic": false
-    },
-    {
       "id": "relation:93de03d9972944ef",
       "type": "contains",
       "source": "file:shared/securityOverlay.js",
@@ -91464,6 +94723,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "TWIN_ENGINE_SCHEMA_VERSION"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:9493cc7842dd991d",
+      "type": "contains",
+      "source": "file:shared/sourceCodeWorldProjection.js",
+      "target": "function:shared/sourceCodeWorldProjection.js:traceSourceCodeWorld"
     },
     {
       "id": "relation:94c07efc39ed2a45",
@@ -91558,6 +94823,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/components/AuthPanel.jsx",
       "target": "function:src/components/AuthPanel.jsx:handleLogout"
+    },
+    {
+      "id": "relation:9684597d12037d4c",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "function:src/components/CodeWorldWorkspace.jsx:deliveryRelations"
     },
     {
       "id": "relation:9686672ee01b5d4f",
@@ -91920,31 +95191,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/components/CanvasTabs.jsx:grantLabel"
     },
     {
-      "id": "relation:9b0cede018691f8f",
-      "type": "imports",
-      "source": "file:scripts/test-system-layers.mjs",
-      "target": "file:shared/systemLayers.js",
-      "names": [
-        "SYSTEM_LAYER_DEFINITIONS",
-        "annotationDataForSystemLayer",
-        "canvasSupportsSystemLayers",
-        "createCustomSystemLayerView",
-        "createSystemLayerProjection",
-        "createSystemLayerViews",
-        "deriveDefaultSystemLayer",
-        "effectiveSystemLayerForNode",
-        "ensureSystemLayerViews",
-        "isCustomSystemLayerView",
-        "isSystemMapTemplateCanvas",
-        "normalizeNodePresentation",
-        "normalizeSystemLayerId",
-        "removeSystemLayerFromNodes",
-        "systemLayerOptionsFromViews",
-        "withSystemLayerOverride"
-      ],
-      "dynamic": false
-    },
-    {
       "id": "relation:9b2d7a668b500eac",
       "type": "contains",
       "source": "file:src/App.jsx",
@@ -91967,6 +95213,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/components/NotesPanel.jsx",
       "target": "function:src/components/NotesPanel.jsx:NotePage"
+    },
+    {
+      "id": "relation:9bbb8f246c1466a1",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "function:src/components/CodeWorldScreen.jsx:endpointNode"
     },
     {
       "id": "relation:9bd3c21c0aeaf7e2",
@@ -92048,6 +95300,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "dependency:react",
       "names": [
         "StrictMode"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "relation:9cd3c4acd3d7725a",
+      "type": "imports",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "dependency:react",
+      "names": [
+        "useCallback",
+        "useEffect",
+        "useMemo",
+        "useRef",
+        "useState"
       ],
       "dynamic": false
     },
@@ -92295,6 +95561,20 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/edgeOperation.js:edgeOperationStatusDefinition"
     },
     {
+      "id": "relation:9fc2c850c788940c",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "function:src/components/CodeWorldScreen.jsx:graphProjection"
+    },
+    {
+      "id": "relation:9fd54595460e8cf7",
+      "type": "imports",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "file:src/components/CodeWorldWorkspace.css",
+      "names": [],
+      "dynamic": false
+    },
+    {
       "id": "relation:a03f7128017fe355",
       "type": "contains",
       "source": "file:shared/twinBuild.js",
@@ -92395,14 +95675,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/systemRuntime.js:observation"
     },
     {
-      "id": "relation:a189e0f9bf6c3e08",
+      "id": "relation:a18ba7f45ed28793",
       "type": "imports",
-      "source": "file:src/App.jsx",
-      "target": "file:shared/workflowSourceTwinCanvas.js",
+      "source": "file:scripts/test-source-code-world-workspace.mjs",
+      "target": "dependency:vite",
       "names": [
-        "WORKFLOW_GIT_SYNC_EDGE_ID",
-        "workflowSourceTwinEntryForEdgeOperation",
-        "workflowSourceTwinEntryForPart"
+        "createServer"
       ],
       "dynamic": false
     },
@@ -92548,6 +95826,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/sanitize.js:sanitizeExternalUrl"
     },
     {
+      "id": "relation:a3408c004d40c65a",
+      "type": "contains",
+      "source": "file:shared/sourceCodeWorldProjection.js",
+      "target": "function:shared/sourceCodeWorldProjection.js:scopeAllowsEntity"
+    },
+    {
       "id": "relation:a34686deff151c34",
       "type": "contains",
       "source": "file:scripts/source-twin-scanner.mjs",
@@ -92625,6 +95909,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "SYSTEM_ENVIRONMENT_DEFS",
         "SYSTEM_SOURCE_DEFS",
         "normalizeLogicalComponent"
+      ],
+      "dynamic": false
+    },
+    {
+      "id": "relation:a40a68461963a9ae",
+      "type": "imports",
+      "source": "file:shared/sourceCodeWorldProjection.js",
+      "target": "file:shared/sourceTwinSemantics.js",
+      "names": [
+        "groupSourceTwinEntitiesByArea",
+        "groupSourceTwinEntitiesBySubsystem",
+        "sourceTwinAreaId",
+        "sourceTwinSubsystemId"
       ],
       "dynamic": false
     },
@@ -92771,12 +96068,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/sourceAiExplanation.js:explainSourceCodePartWithAi"
     },
     {
-      "id": "relation:a65ea0976cda5cd5",
-      "type": "contains",
-      "source": "file:shared/systemLayers.js",
-      "target": "function:shared/systemLayers.js:ensureSystemLayerViews"
-    },
-    {
       "id": "relation:a66afb492a0f2aeb",
       "type": "contains",
       "source": "file:scripts/source-profiles/index.mjs",
@@ -92793,6 +96084,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:scripts/test-source-twin.mjs",
       "target": "function:scripts/test-source-twin.mjs:localCompletionDb"
+    },
+    {
+      "id": "relation:a6958651b97c2fb8",
+      "type": "imports",
+      "source": "file:src/App.jsx",
+      "target": "file:src/components/CodeWorldWorkspace.jsx",
+      "names": [
+        "default"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:a6a99feef142c651",
@@ -92821,6 +96122,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/systemPartOntology.js",
       "target": "function:shared/systemPartOntology.js:systemPartExposureDefinition"
+    },
+    {
+      "id": "relation:a7a4801d7823d370",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "function:src/components/CodeWorldScreen.jsx:actionCallback"
     },
     {
       "id": "relation:a7dbd53837b4985f",
@@ -92936,6 +96243,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:a993f53b7f0b541e",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "function:src/components/CodeWorldScreen.jsx:observationRows"
+    },
+    {
       "id": "relation:a9ab0d2f4021f6d8",
       "type": "imports",
       "source": "file:scripts/test-performance-boundaries.mjs",
@@ -93041,6 +96354,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
+      "id": "relation:ab51746dca648220",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "function:src/components/CodeWorldScreen.jsx:evidenceRows"
+    },
+    {
       "id": "relation:ab573890c5226822",
       "type": "contains",
       "source": "file:scripts/source-edit-executor.mjs",
@@ -93066,6 +96385,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/operationLifecycle.js",
       "target": "function:shared/operationLifecycle.js:acknowledgeOperationCancellation"
+    },
+    {
+      "id": "relation:ab900d3ad98432e8",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "function:src/components/CodeWorldScreen.jsx:formatRelativeTime"
     },
     {
       "id": "relation:ab95b0b6516dc478",
@@ -93495,14 +96820,10 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/twinAdapterContract.js:normalizePermissions"
     },
     {
-      "id": "relation:b1038c27f38a4e3c",
-      "type": "imports",
-      "source": "file:scripts/test-mcp-logic.mjs",
-      "target": "file:shared/systemLayers.js",
-      "names": [
-        "SYSTEM_LAYER_DEFINITIONS"
-      ],
-      "dynamic": false
+      "id": "relation:b105ac105ab959aa",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "function:src/components/CodeWorldWorkspace.jsx:changedPartStatus"
     },
     {
       "id": "relation:b10b23be87700cde",
@@ -93647,6 +96968,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/nodes/MemoNode.jsx",
       "target": "function:src/nodes/MemoNode.jsx:handleTextMouseMove"
+    },
+    {
+      "id": "relation:b37125f93785f7e3",
+      "type": "contains",
+      "source": "file:shared/sourceCodeWorldProjection.js",
+      "target": "function:shared/sourceCodeWorldProjection.js:validRelations"
     },
     {
       "id": "relation:b3903682b7544401",
@@ -93905,6 +97232,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       ]
     },
     {
+      "id": "relation:b6bab7773a871147",
+      "type": "contains",
+      "source": "file:shared/sourceCodeWorldProjection.js",
+      "target": "function:shared/sourceCodeWorldProjection.js:boundedInteger"
+    },
+    {
       "id": "relation:b6cb2a13cb812198",
       "type": "contains",
       "source": "file:scripts/source-twin-scanner.mjs",
@@ -94129,6 +97462,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "re-export"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:b9c57c84cc1d1623",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "function:src/components/CodeWorldScreen.jsx:statusLabel"
     },
     {
       "id": "relation:b9ca4ee05e7cc63b",
@@ -94378,6 +97717,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "validateGraphInput"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:bd498b47efd39475",
+      "type": "reads-env",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "env:DEV"
     },
     {
       "id": "relation:bd5b370fadbb9693",
@@ -94719,16 +98064,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/storage.js:resetCanvasStorage"
     },
     {
-      "id": "relation:c2296ba5bac3fb21",
-      "type": "imports",
-      "source": "file:shared/workflowCanvasSystemMap.js",
-      "target": "file:shared/systemLayers.js",
-      "names": [
-        "createSystemLayerViews"
-      ],
-      "dynamic": false
-    },
-    {
       "id": "relation:c250d2327f6d59a9",
       "type": "contains",
       "source": "file:scripts/test-workshop-mcp.mjs",
@@ -94867,6 +98202,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:scripts/test-mcp-logic.mjs",
       "target": "function:scripts/test-mcp-logic.mjs:query.limit"
+    },
+    {
+      "id": "relation:c4a8c0c4e56290bf",
+      "type": "imports",
+      "source": "file:shared/sourceCodeWorldProjection.js",
+      "target": "file:shared/sourceFlows.js",
+      "names": [
+        "sourceFlowsForModule"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:c4d3a3897ca9f9ca",
@@ -95311,6 +98656,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:mcp/server.js:buildServer"
     },
     {
+      "id": "relation:c9e592c74fecbd80",
+      "type": "contains",
+      "source": "file:shared/sourceCodeWorldProjection.js",
+      "target": "function:shared/sourceCodeWorldProjection.js:stringList"
+    },
+    {
       "id": "relation:c9f96228ac9c68de",
       "type": "contains",
       "source": "file:mcp/layout.js",
@@ -95354,6 +98705,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "edgeRelationInfo"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:ca5d0aa9d198b827",
+      "type": "contains",
+      "source": "file:shared/sourceCodeWorldProjection.js",
+      "target": "function:shared/sourceCodeWorldProjection.js:sourceCodeWorldSelection"
     },
     {
       "id": "relation:ca637b9da5761170",
@@ -95714,6 +99071,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/components/WorkshopBoard.jsx:contractForStage"
     },
     {
+      "id": "relation:cf73d236a3cfb6d7",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "function:src/components/CodeWorldScreen.jsx:normalizedSize"
+    },
+    {
       "id": "relation:cfa3f05f31f15822",
       "type": "contains",
       "source": "file:src/App.jsx",
@@ -95774,10 +99137,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/workshop.js:workshopGateReadiness"
     },
     {
+      "id": "relation:d10cc7046d69dcbf",
+      "type": "contains",
+      "source": "file:shared/systemLayers.js",
+      "target": "function:shared/systemLayers.js:pruneLegacyOfficialSystemLayerViews"
+    },
+    {
       "id": "relation:d112afce42bc5257",
       "type": "contains",
       "source": "file:shared/operationLifecycle.js",
       "target": "function:shared/operationLifecycle.js:defaultSideEffect"
+    },
+    {
+      "id": "relation:d1171735cfcc3145",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "function:src/components/CodeWorldScreen.jsx:safeText"
     },
     {
       "id": "relation:d128f11e1c235b40",
@@ -95871,16 +99246,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "reconnectEdge",
         "useEdgesState",
         "useNodesState"
-      ],
-      "dynamic": false
-    },
-    {
-      "id": "relation:d2dfcd5bf3a38a14",
-      "type": "imports",
-      "source": "file:scripts/test-source-code-parts.mjs",
-      "target": "file:shared/systemLayers.js",
-      "names": [
-        "deriveDefaultSystemLayer"
       ],
       "dynamic": false
     },
@@ -96110,6 +99475,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/components/DigitalTwinReviewPanel.jsx:ReviewRow"
     },
     {
+      "id": "relation:d57f04c3d72be1d5",
+      "type": "imports",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "file:shared/localConnector.js",
+      "names": [
+        "compareLocalAndDeployedManifests",
+        "localConnectorConnectionState"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:d59571b058880640",
       "type": "contains",
       "source": "file:src/lib/wheelRouting.js",
@@ -96194,6 +99570,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/twinBuild.js",
       "target": "function:shared/twinBuild.js:recordList"
+    },
+    {
+      "id": "relation:d76c24a18aef5524",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "function:src/components/CodeWorldWorkspace.jsx:safeArray"
     },
     {
       "id": "relation:d77aa71a47a189d0",
@@ -96914,6 +100296,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/lib/groupMembership.js:reparentNodePreservingPosition"
     },
     {
+      "id": "relation:e02b7c13b0dc8653",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "function:src/components/CodeWorldWorkspace.jsx:observationRows"
+    },
+    {
       "id": "relation:e038973be79d9a1f",
       "type": "contains",
       "source": "file:src/nodes/StageNode.jsx",
@@ -97070,6 +100458,17 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/nodes/GroupNode.jsx:clamp"
     },
     {
+      "id": "relation:e256953a803a3b35",
+      "type": "imports",
+      "source": "file:shared/sourceCodeWorldProjection.js",
+      "target": "file:shared/sourceTwin.js",
+      "names": [
+        "sourceTwinEntities",
+        "sourceTwinEntityMap"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:e271c006bf8794a0",
       "type": "imports",
       "source": "file:src/nodes/StageNode.jsx",
@@ -97105,6 +100504,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/workflowSystemTwinBuild.js",
       "target": "function:shared/workflowSystemTwinBuild.js:createWorkflowSystemTwinBuild"
+    },
+    {
+      "id": "relation:e3699854c9cf98aa",
+      "type": "imports",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "file:src/components/CodeWorldScreen.jsx",
+      "names": [
+        "default"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:e3880cb9208ef1ac",
@@ -97242,6 +100651,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/operationLifecycle.js",
       "target": "function:shared/operationLifecycle.js:requestOperationCancellation"
+    },
+    {
+      "id": "relation:e62bd72e36da7f53",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "function:src/components/CodeWorldScreen.jsx:ExternalSystemNode"
     },
     {
       "id": "relation:e64abb4b0549a868",
@@ -97450,6 +100865,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/sourceTwin.js",
       "target": "function:shared/sourceTwin.js:sourceTwinCodeUrl"
+    },
+    {
+      "id": "relation:e8012dc2e78ca986",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "function:src/components/CodeWorldScreen.jsx:moduleItems"
     },
     {
       "id": "relation:e8295ed10fe4030d",
@@ -98069,6 +101490,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:src/components/WorkIntentPicker.jsx:createAndAttach"
     },
     {
+      "id": "relation:efc9586251d4ac49",
+      "type": "contains",
+      "source": "file:shared/sourceCodeWorldProjection.js",
+      "target": "function:shared/sourceCodeWorldProjection.js:createSourceCodeWorldProjection"
+    },
+    {
       "id": "relation:efef2452f85781b1",
       "type": "contains",
       "source": "file:scripts/test-workshop-mcp.mjs",
@@ -98181,6 +101608,26 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:shared/localConnector.js:shellSingleQuote"
     },
     {
+      "id": "relation:f166e5100c79fb96",
+      "type": "imports",
+      "source": "file:scripts/test-system-layers.mjs",
+      "target": "file:shared/systemLayers.js",
+      "names": [
+        "annotationDataForSystemLayer",
+        "canvasSupportsSystemLayers",
+        "createCustomSystemLayerView",
+        "createSystemLayerProjection",
+        "effectiveSystemLayerForNode",
+        "normalizeNodePresentation",
+        "normalizeSystemLayerId",
+        "pruneLegacyOfficialSystemLayerViews",
+        "removeSystemLayerFromNodes",
+        "systemLayerOptionsFromViews",
+        "withSystemLayerOverride"
+      ],
+      "dynamic": false
+    },
+    {
       "id": "relation:f1881b3ddaa83171",
       "type": "contains",
       "source": "file:shared/twinBuild.js",
@@ -98197,6 +101644,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:scripts/test-source-feature-model.mjs",
       "target": "function:scripts/test-source-feature-model.mjs:buildSourceTwinManifest"
+    },
+    {
+      "id": "relation:f1d468327b76fbc2",
+      "type": "contains",
+      "source": "file:shared/sourceCodeWorldProjection.js",
+      "target": "function:shared/sourceCodeWorldProjection.js:add"
     },
     {
       "id": "relation:f1fbbb89628ab812",
@@ -98284,34 +101737,16 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "dynamic": false
     },
     {
-      "id": "relation:f2ab2fabefa3b103",
-      "type": "imports",
-      "source": "file:src/App.jsx",
-      "target": "file:shared/systemLayers.js",
-      "names": [
-        "annotationDataForSystemLayer",
-        "canvasSupportsSystemLayers",
-        "createCustomSystemLayerView",
-        "createSystemLayerProjection",
-        "effectiveSystemLayerForNode",
-        "ensureSystemLayerViews",
-        "isCanvasAnnotationNode",
-        "isCustomSystemLayerView",
-        "isSystemLayerView",
-        "isSystemMapTemplateCanvas",
-        "normalizeSystemLayerId",
-        "removeSystemLayerFromNodes",
-        "systemLayerFromView",
-        "systemLayerOptionsFromViews",
-        "withSystemLayerOverride"
-      ],
-      "dynamic": false
-    },
-    {
       "id": "relation:f2bc51f902517d10",
       "type": "contains",
       "source": "file:src/App.jsx",
       "target": "function:src/App.jsx:distOf"
+    },
+    {
+      "id": "relation:f2d6dc436ea7f79a",
+      "type": "contains",
+      "source": "file:shared/sourceCodeWorldProjection.js",
+      "target": "function:shared/sourceCodeWorldProjection.js:normalizeLod"
     },
     {
       "id": "relation:f31add68c9e57e80",
@@ -98449,6 +101884,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:src/lib/shares.js",
       "target": "function:src/lib/shares.js:kickMember"
+    },
+    {
+      "id": "relation:f51fb50434d57b7c",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "function:src/components/CodeWorldScreen.jsx:statusId"
     },
     {
       "id": "relation:f5277021d03ed81b",
@@ -98639,12 +102080,6 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "target": "function:api/source-twin-webhook.js:send"
     },
     {
-      "id": "relation:f79a4729fd2a2aca",
-      "type": "contains",
-      "source": "file:shared/systemLayers.js",
-      "target": "function:shared/systemLayers.js:deriveDefaultSystemLayer"
-    },
-    {
       "id": "relation:f7caed875cca5cb5",
       "type": "contains",
       "source": "file:shared/capabilityMapper.js",
@@ -98661,6 +102096,19 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/systemStateSnapshot.js",
       "target": "function:shared/systemStateSnapshot.js:stableValue"
+    },
+    {
+      "id": "relation:f837588a6af6f267",
+      "type": "imports",
+      "source": "file:src/App.jsx",
+      "target": "file:shared/workflowSourceTwinCanvas.js",
+      "names": [
+        "WORKFLOW_GIT_SYNC_EDGE_ID",
+        "workflowSourceTwinEntryForEdgeOperation",
+        "workflowSourceTwinEntryForNode",
+        "workflowSourceTwinEntryForPart"
+      ],
+      "dynamic": false
     },
     {
       "id": "relation:f87d7c9080602d17",
@@ -98691,6 +102139,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "type": "contains",
       "source": "file:shared/richTextSanitizer.js",
       "target": "function:shared/richTextSanitizer.js:safeStyleValue"
+    },
+    {
+      "id": "relation:f8eff7c392646cc3",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "function:src/components/CodeWorldScreen.jsx:DeliveryFrameNode"
     },
     {
       "id": "relation:f8f98ad40d12aa9c",
@@ -98793,6 +102247,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "supabase"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:fa77ee2a8c8144cd",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldScreen.jsx",
+      "target": "function:src/components/CodeWorldScreen.jsx:safeArray"
     },
     {
       "id": "relation:faaab8158042d036",
@@ -98912,6 +102372,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "useRef"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:fc9e6abaf2bbd20e",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "function:src/components/CodeWorldWorkspace.jsx:sourceEventRows"
     },
     {
       "id": "relation:fcb6cb720bec9a51",
@@ -99140,6 +102606,12 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
         "verifySignedSystemOperationPlan"
       ],
       "dynamic": false
+    },
+    {
+      "id": "relation:ffb0f857e8e34e0c",
+      "type": "contains",
+      "source": "file:src/components/CodeWorldWorkspace.jsx",
+      "target": "function:src/components/CodeWorldWorkspace.jsx:CodeWorldWorkspace"
     },
     {
       "id": "relation:ffc028a609775d7a",
@@ -100213,27 +103685,27 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
     "schemaVersion": 1,
     "loading": "module-on-demand",
     "endpoint": "/api/source-twin?mode=code-parts",
-    "moduleCount": 1659,
-    "partCount": 23936,
+    "moduleCount": 1724,
+    "partCount": 24972,
     "kindCounts": {
-      "branch": 4688,
-      "command": 5827,
-      "config": 26,
+      "branch": 4912,
+      "command": 6016,
+      "config": 28,
       "data": 109,
-      "declaration": 8604,
-      "loop": 484,
-      "resource": 608,
-      "return": 3590
+      "declaration": 9057,
+      "loop": 499,
+      "resource": 628,
+      "return": 3723
     }
   },
   "flows": {
     "schemaVersion": 1,
     "loading": "module-on-demand",
     "endpoint": "/api/source-twin?mode=flows",
-    "entrypointCount": 695,
-    "relationCount": 18852,
-    "unknownCount": 9660,
-    "promotionCandidateCount": 311,
+    "entrypointCount": 733,
+    "relationCount": 19785,
+    "unknownCount": 10154,
+    "promotionCandidateCount": 376,
     "evidenceKind": "code",
     "realityLevel": "declared"
   },
@@ -100280,6 +103752,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:shared/sourceAiExplanation.js",
       "file:shared/sourceAssetHierarchy.js",
       "file:shared/sourceCodeParts.js",
+      "file:shared/sourceCodeWorldProjection.js",
       "file:shared/sourceEditableProperties.js",
       "file:shared/sourceFeatureModel.js",
       "file:shared/sourceFlows.js",
@@ -100318,6 +103791,10 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:src/components/AuthPanel.jsx",
       "file:src/components/CanvasImage.jsx",
       "file:src/components/CanvasTabs.jsx",
+      "file:src/components/CodeWorldScreen.css",
+      "file:src/components/CodeWorldScreen.jsx",
+      "file:src/components/CodeWorldWorkspace.css",
+      "file:src/components/CodeWorldWorkspace.jsx",
       "file:src/components/DigitalTwinReviewPanel.jsx",
       "file:src/components/EdgeRelationEditor.jsx",
       "file:src/components/EditToolbar.jsx",
@@ -101106,6 +104583,27 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/sourceCodeParts.js:sourceCodePartToSystemPart",
       "function:shared/sourceCodeParts.js:sourceCodePartsForModule",
       "function:shared/sourceCodeParts.js:text",
+      "function:shared/sourceCodeWorldProjection.js:add",
+      "function:shared/sourceCodeWorldProjection.js:baseProjection",
+      "function:shared/sourceCodeWorldProjection.js:boundedInteger",
+      "function:shared/sourceCodeWorldProjection.js:compareEntities",
+      "function:shared/sourceCodeWorldProjection.js:createSourceCodeWorldProjection",
+      "function:shared/sourceCodeWorldProjection.js:emptyProjection",
+      "function:shared/sourceCodeWorldProjection.js:entitySortKey",
+      "function:shared/sourceCodeWorldProjection.js:focusEntityIds",
+      "function:shared/sourceCodeWorldProjection.js:normalizeLod",
+      "function:shared/sourceCodeWorldProjection.js:projectEdge",
+      "function:shared/sourceCodeWorldProjection.js:projectPart",
+      "function:shared/sourceCodeWorldProjection.js:relationSortKey",
+      "function:shared/sourceCodeWorldProjection.js:repositoryMetadata",
+      "function:shared/sourceCodeWorldProjection.js:scopeAllowsEntity",
+      "function:shared/sourceCodeWorldProjection.js:selectGroupsWithFocus",
+      "function:shared/sourceCodeWorldProjection.js:sourceCodeWorldSelection",
+      "function:shared/sourceCodeWorldProjection.js:stringList",
+      "function:shared/sourceCodeWorldProjection.js:text",
+      "function:shared/sourceCodeWorldProjection.js:traceSourceCodeWorld",
+      "function:shared/sourceCodeWorldProjection.js:uniqueEntities",
+      "function:shared/sourceCodeWorldProjection.js:validRelations",
       "function:shared/sourceEditableProperties.js:createSourceEditablePropertyRegistry",
       "function:shared/sourceEditableProperties.js:definition",
       "function:shared/sourceEditableProperties.js:definitionForAnchor",
@@ -101201,27 +104699,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/systemLayers.js:addPortal",
       "function:shared/systemLayers.js:annotationDataForSystemLayer",
       "function:shared/systemLayers.js:canvasSupportsSystemLayers",
+      "function:shared/systemLayers.js:colorForLayerId",
       "function:shared/systemLayers.js:createCustomSystemLayerView",
       "function:shared/systemLayers.js:createSystemLayerProjection",
-      "function:shared/systemLayers.js:createSystemLayerViews",
-      "function:shared/systemLayers.js:deriveDefaultSystemLayer",
       "function:shared/systemLayers.js:edgeIsVisible",
       "function:shared/systemLayers.js:effectiveSystemLayerForNode",
-      "function:shared/systemLayers.js:ensureSystemLayerViews",
       "function:shared/systemLayers.js:isCanvasAnnotationNode",
-      "function:shared/systemLayers.js:isCustomSystemLayerView",
-      "function:shared/systemLayers.js:isOfficialSystemLayerId",
       "function:shared/systemLayers.js:isSystemLayerView",
-      "function:shared/systemLayers.js:isSystemMapTemplateCanvas",
       "function:shared/systemLayers.js:metaFor",
       "function:shared/systemLayers.js:nodeIsRedacted",
       "function:shared/systemLayers.js:normalizeNodePresentation",
       "function:shared/systemLayers.js:normalizeSystemLayerId",
       "function:shared/systemLayers.js:orderOf",
       "function:shared/systemLayers.js:plainNodeLabel",
+      "function:shared/systemLayers.js:pruneLegacyOfficialSystemLayerViews",
       "function:shared/systemLayers.js:relationLabel",
       "function:shared/systemLayers.js:removeSystemLayerFromNodes",
-      "function:shared/systemLayers.js:systemLayerDefinition",
       "function:shared/systemLayers.js:systemLayerFromView",
       "function:shared/systemLayers.js:systemLayerOptionsFromViews",
       "function:shared/systemLayers.js:withSystemLayerOverride",
@@ -101624,6 +105117,51 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/components/CanvasTabs.jsx:startRename",
       "function:src/components/CanvasTabs.jsx:targetName",
       "function:src/components/CanvasTabs.jsx:textContent",
+      "function:src/components/CodeWorldScreen.jsx:CodeWorldScreen",
+      "function:src/components/CodeWorldScreen.jsx:ComponentNode",
+      "function:src/components/CodeWorldScreen.jsx:DeliveryFrameNode",
+      "function:src/components/CodeWorldScreen.jsx:DeliveryStageNode",
+      "function:src/components/CodeWorldScreen.jsx:DistrictNode",
+      "function:src/components/CodeWorldScreen.jsx:ExternalSystemNode",
+      "function:src/components/CodeWorldScreen.jsx:actionCallback",
+      "function:src/components/CodeWorldScreen.jsx:connectionView",
+      "function:src/components/CodeWorldScreen.jsx:districtComponents",
+      "function:src/components/CodeWorldScreen.jsx:endpointNode",
+      "function:src/components/CodeWorldScreen.jsx:evidenceRows",
+      "function:src/components/CodeWorldScreen.jsx:formatRelativeTime",
+      "function:src/components/CodeWorldScreen.jsx:graphProjection",
+      "function:src/components/CodeWorldScreen.jsx:idOf",
+      "function:src/components/CodeWorldScreen.jsx:itemDescription",
+      "function:src/components/CodeWorldScreen.jsx:moduleItems",
+      "function:src/components/CodeWorldScreen.jsx:normalizedPosition",
+      "function:src/components/CodeWorldScreen.jsx:normalizedSize",
+      "function:src/components/CodeWorldScreen.jsx:observationRows",
+      "function:src/components/CodeWorldScreen.jsx:registerAsset",
+      "function:src/components/CodeWorldScreen.jsx:safeArray",
+      "function:src/components/CodeWorldScreen.jsx:safeText",
+      "function:src/components/CodeWorldScreen.jsx:selectedConnector",
+      "function:src/components/CodeWorldScreen.jsx:statusId",
+      "function:src/components/CodeWorldScreen.jsx:statusLabel",
+      "function:src/components/CodeWorldWorkspace.jsx:CodeWorldWorkspace",
+      "function:src/components/CodeWorldWorkspace.jsx:buildCodeWorldModel",
+      "function:src/components/CodeWorldWorkspace.jsx:changedPartStatus",
+      "function:src/components/CodeWorldWorkspace.jsx:connectorWithFreshState",
+      "function:src/components/CodeWorldWorkspace.jsx:deliveryModel",
+      "function:src/components/CodeWorldWorkspace.jsx:deliveryRelations",
+      "function:src/components/CodeWorldWorkspace.jsx:districtHeight",
+      "function:src/components/CodeWorldWorkspace.jsx:errorMessage",
+      "function:src/components/CodeWorldWorkspace.jsx:initialPartIdForEntry",
+      "function:src/components/CodeWorldWorkspace.jsx:isAuthenticationFailure",
+      "function:src/components/CodeWorldWorkspace.jsx:isPreviewRequest",
+      "function:src/components/CodeWorldWorkspace.jsx:layoutDistricts",
+      "function:src/components/CodeWorldWorkspace.jsx:loadDevelopmentPreview",
+      "function:src/components/CodeWorldWorkspace.jsx:observationRows",
+      "function:src/components/CodeWorldWorkspace.jsx:safeArray",
+      "function:src/components/CodeWorldWorkspace.jsx:screenPart",
+      "function:src/components/CodeWorldWorkspace.jsx:selectedConnector",
+      "function:src/components/CodeWorldWorkspace.jsx:shaLabel",
+      "function:src/components/CodeWorldWorkspace.jsx:sourceEventRows",
+      "function:src/components/CodeWorldWorkspace.jsx:text",
       "function:src/components/DigitalTwinReviewPanel.jsx:DigitalTwinReviewPanel",
       "function:src/components/DigitalTwinReviewPanel.jsx:IconButton",
       "function:src/components/DigitalTwinReviewPanel.jsx:ReviewRow",
@@ -102105,6 +105643,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:docs/MASTER.md",
       "file:docs/README.md",
       "file:docs/architecture/FOUNDRY_MODEL.md",
+      "file:docs/architecture/LIVE_EDIT_OBSERVATION.md",
+      "file:docs/architecture/SYSTEM_MAP_BLUEPRINT.md",
       "file:docs/architecture/WORKSHOP_BLUEPRINT.md",
       "file:docs/architecture/decisions/DEPENDENCY_DECISIONS.md",
       "file:docs/architecture/decisions/OPEN_SOURCE_POLICY.md",
@@ -102174,6 +105714,8 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:scripts/test-security-boundaries.mjs",
       "file:scripts/test-security-overlay.mjs",
       "file:scripts/test-source-code-parts.mjs",
+      "file:scripts/test-source-code-world-workspace.mjs",
+      "file:scripts/test-source-code-world.mjs",
       "file:scripts/test-source-editable-properties.mjs",
       "file:scripts/test-source-feature-model.mjs",
       "file:scripts/test-source-functional-context.mjs",
@@ -102204,6 +105746,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:shared/sourceAiExplanation.js",
       "file:shared/sourceAssetHierarchy.js",
       "file:shared/sourceCodeParts.js",
+      "file:shared/sourceCodeWorldProjection.js",
       "file:shared/sourceEditableProperties.js",
       "file:shared/sourceFeatureModel.js",
       "file:shared/sourceFlows.js",
@@ -102242,6 +105785,10 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "file:src/components/AuthPanel.jsx",
       "file:src/components/CanvasImage.jsx",
       "file:src/components/CanvasTabs.jsx",
+      "file:src/components/CodeWorldScreen.css",
+      "file:src/components/CodeWorldScreen.jsx",
+      "file:src/components/CodeWorldWorkspace.css",
+      "file:src/components/CodeWorldWorkspace.jsx",
       "file:src/components/DigitalTwinReviewPanel.jsx",
       "file:src/components/EdgeRelationEditor.jsx",
       "file:src/components/EditToolbar.jsx",
@@ -103052,6 +106599,27 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/sourceCodeParts.js:sourceCodePartToSystemPart",
       "function:shared/sourceCodeParts.js:sourceCodePartsForModule",
       "function:shared/sourceCodeParts.js:text",
+      "function:shared/sourceCodeWorldProjection.js:add",
+      "function:shared/sourceCodeWorldProjection.js:baseProjection",
+      "function:shared/sourceCodeWorldProjection.js:boundedInteger",
+      "function:shared/sourceCodeWorldProjection.js:compareEntities",
+      "function:shared/sourceCodeWorldProjection.js:createSourceCodeWorldProjection",
+      "function:shared/sourceCodeWorldProjection.js:emptyProjection",
+      "function:shared/sourceCodeWorldProjection.js:entitySortKey",
+      "function:shared/sourceCodeWorldProjection.js:focusEntityIds",
+      "function:shared/sourceCodeWorldProjection.js:normalizeLod",
+      "function:shared/sourceCodeWorldProjection.js:projectEdge",
+      "function:shared/sourceCodeWorldProjection.js:projectPart",
+      "function:shared/sourceCodeWorldProjection.js:relationSortKey",
+      "function:shared/sourceCodeWorldProjection.js:repositoryMetadata",
+      "function:shared/sourceCodeWorldProjection.js:scopeAllowsEntity",
+      "function:shared/sourceCodeWorldProjection.js:selectGroupsWithFocus",
+      "function:shared/sourceCodeWorldProjection.js:sourceCodeWorldSelection",
+      "function:shared/sourceCodeWorldProjection.js:stringList",
+      "function:shared/sourceCodeWorldProjection.js:text",
+      "function:shared/sourceCodeWorldProjection.js:traceSourceCodeWorld",
+      "function:shared/sourceCodeWorldProjection.js:uniqueEntities",
+      "function:shared/sourceCodeWorldProjection.js:validRelations",
       "function:shared/sourceEditableProperties.js:createSourceEditablePropertyRegistry",
       "function:shared/sourceEditableProperties.js:definition",
       "function:shared/sourceEditableProperties.js:definitionForAnchor",
@@ -103147,27 +106715,22 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:shared/systemLayers.js:addPortal",
       "function:shared/systemLayers.js:annotationDataForSystemLayer",
       "function:shared/systemLayers.js:canvasSupportsSystemLayers",
+      "function:shared/systemLayers.js:colorForLayerId",
       "function:shared/systemLayers.js:createCustomSystemLayerView",
       "function:shared/systemLayers.js:createSystemLayerProjection",
-      "function:shared/systemLayers.js:createSystemLayerViews",
-      "function:shared/systemLayers.js:deriveDefaultSystemLayer",
       "function:shared/systemLayers.js:edgeIsVisible",
       "function:shared/systemLayers.js:effectiveSystemLayerForNode",
-      "function:shared/systemLayers.js:ensureSystemLayerViews",
       "function:shared/systemLayers.js:isCanvasAnnotationNode",
-      "function:shared/systemLayers.js:isCustomSystemLayerView",
-      "function:shared/systemLayers.js:isOfficialSystemLayerId",
       "function:shared/systemLayers.js:isSystemLayerView",
-      "function:shared/systemLayers.js:isSystemMapTemplateCanvas",
       "function:shared/systemLayers.js:metaFor",
       "function:shared/systemLayers.js:nodeIsRedacted",
       "function:shared/systemLayers.js:normalizeNodePresentation",
       "function:shared/systemLayers.js:normalizeSystemLayerId",
       "function:shared/systemLayers.js:orderOf",
       "function:shared/systemLayers.js:plainNodeLabel",
+      "function:shared/systemLayers.js:pruneLegacyOfficialSystemLayerViews",
       "function:shared/systemLayers.js:relationLabel",
       "function:shared/systemLayers.js:removeSystemLayerFromNodes",
-      "function:shared/systemLayers.js:systemLayerDefinition",
       "function:shared/systemLayers.js:systemLayerFromView",
       "function:shared/systemLayers.js:systemLayerOptionsFromViews",
       "function:shared/systemLayers.js:withSystemLayerOverride",
@@ -103570,6 +107133,51 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
       "function:src/components/CanvasTabs.jsx:startRename",
       "function:src/components/CanvasTabs.jsx:targetName",
       "function:src/components/CanvasTabs.jsx:textContent",
+      "function:src/components/CodeWorldScreen.jsx:CodeWorldScreen",
+      "function:src/components/CodeWorldScreen.jsx:ComponentNode",
+      "function:src/components/CodeWorldScreen.jsx:DeliveryFrameNode",
+      "function:src/components/CodeWorldScreen.jsx:DeliveryStageNode",
+      "function:src/components/CodeWorldScreen.jsx:DistrictNode",
+      "function:src/components/CodeWorldScreen.jsx:ExternalSystemNode",
+      "function:src/components/CodeWorldScreen.jsx:actionCallback",
+      "function:src/components/CodeWorldScreen.jsx:connectionView",
+      "function:src/components/CodeWorldScreen.jsx:districtComponents",
+      "function:src/components/CodeWorldScreen.jsx:endpointNode",
+      "function:src/components/CodeWorldScreen.jsx:evidenceRows",
+      "function:src/components/CodeWorldScreen.jsx:formatRelativeTime",
+      "function:src/components/CodeWorldScreen.jsx:graphProjection",
+      "function:src/components/CodeWorldScreen.jsx:idOf",
+      "function:src/components/CodeWorldScreen.jsx:itemDescription",
+      "function:src/components/CodeWorldScreen.jsx:moduleItems",
+      "function:src/components/CodeWorldScreen.jsx:normalizedPosition",
+      "function:src/components/CodeWorldScreen.jsx:normalizedSize",
+      "function:src/components/CodeWorldScreen.jsx:observationRows",
+      "function:src/components/CodeWorldScreen.jsx:registerAsset",
+      "function:src/components/CodeWorldScreen.jsx:safeArray",
+      "function:src/components/CodeWorldScreen.jsx:safeText",
+      "function:src/components/CodeWorldScreen.jsx:selectedConnector",
+      "function:src/components/CodeWorldScreen.jsx:statusId",
+      "function:src/components/CodeWorldScreen.jsx:statusLabel",
+      "function:src/components/CodeWorldWorkspace.jsx:CodeWorldWorkspace",
+      "function:src/components/CodeWorldWorkspace.jsx:buildCodeWorldModel",
+      "function:src/components/CodeWorldWorkspace.jsx:changedPartStatus",
+      "function:src/components/CodeWorldWorkspace.jsx:connectorWithFreshState",
+      "function:src/components/CodeWorldWorkspace.jsx:deliveryModel",
+      "function:src/components/CodeWorldWorkspace.jsx:deliveryRelations",
+      "function:src/components/CodeWorldWorkspace.jsx:districtHeight",
+      "function:src/components/CodeWorldWorkspace.jsx:errorMessage",
+      "function:src/components/CodeWorldWorkspace.jsx:initialPartIdForEntry",
+      "function:src/components/CodeWorldWorkspace.jsx:isAuthenticationFailure",
+      "function:src/components/CodeWorldWorkspace.jsx:isPreviewRequest",
+      "function:src/components/CodeWorldWorkspace.jsx:layoutDistricts",
+      "function:src/components/CodeWorldWorkspace.jsx:loadDevelopmentPreview",
+      "function:src/components/CodeWorldWorkspace.jsx:observationRows",
+      "function:src/components/CodeWorldWorkspace.jsx:safeArray",
+      "function:src/components/CodeWorldWorkspace.jsx:screenPart",
+      "function:src/components/CodeWorldWorkspace.jsx:selectedConnector",
+      "function:src/components/CodeWorldWorkspace.jsx:shaLabel",
+      "function:src/components/CodeWorldWorkspace.jsx:sourceEventRows",
+      "function:src/components/CodeWorldWorkspace.jsx:text",
       "function:src/components/DigitalTwinReviewPanel.jsx:DigitalTwinReviewPanel",
       "function:src/components/DigitalTwinReviewPanel.jsx:IconButton",
       "function:src/components/DigitalTwinReviewPanel.jsx:ReviewRow",
@@ -104232,6 +107840,7 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
     ],
     "deployment": [
       "deployment:vercel-web",
+      "env:DEV",
       "env:NODE_ENV",
       "env:SUPABASE_URL",
       "env:VERCEL",
@@ -104250,895 +107859,355 @@ export const SOURCE_TWIN_MANIFEST = Object.freeze(
     ]
   },
   "fingerprints": {
-    "code": "fdcb075d0e7a5b0d0874",
-    "database": "1715700a768948098b3d",
+    "code": "67ecda9a628f2e05664b",
+    "database": "52cee43e4930383e89c5",
     "security": "ce3a12ef3d2c462d5c82",
-    "deployment": "55de1b395833320dd032",
-    "explanations": "167bc64ac5ca449fb5ec"
+    "deployment": "a7a52a03b695a23b4b87",
+    "explanations": "42e9b7f9f5b0665c86d7"
   },
   "summary": {
-    "entities": 2083,
+    "entities": 2154,
     "areas": 14,
     "subsystems": 38,
-    "files": 223,
-    "functions": 1692,
-    "imports": 610,
+    "files": 232,
+    "functions": 1753,
+    "imports": 630,
     "apiRoutes": 6,
     "dbTables": 23,
     "dbFunctions": 45,
     "rlsPolicies": 38,
-    "environmentVariables": 13,
-    "testFiles": 25,
-    "deploymentEntities": 16,
+    "environmentVariables": 14,
+    "testFiles": 27,
+    "deploymentEntities": 17,
     "securityEntities": 62,
     "parseFailures": 0,
     "structureOnlyFiles": 0,
     "components": 54,
-    "moduleAssets": 1915,
-    "codeParts": 23936,
-    "flowEntrypoints": 695,
-    "flowRelations": 18852,
-    "uiTexts": 688,
+    "moduleAssets": 1985,
+    "codeParts": 24972,
+    "flowEntrypoints": 733,
+    "flowRelations": 19785,
+    "uiTexts": 754,
     "screenPaths": 0
   },
   "changeSet": {
-    "baseManifestId": "source-twin-v1-b49ab8bbb31f",
+    "baseManifestId": "source-twin-v1-9a1a5c5b95a7",
     "initialBaseline": false,
     "added": [
-      "file:AGENTS.md",
-      "file:CLAUDE.md",
-      "file:THIRD_PARTY_NOTICES.md",
-      "file:docs/AI_MASTER.md",
-      "file:docs/MASTER.md",
-      "file:docs/README.md",
-      "file:docs/architecture/FOUNDRY_MODEL.md",
-      "file:docs/architecture/decisions/DEPENDENCY_DECISIONS.md",
-      "file:docs/architecture/decisions/OPEN_SOURCE_POLICY.md",
-      "file:docs/architecture/evaluations/source-lens/SOURCE_LENS_AI_PROVIDER_PILOT.md",
-      "file:docs/architecture/evaluations/source-lens/SOURCE_LENS_FLOW_VISUALIZATION_EVALUATION.md",
-      "file:docs/architecture/evaluations/source-lens/SOURCE_LENS_TREE_SITTER_EVALUATION.md",
-      "file:docs/archive/handoffs/CODEX_HANDOFF_SOURCE_LENS_SL0_SL1_KO.md",
-      "file:docs/archive/handoffs/SOURCE_LENS_SL2_HANDOFF_KO.md",
-      "file:docs/archive/handoffs/SOURCE_LENS_SL2_SL4_SL3_FINAL_KO.md",
-      "file:docs/archive/handoffs/SOURCE_LENS_SL3_HANDOFF_KO.md",
-      "file:docs/archive/handoffs/SOURCE_LENS_SL4_HANDOFF_KO.md",
-      "file:docs/contracts/OPERATION_LIFECYCLE_CONTRACT.md",
-      "file:docs/contracts/SOURCE_PROFILE_CONTRACT.md",
-      "file:docs/engines/AI_CONTEXT_GATE_MASTER.md",
-      "file:docs/engines/CONNECTOR_BRIDGE_MASTER.md",
-      "file:docs/engines/SOURCE_LENS_MASTER.md",
-      "file:docs/governance/AUDIT_PLAYBOOK.md",
-      "file:docs/governance/TECHNICAL_DEBT.md",
-      "file:docs/product/ENGINE_AGENT_REGISTRY.md",
-      "file:docs/product/ENGINE_CHANGELOG.md",
-      "file:docs/product/PRODUCT_CATALOG.md",
-      "file:docs/protocols/STARTING_PROTOCOL.md",
-      "file:docs/protocols/SYSTEM_ONBOARDING_PROTOCOL.md",
-      "file:docs/protocols/WORKFLOW_CATALOG.md",
-      "file:docs/twin/README.md",
-      "file:docs/twin/architecture/TWIN_IDENTITY_AND_OBSERVATION.md",
-      "file:docs/twin/archive/TWIN_ENGINE_ROADMAP.md",
-      "file:docs/twin/contracts/TWIN_ADAPTER_CONTRACT.md",
-      "file:docs/twin/contracts/TWIN_BUILD_SCHEMA.md",
-      "file:scripts/ai-context-gate-engine.mjs",
-      "file:scripts/source-lens-engine.mjs",
-      "file:scripts/test-ai-context-gate.mjs",
-      "file:scripts/test-source-functional-context.mjs",
-      "file:scripts/test-source-lens-engine.mjs",
-      "file:shared/aiContextGate.js",
-      "file:shared/sourceFunctionalContext.js",
-      "file:shared/systemStateSnapshot.js",
-      "file:shared/workflowSourceEditCodePartAdapter.js",
-      "function:scripts/ai-context-gate-engine.mjs:completeAiContextGateWorkflow",
-      "function:scripts/ai-context-gate-engine.mjs:runAiContextGateWorkflow",
-      "function:scripts/source-lens-engine.mjs:runSourceLensRepositoryWorkflow",
-      "function:scripts/source-lens-engine.mjs:runSourceLensWorkflow",
-      "function:scripts/source-twin-scanner.mjs:addScreenPath",
-      "function:scripts/source-twin-scanner.mjs:addUiText",
-      "function:scripts/test-source-feature-model.mjs:buildSourceTwinManifest",
-      "function:scripts/test-source-profiles.mjs:buildSourceTwinManifest",
-      "function:scripts/test-source-twin.mjs:buildSourceTwinManifest",
-      "function:shared/aiContextGate.js:AiContextGateError.constructor",
-      "function:shared/aiContextGate.js:assertTokenBudget",
-      "function:shared/aiContextGate.js:buildPlanningContextPackBlock",
-      "function:shared/aiContextGate.js:buildProjectMasterTemplate",
-      "function:shared/aiContextGate.js:buildTargetAiPrompt",
-      "function:shared/aiContextGate.js:compactFingerprint",
-      "function:shared/aiContextGate.js:compactList",
-      "function:shared/aiContextGate.js:compactSingleLine",
-      "function:shared/aiContextGate.js:compactText",
-      "function:shared/aiContextGate.js:createAiContextEnrollment",
-      "function:shared/aiContextGate.js:deepFreeze",
-      "function:shared/aiContextGate.js:estimateAiContextTokens",
-      "function:shared/aiContextGate.js:normalizeBudgets",
-      "function:shared/aiContextGate.js:normalizeDelivery",
-      "function:shared/aiContextGate.js:normalizePlanningContextPack",
-      "function:shared/aiContextGate.js:normalizePlanningFact",
-      "function:shared/aiContextGate.js:plainObject",
-      "function:shared/aiContextGate.js:relativeProjectMasterPath",
-      "function:shared/aiContextGate.js:validateEnrollment",
-      "function:shared/aiContextGate.js:verifyAiContextHandoff",
-      "function:shared/sourceFunctionalContext.js:add",
-      "function:shared/sourceFunctionalContext.js:addCandidate",
-      "function:shared/sourceFunctionalContext.js:buildFunctionalContextPack",
-      "function:shared/sourceFunctionalContext.js:cleanFunctionalPhrase",
-      "function:shared/sourceFunctionalContext.js:compactText",
-      "function:shared/sourceFunctionalContext.js:compareText",
-      "function:shared/sourceFunctionalContext.js:deepFreeze",
-      "function:shared/sourceFunctionalContext.js:documentKind",
-      "function:shared/sourceFunctionalContext.js:evidenceRef",
-      "function:shared/sourceFunctionalContext.js:extractMarkdownPhrases",
-      "function:shared/sourceFunctionalContext.js:finalTerm",
-      "function:shared/sourceFunctionalContext.js:firstEntityEvidence",
-      "function:shared/sourceFunctionalContext.js:humanizedIdentifier",
-      "function:shared/sourceFunctionalContext.js:markdownDocuments",
-      "function:shared/sourceFunctionalContext.js:markdownPhrase",
-      "function:shared/sourceFunctionalContext.js:matchesSourceEvidence",
-      "function:shared/sourceFunctionalContext.js:normalizeFunctionalPhrase",
-      "function:shared/sourceFunctionalContext.js:normalizedPreviousPack",
-      "function:shared/sourceFunctionalContext.js:parseGeneratedFunctionalContextPack",
-      "function:shared/sourceFunctionalContext.js:phraseTokens",
-      "function:shared/sourceFunctionalContext.js:plainObject",
-      "function:shared/sourceFunctionalContext.js:preferredContextDocument",
-      "function:shared/sourceFunctionalContext.js:priority",
-      "function:shared/sourceFunctionalContext.js:serializeFunctionalContextPack",
-      "function:shared/sourceFunctionalContext.js:sourceCandidates",
-      "function:shared/sourceFunctionalContext.js:sourceEvidenceFingerprint",
-      "function:shared/sourceFunctionalContext.js:validateFunctionalContextPack",
-      "function:shared/systemStateSnapshot.js:changedEntities",
-      "function:shared/systemStateSnapshot.js:compactEntityFingerprints",
-      "function:shared/systemStateSnapshot.js:compareSourceTwinSnapshots",
-      "function:shared/systemStateSnapshot.js:createSourceTwinSnapshot",
-      "function:shared/systemStateSnapshot.js:metricChanges",
-      "function:shared/systemStateSnapshot.js:normalizeMetrics",
-      "function:shared/systemStateSnapshot.js:plainObject",
-      "function:shared/systemStateSnapshot.js:sort",
-      "function:shared/systemStateSnapshot.js:sourceTwinFingerprint",
-      "function:shared/systemStateSnapshot.js:stableValue",
-      "function:shared/workflowSourceEditCodePartAdapter.js:WORKFLOW_SOURCE_EDIT_CODE_PART_ADAPTER.annotateDeclaration",
-      "function:shared/workflowSourceEditCodePartAdapter.js:applyWorkflowSourceEditPolicy",
-      "function:shared/workflowSourceEditCodePartAdapter.js:readonly",
-      "function:shared/workflowSourceEditCodePartAdapter.js:sourceCodePartsForModuleWithWorkflowEditPolicy"
+      "env:DEV",
+      "file:docs/architecture/LIVE_EDIT_OBSERVATION.md",
+      "file:docs/architecture/SYSTEM_MAP_BLUEPRINT.md",
+      "file:scripts/test-source-code-world-workspace.mjs",
+      "file:scripts/test-source-code-world.mjs",
+      "file:shared/sourceCodeWorldProjection.js",
+      "file:src/components/CodeWorldScreen.css",
+      "file:src/components/CodeWorldScreen.jsx",
+      "file:src/components/CodeWorldWorkspace.css",
+      "file:src/components/CodeWorldWorkspace.jsx",
+      "function:shared/sourceCodeWorldProjection.js:add",
+      "function:shared/sourceCodeWorldProjection.js:baseProjection",
+      "function:shared/sourceCodeWorldProjection.js:boundedInteger",
+      "function:shared/sourceCodeWorldProjection.js:compareEntities",
+      "function:shared/sourceCodeWorldProjection.js:createSourceCodeWorldProjection",
+      "function:shared/sourceCodeWorldProjection.js:emptyProjection",
+      "function:shared/sourceCodeWorldProjection.js:entitySortKey",
+      "function:shared/sourceCodeWorldProjection.js:focusEntityIds",
+      "function:shared/sourceCodeWorldProjection.js:normalizeLod",
+      "function:shared/sourceCodeWorldProjection.js:projectEdge",
+      "function:shared/sourceCodeWorldProjection.js:projectPart",
+      "function:shared/sourceCodeWorldProjection.js:relationSortKey",
+      "function:shared/sourceCodeWorldProjection.js:repositoryMetadata",
+      "function:shared/sourceCodeWorldProjection.js:scopeAllowsEntity",
+      "function:shared/sourceCodeWorldProjection.js:selectGroupsWithFocus",
+      "function:shared/sourceCodeWorldProjection.js:sourceCodeWorldSelection",
+      "function:shared/sourceCodeWorldProjection.js:stringList",
+      "function:shared/sourceCodeWorldProjection.js:text",
+      "function:shared/sourceCodeWorldProjection.js:traceSourceCodeWorld",
+      "function:shared/sourceCodeWorldProjection.js:uniqueEntities",
+      "function:shared/sourceCodeWorldProjection.js:validRelations",
+      "function:shared/systemLayers.js:colorForLayerId",
+      "function:shared/systemLayers.js:pruneLegacyOfficialSystemLayerViews",
+      "function:src/components/CodeWorldScreen.jsx:CodeWorldScreen",
+      "function:src/components/CodeWorldScreen.jsx:ComponentNode",
+      "function:src/components/CodeWorldScreen.jsx:DeliveryFrameNode",
+      "function:src/components/CodeWorldScreen.jsx:DeliveryStageNode",
+      "function:src/components/CodeWorldScreen.jsx:DistrictNode",
+      "function:src/components/CodeWorldScreen.jsx:ExternalSystemNode",
+      "function:src/components/CodeWorldScreen.jsx:actionCallback",
+      "function:src/components/CodeWorldScreen.jsx:connectionView",
+      "function:src/components/CodeWorldScreen.jsx:districtComponents",
+      "function:src/components/CodeWorldScreen.jsx:endpointNode",
+      "function:src/components/CodeWorldScreen.jsx:evidenceRows",
+      "function:src/components/CodeWorldScreen.jsx:formatRelativeTime",
+      "function:src/components/CodeWorldScreen.jsx:graphProjection",
+      "function:src/components/CodeWorldScreen.jsx:idOf",
+      "function:src/components/CodeWorldScreen.jsx:itemDescription",
+      "function:src/components/CodeWorldScreen.jsx:moduleItems",
+      "function:src/components/CodeWorldScreen.jsx:normalizedPosition",
+      "function:src/components/CodeWorldScreen.jsx:normalizedSize",
+      "function:src/components/CodeWorldScreen.jsx:observationRows",
+      "function:src/components/CodeWorldScreen.jsx:registerAsset",
+      "function:src/components/CodeWorldScreen.jsx:safeArray",
+      "function:src/components/CodeWorldScreen.jsx:safeText",
+      "function:src/components/CodeWorldScreen.jsx:selectedConnector",
+      "function:src/components/CodeWorldScreen.jsx:statusId",
+      "function:src/components/CodeWorldScreen.jsx:statusLabel",
+      "function:src/components/CodeWorldWorkspace.jsx:CodeWorldWorkspace",
+      "function:src/components/CodeWorldWorkspace.jsx:buildCodeWorldModel",
+      "function:src/components/CodeWorldWorkspace.jsx:changedPartStatus",
+      "function:src/components/CodeWorldWorkspace.jsx:connectorWithFreshState",
+      "function:src/components/CodeWorldWorkspace.jsx:deliveryModel",
+      "function:src/components/CodeWorldWorkspace.jsx:deliveryRelations",
+      "function:src/components/CodeWorldWorkspace.jsx:districtHeight",
+      "function:src/components/CodeWorldWorkspace.jsx:errorMessage",
+      "function:src/components/CodeWorldWorkspace.jsx:initialPartIdForEntry",
+      "function:src/components/CodeWorldWorkspace.jsx:isAuthenticationFailure",
+      "function:src/components/CodeWorldWorkspace.jsx:isPreviewRequest",
+      "function:src/components/CodeWorldWorkspace.jsx:layoutDistricts",
+      "function:src/components/CodeWorldWorkspace.jsx:loadDevelopmentPreview",
+      "function:src/components/CodeWorldWorkspace.jsx:observationRows",
+      "function:src/components/CodeWorldWorkspace.jsx:safeArray",
+      "function:src/components/CodeWorldWorkspace.jsx:screenPart",
+      "function:src/components/CodeWorldWorkspace.jsx:selectedConnector",
+      "function:src/components/CodeWorldWorkspace.jsx:shaLabel",
+      "function:src/components/CodeWorldWorkspace.jsx:sourceEventRows",
+      "function:src/components/CodeWorldWorkspace.jsx:text"
     ],
     "changed": [
-      "api:/api/source-twin",
-      "api:/api/source-twin-webhook",
       "deployment:vercel-web",
-      "file:README.md",
-      "file:api/source-twin-webhook.js",
-      "file:api/source-twin.js",
-      "file:mcp/layout.js",
-      "file:mcp/localConnectorStore.js",
-      "file:mcp/sanitize.js",
-      "file:mcp/server.js",
-      "file:mcp/sourceTwinStore.js",
-      "file:mcp/store.js",
+      "file:docs/MASTER.md",
+      "file:docs/architecture/FOUNDRY_MODEL.md",
+      "file:docs/architecture/WORKSHOP_BLUEPRINT.md",
       "file:package.json",
-      "file:scripts/generate-source-twin.mjs",
-      "file:scripts/local-connector-agent.mjs",
-      "file:scripts/source-profiles/workflow-canvas.mjs",
-      "file:scripts/source-twin-scanner.mjs",
-      "file:scripts/source-twin-semantics.mjs",
-      "file:scripts/system-discovery.mjs",
-      "file:scripts/test-engine-registry.mjs",
       "file:scripts/test-mcp-logic.mjs",
       "file:scripts/test-source-code-parts.mjs",
-      "file:scripts/test-source-feature-model.mjs",
-      "file:scripts/test-source-profiles.mjs",
-      "file:scripts/test-source-twin.mjs",
+      "file:scripts/test-system-layers.mjs",
       "file:scripts/test-twin-build.mjs",
-      "file:shared/capabilityMapper.js",
-      "file:shared/digitalTwinProposal.js",
-      "file:shared/digitalTwinReview.js",
-      "file:shared/engineRegistry.js",
-      "file:shared/operationLifecycle.js",
-      "file:shared/sourceCodeParts.js",
-      "file:shared/sourceTwin.js",
-      "file:shared/sourceTwinSemantics.js",
-      "file:shared/systemOntology.js",
-      "file:shared/twinAdapterContract.js",
-      "file:shared/twinBuild.js",
-      "file:shared/twinBuildReconciler.js",
+      "file:shared/sourceModuleProposal.js",
+      "file:shared/systemLayers.js",
       "file:shared/workflowCanvasSystemMap.js",
-      "file:shared/workflowOperationDefinitions.js",
-      "file:shared/workflowSystemTwinAdapter.js",
       "file:src/App.jsx",
-      "file:src/components/DigitalTwinReviewPanel.jsx",
-      "file:src/components/NodePalette.jsx",
-      "file:src/components/SourceTwinPanel.jsx",
-      "file:src/lib/sourceTwinApi.js",
-      "file:src/nodes/SystemNode.jsx",
-      "function:api/source-twin-webhook.js:handler",
-      "function:api/source-twin.js:handler",
-      "function:mcp/layout.js:layoutGraph",
-      "function:mcp/localConnectorStore.js:sourceEditPart",
-      "function:mcp/sanitize.js:sanitizeTextFields",
-      "function:mcp/server.js:buildServer",
-      "function:mcp/sourceTwinStore.js:listSourceTwinSnapshots",
-      "function:mcp/sourceTwinStore.js:recordSourceTwinPushEvent",
-      "function:mcp/sourceTwinStore.js:requireSourceTwinOwner",
-      "function:scripts/local-connector-agent.mjs:buildLocalConnectorManifest",
-      "function:scripts/source-twin-scanner.mjs:addCodePart",
-      "function:scripts/source-twin-scanner.mjs:buildSourceTwinManifest",
-      "function:scripts/source-twin-scanner.mjs:parseJavaScript",
-      "function:scripts/source-twin-scanner.mjs:shouldInspect",
-      "function:scripts/source-twin-scanner.mjs:visit",
-      "function:scripts/source-twin-semantics.mjs:explainEnvironmentVariable",
-      "function:scripts/source-twin-semantics.mjs:identifierWords",
-      "function:scripts/system-discovery.mjs:shouldInspect",
-      "function:scripts/test-source-code-parts.mjs:build",
-      "function:scripts/test-twin-build.mjs:bindAllTwinEntities",
-      "function:shared/capabilityMapper.js:validateRegistry",
-      "function:shared/digitalTwinProposal.js:normalizeOperation",
-      "function:shared/digitalTwinProposal.js:planDigitalTwinGraphProposal",
-      "function:shared/digitalTwinReview.js:createDigitalTwinReviewItem",
-      "function:shared/operationLifecycle.js:createOperationPlan",
-      "function:shared/sourceCodeParts.js:normalizeSourceCodePart",
-      "function:shared/systemOntology.js:systemNodeTwinLink",
-      "function:shared/twinAdapterContract.js:createTwinAdapterDescriptor",
-      "function:shared/twinAdapterContract.js:createTwinAdapterRegistration",
-      "function:shared/twinAdapterContract.js:createTwinAdapterRegistry",
-      "function:shared/twinBuild.js:createTwinBuild",
-      "function:shared/twinBuild.js:normalizeEndpoint",
-      "function:shared/twinBuild.js:normalizeEntity",
-      "function:shared/twinBuild.js:normalizePart",
-      "function:shared/twinBuild.js:normalizeSource",
-      "function:shared/twinBuild.js:requireReferences",
-      "function:shared/twinBuildReconciler.js:entityBindingBatchReview",
-      "function:shared/twinBuildReconciler.js:entityReview",
-      "function:shared/workflowCanvasSystemMap.js:mapNodes",
-      "function:shared/workflowSystemTwinAdapter.js:engineCapabilityMigrationItem",
-      "function:shared/workflowSystemTwinAdapter.js:resourceProposal",
-      "function:shared/workflowSystemTwinAdapter.js:resourceReviewItem",
+      "file:src/components/Toolbar.jsx",
+      "function:shared/sourceModuleProposal.js:createSourceModuleMaterializationItem",
+      "function:shared/systemLayers.js:canvasSupportsSystemLayers",
+      "function:shared/systemLayers.js:createSystemLayerProjection",
+      "function:shared/systemLayers.js:effectiveSystemLayerForNode",
+      "function:shared/systemLayers.js:metaFor",
+      "function:shared/systemLayers.js:normalizeSystemLayerId",
+      "function:shared/systemLayers.js:systemLayerOptionsFromViews",
+      "function:shared/workflowCanvasSystemMap.js:createWorkflowCanvasSystemMap",
       "function:src/App.jsx:App",
-      "function:src/App.jsx:nodeDisplayName",
-      "function:src/components/DigitalTwinReviewPanel.jsx:DigitalTwinReviewPanel",
-      "function:src/components/DigitalTwinReviewPanel.jsx:ReviewRow",
-      "function:src/components/SourceTwinPanel.jsx:CodePartsDetail",
-      "function:src/components/SourceTwinPanel.jsx:EntityDetail",
-      "function:src/components/SourceTwinPanel.jsx:SourceTwinPanel",
-      "function:src/components/SourceTwinPanel.jsx:StructureView",
-      "function:src/lib/sourceTwinApi.js:sourceTwinRequest",
-      "function:src/nodes/SystemNode.jsx:SystemNode",
+      "function:src/App.jsx:changeContextSystemLayer",
+      "function:src/components/Toolbar.jsx:LayerSwitcher",
+      "function:src/components/Toolbar.jsx:Toolbar",
+      "function:src/components/Toolbar.jsx:ViewSelector",
       "npm-script:test"
     ],
     "explanationChanged": [
-      "db-function:apply_source_twin_snapshot_operation",
-      "db-function:reject_source_twin_history_mutation",
-      "db-table:source_twin_events",
-      "db-table:source_twin_snapshots",
-      "db-table:system_runtime_observations",
-      "dependency:@modelcontextprotocol/sdk/server/mcp.js",
-      "dependency:@modelcontextprotocol/sdk/server/streamableHttp.js",
-      "dependency:node:assert/strict",
-      "dependency:node:child_process",
-      "dependency:node:fs",
-      "dependency:node:url",
-      "dependency:zod",
-      "env:WORKFLOW_CANVAS_GITHUB_WEBHOOK_SECRET",
-      "env:WORKFLOW_CANVAS_LOCAL_CONNECTOR_TOKEN",
-      "file:api/local-connector.js",
-      "file:api/mcp.js",
-      "file:api/shared-canvas.js",
-      "file:api/system-runtime.js",
-      "file:index.html",
-      "file:mcp/canvasSummaries.js",
-      "file:mcp/dataAccessAudit.js",
-      "file:mcp/shareAccess.js",
-      "file:mcp/systemOperationPlan.js",
-      "file:mcp/systemRuntime.js",
-      "file:scripts/check-governance.mjs",
-      "file:scripts/check-privacy-release.mjs",
-      "file:scripts/generate-system-discovery.mjs",
-      "file:scripts/source-edit-executor.mjs",
-      "file:scripts/source-profiles/fastapi-order-service.mjs",
-      "file:scripts/source-profiles/index.mjs",
-      "file:scripts/test-collaboration-permissions.mjs",
-      "file:scripts/test-group-membership.mjs",
-      "file:scripts/test-intent-node.mjs",
-      "file:scripts/test-local-connector-agent.mjs",
-      "file:scripts/test-operation-lifecycle.mjs",
-      "file:scripts/test-performance-boundaries.mjs",
-      "file:scripts/test-security-boundaries.mjs",
-      "file:scripts/test-security-overlay.mjs",
-      "file:scripts/test-source-editable-properties.mjs",
-      "file:scripts/test-sql-security.mjs",
-      "file:scripts/test-system-layers.mjs",
-      "file:scripts/test-twin-adapter-contract.mjs",
-      "file:scripts/test-work-intent-parts.mjs",
-      "file:shared/edgeOperation.js",
-      "file:shared/intentOntology.js",
-      "file:shared/localConnector.js",
-      "file:shared/privacyCapabilities.js",
-      "file:shared/relationOntology.js",
-      "file:shared/richTextSanitizer.js",
-      "file:shared/securityOverlay.js",
-      "file:shared/sharePermissions.js",
-      "file:shared/sourceAiExplanation.js",
-      "file:shared/sourceAssetHierarchy.js",
-      "file:shared/sourceEditableProperties.js",
-      "file:shared/sourceFeatureModel.js",
-      "file:shared/sourceFlows.js",
-      "file:shared/sourceModuleProposal.js",
-      "file:shared/sourceProfileContract.js",
-      "file:shared/systemLayers.js",
-      "file:shared/systemObservationCatalog.js",
-      "file:shared/systemPartOntology.js",
-      "file:shared/systemRuntime.js",
-      "file:shared/trustTopology.js",
-      "file:shared/twinBuildCanvas.js",
-      "file:shared/uiConstants.js",
-      "file:shared/workOntology.js",
-      "file:shared/workflowSourceEditableProperties.js",
-      "file:shared/workflowSourceFeatureBuild.js",
-      "file:shared/workflowSourceTwinCanvas.js",
-      "file:shared/workflowSystemDiscovery.js",
-      "file:shared/workflowSystemMapRepair.js",
-      "file:shared/workflowSystemTwinAdapterDescriptor.js",
-      "file:shared/workflowSystemTwinBuild.js",
-      "file:shared/workflowTrustTopology.js",
-      "file:src/components/AuthPanel.jsx",
-      "file:src/components/CanvasImage.jsx",
-      "file:src/components/CanvasTabs.jsx",
-      "file:src/components/EdgeRelationEditor.jsx",
-      "file:src/components/EditToolbar.jsx",
-      "file:src/components/FriendManager.jsx",
-      "file:src/components/IntentWorkspace.jsx",
-      "file:src/components/InvitePopover.jsx",
-      "file:src/components/NotesPanel.jsx",
-      "file:src/components/OpenInNotesButton.jsx",
-      "file:src/components/ParticipantAvatar.jsx",
-      "file:src/components/ScopedParticipants.jsx",
-      "file:src/components/SecurityOverlayLegend.jsx",
-      "file:src/components/SystemObservationCatalog.jsx",
-      "file:src/components/Toolbar.jsx",
-      "file:src/components/WorkIntentPicker.jsx",
-      "file:src/demoCanvases.js",
-      "file:src/edges/StubEdge.jsx",
-      "file:src/edges/stubEdgeGeometry.js",
-      "file:src/index.css",
-      "file:src/lib/canvasGeometry.js",
-      "file:src/lib/canvasMerge.js",
-      "file:src/lib/canvasNavigation.js",
-      "file:src/lib/canvasSchemaGuard.js",
-      "file:src/lib/canvasSync.js",
-      "file:src/lib/cloudStorage.js",
-      "file:src/lib/digitalTwinAdapters.js",
-      "file:src/lib/friendships.js",
-      "file:src/lib/groupMembership.js",
-      "file:src/lib/imageStorage.js",
-      "file:src/lib/localConnectorApi.js",
-      "file:src/lib/mcpTokens.js",
-      "file:src/lib/presence.js",
-      "file:src/lib/profiles.js",
-      "file:src/lib/sanitizeHtml.js",
-      "file:src/lib/shareLaunchCoordinator.js",
-      "file:src/lib/sharedCanvasApi.js",
-      "file:src/lib/shares.js",
-      "file:src/lib/supabase.js",
-      "file:src/lib/systemRuntimeApi.js",
-      "file:src/lib/wheelRouting.js",
-      "file:src/main.jsx",
-      "file:src/nodes/ContentNode.jsx",
-      "file:src/nodes/GroupNode.jsx",
-      "file:src/nodes/IntentNode.jsx",
-      "file:src/nodes/MemoNode.jsx",
-      "file:src/nodes/StageNode.jsx",
-      "file:src/storage.js",
-      "file:supabase-canvas-images.sql",
-      "file:supabase-canvas-notes.sql",
-      "file:supabase-canvas-stage-types.sql",
-      "file:supabase-canvas-summaries.sql",
-      "file:supabase-canvas-views.sql",
-      "file:supabase-data-access-audit.sql",
-      "file:supabase-local-connectors.sql",
-      "file:supabase-mcp-schema.sql",
-      "file:supabase-profile-privacy.sql",
-      "file:supabase-profiles.sql",
-      "file:supabase-realtime.sql",
-      "file:supabase-relation-metadata-guard.sql",
-      "file:supabase-runtime-observations.sql",
-      "file:supabase-runtime-read.sql",
-      "file:supabase-schema.sql",
-      "file:supabase-security-hardening.sql",
-      "file:supabase-source-lens-roundtrip.sql",
-      "file:supabase-source-twin-history.sql",
-      "file:vercel.json",
-      "file:vite.config.js",
-      "function:api/source-twin-webhook.js:sourceTwinRepositoryName",
-      "function:mcp/layout.js:validateGraphInput",
-      "function:mcp/server.js:bearer",
-      "function:mcp/server.js:g",
-      "function:mcp/server.js:handler",
-      "function:mcp/sourceTwinStore.js:SourceTwinError.constructor",
-      "function:mcp/sourceTwinStore.js:applySourceTwinSnapshotOperation",
-      "function:mcp/sourceTwinStore.js:asSourceTwinError",
-      "function:mcp/sourceTwinStore.js:compareStoredSourceTwinSnapshots",
-      "function:mcp/sourceTwinStore.js:currentSourceTwinState",
-      "function:mcp/sourceTwinStore.js:declaredDatabaseState",
-      "function:mcp/sourceTwinStore.js:listSourceTwinEvents",
-      "function:mcp/sourceTwinStore.js:loadSnapshot",
-      "function:mcp/sourceTwinStore.js:metricsFromOperationRow",
-      "function:mcp/sourceTwinStore.js:previewSourceTwinSnapshotOperation",
-      "function:mcp/sourceTwinStore.js:readOperationalState",
-      "function:mcp/sourceTwinStore.js:readRuntimeState",
-      "function:mcp/sourceTwinStore.js:snapshotFromState",
-      "function:mcp/sourceTwinStore.js:snapshotRow",
-      "function:mcp/sourceTwinStore.js:snapshotSummary",
-      "function:mcp/sourceTwinStore.js:sourceTwinDeploymentContext",
-      "function:mcp/sourceTwinStore.js:sourceTwinStateFingerprint",
-      "function:mcp/sourceTwinStore.js:unavailable",
-      "function:mcp/store.js:applySourceTwinSnapshot",
-      "function:mcp/store.js:compareSourceTwinHistory",
-      "function:mcp/store.js:createGraph",
-      "function:mcp/store.js:getSourceTwinHistory",
-      "function:mcp/store.js:inspectSourceTwin",
-      "function:mcp/store.js:previewSourceTwinSnapshot",
-      "function:scripts/generate-source-twin.mjs:diagnosticValue",
-      "function:scripts/generate-source-twin.mjs:firstDifference",
-      "function:scripts/local-connector-agent.mjs:argument",
-      "function:scripts/local-connector-agent.mjs:changedPaths",
-      "function:scripts/local-connector-agent.mjs:git",
-      "function:scripts/local-connector-agent.mjs:observeLocalGit",
-      "function:scripts/local-connector-agent.mjs:pinnedGitHubOrigin",
-      "function:scripts/local-connector-agent.mjs:resolveRepositoryRoot",
-      "function:scripts/local-connector-agent.mjs:safeServerUrl",
-      "function:scripts/local-connector-agent.mjs:sha",
-      "function:scripts/source-twin-scanner.mjs:addEntity",
-      "function:scripts/source-twin-scanner.mjs:addFunction",
-      "function:scripts/source-twin-scanner.mjs:addRelation",
-      "function:scripts/source-twin-scanner.mjs:addRelation#2",
-      "function:scripts/source-twin-scanner.mjs:analysisLevelForLanguage",
-      "function:scripts/source-twin-scanner.mjs:buildSourceCodePartArtifacts",
-      "function:scripts/source-twin-scanner.mjs:buildSourceFlowArtifacts",
-      "function:scripts/source-twin-scanner.mjs:compareSourceTwinText",
-      "function:scripts/source-twin-scanner.mjs:enclosingSymbol",
-      "function:scripts/source-twin-scanner.mjs:entity",
-      "function:scripts/source-twin-scanner.mjs:explanationBasis",
-      "function:scripts/source-twin-scanner.mjs:filesystemSourceTwinPaths",
-      "function:scripts/source-twin-scanner.mjs:functionId",
-      "function:scripts/source-twin-scanner.mjs:hash",
-      "function:scripts/source-twin-scanner.mjs:importedNames",
-      "function:scripts/source-twin-scanner.mjs:jsxName",
-      "function:scripts/source-twin-scanner.mjs:languageForFile",
-      "function:scripts/source-twin-scanner.mjs:layerForFile",
-      "function:scripts/source-twin-scanner.mjs:lineFor",
-      "function:scripts/source-twin-scanner.mjs:memberProperty",
-      "function:scripts/source-twin-scanner.mjs:nodeName",
-      "function:scripts/source-twin-scanner.mjs:nodeSubject",
-      "function:scripts/source-twin-scanner.mjs:normalized",
-      "function:scripts/source-twin-scanner.mjs:nulSeparated",
-      "function:scripts/source-twin-scanner.mjs:parseGeneratedSourceTwin",
-      "function:scripts/source-twin-scanner.mjs:parseSql",
-      "function:scripts/source-twin-scanner.mjs:perspective",
-      "function:scripts/source-twin-scanner.mjs:readSourceRepositoryMetadata",
-      "function:scripts/source-twin-scanner.mjs:readSourceTwinWorkingTree",
-      "function:scripts/source-twin-scanner.mjs:redactedForFingerprint",
-      "function:scripts/source-twin-scanner.mjs:registerModule",
-      "function:scripts/source-twin-scanner.mjs:relation",
-      "function:scripts/source-twin-scanner.mjs:repositoryUrl",
-      "function:scripts/source-twin-scanner.mjs:resolveLocalImport",
-      "function:scripts/source-twin-scanner.mjs:resolveTarget",
-      "function:scripts/source-twin-scanner.mjs:safeSourceFile",
-      "function:scripts/source-twin-scanner.mjs:semanticHash",
-      "function:scripts/source-twin-scanner.mjs:serializeSourceCodePartManifest",
-      "function:scripts/source-twin-scanner.mjs:serializeSourceFlowManifest",
-      "function:scripts/source-twin-scanner.mjs:serializeSourceTwinManifest",
-      "function:scripts/source-twin-scanner.mjs:sourceEvidenceRef",
-      "function:scripts/source-twin-scanner.mjs:sourceTwinFilePaths",
-      "function:scripts/source-twin-scanner.mjs:stable",
-      "function:scripts/source-twin-scanner.mjs:stringArgument",
-      "function:scripts/source-twin-scanner.mjs:unique",
-      "function:scripts/source-twin-scanner.mjs:visit#2",
-      "function:scripts/source-twin-semantics.mjs:sourceTwinProjectIdentity",
-      "function:scripts/source-twin-semantics.mjs:sourceTwinSubsystemForRecord",
-      "function:scripts/source-twin-semantics.mjs:sourceTwinTechnicalSummary",
-      "function:scripts/system-discovery.mjs:addTableSource",
-      "function:scripts/system-discovery.mjs:buildDiscoveryManifest",
-      "function:scripts/system-discovery.mjs:contentForFingerprint",
-      "function:scripts/system-discovery.mjs:createResource",
-      "function:scripts/system-discovery.mjs:fileEntries",
-      "function:scripts/system-discovery.mjs:fingerprint",
-      "function:scripts/system-discovery.mjs:matches",
-      "function:scripts/system-discovery.mjs:normalizedContent",
-      "function:scripts/system-discovery.mjs:nulSeparated",
-      "function:scripts/system-discovery.mjs:parseGeneratedManifest",
-      "function:scripts/system-discovery.mjs:readGitTree",
-      "function:scripts/system-discovery.mjs:readWorkingTree",
-      "function:scripts/system-discovery.mjs:semanticFingerprint",
-      "function:scripts/system-discovery.mjs:serializeGeneratedManifest",
-      "function:scripts/system-discovery.mjs:sortedUnique",
-      "function:scripts/system-discovery.mjs:stableValue",
-      "function:scripts/test-source-twin.mjs:localCompletionDb",
-      "function:scripts/test-source-twin.mjs:localCompletionDb.from",
-      "function:scripts/test-source-twin.mjs:localConnectorDb.from",
-      "function:scripts/test-source-twin.mjs:readResult",
-      "function:scripts/test-twin-adapter-contract.mjs:reconciliationProjection",
-      "function:shared/capabilityMapper.js:createCapabilityNode",
-      "function:shared/capabilityMapper.js:createCapabilityRelation",
-      "function:shared/capabilityMapper.js:createEngineCapabilityMap",
-      "function:shared/digitalTwinProposal.js:DigitalTwinProposalError.constructor",
-      "function:shared/digitalTwinProposal.js:applyDigitalTwinGraphProposal",
-      "function:shared/digitalTwinProposal.js:createDigitalTwinGraphProposal",
-      "function:shared/digitalTwinProposal.js:digitalTwinProposalAutoFitKey",
-      "function:shared/digitalTwinProposal.js:digitalTwinProposalEdgeFingerprint",
-      "function:shared/digitalTwinProposal.js:digitalTwinProposalLogicalComponentFingerprint",
-      "function:shared/digitalTwinProposal.js:digitalTwinProposalMatchesItem",
-      "function:shared/digitalTwinProposal.js:digitalTwinProposalNodeIdentityFingerprint",
-      "function:shared/digitalTwinProposal.js:digitalTwinProposalTrustGatewayFingerprint",
-      "function:shared/digitalTwinProposal.js:digitalTwinProposalTrustZoneFingerprint",
-      "function:shared/digitalTwinProposal.js:filterDigitalTwinProposalNodeChanges",
-      "function:shared/digitalTwinProposal.js:finiteNumber",
-      "function:shared/digitalTwinProposal.js:plainObject",
-      "function:shared/digitalTwinProposal.js:previewDigitalTwinPartChanges",
-      "function:shared/digitalTwinReview.js:clearDigitalTwinReviewDecision",
-      "function:shared/digitalTwinReview.js:digitalTwinReviewDecision",
-      "function:shared/digitalTwinReview.js:digitalTwinReviewFingerprint",
-      "function:shared/digitalTwinReview.js:normalizeDigitalTwinReviewState",
-      "function:shared/digitalTwinReview.js:partitionDigitalTwinReviewItems",
-      "function:shared/digitalTwinReview.js:plainObject",
-      "function:shared/digitalTwinReview.js:setDigitalTwinReviewDecision",
-      "function:shared/engineRegistry.js:component",
-      "function:shared/engineRegistry.js:deepFreeze",
-      "function:shared/engineRegistry.js:topLevel",
-      "function:shared/localConnector.js:entityDetails",
-      "function:shared/localConnector.js:sourceEntity",
-      "function:shared/sourceAssetHierarchy.js:buildSourceAssetHierarchy",
-      "function:shared/sourceAssetHierarchy.js:sourceEntityIsModuleAsset",
-      "function:shared/sourceCodeParts.js:compactSourceCodePart",
-      "function:shared/sourceCodeParts.js:expandSourceCodePart",
-      "function:shared/sourceCodeParts.js:sourceCodePartKindDefinition",
-      "function:shared/sourceCodeParts.js:sourceCodePartSummary",
-      "function:shared/sourceCodeParts.js:sourceCodePartToSystemPart",
-      "function:shared/sourceCodeParts.js:sourceCodePartsForModule",
-      "function:shared/sourceCodeParts.js:text",
-      "function:shared/sourceTwin.js:explanationReference",
-      "function:shared/sourceTwin.js:sourceTwinAudienceMode",
-      "function:shared/sourceTwin.js:sourceTwinCodeUrl",
-      "function:shared/sourceTwin.js:sourceTwinEntities",
-      "function:shared/sourceTwin.js:sourceTwinEntityMap",
-      "function:shared/sourceTwin.js:sourceTwinExplanationEvidence",
-      "function:shared/sourceTwinSemantics.js:groupSourceTwinEntitiesByArea",
-      "function:shared/sourceTwinSemantics.js:groupSourceTwinEntitiesBySubsystem",
-      "function:shared/sourceTwinSemantics.js:sourceTwinAreaCatalog",
-      "function:shared/sourceTwinSemantics.js:sourceTwinAreaDefinition",
-      "function:shared/sourceTwinSemantics.js:sourceTwinAreaId",
-      "function:shared/sourceTwinSemantics.js:sourceTwinSubsystemCatalog",
-      "function:shared/sourceTwinSemantics.js:sourceTwinSubsystemDefinition",
-      "function:shared/sourceTwinSemantics.js:sourceTwinSubsystemId",
-      "function:shared/systemPartOntology.js:normalizeDigitalTwinBinding",
-      "function:shared/twinAdapterContract.js:TwinAdapterContractError.constructor",
-      "function:shared/twinAdapterContract.js:createTwinAdapterRegistry.inspect",
-      "function:shared/twinAdapterContract.js:validateTwinAdapterReview",
-      "function:shared/twinBuild.js:TwinBuildError.constructor",
-      "function:shared/twinBuild.js:deepFreeze",
-      "function:shared/twinBuild.js:finiteNumber",
-      "function:shared/twinBuild.js:migrateTwinBuild",
-      "function:shared/twinBuild.js:plainObject",
-      "function:shared/twinBuild.js:positiveInteger",
-      "function:shared/twinBuild.js:requireUniquePlacement",
-      "function:shared/twinBuild.js:uniqueIds",
-      "function:shared/twinBuildCanvas.js:createTwinBuildFromCanvasTemplate",
-      "function:shared/twinBuildCanvas.js:endpointHandle",
-      "function:shared/twinBuildCanvas.js:entityParentNodeId",
-      "function:shared/twinBuildCanvas.js:entityTrustZone",
-      "function:shared/twinBuildCanvas.js:findTwinBuildEntityNode",
-      "function:shared/twinBuildCanvas.js:materializeTwinBuildEntity",
-      "function:shared/twinBuildCanvas.js:materializeTwinBuildPart",
-      "function:shared/twinBuildCanvas.js:materializeTwinBuildRelation",
-      "function:shared/twinBuildCanvas.js:twinBuildEntityCanvasProjection",
-      "function:shared/twinBuildCanvas.js:withoutDerivedFields",
-      "function:shared/twinBuildReconciler.js:entityBindingCandidate",
-      "function:shared/twinBuildReconciler.js:logicalComponentBatchReview",
-      "function:shared/twinBuildReconciler.js:logicalComponentCandidate",
-      "function:shared/twinBuildReconciler.js:matchingBindingIdentity",
-      "function:shared/twinBuildReconciler.js:priority",
-      "function:shared/twinBuildReconciler.js:priority#2",
-      "function:shared/twinBuildReconciler.js:reconcileTwinBuild",
-      "function:shared/twinBuildReconciler.js:sameObservedEntity",
-      "function:shared/twinBuildReconciler.js:severityRank",
+      "dependency:./workflowSystemDiscoveryManifest.js",
+      "dependency:@xyflow/react",
+      "dependency:@xyflow/react/dist/style.css",
+      "dependency:react",
+      "dependency:vite",
+      "function:scripts/test-mcp-logic.mjs:bigStage",
+      "function:scripts/test-mcp-logic.mjs:db.abortSignal",
+      "function:scripts/test-mcp-logic.mjs:db.rpc",
+      "function:scripts/test-mcp-logic.mjs:deniedWriteDb.from",
+      "function:scripts/test-mcp-logic.mjs:edge",
+      "function:scripts/test-mcp-logic.mjs:fakeElement",
+      "function:scripts/test-mcp-logic.mjs:getRect",
+      "function:scripts/test-mcp-logic.mjs:getRect#2",
+      "function:scripts/test-mcp-logic.mjs:memo",
+      "function:scripts/test-mcp-logic.mjs:paddedRect",
+      "function:scripts/test-mcp-logic.mjs:paddedRect#2",
+      "function:scripts/test-mcp-logic.mjs:query.eq",
+      "function:scripts/test-mcp-logic.mjs:query.eq#2",
+      "function:scripts/test-mcp-logic.mjs:query.eq#3",
+      "function:scripts/test-mcp-logic.mjs:query.limit",
+      "function:scripts/test-mcp-logic.mjs:query.limit#2",
+      "function:scripts/test-mcp-logic.mjs:query.lt",
+      "function:scripts/test-mcp-logic.mjs:query.order",
+      "function:scripts/test-mcp-logic.mjs:query.order#2",
+      "function:scripts/test-mcp-logic.mjs:query.select",
+      "function:scripts/test-mcp-logic.mjs:query.select#2",
+      "function:scripts/test-mcp-logic.mjs:readDb.from",
+      "function:scripts/test-mcp-logic.mjs:result.text",
+      "function:scripts/test-mcp-logic.mjs:scan",
+      "function:scripts/test-mcp-logic.mjs:stage",
+      "function:scripts/test-mcp-logic.mjs:system",
+      "function:scripts/test-mcp-logic.mjs:t",
+      "function:scripts/test-mcp-logic.mjs:ta",
+      "function:scripts/test-mcp-logic.mjs:unavailableDb.from",
+      "function:scripts/test-mcp-logic.mjs:writeDb.delete",
+      "function:scripts/test-mcp-logic.mjs:writeDb.from",
+      "function:scripts/test-mcp-logic.mjs:writeDb.insert",
+      "function:scripts/test-source-code-parts.mjs:build",
+      "function:shared/systemLayers.js:addAncestorIds",
+      "function:shared/systemLayers.js:addPortal",
+      "function:shared/systemLayers.js:annotationDataForSystemLayer",
+      "function:shared/systemLayers.js:createCustomSystemLayerView",
+      "function:shared/systemLayers.js:edgeIsVisible",
+      "function:shared/systemLayers.js:isCanvasAnnotationNode",
+      "function:shared/systemLayers.js:isSystemLayerView",
+      "function:shared/systemLayers.js:nodeIsRedacted",
+      "function:shared/systemLayers.js:normalizeNodePresentation",
+      "function:shared/systemLayers.js:orderOf",
+      "function:shared/systemLayers.js:plainNodeLabel",
+      "function:shared/systemLayers.js:relationLabel",
+      "function:shared/systemLayers.js:removeSystemLayerFromNodes",
+      "function:shared/systemLayers.js:systemLayerFromView",
+      "function:shared/systemLayers.js:withSystemLayerOverride",
+      "function:shared/workflowCanvasSystemMap.js:groupNode",
+      "function:shared/workflowCanvasSystemMap.js:mapEdges",
+      "function:shared/workflowCanvasSystemMap.js:mapNodes",
+      "function:shared/workflowCanvasSystemMap.js:relationEdge",
+      "function:shared/workflowCanvasSystemMap.js:runtimePart",
       "function:shared/workflowCanvasSystemMap.js:sourceTwinViewPart",
-      "function:shared/workflowSourceFeatureBuild.js:extendWorkflowTwinBuildWithSourceFeatures",
-      "function:shared/workflowSourceFeatureBuild.js:featureEntityId",
-      "function:shared/workflowSourceTwinCanvas.js:workflowSourceTwinEntryForEdgeOperation",
-      "function:shared/workflowSourceTwinCanvas.js:workflowSourceTwinEntryForNode",
-      "function:shared/workflowSourceTwinCanvas.js:workflowSourceTwinEntryForPart",
-      "function:shared/workflowSystemDiscovery.js:addDigitalTwinBinding",
-      "function:shared/workflowSystemTwinAdapter.js:absolutePosition",
-      "function:shared/workflowSystemTwinAdapter.js:inspectWorkflowSystemTwin",
-      "function:shared/workflowSystemTwinAdapter.js:isEngineBatchBuildItem",
-      "function:shared/workflowSystemTwinAdapter.js:isSourceFeatureBatchBuildItem",
-      "function:shared/workflowSystemTwinAdapter.js:overlapsWithMargin",
-      "function:shared/workflowSystemTwinAdapter.js:severityRank",
-      "function:shared/workflowSystemTwinAdapter.js:unique",
-      "function:shared/workflowSystemTwinAdapter.js:workflowTwinRoot",
-      "function:shared/workflowSystemTwinBuild.js:createWorkflowSystemTwinBuild",
-      "function:shared/workflowSystemTwinBuild.js:createWorkflowSystemTwinBuildResult",
+      "function:shared/workflowCanvasSystemMap.js:systemNode",
+      "function:src/App.jsx:ContextItem",
+      "function:src/App.jsx:IconBtn",
+      "function:src/App.jsx:TypeItem",
+      "function:src/App.jsx:absPos",
+      "function:src/App.jsx:afterLogin",
+      "function:src/App.jsx:aggregateSystemNodeRuntime",
+      "function:src/App.jsx:assignWorkshopControlNode",
+      "function:src/App.jsx:baseEdgeStyle",
+      "function:src/App.jsx:cancelEdgeLp",
+      "function:src/App.jsx:canvasSnapshot",
+      "function:src/App.jsx:centerInFrame",
+      "function:src/App.jsx:cleanup",
+      "function:src/App.jsx:closeContext",
+      "function:src/App.jsx:closestHandles",
+      "function:src/App.jsx:cloudRowSnapshot",
+      "function:src/App.jsx:commitRename",
+      "function:src/App.jsx:creationPosition",
+      "function:src/App.jsx:dedupeParticipants",
       "function:src/App.jsx:detachDigitalTwinBinding",
-      "function:src/components/SourceTwinPanel.jsx:ChangeEntityList",
-      "function:src/components/SourceTwinPanel.jsx:EntityRow",
-      "function:src/lib/digitalTwinAdapters.js:inspectDigitalTwinCanvas",
-      "function:src/lib/sourceTwinApi.js:applySourceTwinHistoryCapture",
-      "function:src/lib/sourceTwinApi.js:compareSourceTwinHistory",
-      "function:src/lib/sourceTwinApi.js:loadSourceTwinCurrent",
-      "function:src/lib/sourceTwinApi.js:loadSourceTwinHistory",
-      "function:src/lib/sourceTwinApi.js:previewSourceTwinHistoryCapture"
+      "function:src/App.jsx:dim",
+      "function:src/App.jsx:dim#2",
+      "function:src/App.jsx:dim#3",
+      "function:src/App.jsx:distOf",
+      "function:src/App.jsx:findAxisSnap",
+      "function:src/App.jsx:fn",
+      "function:src/App.jsx:handleContextAddContent",
+      "function:src/App.jsx:handleContextAddGroup",
+      "function:src/App.jsx:handleContextAddIntent",
+      "function:src/App.jsx:handleContextAddMemo",
+      "function:src/App.jsx:handleContextAddStage",
+      "function:src/App.jsx:handleContextAddSystem",
+      "function:src/App.jsx:handleContextCleanupEdges",
+      "function:src/App.jsx:handleContextDeleteEdge",
+      "function:src/App.jsx:handleContextDeleteNode",
+      "function:src/App.jsx:handleContextGroupSelection",
+      "function:src/App.jsx:handleContextPaste",
+      "function:src/App.jsx:handleContextUngroup",
+      "function:src/App.jsx:handleContextUpdateEdgeRelation",
+      "function:src/App.jsx:handler",
+      "function:src/App.jsx:handler#2",
+      "function:src/App.jsx:handler#3",
+      "function:src/App.jsx:isPartEdge",
+      "function:src/App.jsx:isTypingTarget",
+      "function:src/App.jsx:maxNodeId",
+      "function:src/App.jsx:midOf",
+      "function:src/App.jsx:nextId",
+      "function:src/App.jsx:nodeDisplayName",
+      "function:src/App.jsx:normalizeEdges",
+      "function:src/App.jsx:onClickCapture",
+      "function:src/App.jsx:onDown",
+      "function:src/App.jsx:onDown#2",
+      "function:src/App.jsx:onEdgeLpMove",
+      "function:src/App.jsx:onEnd",
+      "function:src/App.jsx:onHashChange",
+      "function:src/App.jsx:onKey",
+      "function:src/App.jsx:onMouseDown",
+      "function:src/App.jsx:onMove",
+      "function:src/App.jsx:onMove#2",
+      "function:src/App.jsx:onSecondPointer",
+      "function:src/App.jsx:onStart",
+      "function:src/App.jsx:onStorageError",
+      "function:src/App.jsx:onTouchStart",
+      "function:src/App.jsx:onUp",
+      "function:src/App.jsx:openWorkshop",
+      "function:src/App.jsx:parseSharedId",
+      "function:src/App.jsx:partIdFromHandle",
+      "function:src/App.jsx:participantKey",
+      "function:src/App.jsx:poll",
+      "function:src/App.jsx:positionMenu",
+      "function:src/App.jsx:refreshDecision",
+      "function:src/App.jsx:remapPartHandle",
+      "function:src/App.jsx:sanitizeNodes",
+      "function:src/App.jsx:sanitizeNotes",
+      "function:src/App.jsx:scopedParticipants",
+      "function:src/App.jsx:sharedCanvasId",
+      "function:src/App.jsx:sortParentsFirst",
+      "function:src/App.jsx:stripEdge",
+      "function:src/App.jsx:stripNode",
+      "function:src/App.jsx:stripNote",
+      "function:src/App.jsx:swallow",
+      "function:src/App.jsx:swallow#2",
+      "function:src/App.jsx:systemRuntimeByEdge",
+      "function:src/App.jsx:systemRuntimeDashboardSummary",
+      "function:src/App.jsx:systemRuntimeMapFromRecords",
+      "function:src/App.jsx:systemRuntimePersistenceError",
+      "function:src/App.jsx:systemRuntimeTargetsForNodes",
+      "function:src/App.jsx:visit",
+      "function:src/components/Toolbar.jsx:MobileBtn",
+      "function:src/components/Toolbar.jsx:RuntimeButton",
+      "function:src/components/Toolbar.jsx:SecurityOverlayButton",
+      "function:src/components/Toolbar.jsx:SmallIcon",
+      "function:src/components/Toolbar.jsx:ToolBtn",
+      "function:src/components/Toolbar.jsx:promptNewLayer",
+      "function:src/components/Toolbar.jsx:rowBtn"
     ],
     "removed": [
-      "function:shared/sourceTwin.js:changedEntities",
-      "function:shared/sourceTwin.js:compactEntityFingerprints",
-      "function:shared/sourceTwin.js:compareSourceTwinSnapshots",
-      "function:shared/sourceTwin.js:createSourceTwinSnapshot",
-      "function:shared/sourceTwin.js:metricChanges",
-      "function:shared/sourceTwin.js:normalizeMetrics",
-      "function:shared/sourceTwin.js:plainObject",
-      "function:shared/sourceTwin.js:sort",
-      "function:shared/sourceTwin.js:sourceTwinFingerprint",
-      "function:shared/sourceTwin.js:stableValue"
+      "function:shared/systemLayers.js:createSystemLayerViews",
+      "function:shared/systemLayers.js:deriveDefaultSystemLayer",
+      "function:shared/systemLayers.js:ensureSystemLayerViews",
+      "function:shared/systemLayers.js:isCustomSystemLayerView",
+      "function:shared/systemLayers.js:isOfficialSystemLayerId",
+      "function:shared/systemLayers.js:isSystemMapTemplateCanvas",
+      "function:shared/systemLayers.js:systemLayerDefinition"
     ],
     "changedPaths": [
-      "AGENTS.md",
-      "CLAUDE.md",
-      "README.md",
-      "THIRD_PARTY_NOTICES.md",
-      "api/source-twin-webhook.js",
-      "api/source-twin.js",
-      "docs/AI_MASTER.md",
       "docs/MASTER.md",
-      "docs/README.md",
       "docs/architecture/FOUNDRY_MODEL.md",
-      "docs/architecture/decisions/DEPENDENCY_DECISIONS.md",
-      "docs/architecture/decisions/OPEN_SOURCE_POLICY.md",
-      "docs/architecture/evaluations/source-lens/SOURCE_LENS_AI_PROVIDER_PILOT.md",
-      "docs/architecture/evaluations/source-lens/SOURCE_LENS_FLOW_VISUALIZATION_EVALUATION.md",
-      "docs/architecture/evaluations/source-lens/SOURCE_LENS_TREE_SITTER_EVALUATION.md",
-      "docs/archive/handoffs/CODEX_HANDOFF_SOURCE_LENS_SL0_SL1_KO.md",
-      "docs/archive/handoffs/SOURCE_LENS_SL2_HANDOFF_KO.md",
-      "docs/archive/handoffs/SOURCE_LENS_SL2_SL4_SL3_FINAL_KO.md",
-      "docs/archive/handoffs/SOURCE_LENS_SL3_HANDOFF_KO.md",
-      "docs/archive/handoffs/SOURCE_LENS_SL4_HANDOFF_KO.md",
-      "docs/contracts/OPERATION_LIFECYCLE_CONTRACT.md",
-      "docs/contracts/SOURCE_PROFILE_CONTRACT.md",
-      "docs/engines/AI_CONTEXT_GATE_MASTER.md",
-      "docs/engines/CONNECTOR_BRIDGE_MASTER.md",
-      "docs/engines/SOURCE_LENS_MASTER.md",
-      "docs/governance/AUDIT_PLAYBOOK.md",
-      "docs/governance/TECHNICAL_DEBT.md",
-      "docs/product/ENGINE_AGENT_REGISTRY.md",
-      "docs/product/ENGINE_CHANGELOG.md",
-      "docs/product/PRODUCT_CATALOG.md",
-      "docs/protocols/STARTING_PROTOCOL.md",
-      "docs/protocols/SYSTEM_ONBOARDING_PROTOCOL.md",
-      "docs/protocols/WORKFLOW_CATALOG.md",
-      "docs/twin/README.md",
-      "docs/twin/architecture/TWIN_IDENTITY_AND_OBSERVATION.md",
-      "docs/twin/archive/TWIN_ENGINE_ROADMAP.md",
-      "docs/twin/contracts/TWIN_ADAPTER_CONTRACT.md",
-      "docs/twin/contracts/TWIN_BUILD_SCHEMA.md",
-      "mcp/layout.js",
-      "mcp/localConnectorStore.js",
-      "mcp/sanitize.js",
-      "mcp/server.js",
-      "mcp/sourceTwinStore.js",
-      "mcp/store.js",
+      "docs/architecture/LIVE_EDIT_OBSERVATION.md",
+      "docs/architecture/SYSTEM_MAP_BLUEPRINT.md",
+      "docs/architecture/WORKSHOP_BLUEPRINT.md",
       "package.json",
-      "scripts/ai-context-gate-engine.mjs",
-      "scripts/generate-source-twin.mjs",
-      "scripts/local-connector-agent.mjs",
-      "scripts/source-lens-engine.mjs",
-      "scripts/source-profiles/workflow-canvas.mjs",
-      "scripts/source-twin-scanner.mjs",
-      "scripts/source-twin-semantics.mjs",
-      "scripts/system-discovery.mjs",
-      "scripts/test-ai-context-gate.mjs",
-      "scripts/test-engine-registry.mjs",
       "scripts/test-mcp-logic.mjs",
       "scripts/test-source-code-parts.mjs",
-      "scripts/test-source-feature-model.mjs",
-      "scripts/test-source-functional-context.mjs",
-      "scripts/test-source-lens-engine.mjs",
-      "scripts/test-source-profiles.mjs",
-      "scripts/test-source-twin.mjs",
+      "scripts/test-source-code-world-workspace.mjs",
+      "scripts/test-source-code-world.mjs",
+      "scripts/test-system-layers.mjs",
       "scripts/test-twin-build.mjs",
-      "shared/aiContextGate.js",
-      "shared/capabilityMapper.js",
-      "shared/digitalTwinProposal.js",
-      "shared/digitalTwinReview.js",
-      "shared/engineRegistry.js",
-      "shared/operationLifecycle.js",
-      "shared/sourceCodeParts.js",
-      "shared/sourceFunctionalContext.js",
-      "shared/sourceTwin.js",
-      "shared/sourceTwinSemantics.js",
-      "shared/systemOntology.js",
-      "shared/systemStateSnapshot.js",
-      "shared/twinAdapterContract.js",
-      "shared/twinBuild.js",
-      "shared/twinBuildReconciler.js",
+      "shared/sourceCodeWorldProjection.js",
+      "shared/sourceModuleProposal.js",
+      "shared/systemLayers.js",
       "shared/workflowCanvasSystemMap.js",
-      "shared/workflowOperationDefinitions.js",
-      "shared/workflowSourceEditCodePartAdapter.js",
-      "shared/workflowSystemTwinAdapter.js",
       "src/App.jsx",
-      "src/components/DigitalTwinReviewPanel.jsx",
-      "src/components/NodePalette.jsx",
-      "src/components/SourceTwinPanel.jsx",
-      "src/lib/sourceTwinApi.js",
-      "src/nodes/SystemNode.jsx"
+      "src/components/CodeWorldScreen.css",
+      "src/components/CodeWorldScreen.jsx",
+      "src/components/CodeWorldWorkspace.css",
+      "src/components/CodeWorldWorkspace.jsx",
+      "src/components/Toolbar.jsx"
     ],
     "explanationChangedPaths": [
-      "api/local-connector.js",
-      "api/mcp.js",
-      "api/shared-canvas.js",
-      "api/source-twin-webhook.js",
-      "api/system-runtime.js",
-      "index.html",
-      "mcp/canvasSummaries.js",
-      "mcp/dataAccessAudit.js",
-      "mcp/layout.js",
-      "mcp/server.js",
-      "mcp/shareAccess.js",
-      "mcp/sourceTwinStore.js",
-      "mcp/store.js",
-      "mcp/systemOperationPlan.js",
-      "mcp/systemRuntime.js",
-      "scripts/check-governance.mjs",
-      "scripts/check-privacy-release.mjs",
-      "scripts/generate-source-twin.mjs",
-      "scripts/generate-system-discovery.mjs",
-      "scripts/local-connector-agent.mjs",
-      "scripts/source-edit-executor.mjs",
-      "scripts/source-profiles/fastapi-order-service.mjs",
-      "scripts/source-profiles/index.mjs",
-      "scripts/source-twin-scanner.mjs",
-      "scripts/source-twin-semantics.mjs",
-      "scripts/system-discovery.mjs",
-      "scripts/test-collaboration-permissions.mjs",
-      "scripts/test-group-membership.mjs",
-      "scripts/test-intent-node.mjs",
-      "scripts/test-local-connector-agent.mjs",
-      "scripts/test-operation-lifecycle.mjs",
-      "scripts/test-performance-boundaries.mjs",
-      "scripts/test-security-boundaries.mjs",
-      "scripts/test-security-overlay.mjs",
-      "scripts/test-source-editable-properties.mjs",
-      "scripts/test-source-twin.mjs",
-      "scripts/test-sql-security.mjs",
-      "scripts/test-system-layers.mjs",
-      "scripts/test-twin-adapter-contract.mjs",
-      "scripts/test-work-intent-parts.mjs",
-      "shared/capabilityMapper.js",
-      "shared/digitalTwinProposal.js",
-      "shared/digitalTwinReview.js",
-      "shared/edgeOperation.js",
-      "shared/engineRegistry.js",
-      "shared/intentOntology.js",
-      "shared/localConnector.js",
-      "shared/privacyCapabilities.js",
-      "shared/relationOntology.js",
-      "shared/richTextSanitizer.js",
-      "shared/securityOverlay.js",
-      "shared/sharePermissions.js",
-      "shared/sourceAiExplanation.js",
-      "shared/sourceAssetHierarchy.js",
-      "shared/sourceCodeParts.js",
-      "shared/sourceEditableProperties.js",
-      "shared/sourceFeatureModel.js",
-      "shared/sourceFlows.js",
-      "shared/sourceModuleProposal.js",
-      "shared/sourceProfileContract.js",
-      "shared/sourceTwin.js",
-      "shared/sourceTwinSemantics.js",
+      "scripts/test-mcp-logic.mjs",
+      "scripts/test-source-code-parts.mjs",
       "shared/systemLayers.js",
-      "shared/systemObservationCatalog.js",
-      "shared/systemPartOntology.js",
-      "shared/systemRuntime.js",
-      "shared/trustTopology.js",
-      "shared/twinAdapterContract.js",
-      "shared/twinBuild.js",
-      "shared/twinBuildCanvas.js",
-      "shared/twinBuildReconciler.js",
-      "shared/uiConstants.js",
-      "shared/workOntology.js",
       "shared/workflowCanvasSystemMap.js",
-      "shared/workflowSourceEditableProperties.js",
-      "shared/workflowSourceFeatureBuild.js",
-      "shared/workflowSourceTwinCanvas.js",
-      "shared/workflowSystemDiscovery.js",
-      "shared/workflowSystemMapRepair.js",
-      "shared/workflowSystemTwinAdapter.js",
-      "shared/workflowSystemTwinAdapterDescriptor.js",
-      "shared/workflowSystemTwinBuild.js",
-      "shared/workflowTrustTopology.js",
       "src/App.jsx",
-      "src/components/AuthPanel.jsx",
-      "src/components/CanvasImage.jsx",
-      "src/components/CanvasTabs.jsx",
-      "src/components/EdgeRelationEditor.jsx",
-      "src/components/EditToolbar.jsx",
-      "src/components/FriendManager.jsx",
-      "src/components/IntentWorkspace.jsx",
-      "src/components/InvitePopover.jsx",
-      "src/components/NotesPanel.jsx",
-      "src/components/OpenInNotesButton.jsx",
-      "src/components/ParticipantAvatar.jsx",
-      "src/components/ScopedParticipants.jsx",
-      "src/components/SecurityOverlayLegend.jsx",
-      "src/components/SourceTwinPanel.jsx",
-      "src/components/SystemObservationCatalog.jsx",
-      "src/components/Toolbar.jsx",
-      "src/components/WorkIntentPicker.jsx",
-      "src/demoCanvases.js",
-      "src/edges/StubEdge.jsx",
-      "src/edges/stubEdgeGeometry.js",
-      "src/index.css",
-      "src/lib/canvasGeometry.js",
-      "src/lib/canvasMerge.js",
-      "src/lib/canvasNavigation.js",
-      "src/lib/canvasSchemaGuard.js",
-      "src/lib/canvasSync.js",
-      "src/lib/cloudStorage.js",
-      "src/lib/digitalTwinAdapters.js",
-      "src/lib/friendships.js",
-      "src/lib/groupMembership.js",
-      "src/lib/imageStorage.js",
-      "src/lib/localConnectorApi.js",
-      "src/lib/mcpTokens.js",
-      "src/lib/presence.js",
-      "src/lib/profiles.js",
-      "src/lib/sanitizeHtml.js",
-      "src/lib/shareLaunchCoordinator.js",
-      "src/lib/sharedCanvasApi.js",
-      "src/lib/shares.js",
-      "src/lib/sourceTwinApi.js",
-      "src/lib/supabase.js",
-      "src/lib/systemRuntimeApi.js",
-      "src/lib/wheelRouting.js",
-      "src/main.jsx",
-      "src/nodes/ContentNode.jsx",
-      "src/nodes/GroupNode.jsx",
-      "src/nodes/IntentNode.jsx",
-      "src/nodes/MemoNode.jsx",
-      "src/nodes/StageNode.jsx",
-      "src/storage.js",
-      "supabase-canvas-images.sql",
-      "supabase-canvas-notes.sql",
-      "supabase-canvas-stage-types.sql",
-      "supabase-canvas-summaries.sql",
-      "supabase-canvas-views.sql",
-      "supabase-data-access-audit.sql",
-      "supabase-local-connectors.sql",
-      "supabase-mcp-schema.sql",
-      "supabase-profile-privacy.sql",
-      "supabase-profiles.sql",
-      "supabase-realtime.sql",
-      "supabase-relation-metadata-guard.sql",
-      "supabase-runtime-observations.sql",
-      "supabase-runtime-read.sql",
-      "supabase-schema.sql",
-      "supabase-security-hardening.sql",
-      "supabase-source-lens-roundtrip.sql",
-      "supabase-source-twin-history.sql",
-      "vercel.json",
-      "vite.config.js"
+      "src/components/Toolbar.jsx"
     ],
-    "profileChanged": {
-      "before": {
-        "id": "workflow-canvas",
-        "version": "0.7.0"
-      },
-      "after": {
-        "id": "workflow-canvas",
-        "version": "0.9.0"
-      }
-    },
+    "profileChanged": null,
     "summary": {
-      "added": 114,
-      "changed": 100,
-      "explanationChanged": 360,
-      "removed": 10,
-      "paths": 88,
-      "explanationPaths": 154
+      "added": 78,
+      "changed": 28,
+      "explanationChanged": 154,
+      "removed": 7,
+      "paths": 22,
+      "explanationPaths": 6
     }
   }
 }

@@ -1,66 +1,15 @@
-export const SYSTEM_LAYER_CONTRACT_VERSION = 1
-
-export const SYSTEM_LAYER_DEFINITIONS = Object.freeze([
-  { id: 'L1', label: '경험 층', question: '무엇을 할 수 있는가', color: '#22c55e', order: 1 },
-  { id: 'L2', label: '앱 구조 층', question: '무엇이 돌아가는가', color: '#3b82f6', order: 2 },
-  { id: 'L3', label: '데이터 층', question: '데이터는 어디에 사는가', color: '#a855f7', order: 3 },
-  { id: 'L4', label: '인프라 층', question: '어디에 배치되어 있는가', color: '#64748b', order: 4 },
-])
-
-const LAYER_BY_ID = new Map(SYSTEM_LAYER_DEFINITIONS.map((item) => [item.id, item]))
-const SYSTEM_KIND_LAYER = Object.freeze({
-  actor: 'L1',
-  feature: 'L1',
-  engine: 'L2',
-  module: 'L2',
-  frontend: 'L2',
-  service: 'L2',
-  api: 'L2',
-  function: 'L2',
-  auth: 'L2',
-  queue: 'L2',
-  mcp: 'L2',
-  database: 'L3',
-  table: 'L3',
-  storage: 'L3',
-  policy: 'L3',
-  deployment: 'L4',
-  external: 'L4',
-  credential: 'L4',
-})
-const INFRASTRUCTURE_TRUST_ZONES = new Set([
-  'local-device',
-  'local-network',
-  'intranet',
-  'private-datacenter',
-  'private-cloud',
-  'public-cloud',
-  'public-internet',
-  'external-saas',
-  'physical-site',
-])
 const ANNOTATION_NODE_TYPES = new Set(['stage', 'memo', 'content', 'group'])
 const SYSTEM_LAYER_VIEW_PREFIX = 'view:system-layer:'
-// Custom (user-created) layer ids: `u` + 4-24 base36 chars. Layers are a
-// general canvas feature (MASTER.md §2.4); L1-L4 are the protected presets
-// of system maps, everything else is user-defined.
+const LEGACY_OFFICIAL_LAYER_IDS = new Set(['L1', 'L2', 'L3', 'L4'])
+// User-created layer ids: `u` + 4-24 base36 chars. Layer meaning lives in the
+// saved view itself; there is no built-in layer catalog or kind-to-layer map.
 const CUSTOM_LAYER_ID_PATTERN = /^u[0-9a-z]{4,24}$/
 const CUSTOM_LAYER_COLORS = Object.freeze([
   '#f59e0b', '#ec4899', '#14b8a6', '#8b5cf6', '#ef4444', '#84cc16', '#0ea5e9', '#f97316',
 ])
 
-export function isOfficialSystemLayerId(value) {
-  return typeof value === 'string' && LAYER_BY_ID.has(value)
-}
-
 export function normalizeSystemLayerId(value) {
-  if (typeof value !== 'string') return null
-  if (LAYER_BY_ID.has(value)) return value
-  return CUSTOM_LAYER_ID_PATTERN.test(value) ? value : null
-}
-
-export function systemLayerDefinition(value) {
-  return LAYER_BY_ID.get(value) ?? null
+  return typeof value === 'string' && CUSTOM_LAYER_ID_PATTERN.test(value) ? value : null
 }
 
 export function normalizeNodePresentation(value) {
@@ -88,25 +37,8 @@ export function isCanvasAnnotationNode(node) {
   return ANNOTATION_NODE_TYPES.has(node?.type) && !node?.data?.digitalTwinBinding
 }
 
-// This is intentionally a pure, closed mapping. New kinds stay unclassified
-// until the contract and regression fixtures are updated together.
-export function deriveDefaultSystemLayer({ systemKind, trustZone } = {}) {
-  if (SYSTEM_KIND_LAYER[systemKind]) return SYSTEM_KIND_LAYER[systemKind]
-  return INFRASTRUCTURE_TRUST_ZONES.has(trustZone?.kind) ? 'L4' : null
-}
-
 export function effectiveSystemLayerForNode(node) {
-  const override = normalizeNodePresentation(node?.data?.presentation)?.layerOverride
-  return override ?? deriveDefaultSystemLayer(node?.data)
-}
-
-export function createSystemLayerViews() {
-  return SYSTEM_LAYER_DEFINITIONS.map((layer) => ({
-    id: `${SYSTEM_LAYER_VIEW_PREFIX}${layer.id}`,
-    name: `${layer.id} ${layer.label}`,
-    viewKind: 'system-layer',
-    systemLayer: layer.id,
-  }))
+  return normalizeNodePresentation(node?.data?.presentation)?.layerOverride ?? null
 }
 
 export function isSystemLayerView(view) {
@@ -115,13 +47,6 @@ export function isSystemLayerView(view) {
 
 export function systemLayerFromView(view) {
   return normalizeSystemLayerId(view?.systemLayer)
-}
-
-export function ensureSystemLayerViews(views = []) {
-  const current = Array.isArray(views) ? views : []
-  const present = new Set(current.filter(isSystemLayerView).map(systemLayerFromView).filter(Boolean))
-  const missing = createSystemLayerViews().filter((view) => !present.has(view.systemLayer))
-  return missing.length ? [...current, ...missing] : current
 }
 
 export function createCustomSystemLayerView(name) {
@@ -136,46 +61,49 @@ export function createCustomSystemLayerView(name) {
   }
 }
 
-export function isCustomSystemLayerView(view) {
-  return isSystemLayerView(view) && !isOfficialSystemLayerId(view.systemLayer)
+function colorForLayerId(id) {
+  let hash = 0
+  for (let index = 0; index < id.length; index += 1) hash = ((hash * 31) + id.charCodeAt(index)) | 0
+  return CUSTOM_LAYER_COLORS[Math.abs(hash) % CUSTOM_LAYER_COLORS.length]
 }
 
-// Ordered switcher entries derived from the canvas's own views: official
-// presets first (L1-L4 order), then custom layers in view order. The result
-// also feeds portal labels/ordering so custom layers never fall back to ids.
+// Ordered switcher entries come entirely from the canvas's saved layer views.
+// The same metadata feeds portal labels and ordering.
 export function systemLayerOptionsFromViews(views = []) {
   const layerViews = (Array.isArray(views) ? views : []).filter(isSystemLayerView)
-  const official = []
-  const custom = []
+  const options = []
   const seen = new Set()
   for (const view of layerViews) {
     const id = systemLayerFromView(view)
     if (!id || seen.has(id)) continue
     seen.add(id)
-    const def = systemLayerDefinition(id)
-    if (def) {
-      official.push({ ...def, short: def.id, official: true })
-    } else {
-      custom.push({
-        id,
-        label: view.name || '사용자 층',
-        short: (view.name || '층').slice(0, 2),
-        color: CUSTOM_LAYER_COLORS[custom.length % CUSTOM_LAYER_COLORS.length],
-        question: '',
-        official: false,
-      })
-    }
+    const label = view.name || '사용자 층'
+    options.push({
+      id,
+      label,
+      short: label.slice(0, 2),
+      color: colorForLayerId(id),
+      question: '',
+      order: options.length + 1,
+    })
   }
-  official.sort((left, right) => left.order - right.order)
-  return [...official.map((item, i) => ({ ...item })), ...custom.map((item, index) => ({
-    ...item,
-    order: 100 + index,
-  }))]
+  return options
 }
 
-// Pure helper for deleting a custom layer: clears matching overrides so nodes
-// return to the derived default (assets) or the everywhere-visible legacy
-// mode (annotations) instead of vanishing behind a dead layer id.
+// Removes only the retired built-in L1-L4 layer views. Ordinary saved views and
+// user-created layers are preserved. Returning the original array when unchanged
+// keeps React state updates stable.
+export function pruneLegacyOfficialSystemLayerViews(views = []) {
+  const current = Array.isArray(views) ? views : []
+  const filtered = current.filter((view) => !(
+    view?.viewKind === 'system-layer'
+    && LEGACY_OFFICIAL_LAYER_IDS.has(view?.systemLayer)
+  ))
+  return filtered.length === current.length ? current : filtered
+}
+
+// Deleting a layer clears matching overrides. Those nodes remain available in
+// the all-nodes view and can be assigned to another layer later.
 export function removeSystemLayerFromNodes(nodes = [], layerId) {
   const normalized = normalizeSystemLayerId(layerId)
   if (!normalized) return nodes
@@ -186,31 +114,10 @@ export function removeSystemLayerFromNodes(nodes = [], layerId) {
   })
 }
 
-// Stable group ids from the self system map template (present since the map
-// template's first commit, well before systemMapSnapshot metadata existed).
-// A map created before that metadata field shipped still carries these ids,
-// so detection must not depend on systemMapSnapshot alone.
-const LEGACY_SYSTEM_MAP_GROUP_IDS = new Set([
-  'map-group-experience', 'map-group-runtime', 'map-group-data', 'map-group-development',
-])
-
-// True only for the self system map template — gates the official L1-L4
-// preset backfill. Generic canvases never get presets forced onto them.
-export function isSystemMapTemplateCanvas(nodes = []) {
-  return (nodes ?? []).some((node) => (
-    node?.data?.redacted !== true
-    && (
-      node?.data?.systemMapSnapshot?.source === 'server-template'
-      || LEGACY_SYSTEM_MAP_GROUP_IDS.has(node?.id)
-    )
-  ))
-}
-
-// Layers are enabled wherever any layer view exists (user-created included),
-// or on a recognized system map template (which then backfills presets).
-export function canvasSupportsSystemLayers(nodes = [], views = []) {
-  if ((views ?? []).some(isSystemLayerView)) return true
-  return isSystemMapTemplateCanvas(nodes)
+// Layer filtering is enabled only by layer views owned by the canvas. Nodes and
+// stable self-map group ids no longer imply or backfill a layer contract.
+export function canvasSupportsSystemLayers(_nodes = [], views = []) {
+  return (views ?? []).some(isSystemLayerView)
 }
 
 function nodeIsRedacted(node) {
@@ -246,11 +153,10 @@ function addAncestorIds(visibleNodeIds, nodeById) {
   }
 }
 
-// layerMeta: optional Map(layerId -> {short, label, order}) so custom (user)
-// layers resolve to their names/order in portals instead of raw ids. Falls
-// back to the official definition, then the id itself.
+// layerMeta: optional Map(layerId -> {short, label, order}) so user layers
+// resolve to their names and order in portals instead of raw ids.
 export function createSystemLayerProjection(nodes = [], edges = [], activeLayerId = null, layerMeta = null) {
-  const metaFor = (id) => (layerMeta?.get?.(id)) ?? systemLayerDefinition(id) ?? null
+  const metaFor = (id) => (layerMeta?.get?.(id)) ?? null
   const orderOf = (id) => metaFor(id)?.order ?? 999
   const activeLayer = normalizeSystemLayerId(activeLayerId)
   if (!activeLayer) {

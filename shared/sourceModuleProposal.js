@@ -55,7 +55,7 @@ export function createSourceModuleMaterializationItem({
     changeType: 'added',
     severity: 'info',
     title: `${text(entity.label, 150) || sourceEntityId} 캔버스에 올리기`,
-    summary: '선택한 코드 모듈과 읽기 전용 코드 파츠를 L2 앱 구조 층의 CODE 근거 노드로 제안합니다.',
+    summary: '선택한 코드 모듈과 읽기 전용 코드 파츠를 CODE 근거 대상으로 제안합니다.',
     evidence: [
       text(entity.path, 500),
       ...(entity.explanationBasis?.refs ?? []).slice(0, 8),

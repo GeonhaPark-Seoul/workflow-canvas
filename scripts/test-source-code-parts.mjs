@@ -4,7 +4,6 @@ import { sourceCodePartsForModule } from '../shared/sourceCodeParts.js'
 import { sourceFlowsForModule } from '../shared/sourceFlows.js'
 import { createSourceModuleMaterializationItem } from '../shared/sourceModuleProposal.js'
 import { systemNodeShouldDim } from '../shared/systemOntology.js'
-import { deriveDefaultSystemLayer } from '../shared/systemLayers.js'
 import { explainSourceCodePartWithAi } from '../shared/sourceAiExplanation.js'
 import {
   sourceCodePartsForModuleWithWorkflowEditPolicy,
@@ -101,7 +100,6 @@ assert.equal(proposedNode.data.digitalTwinBinding.entityKey, moduleId)
 assert.ok(proposedNode.data.systemParts.length > 0)
 assert.ok(proposedNode.data.systemParts.some((part) => part.kind === 'capability'))
 assert.ok(proposedNode.data.systemParts.every((part) => part.digitalTwinBinding))
-assert.equal(deriveDefaultSystemLayer(proposedNode.data), 'L2')
 assert.equal(systemNodeShouldDim(proposedNode.data), false)
 assert.equal(systemNodeShouldDim({ systemKind: 'module', assetStatus: 'candidate' }), true)
 assert.equal(systemNodeShouldDim({ systemKind: 'service', sourceKind: 'manual', evidence: '' }), true)

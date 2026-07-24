@@ -23,7 +23,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:src/App.jsx",
           "path": "src/App.jsx",
-          "fingerprint": "3518c7150762538ab773",
+          "fingerprint": "e1b307140827f26542aa",
           "summary": "캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다."
         },
         {
@@ -31,6 +31,24 @@ export const SOURCE_FEATURE_MANIFEST = {
           "path": "src/components/CanvasTabs.jsx",
           "fingerprint": "5873ef7f7c009636aa87",
           "summary": "개인·공유 캔버스 목록과 현재 캔버스 전환 화면을 표시합니다."
+        },
+        {
+          "entityId": "file:src/components/CodeWorldScreen.css",
+          "path": "src/components/CodeWorldScreen.css",
+          "fingerprint": "c3a597bb6a6436e59a79",
+          "summary": "코드 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다."
+        },
+        {
+          "entityId": "file:src/components/CodeWorldScreen.jsx",
+          "path": "src/components/CodeWorldScreen.jsx",
+          "fingerprint": "63f8108a21f06d48f0dd",
+          "summary": "코드 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다."
+        },
+        {
+          "entityId": "file:src/components/CodeWorldWorkspace.css",
+          "path": "src/components/CodeWorldWorkspace.css",
+          "fingerprint": "57285e518b10f3894af2",
+          "summary": "코드 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다."
         },
         {
           "entityId": "file:src/components/EdgeRelationEditor.jsx",
@@ -53,7 +71,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:src/components/Toolbar.jsx",
           "path": "src/components/Toolbar.jsx",
-          "fingerprint": "ea6ee7d94d97dbcb90eb",
+          "fingerprint": "6056f597cdffceb8b432",
           "summary": "노드 추가, 전체 보기, 되돌리기 같은 캔버스의 주요 명령을 모아 보여줍니다."
         },
         {
@@ -102,6 +120,9 @@ export const SOURCE_FEATURE_MANIFEST = {
       "evidenceEntityIds": [
         "file:src/App.jsx",
         "file:src/components/CanvasTabs.jsx",
+        "file:src/components/CodeWorldScreen.css",
+        "file:src/components/CodeWorldScreen.jsx",
+        "file:src/components/CodeWorldWorkspace.css",
         "file:src/components/EdgeRelationEditor.jsx",
         "file:src/components/FriendManager.jsx",
         "file:src/components/NodePalette.jsx",
@@ -117,6 +138,9 @@ export const SOURCE_FEATURE_MANIFEST = {
       "evidencePaths": [
         "src/App.jsx",
         "src/components/CanvasTabs.jsx",
+        "src/components/CodeWorldScreen.css",
+        "src/components/CodeWorldScreen.jsx",
+        "src/components/CodeWorldWorkspace.css",
         "src/components/EdgeRelationEditor.jsx",
         "src/components/FriendManager.jsx",
         "src/components/NodePalette.jsx",
@@ -143,6 +167,9 @@ export const SOURCE_FEATURE_MANIFEST = {
           "evidenceEntityIds": [
             "file:src/App.jsx",
             "file:src/components/CanvasTabs.jsx",
+            "file:src/components/CodeWorldScreen.css",
+            "file:src/components/CodeWorldScreen.jsx",
+            "file:src/components/CodeWorldWorkspace.css",
             "file:src/components/EdgeRelationEditor.jsx",
             "file:src/components/FriendManager.jsx",
             "file:src/components/NodePalette.jsx",
@@ -169,7 +196,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "54afd4d947dd146c"
+      "fingerprint": "28de4feb203bdc2e"
     },
     {
       "key": "area:canvas-model",
@@ -424,9 +451,15 @@ export const SOURCE_FEATURE_MANIFEST = {
           "summary": "소스 코드 · Asset에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
         },
         {
+          "entityId": "file:shared/sourceCodeWorldProjection.js",
+          "path": "shared/sourceCodeWorldProjection.js",
+          "fingerprint": "7dfe96688db66b892019",
+          "summary": "소스 코드 · 코드에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
+        },
+        {
           "entityId": "file:shared/systemLayers.js",
           "path": "shared/systemLayers.js",
-          "fingerprint": "91d56e491b6735405f3e",
+          "fingerprint": "c2de6188f4438ea52906",
           "summary": "시스템에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
         },
         {
@@ -446,6 +479,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "path": "shared/workshop.js",
           "fingerprint": "a1918b9134df1de940cd",
           "summary": "workshop에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
+        },
+        {
+          "entityId": "file:src/components/CodeWorldWorkspace.jsx",
+          "path": "src/components/CodeWorldWorkspace.jsx",
+          "fingerprint": "b09e107f6073becaf500",
+          "summary": "코드 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다."
         },
         {
           "entityId": "file:src/components/InvitePopover.jsx",
@@ -516,10 +555,12 @@ export const SOURCE_FEATURE_MANIFEST = {
         "file:shared/securityOverlay.js",
         "file:shared/sharePermissions.js",
         "file:shared/sourceAssetHierarchy.js",
+        "file:shared/sourceCodeWorldProjection.js",
         "file:shared/systemLayers.js",
         "file:shared/uiConstants.js",
         "file:shared/workflowTrustTopology.js",
         "file:shared/workshop.js",
+        "file:src/components/CodeWorldWorkspace.jsx",
         "file:src/components/InvitePopover.jsx",
         "file:src/components/ParticipantAvatar.jsx",
         "file:src/components/ScopedParticipants.jsx",
@@ -539,10 +580,12 @@ export const SOURCE_FEATURE_MANIFEST = {
         "shared/securityOverlay.js",
         "shared/sharePermissions.js",
         "shared/sourceAssetHierarchy.js",
+        "shared/sourceCodeWorldProjection.js",
         "shared/systemLayers.js",
         "shared/uiConstants.js",
         "shared/workflowTrustTopology.js",
         "shared/workshop.js",
+        "src/components/CodeWorldWorkspace.jsx",
         "src/components/InvitePopover.jsx",
         "src/components/ParticipantAvatar.jsx",
         "src/components/ScopedParticipants.jsx",
@@ -570,6 +613,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "targetEntityId": "map-web-app",
           "evidenceEntityIds": [
+            "file:src/components/CodeWorldWorkspace.jsx",
             "file:src/components/InvitePopover.jsx",
             "file:src/components/ParticipantAvatar.jsx",
             "file:src/components/ScopedParticipants.jsx",
@@ -656,7 +700,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "48c606042f48ff1c"
+      "fingerprint": "d5d4a99b740b7003"
     },
     {
       "key": "area:identity-profile",
@@ -896,7 +940,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/workflowCanvasSystemMap.js",
           "path": "shared/workflowCanvasSystemMap.js",
-          "fingerprint": "53f58539e325ef0ea240",
+          "fingerprint": "516094710e5ab23ea768",
           "summary": "Workflow Canvas 앱의 브라우저·서버·DB·저장소·배포 구조를 나타내는 기준 시스템 지도를 정의합니다."
         },
         {
@@ -1211,7 +1255,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "453d7db46a87803a"
+      "fingerprint": "76d08a924058b02a"
     },
     {
       "key": "area:source-code-twin",
@@ -1356,7 +1400,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/sourceModuleProposal.js",
           "path": "shared/sourceModuleProposal.js",
-          "fingerprint": "4f2204419bfcdac513b1",
+          "fingerprint": "782bb807b32cb6be4abb",
           "summary": "코드 브라우저에서 선택한 모듈 하나를 캔버스 코드 Asset 후보 제안으로 바꾸어 주어요."
         },
         {
@@ -1588,7 +1632,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "42170797edd05dfd"
+      "fingerprint": "74e07b08c99c3dc6"
     },
     {
       "key": "area:ai-integration",
@@ -2157,7 +2201,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:package.json",
           "path": "package.json",
-          "fingerprint": "f0f5aa8a4d79b7860bf0",
+          "fingerprint": "c39626b6a51053b1b46c",
           "summary": "개발 코드를 검사·빌드해 실제 웹 서비스로 실행할 설정과 명령을 정의합니다."
         },
         {
@@ -2185,7 +2229,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "66ba1069dbaf4e21"
+      "fingerprint": "d39253d6ab264714"
     },
     {
       "key": "area:testing-quality",
@@ -2252,7 +2296,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:scripts/test-mcp-logic.mjs",
           "path": "scripts/test-mcp-logic.mjs",
-          "fingerprint": "745cef391c781b701cd6",
+          "fingerprint": "80e89b7a1dfda87647ad",
           "summary": "mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
         },
         {
@@ -2282,8 +2326,20 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:scripts/test-source-code-parts.mjs",
           "path": "scripts/test-source-code-parts.mjs",
-          "fingerprint": "af370f3bd5e423a56754",
+          "fingerprint": "8c336bbbbb9fbc03a41c",
           "summary": "source code parts 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
+        },
+        {
+          "entityId": "file:scripts/test-source-code-world-workspace.mjs",
+          "path": "scripts/test-source-code-world-workspace.mjs",
+          "fingerprint": "9b423795d5909d63389c",
+          "summary": "source code world workspace 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
+        },
+        {
+          "entityId": "file:scripts/test-source-code-world.mjs",
+          "path": "scripts/test-source-code-world.mjs",
+          "fingerprint": "6ec5ce28238368f4462f",
+          "summary": "source code world 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
         },
         {
           "entityId": "file:scripts/test-source-editable-properties.mjs",
@@ -2330,7 +2386,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:scripts/test-system-layers.mjs",
           "path": "scripts/test-system-layers.mjs",
-          "fingerprint": "15a79a1f0abf3f784732",
+          "fingerprint": "dceaf8f270891e82040d",
           "summary": "system layers 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
         },
         {
@@ -2342,7 +2398,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:scripts/test-twin-build.mjs",
           "path": "scripts/test-twin-build.mjs",
-          "fingerprint": "9a87209f6f4c0d8a6774",
+          "fingerprint": "fb2a72b582b950e60fd7",
           "summary": "Asset 원장 정규형·마이그레이션·참조 무결성·대조 규칙을 검사합니다."
         },
         {
@@ -2379,6 +2435,8 @@ export const SOURCE_FEATURE_MANIFEST = {
         "file:scripts/test-security-boundaries.mjs",
         "file:scripts/test-security-overlay.mjs",
         "file:scripts/test-source-code-parts.mjs",
+        "file:scripts/test-source-code-world-workspace.mjs",
+        "file:scripts/test-source-code-world.mjs",
         "file:scripts/test-source-editable-properties.mjs",
         "file:scripts/test-source-feature-model.mjs",
         "file:scripts/test-source-functional-context.mjs",
@@ -2408,6 +2466,8 @@ export const SOURCE_FEATURE_MANIFEST = {
         "scripts/test-security-boundaries.mjs",
         "scripts/test-security-overlay.mjs",
         "scripts/test-source-code-parts.mjs",
+        "scripts/test-source-code-world-workspace.mjs",
+        "scripts/test-source-code-world.mjs",
         "scripts/test-source-editable-properties.mjs",
         "scripts/test-source-feature-model.mjs",
         "scripts/test-source-functional-context.mjs",
@@ -2424,7 +2484,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "af04187a33d579fd"
+      "fingerprint": "017436ec834797b1"
     },
     {
       "key": "area:project-foundation",
@@ -2479,13 +2539,25 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:docs/architecture/FOUNDRY_MODEL.md",
           "path": "docs/architecture/FOUNDRY_MODEL.md",
-          "fingerprint": "73e40a1c2b151025b4c4",
+          "fingerprint": "d430e9a521eff3167fea",
           "summary": "FOUNDRY_MODEL에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/architecture/LIVE_EDIT_OBSERVATION.md",
+          "path": "docs/architecture/LIVE_EDIT_OBSERVATION.md",
+          "fingerprint": "bc4a954f25fb05380e7b",
+          "summary": "LIVE_EDIT_OBSERVATION에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/architecture/SYSTEM_MAP_BLUEPRINT.md",
+          "path": "docs/architecture/SYSTEM_MAP_BLUEPRINT.md",
+          "fingerprint": "6ae958aeca505fe62684",
+          "summary": "SYSTEM_MAP_BLUEPRINT에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
         },
         {
           "entityId": "file:docs/architecture/WORKSHOP_BLUEPRINT.md",
           "path": "docs/architecture/WORKSHOP_BLUEPRINT.md",
-          "fingerprint": "5912e714ef85ebc45d7c",
+          "fingerprint": "dc2367ab300d3e5af5ed",
           "summary": "WORKSHOP_BLUEPRINT에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
         },
         {
@@ -2563,7 +2635,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:docs/MASTER.md",
           "path": "docs/MASTER.md",
-          "fingerprint": "db4b0392d9d5ea411e51",
+          "fingerprint": "cd57e46c93aa491add2b",
           "summary": "MASTER에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
         },
         {
@@ -2671,6 +2743,8 @@ export const SOURCE_FEATURE_MANIFEST = {
         "file:docs/architecture/evaluations/source-lens/SOURCE_LENS_FLOW_VISUALIZATION_EVALUATION.md",
         "file:docs/architecture/evaluations/source-lens/SOURCE_LENS_TREE_SITTER_EVALUATION.md",
         "file:docs/architecture/FOUNDRY_MODEL.md",
+        "file:docs/architecture/LIVE_EDIT_OBSERVATION.md",
+        "file:docs/architecture/SYSTEM_MAP_BLUEPRINT.md",
         "file:docs/architecture/WORKSHOP_BLUEPRINT.md",
         "file:docs/archive/handoffs/CODEX_HANDOFF_SOURCE_LENS_SL0_SL1_KO.md",
         "file:docs/archive/handoffs/SOURCE_LENS_SL2_HANDOFF_KO.md",
@@ -2710,6 +2784,8 @@ export const SOURCE_FEATURE_MANIFEST = {
         "docs/architecture/evaluations/source-lens/SOURCE_LENS_FLOW_VISUALIZATION_EVALUATION.md",
         "docs/architecture/evaluations/source-lens/SOURCE_LENS_TREE_SITTER_EVALUATION.md",
         "docs/architecture/FOUNDRY_MODEL.md",
+        "docs/architecture/LIVE_EDIT_OBSERVATION.md",
+        "docs/architecture/SYSTEM_MAP_BLUEPRINT.md",
         "docs/architecture/WORKSHOP_BLUEPRINT.md",
         "docs/archive/handoffs/CODEX_HANDOFF_SOURCE_LENS_SL0_SL1_KO.md",
         "docs/archive/handoffs/SOURCE_LENS_SL2_HANDOFF_KO.md",
@@ -2743,7 +2819,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "d23200711881edca"
+      "fingerprint": "2dd6f5cfc686e9fa"
     },
     {
       "key": "subsystem:canvas-workspace",
@@ -2762,7 +2838,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:src/App.jsx",
           "path": "src/App.jsx",
-          "fingerprint": "3518c7150762538ab773",
+          "fingerprint": "e1b307140827f26542aa",
           "summary": "캔버스 편집 화면 전체를 조율합니다. 노드·연결선 편집, 현재 캔버스, 공유 상태, 오른쪽 작업 창과 저장 동작을 서로 연결합니다."
         },
         {
@@ -2770,6 +2846,24 @@ export const SOURCE_FEATURE_MANIFEST = {
           "path": "src/components/CanvasTabs.jsx",
           "fingerprint": "5873ef7f7c009636aa87",
           "summary": "개인·공유 캔버스 목록과 현재 캔버스 전환 화면을 표시합니다."
+        },
+        {
+          "entityId": "file:src/components/CodeWorldScreen.css",
+          "path": "src/components/CodeWorldScreen.css",
+          "fingerprint": "c3a597bb6a6436e59a79",
+          "summary": "코드 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다."
+        },
+        {
+          "entityId": "file:src/components/CodeWorldScreen.jsx",
+          "path": "src/components/CodeWorldScreen.jsx",
+          "fingerprint": "63f8108a21f06d48f0dd",
+          "summary": "코드 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다."
+        },
+        {
+          "entityId": "file:src/components/CodeWorldWorkspace.css",
+          "path": "src/components/CodeWorldWorkspace.css",
+          "fingerprint": "57285e518b10f3894af2",
+          "summary": "코드 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다."
         },
         {
           "entityId": "file:src/components/FriendManager.jsx",
@@ -2786,7 +2880,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:src/components/Toolbar.jsx",
           "path": "src/components/Toolbar.jsx",
-          "fingerprint": "ea6ee7d94d97dbcb90eb",
+          "fingerprint": "6056f597cdffceb8b432",
           "summary": "노드 추가, 전체 보기, 되돌리기 같은 캔버스의 주요 명령을 모아 보여줍니다."
         },
         {
@@ -2811,6 +2905,9 @@ export const SOURCE_FEATURE_MANIFEST = {
       "evidenceEntityIds": [
         "file:src/App.jsx",
         "file:src/components/CanvasTabs.jsx",
+        "file:src/components/CodeWorldScreen.css",
+        "file:src/components/CodeWorldScreen.jsx",
+        "file:src/components/CodeWorldWorkspace.css",
         "file:src/components/FriendManager.jsx",
         "file:src/components/NodePalette.jsx",
         "file:src/components/Toolbar.jsx",
@@ -2821,6 +2918,9 @@ export const SOURCE_FEATURE_MANIFEST = {
       "evidencePaths": [
         "src/App.jsx",
         "src/components/CanvasTabs.jsx",
+        "src/components/CodeWorldScreen.css",
+        "src/components/CodeWorldScreen.jsx",
+        "src/components/CodeWorldWorkspace.css",
         "src/components/FriendManager.jsx",
         "src/components/NodePalette.jsx",
         "src/components/Toolbar.jsx",
@@ -2834,6 +2934,9 @@ export const SOURCE_FEATURE_MANIFEST = {
           "evidenceEntityIds": [
             "file:src/App.jsx",
             "file:src/components/CanvasTabs.jsx",
+            "file:src/components/CodeWorldScreen.css",
+            "file:src/components/CodeWorldScreen.jsx",
+            "file:src/components/CodeWorldWorkspace.css",
             "file:src/components/FriendManager.jsx",
             "file:src/components/NodePalette.jsx",
             "file:src/components/Toolbar.jsx",
@@ -2858,7 +2961,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "4ca030f4f84ec8ef"
+      "fingerprint": "a5f179b094334283"
     },
     {
       "key": "subsystem:canvas-elements",
@@ -3346,9 +3449,15 @@ export const SOURCE_FEATURE_MANIFEST = {
           "summary": "소스 코드 · Asset에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
         },
         {
+          "entityId": "file:shared/sourceCodeWorldProjection.js",
+          "path": "shared/sourceCodeWorldProjection.js",
+          "fingerprint": "7dfe96688db66b892019",
+          "summary": "소스 코드 · 코드에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
+        },
+        {
           "entityId": "file:shared/systemLayers.js",
           "path": "shared/systemLayers.js",
-          "fingerprint": "91d56e491b6735405f3e",
+          "fingerprint": "c2de6188f4438ea52906",
           "summary": "시스템에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
         },
         {
@@ -3368,6 +3477,12 @@ export const SOURCE_FEATURE_MANIFEST = {
           "path": "shared/workshop.js",
           "fingerprint": "a1918b9134df1de940cd",
           "summary": "workshop에 대해 브라우저와 서버가 함께 지켜야 할 공통 판단 규칙을 제공합니다."
+        },
+        {
+          "entityId": "file:src/components/CodeWorldWorkspace.jsx",
+          "path": "src/components/CodeWorldWorkspace.jsx",
+          "fingerprint": "b09e107f6073becaf500",
+          "summary": "코드 화면을 그리고 사용자의 클릭·입력 결과를 연결합니다."
         },
         {
           "entityId": "file:src/components/WorkshopBoard.jsx",
@@ -3407,10 +3522,12 @@ export const SOURCE_FEATURE_MANIFEST = {
         "file:shared/securityOverlay.js",
         "file:shared/sharePermissions.js",
         "file:shared/sourceAssetHierarchy.js",
+        "file:shared/sourceCodeWorldProjection.js",
         "file:shared/systemLayers.js",
         "file:shared/uiConstants.js",
         "file:shared/workflowTrustTopology.js",
         "file:shared/workshop.js",
+        "file:src/components/CodeWorldWorkspace.jsx",
         "file:src/components/WorkshopBoard.jsx",
         "file:src/lib/sharedCanvasApi.js",
         "file:src/lib/shares.js",
@@ -3424,10 +3541,12 @@ export const SOURCE_FEATURE_MANIFEST = {
         "shared/securityOverlay.js",
         "shared/sharePermissions.js",
         "shared/sourceAssetHierarchy.js",
+        "shared/sourceCodeWorldProjection.js",
         "shared/systemLayers.js",
         "shared/uiConstants.js",
         "shared/workflowTrustTopology.js",
         "shared/workshop.js",
+        "src/components/CodeWorldWorkspace.jsx",
         "src/components/WorkshopBoard.jsx",
         "src/lib/sharedCanvasApi.js",
         "src/lib/shares.js",
@@ -3444,6 +3563,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "targetEntityId": "map-web-app",
           "evidenceEntityIds": [
+            "file:src/components/CodeWorldWorkspace.jsx",
             "file:src/components/WorkshopBoard.jsx",
             "file:src/lib/sharedCanvasApi.js",
             "file:src/lib/shares.js",
@@ -3512,7 +3632,7 @@ export const SOURCE_FEATURE_MANIFEST = {
           ]
         }
       ],
-      "fingerprint": "d0e32d5c8ce4ead5"
+      "fingerprint": "333623157bc9624a"
     },
     {
       "key": "subsystem:identity-account",
@@ -3911,7 +4031,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/workflowCanvasSystemMap.js",
           "path": "shared/workflowCanvasSystemMap.js",
-          "fingerprint": "53f58539e325ef0ea240",
+          "fingerprint": "516094710e5ab23ea768",
           "summary": "Workflow Canvas 앱의 브라우저·서버·DB·저장소·배포 구조를 나타내는 기준 시스템 지도를 정의합니다."
         },
         {
@@ -3933,7 +4053,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "3542bec70b2ef4ec"
+      "fingerprint": "bb065f25a04d3da4"
     },
     {
       "key": "subsystem:twin-runtime",
@@ -4375,7 +4495,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:shared/sourceModuleProposal.js",
           "path": "shared/sourceModuleProposal.js",
-          "fingerprint": "4f2204419bfcdac513b1",
+          "fingerprint": "782bb807b32cb6be4abb",
           "summary": "코드 브라우저에서 선택한 모듈 하나를 캔버스 코드 Asset 후보 제안으로 바꾸어 주어요."
         },
         {
@@ -4506,7 +4626,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         }
       ],
       "dataAccess": [],
-      "fingerprint": "a19ab12d0a7923f3"
+      "fingerprint": "6798adfa33eff9ec"
     },
     {
       "key": "subsystem:source-browser-history",
@@ -5495,7 +5615,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:package.json",
           "path": "package.json",
-          "fingerprint": "f0f5aa8a4d79b7860bf0",
+          "fingerprint": "c39626b6a51053b1b46c",
           "summary": "개발 코드를 검사·빌드해 실제 웹 서비스로 실행할 설정과 명령을 정의합니다."
         },
         {
@@ -5523,7 +5643,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "ac84e7b55aa01787"
+      "fingerprint": "7f85158a20b51738"
     },
     {
       "key": "subsystem:source-tests",
@@ -5629,7 +5749,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:scripts/test-twin-build.mjs",
           "path": "scripts/test-twin-build.mjs",
-          "fingerprint": "9a87209f6f4c0d8a6774",
+          "fingerprint": "fb2a72b582b950e60fd7",
           "summary": "Asset 원장 정규형·마이그레이션·참조 무결성·대조 규칙을 검사합니다."
         },
         {
@@ -5657,7 +5777,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "8c84f28355c8c3f1"
+      "fingerprint": "f262ac3091e57dd6"
     },
     {
       "key": "subsystem:app-tests",
@@ -5706,7 +5826,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:scripts/test-mcp-logic.mjs",
           "path": "scripts/test-mcp-logic.mjs",
-          "fingerprint": "745cef391c781b701cd6",
+          "fingerprint": "80e89b7a1dfda87647ad",
           "summary": "mcp logic 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
         },
         {
@@ -5730,8 +5850,20 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:scripts/test-source-code-parts.mjs",
           "path": "scripts/test-source-code-parts.mjs",
-          "fingerprint": "af370f3bd5e423a56754",
+          "fingerprint": "8c336bbbbb9fbc03a41c",
           "summary": "source code parts 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
+        },
+        {
+          "entityId": "file:scripts/test-source-code-world-workspace.mjs",
+          "path": "scripts/test-source-code-world-workspace.mjs",
+          "fingerprint": "9b423795d5909d63389c",
+          "summary": "source code world workspace 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
+        },
+        {
+          "entityId": "file:scripts/test-source-code-world.mjs",
+          "path": "scripts/test-source-code-world.mjs",
+          "fingerprint": "6ec5ce28238368f4462f",
+          "summary": "source code world 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
         },
         {
           "entityId": "file:scripts/test-source-editable-properties.mjs",
@@ -5754,7 +5886,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:scripts/test-system-layers.mjs",
           "path": "scripts/test-system-layers.mjs",
-          "fingerprint": "15a79a1f0abf3f784732",
+          "fingerprint": "dceaf8f270891e82040d",
           "summary": "system layers 기능과 보호 규칙이 변경 뒤에도 유지되는지 자동으로 확인합니다."
         },
         {
@@ -5781,6 +5913,8 @@ export const SOURCE_FEATURE_MANIFEST = {
         "file:scripts/test-security-boundaries.mjs",
         "file:scripts/test-security-overlay.mjs",
         "file:scripts/test-source-code-parts.mjs",
+        "file:scripts/test-source-code-world-workspace.mjs",
+        "file:scripts/test-source-code-world.mjs",
         "file:scripts/test-source-editable-properties.mjs",
         "file:scripts/test-source-lens-engine.mjs",
         "file:scripts/test-sql-security.mjs",
@@ -5799,6 +5933,8 @@ export const SOURCE_FEATURE_MANIFEST = {
         "scripts/test-security-boundaries.mjs",
         "scripts/test-security-overlay.mjs",
         "scripts/test-source-code-parts.mjs",
+        "scripts/test-source-code-world-workspace.mjs",
+        "scripts/test-source-code-world.mjs",
         "scripts/test-source-editable-properties.mjs",
         "scripts/test-source-lens-engine.mjs",
         "scripts/test-sql-security.mjs",
@@ -5808,7 +5944,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "22a3fa0bea00aff0"
+      "fingerprint": "f0c68902db7c4019"
     },
     {
       "key": "subsystem:project-config",
@@ -5912,13 +6048,25 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:docs/architecture/FOUNDRY_MODEL.md",
           "path": "docs/architecture/FOUNDRY_MODEL.md",
-          "fingerprint": "73e40a1c2b151025b4c4",
+          "fingerprint": "d430e9a521eff3167fea",
           "summary": "FOUNDRY_MODEL에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/architecture/LIVE_EDIT_OBSERVATION.md",
+          "path": "docs/architecture/LIVE_EDIT_OBSERVATION.md",
+          "fingerprint": "bc4a954f25fb05380e7b",
+          "summary": "LIVE_EDIT_OBSERVATION에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
+        },
+        {
+          "entityId": "file:docs/architecture/SYSTEM_MAP_BLUEPRINT.md",
+          "path": "docs/architecture/SYSTEM_MAP_BLUEPRINT.md",
+          "fingerprint": "6ae958aeca505fe62684",
+          "summary": "SYSTEM_MAP_BLUEPRINT에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
         },
         {
           "entityId": "file:docs/architecture/WORKSHOP_BLUEPRINT.md",
           "path": "docs/architecture/WORKSHOP_BLUEPRINT.md",
-          "fingerprint": "5912e714ef85ebc45d7c",
+          "fingerprint": "dc2367ab300d3e5af5ed",
           "summary": "WORKSHOP_BLUEPRINT에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
         },
         {
@@ -5996,7 +6144,7 @@ export const SOURCE_FEATURE_MANIFEST = {
         {
           "entityId": "file:docs/MASTER.md",
           "path": "docs/MASTER.md",
-          "fingerprint": "db4b0392d9d5ea411e51",
+          "fingerprint": "cd57e46c93aa491add2b",
           "summary": "MASTER에 필요한 프로젝트 구조와 참고 정보를 제공합니다."
         },
         {
@@ -6085,6 +6233,8 @@ export const SOURCE_FEATURE_MANIFEST = {
         "file:docs/architecture/evaluations/source-lens/SOURCE_LENS_FLOW_VISUALIZATION_EVALUATION.md",
         "file:docs/architecture/evaluations/source-lens/SOURCE_LENS_TREE_SITTER_EVALUATION.md",
         "file:docs/architecture/FOUNDRY_MODEL.md",
+        "file:docs/architecture/LIVE_EDIT_OBSERVATION.md",
+        "file:docs/architecture/SYSTEM_MAP_BLUEPRINT.md",
         "file:docs/architecture/WORKSHOP_BLUEPRINT.md",
         "file:docs/archive/handoffs/CODEX_HANDOFF_SOURCE_LENS_SL0_SL1_KO.md",
         "file:docs/archive/handoffs/SOURCE_LENS_SL2_HANDOFF_KO.md",
@@ -6120,6 +6270,8 @@ export const SOURCE_FEATURE_MANIFEST = {
         "docs/architecture/evaluations/source-lens/SOURCE_LENS_FLOW_VISUALIZATION_EVALUATION.md",
         "docs/architecture/evaluations/source-lens/SOURCE_LENS_TREE_SITTER_EVALUATION.md",
         "docs/architecture/FOUNDRY_MODEL.md",
+        "docs/architecture/LIVE_EDIT_OBSERVATION.md",
+        "docs/architecture/SYSTEM_MAP_BLUEPRINT.md",
         "docs/architecture/WORKSHOP_BLUEPRINT.md",
         "docs/archive/handoffs/CODEX_HANDOFF_SOURCE_LENS_SL0_SL1_KO.md",
         "docs/archive/handoffs/SOURCE_LENS_SL2_HANDOFF_KO.md",
@@ -6150,7 +6302,7 @@ export const SOURCE_FEATURE_MANIFEST = {
       ],
       "implementations": [],
       "dataAccess": [],
-      "fingerprint": "af4cdb0fcbfcab51"
+      "fingerprint": "2772335169b1ca5a"
     }
   ],
   "summary": {
@@ -6159,5 +6311,5 @@ export const SOURCE_FEATURE_MANIFEST = {
     "attributes": 22,
     "ineligible": 0
   },
-  "fingerprint": "2c4df42c4cf3a79a"
+  "fingerprint": "f33f8083e2d6956e"
 }

@@ -44,7 +44,7 @@ export default function Toolbar({
           {paletteOpen && <NodePalette mobile onClose={closePalette} onPick={handlePick} />}
         </div>
         <ViewSelector {...viewProps} />
-        {systemLayers.length > 0 && <LayerSwitcher {...layerProps} />}
+        {(systemLayers.length > 0 || onCreateSystemLayer) && <LayerSwitcher {...layerProps} />}
         {securityOverlayAvailable && (
           <SecurityOverlayButton
             active={securityOverlayEnabled}
@@ -82,7 +82,7 @@ export default function Toolbar({
       </div>
       <div style={{ width: 1, background: '#ffffff18', margin: '0 4px' }} />
       <ViewSelector {...viewProps} />
-      {systemLayers.length > 0 && (
+      {(systemLayers.length > 0 || onCreateSystemLayer) && (
         <>
           <div style={{ width: 1, background: '#ffffff18', margin: '0 4px' }} />
           <LayerSwitcher {...layerProps} />
@@ -161,13 +161,9 @@ function ViewSelector({ views, currentViewId, onSelectView, onRenameView, onDele
         <div style={{ padding: '6px 12px', color: '#555', fontSize: 11 }}>저장된 뷰 없음</div>
       )}
 
-      {views.map((v) => {
-        // Only the official L1-L4 presets are name/delete locked; custom
-        // (user-created) layers use the ':custom:' id segment and stay editable.
-        const fixedLayerView = v.viewKind === 'system-layer' && !v.id.includes(':custom:')
-        return (
+      {views.map((v) => (
         <div key={v.id} style={{ display: 'flex', alignItems: 'center', gap: 2, padding: '1px 2px' }}>
-          {renameId === v.id && !fixedLayerView ? (
+          {renameId === v.id ? (
             <input
               autoFocus
               value={renameValue}
@@ -189,22 +185,17 @@ function ViewSelector({ views, currentViewId, onSelectView, onRenameView, onDele
           ) : (
             <>
               <button onClick={() => pick(v.id)} style={rowBtn(currentViewId === v.id)}>
-                <span style={{ fontSize: 11 }}>{fixedLayerView ? v.systemLayer : '⊡'}</span>
+                <span style={{ fontSize: 11 }}>{v.viewKind === 'system-layer' ? '층' : '⊡'}</span>
                 <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.name}</span>
               </button>
-              {!fixedLayerView && (
-                <>
-                  <SmallIcon title="이름 변경" hoverColor="#aaa"
-                    onClick={(e) => { e.stopPropagation(); setRenameId(v.id); setRenameValue(v.name) }}>✎</SmallIcon>
-                  <SmallIcon title="삭제" hoverColor="#ef4444"
-                    onClick={(e) => { e.stopPropagation(); onDeleteView(v.id) }}>✕</SmallIcon>
-                </>
-              )}
+              <SmallIcon title="이름 변경" hoverColor="#aaa"
+                onClick={(e) => { e.stopPropagation(); setRenameId(v.id); setRenameValue(v.name) }}>✎</SmallIcon>
+              <SmallIcon title="삭제" hoverColor="#ef4444"
+                onClick={(e) => { e.stopPropagation(); onDeleteView(v.id) }}>✕</SmallIcon>
             </>
           )}
         </div>
-        )
-      })}
+      ))}
     </div>
   )
 
@@ -319,7 +310,7 @@ function LayerSwitcher({ layers, activeLayer, onSelectLayer, onCreateLayer, mobi
             style={{
               minWidth: mobile ? 27 : 31,
               height: mobile ? 31 : 29,
-              padding: layer.official ? 0 : '0 6px',
+              padding: '0 6px',
               display: 'grid',
               placeItems: 'center',
               border: `1px solid ${active ? layer.color : `${layer.color}55`}`,

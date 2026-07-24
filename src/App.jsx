@@ -33,6 +33,7 @@ import InvitePopover from './components/InvitePopover'
 import NotesPanel from './components/NotesPanel'
 import DigitalTwinReviewPanel from './components/DigitalTwinReviewPanel'
 import SourceTwinPanel from './components/SourceTwinPanel'
+import CodeWorldWorkspace from './components/CodeWorldWorkspace'
 import SecurityOverlayLegend from './components/SecurityOverlayLegend'
 import EdgeRelationEditor from './components/EdgeRelationEditor'
 import { WorkshopBoard } from './components/WorkshopBoard'
@@ -97,12 +98,9 @@ import {
   createCustomSystemLayerView,
   createSystemLayerProjection,
   effectiveSystemLayerForNode,
-  ensureSystemLayerViews,
-  isCanvasAnnotationNode,
-  isCustomSystemLayerView,
   isSystemLayerView,
-  isSystemMapTemplateCanvas,
   normalizeSystemLayerId,
+  pruneLegacyOfficialSystemLayerViews,
   removeSystemLayerFromNodes,
   systemLayerOptionsFromViews,
   systemLayerFromView,
@@ -116,6 +114,7 @@ import {
 import {
   WORKFLOW_GIT_SYNC_EDGE_ID,
   workflowSourceTwinEntryForEdgeOperation,
+  workflowSourceTwinEntryForNode,
   workflowSourceTwinEntryForPart,
 } from '../shared/workflowSourceTwinCanvas.js'
 import { detachSystemPartBindings, normalizeSystemParts } from '../shared/systemPartOntology.js'
@@ -548,6 +547,12 @@ const { list: initCanvasList, activeId: initActiveId } = initCanvases(EMPTY_CANV
 const initData = parseSharedId(initActiveId)
   ? { nodes: [], edges: [] }
   : (loadCanvasData(initActiveId) ?? { nodes: [], edges: [] })
+const DEV_CODE_WORLD_PREVIEW = import.meta.env.DEV
+  && typeof window !== 'undefined'
+  && new URLSearchParams(window.location.search).get('code-world') === '1'
+const INITIAL_SOURCE_TWIN_ENTRY = DEV_CODE_WORLD_PREVIEW
+  ? workflowSourceTwinEntryForNode('map-local-repo')
+  : null
 
 // ── App ─────────────────────────────────────────────────────────────────────
 export default function App() {
@@ -562,7 +567,7 @@ export default function App() {
   const [renamingTypeIdx, setRenamingTypeIdx] = useState(null)
   const [notesPanel, setNotesPanel] = useState(null) // { type: 'stage'|'memo'|'content'|'system'|'intent' } | null
   const [twinReviewOpen, setTwinReviewOpen] = useState(false)
-  const [sourceTwinEntry, setSourceTwinEntry] = useState(null)
+  const [sourceTwinEntry, setSourceTwinEntry] = useState(INITIAL_SOURCE_TWIN_ENTRY)
   const [gitSyncEdgeOperation, setGitSyncEdgeOperation] = useState(IDLE_GIT_SYNC_EDGE_OPERATION)
   const [gitSyncEdgeDecision, setGitSyncEdgeDecision] = useState(null)
   const [digitalTwinReview, setDigitalTwinReview] = useState(null)
@@ -604,7 +609,12 @@ export default function App() {
   }, [activeCanvasId])
 
   // Saved views (per canvas): [{ id, name, bounds: {x,y,width,height} }]
-  const [views, setViews] = useState(initData.views ?? [])
+  const [views, setViewsState] = useState(() => pruneLegacyOfficialSystemLayerViews(initData.views ?? []))
+  const setViews = useCallback((next) => {
+    setViewsState((current) => pruneLegacyOfficialSystemLayerViews(
+      typeof next === 'function' ? next(current) : next,
+    ))
+  }, [])
   const [currentViewId, setCurrentViewId] = useState(null) // view shown in the toolbar selector
   const currentView = views.find((view) => view.id === currentViewId) ?? null
   const activeSystemLayer = systemLayerFromView(currentView)
@@ -624,12 +634,6 @@ export default function App() {
   // stay unassigned (visible on every layer, legacy-compatible).
   const annotationCreationLayer = systemLayersEnabled ? activeSystemLayer : null
 
-  // Only the self system map template gets the official L1-L4 preset backfill.
-  // Generic canvases enable layers solely through user-created layer views.
-  useEffect(() => {
-    if (!isSystemMapTemplateCanvas(nodes)) return
-    setViews((current) => ensureSystemLayerViews(current))
-  }, [nodes, views])
   useEffect(() => {
     if (!securityOverlayAvailable) setSecurityOverlayEnabled(false)
   }, [securityOverlayAvailable])
@@ -2472,7 +2476,7 @@ export default function App() {
 
   useEffect(() => {
     setDigitalTwinReview(null)
-    setSourceTwinEntry(null)
+    setSourceTwinEntry(DEV_CODE_WORLD_PREVIEW ? INITIAL_SOURCE_TWIN_ENTRY : null)
     setTwinProposalPreview(null)
     setTwinProposalStatus(null)
   }, [activeCanvasId])
@@ -4035,6 +4039,14 @@ export default function App() {
     setSourceTwinEntry(entry)
   }, [])
 
+  const openCodeWorldFromNode = useCallback((event, node) => {
+    if (event.defaultPrevented || perm.role !== 'owner' || !user) return
+    const entry = workflowSourceTwinEntryForNode(node?.id)
+    if (entry?.view === 'structure' || entry?.view === 'github-code') {
+      openSourceTwinFromNode(entry)
+    }
+  }, [openSourceTwinFromNode, perm.role, user])
+
   const updateLocalGitOperationState = useCallback((next) => {
     const status = edgeOperationStatusDefinition(next?.status).id
     const action = String(next?.action ?? '')
@@ -4214,37 +4226,28 @@ export default function App() {
     recallView(v)
   }, [views, fitView, recallView])
 
-  // Official L1-L4 presets are name-locked; custom (user-created) layers and
-  // ordinary saved views can be renamed and deleted.
-  const isLockedView = useCallback((v) => isSystemLayerView(v) && !isCustomSystemLayerView(v), [])
-
   const renameView = useCallback((id, name) => {
     if (!name.trim()) return
-    setViews((prev) => prev.map((v) => (
-      v.id === id && !isLockedView(v) ? { ...v, name: name.trim() } : v
-    )))
-  }, [isLockedView])
+    setViews((prev) => prev.map((v) => (v.id === id ? { ...v, name: name.trim() } : v)))
+  }, [setViews])
 
   const deleteView = useCallback((id) => {
     const target = views.find((view) => view.id === id)
-    if (!target || isLockedView(target)) return
-    // Deleting a custom layer clears its overrides so nodes fall back to their
-    // derived default or the everywhere-visible legacy mode, not a dead id.
-    if (isCustomSystemLayerView(target)) {
+    if (!target) return
+    // Deleting a layer clears its node assignments so no dead layer id remains.
+    if (isSystemLayerView(target)) {
       const layerId = systemLayerFromView(target)
       setNodes((current) => removeSystemLayerFromNodes(current, layerId))
     }
     setViews((prev) => prev.filter((v) => v.id !== id))
     setCurrentViewId((cur) => (cur === id ? null : cur))
-  }, [views, isLockedView, setNodes])
+  }, [views, setNodes, setViews])
 
   const createSystemLayer = useCallback((name) => {
     const view = createCustomSystemLayerView(name)
     if (!view) return
     setViews((prev) => [...prev, view])
-    setCurrentViewId(view.id)
-    recallView(view)
-  }, [recallView])
+  }, [setViews])
 
   const selectSystemLayer = useCallback((layerId) => {
     const normalized = normalizeSystemLayerId(layerId)
@@ -4491,16 +4494,12 @@ export default function App() {
     && ctxNodes.length > 0
     && ctxNodes.every((node) => isNodeStructureEditable(node.id))
   const ctxSystemLayers = new Set(ctxNodes.map(effectiveSystemLayerForNode).filter(Boolean))
-  const ctxCanUseAutomaticLayer = ctxNodes.length > 0 && ctxNodes.every((node) => (
-    !isCanvasAnnotationNode(node)
-    && !!effectiveSystemLayerForNode({ ...node, data: withSystemLayerOverride(node.data, null) })
-  ))
+  const ctxCanClearSystemLayer = ctxNodes.some((node) => !!effectiveSystemLayerForNode(node))
   const changeContextSystemLayer = (layerId) => {
     if (!ctxCanChangeSystemLayer) return
     const ids = new Set(ctxNodes.map((node) => node.id))
     setNodes((current) => current.map((node) => {
       if (!ids.has(node.id) || !isNodeStructureEditable(node.id)) return node
-      if (!layerId && isCanvasAnnotationNode(node)) return node
       return { ...node, data: sanitizeNodeData(withSystemLayerOverride(node.data, layerId)) }
     }))
     closeContext()
@@ -4542,6 +4541,9 @@ export default function App() {
     })
     closeContext()
   }
+  const codeWorldOpen = !!sourceTwinEntry
+    && sourceTwinEntry.focus !== 'git-sync'
+    && ['structure', 'github-code'].includes(sourceTwinEntry.view)
 
   return (
     <div
@@ -4593,7 +4595,7 @@ export default function App() {
         onSelectView={selectView}
         onRenameView={renameView}
         onDeleteView={deleteView}
-        systemLayers={systemLayersEnabled ? systemLayerOptions : []}
+        systemLayers={systemLayerOptions}
         activeSystemLayer={activeSystemLayer}
         onSelectSystemLayer={selectSystemLayer}
         onCreateSystemLayer={canEditFullCanvas ? createSystemLayer : null}
@@ -4961,6 +4963,7 @@ export default function App() {
         onNodeDrag={onNodeDrag}
         onNodeDragStop={onNodeDragStop}
         onNodeClick={onNodeClick}
+        onNodeDoubleClick={openCodeWorldFromNode}
         onInit={setRfInstance}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
@@ -5207,10 +5210,10 @@ export default function App() {
                   onClick={() => changeContextSystemLayer(layer.id)}
                 />
               ))}
-              {ctxCanUseAutomaticLayer && (
+              {ctxCanClearSystemLayer && (
                 <ContextItem
-                  icon="↺"
-                  label="결정적 기본값 사용"
+                  icon="⊘"
+                  label="층 지정 해제"
                   color="#8b94a7"
                   onClick={() => changeContextSystemLayer(null)}
                 />
@@ -5399,7 +5402,16 @@ export default function App() {
           onApplyProposal={applyDigitalTwinProposal}
         />
       )}
-      {sourceTwinEntry && digitalTwinReview && perm.role === 'owner' && (
+      {codeWorldOpen && perm.role === 'owner' && (user || DEV_CODE_WORLD_PREVIEW) && (
+        <CodeWorldWorkspace
+          entry={sourceTwinEntry}
+          onBack={closeSourceTwin}
+          onOpenSourceTwin={openSourceTwinFromNode}
+          onMaterializeSourceModule={queueSourceModuleMaterialization}
+          canMaterialize={!!digitalTwinReview}
+        />
+      )}
+      {sourceTwinEntry && !codeWorldOpen && digitalTwinReview && perm.role === 'owner' && (
         <SourceTwinPanel
           entry={sourceTwinEntry}
           side={notesSide}

@@ -9,8 +9,8 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
     "profileId": "workflow-canvas",
     "profileVersion": "0.9.0"
   },
-  "sourceEvidenceFingerprint": "944cfbc1e5d8d28f",
-  "documentFingerprint": "1e90f7091913293f",
+  "sourceEvidenceFingerprint": "8898d6c2b2a8aa9c",
+  "documentFingerprint": "0ca632e25bc95ffa",
   "documents": [
     {
       "path": "README.md",
@@ -23,7 +23,7 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
     {
       "path": "docs/MASTER.md",
       "kind": "planning",
-      "fingerprint": "81ca494986284e60",
+      "fingerprint": "72fdb69e70ba18be",
       "freshness": "changed",
       "extractedTerms": 16,
       "used": true
@@ -48,9 +48,9 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
       "path": "docs/twin/README.md",
       "kind": "readme",
       "fingerprint": "421e082734e5b453",
-      "freshness": "changed",
+      "freshness": "possibly-stale",
       "extractedTerms": 18,
-      "used": true
+      "used": false
     }
   ],
   "vocabulary": [
@@ -67,10 +67,10 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
         {
           "ref": "source:docs/MASTER.md#L47",
           "kind": "document-heading",
-          "fingerprint": "81ca494986284e60"
+          "fingerprint": "72fdb69e70ba18be"
         }
       ],
-      "evidenceFingerprint": "2aeef9f0232983b4",
+      "evidenceFingerprint": "dde5067ff18798f9",
       "reusedFromPrevious": false
     },
     {
@@ -90,7 +90,7 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
         }
       ],
       "evidenceFingerprint": "8263c1abee944ae3",
-      "reusedFromPrevious": false
+      "reusedFromPrevious": true
     },
     {
       "id": "functional-context:d527504167f47bba",
@@ -136,7 +136,7 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
         }
       ],
       "evidenceFingerprint": "01a85566cdbced49",
-      "reusedFromPrevious": false
+      "reusedFromPrevious": true
     },
     {
       "id": "functional-context:a67f74e99f0914e0",
@@ -155,7 +155,7 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
         }
       ],
       "evidenceFingerprint": "f863e25b70831721",
-      "reusedFromPrevious": false
+      "reusedFromPrevious": true
     },
     {
       "id": "functional-context:a78410f9cc9cd238",
@@ -184,7 +184,7 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
         }
       ],
       "evidenceFingerprint": "a71ea87ec279cfd7",
-      "reusedFromPrevious": false
+      "reusedFromPrevious": true
     },
     {
       "id": "functional-context:c7045363d715452c",
@@ -203,7 +203,7 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
         }
       ],
       "evidenceFingerprint": "fdf3dbd05a4f6f02",
-      "reusedFromPrevious": false
+      "reusedFromPrevious": true
     },
     {
       "id": "functional-context:a737fd4ca5f26c4b",
@@ -222,7 +222,7 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
         }
       ],
       "evidenceFingerprint": "0222a858bc85d310",
-      "reusedFromPrevious": false
+      "reusedFromPrevious": true
     },
     {
       "id": "functional-context:7dba1a414ead17a0",
@@ -257,7 +257,7 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
         }
       ],
       "evidenceFingerprint": "a4a5e3636ea1313a",
-      "reusedFromPrevious": false
+      "reusedFromPrevious": true
     },
     {
       "id": "functional-context:a2f7d11f5b21ef2b",
@@ -276,25 +276,68 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
         }
       ],
       "evidenceFingerprint": "567ef613d3d83e25",
-      "reusedFromPrevious": false
+      "reusedFromPrevious": true
     },
     {
-      "id": "functional-context:8722bc5476320af0",
-      "label": "Asset 원장 관련 문서 안내서",
-      "normalized": "asset 원장 관련 문서 안내서",
-      "confidence": "medium",
-      "verification": "document-evidence",
+      "id": "functional-context:96688df413d7bc0f",
+      "label": "api-route",
+      "normalized": "api route",
+      "confidence": "high",
+      "verification": "source-evidence",
       "sourceKinds": [
-        "document-heading"
+        "ui-text"
       ],
       "evidence": [
         {
-          "ref": "source:docs/twin/README.md#L1",
-          "kind": "document-heading",
-          "fingerprint": "421e082734e5b453"
+          "ref": "source:src/components/SourceTwinPanel.jsx#L348",
+          "kind": "ui-text",
+          "fingerprint": "9c48cae2b232cc030120"
         }
       ],
-      "evidenceFingerprint": "bb024581f4954b9b",
+      "evidenceFingerprint": "567ef613d3d83e25",
+      "reusedFromPrevious": false
+    },
+    {
+      "id": "functional-context:d7243ae39abd8974",
+      "label": "archived",
+      "normalized": "archived",
+      "confidence": "high",
+      "verification": "source-evidence",
+      "sourceKinds": [
+        "ui-text"
+      ],
+      "evidence": [
+        {
+          "ref": "source:src/components/WorkshopBoard.jsx#L630",
+          "kind": "ui-text",
+          "fingerprint": "5db83bf520ace8d567ce"
+        },
+        {
+          "ref": "source:src/components/WorkshopBoard.jsx#L632",
+          "kind": "ui-text",
+          "fingerprint": "5db83bf520ace8d567ce"
+        }
+      ],
+      "evidenceFingerprint": "774370e356a3f098",
+      "reusedFromPrevious": false
+    },
+    {
+      "id": "functional-context:89273288ac6a96e2",
+      "label": "Asset Core",
+      "normalized": "asset core",
+      "confidence": "high",
+      "verification": "source-evidence",
+      "sourceKinds": [
+        "profile-subsystem"
+      ],
+      "evidence": [
+        {
+          "ref": "profile:workflow-canvas@0.9.0",
+          "kind": "profile-subsystem",
+          "fingerprint": "0.9.0"
+        }
+      ],
+      "evidenceFingerprint": "a5fbd7742403ede9",
       "reusedFromPrevious": false
     },
     {
@@ -410,7 +453,7 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
         {
           "ref": "source:shared/workflowCanvasSystemMap.js#L1",
           "kind": "feature-model",
-          "fingerprint": "53f58539e325ef0ea240"
+          "fingerprint": "516094710e5ab23ea768"
         },
         {
           "ref": "source:shared/workflowSystemMapRepair.js#L1",
@@ -423,8 +466,8 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
           "fingerprint": "0.9.0"
         }
       ],
-      "evidenceFingerprint": "ad6cdb0f513006df",
-      "reusedFromPrevious": true
+      "evidenceFingerprint": "21b2afcd1e3636db",
+      "reusedFromPrevious": false
     },
     {
       "id": "functional-context:053ae2fc0b738451",
@@ -434,7 +477,8 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
       "verification": "source-evidence",
       "sourceKinds": [
         "feature-model",
-        "profile-subsystem"
+        "profile-subsystem",
+        "ui-text"
       ],
       "evidence": [
         {
@@ -451,10 +495,15 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
           "ref": "profile:workflow-canvas@0.9.0",
           "kind": "profile-subsystem",
           "fingerprint": "0.9.0"
+        },
+        {
+          "ref": "source:src/components/CodeWorldScreen.jsx#L267",
+          "kind": "ui-text",
+          "fingerprint": "63f8108a21f06d48f0dd"
         }
       ],
-      "evidenceFingerprint": "89e8b70d8cba4b91",
-      "reusedFromPrevious": true
+      "evidenceFingerprint": "8ecf99170ff56de2",
+      "reusedFromPrevious": false
     },
     {
       "id": "functional-context:1caafa9293cb2cfd",
@@ -500,7 +549,7 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
         }
       ],
       "evidenceFingerprint": "198eb298e4a0390c",
-      "reusedFromPrevious": false
+      "reusedFromPrevious": true
     },
     {
       "id": "functional-context:5a21dba052252960",
@@ -556,7 +605,7 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
         {
           "ref": "source:docs/MASTER.md#L1",
           "kind": "document-heading",
-          "fingerprint": "81ca494986284e60"
+          "fingerprint": "72fdb69e70ba18be"
         },
         {
           "ref": "source:src/components/SourceTwinPanel.jsx#L824",
@@ -564,7 +613,7 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
           "fingerprint": "9c48cae2b232cc030120"
         }
       ],
-      "evidenceFingerprint": "202a8ed1e57d9fc2",
+      "evidenceFingerprint": "9bbdc04a0d4ef4fb",
       "reusedFromPrevious": false
     },
     {
@@ -590,7 +639,7 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
         }
       ],
       "evidenceFingerprint": "b6ada2354b6ee88f",
-      "reusedFromPrevious": false
+      "reusedFromPrevious": true
     },
     {
       "id": "functional-context:c97b7c64979c83d8",
@@ -820,12 +869,12 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
           "fingerprint": "0.9.0"
         },
         {
-          "ref": "source:src/App.jsx#L5052",
+          "ref": "source:src/App.jsx#L5055",
           "kind": "ui-text",
-          "fingerprint": "3518c7150762538ab773"
+          "fingerprint": "e1b307140827f26542aa"
         }
       ],
-      "evidenceFingerprint": "4a0c834950562cd4",
+      "evidenceFingerprint": "25d370998417d4de",
       "reusedFromPrevious": false
     },
     {
@@ -952,44 +1001,6 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
       ],
       "evidenceFingerprint": "ab9c93ff617a6dac",
       "reusedFromPrevious": true
-    },
-    {
-      "id": "functional-context:ed2ada635a9a9b48",
-      "label": "문서 범위",
-      "normalized": "문서 범위",
-      "confidence": "medium",
-      "verification": "document-evidence",
-      "sourceKinds": [
-        "document-heading"
-      ],
-      "evidence": [
-        {
-          "ref": "source:docs/twin/README.md#L3",
-          "kind": "document-heading",
-          "fingerprint": "421e082734e5b453"
-        }
-      ],
-      "evidenceFingerprint": "16c76ae7d5ee622d",
-      "reusedFromPrevious": false
-    },
-    {
-      "id": "functional-context:02f60e30cce02993",
-      "label": "문서 책임 지도",
-      "normalized": "문서 책임 지도",
-      "confidence": "medium",
-      "verification": "document-evidence",
-      "sourceKinds": [
-        "document-heading"
-      ],
-      "evidence": [
-        {
-          "ref": "source:docs/twin/README.md#L14",
-          "kind": "document-heading",
-          "fingerprint": "421e082734e5b453"
-        }
-      ],
-      "evidenceFingerprint": "2ba3885b3a123371",
-      "reusedFromPrevious": false
     },
     {
       "id": "functional-context:ed648442922581e7",
@@ -1395,7 +1406,7 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
         }
       ],
       "evidenceFingerprint": "a5fbd7742403ede9",
-      "reusedFromPrevious": false
+      "reusedFromPrevious": true
     },
     {
       "id": "functional-context:ad66c87a0b5e8a78",
@@ -1450,10 +1461,10 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
         {
           "ref": "source:docs/MASTER.md#L20",
           "kind": "document-heading",
-          "fingerprint": "81ca494986284e60"
+          "fingerprint": "72fdb69e70ba18be"
         }
       ],
-      "evidenceFingerprint": "0b9cd6f15f7cbbf9",
+      "evidenceFingerprint": "e8e7cf9ab401fd78",
       "reusedFromPrevious": false
     },
     {
@@ -1524,9 +1535,9 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
           "fingerprint": "0.9.0"
         },
         {
-          "ref": "source:src/App.jsx#L4800",
+          "ref": "source:src/App.jsx#L4802",
           "kind": "ui-text",
-          "fingerprint": "3518c7150762538ab773"
+          "fingerprint": "e1b307140827f26542aa"
         },
         {
           "ref": "source:src/components/ScopedParticipants.jsx#L101",
@@ -1534,7 +1545,7 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
           "fingerprint": "913a3f211bec0858f918"
         }
       ],
-      "evidenceFingerprint": "6708117b3e9c0065",
+      "evidenceFingerprint": "0188978239822800",
       "reusedFromPrevious": false
     },
     {
@@ -1589,7 +1600,7 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
         {
           "ref": "source:src/App.jsx#L1",
           "kind": "feature-model",
-          "fingerprint": "3518c7150762538ab773"
+          "fingerprint": "e1b307140827f26542aa"
         },
         {
           "ref": "source:src/components/CanvasTabs.jsx#L1",
@@ -1597,14 +1608,14 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
           "fingerprint": "5873ef7f7c009636aa87"
         },
         {
-          "ref": "source:src/components/FriendManager.jsx#L1",
+          "ref": "source:src/components/CodeWorldScreen.css#L1",
           "kind": "feature-model",
-          "fingerprint": "275c07446c9f82b9dcf1"
+          "fingerprint": "c3a597bb6a6436e59a79"
         },
         {
-          "ref": "source:src/components/NodePalette.jsx#L1",
+          "ref": "source:src/components/CodeWorldScreen.jsx#L1",
           "kind": "feature-model",
-          "fingerprint": "30642800e15400d67bda"
+          "fingerprint": "63f8108a21f06d48f0dd"
         },
         {
           "ref": "profile:workflow-canvas@0.9.0",
@@ -1612,7 +1623,7 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
           "fingerprint": "0.9.0"
         }
       ],
-      "evidenceFingerprint": "ea08c9bd2cb52c17",
+      "evidenceFingerprint": "3bf7b751bb0d4542",
       "reusedFromPrevious": false
     },
     {
@@ -1629,7 +1640,7 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
         {
           "ref": "source:src/App.jsx#L1",
           "kind": "feature-model",
-          "fingerprint": "3518c7150762538ab773"
+          "fingerprint": "e1b307140827f26542aa"
         },
         {
           "ref": "source:src/components/CanvasTabs.jsx#L1",
@@ -1637,14 +1648,14 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
           "fingerprint": "5873ef7f7c009636aa87"
         },
         {
-          "ref": "source:src/components/EdgeRelationEditor.jsx#L1",
+          "ref": "source:src/components/CodeWorldScreen.css#L1",
           "kind": "feature-model",
-          "fingerprint": "dbb0f9b5387be396ff0f"
+          "fingerprint": "c3a597bb6a6436e59a79"
         },
         {
-          "ref": "source:src/components/FriendManager.jsx#L1",
+          "ref": "source:src/components/CodeWorldScreen.jsx#L1",
           "kind": "feature-model",
-          "fingerprint": "275c07446c9f82b9dcf1"
+          "fingerprint": "63f8108a21f06d48f0dd"
         },
         {
           "ref": "profile:workflow-canvas@0.9.0",
@@ -1652,7 +1663,7 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
           "fingerprint": "0.9.0"
         }
       ],
-      "evidenceFingerprint": "92666f2d2d53d08a",
+      "evidenceFingerprint": "153501c988bf4631",
       "reusedFromPrevious": false
     },
     {
@@ -1881,10 +1892,10 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
         {
           "ref": "source:docs/MASTER.md#L42",
           "kind": "document-heading",
-          "fingerprint": "81ca494986284e60"
+          "fingerprint": "72fdb69e70ba18be"
         }
       ],
-      "evidenceFingerprint": "4cf217dd7afd6c31",
+      "evidenceFingerprint": "0fc1c0cace702d6c",
       "reusedFromPrevious": false
     },
     {
@@ -1923,7 +1934,7 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
         }
       ],
       "evidenceFingerprint": "a5fbd7742403ede9",
-      "reusedFromPrevious": false
+      "reusedFromPrevious": true
     }
   ],
   "diagnostics": [
@@ -1934,23 +1945,24 @@ export const SOURCE_FUNCTIONAL_CONTEXT_MANIFEST = Object.freeze(
       "paths": [
         "README.md",
         "docs/README.md",
-        "docs/product/PRODUCT_CATALOG.md"
+        "docs/product/PRODUCT_CATALOG.md",
+        "docs/twin/README.md"
       ]
     }
   ],
   "summary": {
     "documents": 5,
-    "usedDocuments": 2,
-    "possiblyStaleDocuments": 3,
+    "usedDocuments": 1,
+    "possiblyStaleDocuments": 4,
     "vocabularyTerms": 64,
-    "sourceVerifiedTerms": 58,
-    "reusedTerms": 41
+    "sourceVerifiedTerms": 61,
+    "reusedTerms": 51
   },
-  "fingerprint": "f4561f6518fe3a53",
+  "fingerprint": "3cd6aaa54b33f411",
   "reuse": {
-    "previousPackFingerprint": "f05b5eaa98b3c3fa",
-    "reusedTerms": 41,
-    "invalidatedTerms": 23
+    "previousPackFingerprint": "f4561f6518fe3a53",
+    "reusedTerms": 51,
+    "invalidatedTerms": 13
   }
 }
 )
